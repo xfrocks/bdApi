@@ -1,0 +1,3 @@
+.DS_Store
+*.devhelper
+library/${ADDON_DIR}/DevHelper/Generated/*
