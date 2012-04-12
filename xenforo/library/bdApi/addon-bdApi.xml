@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="bdApi" title="[bd] API" version_string="0.1" version_id="1" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates/>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="file_health_check" execute_order="10" callback_class="bdApi_Listener" callback_method="file_health_check" active="1" description=""/>
+    <listener event_id="load_class_model" execute_order="10" callback_class="bdApi_Listener" callback_method="load_class" active="1" description=""/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <optiongroups/>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="bdapi_slash_posts_requires_thread_id" version_id="1" version_string="0.1"><![CDATA[/posts requires thread_id]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates/>
+  <bb_code_media_sites/>
+</addon>
