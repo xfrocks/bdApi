@@ -2,7 +2,7 @@
 
 class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 {
-	public function actionIndex()
+	public function actionGetIndex()
 	{
 		$threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
 		if (empty($threadId))

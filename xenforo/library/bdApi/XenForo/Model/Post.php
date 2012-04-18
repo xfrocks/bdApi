@@ -39,7 +39,6 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		
 		$data['links'] = array(
 			'permalink' => bdApi_Link::buildPublicLink('posts', $post),
-			'detail' => bdApi_Link::buildApiLink('posts', $post),
 			'thread' => bdApi_Link::buildApiLink('threads', $post),
 			'poster' => bdApi_Link::buildApiLink('users', $post),
 		);

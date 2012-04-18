@@ -5,6 +5,8 @@ class bdApi_Listener
 	public static function load_class($class, array &$extend)
 	{
 		static $classes = array(
+			'XenForo_ControllerPublic_Account',
+		
 			'XenForo_Model_Node',
 			'XenForo_Model_Post',
 			'XenForo_Model_Thread',
@@ -15,6 +17,10 @@ class bdApi_Listener
 		{
 			$extend[] = 'bdApi_' . $class;
 		}
+	}
+	
+	public static function init_dependencies(XenForo_Dependencies_Abstract $dependencies, array $data)
+	{
 	}
 	
 	public static function file_health_check(XenForo_ControllerAdmin_Abstract $controller, array &$hashes)

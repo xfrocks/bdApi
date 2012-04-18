@@ -2,12 +2,12 @@
 
 class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
 {
-	public function actionIndex()
+	public function actionGetIndex()
 	{
 		$nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
 		if (!empty($nodeId))
 		{
-			return $this->responseReroute(__CLASS__, 'single');
+			return $this->responseReroute(__CLASS__, 'get-single');
 		}
 		
 		$nodeModel = $this->_getNodeModel();
@@ -23,7 +23,7 @@ class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_Node_List', $data);
 	}
 	
-	public function actionSingle()
+	public function actionGetSingle()
 	{
 		$nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
 		

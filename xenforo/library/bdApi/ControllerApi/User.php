@@ -2,12 +2,12 @@
 
 class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 {
-	public function actionIndex()
+	public function actionGetIndex()
 	{
 		$userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
 		if (!empty($userId))
 		{
-			return $this->responseReroute(__CLASS__, 'single');
+			return $this->responseReroute(__CLASS__, 'get-single');
 		}
 		
 		$userModel = $this->_getUserModel();
@@ -49,7 +49,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_User_List', $data);
 	}
 	
-	public function actionSingle()
+	public function actionGetSingle()
 	{
 		$userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
 		

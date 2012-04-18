@@ -123,6 +123,17 @@ class bdApi_Link extends XenForo_Link
 			$type = 'full:' . $type;
 		}
 		
+		// auto appends oauth_token param from the session
+		if (!isset($extraParams[OAUTH2_TOKEN_PARAM_NAME]))
+		{
+			$session = XenForo_Application::get('session');
+			$oauthToken = $session->getOAuthTokenText();
+			if (!empty($oauthToken))
+			{
+				$extraParams[OAUTH2_TOKEN_PARAM_NAME] = $oauthToken;
+			}
+		}
+		
 		$type = self::_checkForFullLink($type, $fullLink, $fullLinkPrefix);
 
 		$link = parent::_buildLink(self::API_LINK_GROUP, $type, $data, $extraParams);

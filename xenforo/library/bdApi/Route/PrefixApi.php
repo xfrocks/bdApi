@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_Route_Prefix extends XenForo_Route_Prefix
+class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
 {
 	public function __construct($routeType)
 	{
@@ -16,12 +16,14 @@ class bdApi_Route_Prefix extends XenForo_Route_Prefix
 	 */
 	public static function setupRoutes(array &$routes)
 	{
-		self::addRoute($routes, 'index', 'bdApi_Route_Prefix_Index');
+		self::addRoute($routes, 'index', 'bdApi_Route_PrefixApi_Index');
 		
-		self::addRoute($routes, 'users', 'bdApi_Route_Prefix_Users', 'data_only');
-		self::addRoute($routes, 'nodes', 'bdApi_Route_Prefix_Nodes', 'data_only');
-		self::addRoute($routes, 'posts', 'bdApi_Route_Prefix_Posts', 'data_only');
-		self::addRoute($routes, 'threads', 'bdApi_Route_Prefix_Threads', 'data_only');
+		self::addRoute($routes, 'oauth', 'bdApi_Route_PrefixApi_OAuth');
+		
+		self::addRoute($routes, 'users', 'bdApi_Route_PrefixApi_Users', 'data_only');
+		self::addRoute($routes, 'nodes', 'bdApi_Route_PrefixApi_Nodes', 'data_only');
+		self::addRoute($routes, 'posts', 'bdApi_Route_PrefixApi_Posts', 'data_only');
+		self::addRoute($routes, 'threads', 'bdApi_Route_PrefixApi_Threads', 'data_only');
 		
 		XenForo_CodeEvent::fire('bdapi_setup_routes', array(&$routes));
 	}
