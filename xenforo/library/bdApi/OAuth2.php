@@ -143,7 +143,16 @@ class bdApi_OAuth2 extends OAuth2
 		$dw->set('client_id', $clientId);
 		$dw->set('expire_date', $expireDate);
 		$dw->set('user_id', $this->_getUserId());
-		$dw->set('scope', $scope);
+		
+		if ($scope === NULL)
+		{
+			// no scope, use all scopes available
+			$dw->set('scope', implode(',', $this->_model->getSystemSupportedScopes())); 
+		}
+		else
+		{
+			$dw->set('scope', $scope);
+		}
 		
 		$dw->save();
 	}
@@ -200,7 +209,18 @@ class bdApi_OAuth2 extends OAuth2
 	
 	protected function checkUserCredentials($clientId, $username, $password)
 	{
-		return $this->_model->getUserModel()->validateAuthentication($username, $password);
+		$userId = $this->_model->getUserModel()->validateAuthentication($username, $password);
+		
+		if (!empty($userId) AND $userId > 0)
+		{
+			$this->_userId = $userId;
+			
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 	protected function getRefreshToken($refreshToken)
@@ -229,7 +249,16 @@ class bdApi_OAuth2 extends OAuth2
 		$dw->set('client_id', $clientId);
 		$dw->set('expire_date', $expireDate);
 		$dw->set('user_id', $this->_getUserId());
-		$dw->set('scope', $scope);
+		
+		if ($scope === NULL)
+		{
+			// no scope, use all scopes available
+			$dw->set('scope', implode(',', $this->_model->getSystemSupportedScopes())); 
+		}
+		else
+		{
+			$dw->set('scope', $scope);
+		}
 		
 		$dw->save();
 	}
