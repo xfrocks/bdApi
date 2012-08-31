@@ -10,6 +10,8 @@
 
 #import "DetailViewController.h"
 
+#import "GTMOAuth2ViewControllerTouch.h"
+
 @interface MasterViewController ()
 - (void)configureCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath;
 @end
@@ -41,6 +43,12 @@
 
     UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
     self.navigationItem.rightBarButtonItem = addButton;
+    
+    GTMOAuth2ViewControllerTouch *viewController;
+    viewController = [[GTMOAuth2ViewControllerTouch alloc] initWithScope:@"" clientID:@"" clientSecret:@"" keychainItemName:NULL completionHandler:^(GTMOAuth2ViewControllerTouch *viewController, GTMOAuth2Authentication *auth, NSError *error) {
+        // do something?
+    }];
+    [self.navigationController pushViewController:viewController animated:YES];
 }
 
 - (void)viewDidUnload

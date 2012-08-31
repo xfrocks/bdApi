@@ -105,8 +105,6 @@
 		1611A114155404CD0023C849 = {
 			isa = PBXGroup;
 			children = (
-				165F5E991588C166006C59C2 /* SystemConfiguration.framework */,
-				165F5E971588C15F006C59C2 /* Security.framework */,
 				1611A12B155404CD0023C849 /* bdMobileReader */,
 				1611A122155404CD0023C849 /* Frameworks */,
 				1611A120155404CD0023C849 /* Products */,
@@ -124,6 +122,8 @@
 		1611A122155404CD0023C849 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				165F5E991588C166006C59C2 /* SystemConfiguration.framework */,
+				165F5E971588C15F006C59C2 /* Security.framework */,
 				1611A123155404CD0023C849 /* UIKit.framework */,
 				1611A125155404CD0023C849 /* Foundation.framework */,
 				1611A127155404CD0023C849 /* CoreGraphics.framework */,
