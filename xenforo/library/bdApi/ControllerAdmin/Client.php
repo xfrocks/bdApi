@@ -1,9 +1,9 @@
 <?php
-/* Start auto-generated lines of code. Change made will be overwriten... */
 
-class bdApi_ControllerAdmin_Client_Generated extends XenForo_ControllerAdmin_Abstract {
-
-	public function actionIndex() {
+class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
+{
+	public function actionIndex()
+	{
 		$clientModel = $this->_getClientModel();
 		$clients = $clientModel->getClients();
 		
@@ -14,43 +14,47 @@ class bdApi_ControllerAdmin_Client_Generated extends XenForo_ControllerAdmin_Abs
 		return $this->responseView('bdApi_ViewAdmin_Client_List', 'bdapi_client_list', $viewParams);
 	}
 	
-	public function actionAdd() {
+	public function actionAdd()
+	{
 		$viewParams = array(
 			'client' => array(),
-			
 		);
 		
 		return $this->responseView('bdApi_ViewAdmin_Client_Edit', 'bdapi_client_edit', $viewParams);
 	}
 	
-	public function actionEdit() {
+	public function actionEdit()
+	{
 		$id = $this->_input->filterSingle('client_id', XenForo_Input::UINT);
 		$client = $this->_getClientOrError($id);
 		
 		$viewParams = array(
 			'client' => $client,
-			
 		);
 		
 		return $this->responseView('bdApi_ViewAdmin_Client_Edit', 'bdapi_client_edit', $viewParams);
 	}
 	
-	public function actionSave() {
+	public function actionSave()
+	{
 		$this->_assertPostOnly();
 		
 		$id = $this->_input->filterSingle('client_id', XenForo_Input::UINT);
 
-		$dwInput = $this->_input->filter(array('client_secret' => 'string', 'redirect_uri' => 'string', 'name' => 'string', 'description' => 'string', 'user_id' => 'uint'));
+		$dwInput = $this->_input->filter(array(
+			'client_secret' => 'string',
+			'redirect_uri' => 'string',
+			'name' => 'string',
+			'description' => 'string',
+			'user_id' => 'uint'
+		));
 		
 		$dw = $this->_getClientDataWriter();
-		if ($id) {
+		if ($id)
+		{
 			$dw->setExistingData($id);
 		}
 		$dw->bulkSet($dwInput);
-		
-
-		
-		$this->_prepareDwBeforeSaving($dw);
 		
 		$dw->save();
 
@@ -60,11 +64,13 @@ class bdApi_ControllerAdmin_Client_Generated extends XenForo_ControllerAdmin_Abs
 		);
 	}
 	
-	public function actionDelete() {
+	public function actionDelete()
+	{
 		$id = $this->_input->filterSingle('client_id', XenForo_Input::UINT);
 		$client = $this->_getClientOrError($id);
 		
-		if ($this->isConfirmedPost()) {
+		if ($this->isConfirmedPost())
+		{
 			$dw = $this->_getClientDataWriter();
 			$dw->setExistingData($id);
 			$dw->delete();
@@ -73,7 +79,9 @@ class bdApi_ControllerAdmin_Client_Generated extends XenForo_ControllerAdmin_Abs
 				XenForo_ControllerResponse_Redirect::SUCCESS,
 				XenForo_Link::buildAdminLink('api-clients')
 			);
-		} else {
+		}
+		else
+		{
 			$viewParams = array(
 				'client' => $client
 			);
@@ -83,10 +91,12 @@ class bdApi_ControllerAdmin_Client_Generated extends XenForo_ControllerAdmin_Abs
 	}
 	
 	
-	protected function _getClientOrError($id, array $fetchOptions = array()) {
+	protected function _getClientOrError($id, array $fetchOptions = array())
+	{
 		$info = $this->_getClientModel()->getClientById($id, $fetchOptions);
 		
-		if (empty($info)) {
+		if (empty($info))
+		{
 			throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_client_not_found'), 404));
 		}
 		
@@ -96,23 +106,16 @@ class bdApi_ControllerAdmin_Client_Generated extends XenForo_ControllerAdmin_Abs
 	/**
 	 * @return bdApi_Model_Client
 	 */
-	protected function _getClientModel() {
+	protected function _getClientModel()
+	{
 		return $this->getModelFromCache('bdApi_Model_Client');
 	}
 	
 	/**
 	 * @return bdApi_DataWriter_Client
 	 */
-	protected function _getClientDataWriter() {
+	protected function _getClientDataWriter()
+	{
 		return XenForo_DataWriter::create('bdApi_DataWriter_Client');
 	}
-	
-	protected function _prepareDwBeforeSaving(bdApi_DataWriter_Client $dw) {
-		// this method should be overriden if datawriter requires special treatments
-	}
-}
-
-/* End auto-generated lines of code. Feel free to make changes below */
-class bdApi_ControllerAdmin_Client extends bdApi_ControllerAdmin_Client_Generated {
-	// customized actions and whatelse should go here
 }

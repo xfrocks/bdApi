@@ -1,6 +1,6 @@
 <?php
-class bdApi_Model_Token extends XenForo_Model {
-	
+class bdApi_Model_Token extends XenForo_Model
+{	
 	public function getTokenByText($tokenText, array $fetchOptions = array())
 	{
 		$tokens = $this->getTokens(array('token_text' => $tokenText), $fetchOptions);
@@ -8,44 +8,28 @@ class bdApi_Model_Token extends XenForo_Model {
 		return reset($tokens);
 	}
 	
-	protected function _getTokensCustomized(array &$data, array $fetchOptions) {
-		// customized processing for getAllToken() should go here
-	}
-	
-	protected function _prepareTokenConditionsCustomized(array &$sqlConditions, array $conditions, array &$fetchOptions) {
-		if (isset($conditions['token_text']))
-		{
-			$sqlConditions[] = 'token.token_text = ' . $this->_getDb()->quote($conditions['token_text']);
-		}
-	}
-	
-	protected function _prepareTokenFetchOptionsCustomized(&$selectFields, &$joinTables, array $fetchOptions) {
-		// customized code goes here
-	}
-	
-	protected function _prepareTokenOrderOptionsCustomized(array &$choices, array &$fetchOptions) {
-		// customized code goes here
-	}
-	/* Start auto-generated lines of code. Change made will be overwriten... */
-
-	public function getList(array $conditions = array(), array $fetchOptions = array()) {
-		$data = $this->getTokens($conditions, $fetchOptions);
+	public function getList(array $conditions = array(), array $fetchOptions = array())
+	{
+		$tokens = $this->getTokens($conditions, $fetchOptions);
 		$list = array();
 		
-		foreach ($data as $id => $row) {
-			$list[$id] = $row['token_text'];
+		foreach ($data as $tokenId => $token)
+		{
+			$tokens[$tokenId] = $token['token_text'];
 		}
 		
 		return $list;
 	}
 
-	public function getTokenById($id, array $fetchOptions = array()) {
-		$data = $this->getTokens(array ('token_id' => $id), $fetchOptions);
+	public function getTokenById($tokenId, array $fetchOptions = array())
+	{
+		$data = $this->getTokens(array ('token_id' => $tokenId), $fetchOptions);
 		
 		return reset($data);
 	}
 	
-	public function getTokens(array $conditions = array(), array $fetchOptions = array()) {
+	public function getTokens(array $conditions = array(), array $fetchOptions = array())
+	{
 		$whereConditions = $this->prepareTokenConditions($conditions, $fetchOptions);
 
 		$orderClause = $this->prepareTokenOrderOptions($fetchOptions);
@@ -62,14 +46,11 @@ class bdApi_Model_Token extends XenForo_Model {
 			", $limitOptions['limit'], $limitOptions['offset']
 		), 'token_id');
 
-
-
-		$this->_getTokensCustomized($all, $fetchOptions);
-		
 		return $all;
 	}
 		
-	public function countTokens(array $conditions = array(), array $fetchOptions = array()) {
+	public function countTokens(array $conditions = array(), array $fetchOptions = array())
+	{
 		$whereConditions = $this->prepareTokenConditions($conditions, $fetchOptions);
 
 		$orderClause = $this->prepareTokenOrderOptions($fetchOptions);
@@ -84,51 +65,53 @@ class bdApi_Model_Token extends XenForo_Model {
 		");
 	}
 	
-	public function prepareTokenConditions(array $conditions, array &$fetchOptions) {
+	public function prepareTokenConditions(array $conditions, array &$fetchOptions)
+	{
 		$sqlConditions = array();
 		$db = $this->_getDb();
 		
-		foreach (array('token_id', 'client_id', 'expire_date', 'user_id') as $intField) {
-			if (!isset($conditions[$intField])) continue;
+		foreach (array('token_id', 'client_id', 'expire_date', 'user_id') as $columnName) {
+			if (!isset($conditions[$columnName])) continue;
 			
-			if (is_array($conditions[$intField])) {
-				if (!empty($conditions[$intField])) {
+			if (is_array($conditions[$columnName]))
+			{
+				if (!empty($conditions[$columnName]))
+				{
 					// only use IN condition if the array is not empty (nasty!)
-					$sqlConditions[] = "token.$intField IN (" . $db->quote($conditions[$intField]) . ")";
+					$sqlConditions[] = "token.$columnName IN (" . $db->quote($conditions[$columnName]) . ")";
 				}
-			} else {
-				$sqlConditions[] = "token.$intField = " . $db->quote($conditions[$intField]);
+			}
+			else
+			{
+				$sqlConditions[] = "token.$columnName = " . $db->quote($conditions[$columnName]);
 			}
 		}
 		
-		$this->_prepareTokenConditionsCustomized($sqlConditions, $conditions, $fetchOptions);
+		if (isset($conditions['token_text']))
+		{
+			$sqlConditions[] = 'token.token_text = ' . $this->_getDb()->quote($conditions['token_text']);
+		}
 		
 		return $this->getConditionsForClause($sqlConditions);
 	}
 	
-	public function prepareTokenFetchOptions(array $fetchOptions) {
+	public function prepareTokenFetchOptions(array $fetchOptions)
+	{
 		$selectFields = '';
 		$joinTables = '';
 		
-		$this->_prepareTokenFetchOptionsCustomized($selectFields,  $joinTables, $fetchOptions);
-
 		return array(
 			'selectFields' => $selectFields,
 			'joinTables'   => $joinTables
 		);
 	}
 	
-	public function prepareTokenOrderOptions(array &$fetchOptions, $defaultOrderSql = '') {
+	public function prepareTokenOrderOptions(array &$fetchOptions, $defaultOrderSql = '')
+	{
 		$choices = array(
 			
 		);
 		
-		$this->_prepareTokenOrderOptionsCustomized($choices, $fetchOptions);
-		
 		return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
 	}
-	
-
-
-	/* End auto-generated lines of code. Feel free to make changes below */
 }

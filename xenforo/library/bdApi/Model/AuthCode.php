@@ -7,45 +7,29 @@ class bdApi_Model_AuthCode extends XenForo_Model
 		
 		return reset($authCodes);
 	}
-	
-	protected function _getAuthCodesCustomized(array &$data, array $fetchOptions) {
-		// customized processing for getAllAuthCode() should go here
-	}
-	
-	protected function _prepareAuthCodeConditionsCustomized(array &$sqlConditions, array $conditions, array &$fetchOptions) {
-		if (isset($conditions['auth_code_text']))
-		{
-			$sqlConditions[] = 'auth_code.auth_code_text = ' . $this->_getDb()->quote($conditions['auth_code_text']);
-		}
-	}
-	
-	protected function _prepareAuthCodeFetchOptionsCustomized(&$selectFields, &$joinTables, array $fetchOptions) {
-		// customized code goes here
-	}
-	
-	protected function _prepareAuthCodeOrderOptionsCustomized(array &$choices, array &$fetchOptions) {
-		// customized code goes here
-	}
-	/* Start auto-generated lines of code. Change made will be overwriten... */
 
-	public function getList(array $conditions = array(), array $fetchOptions = array()) {
-		$data = $this->getAuthCodes($conditions, $fetchOptions);
+	public function getList(array $conditions = array(), array $fetchOptions = array())
+	{
+		$authCodes = $this->getAuthCodes($conditions, $fetchOptions);
 		$list = array();
 		
-		foreach ($data as $id => $row) {
-			$list[$id] = $row['auth_code_text'];
+		foreach ($authCodes as $authCodeId => $authCode)
+		{
+			$list[$authCodeId] = $authCode['auth_code_text'];
 		}
 		
 		return $list;
 	}
 
-	public function getAuthCodeById($id, array $fetchOptions = array()) {
-		$data = $this->getAuthCodes(array ('auth_code_id' => $id), $fetchOptions);
+	public function getAuthCodeById($authCodeId, array $fetchOptions = array())
+	{
+		$data = $this->getAuthCodes(array ('auth_code_id' => $authCodeId), $fetchOptions);
 		
 		return reset($data);
 	}
 	
-	public function getAuthCodes(array $conditions = array(), array $fetchOptions = array()) {
+	public function getAuthCodes(array $conditions = array(), array $fetchOptions = array())
+	{
 		$whereConditions = $this->prepareAuthCodeConditions($conditions, $fetchOptions);
 
 		$orderClause = $this->prepareAuthCodeOrderOptions($fetchOptions);
@@ -62,14 +46,11 @@ class bdApi_Model_AuthCode extends XenForo_Model
 			", $limitOptions['limit'], $limitOptions['offset']
 		), 'auth_code_id');
 
-
-
-		$this->_getAuthCodesCustomized($all, $fetchOptions);
-		
 		return $all;
 	}
 		
-	public function countAuthCodes(array $conditions = array(), array $fetchOptions = array()) {
+	public function countAuthCodes(array $conditions = array(), array $fetchOptions = array())
+	{
 		$whereConditions = $this->prepareAuthCodeConditions($conditions, $fetchOptions);
 
 		$orderClause = $this->prepareAuthCodeOrderOptions($fetchOptions);
@@ -84,51 +65,54 @@ class bdApi_Model_AuthCode extends XenForo_Model
 		");
 	}
 	
-	public function prepareAuthCodeConditions(array $conditions, array &$fetchOptions) {
+	public function prepareAuthCodeConditions(array $conditions, array &$fetchOptions)
+	{
 		$sqlConditions = array();
 		$db = $this->_getDb();
 		
-		foreach (array('auth_code_id', 'client_id', 'expire_date', 'user_id') as $intField) {
-			if (!isset($conditions[$intField])) continue;
+		foreach (array('auth_code_id', 'client_id', 'expire_date', 'user_id') as $columnName)
+		{
+			if (!isset($conditions[$columnName])) continue;
 			
-			if (is_array($conditions[$intField])) {
-				if (!empty($conditions[$intField])) {
+			if (is_array($conditions[$columnName]))
+			{
+				if (!empty($conditions[$columnName]))
+				{
 					// only use IN condition if the array is not empty (nasty!)
-					$sqlConditions[] = "auth_code.$intField IN (" . $db->quote($conditions[$intField]) . ")";
+					$sqlConditions[] = "auth_code.$columnName IN (" . $db->quote($conditions[$columnName]) . ")";
 				}
-			} else {
-				$sqlConditions[] = "auth_code.$intField = " . $db->quote($conditions[$intField]);
+			}
+			else
+			{
+				$sqlConditions[] = "auth_code.$columnName = " . $db->quote($conditions[$columnName]);
 			}
 		}
 		
-		$this->_prepareAuthCodeConditionsCustomized($sqlConditions, $conditions, $fetchOptions);
+		if (isset($conditions['auth_code_text']))
+		{
+			$sqlConditions[] = 'auth_code.auth_code_text = ' . $this->_getDb()->quote($conditions['auth_code_text']);
+		}
 		
 		return $this->getConditionsForClause($sqlConditions);
 	}
 	
-	public function prepareAuthCodeFetchOptions(array $fetchOptions) {
+	public function prepareAuthCodeFetchOptions(array $fetchOptions)
+	{
 		$selectFields = '';
 		$joinTables = '';
 		
-		$this->_prepareAuthCodeFetchOptionsCustomized($selectFields,  $joinTables, $fetchOptions);
-
 		return array(
 			'selectFields' => $selectFields,
 			'joinTables'   => $joinTables
 		);
 	}
 	
-	public function prepareAuthCodeOrderOptions(array &$fetchOptions, $defaultOrderSql = '') {
+	public function prepareAuthCodeOrderOptions(array &$fetchOptions, $defaultOrderSql = '')
+	{
 		$choices = array(
 			
 		);
 		
-		$this->_prepareAuthCodeOrderOptionsCustomized($choices, $fetchOptions);
-		
 		return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
 	}
-	
-
-
-	/* End auto-generated lines of code. Feel free to make changes below */
 }

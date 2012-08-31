@@ -1,53 +1,38 @@
 <?php
-class bdApi_Model_Client extends XenForo_Model {
-	
+class bdApi_Model_Client extends XenForo_Model
+{	
 	public function verifySecret(array $client, $secret)
 	{
-		return $client['client_secret'] == $secret;
-		// TODO: switch to use hashSecret
-		// return $client['client_secret'] == $this->hashSecret($secret);
+		return $client['client_secret'] == $this->hashSecret($secret);
 	}
 	
 	public function hashSecret($secret)
 	{
-		return md5(str_repeat(md5($secret), 2));
+		return md5($secret);
 	}
-	
-	protected function _getClientsCustomized(array &$data, array $fetchOptions) {
-		// customized processing for getAllClient() should go here
-	}
-	
-	protected function _prepareClientConditionsCustomized(array &$sqlConditions, array $conditions, array &$fetchOptions) {
-		// customized code goes here
-	}
-	
-	protected function _prepareClientFetchOptionsCustomized(&$selectFields, &$joinTables, array $fetchOptions) {
-		// customized code goes here
-	}
-	
-	protected function _prepareClientOrderOptionsCustomized(array &$choices, array &$fetchOptions) {
-		// customized code goes here
-	}
-	/* Start auto-generated lines of code. Change made will be overwriten... */
 
-	public function getList(array $conditions = array(), array $fetchOptions = array()) {
-		$data = $this->getClients($conditions, $fetchOptions);
+	public function getList(array $conditions = array(), array $fetchOptions = array())
+	{
+		$clients = $this->getClients($conditions, $fetchOptions);
 		$list = array();
 		
-		foreach ($data as $id => $row) {
-			$list[$id] = $row['name'];
+		foreach ($clients as $clientId => $client)
+		{
+			$list[$clientId] = $client['name'];
 		}
 		
 		return $list;
 	}
 
-	public function getClientById($id, array $fetchOptions = array()) {
-		$data = $this->getClients(array ('client_id' => $id), $fetchOptions);
+	public function getClientById($clientId, array $fetchOptions = array())
+	{
+		$data = $this->getClients(array ('client_id' => $clientId), $fetchOptions);
 		
 		return reset($data);
 	}
 	
-	public function getClients(array $conditions = array(), array $fetchOptions = array()) {
+	public function getClients(array $conditions = array(), array $fetchOptions = array())
+	{
 		$whereConditions = $this->prepareClientConditions($conditions, $fetchOptions);
 
 		$orderClause = $this->prepareClientOrderOptions($fetchOptions);
@@ -64,14 +49,11 @@ class bdApi_Model_Client extends XenForo_Model {
 			", $limitOptions['limit'], $limitOptions['offset']
 		), 'client_id');
 
-
-
-		$this->_getClientsCustomized($all, $fetchOptions);
-		
 		return $all;
 	}
 		
-	public function countClients(array $conditions = array(), array $fetchOptions = array()) {
+	public function countClients(array $conditions = array(), array $fetchOptions = array())
+	{
 		$whereConditions = $this->prepareClientConditions($conditions, $fetchOptions);
 
 		$orderClause = $this->prepareClientOrderOptions($fetchOptions);
@@ -86,31 +68,37 @@ class bdApi_Model_Client extends XenForo_Model {
 		");
 	}
 	
-	public function prepareClientConditions(array $conditions, array &$fetchOptions) {
+	public function prepareClientConditions(array $conditions, array &$fetchOptions)
+	{
 		$sqlConditions = array();
 		$db = $this->_getDb();
 		
-		foreach (array('client_id', 'user_id') as $intField) {
-			if (!isset($conditions[$intField])) continue;
+		foreach (array('client_id', 'user_id') as $columnName)
+		{
+			if (!isset($conditions[$columnName])) continue;
 			
-			if (is_array($conditions[$intField])) {
-				$sqlConditions[] = "client.$intField IN (" . $db->quote($conditions[$intField]) . ")";
-			} else {
-				$sqlConditions[] = "client.$intField = " . $db->quote($conditions[$intField]);
+			if (is_array($conditions[$columnName]))
+			{
+				if (!empty($conditions[$columnName]))
+				{
+					// only use IN condition if the array is not empty (nasty!)
+					$sqlConditions[] = "client.$columnName IN (" . $db->quote($conditions[$columnName]) . ")";
+				}
+			}
+			else
+			{
+				$sqlConditions[] = "client.$columnName = " . $db->quote($conditions[$columnName]);
 			}
 		}
-		
-		$this->_prepareClientConditionsCustomized($sqlConditions, $conditions, $fetchOptions);
 		
 		return $this->getConditionsForClause($sqlConditions);
 	}
 	
-	public function prepareClientFetchOptions(array $fetchOptions) {
+	public function prepareClientFetchOptions(array $fetchOptions)
+	{
 		$selectFields = '';
 		$joinTables = '';
 		
-		$this->_prepareClientFetchOptionsCustomized($selectFields,  $joinTables, $fetchOptions);
-
 		return array(
 			'selectFields' => $selectFields,
 			'joinTables'   => $joinTables
@@ -122,12 +110,6 @@ class bdApi_Model_Client extends XenForo_Model {
 			
 		);
 		
-		$this->_prepareClientOrderOptionsCustomized($choices, $fetchOptions);
-		
 		return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
 	}
-	
-
-
-	/* End auto-generated lines of code. Feel free to make changes below */
 }

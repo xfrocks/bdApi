@@ -30,7 +30,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
 		return array(
 			'client_id' 			=> XenForo_Input::UINT,
 			'response_type' 		=> XenForo_Input::STRING,
-			'redirect_uri' 		=> XenForo_Input::STRING,
+			'redirect_uri' 			=> XenForo_Input::STRING,
 			'state' 				=> XenForo_Input::STRING,
 			'scope' 				=> XenForo_Input::STRING,
 		);
