@@ -1,21 +1,21 @@
 <?php
 class bdApiConsumer_Helper_Api
 {
-	public static function getRequestUrl(array $producer, $redirectUri)
+	public static function getRequestUrl(array $provider, $redirectUri)
 	{
-		return sprintf('%s/oauth/authorize/?client_id=%s&redirect_uri=%s&response_type=code&scope=read', $producer['root'], $producer['client_id'], $redirectUri);
+		return sprintf('%s/oauth/authorize/?client_id=%s&redirect_uri=%s&response_type=code&scope=read', $provider['root'], $provider['client_id'], $redirectUri);
 	}
 
-	public static function getAccessTokenFromCode(array $producer, $code, $redirectUri)
+	public static function getAccessTokenFromCode(array $provider, $code, $redirectUri)
 	{
 		try
 		{
-			$uri = sprintf('%s/oauth/token/', $producer['root']);
+			$uri = sprintf('%s/oauth/token/', $provider['root']);
 			$client = XenForo_Helper_Http::getClient($uri);
 			$client->setParameterPost(array(
 				'grant_type' => 'authorization_code',
-				'client_id' => $producer['client_id'],
-				'client_secret' => $producer['client_secret'],
+				'client_id' => $provider['client_id'],
+				'client_secret' => $provider['client_secret'],
 				'code' => $code,
 				'redirect_uri' => $redirectUri,
 				'scope' => 'read',
@@ -43,11 +43,11 @@ class bdApiConsumer_Helper_Api
 		}
 	}
 	
-	public static function getVisitor(array $producer, $accessToken)
+	public static function getVisitor(array $provider, $accessToken)
 	{
 		try
 		{
-			$uri = sprintf('%s/users/me/', $producer['root']);
+			$uri = sprintf('%s/users/me/', $provider['root']);
 			$client = XenForo_Helper_Http::getClient($uri);
 			$client->setParameterGet(array(
 				'oauth_token' => $accessToken,

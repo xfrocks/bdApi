@@ -5,18 +5,18 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 
 	public function actionExternal()
 	{
-		$producerCode = $this->_input->filterSingle('producer', XenForo_Input::STRING);
+		$providerCode = $this->_input->filterSingle('provider', XenForo_Input::STRING);
 		$assocUserId = $this->_input->filterSingle('assoc', XenForo_Input::UINT);
 		$redirect = $this->_input->filterSingle('redirect', XenForo_Input::STRING);
 
-		$producer = bdApiConsumer_Option::getProducerByCode($producerCode);
-		if (empty($producer))
+		$provider = bdApiConsumer_Option::getProviderByCode($providerCode);
+		if (empty($provider))
 		{
 			return $this->responseNoPermission();
 		}
 
 		$externalRedirectUri = XenForo_Link::buildPublicLink('canonical:register/external', false, array(
-			'producer' => $producerCode,
+			'provider' => $providerCode,
 			'assoc' => ($assocUserId ? $assocUserId : false),
 		));
 
@@ -27,7 +27,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 
 			return $this->responseRedirect(
 				XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL,
-				bdApiConsumer_Helper_Api::getRequestUrl($producer, $externalRedirectUri)
+				bdApiConsumer_Helper_Api::getRequestUrl($provider, $externalRedirectUri)
 			);
 		}
 
@@ -40,37 +40,37 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			if (empty($externalCode))
 			{
 				return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array(
-					'producer' => $producer['name'],
+					'provider' => $provider['name'],
 				)));
 			}
 
-			$externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromCode($producer, $externalCode, $externalRedirectUri);
+			$externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromCode($provider, $externalCode, $externalRedirectUri);
 			if (empty($externalToken))
 			{
 				return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array(
-					'producer' => $producer['name'],
+					'provider' => $provider['name'],
 				)));
 			}
 		}
 
-		$externalVisitor = bdApiConsumer_Helper_Api::getVisitor($producer, $externalToken);
+		$externalVisitor = bdApiConsumer_Helper_Api::getVisitor($provider, $externalToken);
 		if (empty($externalVisitor))
 		{
 			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array(
-				'producer' => $producer['name'],
+				'provider' => $provider['name'],
 			)));
 		}
 		if (empty($externalVisitor['email']))
 		{var_dump($externalVisitor);exit;
 			return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_returned_unknown_error', array(
-				'producer' => $producer['name'],
+				'provider' => $provider['name'],
 			)));
 		}
 
 		$userModel = $this->_getUserModel();
 		$userExternalModel = $this->_getUserExternalModel();
 
-		$existingAssoc = $userExternalModel->getExternalAuthAssociation($userExternalModel->bdApiConsumer_getProviderCode($producer), $externalVisitor['user_id']);
+		$existingAssoc = $userExternalModel->getExternalAuthAssociation($userExternalModel->bdApiConsumer_getProviderCode($provider), $externalVisitor['user_id']);
 		if ($existingAssoc && $userModel->getUserById($existingAssoc['user_id']))
 		{
 			$redirect = XenForo_Application::get('session')->get(self::SESSION_KEY_REDIRECT);
@@ -113,7 +113,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			return $this->responseView('bdApiConsumer_ViewPublic_Register_External', 'bdapi_consumer_register', array(
 				'associateOnly' => true,
 
-				'producer' => $producer,
+				'provider' => $provider,
 				'externalToken' => $externalToken,
 				'externalVisitor' => $externalVisitor,
 
@@ -134,7 +134,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		}
 
 		return $this->responseView('bdApiConsumer_ViewPublic_Register_External', 'bdapi_consumer_register', array(
-			'producer' => $producer,
+			'provider' => $provider,
 			'externalToken' => $externalToken,
 			'externalVisitor' => $externalVisitor,
 			'redirect' => $redirect,
@@ -150,26 +150,26 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 	{
 		$this->_assertPostOnly();
 
-		$producerCode = $this->_input->filterSingle('producer', XenForo_Input::STRING);
+		$providerCode = $this->_input->filterSingle('provider', XenForo_Input::STRING);
 		$externalToken = $this->_input->filterSingle('externalToken', XenForo_Input::STRING);
 
-		$producer = bdApiConsumer_Option::getProducerByCode($producerCode);
-		if (empty($producer))
+		$provider = bdApiConsumer_Option::getProviderByCode($providerCode);
+		if (empty($provider))
 		{
 			return $this->responseNoPermission();
 		}
 
-		$externalVisitor = bdApiConsumer_Helper_Api::getVisitor($producer, $externalToken);
+		$externalVisitor = bdApiConsumer_Helper_Api::getVisitor($provider, $externalToken);
 		if (empty($externalVisitor))
 		{
 			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array(
-				'producer' => $producer['name'],
+				'provider' => $provider['name'],
 			)));
 		}
 		if (empty($externalVisitor['email']))
 		{
 			return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_returned_unknown_error', array(
-				'producer' => $producer['name'],
+				'provider' => $provider['name'],
 			)));
 		}
 
@@ -202,7 +202,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			}
 
 			$userExternalModel->updateExternalAuthAssociation(
-				$userExternalModel->bdApiConsumer_getProviderCode($producer),
+				$userExternalModel->bdApiConsumer_getProviderCode($provider),
 				$externalVisitor['user_id'],
 				$userId,
 				$userExternalModel->bdApiConsumer_getUserProfileField()
@@ -284,7 +284,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		$user = $writer->getMergedData();
 
 		$userExternalModel->updateExternalAuthAssociation(
-			$userExternalModel->bdApiConsumer_getProviderCode($producer),
+			$userExternalModel->bdApiConsumer_getProviderCode($provider),
 			$externalVisitor['user_id'],
 			$user['user_id'],
 			$userExternalModel->bdApiConsumer_getUserProfileField()

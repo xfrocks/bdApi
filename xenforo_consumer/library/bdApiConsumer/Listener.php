@@ -60,7 +60,7 @@ class bdApiConsumer_Listener
 
 				if ($hookName === 'login_bar_eauth_items')
 				{
-					$ourTemplate->setParam('producers', bdApiConsumer_Option::get('_producers'));
+					$ourTemplate->setParam('providers', bdApiConsumer_Option::get('_providers'));
 				}
 
 				$rendered = $ourTemplate->render();
@@ -76,7 +76,7 @@ class bdApiConsumer_Listener
 			case 'login':
 			case 'error_with_login':
 				$ourTemplate = $template->create('bdapi_consumer_' . $templateName, $template->getParams());
-				$ourTemplate->setParam('producers', bdApiConsumer_Option::get('_producers'));
+				$ourTemplate->setParam('providers', bdApiConsumer_Option::get('_providers'));
 
 				$rendered = $ourTemplate->render();
 				$content .= $rendered;

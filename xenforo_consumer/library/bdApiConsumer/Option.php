@@ -8,7 +8,7 @@ class bdApiConsumer_Option
 		switch ($key)
 		{
 			case '_activated': return true;
-			case '_producers': return array(
+			case '_providers': return array(
 			array('code' => 'test', 'name' => 'Test', 'root' => 'http://localxf.daohoangson.com/api', 'client_id' => 2, 'client_secret' => 'secret'),
 			);
 		}
@@ -16,15 +16,15 @@ class bdApiConsumer_Option
 		return $options->get('bdapi_consumer_' . $key);
 	}
 	
-	public static function getProducerByCode($code)
+	public static function getProviderByCode($code)
 	{
-		$producers = self::get('_producers');
+		$providers = self::get('_providers');
 		
-		foreach ($producers as $producer)
+		foreach ($providers as $provider)
 		{
-			if ($producer['code'] === $code)
+			if ($provider['code'] === $code)
 			{
-				return $producer;
+				return $provider;
 			}
 		}
 		

@@ -1,9 +1,9 @@
 <?php
 class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenForo_Model_UserExternal
 {
-	public function bdApiConsumer_getProviderCode(array $producer)
+	public function bdApiConsumer_getProviderCode(array $provider)
 	{
-		return 'bdapi_' . $producer['code'];
+		return 'bdapi_' . $provider['code'];
 	}
 	
 	public function bdApiConsumer_getUserProfileField()
