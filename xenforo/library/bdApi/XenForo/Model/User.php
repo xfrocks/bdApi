@@ -35,6 +35,11 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 				'like_count',
 		);
 		
+		if ($user['user_id'] == XenForo_Visitor::getUserId())
+		{
+			$publicKeys[] = 'email';
+		}
+		
 		$data = bdApi_Data_Helper_Core::filter($user, $publicKeys);
 		
 		$data['links'] = array(
