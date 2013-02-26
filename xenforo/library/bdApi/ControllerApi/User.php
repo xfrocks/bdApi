@@ -73,6 +73,12 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_User_Single', $data);
 	}
 	
+	public function actionGetMe()
+	{
+		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
+		return $this->responseReroute(__CLASS__, 'get-single');
+	}
+	
 	/**
 	 * @return XenForo_Model_User
 	 */
