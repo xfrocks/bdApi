@@ -37,7 +37,13 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 		
 		if ($user['user_id'] == XenForo_Visitor::getUserId())
 		{
+			// xf_user
 			$publicKeys[] = 'email';
+			
+			// xf_user_profile
+			$publicKeys[] = 'dob_day';
+			$publicKeys[] = 'dob_month';
+			$publicKeys[] = 'dob_year';
 		}
 		
 		$data = bdApi_Data_Helper_Core::filter($user, $publicKeys);
