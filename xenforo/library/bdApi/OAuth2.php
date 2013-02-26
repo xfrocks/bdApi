@@ -57,6 +57,22 @@ class bdApi_OAuth2 extends OAuth2
 	}
 	
 	/**
+	 * Redirect the user appropriately after approval.
+	 * This method mimics parent::finishClientAuthorization but it doesn't
+	 * create a new access token, it just uses an existing token.
+	 */
+	public function finishClientAuthorizationWithAccessToken($params, $accessTokenText)
+	{
+		$result = array(
+			'query' => array(
+				't' => $accessTokenText, // this is a non-standard element
+			),
+		);
+
+		$this->doRedirectUriCallback($params['redirect_uri'], $result);
+	}
+
+	/**
 	 * Constructor
 	 * 
 	 * @param bdApi_Model_OAuth2 $model

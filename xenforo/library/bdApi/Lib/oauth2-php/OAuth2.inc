@@ -1263,7 +1263,7 @@ abstract class OAuth2 {
    *
    * @ingroup oauth2_section_3
    */
-  private function doRedirectUriCallback($redirect_uri, $params) {
+  protected function doRedirectUriCallback($redirect_uri, $params) {
     header("HTTP/1.1 ". OAUTH2_HTTP_FOUND);
     header("Location: " . $this->buildUri($redirect_uri, $params));
     exit;
