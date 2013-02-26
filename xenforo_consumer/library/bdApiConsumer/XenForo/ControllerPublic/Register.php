@@ -219,8 +219,8 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			}
 
 			return $this->responseRedirect(
-			XenForo_ControllerResponse_Redirect::SUCCESS,
-			$redirect
+				XenForo_ControllerResponse_Redirect::SUCCESS,
+				$redirect
 			);
 		}
 
@@ -244,10 +244,13 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			$writer->bulkSet($options->registrationDefaults, array('ignoreInvalidFields' => true));
 		}
 		$writer->bulkSet($data);
-		$writer->bulkSet(array(
-			'gender' => $externalVisitor['gender'],
-			'email' => $externalVisitor['email'],
-		));
+		
+		$writer->set('email', $externalVisitor['email']);
+		
+		if (!empty($externalVisitor['gender']))
+		{
+			$writer->set('gender', $externalVisitor['gender']);
+		}
 
 		if (!empty($externalVisitor['dob_day']) AND !empty($externalVisitor['dob_month']) AND !empty($externalVisitor['dob_year']))
 		{
@@ -255,14 +258,13 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			$writer->set('dob_month', $externalVisitor['dob_month']);
 			$writer->set('dob_year', $externalVisitor['dob_year']);
 		}
-
-		if (!empty($externalVisitor['homepage']))
+		
+		if (!empty($externalVisitor['register_date']))
 		{
-			if (Zend_Uri::check($externalVisitor['homepage']))
-			{
-				$writer->set('homepage', $externalVisitor['homepage']);
-			}
+			$writer->set('register_date', $externalVisitor['register_date']);
 		}
+
+		$userExternalModel->bdApiConsumer_syncUpOnRegistration($writer, $externalToken, $externalVisitor);
 
 		$auth = XenForo_Authentication_Abstract::create('XenForo_Authentication_NoPassword');
 		$writer->set('scheme_class', $auth->getClassName());

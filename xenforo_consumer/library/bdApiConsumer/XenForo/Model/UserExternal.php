@@ -10,4 +10,9 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
 	{
 		return 'bdapiconsumer_unused';
 	}
+	
+	public function bdApiConsumer_syncUpOnRegistration(XenForo_DataWriter_User $userDw, $externalToken, array $externalVisitor)
+	{
+		// TODO
+	}
 }
