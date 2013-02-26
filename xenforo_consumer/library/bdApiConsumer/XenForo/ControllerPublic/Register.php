@@ -31,20 +31,26 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			);
 		}
 
-		$externalCode = $this->_input->filterSingle('code', XenForo_Input::STRING);
-		if (empty($externalCode))
-		{
-			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array(
-				'producer' => $producer['name'],
-			)));
-		}
-
-		$externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromCode($producer, $externalCode, $externalRedirectUri);
+		// try to use the non-standard query parameter `t` first,
+		// continue exchange code for access token later if that fails
+		$externalToken = $this->_input->filterSingle('t', XenForo_Input::STRING);
 		if (empty($externalToken))
 		{
-			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array(
-				'producer' => $producer['name'],
-			)));
+			$externalCode = $this->_input->filterSingle('code', XenForo_Input::STRING);
+			if (empty($externalCode))
+			{
+				return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array(
+					'producer' => $producer['name'],
+				)));
+			}
+
+			$externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromCode($producer, $externalCode, $externalRedirectUri);
+			if (empty($externalToken))
+			{
+				return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array(
+					'producer' => $producer['name'],
+				)));
+			}
 		}
 
 		$externalVisitor = bdApiConsumer_Helper_Api::getVisitor($producer, $externalToken);
