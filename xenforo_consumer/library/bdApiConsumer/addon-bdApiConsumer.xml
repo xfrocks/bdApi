@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="bdApiConsumer" title="[bd] Api Consumer" version_string="0.9-dev" version_id="1" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates/>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="file_health_check" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="file_health_check" active="1" description=""/>
+    <listener event_id="init_dependencies" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="init_dependencies" active="1" description=""/>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="load_class" active="1" description=""/>
+    <listener event_id="load_class_model" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="load_class" active="1" description=""/>
+    <listener event_id="template_create" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_create" active="1" description=""/>
+    <listener event_id="template_hook" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_hook" active="1" description=""/>
+    <listener event_id="template_post_render" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_post_render" active="1" description=""/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <optiongroups/>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="bdapi_consumer_error_occurred_while_connecting_with_x" version_id="1" version_string="0.9-dev"><![CDATA[An error occurred while connecting with {producer}. Please try again later.]]></phrase>
+    <phrase title="bdapi_consumer_login_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Login with {producer}]]></phrase>
+    <phrase title="bdapi_consumer_sign_up_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Sign Up with {producer}]]></phrase>
+    <phrase title="bdapi_consumer_x_returned_unknown_error" version_id="1" version_string="0.9-dev"><![CDATA[{producer} returned an unknown error. Please try again later.]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates>
+    <template title="bdapi_consumer_error_with_login" version_id="1" version_string="0.9-dev"><![CDATA[<xen:include template="bdapi_consumer_helper_login_form" />]]></template>
+    <template title="bdapi_consumer_helper_login_form" version_id="1" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
+<div class="xenForm">
+	<dl class="ctrlUnit">
+		<dt>&nbsp;</dt>
+		<dd>
+			<ul>
+				<xen:foreach loop="$producers" value="$producer">
+					<li><a href="{xen:link register/external, '', 'producer={$producer.code}', 'reg=1', 'redirect={xen:if $redirect, $redirect, $requestPaths.requestUri}'}" tabindex="110"><span>{xen:phrase bdapi_consumer_login_with_x, 'producer={$producer.name}'}</span></a></li>
+				</xen:foreach>
+			</ul>
+		</dd>
+	</dl>
+</div>
+</xen:if>]]></template>
+    <template title="bdapi_consumer_login" version_id="1" version_string="0.9-dev"><![CDATA[<xen:include template="bdapi_consumer_helper_login_form" />]]></template>
+    <template title="bdapi_consumer_login_bar_eauth_items" version_id="1" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
+	<xen:foreach loop="$producers" value="$producer">
+		<li><a href="{xen:link register/external, '', 'producer={$producer.code}', 'reg=1'}" tabindex="110"><span>{xen:phrase bdapi_consumer_login_with_x, 'producer={$producer.name}'}</span></a></li>
+	</xen:foreach>
+</xen:if>]]></template>
+    <template title="bdapi_consumer_login_bar_eauth_set" version_id="1" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
+	<xen:comment>Setting $eAuth here doesn't work, the real set is done in bdApiConsumer_Listener::template_create</xen:comment>
+	<xen:set var="$eAuth">1</xen:set>
+</xen:if>]]></template>
+    <template title="bdapi_consumer_register" version_id="1" version_string="0.9-dev"><![CDATA[<xen:title>{xen:phrase bdapi_consumer_sign_up_with_x, 'producer={$producer.name}'}</xen:title>
+	
+<form action="{xen:link 'register/external/register'}" method="post" class="xenForm AutoValidator"
+	data-fieldValidatorUrl="{xen:link register/validate-field}"
+	data-OptInOut="OptIn"
+	data-normalSubmit="1">
+
+<ul class="tabs Tabs" data-panes="#Tabs > li">
+	<xen:if is="!{$associateOnly}"><li><a>{xen:phrase create_new_account}</a></li></xen:if>
+	<li><a>{xen:phrase associate_existing_account}</a></li>
+</ul>
+
+<ul id="Tabs">
+	
+	<xen:if is="!{$associateOnly}">
+	<li>
+		<dl class="ctrlUnit">
+			<dt><label for="ctrl_username">{xen:phrase name}:</label></dt>
+			<dd>
+				<input type="text" name="username" value="{$externalVisitor.username}" class="textCtrl OptIn" id="ctrl_username" autofocus="true" autocomplete="off" />
+				<p class="explain">{xen:phrase this_is_name_that_will_be_shown_with_your_messages}</p>
+			</dd>
+		</dl>
+	
+		<dl class="ctrlUnit">
+			<dt><label for="ctrl_email">{xen:phrase email}:</label></dt>
+			<dd>{$externalVisitor.email}</dd>
+		</dl>
+		
+		<xen:include template="custom_fields_edit" />
+	
+		<dl class="ctrlUnit">
+			<dt><label for="ctrl_timezone">{xen:phrase time_zone}:</label></dt>
+			<dd>
+				<select name="timezone" class="textCtrl AutoTimeZone OptOut" id="ctrl_timezone">
+					<xen:foreach loop="$timeZones" key="$identifier" value="$name">
+						<option value="{$identifier}" {xen:selected "{$identifier} == {$xenOptions.guestTimeZone}"}>{$name}</option>
+					</xen:foreach>
+				</select>
+			</dd>
+		</dl>
+		
+		<dl class="ctrlUnit submitUnit">
+			<dt></dt>
+			<dd>
+				<xen:if is="{$tosUrl}">
+					<ul>
+						<li>
+							{xen:phrase i_agree_to_terms_and_rules, 'checkbox=<input type="checkbox" name="agree" value="1" id="ctrl_agree" class="Disabler" />', 'terms_attributes=href="{$tosUrl}" target="_blank"'}
+							<ul id="ctrl_agree_Disabler">
+								<li><input type="submit" value="{xen:phrase sign_up}" accesskey="s" class="button primary" /></li>
+							</ul>						
+						</li>
+					</ul>
+				<xen:else />
+					<input type="submit" value="{xen:phrase sign_up}" accesskey="s" class="button primary" />
+				</xen:if>
+			</dd>
+		</dl>
+	
+	</li>
+	</xen:if>
+
+	<li>
+		<dl class="ctrlUnit">
+			<dt><label for="ctrl_associate_login">{xen:phrase associate_with}:</label></dt>
+			<dd>
+				<xen:if is="{$existingUser}">
+					{$existingUser.username}
+					<xen:if is="{$emailMatch}">
+						<p class="explain">{xen:phrase this_member_matches_email_address_associated_with_your_facebook_account}</p>
+					</xen:if>
+					<input type="hidden" name="associate_login" value="{$existingUser.username}" />
+					<input type="hidden" name="force_assoc" value="1" />
+				<xen:else />
+					<input type="text" name="associate_login" class="textCtrl" id="ctrl_associate_login" />
+				</xen:if>
+			</dd>
+		</dl>
+		
+		<dl class="ctrlUnit">
+			<dt><label for="ctrl_associate_password">{xen:phrase password}:</label></dt>
+			<dd>
+				<input type="password" name="associate_password" class="textCtrl" id="ctrl_associate_password" />
+				<p class="explain">{xen:phrase password_of_x_account_wish_to_associate_with_not_facebook, 'board_title={$xenOptions.boardTitle}'}</p>
+			</dd>
+		</dl>
+		
+		<dl class="ctrlUnit submitUnit">
+			<dt></dt>
+			<dd><input type="submit" value="{xen:phrase associate_account}" name="associate" accesskey="a" class="button primary" /></dd>
+		</dl>
+	</li>
+
+</ul>
+
+<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+<input type="hidden" name="redirect" value="{$redirect}" />
+<input type="hidden" name="producer" value="{$producer.code}" />
+<input type="hidden" name="externalToken" value="{$externalToken}" />
+</form>]]></template>
+  </templates>
+  <bb_code_media_sites/>
+</addon>

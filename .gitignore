@@ -1,3 +1,5 @@
 .DS_Store
 *.devhelper
 xenforo/library/bdApi/DevHelper/Generated/*
+xenforo_consumer/library/bdApiConsumer/DevHelper/Generated/*
+
