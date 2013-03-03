@@ -1,9 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApiConsumer" title="[bd] Api Consumer" version_string="0.9-dev" version_id="1" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9-dev" version_id="1" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
-  <admin_templates/>
+  <admin_templates>
+    <template title="bdapi_consumer_option_providers"><![CDATA[<xen:controlunit label="{$preparedOption.title}" hint="{$preparedOption.hint}">
+	<xen:explain>{xen:raw $preparedOption.explain}</xen:explain>
+	<xen:html>
+		<ul>
+			<xen:foreach loop="$providers" key="$counter" value="$provider">
+			<li>
+				<xen:include template="bdapi_consumer_option_providers_single">
+				</xen:include>
+			</li>
+			</xen:foreach>
+		
+			<li class="CensorWordOptionListener">
+				<xen:include template="bdapi_consumer_option_providers_single">
+					<xen:set var="$counter">{xen:count $providers}</xen:set>
+					<xen:set var="$provider"></xen:set>
+				</xen:include>
+			</li>
+		</ul>
+		
+		<input type="hidden" name="{$listedFieldName}" value="{$preparedOption.option_id}" />
+		{xen:raw $editLink}
+	</xen:html>
+</xen:controlunit>]]></template>
+    <template title="bdapi_consumer_option_providers_single"><![CDATA[<xen:if is="{$counter} > 0"><hr /></xen:if>
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][name]" value="{$provider.name}"
+	size="20" placeholder="{xen:phrase bdapi_consumer_name}" />
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][root]" value="{$provider.root}"
+	placeholder="{xen:phrase bdapi_consumer_root}" />
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][client_id]" value="{$provider.client_id}"
+	placeholder="{xen:phrase bdapi_consumer_client_id}" />
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][client_secret]" value="{$provider.client_secret}"
+	placeholder="{xen:phrase bdapi_consumer_client_secret}" />
+
+]]></template>
+  </admin_templates>
   <code_events/>
   <code_event_listeners>
     <listener event_id="file_health_check" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="file_health_check" active="1" description=""/>
@@ -16,18 +51,34 @@
   </code_event_listeners>
   <cron/>
   <email_templates/>
-  <optiongroups/>
+  <optiongroups>
+    <group group_id="bdApiConsumer" display_order="9999" debug_only="0"/>
+    <option option_id="bdapi_consumer_providers" edit_format="callback" data_type="array" can_backup="1" validation_class="bdApiConsumer_Option" validation_method="verifyOptionProviders">
+      <default_value></default_value>
+      <edit_format_params>bdApiConsumer_Option::renderOptionProviders</edit_format_params>
+      <sub_options>*</sub_options>
+      <relation group_id="bdApiConsumer" display_order="10"/>
+    </option>
+  </optiongroups>
   <permissions>
     <permission_groups/>
     <permissions/>
     <interface_groups/>
   </permissions>
   <phrases>
+    <phrase title="bdapi_consumer_client_id" version_id="1" version_string="0.9-dev"><![CDATA[Client ID]]></phrase>
+    <phrase title="bdapi_consumer_client_secret" version_id="1" version_string="0.9-dev"><![CDATA[Client Secret]]></phrase>
     <phrase title="bdapi_consumer_error_occurred_while_connecting_with_x" version_id="1" version_string="0.9-dev"><![CDATA[An error occurred while connecting with {provider}. Please try again later.]]></phrase>
     <phrase title="bdapi_consumer_login_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Login with {provider}]]></phrase>
     <phrase title="bdapi_consumer_matches_email_address_associated_with_your_x_account" version_id="1" version_string="0.9-dev"><![CDATA[This member matches the email address associated with your {provider} account.]]></phrase>
+    <phrase title="bdapi_consumer_name" version_id="1" version_string="0.9-dev"><![CDATA[Provider Name]]></phrase>
+    <phrase title="bdapi_consumer_root" version_id="1" version_string="0.9-dev"><![CDATA[http://domain.com/xenforo/api]]></phrase>
     <phrase title="bdapi_consumer_sign_up_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Sign Up with {provider}]]></phrase>
     <phrase title="bdapi_consumer_x_returned_unknown_error" version_id="1" version_string="0.9-dev"><![CDATA[{provider} returned an unknown error. Please try again later.]]></phrase>
+    <phrase title="option_bdapi_consumer_providers" version_id="1" version_string="0.9-dev"><![CDATA[Providers]]></phrase>
+    <phrase title="option_bdapi_consumer_providers_explain" version_id="1" version_string="0.9-dev"><![CDATA[Enter providers' information to authenticate against. All fields are required for each providers.]]></phrase>
+    <phrase title="option_group_bdApiConsumer" version_id="1" version_string="0.9-dev"><![CDATA[[bd] API Consumer]]></phrase>
+    <phrase title="option_group_bdApiConsumer_description" version_id="1" version_string="0.9-dev"><![CDATA[]]></phrase>
     <phrase title="password_of_x_account_wish_to_associate_with_not_y" version_id="1" version_string="0.9-dev"><![CDATA[This is the password of the {board_title} account that you wish to associate with. It is not your {provider} password.]]></phrase>
   </phrases>
   <route_prefixes/>
@@ -41,7 +92,11 @@
 		<dd>
 			<ul>
 				<xen:foreach loop="$providers" value="$provider">
-					<li><a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1', 'redirect={xen:if $redirect, $redirect, $requestPaths.requestUri}'}" tabindex="110"><span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span></a></li>
+					<li id="provider-{$provider.code}" class="bdApiConsumer_LoginForm_Provider">
+						<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1', 'redirect={xen:if $redirect, $redirect, $requestPaths.requestUri}'}" tabindex="110">
+							<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
+						</a>
+					</li>
 				</xen:foreach>
 			</ul>
 		</dd>
@@ -51,7 +106,11 @@
     <template title="bdapi_consumer_login" version_id="1" version_string="0.9-dev"><![CDATA[<xen:include template="bdapi_consumer_helper_login_form" />]]></template>
     <template title="bdapi_consumer_login_bar_eauth_items" version_id="1" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
 	<xen:foreach loop="$providers" value="$provider">
-		<li><a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1'}" tabindex="110"><span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span></a></li>
+		<li id="provider-{$provider.code}" class="bdApiConsumer_LoginForm_Provider">
+			<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1'}" tabindex="110">
+				<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
+			</a>
+		</li>
 	</xen:foreach>
 </xen:if>]]></template>
     <template title="bdapi_consumer_login_bar_eauth_set" version_id="1" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
