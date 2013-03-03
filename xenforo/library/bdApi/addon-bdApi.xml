@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApi" title="[bd] API" version_string="0.2.1" version_id="3" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApi" title="[bd] API" version_string="0.9-dev" version_id="4" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdApi" parent_navigation_id="tools" display_order="9999" link="api-clients" admin_permission_id="bdApi" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_auth_codes" parent_navigation_id="bdApi" display_order="3000" link="api-auth-codes" admin_permission_id="" debug_only="0" hide_no_children="0"/>
@@ -109,7 +109,6 @@
     <template title="bdapi_client_edit"><![CDATA[<xen:title>{xen:if '{$client.client_id}', '{xen:phrase bdapi_client_edit}', '{xen:phrase bdapi_client_add}'}</xen:title>
 
 <xen:form action="{xen:adminlink 'api-clients/save'}" class="AutoValidator" data-redirect="yes">
-
 	
 	<xen:textboxunit label="{xen:phrase bdapi_client_secret}:" name="client_secret" value="{$client.client_secret}" />
 	<xen:textboxunit label="{xen:phrase bdapi_redirect_uri}:" name="redirect_uri" value="{$client.redirect_uri}"  rows="5"/>
@@ -313,10 +312,10 @@
   </admin_templates>
   <code_events/>
   <code_event_listeners>
-    <listener event_id="file_health_check" execute_order="10" callback_class="bdApi_Listener" callback_method="file_health_check" active="1" description=""/>
-    <listener event_id="init_dependencies" execute_order="10" callback_class="bdApi_Listener" callback_method="init_dependencies" active="1" description=""/>
-    <listener event_id="load_class_controller" execute_order="10" callback_class="bdApi_Listener" callback_method="load_class" active="1" description=""/>
-    <listener event_id="load_class_model" execute_order="10" callback_class="bdApi_Listener" callback_method="load_class" active="1" description=""/>
+    <listener event_id="file_health_check" execute_order="5" callback_class="bdApi_Listener" callback_method="file_health_check" active="1" description=""/>
+    <listener event_id="init_dependencies" execute_order="5" callback_class="bdApi_Listener" callback_method="init_dependencies" active="1" description=""/>
+    <listener event_id="load_class_controller" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" description=""/>
+    <listener event_id="load_class_model" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" description=""/>
   </code_event_listeners>
   <cron/>
   <email_templates/>
@@ -348,6 +347,7 @@
     <phrase title="bdapi_auth_code_save" version_id="1" version_string="0.1"><![CDATA[Save Authentication Code]]></phrase>
     <phrase title="bdapi_auth_code_text" version_id="1" version_string="0.1"><![CDATA[Authentication Code Text]]></phrase>
     <phrase title="bdapi_client" version_id="1" version_string="0.1"><![CDATA[Client]]></phrase>
+    <phrase title="bdapi_clients" version_id="3" version_string="0.2.1"><![CDATA[Clients]]></phrase>
     <phrase title="bdapi_client_add" version_id="1" version_string="0.1"><![CDATA[Add New Client]]></phrase>
     <phrase title="bdapi_client_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Client]]></phrase>
     <phrase title="bdapi_client_delete" version_id="1" version_string="0.1"><![CDATA[Delete Client]]></phrase>
@@ -376,7 +376,7 @@
     <phrase title="bdapi_requested_scopes" version_id="1" version_string="0.1"><![CDATA[Requested Permissions]]></phrase>
     <phrase title="bdapi_scope" version_id="1" version_string="0.1"><![CDATA[Scope]]></phrase>
     <phrase title="bdapi_scope_manage_account_settings" version_id="1" version_string="0.1"><![CDATA[Change your account settings]]></phrase>
-    <phrase title="bdapi_scope_participate_in_conversations" version_id="1" version_string="0.1"><![CDATA[Read and start/reply your conversations]]></phrase>
+    <phrase title="bdapi_scope_participate_in_conversations" version_id="3" version_string="0.2.1"><![CDATA[Read and start/reply to your conversations]]></phrase>
     <phrase title="bdapi_scope_post" version_id="1" version_string="0.1"><![CDATA[Post contents (threads, posts) on behalf of you]]></phrase>
     <phrase title="bdapi_scope_read" version_id="1" version_string="0.1"><![CDATA[Read information (forums, threads, posts) with your account's permissions]]></phrase>
     <phrase title="bdapi_slash_oauth_token_only_accepts_post_requests" version_id="2" version_string="0.2"><![CDATA[/oauth/token only accepts POST requests.]]></phrase>
@@ -393,6 +393,7 @@
     <phrase title="bdapi_token_save" version_id="1" version_string="0.1"><![CDATA[Save Token]]></phrase>
     <phrase title="bdapi_token_text" version_id="1" version_string="0.1"><![CDATA[Token Text]]></phrase>
     <phrase title="bdapi_user_id" version_id="1" version_string="0.1"><![CDATA[User Id]]></phrase>
+    <phrase title="bdappi_you_will_be_redirected_x" version_id="3" version_string="0.2.1"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
   </phrases>
   <route_prefixes>
     <route_type type="admin">
@@ -404,7 +405,10 @@
   </route_prefixes>
   <style_properties/>
   <templates>
-    <template title="bdapi_account_authorize" version_id="1" version_string="0.1"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
+    <template title="bdapi_account_api_clients" version_id="3" version_string="0.2.1"><![CDATA[<xen:title>{xen:phrase bdapi_clients}</xen:title>
+
+blah]]></template>
+    <template title="bdapi_account_authorize" version_id="3" version_string="0.2.1"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
 <form method="post" class="xenForm" action="{xen:link 'account/authorize'}">
 	
@@ -451,6 +455,8 @@
 			</ul>
 		</dd>
 	</dl>
+	
+	<p>{xen:phrase bdappi_you_will_be_redirected_x, 'redirectUri={$authorizeRedirectUri}', 'clientName={$client.name}'}</p>
 
 	<dl class="ctrlUnit submitUnit">
 		<dt></dt>
