@@ -4,6 +4,15 @@ class bdApi_Model_AuthCode extends XenForo_Model
 	const FETCH_CLIENT = 0x01;
 	const FETCH_USER = 0x02;
 	
+	public function pruneExpired()
+	{
+		$this->_getDb()->query('
+			DELETE FROM `xf_bdapi_auth_code`
+			WHERE expire_date > 0
+				AND expire_date < ?
+		', array(XenForo_Application::$time));
+	}
+	
 	public function getAuthCodeByText($authCodeText, array $fetchOptions = array())
 	{
 		$authCodes = $this->getAuthCodes(array('auth_code_text' => $authCodeText), $fetchOptions);

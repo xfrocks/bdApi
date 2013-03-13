@@ -4,6 +4,15 @@ class bdApi_Model_Token extends XenForo_Model
 	const FETCH_CLIENT = 0x01;
 	const FETCH_USER = 0x02;
 	
+	public function pruneExpired()
+	{
+		$this->_getDb()->query('
+			DELETE FROM `xf_bdapi_token`
+			WHERE expire_date > 0
+				AND expire_date < ?
+		', array(XenForo_Application::$time));
+	}
+	
 	public function getTokenByText($tokenText, array $fetchOptions = array())
 	{
 		$tokens = $this->getTokens(array('token_text' => $tokenText), $fetchOptions);

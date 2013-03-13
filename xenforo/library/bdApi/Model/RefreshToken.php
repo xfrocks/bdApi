@@ -4,6 +4,15 @@ class bdApi_Model_RefreshToken extends XenForo_Model
 	const FETCH_CLIENT = 0x01;
 	const FETCH_USER = 0x02;
 	
+	public function pruneExpired()
+	{
+		$this->_getDb()->query('
+			DELETE FROM `xf_bdapi_refresh_token`
+			WHERE expire_date > 0
+				AND expire_date < ?
+		', array(XenForo_Application::$time));
+	}
+	
 	public function getRefreshTokenByText($refreshTokenText, array $fetchOptions = array())
 	{
 		$refreshTokens = $this->getAuthCodes(array('refresh_token_text' => $refreshTokenText), $fetchOptions);
