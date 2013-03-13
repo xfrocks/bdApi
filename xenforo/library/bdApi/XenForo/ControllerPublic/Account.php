@@ -2,6 +2,221 @@
 
 class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_ControllerPublic_Account
 {
+	public function actionApi()
+	{
+		$visitor = XenForo_Visitor::getInstance();
+		
+		/* @var $clientModel bdApi_Model_Client */
+		$clientModel = $this->getModelFromCache('bdApi_Model_Client');
+		/* @var $clientModel bdApi_Model_Token */
+		$tokenModel = $this->getModelFromCache('bdApi_Model_Token');
+		
+		$clients = $clientModel->getClients(
+			array(
+				'user_id' => XenForo_Visitor::getUserId(),
+			),
+			array(
+			)
+		);
+		$tokens = $tokenModel->getTokens(
+			array(
+				'user_id' => XenForo_Visitor::getUserId(),
+			),
+			array(
+				'join' => bdApi_Model_Token::FETCH_CLIENT,
+			)
+		);
+		
+		$viewParams = array(
+			'clients' => $clients,
+			'tokens' => $tokens,
+		
+			'permClientNew' => $visitor->hasPermission('general', 'bdApi_clientNew'),
+		);
+		
+		return $this->_getWrapper(
+			'account', 'bdApi',
+			$this->responseView('bdApi_ViewPublic_Account_Api_Index', 'bdapi_account_api', $viewParams)
+		);
+	}
+	
+	public function actionApiClientAdd()
+	{
+		$visitor = XenForo_Visitor::getInstance();
+		if (!$visitor->hasPermission('general', 'bdApi_clientNew'))
+		{
+			return $this->responseNoPermission();
+		}
+		
+		/* @var $clientModel bdApi_Model_Client */
+		$clientModel = $this->getModelFromCache('bdApi_Model_Client');
+		
+		if ($this->_request->isPost())
+		{
+			$dwInput = $this->_input->filter(array(
+				'name' => XenForo_Input::STRING,
+				'description' => XenForo_Input::STRING,	
+				'redirect_uri' => XenForo_Input::STRING,
+			));
+			
+			$dw = XenForo_DataWriter::create('bdApi_DataWriter_Client');
+			$dw->bulkSet($dwInput);
+			
+			$dw->set('client_id', $clientModel->generateClientId());
+			$dw->set('client_secret', $clientModel->generateClientSecret());
+			$dw->set('user_id', $visitor->get('user_id'));
+			
+			$dw->save();
+			
+			return $this->responseRedirect(
+				XenForo_ControllerResponse_Redirect::RESOURCE_CREATED,
+				XenForo_Link::buildPublicLink('account/api')
+			);
+		}
+		else 
+		{
+			$viewParams = array(
+			);
+			
+			return $this->_getWrapper(
+				'account', 'bdApi',
+				$this->responseView('bdApi_ViewPublic_Account_Api_Client_Add', 'bdapi_account_api_client_add', $viewParams)
+			);
+		}
+	}
+	
+	public function actionApiClientDelete()
+	{
+		$visitor = XenForo_Visitor::getInstance();
+		/* @var $clientModel bdApi_Model_Client */
+		$clientModel = $this->getModelFromCache('bdApi_Model_Client');
+		
+		$clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
+		$client = $clientModel->getClientByid($clientId);
+		if (empty($client))
+		{
+			return $this->responseNoPermission();
+		}
+		if ($client['user_id'] != $visitor->get('user_id'))
+		{
+			return $this->responseNoPermission();
+		}
+		
+		if ($this->_request->isPost())
+		{
+			$dw = XenForo_DataWriter::create('bdApi_DataWriter_Client');
+			$dw->setExistingData($client, true);
+			$dw->delete();
+			
+			return $this->responseRedirect(
+				XenForo_ControllerResponse_Redirect::RESOURCE_UPDATED,
+				XenForo_Link::buildPublicLink('account/api')
+			);
+		}
+		else 
+		{
+			$viewParams = array(
+				'client' => $client,
+			);
+			
+			return $this->_getWrapper(
+				'account', 'bdApi',
+				$this->responseView('bdApi_ViewPublic_Account_Api_Client_Delete', 'bdapi_account_api_client_delete', $viewParams)
+			);
+		}
+	}
+	
+	public function actionApiTokenRevoke()
+	{
+		$visitor = XenForo_Visitor::getInstance();
+		/* @var $clientModel bdApi_Model_AuthCode */
+		$authCodeModel = $this->getModelFromCache('bdApi_Model_AuthCode');
+		/* @var $clientModel bdApi_Model_Client */
+		$clientModel = $this->getModelFromCache('bdApi_Model_Client');
+		/* @var $clientModel bdApi_Model_RefreshToken */
+		$refreshTokenModel = $this->getModelFromCache('bdApi_Model_RefreshToken');
+		/* @var $clientModel bdApi_Model_Token */
+		$tokenModel = $this->getModelFromCache('bdApi_Model_Token');
+		
+		$tokenId = $this->_input->filterSingle('token_id', XenForo_Input::STRING);
+		$token = $tokenModel->getTokenByid($tokenId, array(
+			'join' => bdApi_Model_Token::FETCH_CLIENT,
+		));
+		if (empty($token))
+		{
+			return $this->responseNoPermission();
+		}
+		if ($token['user_id'] != $visitor->get('user_id'))
+		{
+			return $this->responseNoPermission();
+		}
+		
+		if ($this->_request->isPost())
+		{
+			// besides deleting all the tokens, we will delete all associated auth code/refresh token too
+			XenForo_Db::beginTransaction();
+			
+			try
+			{
+				$authCodes = $authCodeModel->getAuthCodes(array(
+					'client_id' => $token['client_id'],
+					'user_id' => $visitor->get('user_id'),
+				));
+				foreach ($authCodes as $authCode)
+				{
+					$authCodeDw = XenForo_DataWriter::create('bdApi_DataWriter_AuthCode');
+					$authCodeDw->setExistingData($authCode, true);
+					$authCodeDw->delete();
+				}
+				
+				$tokens = $tokenModel->getTokens(array(
+					'client_id' => $token['client_id'],
+					'user_id' => $visitor->get('user_id'),
+				));
+				foreach ($tokens as $_token)
+				{
+					$tokenDw = XenForo_DataWriter::create('bdApi_DataWriter_Token');
+					$tokenDw->setExistingData($_token, true);
+					$tokenDw->delete();
+				}
+				
+				$refreshTokens = $refreshTokenModel->getRefreshTokens(array(
+					'client_id' => $token['client_id'],
+					'user_id' => $visitor->get('user_id'),
+				));
+				foreach ($refreshTokens as $refreshToken)
+				{
+					$refreshTokenDw = XenForo_DataWriter::create('bdApi_DataWriter_RefreshToken');
+					$refreshTokenDw->setExistingData($refreshToken, true);
+					$refreshTokenDw->delete();
+				}
+				
+				XenForo_Db::commit();
+			}
+			catch (Exception $e)
+			{
+				XenForo_Db::rollback();
+				throw $e;
+			}
+			
+			return $this->responseRedirect(
+				XenForo_ControllerResponse_Redirect::RESOURCE_UPDATED,
+				XenForo_Link::buildPublicLink('account/api')
+			);
+		}
+		else 
+		{
+			$viewParams = array(
+				'token' => $token,
+			);
+			
+			return $this->_getWrapper(
+				'account', 'bdApi',
+				$this->responseView('bdApi_ViewPublic_Account_Api_Token_Revoke', 'bdapi_account_api_token_revoke', $viewParams)
+			);
+		}
+	}
+	
 	public function actionAuthorize()
 	{
 		/* @var $oauth2Model bdApi_Model_OAuth2 */

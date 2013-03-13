@@ -25,7 +25,7 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
 	
 	public function actionEdit()
 	{
-		$id = $this->_input->filterSingle('client_id', XenForo_Input::UINT);
+		$id = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
 		$client = $this->_getClientOrError($id);
 		
 		$viewParams = array(
@@ -39,18 +39,19 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
 	{
 		$this->_assertPostOnly();
 		
-		$id = $this->_input->filterSingle('client_id', XenForo_Input::UINT);
+		$id = $this->_input->filterSingle('existing_client_id', XenForo_Input::STRING);
 
 		$dwInput = $this->_input->filter(array(
-			'client_secret' => 'string',
-			'redirect_uri' => 'string',
-			'name' => 'string',
-			'description' => 'string',
-			'user_id' => 'uint'
+			'name' => XenForo_Input::STRING,
+			'description' => XenForo_Input::STRING,	
+			'client_id' => XenForo_Input::STRING,
+			'client_secret' => XenForo_Input::STRING,
+			'redirect_uri' => XenForo_Input::STRING,
+			'user_id' => XenForo_Input::UINT
 		));
 		
 		$dw = $this->_getClientDataWriter();
-		if ($id)
+		if (!empty($id))
 		{
 			$dw->setExistingData($id);
 		}
@@ -66,13 +67,13 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
 	
 	public function actionDelete()
 	{
-		$id = $this->_input->filterSingle('client_id', XenForo_Input::UINT);
+		$id = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
 		$client = $this->_getClientOrError($id);
 		
 		if ($this->isConfirmedPost())
 		{
 			$dw = $this->_getClientDataWriter();
-			$dw->setExistingData($id);
+			$dw->setExistingData($client, true);
 			$dw->delete();
 
 			return $this->responseRedirect(

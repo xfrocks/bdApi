@@ -7,7 +7,7 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base {
 			'camelCasePlural' => 'Clients',
 			'camelCaseWSpace' => 'Client',
 			'fields' => array(
-				'client_id' => array('name' => 'client_id', 'type' => 'uint', 'autoIncrement' => true),
+				'client_id' => array('name' => 'client_id', 'type' => 'string', 'length' => 255, 'required' => true),
 				'client_secret' => array('name' => 'client_secret', 'type' => 'string', 'length' => 255, 'required' => true),
 				'redirect_uri' => array('name' => 'redirect_uri', 'type' => 'string', 'required' => true),
 				'name' => array('name' => 'name', 'type' => 'string', 'length' => 255, 'required' => true),
@@ -33,7 +33,7 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base {
 			'camelCaseWSpace' => 'Token',
 			'fields' => array(
 				'token_id' => array('name' => 'token_id', 'type' => 'uint', 'autoIncrement' => true),
-				'client_id' => array('name' => 'client_id', 'type' => 'uint', 'required' => true),
+				'client_id' => array('name' => 'client_id', 'type' => 'string', 'length' => 255, 'required' => true),
 				'token_text' => array('name' => 'token_text', 'type' => 'string', 'length' => 255, 'required' => true),
 				'expire_date' => array('name' => 'expire_date', 'type' => 'uint', 'required' => true),
 				'user_id' => array('name' => 'user_id', 'type' => 'uint', 'required' => true),
@@ -59,7 +59,7 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base {
 			'camelCaseWSpace' => 'Auth Code',
 			'fields' => array(
 				'auth_code_id' => array('name' => 'auth_code_id', 'type' => 'uint', 'autoIncrement' => true),
-				'client_id' => array('name' => 'client_id', 'type' => 'uint', 'required' => true),
+				'client_id' => array('name' => 'client_id', 'type' => 'string', 'length' => 255, 'required' => true),
 				'auth_code_text' => array('name' => 'auth_code_text', 'type' => 'string', 'length' => 255, 'required' => true),
 				'redirect_uri' => array('name' => 'redirect_uri', 'type' => 'string', 'required' => true),
 				'expire_date' => array('name' => 'expire_date', 'type' => 'uint', 'required' => true),
@@ -86,7 +86,7 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base {
 			'camelCaseWSpace' => 'Refresh Token',
 			'fields' => array(
 				'refresh_token_id' => array('name' => 'refresh_token_id', 'type' => 'uint', 'autoIncrement' => true),
-				'client_id' => array('name' => 'client_id', 'type' => 'uint', 'required' => true),
+				'client_id' => array('name' => 'client_id', 'type' => 'string', 'length' => 255, 'required' => true),
 				'refresh_token_text' => array('name' => 'refresh_token_text', 'type' => 'string', 'length' => 255, 'required' => true),
 				'expire_date' => array('name' => 'expire_date', 'type' => 'uint', 'required' => true),
 				'user_id' => array('name' => 'user_id', 'type' => 'uint', 'required' => true),
@@ -106,11 +106,19 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base {
 			)
 		)
 	);
-	protected $_dataPatches = array();
-	protected $_exportPath = '/Users/sondh/Dropbox/XenForo/bdApi';
-	protected $_exportIncludes = array(
-		'api/index.php',
+	protected $_dataPatches = array(
+		'xf_bdapi_token' => array(
+			'issue_date' => array('name' => 'issue_date', 'type' => 'uint', 'required' => true, 'default' => 0)
+		),
+		'xf_bdapi_auth_code' => array(
+			'issue_date' => array('name' => 'issue_date', 'type' => 'uint', 'required' => true, 'default' => 0)
+		),
+		'xf_bdapi_refresh_token' => array(
+			'issue_date' => array('name' => 'issue_date', 'type' => 'uint', 'required' => true, 'default' => 0)
+		)
 	);
+	protected $_exportPath = '/Users/sondh/Dropbox/XenForo/bdApi';
+	protected $_exportIncludes = array('api/index.php');
 	
 	/**
 	 * Return false to trigger the upgrade!

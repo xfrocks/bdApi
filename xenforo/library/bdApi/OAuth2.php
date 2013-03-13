@@ -225,6 +225,7 @@ class bdApi_OAuth2 extends OAuth2
 	
 	protected function checkUserCredentials($clientId, $username, $password)
 	{
+		$client = $this->_model->getClientModel()->getClientById($clientId);
 		$userId = $this->_model->getUserModel()->validateAuthentication($username, $password);
 		
 		if (!empty($userId) AND $userId > 0)

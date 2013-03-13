@@ -5,7 +5,7 @@ class bdApi_Installer {
 	protected static $_tables = array(
 		'client' => array(
 			'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_client` (
-				`client_id` INT(10) UNSIGNED AUTO_INCREMENT
+				`client_id` VARCHAR(255) NOT NULL
 				,`client_secret` VARCHAR(255) NOT NULL
 				,`redirect_uri` TEXT NOT NULL
 				,`name` VARCHAR(255) NOT NULL
@@ -20,7 +20,7 @@ class bdApi_Installer {
 		'token' => array(
 			'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_token` (
 				`token_id` INT(10) UNSIGNED AUTO_INCREMENT
-				,`client_id` INT(10) UNSIGNED NOT NULL
+				,`client_id` VARCHAR(255) NOT NULL
 				,`token_text` VARCHAR(255) NOT NULL
 				,`expire_date` INT(10) UNSIGNED NOT NULL
 				,`user_id` INT(10) UNSIGNED NOT NULL
@@ -33,7 +33,7 @@ class bdApi_Installer {
 		'auth_code' => array(
 			'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_auth_code` (
 				`auth_code_id` INT(10) UNSIGNED AUTO_INCREMENT
-				,`client_id` INT(10) UNSIGNED NOT NULL
+				,`client_id` VARCHAR(255) NOT NULL
 				,`auth_code_text` VARCHAR(255) NOT NULL
 				,`redirect_uri` TEXT NOT NULL
 				,`expire_date` INT(10) UNSIGNED NOT NULL
@@ -47,7 +47,7 @@ class bdApi_Installer {
 		'refresh_token' => array(
 			'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_refresh_token` (
 				`refresh_token_id` INT(10) UNSIGNED AUTO_INCREMENT
-				,`client_id` INT(10) UNSIGNED NOT NULL
+				,`client_id` VARCHAR(255) NOT NULL
 				,`refresh_token_text` VARCHAR(255) NOT NULL
 				,`expire_date` INT(10) UNSIGNED NOT NULL
 				,`user_id` INT(10) UNSIGNED NOT NULL
@@ -58,7 +58,29 @@ class bdApi_Installer {
 			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_refresh_token`'
 		)
 	);
-	protected static $_patches = array();
+	protected static $_patches = array(
+		array(
+			'table' => 'xf_bdapi_token',
+			'field' => 'issue_date',
+			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_bdapi_token` LIKE \'issue_date\'',
+			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_bdapi_token` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
+			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_token` DROP COLUMN `issue_date`'
+		),
+		array(
+			'table' => 'xf_bdapi_auth_code',
+			'field' => 'issue_date',
+			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_bdapi_auth_code` LIKE \'issue_date\'',
+			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_bdapi_auth_code` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
+			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_auth_code` DROP COLUMN `issue_date`'
+		),
+		array(
+			'table' => 'xf_bdapi_refresh_token',
+			'field' => 'issue_date',
+			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_bdapi_refresh_token` LIKE \'issue_date\'',
+			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
+			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` DROP COLUMN `issue_date`'
+		)
+	);
 
 	public static function install() {
 		$db = XenForo_Application::get('db');
@@ -80,15 +102,15 @@ class bdApi_Installer {
 	public static function uninstall() {
 		$db = XenForo_Application::get('db');
 		
-		foreach (self::$_tables as $table) {
-			$db->query($table['dropQuery']);
-		}
-		
 		foreach (self::$_patches as $patch) {
 			$existed = $db->fetchOne($patch['showColumnsQuery']);
 			if (!empty($existed)) {
 				$db->query($patch['alterTableDropColumnQuery']);
 			}
+		}
+		
+		foreach (self::$_tables as $table) {
+			$db->query($table['dropQuery']);
 		}
 		
 		self::uninstallCustomized();

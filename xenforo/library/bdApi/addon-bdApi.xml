@@ -30,38 +30,7 @@
 	
 	<input type="hidden" name="_xfConfirm" value="1" />
 </xen:form>]]></template>
-    <template title="bdapi_auth_code_edit"><![CDATA[<xen:title>{xen:if '{$authCode.auth_code_id}', '{xen:phrase bdapi_auth_code_edit}', '{xen:phrase bdapi_auth_code_add}'}</xen:title>
-
-<xen:form action="{xen:adminlink 'api-auth-codes/save'}" class="AutoValidator" data-redirect="yes">
-
-	
-	<xen:selectunit label="{xen:phrase bdapi_client}:" name="client_id" value="{$authCode.client_id}">
-		<xen:option value="">&nbsp;</xen:option>
-		<xen:options source="$allClient" />
-	</xen:selectunit>
-	<xen:textboxunit label="{xen:phrase bdapi_auth_code_text}:" name="auth_code_text" value="{$authCode.auth_code_text}" data-liveTitleTemplate="{xen:if {$authCode.auth_code_id},
-		'{xen:phrase bdapi_auth_code_edit}: <em>%s</em>',
-		'{xen:phrase bdapi_auth_code_add}: <em>%s</em>'}" />
-	<xen:textboxunit label="{xen:phrase bdapi_redirect_uri}:" name="redirect_uri" value="{$authCode.redirect_uri}"  rows="5"/>
-	<xen:textboxunit label="{xen:phrase bdapi_expire_date}:" name="expire_date" value="{$authCode.expire_date}" />
-	<xen:textboxunit label="{xen:phrase bdapi_user_id}:" name="user_id" value="{$authCode.user_id}" />
-	<xen:textboxunit label="{xen:phrase bdapi_scope}:" name="scope" value="{$authCode.scope}"  rows="5"/>
-
-	<xen:submitunit save="{xen:phrase bdapi_auth_code_save}">
-		<input type="button" name="delete" value="{xen:phrase bdapi_auth_code_delete}"
-			accesskey="d" class="button OverlayTrigger"
-			data-href="{xen:adminlink 'api-auth-codes/delete', $authCode}"
-			{xen:if '!{$authCode.auth_code_id}', 'style="display: none"'}
-		/>
-	</xen:submitunit>
-	
-	<input type="hidden" name="auth_code_id" value="{$authCode.auth_code_id}" />
-</xen:form>]]></template>
     <template title="bdapi_auth_code_list"><![CDATA[<xen:title>{xen:phrase bdapi_auth_code}</xen:title>
-
-<xen:topctrl>
-	<a href="{xen:adminlink 'api-auth-codes/add'}" class="button" accesskey="a">+ {xen:phrase bdapi_auth_code_add}</a>
-</xen:topctrl>
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
@@ -77,8 +46,8 @@
 			<xen:foreach loop="$authCodes" value="$authCode">
 				<xen:listitem
 					id="{$authCode.auth_code_id}"
-					href="{xen:adminlink 'api-auth-codes/edit', $authCode}"
 					label="{$authCode.auth_code_text}"
+					snippet="{$authCode.client_name}->{$authCode.username} ({xen:datetime $authCode.issue_date})"
 					delete="{xen:adminlink 'api-auth-codes/delete', $authCode}" />
 			</xen:foreach>
 		</ol>
@@ -110,12 +79,15 @@
 
 <xen:form action="{xen:adminlink 'api-clients/save'}" class="AutoValidator" data-redirect="yes">
 	
-	<xen:textboxunit label="{xen:phrase bdapi_client_secret}:" name="client_secret" value="{$client.client_secret}" />
-	<xen:textboxunit label="{xen:phrase bdapi_redirect_uri}:" name="redirect_uri" value="{$client.redirect_uri}"  rows="5"/>
 	<xen:textboxunit label="{xen:phrase bdapi_name}:" name="name" value="{$client.name}" data-liveTitleTemplate="{xen:if {$client.client_id},
 		'{xen:phrase bdapi_client_edit}: <em>%s</em>',
 		'{xen:phrase bdapi_client_add}: <em>%s</em>'}" />
-	<xen:textboxunit label="{xen:phrase bdapi_description}:" name="description" value="{$client.description}"  rows="5"/>
+	<xen:textboxunit label="{xen:phrase bdapi_description}:" name="description" value="{$client.description}" rows="5"/>
+	
+	<xen:textboxunit label="{xen:phrase bdapi_client_key}:" name="client_id" value="{$client.client_id}" />
+	<xen:textboxunit label="{xen:phrase bdapi_client_secret}:" name="client_secret" value="{$client.client_secret}" />
+	<xen:textboxunit label="{xen:phrase bdapi_redirect_uri}:" name="redirect_uri" value="{$client.redirect_uri}" />
+	
 	<xen:textboxunit label="{xen:phrase bdapi_user_id}:" name="user_id" value="{$client.user_id}" />
 
 	<xen:submitunit save="{xen:phrase bdapi_client_save}">
@@ -126,7 +98,7 @@
 		/>
 	</xen:submitunit>
 	
-	<input type="hidden" name="client_id" value="{$client.client_id}" />
+	<input type="hidden" name="existing_client_id" value="{$client.client_id}" />
 </xen:form>]]></template>
     <template title="bdapi_client_list"><![CDATA[<xen:title>{xen:phrase bdapi_client}</xen:title>
 
@@ -150,6 +122,7 @@
 					id="{$client.client_id}"
 					href="{xen:adminlink 'api-clients/edit', $client}"
 					label="{$client.name}"
+					snippet="{$client.redirect_uri}"
 					delete="{xen:adminlink 'api-clients/delete', $client}" />
 			</xen:foreach>
 		</ol>
@@ -177,37 +150,7 @@
 	
 	<input type="hidden" name="_xfConfirm" value="1" />
 </xen:form>]]></template>
-    <template title="bdapi_refresh_token_edit"><![CDATA[<xen:title>{xen:if '{$refreshToken.refresh_token_id}', '{xen:phrase bdapi_refresh_token_edit}', '{xen:phrase bdapi_refresh_token_add}'}</xen:title>
-
-<xen:form action="{xen:adminlink 'api-refresh-tokens/save'}" class="AutoValidator" data-redirect="yes">
-
-	
-	<xen:selectunit label="{xen:phrase bdapi_client}:" name="client_id" value="{$refreshToken.client_id}">
-		<xen:option value="">&nbsp;</xen:option>
-		<xen:options source="$allClient" />
-	</xen:selectunit>
-	<xen:textboxunit label="{xen:phrase bdapi_refresh_token_text}:" name="refresh_token_text" value="{$refreshToken.refresh_token_text}" data-liveTitleTemplate="{xen:if {$refreshToken.refresh_token_id},
-		'{xen:phrase bdapi_refresh_token_edit}: <em>%s</em>',
-		'{xen:phrase bdapi_refresh_token_add}: <em>%s</em>'}" />
-	<xen:textboxunit label="{xen:phrase bdapi_expire_date}:" name="expire_date" value="{$refreshToken.expire_date}" />
-	<xen:textboxunit label="{xen:phrase bdapi_user_id}:" name="user_id" value="{$refreshToken.user_id}" />
-	<xen:textboxunit label="{xen:phrase bdapi_scope}:" name="scope" value="{$refreshToken.scope}"  rows="5"/>
-
-	<xen:submitunit save="{xen:phrase bdapi_refresh_token_save}">
-		<input type="button" name="delete" value="{xen:phrase bdapi_refresh_token_delete}"
-			accesskey="d" class="button OverlayTrigger"
-			data-href="{xen:adminlink 'api-refresh-tokens/delete', $refreshToken}"
-			{xen:if '!{$refreshToken.refresh_token_id}', 'style="display: none"'}
-		/>
-	</xen:submitunit>
-	
-	<input type="hidden" name="refresh_token_id" value="{$refreshToken.refresh_token_id}" />
-</xen:form>]]></template>
     <template title="bdapi_refresh_token_list"><![CDATA[<xen:title>{xen:phrase bdapi_refresh_token}</xen:title>
-
-<xen:topctrl>
-	<a href="{xen:adminlink 'api-refresh-tokens/add'}" class="button" accesskey="a">+ {xen:phrase bdapi_refresh_token_add}</a>
-</xen:topctrl>
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
@@ -223,8 +166,8 @@
 			<xen:foreach loop="$refreshTokens" value="$refreshToken">
 				<xen:listitem
 					id="{$refreshToken.refresh_token_id}"
-					href="{xen:adminlink 'api-refresh-tokens/edit', $refreshToken}"
 					label="{$refreshToken.refresh_token_text}"
+					snippet="{$refreshToken.client_name}->{$refreshToken.username} ({xen:datetime $refreshToken.issue_date})"
 					delete="{xen:adminlink 'api-refresh-tokens/delete', $refreshToken}" />
 			</xen:foreach>
 		</ol>
@@ -252,37 +195,7 @@
 	
 	<input type="hidden" name="_xfConfirm" value="1" />
 </xen:form>]]></template>
-    <template title="bdapi_token_edit"><![CDATA[<xen:title>{xen:if '{$token.token_id}', '{xen:phrase bdapi_token_edit}', '{xen:phrase bdapi_token_add}'}</xen:title>
-
-<xen:form action="{xen:adminlink 'api-tokens/save'}" class="AutoValidator" data-redirect="yes">
-
-	
-	<xen:selectunit label="{xen:phrase bdapi_client}:" name="client_id" value="{$token.client_id}">
-		<xen:option value="">&nbsp;</xen:option>
-		<xen:options source="$allClient" />
-	</xen:selectunit>
-	<xen:textboxunit label="{xen:phrase bdapi_token_text}:" name="token_text" value="{$token.token_text}" data-liveTitleTemplate="{xen:if {$token.token_id},
-		'{xen:phrase bdapi_token_edit}: <em>%s</em>',
-		'{xen:phrase bdapi_token_add}: <em>%s</em>'}" />
-	<xen:textboxunit label="{xen:phrase bdapi_expire_date}:" name="expire_date" value="{$token.expire_date}" />
-	<xen:textboxunit label="{xen:phrase bdapi_user_id}:" name="user_id" value="{$token.user_id}" />
-	<xen:textboxunit label="{xen:phrase bdapi_scope}:" name="scope" value="{$token.scope}"  rows="5"/>
-
-	<xen:submitunit save="{xen:phrase bdapi_token_save}">
-		<input type="button" name="delete" value="{xen:phrase bdapi_token_delete}"
-			accesskey="d" class="button OverlayTrigger"
-			data-href="{xen:adminlink 'api-tokens/delete', $token}"
-			{xen:if '!{$token.token_id}', 'style="display: none"'}
-		/>
-	</xen:submitunit>
-	
-	<input type="hidden" name="token_id" value="{$token.token_id}" />
-</xen:form>]]></template>
     <template title="bdapi_token_list"><![CDATA[<xen:title>{xen:phrase bdapi_token}</xen:title>
-
-<xen:topctrl>
-	<a href="{xen:adminlink 'api-tokens/add'}" class="button" accesskey="a">+ {xen:phrase bdapi_token_add}</a>
-</xen:topctrl>
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
@@ -298,8 +211,8 @@
 			<xen:foreach loop="$tokens" value="$token">
 				<xen:listitem
 					id="{$token.token_id}"
-					href="{xen:adminlink 'api-tokens/edit', $token}"
 					label="{$token.token_text}"
+					snippet="{$token.client_name}->{$token.username} ({xen:datetime $token.issue_date})"
 					delete="{xen:adminlink 'api-tokens/delete', $token}" />
 			</xen:foreach>
 		</ol>
@@ -322,7 +235,9 @@
   <optiongroups/>
   <permissions>
     <permission_groups/>
-    <permissions/>
+    <permissions>
+      <permission permission_group_id="general" permission_id="bdApi_clientNew" permission_type="flag" default_value="unset" interface_group_id="generalPermissions" display_order="9999"/>
+    </permissions>
     <interface_groups/>
   </permissions>
   <phrases>
@@ -343,23 +258,26 @@
     <phrase title="bdapi_auth_code_edit" version_id="1" version_string="0.1"><![CDATA[Edit Authentication Code]]></phrase>
     <phrase title="bdapi_auth_code_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Authentication Code could not be found]]></phrase>
     <phrase title="bdapi_auth_code_no_results" version_id="1" version_string="0.1"><![CDATA[No authentication codes to display...]]></phrase>
-    <phrase title="bdapi_auth_code_please_confirm" version_id="1" version_string="0.1"><![CDATA[Please confirm that you want to delete the following Authentication Code]]></phrase>
+    <phrase title="bdapi_auth_code_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following authentication code]]></phrase>
     <phrase title="bdapi_auth_code_save" version_id="1" version_string="0.1"><![CDATA[Save Authentication Code]]></phrase>
     <phrase title="bdapi_auth_code_text" version_id="1" version_string="0.1"><![CDATA[Authentication Code Text]]></phrase>
     <phrase title="bdapi_client" version_id="1" version_string="0.1"><![CDATA[Client]]></phrase>
-    <phrase title="bdapi_clients" version_id="3" version_string="0.2.1"><![CDATA[Clients]]></phrase>
+    <phrase title="bdapi_clients" version_id="4" version_string="0.9-dev"><![CDATA[API Clients]]></phrase>
     <phrase title="bdapi_client_add" version_id="1" version_string="0.1"><![CDATA[Add New Client]]></phrase>
     <phrase title="bdapi_client_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Client]]></phrase>
     <phrase title="bdapi_client_delete" version_id="1" version_string="0.1"><![CDATA[Delete Client]]></phrase>
     <phrase title="bdapi_client_edit" version_id="1" version_string="0.1"><![CDATA[Edit Client]]></phrase>
+    <phrase title="bdapi_client_key" version_id="4" version_string="0.9-dev"><![CDATA[API Key]]></phrase>
     <phrase title="bdapi_client_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Client could not be found]]></phrase>
     <phrase title="bdapi_client_no_results" version_id="1" version_string="0.1"><![CDATA[No clients to display...]]></phrase>
-    <phrase title="bdapi_client_please_confirm" version_id="1" version_string="0.1"><![CDATA[Please confirm that you want to delete the following Client]]></phrase>
+    <phrase title="bdapi_client_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following client]]></phrase>
     <phrase title="bdapi_client_save" version_id="1" version_string="0.1"><![CDATA[Save Client]]></phrase>
-    <phrase title="bdapi_client_secret" version_id="1" version_string="0.1"><![CDATA[Client Secret]]></phrase>
+    <phrase title="bdapi_client_secret" version_id="4" version_string="0.9-dev"><![CDATA[API Secret]]></phrase>
     <phrase title="bdapi_description" version_id="1" version_string="0.1"><![CDATA[Description]]></phrase>
     <phrase title="bdapi_expire_date" version_id="1" version_string="0.1"><![CDATA[Expire Date]]></phrase>
-    <phrase title="bdapi_name" version_id="1" version_string="0.1"><![CDATA[Name]]></phrase>
+    <phrase title="bdapi_home" version_id="4" version_string="0.9-dev"><![CDATA[API Access]]></phrase>
+    <phrase title="bdapi_issue_date" version_id="4" version_string="0.9-dev"><![CDATA[Issue Date]]></phrase>
+    <phrase title="bdapi_name" version_id="4" version_string="0.9-dev"><![CDATA[Client Name]]></phrase>
     <phrase title="bdapi_please_confirm_to_authorize_access" version_id="1" version_string="0.1"><![CDATA[Please confirm to authorize access to the listed client with below permissions.]]></phrase>
     <phrase title="bdapi_realm" global_cache="1" version_id="1" version_string="0.1"><![CDATA[{boardTitle} API]]></phrase>
     <phrase title="bdapi_redirect_uri" version_id="1" version_string="0.1"><![CDATA[Redirect Uri]]></phrase>
@@ -370,10 +288,11 @@
     <phrase title="bdapi_refresh_token_edit" version_id="1" version_string="0.1"><![CDATA[Edit Refresh Token]]></phrase>
     <phrase title="bdapi_refresh_token_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Refresh Token could not be found]]></phrase>
     <phrase title="bdapi_refresh_token_no_results" version_id="1" version_string="0.1"><![CDATA[No refresh tokens to display...]]></phrase>
-    <phrase title="bdapi_refresh_token_please_confirm" version_id="1" version_string="0.1"><![CDATA[Please confirm that you want to delete the following Refresh Token]]></phrase>
+    <phrase title="bdapi_refresh_token_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following refresh token]]></phrase>
     <phrase title="bdapi_refresh_token_save" version_id="1" version_string="0.1"><![CDATA[Save Refresh Token]]></phrase>
     <phrase title="bdapi_refresh_token_text" version_id="1" version_string="0.1"><![CDATA[Refresh Token Text]]></phrase>
     <phrase title="bdapi_requested_scopes" version_id="1" version_string="0.1"><![CDATA[Requested Permissions]]></phrase>
+    <phrase title="bdapi_revoke" version_id="4" version_string="0.9-dev"><![CDATA[Revoke]]></phrase>
     <phrase title="bdapi_scope" version_id="1" version_string="0.1"><![CDATA[Scope]]></phrase>
     <phrase title="bdapi_scope_manage_account_settings" version_id="1" version_string="0.1"><![CDATA[Change your account settings]]></phrase>
     <phrase title="bdapi_scope_participate_in_conversations" version_id="3" version_string="0.2.1"><![CDATA[Read and start/reply to your conversations]]></phrase>
@@ -383,17 +302,19 @@
     <phrase title="bdapi_slash_posts_requires_thread_id" version_id="1" version_string="0.1"><![CDATA[/posts requires thread_id]]></phrase>
     <phrase title="bdapi_slash_threads_requires_node_id" version_id="1" version_string="0.1"><![CDATA[/threads requires node_id]]></phrase>
     <phrase title="bdapi_token" version_id="1" version_string="0.1"><![CDATA[Token]]></phrase>
+    <phrase title="bdapi_tokens" version_id="4" version_string="0.9-dev"><![CDATA[API Access Tokens]]></phrase>
     <phrase title="bdapi_token_add" version_id="1" version_string="0.1"><![CDATA[Add New Token]]></phrase>
-    <phrase title="bdapi_token_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Token]]></phrase>
+    <phrase title="bdapi_token_confirm_deletion" version_id="4" version_string="0.9-dev"><![CDATA[Confirm Revocation of Token]]></phrase>
     <phrase title="bdapi_token_delete" version_id="1" version_string="0.1"><![CDATA[Delete Token]]></phrase>
     <phrase title="bdapi_token_edit" version_id="1" version_string="0.1"><![CDATA[Edit Token]]></phrase>
     <phrase title="bdapi_token_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Token could not be found]]></phrase>
     <phrase title="bdapi_token_no_results" version_id="1" version_string="0.1"><![CDATA[No tokens to display...]]></phrase>
-    <phrase title="bdapi_token_please_confirm" version_id="1" version_string="0.1"><![CDATA[Please confirm that you want to delete the following Token]]></phrase>
+    <phrase title="bdapi_token_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to revoke the following token]]></phrase>
     <phrase title="bdapi_token_save" version_id="1" version_string="0.1"><![CDATA[Save Token]]></phrase>
     <phrase title="bdapi_token_text" version_id="1" version_string="0.1"><![CDATA[Token Text]]></phrase>
     <phrase title="bdapi_user_id" version_id="1" version_string="0.1"><![CDATA[User Id]]></phrase>
     <phrase title="bdappi_you_will_be_redirected_x" version_id="3" version_string="0.2.1"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
+    <phrase title="permission_general_bdApi_clientNew" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Create Client]]></phrase>
   </phrases>
   <route_prefixes>
     <route_type type="admin">
@@ -405,9 +326,444 @@
   </route_prefixes>
   <style_properties/>
   <templates>
-    <template title="bdapi_account_api_clients" version_id="3" version_string="0.2.1"><![CDATA[<xen:title>{xen:phrase bdapi_clients}</xen:title>
+    <template title="bdapi.css" version_id="4" version_string="0.9-dev"><![CDATA[/* clients */
+.bdApi_Client_List
+{
+	position: relative;
+	zoom: 1;
+}
 
-blah]]></template>
+/** column style and width **/
+
+.bdApi_Client_List .sectionHeaders,
+.bdApi_Client_Item
+{
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+	word-wrap: normal;
+}
+
+	.bdApi_Client_List .sectionHeaders dt,
+	.bdApi_Client_List .sectionHeaders dd,
+	.bdApi_Client_Item .listBlock
+	{
+		display: table-cell;
+		vertical-align: middle;
+	}
+
+	.bdApi_Client_Item .cellContents
+	{
+		padding: 5px;
+		overflow: hidden;
+		zoom: 1;
+		position: relative;
+	}
+	
+		.bdApi_Client_List .bdApi_Client_Name
+		{
+			width: auto;
+		}
+		
+		.bdApi_Client_List .bdApi_Client_Key
+		{
+			width: 150px;
+		}
+
+		.bdApi_Client_List .bdApi_Client_Secret
+		{
+			width: 150px;
+		}
+
+		.bdApi_Client_List .bdApi_Client_Control
+		{
+			width: 150px;
+		}
+
+/* column headers */
+
+.bdApi_Client_List .sectionHeaders
+{	
+	{xen:property subHeading}
+	
+	padding: 0;
+}
+		
+	.bdApi_Client_List .sectionHeaders a
+	{
+		display: block;
+		color: {xen:property subHeading.color};
+		outline: none;
+	}
+	
+	.bdApi_Client_List .sectionHeaders a:hover
+	{
+		text-decoration: none;
+	}
+			
+	.bdApi_Client_List .sectionHeaders dd a[href]:hover
+	{
+		{xen:property subHeadingHover}
+	}
+	
+		.bdApi_Client_List .sectionHeaders a span
+		{
+			{xen:property subHeading.padding}
+			display: block;
+		}
+		
+/** IE <8 **/
+.bdApi_Client_List .sectionHeaders,
+.bdApi_Client_Item                    { *display: block; _vertical-align: bottom; }
+.bdApi_Client_List .sectionHeaders dt,
+.bdApi_Client_List .sectionHeaders dd,
+.bdApi_Client_Item .listBlock         { *display: block; *float: left; }
+.bdApi_Client_Item .listBlock         { _height: 52px; *min-height: 52px; } /* todo: should be calculation */
+.bdApi_Client_List .bdApi_Client_Name { *width: 39.98%; }
+.bdApi_Client_List .bdApi_Client_Key  { *width: 19.98%; }
+.bdApi_Client_List .bdApi_Client_Secret{ *width: 19.98%; }
+.bdApi_Client_List .bdApi_Client_Control{ *width: 19.98%; }
+.bdApi_Client_List .sectionHeaders dt,
+.bdApi_Client_List .sectionHeaders dd { *padding: 5px 0; }
+.bdApi_Client_List .sectionHeaders a,
+.bdApi_Client_List .sectionHeaders a span { *display: inline !important; *float: none !important; }
+
+.bdApi_Client_Items
+{
+}
+
+.bdApi_Client_Item
+{
+	{xen:property primaryContent.background}
+	
+	{xen:property primaryContent.border}
+}
+
+		/* sections, section widths */
+	
+		.bdApi_Client_Item .bdApi_Client_Name,		
+		.bdApi_Client_Item .bdApi_Client_Secret
+		{
+		}
+		
+		.bdApi_Client_Item .bdApi_Client_Key,
+		.bdApi_Client_Item .bdApi_Client_Control
+		{
+			{xen:property secondaryContent.background}
+		}
+
+/* tokens */
+.bdApi_Token_List
+{
+	position: relative;
+	zoom: 1;
+}
+
+/** column style and width **/
+
+.bdApi_Token_List .sectionHeaders,
+.bdApi_Token_Item
+{
+	display: table;
+	table-layout: fixed;
+	width: 100%;
+	word-wrap: normal;
+}
+
+	.bdApi_Token_List .sectionHeaders dt,
+	.bdApi_Token_List .sectionHeaders dd,
+	.bdApi_Token_Item .listBlock
+	{
+		display: table-cell;
+		vertical-align: middle;
+	}
+
+	.bdApi_Token_Item .cellContents,
+	.bdApi_Token_NoItem
+	{
+		padding: 5px;
+		overflow: hidden;
+		zoom: 1;
+		position: relative;
+	}
+	
+		.bdApi_Token_List .bdApi_Token_Client
+		{
+			width: auto;
+		}
+		
+		.bdApi_Token_List .bdApi_Token_IssueDate
+		{
+			width: 150px;
+		}
+
+		.bdApi_Token_List .bdApi_Token_Scope
+		{
+			width: 150px;
+		}
+
+		.bdApi_Token_List .bdApi_Token_Control
+		{
+			width: 150px;
+		}
+
+/* column headers */
+
+.bdApi_Token_List .sectionHeaders
+{	
+	{xen:property subHeading}
+	
+	padding: 0;
+}
+		
+	.bdApi_Token_List .sectionHeaders a
+	{
+		display: block;
+		color: {xen:property subHeading.color};
+		outline: none;
+	}
+	
+	.bdApi_Token_List .sectionHeaders a:hover
+	{
+		text-decoration: none;
+	}
+			
+	.bdApi_Token_List .sectionHeaders dd a[href]:hover
+	{
+		{xen:property subHeadingHover}
+	}
+	
+		.bdApi_Token_List .sectionHeaders a span
+		{
+			{xen:property subHeading.padding}
+			display: block;
+		}
+		
+/** IE <8 **/
+.bdApi_Token_List .sectionHeaders,
+.bdApi_Token_Item                    { *display: block; _vertical-align: bottom; }
+.bdApi_Token_List .sectionHeaders dt,
+.bdApi_Token_List .sectionHeaders dd,
+.bdApi_Token_Item .listBlock         { *display: block; *float: left; }
+.bdApi_Token_Item .listBlock         { _height: 52px; *min-height: 52px; } /* todo: should be calculation */
+.bdApi_Token_List .bdApi_Token_Client{ *width: 39.98%; }
+.bdApi_Token_List .bdApi_Token_IssueDate { *width: 19.98%; }
+.bdApi_Token_List .bdApi_Token_Scope { *width: 19.98%; }
+.bdApi_Token_List .bdApi_Token_Control { *width: 19.98%; }
+.bdApi_Token_List .sectionHeaders dt,
+.bdApi_Token_List .sectionHeaders dd { *padding: 5px 0; }
+.bdApi_Token_List .sectionHeaders a,
+.bdApi_Token_List .sectionHeaders a span { *display: inline !important; *float: none !important; }
+
+.bdApi_Token_Items
+{
+}
+
+.bdApi_Token_Item
+{
+	{xen:property primaryContent.background}
+	
+	{xen:property primaryContent.border}
+}
+
+		/* sections, section widths */
+	
+		.bdApi_Token_Item .bdApi_Token_Client,		
+		.bdApi_Token_Item .bdApi_Token_Scope
+		{
+		}
+		
+		.bdApi_Token_Item .bdApi_Token_IssueDate,
+		.bdApi_Token_Item .bdApi_Token_Control
+		{
+			{xen:property secondaryContent.background}
+		}
+]]></template>
+    <template title="bdapi_account_api" version_id="4" version_string="0.9-dev"><![CDATA[<xen:require css="bdapi.css" />
+
+<xen:include template="bdapi_account_api_clients" />
+
+<xen:include template="bdapi_account_api_tokens" />
+
+<xen:title>{xen:phrase bdapi_home}</xen:title>]]></template>
+    <template title="bdapi_account_api_clients" version_id="4" version_string="0.9-dev"><![CDATA[<xen:require css="bdapi.css" />
+
+<xen:title>{xen:phrase bdapi_clients}</xen:title>
+
+<xen:if is="{$permClientNew}">
+	<xen:topctrl>
+		<a href="{xen:link account/api/client-add}" class="callToAction"><span>{xen:phrase bdapi_client_add}</span></a>
+	</xen:topctrl>
+</xen:if>
+
+<xen:if hascontent="true">
+	<h3>{xen:phrase bdapi_clients}</h3>
+	
+	<div class="bdApi_Client_List section">
+		<dl class="sectionHeaders">
+			<dt class="bdApi_Client_Name"><a><span>{xen:phrase bdapi_name}</span></a></dt>
+			<dd class="bdApi_Client_Key"><a><span>{xen:phrase bdapi_client_key}</span></a></dd>
+			<dd class="bdApi_Client_Secret"><a><span>{xen:phrase bdapi_client_secret}</span></a></dd>
+			<dd class="bdApi_Client_Control"><a><span>{xen:phrase controls}</span></a></dd>
+		</dl>
+		<ol class="bdApi_Client_Items">
+			<xen:contentcheck>
+				<xen:foreach loop="$clients" value="$client">
+					<li class="bdApi_Client_Item">
+						<div class="bdApi_Client_Name listBlock">
+							<div class="cellContents">
+								<a name="client-{$client.client_id}">{$client.name}</a>
+								<p class="muted">{$client.description} (<a href="{$client.redirect_uri}" rel="nofollow" target="_blank">{$client.redirect_uri}</a>)</p>
+							</div>
+						</div>
+						<div class="bdApi_Client_Key listBlock">
+							<div class="cellContents">
+								{$client.client_id}
+							</div>
+						</div>
+						<div class="bdApi_Client_Secret listBlock">
+							<div class="cellContents">
+								{$client.client_secret}
+							</div>
+						</div>
+						<div class="bdApi_Client_Control listBlock">
+							<div class="cellContents">
+								<a href="{xen:link 'account/api/client-delete', '', 'client_id={$client.client_id}'}" class="OverlayTrigger">{xen:phrase delete}</a>
+							</div>
+						</div>
+					</li>
+				</xen:foreach>
+			</xen:contentcheck>
+		</ol>
+	</div>
+</xen:if>]]></template>
+    <template title="bdapi_account_api_client_add" version_id="4" version_string="0.9-dev"><![CDATA[<xen:require css="bdapi.css" />
+
+<xen:title>{xen:phrase bdapi_client_add}</xen:title>
+
+<form method="post" class="xenForm AutoValidator"
+	action="{xen:link account/api/client-add}"
+	data-redirect="yes">
+
+	<dl class="ctrlUnit">
+		<dt><label for="ctrl_name">{xen:phrase bdapi_name}:</label></dt>
+		<dd>
+			<input id="name" type="text" name="name" class="textCtrl" />
+		</dd>
+	</dl>
+
+	<dl class="ctrlUnit">
+		<dt><label for="ctrl_description">{xen:phrase bdapi_description}:</label></dt>
+		<dd>
+			<textarea id="description" name="description" class="textCtrl Elastic" rows="5"></textarea>
+		</dd>
+	</dl>
+
+	<dl class="ctrlUnit">
+		<dt><label for="ctrl_redirect_uri">{xen:phrase bdapi_redirect_uri}:</label></dt>
+		<dd>
+			<input id="redirect_uri" type="text" name="redirect_uri" class="textCtrl" />
+		</dd>
+	</dl>
+
+	<dl class="ctrlUnit submitUnit">
+		<dt></dt>
+		<dd><input type="submit" name="save" value="{xen:phrase save}" accesskey="s" class="button primary" /></dd>
+	</dl>
+
+	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+</form>]]></template>
+    <template title="bdapi_account_api_client_delete" version_id="4" version_string="0.9-dev"><![CDATA[<xen:title>{xen:phrase bdapi_client_confirm_deletion}: {$client.name}</xen:title>
+<xen:h1>{xen:phrase bdapi_client_confirm_deletion}</xen:h1>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:link 'account/api'}">{xen:phrase bdapi_home}</xen:breadcrumb>
+</xen:navigation>
+
+<form method="post" class="xenForm formOverlay"
+	action="{xen:link 'account/api/client-delete', '', 'client_id={$client.client_id}'}">
+
+	<p>
+		{xen:phrase bdapi_client_please_confirm}:
+		{$client.name}
+		(<a href="{$client.redirect_uri}" rel="nofollow" target="_blank">{$client.redirect_uri}</a>)
+	</p>
+
+	<dl class="ctrlUnit submitUnit">
+		<dt></dt>
+		<dd><input type="submit" name="save" value="{xen:phrase delete}" accesskey="s" class="button primary" /></dd>
+	</dl>
+	
+	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+</form>]]></template>
+    <template title="bdapi_account_api_tokens" version_id="4" version_string="0.9-dev"><![CDATA[<xen:require css="bdapi.css" />
+
+<xen:title>{xen:phrase bdapi_tokens}</xen:title>
+
+<h3>{xen:phrase bdapi_tokens}</h3>
+
+<div class="bdApi_Token_List section">
+	<dl class="sectionHeaders">
+		<dt class="bdApi_Token_Client"><a><span>{xen:phrase bdapi_name}</span></a></dt>
+		<dd class="bdApi_Token_IssueDate"><a><span>{xen:phrase bdapi_issue_date}</span></a></dd>
+		<dd class="bdApi_Token_Scope"><a><span>{xen:phrase bdapi_scope}</span></a></dd>
+		<dd class="bdApi_Token_Control"><a><span>{xen:phrase controls}</span></a></dd>
+	</dl>
+	<ol class="bdApi_Token_Items">
+		<xen:if is="{$tokens}">
+			<xen:foreach loop="$tokens" value="$token">
+				<li class="bdApi_Token_Item">
+					<div class="bdApi_Client_Name listBlock">
+						<div class="cellContents">
+							<a name="token-{$token.token_id}">{$token.client_name}</a>
+							<p class="muted">{$token.client_description} (<a href="{$token.client_redirect_uri}" rel="nofollow" target="_blank">{$token.client_redirect_uri}</a>)</p>
+						</div>
+					</div>
+					<div class="bdApi_Token_IssueDate listBlock">
+						<div class="cellContents">
+							{xen:datetime $token.issue_date}
+						</div>
+					</div>
+					<div class="bdApi_Token_Scope listBlock">
+						<div class="cellContents">
+							{$token.scope}
+						</div>
+					</div>
+					<div class="bdApi_Token_Control listBlock">
+						<div class="cellContents">
+							<a href="{xen:link 'account/api/token-revoke', '', 'token_id={$token.token_id}'}" class="OverlayTrigger">{xen:phrase bdapi_revoke}</a>
+						</div>
+					</div>
+				</li>
+			</xen:foreach>
+		<xen:else />
+			<li class="bdApi_Token_NoItem">{xen:phrase bdapi_token_no_results}</li>
+		</xen:if>
+	</ol>
+</div>]]></template>
+    <template title="bdapi_account_api_token_revoke" version_id="4" version_string="0.9-dev"><![CDATA[<xen:title>{xen:phrase bdapi_token_confirm_deletion}: {$token.client_name}</xen:title>
+<xen:h1>{xen:phrase bdapi_token_confirm_deletion}</xen:h1>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:link 'account/api'}">{xen:phrase bdapi_home}</xen:breadcrumb>
+</xen:navigation>
+
+<form method="post" class="xenForm formOverlay"
+	action="{xen:link 'account/api/token-revoke', '', 'token_id={$token.token_id}'}">
+
+	<p>
+		{xen:phrase bdapi_token_please_confirm}:
+		{$token.client_name}
+		(<a href="{$token.client_redirect_uri}" rel="nofollow" target="_blank">{$token.client_redirect_uri}</a>)
+	</p>
+
+	<dl class="ctrlUnit submitUnit">
+		<dt></dt>
+		<dd><input type="submit" name="save" value="{xen:phrase bdapi_revoke}" accesskey="s" class="button primary" /></dd>
+	</dl>
+	
+	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+</form>]]></template>
     <template title="bdapi_account_authorize" version_id="3" version_string="0.2.1"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
 <form method="post" class="xenForm" action="{xen:link 'account/authorize'}">

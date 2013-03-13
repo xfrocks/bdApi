@@ -1,14 +1,41 @@
 <?php
 class bdApi_Model_Client extends XenForo_Model
-{	
-	public function verifySecret(array $client, $secret)
+{
+	private $_clients = array();
+	
+	public function generateClientId()
 	{
-		return $client['client_secret'] == $this->hashSecret($secret);
+		do
+		{
+			$clientId = $this->_generateRandomString(bdApi_Option::get('keyLength'));
+			$client = $this->getClientById($clientId);
+		}
+		while (!empty($client));
+		
+		return $clientId;
 	}
 	
-	public function hashSecret($secret)
+	public function generateClientSecret()
 	{
-		return md5($secret);
+		return $this->_generateRandomString(bdApi_Option::get('secretLength'));
+	}
+	
+	protected function _generateRandomString($length)
+	{
+		$chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+		$randStr = '';
+		
+		for ($i = 0; $i < $length; $i++)
+		{
+			$randStr .= $chars[rand(0, strlen($chars) - 1)];
+		}
+		
+		return $randStr;
+	}
+	
+	public function verifySecret(array $client, $secret)
+	{
+		return $client['client_secret'] == $secret;
 	}
 
 	public function getList(array $conditions = array(), array $fetchOptions = array())
@@ -26,9 +53,23 @@ class bdApi_Model_Client extends XenForo_Model
 
 	public function getClientById($clientId, array $fetchOptions = array())
 	{
-		$data = $this->getClients(array ('client_id' => $clientId), $fetchOptions);
+		if (empty($fetchOptions))
+		{
+			foreach ($this->_clients as $client)
+			{
+				if ($client['client_id'] == $clientId)
+				{
+					// try to get previously cached data
+					return $client;
+				}
+			}
+		}
 		
-		return reset($data);
+		$data = $this->getClients(array ('client_id' => $clientId), $fetchOptions);
+		$client = reset($data);
+		$this->_clients[] = $data;
+		
+		return $client;
 	}
 	
 	public function getClients(array $conditions = array(), array $fetchOptions = array())

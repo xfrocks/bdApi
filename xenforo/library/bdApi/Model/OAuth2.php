@@ -28,7 +28,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
 	public function getAuthorizeParamsInputFilter()
 	{
 		return array(
-			'client_id' 			=> XenForo_Input::UINT,
+			'client_id' 			=> XenForo_Input::STRING,
 			'response_type' 		=> XenForo_Input::STRING,
 			'redirect_uri' 			=> XenForo_Input::STRING,
 			'state' 				=> XenForo_Input::STRING,
