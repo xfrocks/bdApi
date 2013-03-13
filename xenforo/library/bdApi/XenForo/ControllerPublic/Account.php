@@ -273,8 +273,10 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 						continue;
 					}
 
-					$scopeArray = explode(',', $authorizeParams['scope']);
-					$activeTokenScopes = explode(',', $activeToken['scope']);
+					$helper = bdApi_Template_Helper_Core::getInstance();
+					$scopeArray = $helper->scopeSplit($authorizeParams['scope']);
+					$activeTokenScopes = $helper->scopeSplit($activeToken['scope']);
+					$hasEnoughScopes = true;
 					foreach ($scopeArray as $scopeSingle)
 					{
 						// use simple in_array check here without any normalization
@@ -282,8 +284,12 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 						if (!in_array($scopeSingle, $activeTokenScopes))
 						{
 							// this token doesn't have enough scopes
-							continue;
+							$hasEnoughScopes = false;
 						}
+					}
+					if (!$hasEnoughScopes)
+					{
+						continue;
 					}
 
 					// reached here? This is a good token, return it asap

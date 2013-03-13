@@ -21,6 +21,26 @@ class bdApi_Listener
 	
 	public static function init_dependencies(XenForo_Dependencies_Abstract $dependencies, array $data)
 	{
+		// initializes the core template helper object
+		// in the future, we may have different template helpers for public/admin/api context
+		$templateHelper = bdApi_Template_Helper_Core::getInstance();
+		
+		// register the helper methods in the format `bdApi_<method_name>`
+		$templateHelperReflector = new ReflectionClass(get_class($templateHelper));
+		$methods = $templateHelperReflector->getMethods();
+		foreach ($methods as $method)
+		{
+			if (!($method->getModifiers() & ReflectionMethod::IS_PUBLIC)
+				OR ($method->getModifiers() & ReflectionMethod::IS_STATIC))
+			{
+				// ignore non-public instance methods
+				continue;
+			}
+			
+			$methodName = $method->getName();
+			$helperCallbackName = utf8_strtolower('bdApi_' . $methodName);
+			XenForo_Template_Helper_Core::$helperCallbacks[$helperCallbackName] = array($templateHelper, $methodName);
+		}
 	}
 	
 	public static function file_health_check(XenForo_ControllerAdmin_Abstract $controller, array &$hashes)

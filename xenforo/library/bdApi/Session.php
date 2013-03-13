@@ -90,8 +90,7 @@ class bdApi_Session extends XenForo_Session
 		{
 			$this->changeUserId($this->_oauthToken['user_id']);
 			
-			$scopes = explode(',', $this->_oauthToken['scope']);
-			$scopes = array_map('trim', $scopes);
+			$scopes = bdApi_Template_Helper_Core::getInstance()->scopeSplit($this->_oauthToken['scope']);
 			$this->set('scopes', $scopes);
 		}
 	}

@@ -296,10 +296,11 @@
     <phrase title="bdapi_requested_scopes" version_id="1" version_string="0.1"><![CDATA[Requested Permissions]]></phrase>
     <phrase title="bdapi_revoke" version_id="4" version_string="0.9-dev"><![CDATA[Revoke]]></phrase>
     <phrase title="bdapi_scope" version_id="1" version_string="0.1"><![CDATA[Scope]]></phrase>
-    <phrase title="bdapi_scope_manage_account_settings" version_id="1" version_string="0.1"><![CDATA[Change your account settings]]></phrase>
-    <phrase title="bdapi_scope_participate_in_conversations" version_id="3" version_string="0.2.1"><![CDATA[Read and start/reply to your conversations]]></phrase>
-    <phrase title="bdapi_scope_post" version_id="1" version_string="0.1"><![CDATA[Post contents (threads, posts) on behalf of you]]></phrase>
-    <phrase title="bdapi_scope_read" version_id="1" version_string="0.1"><![CDATA[Read information (forums, threads, posts) with your account's permissions]]></phrase>
+    <phrase title="bdapi_scope_manage_account_settings" global_cache="1" version_id="1" version_string="0.1"><![CDATA[Change your account settings]]></phrase>
+    <phrase title="bdapi_scope_manage_system" global_cache="1" version_id="4" version_string="0.9-dev"><![CDATA[Manage system-wide settings]]></phrase>
+    <phrase title="bdapi_scope_participate_in_conversations" global_cache="1" version_id="3" version_string="0.2.1"><![CDATA[Read and start/reply to your conversations]]></phrase>
+    <phrase title="bdapi_scope_post" global_cache="1" version_id="1" version_string="0.1"><![CDATA[Post contents (threads, posts) on behalf of you]]></phrase>
+    <phrase title="bdapi_scope_read" global_cache="1" version_id="1" version_string="0.1"><![CDATA[Read information (forums, threads, posts) with your account's permissions]]></phrase>
     <phrase title="bdapi_slash_oauth_token_only_accepts_post_requests" version_id="2" version_string="0.2"><![CDATA[/oauth/token only accepts POST requests.]]></phrase>
     <phrase title="bdapi_slash_posts_requires_thread_id" version_id="1" version_string="0.1"><![CDATA[/posts requires thread_id]]></phrase>
     <phrase title="bdapi_slash_threads_requires_node_id" version_id="1" version_string="0.1"><![CDATA[/threads requires node_id]]></phrase>
@@ -728,7 +729,11 @@
 					</div>
 					<div class="bdApi_Token_Scope listBlock">
 						<div class="cellContents">
-							{$token.scope}
+							<ul>
+								<xen:foreach loop="{$token._scopes}" value="$scope">
+									<li title="{xen:jsescape {xen:helper bdApi_scopeGetText, $scope}}" class="Tooltip">{$scope}</li>
+								</xen:foreach>
+							</ul>
 						</div>
 					</div>
 					<div class="bdApi_Token_Control listBlock">
@@ -766,7 +771,7 @@
 	
 	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
 </form>]]></template>
-    <template title="bdapi_account_authorize" version_id="3" version_string="0.2.1"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
+    <template title="bdapi_account_authorize" version_id="4" version_string="0.9-dev"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
 <form method="post" class="xenForm" action="{xen:link 'account/authorize'}">
 	
@@ -785,30 +790,16 @@
 		<dd>
 			<ul>
 				<xen:foreach loop="$authorizeScopes" value="$scope">
-					<xen:if is="{$scope} == 'read'">
+					<xen:set var="$scopeText">{xen:helper bdApi_scopeGetText, $scope}</xen:set>
+					
+					<xen:if is="{$scopeText}">
 						<li><label>
-							<input type="checkbox" name="scopes[]" value="read" checked="checked" />
-							{xen:phrase bdapi_scope_read}
-						</label></li>
-					<xen:elseif is="{$scope} == 'post'" />
-						<li><label>
-							<input type="checkbox" name="scopes[]" value="post" checked="checked" />
-							{xen:phrase bdapi_scope_post}
-						</label></li>
-					<xen:elseif is="{$scope} == 'manage_account_settings'" />
-						<li><label>
-							<input type="checkbox" name="scopes[]" value="manage_account_settings" checked="checked" />
-							{xen:phrase bdapi_scope_manage_account_settings}
-						</label></li>
-					<xen:elseif is="{$scope} == 'participate_in_conversations'" />
-						<li><label>
-							<input type="checkbox" name="scopes[]" value="participate_in_conversations" checked="checked" />
-							{xen:phrase bdapi_scope_participate_in_conversations}
+							<input type="checkbox" name="scopes[]" value="{$scope}" checked="checked" />
+							{xen:raw $scopeText}
 						</label></li>
 					</xen:if>
 				</xen:foreach>
 				
-				<xen:hook name="bdapi_requested_scopes" params="{xen:array 'scopes={$authorizeScopes}'}" />
 				<input type="hidden" name="scopes_included" value="1" />
 			</ul>
 		</dd>

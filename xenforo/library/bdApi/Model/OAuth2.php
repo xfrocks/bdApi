@@ -4,8 +4,9 @@ class bdApi_Model_OAuth2 extends XenForo_Model
 {
 	const SCOPE_READ = 'read';
 	const SCOPE_POST = 'post';
-	const SCOPE_MANAGE_ACCOUNT_SETTINGS = 'manage_account_settings';
-	const SCOPE_PARTICIPATE_IN_CONVERSATIONS = 'participate_in_conversations';
+	const SCOPE_MANAGE_ACCOUNT_SETTINGS = 'usercp';
+	const SCOPE_PARTICIPATE_IN_CONVERSATIONS = 'conversate';
+	const SCOPE_MANAGE_SYSTEM = 'admincp';
 	
 	protected static $_serverInstance = false;
 	
@@ -49,6 +50,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
 			self::SCOPE_POST,
 			self::SCOPE_MANAGE_ACCOUNT_SETTINGS,
 			self::SCOPE_PARTICIPATE_IN_CONVERSATIONS,
+			self::SCOPE_MANAGE_SYSTEM,
 		);
 	}
 	
