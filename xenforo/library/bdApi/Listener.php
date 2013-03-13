@@ -43,6 +43,26 @@ class bdApi_Listener
 		}
 	}
 	
+	public static function template_create($templateName, array &$params, XenForo_Template_Abstract $template)
+	{
+		if ($templateName == 'account_wrapper')
+		{
+			$template->preloadTemplate('bdapi_account_wrapper_sidebar');
+		}
+	}
+	
+	public static function template_hook($hookName, &$contents, array $hookParams, XenForo_Template_Abstract $template)
+	{
+		switch ($hookName)
+		{
+			case 'account_wrapper_sidebar_settings':
+				$ourTemplate = $template->create('bdapi_account_wrapper_sidebar', $template->getParams());
+				$ourHtml = $ourTemplate->render();
+				$contents .= $ourHtml;
+				break;
+		}
+	}
+	
 	public static function file_health_check(XenForo_ControllerAdmin_Abstract $controller, array &$hashes)
 	{
 		$ourHashes = bdApi_FileSums::getHashes();

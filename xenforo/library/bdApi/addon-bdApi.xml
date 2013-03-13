@@ -229,6 +229,8 @@
     <listener event_id="init_dependencies" execute_order="5" callback_class="bdApi_Listener" callback_method="init_dependencies" active="1" description=""/>
     <listener event_id="load_class_controller" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" description=""/>
     <listener event_id="load_class_model" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" description=""/>
+    <listener event_id="template_create" execute_order="10" callback_class="bdApi_Listener" callback_method="template_create" active="1" description=""/>
+    <listener event_id="template_hook" execute_order="10" callback_class="bdApi_Listener" callback_method="template_hook" active="1" description=""/>
   </code_event_listeners>
   <cron>
     <entry entry_id="bdApi_cleanUpExpired" cron_class="bdApi_CronEntry_CleanUp" cron_method="pruneExpired" active="1"><![CDATA[{"day_type":"dom","dom":["-1"],"hours":["6"],"minutes":["29"]}]]></entry>
@@ -823,6 +825,9 @@
 		<input type="hidden" name="{$key}" value="{$value}" />
 	</xen:foreach>
 </form>]]></template>
+    <template title="bdapi_account_wrapper_sidebar" version_id="6" version_string="0.9-dev"><![CDATA[<li><a
+	class="{xen:if "{$selectedKey} == 'account/bdApi'", 'secondaryContent', 'primaryContent'}"
+	href="{xen:link account/api}">{xen:phrase bdapi_home}</a></li>]]></template>
   </templates>
   <bb_code_media_sites/>
 </addon>
