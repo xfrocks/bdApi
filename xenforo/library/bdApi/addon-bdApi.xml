@@ -267,6 +267,7 @@
     <phrase title="bdapi_client_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Client]]></phrase>
     <phrase title="bdapi_client_delete" version_id="1" version_string="0.1"><![CDATA[Delete Client]]></phrase>
     <phrase title="bdapi_client_edit" version_id="1" version_string="0.1"><![CDATA[Edit Client]]></phrase>
+    <phrase title="bdapi_client_ids_must_be_unique" version_id="4" version_string="0.9-dev"><![CDATA[API keys must be unique. The specified key is already in use.]]></phrase>
     <phrase title="bdapi_client_key" version_id="4" version_string="0.9-dev"><![CDATA[API Key]]></phrase>
     <phrase title="bdapi_client_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Client could not be found]]></phrase>
     <phrase title="bdapi_client_no_results" version_id="1" version_string="0.1"><![CDATA[No clients to display...]]></phrase>
@@ -281,6 +282,7 @@
     <phrase title="bdapi_please_confirm_to_authorize_access" version_id="1" version_string="0.1"><![CDATA[Please confirm to authorize access to the listed client with below permissions.]]></phrase>
     <phrase title="bdapi_realm" global_cache="1" version_id="1" version_string="0.1"><![CDATA[{boardTitle} API]]></phrase>
     <phrase title="bdapi_redirect_uri" version_id="1" version_string="0.1"><![CDATA[Redirect Uri]]></phrase>
+    <phrase title="bdapi_redirect_uri_must_be_valid" version_id="4" version_string="0.9-dev"><![CDATA[Redirect URI must be valid.]]></phrase>
     <phrase title="bdapi_refresh_token" version_id="1" version_string="0.1"><![CDATA[Refresh Token]]></phrase>
     <phrase title="bdapi_refresh_token_add" version_id="1" version_string="0.1"><![CDATA[Add New Refresh Token]]></phrase>
     <phrase title="bdapi_refresh_token_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Refresh Token]]></phrase>

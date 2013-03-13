@@ -8,9 +8,15 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
 			'xf_bdapi_client' => array(
 				'name' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true, 'maxLength' => 255),
 				'description' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true),	
-				'client_id' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true, 'maxLength' => 255),
+				'client_id' => array(
+					'type' => XenForo_DataWriter::TYPE_STRING, 'required' => true, 'maxLength' => 255,
+					'verification' => array('$this', '_verifyClientId'),
+				),
 				'client_secret' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true, 'maxLength' => 255),
-				'redirect_uri' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true),
+				'redirect_uri' => array(
+					'type' => XenForo_DataWriter::TYPE_STRING, 'required' => true,
+					'verification' => array('$this', '_verifyRedirectUri'),
+				),
 				'user_id' => array('type' => XenForo_DataWriter::TYPE_UINT, 'required' => true),
 				'options' => array('type' => XenForo_DataWriter::TYPE_SERIALIZED)
 			)
@@ -37,6 +43,34 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
 		}
 		
 		return implode(' AND ', $conditions);
+	}
+	
+	protected function _verifyClientId(&$clientId)
+	{
+		if ($this->isUpdate() && $clientId === $this->getExisting('client_id'))
+		{
+			return true; // unchanged, always pass
+		}
+
+		$existingClient = $this->_getClientModel()->getClientById($clientId);
+		if ($existingClient)
+		{
+			$this->error(new XenForo_Phrase('bdapi_client_ids_must_be_unique'), 'client_id');
+			return false;
+		}
+
+		return true;
+	}
+	
+	protected function _verifyRedirectUri(&$redirectUri)
+	{
+		if (!Zend_Uri::check($redirectUri))
+		{
+			$this->error(new XenForo_Phrase('bdapi_redirect_uri_must_be_valid'), 'redirect_uri');
+			return false;
+		}
+
+		return true;
 	}
 	
 	protected function _postDelete()
