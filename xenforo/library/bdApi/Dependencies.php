@@ -26,9 +26,17 @@ class bdApi_Dependencies extends XenForo_Dependencies_Public
 		// attempt to call XenForo_Link::buildPublicLink(). The correct
 		// method to call is bdApi_Link::buildPublicLink()
 		XenForo_Link::setHandlerInfoForGroup(bdApi_Link::PUBLIC_LINK_GROUP, $data['routesPublic']);
-		$data['routesPublic'] = array();
+
+		// sondh@2013-03-19
+		// do not empty the routes public array, it will cause problem for other add-on that 
+		// expects its route to exist (like XenPorta)
+		// $data['routesPublic'] = array();
 		
-		return parent::_handleCustomPreloadedData($data);
+		$response = parent::_handleCustomPreloadedData($data);
+
+		// new approach to disable XenForo_Link::buildPublicLink()
+		// let everything set, we will set it back to empty array later
+		XenForo_Link::setHandlerInfoForGroup('public', array());
 	}
 	
 	public function route(Zend_Controller_Request_Http $request)
