@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9-dev" version_id="2" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9-dev" version_id="3" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -53,6 +53,12 @@
   <email_templates/>
   <optiongroups>
     <group group_id="bdApiConsumer" display_order="9999" debug_only="0"/>
+    <option option_id="bdapi_consumer_bypassRegistrationActive" edit_format="onoff" data_type="unsigned_integer" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApiConsumer" display_order="100"/>
+    </option>
     <option option_id="bdapi_consumer_providers" edit_format="callback" data_type="array" can_backup="1" validation_class="bdApiConsumer_Option" validation_method="verifyOptionProviders">
       <default_value></default_value>
       <edit_format_params>bdApiConsumer_Option::renderOptionProviders</edit_format_params>
@@ -75,6 +81,8 @@
     <phrase title="bdapi_consumer_root" version_id="1" version_string="0.9-dev"><![CDATA[http://domain.com/xenforo/api]]></phrase>
     <phrase title="bdapi_consumer_sign_up_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Sign Up with {provider}]]></phrase>
     <phrase title="bdapi_consumer_x_returned_unknown_error" version_id="1" version_string="0.9-dev"><![CDATA[{provider} returned an unknown error. Please try again later.]]></phrase>
+    <phrase title="option_bdapi_consumer_bypassRegistrationActive" version_id="2" version_string="0.9-dev"><![CDATA[Bypass Registration Active Check]]></phrase>
+    <phrase title="option_bdapi_consumer_bypassRegistrationActive_explain" version_id="2" version_string="0.9-dev"><![CDATA[Enabling this option will allow users who came from external sites to register regardless of the <a href="admin.php?options/list/usersAndRegistration" target="_blank" tabindex="-1">"Enable Registration" option</a>.]]></phrase>
     <phrase title="option_bdapi_consumer_providers" version_id="1" version_string="0.9-dev"><![CDATA[Providers]]></phrase>
     <phrase title="option_bdapi_consumer_providers_explain" version_id="1" version_string="0.9-dev"><![CDATA[Enter providers' information to authenticate against. All fields are required for each providers.]]></phrase>
     <phrase title="option_group_bdApiConsumer" version_id="1" version_string="0.9-dev"><![CDATA[[bd] API Consumer]]></phrase>

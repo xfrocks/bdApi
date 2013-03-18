@@ -61,7 +61,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			)));
 		}
 		if (empty($externalVisitor['email']))
-		{var_dump($externalVisitor);exit;
+		{
 			return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_returned_unknown_error', array(
 				'provider' => $provider['name'],
 			)));
@@ -123,7 +123,14 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			));
 		}
 
-		$this->_assertRegistrationActive();
+		if (bdApiConsumer_Option::get('bypassRegistrationActive'))
+		{
+			// do not check for registration active option
+		}
+		else
+		{
+			$this->_assertRegistrationActive();
+		}
 
 		// give a unique username suggestion
 		$i = 2;
@@ -224,7 +231,14 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			);
 		}
 
-		$this->_assertRegistrationActive();
+		if (bdApiConsumer_Option::get('bypassRegistrationActive'))
+		{
+			// do not check for registration active option
+		}
+		else
+		{
+			$this->_assertRegistrationActive();
+		}
 
 		$data = $this->_input->filter(array(
 			'username'   => XenForo_Input::STRING,
