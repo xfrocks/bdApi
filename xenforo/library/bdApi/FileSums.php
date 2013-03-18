@@ -23,7 +23,7 @@ class bdApi_FileSums
   'library/bdApi/DataWriter/Client.php' => '7e81d530db1b4dd01e2bb474d15214d1',
   'library/bdApi/DataWriter/RefreshToken.php' => '710fe939a3bdfb84f4bfc080a7a4cb0b',
   'library/bdApi/DataWriter/Token.php' => 'f92610daf3a17646ea592031a448925b',
-  'library/bdApi/Dependencies.php' => '4348abdc7316fa5a042d4b26558c580e',
+  'library/bdApi/Dependencies.php' => 'f51550151e6ed4c9db38ff84dc58ef64',
   'library/bdApi/Installer.php' => '63e7a28f5c9c6ca693a31385fb3e1aec',
   'library/bdApi/Link.php' => 'ba8ae27808542b58849e1a0bb7f50011',
   'library/bdApi/Listener.php' => '85bccb49006a44989a140e38ad011282',
