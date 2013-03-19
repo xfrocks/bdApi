@@ -223,22 +223,52 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		$oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
 
 		/* @var $tokenModel bdApi_Model_Token */
-		$tokenModel = $this->getModelFromCache('bdApi_Model_Token');
+		$tokenModel = $oauth2Model->getTokenModel();
+
+		/* @var $clientModel bdApi_Model_Client */
+		$clientModel = $oauth2Model->getClientModel();
 
 		$authorizeParams = $this->_input->filter($oauth2Model->getAuthorizeParamsInputFilter());
 
-		// allow user to deny some certain scopes
-		$scopesIncluded = $this->_input->filterSingle('scopes_included', XenForo_Input::UINT);
-		$scopes = $this->_input->filterSingle('scopes', XenForo_Input::ARRAY_SIMPLE);
-		if (!empty($scopesIncluded))
+		if ($this->_request->isPost())
 		{
-			$authorizeParams['scope'] = implode(',', $scopes);
+			// allow user to deny some certain scopes
+			// only when this is a POST request, this should keep us safe from some vectors of attack
+			$scopesIncluded = $this->_input->filterSingle('scopes_included', XenForo_Input::UINT);
+			$scopes = $this->_input->filterSingle('scopes', XenForo_Input::ARRAY_SIMPLE);
+			if (!empty($scopesIncluded))
+			{
+				$authorizeParams['scope'] = implode(',', $scopes);
+			}
 		}
 
-		if ($this->_request->isPost())
+		$client = $clientModel->getClientById($authorizeParams['client_id']);
+		if (empty($client))
+		{
+			throw new XenForo_Exception(new XenForo_Phrase('bdapi_authorize_error_client_x_not_found', array('client' => $authorizeParams['client_id'])));
+		}
+
+		// sondh@2013-03-19
+		// this is a non-standard implementation: bypass confirmation dialog if the client
+		// has appropriate option set
+		$bypassConfirmation = false;
+		if ($clientModel->canAutoAuthorize($client, $authorizeParams['scope']))
+		{
+			$bypassConfirmation = true;
+			$accepted = true;
+		}
+
+		if ($this->_request->isPost() OR $bypassConfirmation)
 		{
 			$accept = $this->_input->filterSingle('accept', XenForo_Input::STRING);
 			$accepted = !!$accept;
+
+			if ($bypassConfirmation)
+			{
+				// sondh@2013-03-19
+				// of course if the dialog was bypassed, $accepted should be true
+				$accepted = true;
+			}
 
 			$oauth2Model->getServer()->finishClientAuthorization($accepted, $authorizeParams);
 
@@ -247,13 +277,6 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		}
 		else
 		{
-			$client = $oauth2Model->getClientModel()->getClientById($authorizeParams['client_id']);
-
-			if (empty($client))
-			{
-				throw new XenForo_Exception(new XenForo_Phrase('bdapi_authorize_error_client_x_not_found', array('client' => $authorizeParams['client_id'])));
-			}
-
 			// sondh@2013-02-17
 			// try to get a working access token if the response_type == OAUTH2_AUTH_RESPONSE_TYPE_AUTH_CODE
 			$oauth2Model->getServer(); // load the constants

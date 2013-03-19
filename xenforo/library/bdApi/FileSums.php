@@ -6,7 +6,7 @@ class bdApi_FileSums
 	{
 		return array (
   'library/bdApi/ControllerAdmin/AuthCode.php' => 'defb34b7f3b9fed82d341238c25c96c7',
-  'library/bdApi/ControllerAdmin/Client.php' => '0110797f27d7e1a65a86e47ed5863f3b',
+  'library/bdApi/ControllerAdmin/Client.php' => '069b67a7330f58e51629e68ecc34c1ae',
   'library/bdApi/ControllerAdmin/RefreshToken.php' => '08ce0d77da86adddcd7d547af8bedd8f',
   'library/bdApi/ControllerAdmin/Token.php' => 'da5f80b4e8646b551b970cc13c384112',
   'library/bdApi/ControllerApi/Abstract.php' => 'c60545dcbcb08fd298c2d6d7bce8fa7f',
@@ -28,7 +28,7 @@ class bdApi_FileSums
   'library/bdApi/Link.php' => 'ba8ae27808542b58849e1a0bb7f50011',
   'library/bdApi/Listener.php' => '85bccb49006a44989a140e38ad011282',
   'library/bdApi/Model/AuthCode.php' => '25b6e0db62025eda69d24ed501805b2e',
-  'library/bdApi/Model/Client.php' => 'e6d86e10b4ddbbb7415ebc59abcba3f6',
+  'library/bdApi/Model/Client.php' => '2978583ddb9850c5c2b6f52e0d0428df',
   'library/bdApi/Model/OAuth2.php' => 'c87e6a163a32a21b63b56ba0fd809260',
   'library/bdApi/Model/RefreshToken.php' => '7a430f94b86039910f7209b48006e0b7',
   'library/bdApi/Model/Token.php' => 'd43ec39ceaccb5bfd5c591bc94c0fb4b',
@@ -53,7 +53,7 @@ class bdApi_FileSums
   'library/bdApi/ViewPublic/Account/Authorize.php' => '600db6b57fb202c473636660e44018fe',
   'library/bdApi/ViewRenderer/Json.php' => '4e17df7246f9f0b6df3009790f26f604',
   'library/bdApi/ViewRenderer/Xml.php' => '8236228096b9d033c06e31a486cc228b',
-  'library/bdApi/XenForo/ControllerPublic/Account.php' => '036db7f27e085a30d2ef4e94f84d57ab',
+  'library/bdApi/XenForo/ControllerPublic/Account.php' => '38c5e593bd93c0cc7f348a639049f1d0',
   'library/bdApi/XenForo/ControllerPublic/Register.php' => '642c121cac314fc5aa4eeb4366d1c7b8',
   'library/bdApi/XenForo/Model/Node.php' => '375a3a5e66a537fc785dad71f6aaac6a',
   'library/bdApi/XenForo/Model/Post.php' => '6b1748f4de7f19f9dcb02da127247ab7',

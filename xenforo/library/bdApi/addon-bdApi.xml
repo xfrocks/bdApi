@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApi" title="[bd] API" version_string="0.9-dev" version_id="9" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApi" title="[bd] API" version_string="0.9-dev" version_id="10" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdApi" parent_navigation_id="tools" display_order="9999" link="api-clients" admin_permission_id="bdApi" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_auth_codes" parent_navigation_id="bdApi" display_order="3000" link="api-auth-codes" admin_permission_id="" debug_only="0" hide_no_children="0"/>
@@ -88,7 +88,30 @@
 	<xen:textboxunit label="{xen:phrase bdapi_client_secret}:" name="client_secret" value="{$client.client_secret}" />
 	<xen:textboxunit label="{xen:phrase bdapi_redirect_uri}:" name="redirect_uri" value="{$client.redirect_uri}" />
 	
-	<xen:textboxunit label="{xen:phrase bdapi_user_id}:" name="user_id" value="{$client.user_id}" />
+	<xen:checkboxunit label="{xen:phrase options}" explain="{xen:phrase bdapi_client_options_explain}">
+		<xen:option label="{xen:phrase bdapi_client_option_auto_authorize_read}"
+			name="options[auto_authorize][read]" value="1"
+			selected="{$client.options.auto_authorize.read}"
+			/>
+		<xen:option label="{xen:phrase bdapi_client_option_auto_authorize_post}"
+			name="options[auto_authorize][post]" value="1"
+			selected="{$client.options.auto_authorize.post}"
+			/>
+		<xen:option label="{xen:phrase bdapi_client_option_auto_authorize_usercp}"
+			name="options[auto_authorize][usercp]" value="1"
+			selected="{$client.options.auto_authorize.usercp}"
+			/>
+		<xen:option label="{xen:phrase bdapi_client_option_auto_authorize_conversate}"
+			name="options[auto_authorize][conversate]" value="1"
+			selected="{$client.options.auto_authorize.conversate}"
+			/>
+		<xen:option label="{xen:phrase bdapi_client_option_auto_authorize_admincp}"
+			name="options[auto_authorize][admincp]" value="1"
+			selected="{$client.options.auto_authorize.admincp}"
+			/>
+	</xen:checkboxunit>
+
+	<xen:hook name="admin_bdapi_client_edit" />
 
 	<xen:submitunit save="{xen:phrase bdapi_client_save}">
 		<input type="button" name="delete" value="{xen:phrase bdapi_client_delete}"
@@ -275,6 +298,12 @@
     <phrase title="bdapi_client_key" version_id="4" version_string="0.9-dev"><![CDATA[API Key]]></phrase>
     <phrase title="bdapi_client_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Client could not be found]]></phrase>
     <phrase title="bdapi_client_no_results" version_id="1" version_string="0.1"><![CDATA[No clients to display...]]></phrase>
+    <phrase title="bdapi_client_options_explain" version_id="9" version_string="0.9-dev"><![CDATA["Automatically authorize *-scope" options are dangerous because the system will bypass user confirmation dialog and will grant the client the requested scope. Please make sure to apply enough security measure to protect the key and secret for client with these kind of options enabled.<br />]]></phrase>
+    <phrase title="bdapi_client_option_auto_authorize_admincp" version_id="9" version_string="0.9-dev"><![CDATA[Automatically authorize ADMINCP-scope]]></phrase>
+    <phrase title="bdapi_client_option_auto_authorize_conversate" version_id="9" version_string="0.9-dev"><![CDATA[Automatically authorize CONVERSATE-scope]]></phrase>
+    <phrase title="bdapi_client_option_auto_authorize_post" version_id="9" version_string="0.9-dev"><![CDATA[Automatically authorize POST-scope]]></phrase>
+    <phrase title="bdapi_client_option_auto_authorize_read" version_id="9" version_string="0.9-dev"><![CDATA[Automatically authorize READ-scope]]></phrase>
+    <phrase title="bdapi_client_option_auto_authorize_usercp" version_id="9" version_string="0.9-dev"><![CDATA[Automatically authorize USERCP-scope]]></phrase>
     <phrase title="bdapi_client_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following client]]></phrase>
     <phrase title="bdapi_client_save" version_id="1" version_string="0.1"><![CDATA[Save Client]]></phrase>
     <phrase title="bdapi_client_secret" version_id="4" version_string="0.9-dev"><![CDATA[API Secret]]></phrase>
@@ -319,7 +348,6 @@
     <phrase title="bdapi_token_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to revoke the following token]]></phrase>
     <phrase title="bdapi_token_save" version_id="1" version_string="0.1"><![CDATA[Save Token]]></phrase>
     <phrase title="bdapi_token_text" version_id="1" version_string="0.1"><![CDATA[Token Text]]></phrase>
-    <phrase title="bdapi_user_id" version_id="1" version_string="0.1"><![CDATA[User Id]]></phrase>
     <phrase title="bdappi_you_will_be_redirected_x" version_id="3" version_string="0.2.1"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
     <phrase title="cron_entry_bdApi_cleanUpExpired" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Clean Up Expired Data]]></phrase>
     <phrase title="permission_general_bdApi_clientNew" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Create Client]]></phrase>

@@ -47,7 +47,7 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
 			'client_id' => XenForo_Input::STRING,
 			'client_secret' => XenForo_Input::STRING,
 			'redirect_uri' => XenForo_Input::STRING,
-			'user_id' => XenForo_Input::UINT
+			'options' => XenForo_Input::ARRAY_SIMPLE
 		));
 		
 		$dw = $this->_getClientDataWriter();

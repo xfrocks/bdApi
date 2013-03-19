@@ -2,6 +2,23 @@
 class bdApi_Model_Client extends XenForo_Model
 {
 	private $_clients = array();
+
+	public function canAutoAuthorize($client, $scopes)
+	{
+		$scopeArray = bdApi_Template_Helper_Core::getInstance()->scopeSplit($scopes);
+
+		foreach ($scopeArray as $scope)
+		{
+			if (empty($client['options']['auto_authorize'][$scope]))
+			{
+				// at least one scope requested is missing
+				// CANNOT auto authorize this set of scopes
+				return false;
+			}
+		}
+
+		return true;
+	}
 	
 	public function generateClientId()
 	{
@@ -89,6 +106,12 @@ class bdApi_Model_Client extends XenForo_Model
 					$orderClause
 			", $limitOptions['limit'], $limitOptions['offset']
 		), 'client_id');
+
+		foreach ($all as &$client)
+		{
+			$client['options'] = @unserialize($client['options']);
+			if (empty($client['options'])) $client['options'] = array();
+		}
 
 		return $all;
 	}
