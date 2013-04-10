@@ -217,6 +217,64 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		}
 	}
 
+	public function actionApiData()
+	{
+		$callback = $this->_input->filterSingle('callback', XenForo_Input::STRING);
+		$cmd = $this->_input->filterSingle('cmd', XenForo_Input::STRING);
+		$clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
+		$data = array(
+		);
+
+		/* @var $oauth2Model bdApi_Model_OAuth2 */
+		$oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
+
+		/* @var $tokenModel bdApi_Model_Token */
+		$tokenModel = $oauth2Model->getTokenModel();
+
+		/* @var $clientModel bdApi_Model_Client */
+		$clientModel = $oauth2Model->getClientModel();
+
+		$client = $clientModel->getClientById($clientId);
+		$visitor = XenForo_Visitor::getInstance();
+
+		if (!empty($client) AND $visitor['user_id'] > 0)
+		{
+			switch ($cmd)
+			{
+				case 'authorized':
+					$scope = $this->_input->filterSingle('scope', XenForo_Input::STRING);
+					$tokens = $tokenModel->getTokens(array(
+						'client_id' => $client['client_id'],
+						'user_id' => $visitor['user_id'],
+					));
+					$data[$cmd] = 0;
+					foreach ($tokens as $token)
+					{
+						if (!$tokenModel->hasExpired($client, $token)
+							AND $tokenModel->hasScope($client, $token, $scope)
+						)
+						{
+							$data[$cmd] = 1;
+							$data['user_id'] = $visitor->get('user_id');
+							break; // foreach ($tokens as $token)
+						}
+					}
+					break; // switch ($cmd)
+			}
+
+			$clientModel->signApiData($client, $data);
+		}
+
+		$viewParams = array(
+			'callback' => $callback,
+			'cmd' => $cmd,
+			'client_id' => $clientId,
+			'data' => $data,
+		);
+
+		return $this->responseView('bdApi_ViewPublic_Account_Api_Data', '', $viewParams);
+	}
+
 	public function actionAuthorize()
 	{
 		/* @var $oauth2Model bdApi_Model_OAuth2 */
@@ -289,29 +347,16 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 
 				foreach ($activeTokens as $activeToken)
 				{
-					if ($activeToken['expire_date'] > 0 AND $activeToken['expire_date'] < XenForo_Application::$time)
+					if ($tokenModel->hasExpired($client, $activeToken))
 					{
 						// hmm, this token has expired
 						// it should be cleaned up by the cron eh? Hopefully soon...
 						continue;
 					}
 
-					$helper = bdApi_Template_Helper_Core::getInstance();
-					$scopeArray = $helper->scopeSplit($authorizeParams['scope']);
-					$activeTokenScopes = $helper->scopeSplit($activeToken['scope']);
-					$hasEnoughScopes = true;
-					foreach ($scopeArray as $scopeSingle)
+					if (!$tokenModel->hasScope($client, $activeToken, $authorizeParams['scope']))
 					{
-						// use simple in_array check here without any normalization
-						// in worst case scenario, user will just need to authorize again
-						if (!in_array($scopeSingle, $activeTokenScopes))
-						{
-							// this token doesn't have enough scopes
-							$hasEnoughScopes = false;
-						}
-					}
-					if (!$hasEnoughScopes)
-					{
+						// not enough scopes...
 						continue;
 					}
 
@@ -340,7 +385,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		}
 		catch (XenForo_ControllerResponse_Exception $e)
 		{
-			if (utf8_strtolower($action) === 'authorize')
+			if ($action === 'Authorize')
 			{
 				// this is our action and an exception is thrown
 				// check to see if it is a registrationRequired error
@@ -358,5 +403,15 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 				
 			throw $e;
 		}
+	}
+
+	protected function _checkCsrf($action)
+	{
+		if ($action === 'ApiData')
+		{
+			return;
+		}
+
+		return parent::_checkCsrf($action);
 	}
 }

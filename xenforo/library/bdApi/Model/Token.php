@@ -3,6 +3,34 @@ class bdApi_Model_Token extends XenForo_Model
 {
 	const FETCH_CLIENT = 0x01;
 	const FETCH_USER = 0x02;
+
+	public function hasExpired($client, $token)
+	{
+		if ($token['expire_date'] > 0 AND $token['expire_date'] < XenForo_Application::$time)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	public function hasScope($client, $token, $scope)
+	{
+		$helper = bdApi_Template_Helper_Core::getInstance();
+		$scopeArray = $helper->scopeSplit($scope);
+		$tokenScopeArray = $helper->scopeSplit($token['scope']);
+
+		foreach ($scopeArray as $scopeSingle)
+		{
+			// use simple in_array check here without any normalization
+			if (!in_array($scopeSingle, $tokenScopeArray))
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
 	
 	public function pruneExpired()
 	{

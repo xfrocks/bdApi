@@ -6,6 +6,7 @@ class bdApiConsumer_Listener
 	public static function load_class($class, array &$extend)
 	{
 		static $classes = array(
+			'XenForo_ControllerPublic_Login',
 			'XenForo_ControllerPublic_Register',
 			'XenForo_Model_UserExternal',
 		);
@@ -27,6 +28,7 @@ class bdApiConsumer_Listener
 		{
 			$template->preloadTemplate('bdapi_consumer_login_bar_eauth_items');
 			$template->preloadTemplate('bdapi_consumer_login_bar_eauth_set');
+			$template->preloadTemplate('bdapi_consumer_page_container_head');
 			self::$_commonTemplatesPreloaded = true;
 		}
 
@@ -56,9 +58,13 @@ class bdApiConsumer_Listener
 		{
 			case 'login_bar_eauth_items':
 			case 'login_bar_eauth_set':
+			case 'page_container_head':
 				$ourTemplate = $template->create('bdapi_consumer_' . $hookName, $template->getParams());
 
-				if ($hookName === 'login_bar_eauth_items')
+				if (in_array($hookName, array(
+					'login_bar_eauth_items',
+					'page_container_head',
+				)))
 				{
 					$ourTemplate->setParam('providers', bdApiConsumer_Option::getProviders());
 				}

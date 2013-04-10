@@ -7,10 +7,9 @@ class bdApiConsumer_Option
 
 		switch ($key)
 		{
-			case '_activated': return true;
-			case '_providers': return array(
-			array('code' => 'test', 'name' => 'Test', 'root' => 'http://localxf.daohoangson.com/api', 'client_id' => 2, 'client_secret' => 'secret'),
-			);
+			case '_activated':
+				$providers = self::getProviders();
+				return !empty($providers);
 		}
 
 		return $options->get('bdapi_consumer_' . $key);

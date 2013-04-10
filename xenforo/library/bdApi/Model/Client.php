@@ -3,6 +3,23 @@ class bdApi_Model_Client extends XenForo_Model
 {
 	private $_clients = array();
 
+	public function signApiData($client, array &$data)
+	{
+		$str = '';
+
+		$keys = array_keys($data);
+		asort($keys);
+		foreach ($keys as $key)
+		{
+			if ($key == 'signature') continue; // ?!
+			
+			$str .= sprintf('%s=%s&', $key, $data[$key]);
+		}
+		$str .= $client['client_secret'];
+
+		$data['signature'] = md5($str);
+	}
+
 	public function canAutoAuthorize($client, $scopes)
 	{
 		$scopeArray = bdApi_Template_Helper_Core::getInstance()->scopeSplit($scopes);

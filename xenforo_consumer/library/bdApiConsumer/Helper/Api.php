@@ -74,4 +74,35 @@ class bdApiConsumer_Helper_Api
 			return false;
 		}
 	}
+
+	public static function verifyJsSdkSignature(array $provider, array $data, $prefix = '_api_data_')
+	{
+		$str = '';
+		$prefixLength = utf8_strlen($prefix);
+
+		$keys = array_keys($data);
+		asort($keys);
+		foreach ($keys as $key)
+		{
+			if (utf8_substr($key, 0, $prefixLength) !== $prefix)
+			{
+				// ignore keys that do not match our prefix
+				continue;
+			}
+
+			$keySubstr = substr($key, $prefixLength);
+			if ($keySubstr == 'signature')
+			{
+				// do not put the signature into calculation
+				continue;
+			}
+			
+			$str .= sprintf('%s=%s&', $keySubstr, $data[$key]);
+		}
+		$str .= $provider['client_secret'];
+
+		$signature = md5($str);
+
+		return isset($data[$prefix . 'signature']) AND ($signature === $data[$prefix . 'signature']);
+	}
 }

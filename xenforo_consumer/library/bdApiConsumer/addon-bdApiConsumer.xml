@@ -72,6 +72,8 @@
     <interface_groups/>
   </permissions>
   <phrases>
+    <phrase title="bdapi_consumer_auto_login_with_x_failed" version_id="3" version_string="0.9-dev"><![CDATA[Attempt to auto login with {provider} has been failed.]]></phrase>
+    <phrase title="bdapi_consumer_auto_login_with_x_succeeded_y" version_id="3" version_string="0.9-dev"><![CDATA[Welcome back {username}, you have been logged in via {provider}.]]></phrase>
     <phrase title="bdapi_consumer_client_id" version_id="1" version_string="0.9-dev"><![CDATA[Client ID]]></phrase>
     <phrase title="bdapi_consumer_client_secret" version_id="1" version_string="0.9-dev"><![CDATA[Client Secret]]></phrase>
     <phrase title="bdapi_consumer_error_occurred_while_connecting_with_x" version_id="1" version_string="0.9-dev"><![CDATA[An error occurred while connecting with {provider}. Please try again later.]]></phrase>
@@ -124,6 +126,49 @@
     <template title="bdapi_consumer_login_bar_eauth_set" version_id="1" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
 	<xen:comment>Setting $eAuth here doesn't work, the real set is done in bdApiConsumer_Listener::template_create</xen:comment>
 	<xen:set var="$eAuth">1</xen:set>
+</xen:if>]]></template>
+    <template title="bdapi_consumer_page_container_head" version_id="3" version_string="0.9-dev"><![CDATA[<xen:if is="{$visitor.user_id} == 0">
+	<xen:foreach loop="$providers" value="$provider">
+<script src="{$provider.root}/assets/sdk.js?prefix={$provider.code}"></script>
+<script type="text/javascript">
+window['{$provider.code}Init'] = function()
+{
+	var SDK = window['{$provider.code}SDK'];
+	SDK.init({
+		'client_id': '{$provider.client_id}'
+	});
+	SDK.isAuthorized('read', function(isAuthorized, apiData)
+	{
+		console.log('isAuthorized', isAuthorized, apiData);
+		
+		if (isAuthorized)
+		{
+			var loginData = {
+				'provider': '{$provider.code}',
+				'external_user_id': apiData['user_id']
+			};
+			for (i in apiData)
+			{
+				loginData['_api_data_' + i] = apiData[i];
+			}
+			
+			XenForo.ajax(
+				'{xen:link login/external}',
+				loginData,
+				function(ajaxData, textStatus)
+				{
+					if (ajaxData._redirectMessage)
+					{
+						// auto login succeeded!
+						XenForo.alert(ajaxData._redirectMessage, '', 2000);
+					}
+				}
+			);
+		}
+	});
+}
+</script>
+	</xen:foreach>
 </xen:if>]]></template>
     <template title="bdapi_consumer_register" version_id="1" version_string="0.9-dev"><![CDATA[<xen:title>{xen:phrase bdapi_consumer_sign_up_with_x, 'provider={$provider.name}'}</xen:title>
 	
