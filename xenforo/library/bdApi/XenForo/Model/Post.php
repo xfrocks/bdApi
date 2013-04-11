@@ -16,9 +16,9 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
 	public function prepareApiDataForPost(array $post, array $thread, array $forum)
 	{
-		if (empty($data['messageHtml']))
+		if (!isset($post['messageHtml']))
 		{
-			$data['messageHtml'] = $this->_renderMessage($post);
+			$post['messageHtml'] = $this->_renderMessage($post);
 		}
 
 		$publicKeys = array(
@@ -28,6 +28,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 				'user_id'			=> 'poster_user_id',
 				'username'			=> 'poster_username',
 				'post_date'			=> 'post_create_date',
+				'message'			=> 'post_body',
 				'messageHtml'		=> 'post_body_html',
 				'likes'				=> 'post_like_count',
 		);
