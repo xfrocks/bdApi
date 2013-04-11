@@ -54,6 +54,12 @@
   <email_templates/>
   <optiongroups>
     <group group_id="bdApiConsumer" display_order="9999" debug_only="0"/>
+    <option option_id="bdapi_consumer_autoLogin" edit_format="onoff" data_type="unsigned_integer" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApiConsumer" display_order="110"/>
+    </option>
     <option option_id="bdapi_consumer_bypassRegistrationActive" edit_format="onoff" data_type="unsigned_integer" can_backup="1">
       <default_value>0</default_value>
       <edit_format_params></edit_format_params>
@@ -84,6 +90,8 @@
     <phrase title="bdapi_consumer_root" version_id="1" version_string="0.9-dev"><![CDATA[http://domain.com/xenforo/api]]></phrase>
     <phrase title="bdapi_consumer_sign_up_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Sign Up with {provider}]]></phrase>
     <phrase title="bdapi_consumer_x_returned_unknown_error" version_id="1" version_string="0.9-dev"><![CDATA[{provider} returned an unknown error. Please try again later.]]></phrase>
+    <phrase title="option_bdapi_consumer_autoLogin" version_id="4" version_string="0.9-dev"><![CDATA[Auto Login]]></phrase>
+    <phrase title="option_bdapi_consumer_autoLogin_explain" version_id="4" version_string="0.9-dev"><![CDATA[This add-on can auto detect logged in user in external site (via JavaScript) and automatically setup user session in the background if an associated account is available.]]></phrase>
     <phrase title="option_bdapi_consumer_bypassRegistrationActive" version_id="2" version_string="0.9-dev"><![CDATA[Bypass Registration Active Check]]></phrase>
     <phrase title="option_bdapi_consumer_bypassRegistrationActive_explain" version_id="2" version_string="0.9-dev"><![CDATA[Enabling this option will allow users who came from external sites to register regardless of the <a href="admin.php?options/list/usersAndRegistration" target="_blank" tabindex="-1">"Enable Registration" option</a>.]]></phrase>
     <phrase title="option_bdapi_consumer_providers" version_id="1" version_string="0.9-dev"><![CDATA[Providers]]></phrase>
@@ -128,7 +136,8 @@
 	<xen:comment>Setting $eAuth here doesn't work, the real set is done in bdApiConsumer_Listener::template_create</xen:comment>
 	<xen:set var="$eAuth">1</xen:set>
 </xen:if>]]></template>
-    <template title="bdapi_consumer_page_container_head" version_id="3" version_string="0.9-dev"><![CDATA[<xen:if is="empty({$bdApiConsumer_logoutTime})
+    <template title="bdapi_consumer_page_container_head" version_id="4" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin}
+	AND empty({$bdApiConsumer_logoutTime})
 	AND ({$debugMode} OR {$session.sessionStart} == {$serverTime})
 	AND {$visitor.user_id} == 0
 	AND {$controllerName} != 'XenForo_ControllerPublic_Register'">
