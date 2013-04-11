@@ -77,11 +77,19 @@ class bdApi_Data_Helper_Core
 	{
 		$filteredData = array();
 		
-		foreach ($publicKeys as $publicKey)
+		foreach ($publicKeys as $publicKey => $mappedKey)
 		{
+			if (is_int($publicKey))
+			{
+				// backward compatible with previous versions
+				// where $publicKeys is just an array of keys 
+				// (with no key value pair)
+				$publicKey = $mappedKey;
+			}
+			
 			if (isset($data[$publicKey]))
 			{
-				$filteredData[$publicKey] = $data[$publicKey];
+				$filteredData[$mappedKey] = $data[$publicKey];
 			}
 		}
 		

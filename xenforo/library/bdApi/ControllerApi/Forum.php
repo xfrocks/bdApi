@@ -21,7 +21,7 @@ class bdApi_ControllerApi_Forum extends bdApi_ControllerApi_Node
 	{
 		$nodes = $this->_getNodeModel()->getViewableNodeList();
 
-		$forums = array();
+		$forumIds = array();
 		foreach ($nodes as $node)
 		{
 			if ($parentNodeId > 0 AND $node['parent_node_id'] != $parentNodeId)
@@ -31,11 +31,11 @@ class bdApi_ControllerApi_Forum extends bdApi_ControllerApi_Node
 
 			if ($node['node_type_id'] === 'Forum')
 			{
-				$forums[] = $node;
+				$forumIds[] = $node['node_id'];
 			}
 		}
 
-		return $forums;
+		return $this->_getForumModel()->getForumsByIds($forumIds);
 	}
 
 	protected function _getSingle($nodeId)

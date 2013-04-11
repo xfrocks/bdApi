@@ -13,7 +13,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		$categoryId = $this->_input->filterSingle('category_id', XenForo_Input::UINT);
 		if (!empty($categoryId))
 		{
-			return $this->_responseDataThreads(array(), 0);
+			return $this->_responseDataThreads(array(), array(), 0);
 		}
 		
 		$forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
@@ -56,11 +56,15 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		);
 		
 		$threads = $threadModel->getThreads($conditions, $fetchOptions);
+		foreach ($threads AS &$thread)
+		{
+			$thread = $threadModel->prepareThread($thread, $forum);
+		}
 		$threads = array_values($threads);
 		
 		$total = $threadModel->countThreads($conditions);
 		
-		return $this->_responseDataThreads($threads, $total, $limit, $page, $pageNavParams);
+		return $this->_responseDataThreads($threads, $forum, $total, $limit, $page, $pageNavParams);
 	}
 	
 	public function actionGetSingle()
@@ -74,16 +78,16 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		$threadModel = $this->_getThreadModel();
 
 		$data = array(
-			'thread' => $threadModel->prepareApiDataForThread($thread),
+			'thread' => $threadModel->prepareApiDataForThread($thread, $forum),
 		);
 		
 		return $this->responseData('bdApi_ViewApi_Thread_Single', $data);
 	}
 	
-	protected function _responseDataThreads($threads, $total, $limit = 0, $page = 1, $pageNavParams = array())
+	protected function _responseDataThreads(array $threads, array $forum, $total, $limit = 0, $page = 1, $pageNavParams = array())
 	{
 		$data = array(
-			'threads' => $this->_getThreadModel()->prepareApiDataForThreads($threads),
+			'threads' => $this->_getThreadModel()->prepareApiDataForThreads($threads, $forum),
 			'threads_total' => $total,
 		);
 
