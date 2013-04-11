@@ -6,15 +6,14 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 	{
 		$data = array(
 			'links' => array(
-				'nodes' 		=> bdApi_Link::buildApiLink('nodes'),
-				'posts' 		=> bdApi_Link::buildApiLink('posts'),
-				'threads' 	=> bdApi_Link::buildApiLink('threads'),
-				'users' 		=> bdApi_Link::buildApiLink('users'),
+				'categories' 		=> bdApi_Link::buildApiLink('categories'),
+				'forums' 			=> bdApi_Link::buildApiLink('forums'),
+				'posts' 			=> bdApi_Link::buildApiLink('posts'),
+				'threads' 			=> bdApi_Link::buildApiLink('threads'),
+				'users' 			=> bdApi_Link::buildApiLink('users'),
 		
-				'oauth_authorize'
-							=> bdApi_Link::buildApiLink('oauth/authorize', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
-				'oauth_token'
-							=> bdApi_Link::buildApiLink('oauth/token', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
+				'oauth_authorize'	=> bdApi_Link::buildApiLink('oauth/authorize', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
+				'oauth_token'		=> bdApi_Link::buildApiLink('oauth/token', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
 			),
 		);
 		

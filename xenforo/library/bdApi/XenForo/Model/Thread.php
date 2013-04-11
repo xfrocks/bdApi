@@ -48,7 +48,7 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 		$data['links'] = array(
 			'permalink' => bdApi_Link::buildPublicLink('threads', $thread),
 			'detail' => bdApi_Link::buildApiLink('threads', $thread),
-			'forum' => bdApi_Link::buildApiLink('nodes', $thread),
+			'forum' => bdApi_Link::buildApiLink('forums', $thread),
 			'posts' => bdApi_Link::buildApiLink('posts', array(), array('thread_id' => $thread['thread_id'])),
 			'first_poster' => bdApi_Link::buildApiLink('users', $thread),
 			'first_post' => bdApi_Link::buildApiLink('posts', array('post_id' => $thread['first_post_id'])),

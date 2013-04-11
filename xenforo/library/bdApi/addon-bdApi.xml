@@ -336,7 +336,7 @@
     <phrase title="bdapi_scope_read" global_cache="1" version_id="1" version_string="0.1"><![CDATA[Read information (forums, threads, posts) with your account's permissions]]></phrase>
     <phrase title="bdapi_slash_oauth_token_only_accepts_post_requests" version_id="2" version_string="0.2"><![CDATA[/oauth/token only accepts POST requests.]]></phrase>
     <phrase title="bdapi_slash_posts_requires_thread_id" version_id="1" version_string="0.1"><![CDATA[/posts requires thread_id]]></phrase>
-    <phrase title="bdapi_slash_threads_requires_node_id" version_id="1" version_string="0.1"><![CDATA[/threads requires node_id]]></phrase>
+    <phrase title="bdapi_slash_threads_requires_forum_id" version_id="11" version_string="0.9-dev"><![CDATA[/threads requires forum_id]]></phrase>
     <phrase title="bdapi_token" version_id="1" version_string="0.1"><![CDATA[Token]]></phrase>
     <phrase title="bdapi_tokens" version_id="4" version_string="0.9-dev"><![CDATA[API Access Tokens]]></phrase>
     <phrase title="bdapi_token_add" version_id="1" version_string="0.1"><![CDATA[Add New Token]]></phrase>

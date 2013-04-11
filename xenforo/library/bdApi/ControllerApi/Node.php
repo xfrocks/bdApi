@@ -1,67 +1,49 @@
 <?php
 
-class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
+abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
 {
 	public function actionGetIndex()
 	{
 		$nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
 		if (!empty($nodeId))
 		{
-			return $this->responseReroute(__CLASS__, 'get-single');
+			return $this->responseReroute($this->_getControllerName(), 'get-single');
 		}
-		
-		$nodeModel = $this->_getNodeModel();
-		
-		$nodes = $nodeModel->getViewableNodeList();
-		$nodes = array_values($nodes);
-		
+
+		$parentId = $this->_input->filterSingle('parent_category_id', XenForo_Input::UINT);
+		if ($parentId == 0)
+		{
+			$parentId = $this->_input->filterSingle('parent_forum_id', XenForo_Input::UINT);
+		}
+
+		$nodes = $this->_getAll($parentId);
+
 		$data = array(
-			'nodes' => $nodeModel->prepareApiDataForNodes($nodes),
-			'nodes_total' => count($nodes),
+				$this->_getNamePlural() => $this->_prepareApiDataForNodes($nodes),
+				$this->_getNamePlural() . '_total' => count($nodes),
 		);
-		
+
 		return $this->responseData('bdApi_ViewApi_Node_List', $data);
 	}
-	
+
 	public function actionGetSingle()
 	{
 		$nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
-		
-		$nodeModel = $this->_getNodeModel();
-		
-		$visitor = XenForo_Visitor::getInstance();
-		
-		$fetchOptions = array(
-			'permissionCombinationId' => $visitor['permission_combination_id'],
-		);
-		
-		$node = $nodeModel->getNodeById($nodeId, $fetchOptions);
-		
-		if (empty($node))
+
+		$node = $this->_getSingle($nodeId);
+
+		if (empty($node) OR !$this->_isViewable($node))
 		{
-			return $this->responseError(new XenForo_Phrase('requested_node_not_found'), 404);
-		}
-		
-		$nodeHandlers = $nodeModel->getNodeHandlersForNodeTypes(
-			$nodeModel->getUniqueNodeTypeIdsFromNodeList(array($node))
-		);
-		
-		$nodePermissions = $nodeModel->getNodePermissionsForPermissionCombination();
-		$thisNodePermissions = (isset($nodePermissions[$node['node_id']]) ? $nodePermissions[$node['node_id']] : array());
-		
-		if (empty($nodeHandlers[$node['node_type_id']])
-			OR !$nodeHandlers[$node['node_type_id']]->isNodeViewable($node, $thisNodePermissions))
-		{
-			return $this->responseNoPermission();
+			return $this->_responseNodeNotFound();
 		}
 
 		$data = array(
-			'node' => $nodeModel->prepareApiDataForNode($node),
+				$this->_getNameSingular() => $this->_prepareApiDataForNode($node),
 		);
-		
+
 		return $this->responseData('bdApi_ViewApi_Node_Single', $data);
 	}
-	
+
 	/**
 	 * @return XenForo_Model_Node
 	 */
@@ -69,4 +51,22 @@ class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
 	{
 		return $this->getModelFromCache('XenForo_Model_Node');
 	}
+
+	abstract protected function _getControllerName();
+
+	abstract protected function _getNameSingular();
+
+	abstract protected function _getNamePlural();
+
+	abstract protected function _getAll($parentNodeId);
+
+	abstract protected function _getSingle($nodeId);
+
+	abstract protected function _isViewable(array $node);
+
+	abstract protected function _prepareApiDataForNodes(array $nodes);
+
+	abstract protected function _prepareApiDataForNode(array $node);
+
+	abstract protected function _responseErrorNotFound();
 }

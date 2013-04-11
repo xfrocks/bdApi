@@ -8,7 +8,8 @@ class bdApi_Listener
 			'XenForo_ControllerPublic_Account',
 			'XenForo_ControllerPublic_Register',
 		
-			'XenForo_Model_Node',
+			'XenForo_Model_Category',
+			'XenForo_Model_Forum',
 			'XenForo_Model_Post',
 			'XenForo_Model_Thread',
 			'XenForo_Model_User',
