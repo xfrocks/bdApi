@@ -7,6 +7,7 @@ class bdApiConsumer_Listener
 	{
 		static $classes = array(
 			'XenForo_ControllerPublic_Login',
+			'XenForo_ControllerPublic_Logout',
 			'XenForo_ControllerPublic_Register',
 			'XenForo_Model_UserExternal',
 		);
@@ -20,6 +21,12 @@ class bdApiConsumer_Listener
 	public static function init_dependencies(XenForo_Dependencies_Abstract $dependencies, array $data)
 	{
 		XenForo_Template_Helper_Core::$helperCallbacks['bdapiconsumer_getoption'] = array('bdApiConsumer_Option', 'get');
+	}
+
+	public static function front_controller_pre_view(XenForo_FrontController $fc, XenForo_ControllerResponse_Abstract &$controllerResponse, XenForo_ViewRenderer_Abstract &$viewRenderer, array &$containerParams)
+	{
+		$cookieLogoutTime = XenForo_Helper_Cookie::getCookie('bdApiConsumer_logoutTime', $fc->getRequest());
+		$containerParams['bdApiConsumer_logoutTime'] = $cookieLogoutTime;
 	}
 
 	public static function template_create($templateName, array &$params, XenForo_Template_Abstract $template)
@@ -60,14 +67,7 @@ class bdApiConsumer_Listener
 			case 'login_bar_eauth_set':
 			case 'page_container_head':
 				$ourTemplate = $template->create('bdapi_consumer_' . $hookName, $template->getParams());
-
-				if (in_array($hookName, array(
-					'login_bar_eauth_items',
-					'page_container_head',
-				)))
-				{
-					$ourTemplate->setParam('providers', bdApiConsumer_Option::getProviders());
-				}
+				$ourTemplate->setParam('providers', bdApiConsumer_Option::getProviders());
 
 				$rendered = $ourTemplate->render();
 				$contents .= $rendered;

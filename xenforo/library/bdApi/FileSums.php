@@ -33,7 +33,7 @@ class bdApi_FileSums
   'library/bdApi/Model/OAuth2.php' => 'c87e6a163a32a21b63b56ba0fd809260',
   'library/bdApi/Model/RefreshToken.php' => '7a430f94b86039910f7209b48006e0b7',
   'library/bdApi/Model/Token.php' => '6815eea2d66471831026766c26a1d33f',
-  'library/bdApi/OAuth2.php' => '8bfa2677fac03eecac2e0cd8ed7449a6',
+  'library/bdApi/OAuth2.php' => '11109d77bdac9c9cb64b522c0515c530',
   'library/bdApi/Option.php' => 'c258d48492b9cb1931fff33ad6a65635',
   'library/bdApi/Route/PrefixAdmin/AuthCode.php' => '6ae4cf1aafaf43f7ae7cd5d9d0a0df9b',
   'library/bdApi/Route/PrefixAdmin/Client.php' => '0ec3878d436cabf75f699c1b0adc6633',
@@ -56,13 +56,13 @@ class bdApi_FileSums
   'library/bdApi/ViewPublic/Account/Authorize.php' => '600db6b57fb202c473636660e44018fe',
   'library/bdApi/ViewRenderer/Json.php' => '4e17df7246f9f0b6df3009790f26f604',
   'library/bdApi/ViewRenderer/Xml.php' => '8236228096b9d033c06e31a486cc228b',
-  'library/bdApi/XenForo/ControllerPublic/Account.php' => '8bc1389b00e829d89af9691f80240caf',
+  'library/bdApi/XenForo/ControllerPublic/Account.php' => '47ad4fff46cfbd608179110c1668c3cf',
   'library/bdApi/XenForo/ControllerPublic/Register.php' => '642c121cac314fc5aa4eeb4366d1c7b8',
   'library/bdApi/XenForo/Model/Node.php' => '375a3a5e66a537fc785dad71f6aaac6a',
   'library/bdApi/XenForo/Model/Post.php' => '6b1748f4de7f19f9dcb02da127247ab7',
   'library/bdApi/XenForo/Model/Thread.php' => '33843b151881d6a634ea4df0f946c085',
   'library/bdApi/XenForo/Model/User.php' => '4ad4856d9689de73738c4b4b1422270a',
-  'js/bdApi/full/sdk.js' => '92823e985f72431eb8a0fa5af88efb8d',
+  'js/bdApi/full/sdk.js' => '639b9db11918dc956e0ffe2f09572f0d',
 );
 	}
 }

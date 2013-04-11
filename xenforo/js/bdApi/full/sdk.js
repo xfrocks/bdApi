@@ -32,6 +32,11 @@
 					dataType: 'jsonp',
 					success: function(data, textStatus)
 					{
+						if (typeof callback != 'function')
+						{
+							return;
+						}
+
 						if (data['authorized'] == 1)
 						{
 							callback(true, data);

@@ -3,6 +3,8 @@ class bdApiConsumer_XenForo_ControllerPublic_Login extends XFCP_bdApiConsumer_Xe
 {
 	public function actionExternal()
 	{
+		$this->_assertPostOnly();
+
 		$providerCode = $this->_input->filterSingle('provider', XenForo_Input::STRING);
 		$provider = bdApiConsumer_Option::getProviderByCode($providerCode);
 		if (empty($provider))

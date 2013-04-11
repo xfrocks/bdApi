@@ -12,7 +12,8 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		$provider = bdApiConsumer_Option::getProviderByCode($providerCode);
 		if (empty($provider))
 		{
-			return $this->responseNoPermission();
+			// this is one serious error
+			throw new XenForo_Exception('Provider could not be determined');
 		}
 
 		$externalRedirectUri = XenForo_Link::buildPublicLink('canonical:register/external', false, array(

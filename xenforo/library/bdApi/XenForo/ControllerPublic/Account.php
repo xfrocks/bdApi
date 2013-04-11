@@ -243,21 +243,41 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 			{
 				case 'authorized':
 					$scope = $this->_input->filterSingle('scope', XenForo_Input::STRING);
-					$tokens = $tokenModel->getTokens(array(
-						'client_id' => $client['client_id'],
-						'user_id' => $visitor['user_id'],
-					));
 					$data[$cmd] = 0;
-					foreach ($tokens as $token)
+					
+					if ($data[$cmd] === 0 AND $clientModel->canAutoAuthorize($client, $scope))
 					{
-						if (!$tokenModel->hasExpired($client, $token)
-							AND $tokenModel->hasScope($client, $token, $scope)
-						)
+						// this client has auto authorize setting for the requested scope
+						// response with authorized = 1
+						// note: we don't have (and don't need) an access token for now
+						// but in case the client application request authorization, it 
+						// will be granted automatically anyway
+						$data[$cmd] = 1;
+					}
+					
+					if ($data[$cmd] === 0)
+					{
+						// start looking for valid access token
+						$tokens = $tokenModel->getTokens(array(
+							'client_id' => $client['client_id'],
+							'user_id' => $visitor['user_id'],
+						));
+						
+						foreach ($tokens as $token)
 						{
-							$data[$cmd] = 1;
-							$data['user_id'] = $visitor->get('user_id');
-							break; // foreach ($tokens as $token)
+							if (!$tokenModel->hasExpired($client, $token)
+								AND $tokenModel->hasScope($client, $token, $scope)
+							)
+							{
+								$data[$cmd] = 1;
+								break; // foreach ($tokens as $token)
+							}
 						}
+					}
+					
+					if ($data[$cmd] === 1)
+					{
+						$data['user_id'] = $visitor['user_id'];
 					}
 					break; // switch ($cmd)
 			}

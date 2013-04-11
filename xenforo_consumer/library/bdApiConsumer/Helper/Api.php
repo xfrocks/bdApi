@@ -3,7 +3,11 @@ class bdApiConsumer_Helper_Api
 {
 	public static function getRequestUrl(array $provider, $redirectUri)
 	{
-		return sprintf('%s/oauth/authorize/?client_id=%s&redirect_uri=%s&response_type=code&scope=read', $provider['root'], $provider['client_id'], $redirectUri);
+		return sprintf('%s/oauth/authorize/?client_id=%s&redirect_uri=%s&response_type=code&scope=read',
+			$provider['root'],
+			rawurlencode($provider['client_id']),
+			rawurlencode($redirectUri)
+		);
 	}
 
 	public static function getAccessTokenFromCode(array $provider, $code, $redirectUri)
