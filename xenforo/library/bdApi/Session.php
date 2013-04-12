@@ -4,14 +4,24 @@ class bdApi_Session extends XenForo_Session
 {
 	/**
 	 * The effective OAuth token of current request.
-	 * 
+	 *
 	 * @var array|false
 	 */
 	protected $_oauthToken = false;
-	
+
+	public function getOAuthClientId()
+	{
+		if (!empty($this->_oauthToken))
+		{
+			return $this->_oauthToken['client_id'];
+		}
+
+		return false;
+	}
+
 	/**
 	 * Gets the effective OAuth token text of current request or false
-	 * if no token could be found. 
+	 * if no token could be found.
 	 */
 	public function getOAuthTokenText()
 	{
@@ -19,16 +29,16 @@ class bdApi_Session extends XenForo_Session
 		{
 			return $this->_oauthToken['token_text'];
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Checks for the specified scope to see if the effective scopes
 	 * contain it.
-	 * 
+	 *
 	 * @param string $scope
-	 * 
+	 *
 	 * @return boolean true if the scope is found
 	 */
 	public function checkScope($scope)
@@ -38,17 +48,17 @@ class bdApi_Session extends XenForo_Session
 			// no token, obviously no scope
 			return false;
 		}
-		
+
 		$scopes = $this->get('scopes');
 		if (empty($scopes))
 		{
 			// no scopes...
 			return false;
 		}
-		
+
 		return in_array($scope, $scopes);
 	}
-	
+
 	/**
 	 * Starts running the API session handler. This will automatically log in the user via
 	 * OAuth if needed, and setup the visitor object. The session will be registered in the
@@ -67,7 +77,7 @@ class bdApi_Session extends XenForo_Session
 
 		$session = new bdApi_Session();
 		$session->start();
-		
+
 		XenForo_Application::set('session', $session);
 
 		$options = $session->getAll();
@@ -76,37 +86,37 @@ class bdApi_Session extends XenForo_Session
 
 		return $session;
 	}
-	
+
 	public function start($sessionId = null, $ipAddress = null)
 	{
 		parent::start($sessionId, $ipAddress);
-		
+
 		/* @var $oauth2Model bdApi_Model_OAuth2 */
 		$oauth2Model = XenForo_Model::create('bdApi_Model_OAuth2');
-		
+
 		$this->_oauthToken = $oauth2Model->getServer()->getEffectiveToken();
-		
+
 		if (!empty($this->_oauthToken) AND !empty($this->_oauthToken['user_id']))
 		{
 			$this->changeUserId($this->_oauthToken['user_id']);
-			
+
 			$scopes = bdApi_Template_Helper_Core::getInstance()->scopeSplit($this->_oauthToken['scope']);
 			$this->set('scopes', $scopes);
 		}
 	}
-	
+
 	public function getSessionFromSource($sessionId)
 	{
 		// api sessions are not saved
 		// so it's uncessary to query the db for it
 		return false;
 	}
-	
+
 	public function deleteSessionFromSource($sessionId)
 	{
 		// do nothing
 	}
-	
+
 	public function saveSessionToSource($sessionId, $isUpdate)
 	{
 		// do nothing

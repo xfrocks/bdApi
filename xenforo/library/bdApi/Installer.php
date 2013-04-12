@@ -62,6 +62,7 @@ class bdApi_Installer {
 		array(
 			'table' => 'xf_bdapi_token',
 			'field' => 'issue_date',
+			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_bdapi_token\'',
 			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_bdapi_token` LIKE \'issue_date\'',
 			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_bdapi_token` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
 			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_token` DROP COLUMN `issue_date`'
@@ -69,6 +70,7 @@ class bdApi_Installer {
 		array(
 			'table' => 'xf_bdapi_auth_code',
 			'field' => 'issue_date',
+			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_bdapi_auth_code\'',
 			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_bdapi_auth_code` LIKE \'issue_date\'',
 			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_bdapi_auth_code` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
 			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_auth_code` DROP COLUMN `issue_date`'
@@ -76,9 +78,18 @@ class bdApi_Installer {
 		array(
 			'table' => 'xf_bdapi_refresh_token',
 			'field' => 'issue_date',
+			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_bdapi_refresh_token\'',
 			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_bdapi_refresh_token` LIKE \'issue_date\'',
 			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
 			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` DROP COLUMN `issue_date`'
+		),
+		array(
+			'table' => 'xf_post',
+			'field' => 'bdapi_origin',
+			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_post\'',
+			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_post` LIKE \'bdapi_origin\'',
+			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_post` ADD COLUMN `bdapi_origin` VARCHAR(255) DEFAULT \'\'',
+			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_post` DROP COLUMN `bdapi_origin`'
 		)
 	);
 
@@ -90,6 +101,11 @@ class bdApi_Installer {
 		}
 		
 		foreach (self::$_patches as $patch) {
+			$tableExisted = $db->fetchOne($patch['showTablesQuery']);
+			if (empty($tableExisted)) {
+				continue;
+			}
+			
 			$existed = $db->fetchOne($patch['showColumnsQuery']);
 			if (empty($existed)) {
 				$db->query($patch['alterTableAddColumnQuery']);
@@ -103,6 +119,11 @@ class bdApi_Installer {
 		$db = XenForo_Application::get('db');
 		
 		foreach (self::$_patches as $patch) {
+			$tableExisted = $db->fetchOne($patch['showTablesQuery']);
+			if (empty($tableExisted)) {
+				continue;
+			}
+			
 			$existed = $db->fetchOne($patch['showColumnsQuery']);
 			if (!empty($existed)) {
 				$db->query($patch['alterTableDropColumnQuery']);

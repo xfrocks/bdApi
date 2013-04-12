@@ -32,8 +32,18 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 	 */
 	protected function _getScopeForAction($action)
 	{
-		if (strpos($action, 'POST') === 0)
+		if (strpos($action, 'Post') === 0)
 		{
+			return bdApi_Model_OAuth2::SCOPE_POST;
+		}
+		elseif (strpos($action, 'Put') === 0)
+		{
+			// TODO: separate scope?
+			return bdApi_Model_OAuth2::SCOPE_POST;
+		}
+		elseif (strpos($action, 'Delete') === 0)
+		{
+			// TODO: separate scope?
 			return bdApi_Model_OAuth2::SCOPE_POST;
 		}
 		else 
@@ -53,10 +63,8 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 	 * Helper to check for the required scope and throw an exception
 	 * if it could not be found.
 	 */
-	protected function _assertRequiredScope($action)
+	protected function _assertRequiredScope($scope)
 	{
-		$scope = $this->_getScopeForAction($action);
-		
 		if (empty($scope))
 		{
 			// no scope is required
@@ -117,7 +125,8 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 	
 	protected function _preDispatch($action)
 	{
-		$this->_assertRequiredScope($action);
+		$requiredScope = $this->_getScopeForAction($action);
+		$this->_assertRequiredScope($requiredScope);
 		
 		parent::_preDispatch($action);
 	}

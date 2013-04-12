@@ -21,7 +21,7 @@ if ($fileDir === false AND !empty($scriptFilename))
 	if (file_exists($parentOfDirOfScriptFilename . $pathToCheck))
 	{
 		$fileDir = $parentOfDirOfScriptFilename;
-	} 
+	}
 }
 if ($fileDir === false)
 {
@@ -30,6 +30,23 @@ if ($fileDir === false)
 
 require($fileDir . '/library/XenForo/Autoloader.php');
 XenForo_Autoloader::getInstance()->setupAutoloader($fileDir . '/library');
+
+// PUT method support
+if (isset($_SERVER['REQUEST_METHOD'])
+AND ($_SERVER['REQUEST_METHOD'] === 'PUT'
+		OR $_SERVER['REQUEST_METHOD'] === 'DELETE'
+)
+)
+{
+	$input = file_get_contents('php://input');
+	$inputParams = array();
+	parse_str($input, $inputParams);
+	foreach ($inputParams as $key => $value)
+	{
+		$_POST[$key] = $value;
+		$_REQUEST[$key] = $value;
+	}
+}
 
 XenForo_Application::initialize($fileDir . '/library', $fileDir);
 XenForo_Application::set('page_start_time', $startTime);

@@ -115,6 +115,9 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base {
 		),
 		'xf_bdapi_refresh_token' => array(
 			'issue_date' => array('name' => 'issue_date', 'type' => 'uint', 'required' => true, 'default' => 0)
+		),
+		'xf_post' => array(
+			'bdapi_origin' => array('name' => 'bdapi_origin', 'type' => 'string', 'length' => 255, 'default' => '')
 		)
 	);
 	protected $_exportPath = '/Users/sondh/Dropbox/XenForo/bdApi';
