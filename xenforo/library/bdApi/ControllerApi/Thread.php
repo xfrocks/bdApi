@@ -10,12 +10,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 			return $this->responseReroute(__CLASS__, 'get-single');
 		}
 
-		$categoryId = $this->_input->filterSingle('category_id', XenForo_Input::UINT);
-		if (!empty($categoryId))
-		{
-			return $this->_responseDataThreads(array(), array(), 0);
-		}
-
 		$forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
 		if (empty($forumId))
 		{
@@ -62,7 +56,15 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
 		$total = $this->_getThreadModel()->countThreads($conditions);
 
-		return $this->_responseDataThreads($threads, $forum, $total, $limit, $page, $pageNavParams);
+		$data = array(
+				'threads' => $this->_getThreadModel()->prepareApiDataForThreads($threads, $forum),
+				'threads_total' => $total,
+		);
+
+		bdApi_Data_Helper_Core::addPageLinks($data, $limit, $total, $page, 'threads',
+		array(), $pageNavParams);
+
+		return $this->responseData('bdApi_ViewApi_Thread_List', $data);
 	}
 
 	public function actionGetSingle()
@@ -166,19 +168,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		);
 
 		return $this->responseMessage(new XenForo_Phrase('bdapi_thread_x_has_been_deleted', array('thread_id' => $thread['thread_id'])));
-	}
-
-	protected function _responseDataThreads(array $threads, array $forum, $total, $limit = 0, $page = 1, $pageNavParams = array())
-	{
-		$data = array(
-				'threads' => $this->_getThreadModel()->prepareApiDataForThreads($threads, $forum),
-				'threads_total' => $total,
-		);
-
-		bdApi_Data_Helper_Core::addPageLinks($data, $limit, $total, $page, 'threads',
-		array(), $pageNavParams);
-
-		return $this->responseData('bdApi_ViewApi_Thread_List', $data);
 	}
 
 	/**
