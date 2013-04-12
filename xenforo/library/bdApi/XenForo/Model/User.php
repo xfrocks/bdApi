@@ -30,11 +30,11 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 		{
 			$publicKeys = array_merge($publicKeys, array(
 					// xf_user
-					'email'			=> 'email',
+					'email'			=> 'user_email',
 					// xf_user_profile
-					'dob_day'		=> 'dob_day',
-					'dob_month'		=> 'dob_month',
-					'dob_year'		=> 'dob_year',
+					'dob_day'		=> 'user_dob_day',
+					'dob_month'		=> 'user_dob_month',
+					'dob_year'		=> 'user_dob_year',
 			));
 		}
 
