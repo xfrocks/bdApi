@@ -20,10 +20,8 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
 
 		$visitor = XenForo_Visitor::getInstance();
-		$threadModel = $this->_getThreadModel();
-		$postModel = $this->_getPostModel();
 
-		if ($threadModel->isRedirect($thread))
+		if ($this->_getThreadModel()->isRedirect($thread))
 		{
 			$redirect = $this->getModelFromCache('XenForo_Model_ThreadRedirect')->getThreadRedirectById($thread['thread_id']);
 			if (!$redirect)
@@ -59,17 +57,17 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 				'page' => $page
 		);
 
-		$posts = $postModel->getPostsInThread($threadId, $fetchOptions);
+		$posts = $this->_getPostModel()->getPostsInThread($threadId, $fetchOptions);
 		foreach ($posts AS &$post)
 		{
-			$post = $postModel->preparePost($post, $thread, $forum);
+			$post = $this->_getPostModel()->preparePost($post, $thread, $forum);
 		}
 		$posts = array_values($posts);
 
 		$total = $thread['reply_count'] + 1;
 
 		$data = array(
-				'posts' => $postModel->prepareApiDataForPosts($posts, $thread, $forum),
+				'posts' => $this->_getPostModel()->prepareApiDataForPosts($posts, $thread, $forum),
 				'posts_total' => $total,
 		);
 
@@ -87,13 +85,11 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId);
 
 		$visitor = XenForo_Visitor::getInstance();
-		$threadModel = $this->_getThreadModel();
-		$postModel = $this->_getPostModel();
 
-		$post = $postModel->preparePost($post, $thread, $forum);
+		$post = $this->_getPostModel()->preparePost($post, $thread, $forum);
 
 		$data = array(
-				'post' => $postModel->prepareApiDataForPost($post, $thread, $forum),
+				'post' => $this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum),
 		);
 
 		return $this->responseData('bdApi_ViewApi_Post_Single', $data);
@@ -102,10 +98,6 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 	public function actionPostIndex()
 	{
 		$threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
-		if (empty($threadId))
-		{
-			return $this->responseError(new XenForo_Phrase('bdapi_slash_posts_requires_thread_id'));
-		}
 
 		$ftpHelper = $this->getHelper('ForumThreadPost');
 		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
@@ -130,6 +122,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$writer->set('message', $input['post_body']);
 		$writer->set('message_state', $this->_getPostModel()->getPostInsertMessageState($thread, $forum));
 		$writer->set('thread_id', $thread['thread_id']);
+		$writer->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
 
 		$clientId = XenForo_Application::getSession()->getOAuthClientId();
 		if (!empty($clientId))
@@ -146,6 +139,13 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
 		$writer->save();
 		$post = $writer->getMergedData();
+
+		$this->_getThreadWatchModel()->setVisitorThreadWatchStateFromInput($thread['thread_id'], array(
+				// TODO
+				'watch_thread_state' => 0,
+				'watch_thread' => 0,
+				'watch_thread_email' => 0,
+		));
 
 		$this->_request->setParam('post_id', $post['post_id']);
 		return $this->responseReroute(__CLASS__, 'get-single');
@@ -184,18 +184,17 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$ftpHelper = $this->getHelper('ForumThreadPost');
 		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId);
 
-		$postModel = $this->_getPostModel();
 		$deleteType = 'soft';
 		$options = array(
 				'reason' => '[bd] API',
 		);
 
-		if (!$postModel->canDeletePost($post, $thread, $forum, $deleteType, $errorPhraseKey))
+		if (!$this->_getPostModel()->canDeletePost($post, $thread, $forum, $deleteType, $errorPhraseKey))
 		{
 			throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
 		}
 
-		$dw = $postModel->deletePost($postId, $deleteType, $options, $forum);
+		$dw = $this->_getPostModel()->deletePost($postId, $deleteType, $options, $forum);
 
 		if ($post['post_id'] == $thread['first_post_id'])
 		{
@@ -227,5 +226,13 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 	protected function _getThreadModel()
 	{
 		return $this->getModelFromCache('XenForo_Model_Thread');
+	}
+
+	/**
+	 * @return XenForo_Model_ThreadWatch
+	 */
+	protected function _getThreadWatchModel()
+	{
+		return $this->getModelFromCache('XenForo_Model_ThreadWatch');
 	}
 }
