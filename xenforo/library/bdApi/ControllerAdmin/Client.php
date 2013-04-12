@@ -91,7 +91,6 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
 		}
 	}
 	
-	
 	protected function _getClientOrError($id, array $fetchOptions = array())
 	{
 		$info = $this->_getClientModel()->getClientById($id, $fetchOptions);

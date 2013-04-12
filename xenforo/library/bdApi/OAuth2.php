@@ -86,6 +86,13 @@ class bdApi_OAuth2 extends OAuth2
 	}
 
 	/**
+	 * Exposes genAccessToken with visibility public.
+	 */
+	public function genAccessTokenPublic() {
+		return $this->genAccessToken();
+	}
+
+	/**
 	 * Constructor
 	 * 
 	 * @param bdApi_Model_OAuth2 $model

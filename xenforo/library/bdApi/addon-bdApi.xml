@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApi" title="[bd] API" version_string="0.9-dev" version_id="11" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApi" title="[bd] API" version_string="0.9-dev" version_id="12" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdApi" parent_navigation_id="tools" display_order="9999" link="api-clients" admin_permission_id="bdApi" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_auth_codes" parent_navigation_id="bdApi" display_order="3000" link="api-auth-codes" admin_permission_id="" debug_only="0" hide_no_children="0"/>
@@ -200,6 +200,26 @@
 		<div class="noResults">{xen:phrase bdapi_refresh_token_no_results}</div>
 	</xen:if>
 </xen:form>]]></template>
+    <template title="bdapi_token_add"><![CDATA[<xen:title>{xen:phrase bdapi_token_add}</xen:title>
+
+<xen:form action="{xen:adminlink 'api-tokens/add'}" class="section AutoValidator" data-redirect="yes">
+	
+	<xen:selectunit label="{xen:phrase bdapi_client}:" name="client_id">
+		<xen:options source="{$clients}" />
+	</xen:selectunit>
+	
+	<xen:textboxunit label="{xen:phrase user_name}:" name="username" inputclass="AutoComplete AcSingle" />
+	
+	<xen:checkboxunit label="{xen:phrase bdapi_scope}:" name="scopes">
+		<xen:options source="{$scopes}" />
+	</xen:checkboxunit>
+	
+	<xen:spinboxunit label="{xen:phrase bdapi_ttl}:" name="ttl" value="3600" />
+	
+	<xen:submitunit save="{xen:phrase bdapi_client_add}" />
+
+	<input type="hidden" name="_xfConfirm" value="1" />
+</xen:form>]]></template>
     <template title="bdapi_token_delete"><![CDATA[<xen:title>{xen:phrase bdapi_token_confirm_deletion}: {$token.token_text}</xen:title>
 <xen:h1>{xen:phrase bdapi_token_confirm_deletion}</xen:h1>
 
@@ -222,6 +242,10 @@
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
+
+<xen:topctrl>
+	<a href="{xen:adminlink 'api-tokens/add'}" class="button" accesskey="a">+ {xen:phrase bdapi_token_add}</a>
+</xen:topctrl>
 
 <xen:form action="{xen:adminlink 'api-tokens'}" class="section">
 	<xen:if is="{$tokens}">
@@ -348,6 +372,7 @@
     <phrase title="bdapi_token_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to revoke the following token]]></phrase>
     <phrase title="bdapi_token_save" version_id="1" version_string="0.1"><![CDATA[Save Token]]></phrase>
     <phrase title="bdapi_token_text" version_id="1" version_string="0.1"><![CDATA[Token Text]]></phrase>
+    <phrase title="bdapi_ttl" version_id="11" version_string="0.9-dev"><![CDATA[Time To Live]]></phrase>
     <phrase title="bdappi_you_will_be_redirected_x" version_id="3" version_string="0.2.1"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
     <phrase title="cron_entry_bdApi_cleanUpExpired" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Clean Up Expired Data]]></phrase>
     <phrase title="permission_general_bdApi_clientNew" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Create Client]]></phrase>
