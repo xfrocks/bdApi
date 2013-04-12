@@ -2,7 +2,7 @@
 
 class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 {
-	public function prepareApiDataForThreads(array $threads, $forum)
+	public function prepareApiDataForThreads(array $threads, array $forum)
 	{
 		$data = array();
 
@@ -14,7 +14,7 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 		return $data;
 	}
 
-	public function prepareApiDataForThread(array $thread, $forum)
+	public function prepareApiDataForThread(array $thread, array $forum)
 	{
 		$publicKeys = array(
 				// xf_thread

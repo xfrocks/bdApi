@@ -65,7 +65,7 @@ class bdApi_FileSums
   'library/bdApi/XenForo/Model/Category.php' => 'd38303c66fce081d3344d12deaf7e5f7',
   'library/bdApi/XenForo/Model/Forum.php' => 'ded8098a26eb3da8f9ca6b24bc8fea2a',
   'library/bdApi/XenForo/Model/Post.php' => '2599dc71ad1e7ece1a30f9e6dd922618',
-  'library/bdApi/XenForo/Model/Thread.php' => 'f493e2d14961d3eea3b1246eefd3a288',
+  'library/bdApi/XenForo/Model/Thread.php' => 'cdcd965a1568377ea609593e67bf2366',
   'library/bdApi/XenForo/Model/User.php' => '3d3007d2e9a752f36235b62d6a6dbe69',
   'js/bdApi/full/sdk.js' => '639b9db11918dc956e0ffe2f09572f0d',
 );
