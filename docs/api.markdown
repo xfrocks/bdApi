@@ -384,7 +384,7 @@ Required scopes:
 Detail information of a user.
 
     {
-        category: {
+        user: {
             user_id: (int),
             username: (string),
             user_title: (string),
@@ -400,6 +400,21 @@ Detail information of a user.
                 detail: (uri)
             }
         }
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### GET `/users/me`
+Detail information of authorized user.
+
+    {
+        user: (user)
     }
 
 Parameters:
