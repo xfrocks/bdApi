@@ -61,7 +61,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 				'provider' => $provider['name'],
 			)));
 		}
-		if (empty($externalVisitor['email']))
+		if (empty($externalVisitor['user_email']))
 		{
 			return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_returned_unknown_error', array(
 				'provider' => $provider['name'],
@@ -104,7 +104,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 
 		if (!$existingUser)
 		{
-			$existingUser = $userModel->getUserByEmail($externalVisitor['email']);
+			$existingUser = $userModel->getUserByEmail($externalVisitor['user_email']);
 			$emailMatch = true;
 		}
 
@@ -174,7 +174,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 				'provider' => $provider['name'],
 			)));
 		}
-		if (empty($externalVisitor['email']))
+		if (empty($externalVisitor['user_email']))
 		{
 			return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_returned_unknown_error', array(
 				'provider' => $provider['name'],
@@ -260,23 +260,23 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		}
 		$writer->bulkSet($data);
 		
-		$writer->set('email', $externalVisitor['email']);
+		$writer->set('email', $externalVisitor['user_email']);
 		
-		if (!empty($externalVisitor['gender']))
+		if (!empty($externalVisitor['user_gender']))
 		{
-			$writer->set('gender', $externalVisitor['gender']);
+			$writer->set('gender', $externalVisitor['user_gender']);
 		}
 
-		if (!empty($externalVisitor['dob_day']) AND !empty($externalVisitor['dob_month']) AND !empty($externalVisitor['dob_year']))
+		if (!empty($externalVisitor['user_dob_day']) AND !empty($externalVisitor['user_dob_month']) AND !empty($externalVisitor['user_dob_year']))
 		{
-			$writer->set('dob_day', $externalVisitor['dob_day']);
-			$writer->set('dob_month', $externalVisitor['dob_month']);
-			$writer->set('dob_year', $externalVisitor['dob_year']);
+			$writer->set('dob_day', $externalVisitor['user_dob_day']);
+			$writer->set('dob_month', $externalVisitor['user_dob_month']);
+			$writer->set('dob_year', $externalVisitor['user_dob_year']);
 		}
 		
-		if (!empty($externalVisitor['register_date']))
+		if (!empty($externalVisitor['user_register_date']))
 		{
-			$writer->set('register_date', $externalVisitor['register_date']);
+			$writer->set('register_date', $externalVisitor['user_register_date']);
 		}
 
 		$userExternalModel->bdApiConsumer_syncUpOnRegistration($writer, $externalToken, $externalVisitor);

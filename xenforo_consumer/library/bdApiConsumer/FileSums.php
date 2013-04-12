@@ -11,7 +11,7 @@ class bdApiConsumer_FileSums
   'library/bdApiConsumer/Option.php' => '0bcae003eb06a75a14e91b0d47dcfe82',
   'library/bdApiConsumer/XenForo/ControllerPublic/Login.php' => '38bcb5be94605bcd1ffa25cb32a54615',
   'library/bdApiConsumer/XenForo/ControllerPublic/Logout.php' => 'f216826e95d1b53ba0f9aaf8b7aca2d7',
-  'library/bdApiConsumer/XenForo/ControllerPublic/Register.php' => '5e8224da06b535db1a1bb67cbdf8360f',
+  'library/bdApiConsumer/XenForo/ControllerPublic/Register.php' => 'f54519fbdcb5c85162edfa5479467c56',
   'library/bdApiConsumer/XenForo/Model/UserExternal.php' => '78043f538d03084f4b1e1f6a92ecb795',
 );
 	}
