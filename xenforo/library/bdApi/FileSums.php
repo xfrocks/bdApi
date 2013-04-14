@@ -17,8 +17,8 @@ class bdApi_FileSums
   'library/bdApi/ControllerApi/Index.php' => '089989f3a1816f2197d0c18d3443effb',
   'library/bdApi/ControllerApi/Node.php' => 'dce07ff85e7e3f0195ea3a80f0d2a790',
   'library/bdApi/ControllerApi/OAuth.php' => 'cb84c3814f496402c4cb87e2582da558',
-  'library/bdApi/ControllerApi/Post.php' => 'ffcae42310b0c05b08959ba19dd01633',
-  'library/bdApi/ControllerApi/Thread.php' => 'cfa68dc2b28f4e01c1efb5ecba15a6d7',
+  'library/bdApi/ControllerApi/Post.php' => 'aab1d8e143d88280e44a271a33d9988b',
+  'library/bdApi/ControllerApi/Thread.php' => '0a283617e4fcc31e22ee763250b89470',
   'library/bdApi/ControllerApi/User.php' => 'e1c6d5dc178960584bb4aa36a5eaa193',
   'library/bdApi/CronEntry/CleanUp.php' => '2bdb4b4f0c1218eb5e39dc6221b5ce8c',
   'library/bdApi/Data/Helper/Core.php' => '0c25ea4a7731b9e079c3ae500be89807',
@@ -67,7 +67,7 @@ class bdApi_FileSums
   'library/bdApi/XenForo/Model/Forum.php' => 'ded8098a26eb3da8f9ca6b24bc8fea2a',
   'library/bdApi/XenForo/Model/Post.php' => '2599dc71ad1e7ece1a30f9e6dd922618',
   'library/bdApi/XenForo/Model/Thread.php' => 'cdcd965a1568377ea609593e67bf2366',
-  'library/bdApi/XenForo/Model/User.php' => '3d3007d2e9a752f36235b62d6a6dbe69',
+  'library/bdApi/XenForo/Model/User.php' => '74873742e08976a881d6accc2025a678',
   'js/bdApi/full/sdk.js' => '639b9db11918dc956e0ffe2f09572f0d',
 );
 	}
