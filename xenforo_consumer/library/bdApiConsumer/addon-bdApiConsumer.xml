@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9-dev" version_id="6" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.1" version_id="7" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -103,6 +103,10 @@
   <route_prefixes/>
   <style_properties/>
   <templates>
+    <template title="bdapi_consumer.css" version_id="6" version_string="0.9-dev"><![CDATA[#loginBar .bdApiConsumer_LoginForm_Provider a
+{
+	color: {xen:property button.color};
+}]]></template>
     <template title="bdapi_consumer_error_with_login" version_id="1" version_string="0.9-dev"><![CDATA[<xen:include template="bdapi_consumer_helper_login_form" />]]></template>
     <template title="bdapi_consumer_helper_login_form" version_id="1" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
 <div class="xenForm">
@@ -123,10 +127,12 @@
 </div>
 </xen:if>]]></template>
     <template title="bdapi_consumer_login" version_id="1" version_string="0.9-dev"><![CDATA[<xen:include template="bdapi_consumer_helper_login_form" />]]></template>
-    <template title="bdapi_consumer_login_bar_eauth_items" version_id="1" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
+    <template title="bdapi_consumer_login_bar_eauth_items" version_id="6" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
+	<xen:require css="bdapi_consumer.css" />
+
 	<xen:foreach loop="$providers" value="$provider">
 		<li id="provider-{$provider.code}" class="bdApiConsumer_LoginForm_Provider">
-			<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1'}" tabindex="110">
+			<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1'}" tabindex="110" class="button">
 				<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
 			</a>
 		</li>
