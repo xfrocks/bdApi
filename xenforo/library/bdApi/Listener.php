@@ -6,6 +6,7 @@ class bdApi_Listener
 	{
 		static $classes = array(
 				'XenForo_ControllerPublic_Account',
+				'XenForo_ControllerPublic_Error',
 				'XenForo_ControllerPublic_Register',
 
 				'XenForo_DataWriter_DiscussionMessage_Post',

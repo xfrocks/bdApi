@@ -418,6 +418,8 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 					$requestPaths = XenForo_Application::get('requestPaths');
 					$session = XenForo_Application::getSession();
 					$session->set('bdApi_authorizePending', $requestPaths['fullUri']);
+
+					$controllerResponse->action = 'authorizeGuest';
 				}
 			}
 				
