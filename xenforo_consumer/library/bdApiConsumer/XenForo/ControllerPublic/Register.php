@@ -317,7 +317,6 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		$viewParams = array(
 			'user' => $user,
 			'redirect' => ($redirect ? XenForo_Link::convertUriToAbsoluteUri($redirect) : ''),
-			'facebook' => true
 		);
 
 		return $this->responseView(
