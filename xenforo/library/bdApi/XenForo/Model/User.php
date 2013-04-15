@@ -45,6 +45,16 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 				'detail' => bdApi_Link::buildApiLink('users', $user),
 		);
 
+		if ($user['user_id'] == XenForo_Visitor::getUserId())
+		{
+			if (isset($user['timezone']))
+			{
+				$dtz = new DateTimeZone($user['timezone']);
+				$dt = new DateTime('now', $dtz);
+				$data['user_timezone_offset'] = $dtz->getOffset($dt);
+			}
+		}
+
 		return $data;
 	}
 }
