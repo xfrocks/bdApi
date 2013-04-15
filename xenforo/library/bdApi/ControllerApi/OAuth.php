@@ -7,7 +7,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
 		/* @var $oauth2Model bdApi_Model_OAuth2 */
 		$oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
 		
-		$authorizeParams = $this->_input->filter($oauth2Model->getAuthorizeParamsInputFilter());
+		$authorizeParams = $oauth2Model->getServer()->getAuthorizeParams();
 		
 		$targetLink = bdApi_Link::buildPublicLink('account/authorize', array(), $authorizeParams);
 		

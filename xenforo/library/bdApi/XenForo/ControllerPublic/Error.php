@@ -9,7 +9,7 @@ class bdApi_XenForo_ControllerPublic_Error extends XFCP_bdApi_XenForo_Controller
 		/* @var $clientModel bdApi_Model_Client */
 		$clientModel = $oauth2Model->getClientModel();
 
-		$authorizeParams = $this->_input->filter($oauth2Model->getAuthorizeParamsInputFilter());
+		$authorizeParams = $oauth2Model->getServer()->getAuthorizeParams();
 
 		$client = $clientModel->getClientById($authorizeParams['client_id']);
 		if (empty($client))
