@@ -72,6 +72,12 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		$userExternalModel = $this->_getUserExternalModel();
 
 		$existingAssoc = $userExternalModel->getExternalAuthAssociation($userExternalModel->bdApiConsumer_getProviderCode($provider), $externalVisitor['user_id']);
+
+		if (empty($existingAssoc))
+		{
+			$existingAssoc = $this->_bdApiConsumer_autoRegister($provider, $externalToken, $externalVisitor);
+		}
+
 		if ($existingAssoc && $userModel->getUserById($existingAssoc['user_id']))
 		{
 			$redirect = XenForo_Application::get('session')->get(self::SESSION_KEY_REDIRECT);
@@ -251,6 +257,28 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			return $this->responseError(new XenForo_Phrase('you_must_agree_to_terms_of_service'));
 		}
 
+		$user = $this->_bdApiConsumer_createUser($data, $provider, $externalToken, $externalVisitor);
+
+		XenForo_Application::get('session')->changeUserId($user['user_id']);
+		XenForo_Visitor::setup($user['user_id']);
+
+		$redirect = $this->_input->filterSingle('redirect', XenForo_Input::STRING);
+
+		$viewParams = array(
+			'user' => $user,
+			'redirect' => ($redirect ? XenForo_Link::convertUriToAbsoluteUri($redirect) : ''),
+		);
+
+		return $this->responseView(
+			'XenForo_ViewPublic_Register_Process',
+			'register_process',
+			$viewParams,
+			$this->_getRegistrationContainerParams()
+		);
+	}
+
+	protected function _bdApiConsumer_createUser(array $data, $provider, $externalToken, array $externalVisitor)
+	{
 		$options = XenForo_Application::get('options');
 
 		$writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
@@ -258,7 +286,16 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		{
 			$writer->bulkSet($options->registrationDefaults, array('ignoreInvalidFields' => true));
 		}
+
+		if (!empty($data['user_id']))
+		{
+			$writer->setImportMode(true);
+		}
 		$writer->bulkSet($data);
+		if (!empty($data['user_id']))
+		{
+			$writer->setImportMode(false);
+		}
 		
 		$writer->set('email', $externalVisitor['user_email']);
 		
@@ -279,7 +316,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			$writer->set('register_date', $externalVisitor['user_register_date']);
 		}
 
-		$userExternalModel->bdApiConsumer_syncUpOnRegistration($writer, $externalToken, $externalVisitor);
+		$this->_getUserExternalModel()->bdApiConsumer_syncUpOnRegistration($writer, $externalToken, $externalVisitor);
 
 		$auth = XenForo_Authentication_Abstract::create('XenForo_Authentication_NoPassword');
 		$writer->set('scheme_class', $auth->getClassName());
@@ -298,32 +335,74 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		// TODO: option for extra user group
 
 		$writer->save();
+		
 		$user = $writer->getMergedData();
 
-		$userExternalModel->updateExternalAuthAssociation(
-			$userExternalModel->bdApiConsumer_getProviderCode($provider),
+		$this->_getUserExternalModel()->updateExternalAuthAssociation(
+			$this->_getUserExternalModel()->bdApiConsumer_getProviderCode($provider),
 			$externalVisitor['user_id'],
 			$user['user_id'],
-			$userExternalModel->bdApiConsumer_getUserProfileField()
+			$this->_getUserExternalModel()->bdApiConsumer_getUserProfileField()
 		);
 
 		XenForo_Model_Ip::log($user['user_id'], 'user', $user['user_id'], 'register');
 
-		XenForo_Application::get('session')->changeUserId($user['user_id']);
-		XenForo_Visitor::setup($user['user_id']);
+		return $user;
+	}
 
-		$redirect = $this->_input->filterSingle('redirect', XenForo_Input::STRING);
+	protected function _bdApiConsumer_autoRegister($provider, $externalToken, array $externalVisitor)
+	{
+		$mode = bdApiConsumer_Option::get('autoRegister');
 
-		$viewParams = array(
-			'user' => $user,
-			'redirect' => ($redirect ? XenForo_Link::convertUriToAbsoluteUri($redirect) : ''),
-		);
+		if ($mode !== 'on' AND $mode !== 'id_sync')
+		{
+			// not in working mode
+			return false;
+		}
 
-		return $this->responseView(
-			'XenForo_ViewPublic_Register_Process',
-			'register_process',
-			$viewParams,
-			$this->_getRegistrationContainerParams()
+		$data = array();
+
+		$sameName = $this->_getUserModel()->getUserByName($externalVisitor['username']);
+		if (!empty($sameName))
+		{
+			// username conflict found, too bad
+			return false;
+		}
+		$data['username'] = $externalVisitor['username'];
+
+		if ($mode === 'id_sync')
+		{
+			// additionally look for user with same ID
+			$sameId = $this->_getUserModel()->getUserById($externalVisitor['user_id']);
+			if (!empty($sameId))
+			{
+				// ID conflict found...
+				return false;
+			}
+			$data['user_id'] = $externalVisitor['user_id'];
+		}
+
+		if (isset($externalVisitor['user_timezone_offset']))
+		{
+			$tzOffset = $externalVisitor['user_timezone_offset'];
+			$tzName = timezone_name_from_abbr('', $tzOffset, 1);
+			if ($tzName !== false)
+			{
+				$data['timezone'] = $tzName;
+			}
+		}
+
+		$user = $this->_bdApiConsumer_createUser($data, $provider, $externalToken, $externalVisitor);
+
+		if (empty($user))
+		{
+			// for some reason, the user could not be created
+			return false;
+		}
+		
+		return $this->_getUserExternalModel()->getExternalAuthAssociation(
+			$this->_getUserExternalModel()->bdApiConsumer_getProviderCode($provider),
+			$externalVisitor['user_id']
 		);
 	}
 }
