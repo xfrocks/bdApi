@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.2" version_id="8" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.3" version_id="9" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -87,6 +87,8 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
     <interface_groups/>
   </permissions>
   <phrases>
+    <phrase title="bdapi_consumer_associated_x_account" version_id="8" version_string="0.9.2"><![CDATA[Associated {provider} Account]]></phrase>
+    <phrase title="bdapi_consumer_associate_with_x" version_id="8" version_string="0.9.2"><![CDATA[Associate with {provider}]]></phrase>
     <phrase title="bdapi_consumer_auto_login_with_x_failed" version_id="3" version_string="0.9-dev"><![CDATA[Attempt to auto login with {provider} has been failed.]]></phrase>
     <phrase title="bdapi_consumer_auto_login_with_x_succeeded_y" version_id="3" version_string="0.9-dev"><![CDATA[Welcome back {username}, you have been logged in via {provider}.]]></phrase>
     <phrase title="bdapi_consumer_auto_register_id_sync" version_id="7" version_string="0.9.1"><![CDATA[Enabled with ID sync]]></phrase>
@@ -94,13 +96,17 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
     <phrase title="bdapi_consumer_auto_register_on" version_id="7" version_string="0.9.1"><![CDATA[Enabled]]></phrase>
     <phrase title="bdapi_consumer_client_id" version_id="1" version_string="0.9-dev"><![CDATA[Client ID]]></phrase>
     <phrase title="bdapi_consumer_client_secret" version_id="1" version_string="0.9-dev"><![CDATA[Client Secret]]></phrase>
+    <phrase title="bdapi_consumer_disassociate_x_account" version_id="8" version_string="0.9.2"><![CDATA[Disassociate {provider} Account]]></phrase>
+    <phrase title="bdapi_consumer_disassociating_with_x_reset_password_email_y" version_id="8" version_string="0.9.2"><![CDATA[Disassociating with {provider} will cause a password to be generated for your account and emailed to {email}.]]></phrase>
     <phrase title="bdapi_consumer_error_occurred_while_connecting_with_x" version_id="1" version_string="0.9-dev"><![CDATA[An error occurred while connecting with {provider}. Please try again later.]]></phrase>
+    <phrase title="bdapi_consumer_external" version_id="8" version_string="0.9.2"><![CDATA[External Associations]]></phrase>
     <phrase title="bdapi_consumer_login_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Login with {provider}]]></phrase>
     <phrase title="bdapi_consumer_matches_email_address_associated_with_your_x_account" version_id="1" version_string="0.9-dev"><![CDATA[This member matches the email address associated with your {provider} account.]]></phrase>
     <phrase title="bdapi_consumer_name" version_id="1" version_string="0.9-dev"><![CDATA[Provider Name]]></phrase>
     <phrase title="bdapi_consumer_root" version_id="1" version_string="0.9-dev"><![CDATA[http://domain.com/xenforo/api]]></phrase>
     <phrase title="bdapi_consumer_sign_up_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Sign Up with {provider}]]></phrase>
     <phrase title="bdapi_consumer_x_returned_unknown_error" version_id="1" version_string="0.9-dev"><![CDATA[{provider} returned an unknown error. Please try again later.]]></phrase>
+    <phrase title="bdapi_consumer_you_not_associated_with_x_account" version_id="8" version_string="0.9.2"><![CDATA[Your account is not currently associated with a {provider} account.]]></phrase>
     <phrase title="option_bdapi_consumer_autoLogin" version_id="4" version_string="0.9-dev"><![CDATA[Auto Login]]></phrase>
     <phrase title="option_bdapi_consumer_autoLogin_explain" version_id="7" version_string="0.9.1"><![CDATA[Enable this option to auto detect logged in user in external site (via JavaScript) and automatically setup user session in the background if an associated account is available.]]></phrase>
     <phrase title="option_bdapi_consumer_autoRegister" version_id="7" version_string="0.9.1"><![CDATA[Auto Register]]></phrase>
@@ -124,6 +130,70 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
 {
 	color: {xen:property button.color};
 }]]></template>
+    <template title="bdapi_consumer_account_external" version_id="8" version_string="0.9.2"><![CDATA[<xen:title>{xen:phrase bdapi_consumer_external}</xen:title>
+
+<xen:foreach loop="$providers" value="$provider">
+	<xen:set var="$authProviderCode">bdapi_{$provider.code}</xen:set>
+	<xen:if is="{$externalAuths.{$authProviderCode}}">
+		<form action="{xen:link account/external}" method="post" class="xenForm">
+			
+			<xen:hook name="bdapi_consumer_account_external_associated" params="{xen:array 'provider={$provider}'}">
+			<dl class="ctrlUnit">
+				<dt>{xen:phrase bdapi_consumer_associated_x_account, 'provider={$provider.name}'}:</dt>
+				<dd>
+					<xen:if is="{$externalAuths.{$authProviderCode}.extra_data}">
+						<a href="{xen:raw {$externalAuths.{$authProviderCode}.extra_data.links.permalink}}" target="_blank">{$externalAuths.{$authProviderCode}.extra_data.username}</a>
+					<xen:else />
+						{$externalAuths.{$authProviderCode}.provider_key}
+					</xen:if>
+				</dd>
+			</dl>
+			</xen:hook>
+			
+			<dl class="ctrlUnit submitUnit">
+				<dt></dt>
+				<dd><ul>
+					<li>
+						<label><input type="checkbox" name="disassociate" value="1" id="ctrl_disassociate_{$provider.code}" class="Disabler" /> {xen:phrase bdapi_consumer_disassociate_x_account, 'provider={$provider.name}'}</label>
+						<ul id="ctrl_disassociate_{$provider.code}_Disabler">
+							<li><input type="submit" class="button" name="disassociate_confirm" value="{xen:phrase confirm_disassociation}" /></li>
+						</ul>
+						<xen:if is="!{$hasPassword}">
+							<p class="explain">{xen:phrase bdapi_consumer_disassociating_with_x_reset_password_email_y, 'provider={$provider.name}', 'email={$visitor.email}'}</p>
+						</xen:if>
+					</li>
+				</ul></dd>
+			</dl>
+
+			<input type="hidden" name="provider" value="{$provider.code}" />
+			<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+			<input type="hidden" name="_xfConfirm" value="1" />
+		</form>
+	<xen:else />
+		<form action="{xen:link account}" method="post" class="xenForm">
+		
+			<xen:hook name="bdapi_consumer_account_external_not_associated" params="{xen:array 'provider={$provider}'}">
+			<dl class="ctrlUnit">
+				<dt></dt>
+				<dd>{xen:phrase bdapi_consumer_you_not_associated_with_x_account, 'provider={$provider.name}'}</dd>
+			</dl>
+			</xen:hook>
+			
+			<dl class="ctrlUnit submitUnit">
+				<dt></dt>
+				<dd><a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1', 'assoc={$visitor.user_id}'}" class="button primary">{xen:phrase bdapi_consumer_associate_with_x, 'provider={$provider.name}'}</a></dd>
+			</dl>
+		</form>
+	</xen:if>
+</xen:foreach>]]></template>
+    <template title="bdapi_consumer_account_wrapper_sidebar_settings" version_id="8" version_string="0.9.2"><![CDATA[<xen:if is="{$providers}">
+	<li>
+		<a class="{xen:if "{$selectedKey} == 'account/bdApiConsumer'", 'secondaryContent', 'primaryContent'}"
+			href="{xen:link account/external}">
+			{xen:phrase bdapi_consumer_external}
+		</a>
+	</li>
+</xen:if>]]></template>
     <template title="bdapi_consumer_error_with_login" version_id="1" version_string="0.9-dev"><![CDATA[<xen:include template="bdapi_consumer_helper_login_form" />]]></template>
     <template title="bdapi_consumer_helper_login_form" version_id="1" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
 <div class="xenForm">
@@ -159,6 +229,7 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
 	<xen:comment>Setting $eAuth here doesn't work, the real set is done in bdApiConsumer_Listener::template_create</xen:comment>
 	<xen:set var="$eAuth">1</xen:set>
 </xen:if>]]></template>
+    <template title="bdapi_consumer_navigation_visitor_tab_links1" version_id="8" version_string="0.9.2"><![CDATA[<xen:if is="{$providers}"><li><a href="{xen:link account/external}">{xen:phrase bdapi_consumer_external}</a></li></xen:if>]]></template>
     <template title="bdapi_consumer_page_container_head" version_id="4" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin}
 	AND empty({$bdApiConsumer_logoutTime})
 	AND ({$debugMode} OR {$session.sessionStart} == {$serverTime})

@@ -15,4 +15,23 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
 	{
 		// TODO
 	}
+
+	public function bdApiConsumer_getExternalAuthAssociations($userId)
+	{
+		$externalAuths = $this->fetchAllKeyed('
+			SELECT *
+			FROM `xf_user_external_auth`
+			WHERE `user_id` = ?
+				AND `provider` LIKE \'bdapi_%\'
+		', 'provider', array(
+			$userId
+		));
+
+		foreach ($externalAuths as &$externalAuth)
+		{
+			$externalAuth['extra_data'] = @unserialize($externalAuth['extra_data']);
+		}
+
+		return $externalAuths;
+	}
 }

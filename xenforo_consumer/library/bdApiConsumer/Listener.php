@@ -6,6 +6,7 @@ class bdApiConsumer_Listener
 	public static function load_class($class, array &$extend)
 	{
 		static $classes = array(
+			'XenForo_ControllerPublic_Account',
 			'XenForo_ControllerPublic_Login',
 			'XenForo_ControllerPublic_Logout',
 			'XenForo_ControllerPublic_Register',
@@ -36,6 +37,7 @@ class bdApiConsumer_Listener
 			$template->preloadTemplate('bdapi_consumer_login_bar_eauth_items');
 			$template->preloadTemplate('bdapi_consumer_login_bar_eauth_set');
 			$template->preloadTemplate('bdapi_consumer_page_container_head');
+			$template->preloadTemplate('bdapi_consumer_navigation_visitor_tab_links1');
 			self::$_commonTemplatesPreloaded = true;
 		}
 
@@ -57,14 +59,21 @@ class bdApiConsumer_Listener
 				$template->preloadTemplate('bdapi_consumer_' . $templateName);
 				break;
 		}
+
+		if ($templateName == 'account_wrapper')
+		{
+			$template->preloadTemplate('bdapi_consumer_account_wrapper_sidebar_settings');
+		}
 	}
 
 	public static function template_hook($hookName, &$contents, array $hookParams, XenForo_Template_Abstract $template)
 	{
 		switch ($hookName)
 		{
+			case 'account_wrapper_sidebar_settings':
 			case 'login_bar_eauth_items':
 			case 'login_bar_eauth_set':
+			case 'navigation_visitor_tab_links1':
 			case 'page_container_head':
 				$ourTemplate = $template->create('bdapi_consumer_' . $hookName, $template->getParams());
 				$ourTemplate->setParam('providers', bdApiConsumer_Option::getProviders());

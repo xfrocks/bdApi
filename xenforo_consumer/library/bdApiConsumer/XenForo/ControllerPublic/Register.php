@@ -219,7 +219,8 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 				$userExternalModel->bdApiConsumer_getProviderCode($provider),
 				$externalVisitor['user_id'],
 				$userId,
-				$userExternalModel->bdApiConsumer_getUserProfileField()
+				$userExternalModel->bdApiConsumer_getUserProfileField(),
+				$externalVisitor
 			);
 
 			$redirect = XenForo_Application::get('session')->get(self::SESSION_KEY_REDIRECT);
@@ -342,7 +343,8 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			$this->_getUserExternalModel()->bdApiConsumer_getProviderCode($provider),
 			$externalVisitor['user_id'],
 			$user['user_id'],
-			$this->_getUserExternalModel()->bdApiConsumer_getUserProfileField()
+			$this->_getUserExternalModel()->bdApiConsumer_getUserProfileField(),
+			$externalVisitor
 		);
 
 		XenForo_Model_Ip::log($user['user_id'], 'user', $user['user_id'], 'register');
