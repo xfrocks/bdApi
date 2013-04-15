@@ -395,6 +395,7 @@ Detail information of a user.
             user_dob_day: (int),
             user_dob_month: (int),
             user_dob_year: (int),
+            user_timezone_offset: (int),
             links: {
                 permalink: (uri),
                 detail: (uri)
