@@ -30,7 +30,8 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		$fetchOptions = array(
 			'join' => XenForo_Model_User::FETCH_USER_FULL,
 			'limit' => $limit,
-			'page' => $page
+			'page' => $page,
+			'order' => bdApi_XenForo_Model_User::ORDER_USER_ID,
 		);
 		
 		$users = $userModel->getUsers($conditions, $fetchOptions);

@@ -2,6 +2,8 @@
 
 class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 {
+	const ORDER_USER_ID = 'bdApi_user_id';
+
 	public function prepareApiDataForUsers(array $users)
 	{
 		$data = array();
@@ -56,5 +58,12 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 		}
 
 		return $data;
+	}
+
+	public function getOrderByClause(array $choices, array $fetchOptions, $defaultOrderSql = '')
+	{
+		$choices[self::ORDER_USER_ID] = 'user.user_id';
+
+		return parent::getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
 	}
 }
