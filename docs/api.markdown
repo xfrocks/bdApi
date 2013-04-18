@@ -426,4 +426,42 @@ Required scopes:
 
  * `read`
 
+## Searching
 
+### POST `/search/threads`
+Search for threads.
+
+    {
+        threads: [
+            (thread),
+            (thread),
+            ...
+        ]
+    }
+
+Parameters:
+
+ * `q` (__required__): query to search for.
+
+Required scopes:
+
+ * `read`
+
+### POST `/search/posts`
+Search for posts.
+
+    {
+        posts: [
+            (post),
+            (post),
+            ...
+        ]
+    }
+
+Parameters:
+
+ * `q` (__required__): query to search for.
+
+Required scopes:
+
+ * `read`
