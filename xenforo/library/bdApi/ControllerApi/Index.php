@@ -11,6 +11,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 				'posts' 			=> bdApi_Link::buildApiLink('posts'),
 				'threads' 			=> bdApi_Link::buildApiLink('threads'),
 				'users' 			=> bdApi_Link::buildApiLink('users'),
+				'search' 			=> bdApi_Link::buildApiLink('search'),
 		
 				'oauth_authorize'	=> bdApi_Link::buildApiLink('oauth/authorize', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
 				'oauth_token'		=> bdApi_Link::buildApiLink('oauth/token', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),

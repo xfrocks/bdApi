@@ -2,6 +2,22 @@
 
 class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 {
+	protected static $_bdApi_threads = array();
+
+	public function getThreadsByIds(array $threadIds, array $fetchOptions = array())
+	{
+		$threads = parent::getThreadsByIds($threadIds, $fetchOptions);
+
+		self::$_bdApi_threads = $threads;
+
+		return $threads;
+	}
+
+	public static function bdApi_getCachedThreads()
+	{
+		return self::$_bdApi_threads;
+	}
+
 	public function prepareApiDataForThreads(array $threads, array $forum)
 	{
 		$data = array();
@@ -75,7 +91,7 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 		{
 			$data['links']['last_post'] = bdApi_Link::buildApiLink('posts', array('post_id' => $thread['last_post_id']));
 		}
-		
+
 		$data['permissions'] = array(
 				'view'				=> $this->canViewThread($thread, $forum),
 				'edit'				=> $this->canEditThread($thread, $forum),

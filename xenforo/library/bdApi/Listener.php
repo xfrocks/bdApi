@@ -16,6 +16,9 @@ class bdApi_Listener
 				'XenForo_Model_Post',
 				'XenForo_Model_Thread',
 				'XenForo_Model_User',
+
+				'XenForo_Search_DataHandler_Post',
+				'XenForo_Search_DataHandler_Thread',
 		);
 
 		if (in_array($class, $classes))
@@ -41,7 +44,7 @@ class bdApi_Listener
 				// ignore non-public instance methods
 				continue;
 			}
-				
+
 			$methodName = $method->getName();
 			$helperCallbackName = utf8_strtolower('bdApi_' . $methodName);
 			XenForo_Template_Helper_Core::$helperCallbacks[$helperCallbackName] = array($templateHelper, $methodName);

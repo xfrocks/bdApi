@@ -2,6 +2,22 @@
 
 class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 {
+	protected static $_bdApi_posts = array();
+
+	public function getPostsByIds(array $postIds, array $fetchOptions = array())
+	{
+		$posts = parent::getPostsByIds($postIds, $fetchOptions);
+
+		self::$_bdApi_posts = $posts;
+
+		return $posts;
+	}
+
+	public static function bdApi_getCachedPosts()
+	{
+		return self::$_bdApi_posts;
+	}
+	
 	public function prepareApiDataForPosts(array $posts, array $thread, array $forum)
 	{
 		$data = array();
