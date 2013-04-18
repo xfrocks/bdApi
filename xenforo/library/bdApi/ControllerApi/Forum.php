@@ -17,14 +17,14 @@ class bdApi_ControllerApi_Forum extends bdApi_ControllerApi_Node
 		return 'forums';
 	}
 
-	protected function _getAll($parentNodeId)
+	protected function _getAll($parentNodeId = false)
 	{
 		$nodes = $this->_getNodeModel()->getViewableNodeList();
 
 		$forumIds = array();
 		foreach ($nodes as $node)
 		{
-			if ($parentNodeId > 0 AND $node['parent_node_id'] != $parentNodeId)
+			if ($parentNodeId !== false AND $node['parent_node_id'] != $parentNodeId)
 			{
 				continue;
 			}

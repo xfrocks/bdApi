@@ -17,14 +17,14 @@ class bdApi_ControllerApi_Category extends bdApi_ControllerApi_Node
 		return 'categories';
 	}
 
-	protected function _getAll($parentNodeId)
+	protected function _getAll($parentNodeId = false)
 	{
 		$nodes = $this->_getNodeModel()->getViewableNodeList();
 
 		$categories = array();
 		foreach ($nodes as $node)
 		{
-			if ($parentNodeId > 0 AND $node['parent_node_id'] != $parentNodeId)
+			if ($parentNodeId !== false AND $node['parent_node_id'] != $parentNodeId)
 			{
 				continue;
 			}

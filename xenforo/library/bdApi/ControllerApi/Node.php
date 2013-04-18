@@ -10,10 +10,18 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
 			return $this->responseReroute($this->_getControllerName(), 'get-single');
 		}
 
-		$parentId = $this->_input->filterSingle('parent_category_id', XenForo_Input::UINT);
-		if ($parentId == 0)
+		$parentId = $this->_input->filterSingle('parent_category_id', XenForo_Input::STRING);
+		if ($parentId === '')
 		{
-			$parentId = $this->_input->filterSingle('parent_forum_id', XenForo_Input::UINT);
+			$parentId = $this->_input->filterSingle('parent_forum_id', XenForo_Input::STRING);
+		}
+		if ($parentId === '')
+		{
+			$parentId = false;
+		}
+		else
+		{
+			$parentId = intval($parentId);
 		}
 
 		$nodes = $this->_getAll($parentId);
@@ -58,7 +66,7 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
 
 	abstract protected function _getNamePlural();
 
-	abstract protected function _getAll($parentNodeId);
+	abstract protected function _getAll($parentNodeId = false);
 
 	abstract protected function _getSingle($nodeId);
 
