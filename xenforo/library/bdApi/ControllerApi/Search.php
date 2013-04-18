@@ -2,10 +2,28 @@
 
 class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 {
+	public function actionGetIndex()
+	{
+		$data = array(
+				'links' => array(
+						'posts' 			=> bdApi_Link::buildApiLink('search/posts'),
+						'threads' 			=> bdApi_Link::buildApiLink('search/threads'),
+				),
+		);
+
+		return $this->responseData('bdApi_ViewApi_Index', $data);
+	}
+
+	public function actionGetThreads()
+	{
+		return $this->responseError(new XenForo_Phrase('bdapi_slash_search_only_accepts_post_requests'), 400);
+	}
+
 	public function actionPostThreads()
 	{
-		$results = $this->_actionPostType('thread');
+		$results = $this->_doSearch('thread');
 
+		$this->_getThreadModel();
 		$threads = bdApi_XenForo_Model_Thread::bdApi_getCachedThreads();
 		$threads = array_values($threads);
 
@@ -28,10 +46,17 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_Search_Threads', $data);
 	}
 
+	public function actionGetPosts()
+	{
+		return $this->responseError(new XenForo_Phrase('bdapi_slash_search_only_accepts_post_requests'), 400);
+	}
+
+
 	public function actionPostPosts()
 	{
-		$results = $this->_actionPostType('post');
+		$results = $this->_doSearch('post');
 
+		$this->_getPostModel();
 		$posts = bdApi_XenForo_Model_Post::bdApi_getCachedPosts();
 		$posts = array_values($posts);
 
@@ -54,7 +79,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_Search_Posts', $data);
 	}
 
-	public function _actionPostType($contentType)
+	public function _doSearch($contentType)
 	{
 		if (!XenForo_Visitor::getInstance()->canSearch())
 		{
@@ -62,8 +87,13 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 		}
 
 		$input = array();
+
 		$input['keywords'] = $this->_input->filterSingle('q', XenForo_Input::STRING);
 		$input['keywords'] = XenForo_Helper_String::censorString($input['keywords'], null, ''); // don't allow searching of censored stuff
+		if (empty($input['keywords']))
+		{
+			throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_slash_search_requires_q'), 400));
+		}
 
 		$visitorUserId = XenForo_Visitor::getUserId();
 		$searchModel = $this->_getSearchModel();
@@ -71,7 +101,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 		$constraints = $searchModel->getGeneralConstraintsFromInput($input, $errors);
 		if ($errors)
 		{
-			return $this->responseError($errors);
+			return $this->responseError($errors, 503);
 		}
 
 		$typeHandler = $searchModel->getSearchDataHandler($contentType);

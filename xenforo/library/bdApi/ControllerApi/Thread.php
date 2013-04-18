@@ -13,7 +13,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		$forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
 		if (empty($forumId))
 		{
-			return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_requires_forum_id'));
+			return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_requires_forum_id'), 400);
 		}
 
 		$ftpHelper = $this->getHelper('ForumThreadPost');
