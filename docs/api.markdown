@@ -447,6 +447,7 @@ Parameters:
 
  * `q` (__required__): query to search for.
  * `limit` (_optional_): maximum number of result threads. The limit may get decreased if the value is too large (depending on the system configuration).
+ * `forum_id` (_optional_): id of the container forum to search. Child forums of the specified forum will be included in the search.
 
 Required scopes:
 
@@ -471,6 +472,7 @@ Parameters:
 
  * `q` (__required__): query to search for.
  * `limit` (_optional_): maximum number of result posts. The limit may get decreased if the value is too large (depending on the system configuration).
+ * `forum_id` (_optional_): id of the container forum to search. Child forums of the specified forum will be included in the search.
 
 Required scopes:
 

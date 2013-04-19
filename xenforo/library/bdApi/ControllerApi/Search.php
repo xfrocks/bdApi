@@ -68,7 +68,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_Search_Posts', $data);
 	}
 
-	public function _doSearch($contentType)
+	public function _doSearch($contentType, array $constraints = array())
 	{
 		if (!XenForo_Visitor::getInstance()->canSearch())
 		{
@@ -90,15 +90,21 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 		{
 			$maxResults = min($maxResults, $limit);
 		}
+		
+		$forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
+		if (!empty($forumId))
+		{
+			$childNodeIds = array_keys($this->getModelFromCache('XenForo_Model_Node')->getChildNodesForNodeIds(array($forumId)));
+			$nodeIds = array_unique(array_merge(array($forumId), $childNodeIds));
+			$constraints['node'] = implode(' ', $nodeIds);
+			if (!$constraints['node'])
+			{
+				unset($constraints['node']); // just 0
+			}
+		}
 
 		$visitorUserId = XenForo_Visitor::getUserId();
 		$searchModel = $this->_getSearchModel();
-
-		$constraints = $searchModel->getGeneralConstraintsFromInput($input, $errors);
-		if ($errors)
-		{
-			return $this->responseError($errors, 503);
-		}
 
 		$typeHandler = $searchModel->getSearchDataHandler($contentType);
 
