@@ -125,7 +125,14 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
 	protected function _getScopeForAction($action)
 	{
-		return bdApi_Model_OAuth2::SCOPE_READ;
+		if (XenForo_Visitor::getUserId() > 0)
+		{
+			return bdApi_Model_OAuth2::SCOPE_READ;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	/**
