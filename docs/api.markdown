@@ -447,7 +447,7 @@ Parameters:
 
  * `q` (__required__): query to search for.
  * `limit` (_optional_): maximum number of result threads. The limit may get decreased if the value is too large (depending on the system configuration).
- * `forum_id` (_optional_): id of the container forum to search. Child forums of the specified forum will be included in the search.
+ * `forum_id` (_optional_): id of the container forum to search for threads. Child forums of the specified forum will be included in the search.
 
 Required scopes:
 
@@ -472,7 +472,8 @@ Parameters:
 
  * `q` (__required__): query to search for.
  * `limit` (_optional_): maximum number of result posts. The limit may get decreased if the value is too large (depending on the system configuration).
- * `forum_id` (_optional_): id of the container forum to search. Child forums of the specified forum will be included in the search.
+ * `forum_id` (_optional_): id of the container forum to search for posts. Child forums of the specified forum will be included in the search.
+ * `thread_id` (_optional_): id of the container thread to search for posts.
 
 Required scopes:
 

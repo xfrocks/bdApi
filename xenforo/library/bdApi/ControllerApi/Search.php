@@ -21,7 +21,9 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
 	public function actionPostThreads()
 	{
-		$rawResults = $this->_doSearch('thread');
+		$constraints = array();
+
+		$rawResults = $this->_doSearch('thread', $constraints);
 
 		$results = array();
 		foreach ($rawResults as $rawResult)
@@ -46,7 +48,15 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
 	public function actionPostPosts()
 	{
-		$this->_doSearch('post');
+		$constraints = array();
+
+		$threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
+		if (!empty($threadId))
+		{
+			$constraints['thread'] = $threadId;
+		}
+
+		$this->_doSearch('post', $constraints);
 
 		// perform get posts from model because the search result are groupped
 		$this->_getPostModel();
@@ -90,7 +100,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 		{
 			$maxResults = min($maxResults, $limit);
 		}
-		
+
 		$forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
 		if (!empty($forumId))
 		{
