@@ -2,22 +2,6 @@
 
 class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 {
-	protected static $_bdApi_threads = array();
-
-	public function getThreadsByIds(array $threadIds, array $fetchOptions = array())
-	{
-		$threads = parent::getThreadsByIds($threadIds, $fetchOptions);
-
-		self::$_bdApi_threads = $threads;
-
-		return $threads;
-	}
-
-	public static function bdApi_getCachedThreads()
-	{
-		return self::$_bdApi_threads;
-	}
-
 	public function prepareApiDataForThreads(array $threads, array $forum)
 	{
 		$data = array();

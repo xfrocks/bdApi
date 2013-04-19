@@ -433,8 +433,12 @@ Search for threads.
 
     {
         threads: [
-            (thread),
-            (thread),
+            {
+                thread_id: (int)
+            },
+            {
+                thread_id: (int)
+            },
             ...
         ]
     }
@@ -442,6 +446,7 @@ Search for threads.
 Parameters:
 
  * `q` (__required__): query to search for.
+ * `limit` (_optional_): maximum number of result threads. The limit may get decreased if the value is too large (depending on the system configuration).
 
 Required scopes:
 
@@ -452,8 +457,12 @@ Search for posts.
 
     {
         posts: [
-            (post),
-            (post),
+            {
+                post_id: (int)
+            },
+            {
+                post_id: (int)
+            },
             ...
         ]
     }
@@ -461,6 +470,7 @@ Search for posts.
 Parameters:
 
  * `q` (__required__): query to search for.
+ * `limit` (_optional_): maximum number of result posts. The limit may get decreased if the value is too large (depending on the system configuration).
 
 Required scopes:
 
