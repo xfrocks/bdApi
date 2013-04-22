@@ -2,6 +2,8 @@
 
 class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 {
+	protected $_bdApi_limitQueryResults_nodeId = false;
+
 	public function prepareApiDataForThreads(array $threads, array $forum)
 	{
 		$data = array();
@@ -84,5 +86,53 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 		);
 
 		return $data;
+	}
+
+	public function bdApi_getUnreadThreadIdsInForum($userId, $forumId, array $fetchOptions = array())
+	{
+		$this->_bdApi_limitQueryResults_nodeId = $forumId;
+		return $this->getUnreadThreadIds($userId, $fetchOptions);
+		$this->_bdApi_limitQueryResults_nodeId = false;
+	}
+
+	public function limitQueryResults($query, $limit, $offset = 0)
+	{
+		if ($this->_bdApi_limitQueryResults_nodeId !== false)
+		{
+			// TODO: improve this
+			// this may break some query if the WHERE conditions contain a mix of AND and OR operators
+			$replacement = false;
+
+			if (!is_array($this->_bdApi_limitQueryResults_nodeId))
+			{
+				if ($this->_bdApi_limitQueryResults_nodeId > 0)
+				{
+					$replacement = "\nthread.node_id = "
+							. $this->_getDb()->quote($this->_bdApi_limitQueryResults_nodeId)
+							. " AND\n";
+				}
+			}
+			else
+			{
+				if (!empty($this->_bdApi_limitQueryResults_nodeId))
+				{
+					$replacement = "\nthread.node_id IN ("
+							. $this->_getDb()->quote($this->_bdApi_limitQueryResults_nodeId)
+							. ") AND\n";
+				}
+			}
+
+			if ($replacement !== false AND preg_match('/\s(WHERE)\s/i', $query, $matches, PREG_OFFSET_CAPTURE) === 1)
+			{
+				$query = substr_replace(
+						$query,
+						$replacement,
+						$matches[1][1] + strlen($matches[1][0]),
+						0
+				);
+			}
+		}
+
+		return parent::limitQueryResults($query, $limit, $offset);
 	}
 }

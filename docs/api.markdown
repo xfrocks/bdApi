@@ -238,6 +238,55 @@ Required scopes:
 
  * `post`
 
+### GET `/threads/new`
+List of unread threads (must be logged in).
+
+    {
+        threads: [
+            {
+                thread_id: (int)
+            },
+            {
+                thread_id: (int)
+            },
+            ...
+        ]
+    }
+
+Parameters:
+
+ * `limit` (_optional_): maximum number of result threads. The limit may get decreased if the value is too large (depending on the system configuration).
+ * `forum_id` (_optional_): id of the container forum to search for threads. Child forums of the specified forum will be included in the search.
+
+Required scopes:
+
+ * `read`
+
+### GET `/threads/recent`
+List of recent threads.
+
+    {
+        threads: [
+            {
+                thread_id: (int)
+            },
+            {
+                thread_id: (int)
+            },
+            ...
+        ]
+    }
+
+Parameters:
+
+ * `days` (_optional_): maximum number of days to search for threads.
+ * `limit` (_optional_): maximum number of result threads. The limit may get decreased if the value is too large (depending on the system configuration).
+ * `forum_id` (_optional_): id of the container forum to search for threads. Child forums of the specified forum will be included in the search.
+
+Required scopes:
+
+ * `read`
+
 ## Posts
 
 ### GET `/posts`

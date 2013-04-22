@@ -147,4 +147,14 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		self::$_executed['csrf'] = true;
 		return;
 	}
+
+	protected function _assertRegistrationRequired()
+	{
+		if (!XenForo_Visitor::getUserId())
+		{
+			throw $this->responseException(
+					$this->responseReroute('bdApi_ControllerApi_Error', 'registrationRequired')
+			);
+		}
+	}
 }

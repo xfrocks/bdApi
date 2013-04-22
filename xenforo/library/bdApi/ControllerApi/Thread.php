@@ -170,6 +170,127 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		return $this->responseMessage(new XenForo_Phrase('bdapi_thread_x_has_been_deleted', array('thread_id' => $thread['thread_id'])));
 	}
 
+	public function actionGetNew()
+	{
+		$this->_assertRegistrationRequired();
+
+		$visitor = XenForo_Visitor::getInstance();
+		$threadModel = $this->_getThreadModel();
+
+		$limit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
+		$maxResults = XenForo_Application::getOptions()->get('maximumSearchResults');
+		if ($limit > 0)
+		{
+			$maxResults = min($maxResults, $limit);
+		}
+
+		$forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
+		if (empty($forumId))
+		{
+			$threadIds = $threadModel->getUnreadThreadIds($visitor->get('user_id'), array(
+					'limit' => $maxResults,
+			));
+		}
+		else
+		{
+			$ftpHelper = $this->getHelper('ForumThreadPost');
+			$forum = $this->getHelper('ForumThreadPost')->assertForumValidAndViewable($forumId);
+			$childNodeIds = array_keys($this->getModelFromCache('XenForo_Model_Node')->getChildNodesForNodeIds(array($forum['node_id'])));
+
+			$threadIds = $threadModel->bdApi_getUnreadThreadIdsInForum($visitor->get('user_id'),
+					array_merge(array($forum['node_id']), $childNodeIds),
+					array(
+							'limit' => $maxResults,
+					)
+			);
+		}
+
+		return $this->_getNewOrRecentResponse($threadIds);
+	}
+
+	public function actionGetRecent()
+	{
+		$visitor = XenForo_Visitor::getInstance();
+		$threadModel = $this->_getThreadModel();
+
+		$days = $this->_input->filterSingle('days', XenForo_Input::UINT);
+		if ($days < 1)
+		{
+			$days = max(7, XenForo_Application::get('options')->readMarkingDataLifetime);
+		}
+
+		$limit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
+		$maxResults = XenForo_Application::getOptions()->get('maximumSearchResults');
+		if ($limit > 0)
+		{
+			$maxResults = min($maxResults, $limit);
+		}
+
+		$conditions = array(
+				'last_post_date' => array('>', XenForo_Application::$time - 86400 * $days),
+				'deleted' => false,
+				'moderated' => false,
+				'find_new' => true,
+		);
+
+		$fetchOptions = array(
+				'limit' => $maxResults,
+				'order' => 'last_post_date',
+				'orderDirection' => 'desc',
+				'join' => XenForo_Model_Thread::FETCH_FORUM_OPTIONS,
+		);
+
+		$forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
+		if (!empty($forumId))
+		{
+			$ftpHelper = $this->getHelper('ForumThreadPost');
+			$forum = $this->getHelper('ForumThreadPost')->assertForumValidAndViewable($forumId);
+			$childNodeIds = array_keys($this->getModelFromCache('XenForo_Model_Node')->getChildNodesForNodeIds(array($forum['node_id'])));
+			$conditions['node_id'] = array_merge(array($forum['node_id']), $childNodeIds);
+		}
+
+		$threadIds = array_keys($threadModel->getThreads($conditions, $fetchOptions));
+
+		return $this->_getNewOrRecentResponse($threadIds);
+	}
+
+	protected function _getNewOrRecentResponse(array $threadIds)
+	{
+		$visitor = XenForo_Visitor::getInstance();
+		$threadModel = $this->_getThreadModel();
+
+		$results = array();
+		$threads = $threadModel->getThreadsByIds(
+				$threadIds,
+				array(
+						'join' =>
+						XenForo_Model_Thread::FETCH_FORUM |
+						XenForo_Model_Thread::FETCH_USER,
+						'permissionCombinationId' => $visitor['permission_combination_id'],
+				)
+		);
+		foreach ($threadIds AS $threadId)
+		{
+			if (!isset($threads[$threadId])) continue;
+			$threadRef =& $threads[$threadId];
+
+			$threadRef['permissions'] = XenForo_Permission::unserializePermissions($threadRef['node_permission_cache']);
+
+			if ($threadModel->canViewThreadAndContainer($threadRef, $threadRef, $null, $threadRef['permissions']))
+			{
+				$results[] = array(
+						'thread_id' => $threadId,
+				);
+			}
+		}
+
+		$data = array(
+				'threads' => $results,
+		);
+
+		return $this->responseData('bdApi_ViewApi_Thread_NewOrRecent', $data);
+	}
+
 	/**
 	 * @return XenForo_Model_Forum
 	 */
