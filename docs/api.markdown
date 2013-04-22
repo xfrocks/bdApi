@@ -527,3 +527,46 @@ Parameters:
 Required scopes:
 
  * `read`
+
+## Batch requests
+
+### POST `/batch`
+Execute multiple API requests at once.
+
+    {
+        jobs: {
+            (job_id): {
+                _job_result: (ok|error|message),
+                _job_error: (string),
+                _job_message: (string),
+                ...
+            },
+            ...
+        }
+    }
+
+JSON POST body:
+
+    [
+        {
+            id: (string),
+            uri: (uri),
+            method: (DELETE|GET|POST|PUT),
+            params: {
+                (key): (value),
+                ...
+            }
+        },
+        ...
+    ]
+
+Parameters (for a single job):
+
+ * `id` (_optional_): identifier for the job, will be use in output as key of a result set. If this parameter is not set, the URI will be used.
+ * `uri` (__required__): URI of the API request to execute.
+ * `method` (_optional_): HTTP method of the API request to execute. If this parameter is not set, GET HTTP method will be used.
+ * `params` (_optional_): parameters of the API request to execute.
+
+Required scopes:
+
+ * N/A

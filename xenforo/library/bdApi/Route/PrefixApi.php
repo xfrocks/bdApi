@@ -26,9 +26,10 @@ class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
 		self::addRoute($routes, 'threads', 'bdApi_Route_PrefixApi_Threads', 'data_only');
 		self::addRoute($routes, 'users', 'bdApi_Route_PrefixApi_Users', 'data_only');
 
-		self::addRoute($routes, 'search', 'bdApi_Route_PrefixApi_Search', 'none');
+		self::addRoute($routes, 'search', 'bdApi_Route_PrefixApi_Search');
 
 		self::addRoute($routes, 'assets', 'bdApi_Route_PrefixApi_Assets');
+		self::addRoute($routes, 'batch', 'bdApi_Route_PrefixApi_Batch');
 
 		XenForo_CodeEvent::fire('bdapi_setup_routes', array(&$routes));
 	}

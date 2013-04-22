@@ -52,4 +52,7 @@ XenForo_Application::initialize($fileDir . '/library', $fileDir);
 XenForo_Application::set('page_start_time', $startTime);
 
 $fc = new XenForo_FrontController(new bdApi_Dependencies());
+
+XenForo_Application::set('_bdApi_fc', $fc);
+
 $fc->run();
