@@ -30,7 +30,6 @@ List of all categories in the system.
     {
         categories: [
             (category),
-            (category),
             ...
         ],
         categories_count: (int)
@@ -82,7 +81,6 @@ List of all forums in the system.
 
     {
         forums: [
-            (forum),
             (forum),
             ...
         ],
@@ -139,7 +137,6 @@ List of threads in a forum (with pagination).
 
     {
         threads: [
-            (thread),
             (thread),
             ...
         ],
@@ -246,9 +243,6 @@ List of unread threads (must be logged in).
             {
                 thread_id: (int)
             },
-            {
-                thread_id: (int)
-            },
             ...
         ]
     }
@@ -267,9 +261,6 @@ List of recent threads.
 
     {
         threads: [
-            {
-                thread_id: (int)
-            },
             {
                 thread_id: (int)
             },
@@ -294,7 +285,6 @@ List of posts in a thread (with pagination).
 
     {
         posts: [
-            (post),
             (post),
             ...
         ],
@@ -351,7 +341,8 @@ Detail information of a post.
                 permalink: (uri),
                 detail: (uri),
                 thread: (uri),
-                poster: (uri)
+                poster: (uri),
+                likes: (uri)
             },
             permissions: {
                 view: (boolean),
@@ -391,6 +382,59 @@ Delete a post.
     {
         status: "ok",
         message: "Post #x has been deleted."
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+
+### GET `/posts/:postId/likes`
+List of users who liked a post.
+
+    {
+        users: [
+            {
+                user_id: (int),
+                username: (string)
+            },
+            ...
+        ]
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### POST `/posts/:postId/likes`
+Like a post.
+
+    {
+        status: "ok",
+        message: "Post #x has been liked."
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+
+### DELETE `/posts/:postId/likes`
+Unlike a post.
+
+    {
+        status: "ok",
+        message: "Post #x has been unliked."
     }
 
 Parameters:
@@ -485,9 +529,6 @@ Search for threads.
             {
                 thread_id: (int)
             },
-            {
-                thread_id: (int)
-            },
             ...
         ]
     }
@@ -507,9 +548,6 @@ Search for posts.
 
     {
         posts: [
-            {
-                post_id: (int)
-            },
             {
                 post_id: (int)
             },

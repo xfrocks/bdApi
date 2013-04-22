@@ -17,7 +17,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 	{
 		return self::$_bdApi_posts;
 	}
-	
+
 	public function prepareApiDataForPosts(array $posts, array $thread, array $forum)
 	{
 		$data = array();
@@ -70,11 +70,17 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 			}
 		}
 
+		if (isset($post['like_date']))
+		{
+			$data['post_is_liked'] = !empty($post['like_date']);
+		}
+
 		$data['links'] = array(
 				'permalink'			=> bdApi_Link::buildPublicLink('posts', $post),
 				'detail'			=> bdApi_Link::buildApiLink('posts', $post),
 				'thread'			=> bdApi_Link::buildApiLink('threads', $post),
 				'poster'			=> bdApi_Link::buildApiLink('users', $post),
+				'likes'				=> bdApi_Link::buildApiLink('posts/likes', $post),
 		);
 
 		$data['permissions'] = array(

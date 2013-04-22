@@ -82,7 +82,9 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
 
 		$ftpHelper = $this->getHelper('ForumThreadPost');
-		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId);
+		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId, array(
+				'likeUserId' => XenForo_Visitor::getUserId(),
+		));
 
 		$visitor = XenForo_Visitor::getInstance();
 
@@ -212,6 +214,90 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		return $this->responseMessage(new XenForo_Phrase('bdapi_post_x_has_been_deleted', array('post_id' => $post['post_id'])));
 	}
 
+	public function actionGetLikes()
+	{
+		$postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
+
+		$ftpHelper = $this->getHelper('ForumThreadPost');
+		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId);
+
+		$likes = $this->_getLikeModel()->getContentLikes('post', $post['post_id']);
+		$users = array();
+
+		if (!empty($likes))
+		{
+			foreach ($likes as $like)
+			{
+				$users[] = array(
+						'user_id' => $like['like_user_id'],
+						'username' => $like['username'],
+				);
+			}
+		}
+
+		$data = array(
+				'users' => $users,
+		);
+
+		return $this->responseData('bdApi_ViewApi_Post_Likes', $data);
+	}
+
+	public function actionPostLikes()
+	{
+		$postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
+
+		$ftpHelper = $this->getHelper('ForumThreadPost');
+		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId);
+
+		if (!$this->_getPostModel()->canLikePost($post, $thread, $forum, $errorPhraseKey))
+		{
+			throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+		}
+
+		$likeModel = $this->_getLikeModel();
+
+		$existingLike = $likeModel->getContentLikeByLikeUser('post', $postId, XenForo_Visitor::getUserId());
+		if (empty($existingLike))
+		{
+			$latestUsers = $likeModel->likeContent('post', $postId, $post['user_id']);
+
+			if ($latestUsers === false)
+			{
+				return $this->responseNoPermission();
+			}
+		}
+
+		return $this->responseMessage(new XenForo_Phrase('bdapi_post_x_has_been_liked', array('post_id' => $post['post_id'])));
+	}
+
+	public function actionDeleteLikes()
+	{
+		$postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
+
+		$ftpHelper = $this->getHelper('ForumThreadPost');
+		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId);
+
+		if (!$this->_getPostModel()->canLikePost($post, $thread, $forum, $errorPhraseKey))
+		{
+			throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+		}
+
+		$likeModel = $this->_getLikeModel();
+
+		$existingLike = $likeModel->getContentLikeByLikeUser('post', $postId, XenForo_Visitor::getUserId());
+		if (!empty($existingLike))
+		{
+			$latestUsers = $likeModel->unlikeContent($existingLike);
+
+			if ($latestUsers === false)
+			{
+				return $this->responseNoPermission();
+			}
+		}
+
+		return $this->responseMessage(new XenForo_Phrase('bdapi_post_x_has_been_unliked', array('post_id' => $post['post_id'])));
+	}
+
 	/**
 	 * @return XenForo_Model_Post
 	 */
@@ -234,5 +320,13 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 	protected function _getThreadWatchModel()
 	{
 		return $this->getModelFromCache('XenForo_Model_ThreadWatch');
+	}
+
+	/**
+	 * @return XenForo_Model_Like
+	 */
+	protected function _getLikeModel()
+	{
+		return $this->getModelFromCache('XenForo_Model_Like');
 	}
 }
