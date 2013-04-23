@@ -22,6 +22,14 @@ The system follows OAuth2 specification [IETF draft v10](http://tools.ietf.org/h
  * Authorization URI: `/oauth/authorize`
  * Access token exchange URI: `/oauth/token`
 
+## Common Parameters
+
+### Fields filtering
+For API response with resource data like a forum or a thread, the data can be filtered to get interested fields only.
+
+ * `fields_include`: coma-separated list of fields of a resource. If this parameter is used along with `fields_exclude`, the other parameter will be ignored.
+ * `fields_exclude`: coma-separated list of fields of a resource to exclude in the response. Cannot be used with `fields_include` or this parameter will be ignored.
+
 ## Categories
 
 ### GET `/categories`

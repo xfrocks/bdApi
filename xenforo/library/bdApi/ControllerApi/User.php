@@ -40,7 +40,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		$total = $userModel->countUsers($conditions);
 		
 		$data = array(
-			'users' => $userModel->prepareApiDataForUsers($users),
+			'users' => $this->_filterDataMany($userModel->prepareApiDataForUsers($users)),
 			'users_total' => $total,
 		);
 		
@@ -68,7 +68,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		}
 
 		$data = array(
-			'user' => $userModel->prepareApiDataForUser($user),
+			'user' => $this->_filterDataSingle($userModel->prepareApiDataForUser($user)),
 		);
 		
 		return $this->responseData('bdApi_ViewApi_User_Single', $data);

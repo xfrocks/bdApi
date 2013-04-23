@@ -27,7 +27,7 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
 		$nodes = $this->_getAll($parentId);
 
 		$data = array(
-				$this->_getNamePlural() => $this->_prepareApiDataForNodes($nodes),
+				$this->_getNamePlural() => $this->_filterDataMany($this->_prepareApiDataForNodes($nodes)),
 				$this->_getNamePlural() . '_total' => count($nodes),
 		);
 
@@ -46,7 +46,7 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
 		}
 
 		$data = array(
-				$this->_getNameSingular() => $this->_prepareApiDataForNode($node),
+				$this->_getNameSingular() => $this->_filterDataSingle($this->_prepareApiDataForNode($node)),
 		);
 
 		return $this->responseData('bdApi_ViewApi_Node_Single', $data);

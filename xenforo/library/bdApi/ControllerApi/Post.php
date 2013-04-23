@@ -67,7 +67,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$total = $thread['reply_count'] + 1;
 
 		$data = array(
-				'posts' => $this->_getPostModel()->prepareApiDataForPosts($posts, $thread, $forum),
+				'posts' => $this->_filterDataMany($this->_getPostModel()->prepareApiDataForPosts($posts, $thread, $forum)),
 				'posts_total' => $total,
 		);
 
@@ -91,7 +91,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$post = $this->_getPostModel()->preparePost($post, $thread, $forum);
 
 		$data = array(
-				'post' => $this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum),
+				'post' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum)),
 		);
 
 		return $this->responseData('bdApi_ViewApi_Post_Single', $data);

@@ -57,7 +57,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		$total = $this->_getThreadModel()->countThreads($conditions);
 
 		$data = array(
-				'threads' => $this->_getThreadModel()->prepareApiDataForThreads($threads, $forum),
+				'threads' => $this->_filterDataMany($this->_getThreadModel()->prepareApiDataForThreads($threads, $forum)),
 				'threads_total' => $total,
 		);
 
@@ -75,7 +75,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
 
 		$data = array(
-				'thread' => $this->_getThreadModel()->prepareApiDataForThread($thread, $forum),
+				'thread' => $this->_filterDataSingle($this->_getThreadModel()->prepareApiDataForThread($thread, $forum)),
 		);
 
 		return $this->responseData('bdApi_ViewApi_Thread_Single', $data);

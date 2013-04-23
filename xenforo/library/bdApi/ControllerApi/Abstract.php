@@ -2,32 +2,141 @@
 
 abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abstract
 {
+	const FIELDS_FILTER_NONE = '';
+	const FIELDS_FILTER_INCLUDE = 'include';
+	const FIELDS_FILTER_EXCLUDE = 'exclude';
+
+	protected $_fieldsFilterType = false;
+	protected $_fieldsFilterList = array();
+
 	/**
 	 * Builds are response with specified data. Basically it's the same
 	 * XenForo_ControllerPublic_Abstract::responseView() but with the
 	 * template name removed so only view name and data array is available.
-	 * Also, the data has some rules enforced to make a good response. 
-	 * 
+	 * Also, the data has some rules enforced to make a good response.
+	 *
 	 * @param string $viewName
 	 * @param array $data
-	 */
+	*/
 	public function responseData($viewName, array $data = array())
 	{
 		return parent::responseView($viewName, 'DEFAULT', $data);
 	}
-	
+
+	/**
+	 * Filters data for many resources
+	 *
+	 * @param array $resourcesData
+	 * @return array
+	 */
+	protected function _filterDataMany(array $resourcesData)
+	{
+		$filtered = array();
+
+		foreach ($resourcesData as $key => $resourceData)
+		{
+			$filtered[$key] = $this->_filterDataSingle($resourceData);
+		}
+
+		return $filtered;
+	}
+
+	/**
+	 * Filters data for one resource
+	 *
+	 * @param array $resourceData
+	 * @return array
+	 */
+	protected function _filterDataSingle(array $resourceData)
+	{
+		$this->_prepareFieldsFilter();
+
+		switch ($this->_fieldsFilterType)
+		{
+			case self::FIELDS_FILTER_INCLUDE:
+				$filtered = array();
+				foreach ($this->_fieldsFilterList as $field)
+				{
+					if (isset($resourceData[$field]))
+					{
+						$filtered[$field] = $resourceData[$field];
+					}
+				}
+				break;
+			case self::FIELDS_FILTER_EXCLUDE:
+				$filtered = $resourceData;
+				foreach ($this->_fieldsFilterList as $field)
+				{
+					if (isset($filtered[$field]))
+					{
+						unset($filtered[$field]);
+					}
+				}
+				break;
+			default:
+				$filtered = $resourceData;
+		}
+
+		return $filtered;
+	}
+
+	protected function _isFieldExcluded($field)
+	{
+		$this->_prepareFieldsFilter();
+
+		switch ($this->_fieldsFilterType)
+		{
+			case self::FIELDS_FILTER_INCLUDE:
+				return !in_array($field, $this->_fieldsFilterList);
+			case self::FIELDS_FILTER_EXCLUDE:
+				return in_array($field, $this->_fieldsFilterList);
+		}
+
+		return false;
+	}
+
+	protected function _prepareFieldsFilter()
+	{
+		if ($this->_fieldsFilterType === false)
+		{
+			$this->_fieldsFilterType = self::FIELDS_FILTER_NONE;
+
+			$include = $this->_input->filterSingle('fields_include', XenForo_Input::STRING);
+			if (!empty($include))
+			{
+				$this->_fieldsFilterType = self::FIELDS_FILTER_INCLUDE;
+				foreach (explode(',', $include) as $field)
+				{
+					$this->_fieldsFilterList[] = trim($field);
+				}
+			}
+			else
+			{
+				$exclude = $this->_input->filterSingle('fields_exclude', XenForo_Input::STRING);
+				if (!empty($exclude))
+				{
+					$this->_fieldsFilterType = self::FIELDS_FILTER_EXCLUDE;
+					foreach (explode(',', $exclude) as $field)
+					{
+						$this->_fieldsFilterList[] = trim($field);
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Gets the required scope for a controller action. By default,
 	 * all API GET actions will require the read scope, POST actions will require
 	 * the post scope.
-	 * 
+	 *
 	 * Special case: if no OAuth token is specified (the session
 	 * will be setup as guest), GET actions won't require the read scope anymore.
-	 * That means guest-permission API requests will have the read scope 
+	 * That means guest-permission API requests will have the read scope
 	 * automatically.
-	 * 
+	 *
 	 * @param string $action
-	 * 
+	 *
 	 * @return string required scope. One of the SCOPE_* constant in bdApi_Model_OAuth2
 	 */
 	protected function _getScopeForAction($action)
@@ -46,7 +155,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 			// TODO: separate scope?
 			return bdApi_Model_OAuth2::SCOPE_POST;
 		}
-		else 
+		else
 		{
 			if (XenForo_Visitor::getUserId() > 0)
 			{
@@ -58,7 +167,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 			}
 		}
 	}
-	
+
 	/**
 	 * Helper to check for the required scope and throw an exception
 	 * if it could not be found.
@@ -70,67 +179,67 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 			// no scope is required
 			return;
 		}
-		
+
 		/* @var $session bdApi_Session */
 		$session = XenForo_Application::get('session');
-		
+
 		$oauthTokenText = $session->getOAuthTokenText();
 		if (empty($oauthTokenText))
 		{
 			throw $this->responseException(
-				$this->responseError(new XenForo_Phrase('bdapi_authorize_error_invalid_or_expired_access_token'), 403)
+					$this->responseError(new XenForo_Phrase('bdapi_authorize_error_invalid_or_expired_access_token'), 403)
 			);
 		}
-		
+
 		if (!$session->checkScope($scope))
 		{
 			throw $this->responseException(
-				$this->responseError(new XenForo_Phrase('bdapi_authorize_error_scope_x_not_granted', array('scope' => $scope)), 403)
+					$this->responseError(new XenForo_Phrase('bdapi_authorize_error_scope_x_not_granted', array('scope' => $scope)), 403)
 			);
 		}
 	}
-	
+
 	public function responseView($viewName, $templateName = 'DEFAULT', array $params = array(), array $containerParams = array())
 	{
 		throw new XenForo_Exception('bdApi_ControllerApi_Abstract::responseView() is not supported.');
 	}
-	
+
 	public function responseRedirect($redirectType, $redirectTarget, $redirectMessage = null, array $redirectParams = array())
 	{
 		$data = array(
-			'redirect' => array(
-				'type' => $redirectType,
-				'target' => $redirectTarget,
-			),
+				'redirect' => array(
+						'type' => $redirectType,
+						'target' => $redirectTarget,
+				),
 		);
-		
+
 		if ($redirectMessage !== null)
 		{
 			$data['redirect']['message'] = $redirectMessage;
 		}
-		
+
 		return $this->responseData('', $data);
 	}
-	
+
 	public function responseNoPermission()
 	{
 		return $this->responseReroute('bdApi_ControllerApi_Error', 'noPermission');
 	}
-	
+
 	public function updateSessionActivity($controllerResponse, $controllerName, $action)
 	{
 		// disable session activity for api requests
 		return;
 	}
-	
+
 	protected function _preDispatch($action)
 	{
 		$requiredScope = $this->_getScopeForAction($action);
 		$this->_assertRequiredScope($requiredScope);
-		
+
 		parent::_preDispatch($action);
 	}
-	
+
 	protected function _setupSession($action)
 	{
 		if (XenForo_Application::isRegistered('session'))
@@ -140,7 +249,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
 		$session = bdApi_Session::startApiSession($this->_request);
 	}
-	
+
 	protected function _checkCsrf($action)
 	{
 		// do not check csrf for api requests
