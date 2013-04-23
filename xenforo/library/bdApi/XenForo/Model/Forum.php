@@ -2,6 +2,11 @@
 
 class bdApi_XenForo_Model_Forum extends XFCP_bdApi_XenForo_Model_Forum
 {
+	public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
+	{
+		return $fetchOptions;
+	}
+
 	public function prepareApiDataForForums(array $forums)
 	{
 		$data = array();

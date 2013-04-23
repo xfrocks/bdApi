@@ -4,20 +4,44 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 {
 	protected $_bdApi_limitQueryResults_nodeId = false;
 
-	public function prepareApiDataForThreads(array $threads, array $forum)
+	public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
+	{
+		$visitor = XenForo_Visitor::getInstance();
+		
+		if (empty($fetchOptions['join']))
+		{
+			$fetchOptions['join'] = XenForo_Model_Thread::FETCH_USER;	
+		}
+		else
+		{
+			$fetchOptions['join'] |= XenForo_Model_Thread::FETCH_USER;
+		}
+		
+		$fetchOptions['readUserId'] = $visitor->get('user_id');
+		$fetchOptions['postCountUserId'] = $visitor->get('user_id');
+
+		return $fetchOptions;
+	}
+
+	public function prepareApiDataForThreads(array $threads, array $forum, array $firstPosts)
 	{
 		$data = array();
 
 		foreach ($threads as $key => $thread)
 		{
-			$data[$key] = $this->prepareApiDataForThread($thread, $forum);
+			$firstPost = array();
+			if (isset($firstPosts[$thread['first_post_id']])) $firstPost = $firstPosts[$thread['first_post_id']];
+
+			$data[$key] = $this->prepareApiDataForThread($thread, $forum, $firstPost);
 		}
 
 		return $data;
 	}
 
-	public function prepareApiDataForThread(array $thread, array $forum)
+	public function prepareApiDataForThread(array $thread, array $forum, array $firstPost)
 	{
+		$thread = $this->prepareThread($thread, $forum);
+
 		$publicKeys = array(
 				// xf_thread
 				'thread_id'			=> 'thread_id',
@@ -35,6 +59,11 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 		if (isset($thread['reply_count']))
 		{
 			$data['thread_post_count'] = $thread['reply_count'] + 1;
+		}
+
+		if (!empty($firstPost))
+		{
+			$data['first_post'] = $this->getModelFromCache('XenForo_Model_Post')->prepareApiDataForPost($firstPost, $thread, $forum);
 		}
 
 		if (isset($thread['sticky']) AND isset($thread['discussion_state']))

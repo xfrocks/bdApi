@@ -18,6 +18,25 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		return self::$_bdApi_posts;
 	}
 
+	public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
+	{
+		$visitor = XenForo_Visitor::getInstance();
+		
+		if (empty($fetchOptions['join']))
+		{
+			$fetchOptions['join'] = XenForo_Model_Post::FETCH_USER | XenForo_Model_Post::FETCH_USER_PROFILE;
+		}
+		else
+		{
+			$fetchOptions['join'] |= XenForo_Model_Post::FETCH_USER;
+			$fetchOptions['join'] |= XenForo_Model_Post::FETCH_USER_PROFILE;
+		}
+		
+		$fetchOptions['likeUserId'] = $visitor->get('user_id');
+		
+		return $fetchOptions;
+	}
+
 	public function prepareApiDataForPosts(array $posts, array $thread, array $forum)
 	{
 		$data = array();
@@ -32,6 +51,8 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
 	public function prepareApiDataForPost(array $post, array $thread, array $forum)
 	{
+		$post = $this->preparePost($post, $thread, $forum);
+
 		if (!isset($post['messageHtml']))
 		{
 			$post['messageHtml'] = $this->_renderMessage($post);
@@ -76,7 +97,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 			}
 		}
 
-		if (isset($post['like_date']))
+		if (in_array('like_date', array_keys($post)))
 		{
 			$data['post_is_liked'] = !empty($post['like_date']);
 		}

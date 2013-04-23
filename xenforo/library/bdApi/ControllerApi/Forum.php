@@ -35,12 +35,18 @@ class bdApi_ControllerApi_Forum extends bdApi_ControllerApi_Node
 			}
 		}
 
-		return $this->_getForumModel()->getForumsByIds($forumIds);
+		return $this->_getForumModel()->getForumsByIds(
+				$forumIds,
+				$this->_getForumModel()->getFetchOptionsToPrepareApiData()
+		);
 	}
 
 	protected function _getSingle($nodeId)
 	{
-		return $this->_getForumModel()->getForumById($nodeId);
+		return $this->_getForumModel()->getForumById(
+				$nodeId,
+				$this->_getForumModel()->getFetchOptionsToPrepareApiData()
+		);
 	}
 
 	protected function _isViewable(array $forum)

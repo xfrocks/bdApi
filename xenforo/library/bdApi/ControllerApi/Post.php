@@ -17,7 +17,11 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		}
 
 		$ftpHelper = $this->getHelper('ForumThreadPost');
-		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
+		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable(
+				$threadId,
+				$this->_getThreadModel()->getFetchOptionsToPrepareApiData(),
+				$this->_getForumModel()->getFetchOptionsToPrepareApiData()
+		);
 
 		$visitor = XenForo_Visitor::getInstance();
 
@@ -49,19 +53,16 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		}
 
 		$fetchOptions = array(
-				'join' => XenForo_Model_Post::FETCH_USER | XenForo_Model_Post::FETCH_USER_PROFILE,
-				'likeUserId' => $visitor['user_id'],
 				'deleted' => false,
 				'moderated' => false,
 				'limit' => $limit,
 				'page' => $page
 		);
 
-		$posts = $this->_getPostModel()->getPostsInThread($threadId, $fetchOptions);
-		foreach ($posts AS &$post)
-		{
-			$post = $this->_getPostModel()->preparePost($post, $thread, $forum);
-		}
+		$posts = $this->_getPostModel()->getPostsInThread(
+				$threadId,
+				$this->_getPostModel()->getFetchOptionsToPrepareApiData($fetchOptions)
+		);
 		$posts = array_values($posts);
 
 		$total = $thread['reply_count'] + 1;
@@ -82,13 +83,14 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
 
 		$ftpHelper = $this->getHelper('ForumThreadPost');
-		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId, array(
-				'likeUserId' => XenForo_Visitor::getUserId(),
-		));
+		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable(
+				$postId,
+				$this->_getPostModel()->getFetchOptionsToPrepareApiData(),
+				$this->_getThreadModel()->getFetchOptionsToPrepareApiData(),
+				$this->_getForumModel()->getFetchOptionsToPrepareApiData()
+		);
 
 		$visitor = XenForo_Visitor::getInstance();
-
-		$post = $this->_getPostModel()->preparePost($post, $thread, $forum);
 
 		$data = array(
 				'post' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum)),
@@ -312,6 +314,14 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 	protected function _getThreadModel()
 	{
 		return $this->getModelFromCache('XenForo_Model_Thread');
+	}
+
+	/**
+	 * @return XenForo_Model_Forum
+	 */
+	protected function _getForumModel()
+	{
+		return $this->getModelFromCache('XenForo_Model_Forum');
 	}
 
 	/**
