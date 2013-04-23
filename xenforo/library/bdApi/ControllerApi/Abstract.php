@@ -47,7 +47,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 	 * @param array $resourceData
 	 * @return array
 	 */
-	protected function _filterDataSingle(array $resourceData)
+	protected function _filterDataSingle(array $resourceData, array $prefixes = array())
 	{
 		$this->_prepareFieldsFilter();
 
@@ -55,21 +55,55 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		{
 			case self::FIELDS_FILTER_INCLUDE:
 				$filtered = array();
-				foreach ($this->_fieldsFilterList as $field)
+				foreach (array_keys($resourceData) as $field)
 				{
-					if (isset($resourceData[$field]))
+					$fieldWithPrefixes = implode('.', array_merge($prefixes, array($field)));
+
+					if (in_array($fieldWithPrefixes, $this->_fieldsFilterList))
 					{
 						$filtered[$field] = $resourceData[$field];
+					}
+					else
+					{
+						if (is_array($resourceData[$field]))
+						{
+							$_prefixes = $prefixes;
+							$_prefixes[] = $field;
+							$_filtered = $this->_filterDataSingle($resourceData[$field], $_prefixes);
+							if (!empty($_filtered))
+							{
+								$filtered[$field] = $_filtered;
+							}
+						}
 					}
 				}
 				break;
 			case self::FIELDS_FILTER_EXCLUDE:
 				$filtered = $resourceData;
-				foreach ($this->_fieldsFilterList as $field)
+				foreach (array_keys($resourceData) as $field)
 				{
-					if (isset($filtered[$field]))
+					$fieldWithPrefixes = implode('.', array_merge($prefixes, array($field)));
+
+					if (in_array($fieldWithPrefixes, $this->_fieldsFilterList))
 					{
 						unset($filtered[$field]);
+					}
+					else
+					{
+						if (is_array($resourceData[$field]))
+						{
+							$_prefixes = $prefixes;
+							$_prefixes[] = $field;
+							$_filtered = $this->_filterDataSingle($resourceData[$field], $_prefixes);
+							if (!empty($_filtered))
+							{
+								$filtered[$field] = $_filtered;
+							}
+							else
+							{
+								unset($filtered[$field]);
+							}
+						}
 					}
 				}
 				break;
@@ -84,10 +118,26 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 	{
 		$this->_prepareFieldsFilter();
 
+		$fieldAndDot = sprintf('%s.', $field);
+		$fieldAndDotStrlen = strlen($fieldAndDot);
+
 		switch ($this->_fieldsFilterType)
 		{
 			case self::FIELDS_FILTER_INCLUDE:
-				return !in_array($field, $this->_fieldsFilterList);
+				foreach ($this->_fieldsFilterList as $_field)
+				{
+					if ($_field == $field)
+					{
+						return false;
+					}
+
+					if (substr($_field, 0, $fieldAndDotStrlen) == $fieldAndDot)
+					{
+						return false;
+					}
+				}
+
+				return true;
 			case self::FIELDS_FILTER_EXCLUDE:
 				return in_array($field, $this->_fieldsFilterList);
 		}
