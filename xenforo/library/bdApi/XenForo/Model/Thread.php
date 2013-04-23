@@ -7,16 +7,16 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 	public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
 	{
 		$visitor = XenForo_Visitor::getInstance();
-		
+
 		if (empty($fetchOptions['join']))
 		{
-			$fetchOptions['join'] = XenForo_Model_Thread::FETCH_USER;	
+			$fetchOptions['join'] = XenForo_Model_Thread::FETCH_USER;
 		}
 		else
 		{
 			$fetchOptions['join'] |= XenForo_Model_Thread::FETCH_USER;
 		}
-		
+
 		$fetchOptions['readUserId'] = $visitor->get('user_id');
 		$fetchOptions['postCountUserId'] = $visitor->get('user_id');
 
@@ -61,11 +61,6 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 			$data['thread_post_count'] = $thread['reply_count'] + 1;
 		}
 
-		if (!empty($firstPost))
-		{
-			$data['first_post'] = $this->getModelFromCache('XenForo_Model_Post')->prepareApiDataForPost($firstPost, $thread, $forum);
-		}
-
 		if (isset($thread['sticky']) AND isset($thread['discussion_state']))
 		{
 			switch ($thread['discussion_state'])
@@ -86,6 +81,11 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 					$data['thread_is_sticky'] = false;
 					break;
 			}
+		}
+
+		if (!empty($firstPost))
+		{
+			$data['first_post'] = $this->getModelFromCache('XenForo_Model_Post')->prepareApiDataForPost($firstPost, $thread, $forum);
 		}
 
 		$data['links'] = array(

@@ -200,6 +200,7 @@ Detail information of a thread.
             thread_is_published: (boolean),
             thread_is_deleted: (boolean),
             thread_is_sticky: (boolean),
+            first_post: (post),
             links: {
                 permalink: (uri),
                 detail: (uri),
