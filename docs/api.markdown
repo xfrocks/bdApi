@@ -25,7 +25,7 @@ The system follows OAuth2 specification [IETF draft v10](http://tools.ietf.org/h
 ## Common Parameters
 
 ### Fields filtering
-For API response with resource data like a forum or a thread, the data can be filtered to get interested fields only.
+For API response with resource data like a forum or a thread, the data can be filtered to get interested fields only. When there are no filter 
 
  * `fields_include`: coma-separated list of fields of a resource. If this parameter is used along with `fields_exclude`, the other parameter will be ignored.
  * `fields_exclude`: coma-separated list of fields of a resource to exclude in the response. Cannot be used with `fields_include` or this parameter will be ignored.
@@ -342,9 +342,11 @@ Detail information of a post.
             post_create_date: (unix timestamp in seconds),
             post_body: (string),
             post_body_html: (string),
+            post_body_plain_text: (string),
             post_like_count: (int),
             post_is_published: (boolean),
             post_is_deleted: (boolean),
+            post_is_liked: (boolean),
             links: {
                 permalink: (uri),
                 detail: (uri),

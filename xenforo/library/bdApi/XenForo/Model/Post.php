@@ -37,6 +37,11 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 			$post['messageHtml'] = $this->_renderMessage($post);
 		}
 
+		if (isset($post['message']))
+		{
+			$post['messagePlainText'] = XenForo_Template_Helper_Core::callHelper('snippet', array($post['message']));
+		}
+
 		$publicKeys = array(
 				// xf_post
 				'post_id'			=> 'post_id',
@@ -46,6 +51,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 				'post_date'			=> 'post_create_date',
 				'message'			=> 'post_body',
 				'messageHtml'		=> 'post_body_html',
+				'messagePlainText'	=> 'post_body_plain_text',
 				'likes'				=> 'post_like_count',
 		);
 
