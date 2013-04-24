@@ -68,7 +68,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 						if (is_array($resourceData[$field]))
 						{
 							$_prefixes = $prefixes;
-							$_prefixes[] = $field;
+							if (!is_int($field))
+							{
+								$_prefixes[] = $field;
+							}
 							$_filtered = $this->_filterDataSingle($resourceData[$field], $_prefixes);
 							if (!empty($_filtered))
 							{
@@ -93,7 +96,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 						if (is_array($resourceData[$field]))
 						{
 							$_prefixes = $prefixes;
-							$_prefixes[] = $field;
+							if (!is_int($field))
+							{
+								$_prefixes[] = $field;
+							}
 							$_filtered = $this->_filterDataSingle($resourceData[$field], $_prefixes);
 							if (!empty($_filtered))
 							{
