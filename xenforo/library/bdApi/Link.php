@@ -4,12 +4,12 @@ class bdApi_Link extends XenForo_Link
 {
 	const API_LINK_GROUP = 'api';
 	const PUBLIC_LINK_GROUP = 'apiPublic';
-	
+
 	/**
 	 * Builds public link. Most of the code is copied from
 	 * XenForo_Link::buildPublicLink() but the group has been changed
 	 * to self::PUBLIC_LINK_GROUP.
-	 * 
+	 *
 	 * @param string $type
 	 * @param miaxed $data
 	 * @param array $extraParams
@@ -29,7 +29,7 @@ class bdApi_Link extends XenForo_Link
 			// enforce canonical:
 			$type = 'canonical:' . $type;
 		}
-		
+
 		$type = self::_checkForFullLink($type, $fullLink, $fullLinkPrefix);
 
 		$link = self::_buildLink(self::PUBLIC_LINK_GROUP, $type, $data, $extraParams);
@@ -98,11 +98,11 @@ class bdApi_Link extends XenForo_Link
 
 		return $outputLink . (empty($hash) ? '' : '#' . $hash);
 	}
-	
+
 	/**
 	 * Builds link to api methods. Basically a simplified version of
-	 * XenForo_Link::buildPublicLink 
-	 * 
+	 * XenForo_Link::buildPublicLink
+	 *
 	 * @param string $type
 	 * @param mixed $data
 	 * @param array $extraParams
@@ -122,7 +122,7 @@ class bdApi_Link extends XenForo_Link
 			// enforce full:
 			$type = 'full:' . $type;
 		}
-		
+
 		// auto appends oauth_token param from the session
 		if (!isset($extraParams[OAUTH2_TOKEN_PARAM_NAME]))
 		{
@@ -133,7 +133,7 @@ class bdApi_Link extends XenForo_Link
 				$extraParams[OAUTH2_TOKEN_PARAM_NAME] = $oauthToken;
 			}
 		}
-		
+
 		$type = self::_checkForFullLink($type, $fullLink, $fullLinkPrefix);
 
 		$link = parent::_buildLink(self::API_LINK_GROUP, $type, $data, $extraParams);

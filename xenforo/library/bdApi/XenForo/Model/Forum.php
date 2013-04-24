@@ -13,7 +13,7 @@ class bdApi_XenForo_Model_Forum extends XFCP_bdApi_XenForo_Model_Forum
 
 		foreach ($forums as $key => $forum)
 		{
-			$data[$key] = $this->prepareApiDataForForum($forum);
+			$data[] = $this->prepareApiDataForForum($forum);
 		}
 
 		return $data;

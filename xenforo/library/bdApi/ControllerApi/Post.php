@@ -63,7 +63,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 				$threadId,
 				$this->_getPostModel()->getFetchOptionsToPrepareApiData($fetchOptions)
 		);
-		$posts = array_values($posts);
+		if (!$this->_isFieldExcluded('attachments'))
+		{
+			$posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
+		}
 
 		$total = $thread['reply_count'] + 1;
 
@@ -90,7 +93,12 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 				$this->_getForumModel()->getFetchOptionsToPrepareApiData()
 		);
 
-		$visitor = XenForo_Visitor::getInstance();
+		if (!$this->_isFieldExcluded('attachments'))
+		{
+			$posts = array($post['post_id'] => $post);
+			$posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
+			$post = reset($posts);
+		}
 
 		$data = array(
 				'post' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum)),
@@ -126,6 +134,9 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$writer->set('message', $input['post_body']);
 		$writer->set('message_state', $this->_getPostModel()->getPostInsertMessageState($thread, $forum));
 		$writer->set('thread_id', $thread['thread_id']);
+		$writer->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentTempHash(array(
+				'thread_id' => $thread['thread_id'],
+		)));
 		$writer->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
 
 		$clientId = XenForo_Application::getSession()->getOAuthClientId();
@@ -176,6 +187,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$dw = XenForo_DataWriter::create('XenForo_DataWriter_DiscussionMessage_Post');
 		$dw->setExistingData($post['post_id']);
 		$dw->set('message', $input['post_body']);
+		$dw->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentTempHash(array(
+				'post_id' => $post['post_id'],
+		)));
+		$dw->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
 		$dw->save();
 
 		return $this->responseReroute(__CLASS__, 'get-single');
@@ -300,6 +315,35 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		return $this->responseMessage(new XenForo_Phrase('bdapi_post_x_has_been_unliked', array('post_id' => $post['post_id'])));
 	}
 
+	public function actionPostAttachments()
+	{
+		$contentData = $this->_input->filter(array(
+				'post_id'		=> XenForo_Input::UINT,
+				'thread_id'		=> XenForo_Input::UINT,
+		));
+		if (empty($contentData['post_id']) AND empty($contentData['thread_id']))
+		{
+			return $this->responseError(new XenForo_Phrase(
+					'bdapi_slash_posts_attachments_requires_ids'
+			), 400);
+		}
+		$hash = $this->_getAttachmentTempHash($contentData);
+
+		$attachmentHelper = $this->_getAttachmentHelper();
+		$response = $attachmentHelper->doUpload('file', $hash, 'post', $contentData);
+
+		if ($response instanceof XenForo_ControllerResponse_Abstract)
+		{
+			return $response;
+		}
+
+		$data = array(
+				'attachment' => $this->_getPostModel()->prepareApiDataForAttachment($response, $hash),
+		);
+
+		return $this->responseData('bdApi_ViewApi_Post_Attachments', $data);
+	}
+
 	/**
 	 * @return XenForo_Model_Post
 	 */
@@ -338,5 +382,32 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 	protected function _getLikeModel()
 	{
 		return $this->getModelFromCache('XenForo_Model_Like');
+	}
+
+	/**
+	 * @return bdApi_ControllerHelper_Attachment
+	 */
+	protected function _getAttachmentHelper()
+	{
+		return $this->getHelper('bdApi_ControllerHelper_Attachment');
+	}
+
+	protected function _getAttachmentTempHash($contentData)
+	{
+		$prefix = '';
+
+		if (!empty($contentData['post_id']))
+		{
+			$prefix = sprintf('post%d', $contentData['post_id']);
+		}
+		elseif (!empty($contentData['thread_id']))
+		{
+			$prefix = sprintf('thread%d', $contentData['thread_id']);
+		}
+
+		return md5(sprintf('%s%s',
+				$prefix,
+				XenForo_Application::getConfig()->get('globalSalt')
+		));
 	}
 }

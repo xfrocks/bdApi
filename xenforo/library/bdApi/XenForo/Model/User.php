@@ -17,7 +17,7 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 
 		foreach ($users as $key => $user)
 		{
-			$data[$key] = $this->prepareApiDataForUser($user);
+			$data[] = $this->prepareApiDataForUser($user);
 		}
 
 		return $data;

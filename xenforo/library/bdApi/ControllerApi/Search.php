@@ -61,7 +61,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 		// perform get posts from model because the search result are groupped
 		$this->_getPostModel();
 		$posts = bdApi_XenForo_Model_Post::bdApi_getCachedPosts();
-		$posts = array_values($posts);
 
 		$results = array();
 		foreach ($posts as $post)

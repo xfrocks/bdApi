@@ -8,7 +8,7 @@ class bdApi_XenForo_Model_Category extends XFCP_bdApi_XenForo_Model_Category
 
 		foreach ($categories as $key => $category)
 		{
-			$data[$key] = $this->prepareApiDataForCategory($category);
+			$data[] = $this->prepareApiDataForCategory($category);
 		}
 
 		return $data;

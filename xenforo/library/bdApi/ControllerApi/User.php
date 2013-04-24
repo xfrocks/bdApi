@@ -37,7 +37,6 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 				$conditions,
 				$userModel->getFetchOptionsToPrepareApiData($fetchOptions)
 		);
-		$users = array_values($users);
 
 		$total = $userModel->countUsers($conditions);
 

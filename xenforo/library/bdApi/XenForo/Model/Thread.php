@@ -32,7 +32,7 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 			$firstPost = array();
 			if (isset($firstPosts[$thread['first_post_id']])) $firstPost = $firstPosts[$thread['first_post_id']];
 
-			$data[$key] = $this->prepareApiDataForThread($thread, $forum, $firstPost);
+			$data[] = $this->prepareApiDataForThread($thread, $forum, $firstPost);
 		}
 
 		return $data;

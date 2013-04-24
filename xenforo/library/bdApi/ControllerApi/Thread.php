@@ -48,7 +48,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 				$conditions,
 				$this->_getThreadModel()->getFetchOptionsToPrepareApiData($fetchOptions)
 		);
-		$threads = array_values($threads);
 
 		$total = $this->_getThreadModel()->countThreads($conditions);
 
@@ -64,6 +63,11 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 					$firstPostIds,
 					$this->_getPostModel()->getFetchOptionsToPrepareApiData()
 			);
+
+			if (!$this->_isFieldExcluded('first_post.attachments'))
+			{
+				$firstPosts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($firstPosts);
+			}
 		}
 
 		$data = array(
@@ -95,6 +99,13 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 					$thread['first_post_id'],
 					$this->_getPostModel()->getFetchOptionsToPrepareApiData()
 			);
+
+			if (!$this->_isFieldExcluded('first_post.attachments'))
+			{
+				$firstPosts = array($firstPost['post_id'] => $firstPost);
+				$firstPosts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($firstPosts);
+				$firstPost = reset($firstPosts);
+			}
 		}
 
 		$data = array(
@@ -139,6 +150,9 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
 		$postWriter = $writer->getFirstMessageDw();
 		$postWriter->set('message', $input['post_body']);
+		$postWriter->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentTempHash(array(
+				'node_id' => $forum['node_id'],
+		)));
 		$postWriter->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
 
 		$writer->setExtraData(XenForo_DataWriter_Discussion_Thread::DATA_FORUM, $forum);
@@ -191,6 +205,34 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		);
 
 		return $this->responseMessage(new XenForo_Phrase('bdapi_thread_x_has_been_deleted', array('thread_id' => $thread['thread_id'])));
+	}
+
+	public function actionPostAttachments()
+	{
+		$contentData = array(
+				'node_id' => $this->_input->filterSingle('forum_id', XenForo_Input::UINT),
+		);
+		if (empty($contentData['node_id']))
+		{
+			return $this->responseError(new XenForo_Phrase(
+					'bdapi_slash_threads_attachments_requires_forum_id'
+			), 400);
+		}
+		$hash = $this->_getAttachmentTempHash($contentData);
+
+		$attachmentHelper = $this->_getAttachmentHelper();
+		$response = $attachmentHelper->doUpload('file', $hash, 'post', $contentData);
+
+		if ($response instanceof XenForo_ControllerResponse_Abstract)
+		{
+			return $response;
+		}
+
+		$data = array(
+				'attachment' => $this->_getPostModel()->prepareApiDataForAttachment($response, $hash),
+		);
+
+		return $this->responseData('bdApi_ViewApi_Thread_Attachments', $data);
 	}
 
 	public function actionGetNew()
@@ -344,5 +386,28 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 	protected function _getThreadWatchModel()
 	{
 		return $this->getModelFromCache('XenForo_Model_ThreadWatch');
+	}
+
+	/**
+	 * @return bdApi_ControllerHelper_Attachment
+	 */
+	protected function _getAttachmentHelper()
+	{
+		return $this->getHelper('bdApi_ControllerHelper_Attachment');
+	}
+
+	protected function _getAttachmentTempHash($contentData)
+	{
+		$prefix = '';
+
+		if (!empty($contentData['node_id']))
+		{
+			$prefix = sprintf('node%d', $contentData['node_id']);
+		}
+
+		return md5(sprintf('%s%s',
+				$prefix,
+				XenForo_Application::getConfig()->get('globalSalt')
+		));
 	}
 }

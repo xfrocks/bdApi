@@ -183,6 +183,22 @@ Required scopes:
 
  * `post`
 
+### POST `/threads/attachments`
+Upload an attachment for a thread.
+
+    {
+        attachment: (post > attachment)
+    }
+
+Parameters:
+
+* `file` (__required__): binary data of the attachment.
+* `forum_id` (__required__): id of the container forum of the target thread.
+
+Required scopes:
+
+* `post`
+
 ### GET `/threads/:threadId`
 Detail information of a thread.
 
@@ -331,6 +347,25 @@ Required scopes:
 
  * `post`
 
+### POST `/posts/attachments`
+Upload an attachment for a post. The attachment will be associated after the post is saved.
+
+    {
+        attachment: (post > attachment)
+    }
+
+Parameters:
+
+ * `file` (__required__): binary data of the attachment.
+ * `thread_id` (_optional_): id of the container thread of the target post.
+ * `post_id` (_optional_): id of the target post.
+
+Parameters Note: either `thread_id` or `post_id` parameter must has a valid id. Simply speaking, `thread_id` must be used with POST `/posts` (creating a new post) while `post_id` must be used with PUT `/posts/:postId` (editing a post).
+
+Required scopes:
+
+* `post`
+
 ### GET `/posts/:postId`
 Detail information of a post.
 
@@ -345,9 +380,25 @@ Detail information of a post.
             post_body_html: (string),
             post_body_plain_text: (string),
             post_like_count: (int),
+            post_attachment_count: (int),
             post_is_published: (boolean),
             post_is_deleted: (boolean),
             post_is_liked: (boolean),
+            attachments: {
+                {
+                    attachment_id: (int),
+                    post_id: (int),
+                    attachment_download_count: (int),
+                    links: {
+                        permalink: (uri),
+                        thumbnail: (uri)
+                    },
+                    permissions: {
+                        view: (boolean)
+                    }
+                },
+                ...
+            },
             links: {
                 permalink: (uri),
                 detail: (uri),
