@@ -25,10 +25,13 @@ The system follows OAuth2 specification [IETF draft v10](http://tools.ietf.org/h
 ## Common Parameters
 
 ### Fields filtering
-For API response with resource data like a forum or a thread, the data can be filtered to get interested fields only. When there are no filter 
+For API method with resource data like a forum or a thread, the data can be filtered to get interested fields only. When there are no filter 
 
  * `fields_include`: coma-separated list of fields of a resource. If this parameter is used along with `fields_exclude`, the other parameter will be ignored.
  * `fields_exclude`: coma-separated list of fields of a resource to exclude in the response. Cannot be used with `fields_include` or this parameter will be ignored.
+
+### Resource ordering
+For API method with list of resources, the resources can be ordered differently with the parameter `order`. List of supported orders will be specified for each method. The default order will always be `natural`. Most of the time, the natural order is the order of which each resource is added to the system (resource id for example).
 
 ## Categories
 
@@ -47,6 +50,7 @@ Parameters:
 
  * `parent_category_id` (_optional_): id of parent category. If exists, filter categories that are direct children of that category.
  * `parent_forum_id` (_optional_): id of parent forum. If exists, filter categories that are direct children of that forum.
+ * `order` (_optional_): ordering of categories. Support `natural`, `list`.
 
 Required scopes:
 
@@ -99,6 +103,7 @@ Parameters:
 
  * `parent_category_id` (_optional_): id of parent category. If exists, filter forums that are direct children of that category.
  * `parent_forum_id` (_optional_): id of parent forum. If exists, filter forums that are direct children of that forum.
+ * `order` (_optional_): ordering of categories. Support `natural`, `list`.
 
 Required scopes:
 
