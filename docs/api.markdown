@@ -103,7 +103,7 @@ Parameters:
 
  * `parent_category_id` (_optional_): id of parent category. If exists, filter forums that are direct children of that category.
  * `parent_forum_id` (_optional_): id of parent forum. If exists, filter forums that are direct children of that forum.
- * `order` (_optional_): ordering of categories. Support `natural`, `list`.
+ * `order` (_optional_): ordering of forums. Support `natural`, `list`.
 
 Required scopes:
 
@@ -166,6 +166,7 @@ Parameters:
  * `forum_id` (__required__): id of needed forum.
  * `page` (_optional_): page number of threads.
  * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.
+ * `order` (_optional_): ordering of threads. Support `natural`, `thread_create_date`, `thread_create_date_reverse`, `thread_update_date`, `thread_update_date_reverse`.
 
 Required scopes:
 

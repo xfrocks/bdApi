@@ -44,6 +44,31 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 				'page' => $page
 		);
 
+		$order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
+		switch ($order)
+		{
+			case 'thread_create_date':
+				$fetchOptions['order'] = 'post_date';
+				$fetchOptions['orderDirection'] = 'asc';
+				$pageNavParams['order'] = $order;
+				break;
+			case 'thread_create_date_reverse':
+				$fetchOptions['order'] = 'post_date';
+				$fetchOptions['orderDirection'] = 'desc';
+				$pageNavParams['order'] = $order;
+				break;
+			case 'thread_update_date':
+				$fetchOptions['order'] = 'last_post_date';
+				$fetchOptions['orderDirection'] = 'asc';
+				$pageNavParams['order'] = $order;
+				break;
+			case 'thread_update_date_reverse':
+				$fetchOptions['order'] = 'last_post_date';
+				$fetchOptions['orderDirection'] = 'desc';
+				$pageNavParams['order'] = $order;
+				break;
+		}
+
 		$threads = $this->_getThreadModel()->getThreads(
 				$conditions,
 				$this->_getThreadModel()->getFetchOptionsToPrepareApiData($fetchOptions)
