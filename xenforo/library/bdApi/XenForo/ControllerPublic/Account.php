@@ -335,6 +335,22 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 			$bypassConfirmation = true;
 			$accepted = true;
 		}
+		
+		// sondh@2013-05-04
+		// this is a non-standard implementation: bypass confirmation dialog if user has an active token
+		// this removed the change set sondh@2013-02-17 (try to get a working access token if the response_type == OAUTH2_AUTH_RESPONSE_TYPE_AUTH_CODE) 
+		$activeTokens = $tokenModel->getTokens(array(
+				'client_id' => $client['client_id'],
+				'user_id' => XenForo_Visitor::getUserId(),
+		));
+		foreach ($activeTokens as $activeToken)
+		{
+			if ($tokenModel->hasExpired($client, $activeToken)) continue; // expired
+			if (!$tokenModel->hasScope($client, $activeToken, $authorizeParams['scope'])) continue; // not enough scope
+
+			$bypassConfirmation = true;
+			$accepted = true;
+		}
 
 		// use the server get authorize params method to perform some extra validation
 		$serverAuthorizeParams = $oauth2Model->getServer()->getAuthorizeParams();
@@ -359,36 +375,6 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		}
 		else
 		{
-			// sondh@2013-02-17
-			// try to get a working access token if the response_type == OAUTH2_AUTH_RESPONSE_TYPE_AUTH_CODE
-			$oauth2Model->getServer(); // load the constants
-			if ($authorizeParams['response_type'] == OAUTH2_AUTH_RESPONSE_TYPE_AUTH_CODE)
-			{
-				$activeTokens = $tokenModel->getTokens(array(
-						'client_id' => $client['client_id'],
-						'user_id' => XenForo_Visitor::getUserId(),
-				));
-
-				foreach ($activeTokens as $activeToken)
-				{
-					if ($tokenModel->hasExpired($client, $activeToken))
-					{
-						// hmm, this token has expired
-						// it should be cleaned up by the cron eh? Hopefully soon...
-						continue;
-					}
-
-					if (!$tokenModel->hasScope($client, $activeToken, $authorizeParams['scope']))
-					{
-						// not enough scopes...
-						continue;
-					}
-
-					// reached here? This is a good token, return it asap
-					$oauth2Model->getServer()->finishClientAuthorizationWithAccessToken($authorizeParams, $activeToken['token_text']);
-				}
-			}
-
 			$viewParams = array(
 					'client' => $client,
 					'authorizeParams' => $authorizeParams,
