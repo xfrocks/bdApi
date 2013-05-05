@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApi" title="[bd] API" version_string="0.9.6" version_id="21" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApi" title="[bd] API" version_string="0.9.7" version_id="22" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdApi" parent_navigation_id="tools" display_order="9999" link="api-clients" admin_permission_id="bdApi" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_auth_codes" parent_navigation_id="bdApi" display_order="3000" link="api-auth-codes" admin_permission_id="" debug_only="0" hide_no_children="0"/>
@@ -271,7 +271,15 @@
 	</xen:if>
 </xen:form>]]></template>
   </admin_templates>
-  <code_events/>
+  <code_events>
+    <event event_id="bdapi_setup_routes"><![CDATA[<p>Called after all default API routes have been registered.</p>
+<p>It's recommended to use <code>bdApi_Route_PrefixApi::addRoute</code> to register new route instead of adding it directly to the <code>$routes</code> array.</p>
+
+Arguments:
+<ol>
+<li><code>array &$routes</code> - an array of reoutes.</li>
+</ol>]]></event>
+  </code_events>
   <code_event_listeners>
     <listener event_id="file_health_check" execute_order="5" callback_class="bdApi_Listener" callback_method="file_health_check" active="1" description=""/>
     <listener event_id="init_dependencies" execute_order="5" callback_class="bdApi_Listener" callback_method="init_dependencies" active="1" description=""/>

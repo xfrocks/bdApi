@@ -191,4 +191,37 @@ class bdApi_Link extends XenForo_Link
 
 		return $outputLink;
 	}
+
+	public static function convertUriToAbsoluteUri($uri, $includeHost = false, array $paths = null)
+	{
+		if (Zend_Uri::check($uri))
+		{
+			return $uri;
+		}
+
+		$boardUrl = XenForo_Application::getOptions()->get('boardUrl');
+		$boardUrlParsed = parse_url($boardUrl);
+
+		if ($uri == '.')
+		{
+			$uri = ''; // current directory
+		}
+
+		if (substr($uri, 0, 2) == '//')
+		{
+			return $boardUrlParsed['scheme'] . ':' . $uri;
+		}
+		else if (substr($uri, 0, 1) == '/')
+		{
+			return $boardUrlParsed['scheme'] . '://' . $boardUrlParsed['host'] . ($boardUrlParsed['port'] ? (':' . $boardUrlParsed) : '') . $uri;
+		}
+		else if (preg_match('#^[a-z0-9-]+://#i', $uri))
+		{
+			return $uri;
+		}
+		else
+		{
+			return $boardUrl . '/' . $uri;
+		}
+	}
 }
