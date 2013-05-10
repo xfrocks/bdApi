@@ -56,6 +56,23 @@ class bdApi_Installer {
 				,UNIQUE INDEX `refresh_token_text` (`refresh_token_text`)
 			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
 			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_refresh_token`'
+		),
+		'log' => array(
+			'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_log` (
+				`log_id` INT(10) UNSIGNED AUTO_INCREMENT
+				,`client_id` VARCHAR(255) NOT NULL
+				,`user_id` INT(10) UNSIGNED NOT NULL
+				,`ip_address` VARCHAR(50) NOT NULL
+				,`request_date` INT(10) UNSIGNED NOT NULL
+				,`request_method` VARCHAR(10) NOT NULL
+				,`request_uri` TEXT
+				,`request_data` MEDIUMBLOB
+				,`response_code` INT(10) UNSIGNED NOT NULL
+				,`response_output` MEDIUMBLOB
+				, PRIMARY KEY (`log_id`)
+				
+			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
+			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_log`'
 		)
 	);
 	protected static $_patches = array(

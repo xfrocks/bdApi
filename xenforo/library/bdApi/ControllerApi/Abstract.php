@@ -288,6 +288,16 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		return;
 	}
 
+	protected function _assertRegistrationRequired()
+	{
+		if (!XenForo_Visitor::getUserId())
+		{
+			throw $this->responseException(
+					$this->responseReroute('bdApi_ControllerApi_Error', 'registrationRequired')
+			);
+		}
+	}
+
 	protected function _preDispatch($action)
 	{
 		$requiredScope = $this->_getScopeForAction($action);
@@ -313,13 +323,41 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		return;
 	}
 
-	protected function _assertRegistrationRequired()
+	protected function _postDispatch($controllerResponse, $controllerName, $action)
 	{
-		if (!XenForo_Visitor::getUserId())
+		$responseCode = $controllerResponse->responseCode;
+		$responseOutput = $this->_getResponseOutput($controllerResponse);
+
+		$this->getModelFromCache('bdApi_Model_Log')->logRequest($responseCode, $responseOutput);
+
+		return parent::_postDispatch($controllerResponse, $controllerName, $action);
+	}
+
+	protected function _getResponseOutput(XenForo_ControllerResponse_Abstract $controllerResponse)
+	{
+		$responseOutput = array();
+
+		if ($controllerResponse instanceof XenForo_ControllerResponse_View)
 		{
-			throw $this->responseException(
-					$this->responseReroute('bdApi_ControllerApi_Error', 'registrationRequired')
+			$responseOutput = $controllerResponse->params;
+		}
+		elseif ($controllerResponse instanceof XenForo_ControllerResponse_Error)
+		{
+			$responseOutput = array(
+					'error' => $controllerResponse->errorText,
 			);
 		}
+		elseif ($controllerResponse instanceof XenForo_ControllerResponse_Exception)
+		{
+			$responseOutput = $this->_getResponseOutput($controllerResponse->getControllerResponse());
+		}
+		elseif ($controllerResponse instanceof XenForo_ControllerResponse_Message)
+		{
+			$responseOutput = array(
+					'message' => $controllerResponse->message,
+			);
+		}
+
+		return $responseOutput;
 	}
 }

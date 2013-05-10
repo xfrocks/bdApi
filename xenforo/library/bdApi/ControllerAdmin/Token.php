@@ -63,7 +63,7 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
 			}
 
 			$scopes = $this->_input->filterSingle('scopes', XenForo_Input::ARRAY_SIMPLE);
-			$scopes = implode(',', array_map('trim', $scopes));
+			$scopes = bdApi_Template_Helper_Core::getInstance()->scopeJoin($scopes);
 
 			$ttl = $this->_input->filterSingle('ttl', XenForo_Input::UINT);
 

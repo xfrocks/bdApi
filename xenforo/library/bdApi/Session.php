@@ -16,7 +16,7 @@ class bdApi_Session extends XenForo_Session
 			return $this->_oauthToken['client_id'];
 		}
 
-		return false;
+		return '';
 	}
 
 	/**

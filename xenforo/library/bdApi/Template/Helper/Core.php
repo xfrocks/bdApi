@@ -3,10 +3,12 @@ class bdApi_Template_Helper_Core
 {
 	public function scopeSplit($scopesStr)
 	{
-		$scopes = explode(',', $scopesStr);
-		$scopes = array_map('trim', $scopes);
-		
-		return $scopes;
+		return array_map('trim', explode(' ', $scopesStr));
+	}
+	
+	public function scopeJoin(array $scopes)
+	{
+		return implode(' ', array_map('trim', $scopes));
 	}
 	
 	public function scopeGetText($scope)

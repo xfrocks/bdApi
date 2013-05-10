@@ -316,7 +316,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 			$scopes = $this->_input->filterSingle('scopes', XenForo_Input::ARRAY_SIMPLE);
 			if (!empty($scopesIncluded))
 			{
-				$authorizeParams['scope'] = implode(',', $scopes);
+				$authorizeParams['scope'] = bdApi_Template_Helper_Core::getInstance()->scopeJoin($scopes);
 			}
 		}
 

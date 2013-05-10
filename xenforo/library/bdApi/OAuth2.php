@@ -183,12 +183,9 @@ class bdApi_OAuth2 extends OAuth2
 		if ($scope === NULL)
 		{
 			// no scope, use all scopes available
-			$dw->set('scope', implode(',', $this->_model->getSystemSupportedScopes())); 
+			$scope = bdApi_Template_Helper_Core::getInstance()->scopeJoin($this->_model->getSystemSupportedScopes());
 		}
-		else
-		{
-			$dw->set('scope', $scope);
-		}
+		$dw->set('scope', $scope);
 		
 		$dw->save();
 	}
@@ -252,7 +249,9 @@ class bdApi_OAuth2 extends OAuth2
 		{
 			$this->_userId = $userId;
 			
-			return true;
+			return array(
+					'scope' => bdApi_Template_Helper_Core::getInstance()->scopeJoin($this->_model->getSystemSupportedScopes()),
+			);
 		}
 		else
 		{
@@ -290,12 +289,9 @@ class bdApi_OAuth2 extends OAuth2
 		if ($scope === NULL)
 		{
 			// no scope, use all scopes available
-			$dw->set('scope', implode(',', $this->_model->getSystemSupportedScopes())); 
+			$scope = bdApi_Template_Helper_Core::getInstance()->scopeJoin($this->_model->getSystemSupportedScopes()); 
 		}
-		else
-		{
-			$dw->set('scope', $scope);
-		}
+		$dw->set('scope', $scope);
 		
 		$dw->save();
 	}
