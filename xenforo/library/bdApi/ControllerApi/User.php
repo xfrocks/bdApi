@@ -110,7 +110,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		$writer->set('language_id', XenForo_Visitor::getInstance()->get('language_id'));
 
 		$writer->advanceRegistrationUserState();
-		
+
 		if ($visitor->hasAdminPermission('user') AND $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM))
 		{
 			$writer->set('user_state', 'valid');
@@ -132,10 +132,72 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		return $this->responseReroute(__CLASS__, 'get-single');
 	}
 
+	public function actionPostAvatar()
+	{
+		$userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+		$visitor = XenForo_Visitor::getInstance();
+
+		if ($userId != $visitor->get('user_id'))
+		{
+			return $this->responseNoPermission();
+		}
+
+		if (!$visitor->canUploadAvatar())
+		{
+			return $this->responseNoPermission();
+		}
+
+		$avatar = XenForo_Upload::getUploadedFile('avatar');
+		if (empty($avatar))
+		{
+			return $this->responseError(new XenForo_Phrase('bdapi_requires_upload_x', array('field' => 'avatar')), 400);
+		}
+
+		$avatarData = $this->getModelFromCache('XenForo_Model_Avatar')->uploadAvatar(
+				$avatar,
+				$visitor->get('user_id'),
+				$visitor->getPermissions()
+		);
+
+		return $this->responseMessage(new XenForo_Phrase('upload_completed_successfully'));
+	}
+
+	public function actionDeleteAvatar()
+	{
+		$userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+		$visitor = XenForo_Visitor::getInstance();
+
+		if ($userId != $visitor->get('user_id'))
+		{
+			return $this->responseNoPermission();
+		}
+
+		if (!$visitor->canUploadAvatar())
+		{
+			return $this->responseNoPermission();
+		}
+
+		$this->getModelFromCache('XenForo_Model_Avatar')->deleteAvatar($visitor->get('user_id'));
+
+		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+	}
+
 	public function actionGetMe()
 	{
 		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
 		return $this->responseReroute(__CLASS__, 'get-single');
+	}
+
+	public function actionPostMeAvatar()
+	{
+		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
+		return $this->responseReroute(__CLASS__, 'post-avatar');
+	}
+
+	public function actionDeleteMeAvatar()
+	{
+		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
+		return $this->responseReroute(__CLASS__, 'delete-avatar');
 	}
 
 	/**
@@ -152,7 +214,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		{
 			$session = XenForo_Application::getSession();
 			$clientId = $session->getOAuthClientId();
-			
+
 			if (empty($clientId))
 			{
 				return false;

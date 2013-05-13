@@ -594,11 +594,28 @@ Required scopes:
 
  * `read`
 
-### GET `/users/me`
-Detail information of authorized user.
+### POST `users/:userId/avatar`
+Upload avatar for a user.
 
     {
-        user: (user)
+        status: "ok",
+        message: "Upload completed successfully"
+    }
+
+Parameters:
+
+ * avatar (__required__): binary data of the avatar.
+
+Required scopes:
+
+ * `post`
+
+### DELETE `users/:userId/avatar`
+Delete avatar for a user.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
     }
 
 Parameters:
@@ -607,7 +624,16 @@ Parameters:
 
 Required scopes:
 
- * `read`
+ * `post`
+
+### GET `/users/me`
+Alias for GET `/users/:userId` for authorized user.
+
+### POST `/users/me/avatar`
+Alias for POST `/users/:userId/avatar` for authorized user.
+
+### DELETE `/users/me/avatar`
+Alias for DELETE `/users/:userId/avatar` for authorized user.
 
 ## Searching
 

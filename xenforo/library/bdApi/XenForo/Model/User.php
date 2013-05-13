@@ -80,6 +80,7 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 		$data['links'] = array(
 				'permalink' => bdApi_Link::buildPublicLink('members', $user),
 				'detail' => bdApi_Link::buildApiLink('users', $user),
+				'avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array($user, 'm', false, true)),
 		);
 
 		if ($user['user_id'] == XenForo_Visitor::getUserId())
