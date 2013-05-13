@@ -4,7 +4,13 @@ class bdApi_Dependencies extends XenForo_Dependencies_Public
 {
 	public function preLoadData()
 	{
+		if (class_exists('bdApi_Link'))
+		{
+			// trigger auto loading of bdApi_Link
+		}
+
 		$this->_dataPreLoadFromRegistry += array(
+				// TODO
 		);
 
 		parent::preLoadData();

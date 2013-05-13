@@ -74,6 +74,64 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_User_Single', $data);
 	}
 
+	public function actionPostIndex()
+	{
+		$input = $this->_input->filter(array(
+				'email' => XenForo_Input::STRING,
+				'username' => XenForo_Input::STRING,
+				'password' => XenForo_Input::STRING,
+				'user_dob_day' => XenForo_Input::UINT,
+				'user_dob_month' => XenForo_Input::UINT,
+				'user_dob_year' => XenForo_Input::UINT,
+		));
+		$userModel = $this->_getUserModel();
+		$options = XenForo_Application::getOptions();
+		$session = XenForo_Application::getSession();
+		$visitor = XenForo_Visitor::getInstance();
+
+		$writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
+		if ($options->registrationDefaults)
+		{
+			$writer->bulkSet($options->registrationDefaults, array('ignoreInvalidFields' => true));
+		}
+		$writer->set('email', $input['email']);
+		$writer->set('username', $input['username']);
+		$writer->setPassword($input['password'], $input['password']);
+		if ($options->gravatarEnable && XenForo_Model_Avatar::gravatarExists($input['email']))
+		{
+			$writer->set('gravatar', $input['email']);
+		}
+
+		$writer->set('dob_day', $input['user_dob_day']);
+		$writer->set('dob_month', $input['user_dob_month']);
+		$writer->set('dob_year', $input['user_dob_year']);
+
+		$writer->set('user_group_id', XenForo_Model_User::$defaultRegisteredGroupId);
+		$writer->set('language_id', XenForo_Visitor::getInstance()->get('language_id'));
+
+		$writer->advanceRegistrationUserState();
+		
+		if ($visitor->hasAdminPermission('user') AND $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM))
+		{
+			$writer->set('user_state', 'valid');
+		}
+
+		$writer->save();
+
+		$user = $writer->getMergedData();
+
+		// log the ip of the user registering
+		XenForo_Model_Ip::log(XenForo_Visitor::getUserId() ? XenForo_Visitor::getUserId() : $user['user_id'], 'user', $user['user_id'], 'register');
+
+		if ($user['user_state'] == 'email_confirm')
+		{
+			$this->getModelFromCache('XenForo_Model_UserConfirmation')->sendEmailConfirmation($user);
+		}
+
+		$this->_request->setParam('user_id', $user['user_id']);
+		return $this->responseReroute(__CLASS__, 'get-single');
+	}
+
 	public function actionGetMe()
 	{
 		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
@@ -86,5 +144,21 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 	protected function _getUserModel()
 	{
 		return $this->getModelFromCache('XenForo_Model_User');
+	}
+
+	protected function _getScopeForAction($action)
+	{
+		if ($action === 'PostIndex')
+		{
+			$session = XenForo_Application::getSession();
+			$clientId = $session->getOAuthClientId();
+			
+			if (empty($clientId))
+			{
+				return false;
+			}
+		}
+
+		return parent::_getScopeForAction($action);
 	}
 }

@@ -541,6 +541,26 @@ Required scopes:
 
  * `read`
 
+### POST `/users`
+Create a new user.
+
+    {
+        user: (user)
+    }
+
+Parameters:
+
+ * `email` (__required__): email of the new user.
+ * `username` (__required__): username of the new user.
+ * `password` (__required__): password of the new user.
+ * `user_dob_day` (_optional_): date of birth (day) of the new user.
+ * `user_dob_month` (_optional_): date of birth (month) of the new user.
+ * `user_dob_year` (_optional_): date of birth (year) of the new user.
+
+Required scopes:
+
+ * `post`
+
 ### GET `/users/:userId`
 Detail information of a user.
 
@@ -557,6 +577,8 @@ Detail information of a user.
             user_dob_month: (int),
             user_dob_year: (int),
             user_timezone_offset: (int),
+            user_is_valid: (boolean),
+            user_is_verified: (boolean),
             links: {
                 permalink: (uri),
                 detail: (uri)

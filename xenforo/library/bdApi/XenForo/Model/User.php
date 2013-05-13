@@ -49,6 +49,34 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 
 		$data = bdApi_Data_Helper_Core::filter($user, $publicKeys);
 
+		if (isset($user['user_state']) AND isset($user['is_banned']))
+		{
+			if (!empty($user['is_banned']))
+			{
+				$data['user_is_valid'] = false;
+				$data['user_is_verified'] = true;
+			}
+			else
+			{
+				switch ($user['user_state'])
+				{
+					case 'valid':
+						$data['user_is_valid'] = true;
+						$data['user_is_verified'] = true;
+						break;
+					case 'email_confirm':
+					case 'email_confirm_edit':
+						$data['user_is_valid'] = true;
+						$data['user_is_verified'] = false;
+						break;
+					case 'moderated':
+						$data['user_is_valid'] = false;
+						$data['user_is_verified'] = false;
+						break;
+				}
+			}
+		}
+
 		$data['links'] = array(
 				'permalink' => bdApi_Link::buildPublicLink('members', $user),
 				'detail' => bdApi_Link::buildApiLink('users', $user),

@@ -1,5 +1,19 @@
 <?php
 
+$xenforoLinkPath = XenForo_Application::getInstance()->getRootDir() . '/library/XenForo/Link.php';
+$xenforoLinkContents = file_get_contents($xenforoLinkPath);
+$xenforoLinkContents = substr($xenforoLinkContents, 6); // remove <?php\n
+$xenforoLinkContents = str_replace('class XenForo_Link', 'class _XenForo_Link', $xenforoLinkContents);
+eval($xenforoLinkContents);
+
+class XenForo_Link extends _XenForo_Link
+{
+	public static function buildPublicLink($type, $data = null, array $extraParams = array(), $skipPrepend = false)
+	{
+		return bdApi_Link::buildPublicLink($type, $data, $extraParams, $skipPrepend);
+	}
+}
+
 class bdApi_Link extends XenForo_Link
 {
 	const API_LINK_GROUP = 'api';
