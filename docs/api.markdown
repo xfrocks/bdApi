@@ -633,7 +633,7 @@ Required scopes:
 List of a user's followers
 
     {
-        followers: [
+        users: [
             {
                 user_id: (int)
             },
@@ -685,7 +685,7 @@ Required scopes:
 List of users whom are followed by a user.
 
     {
-        followings: [
+        users: [
             {
                 user_id: (int)
             },

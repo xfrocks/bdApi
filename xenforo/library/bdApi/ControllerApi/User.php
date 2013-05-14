@@ -178,12 +178,12 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		$followers = $userModel->getUsersFollowingUserId($user['user_id'], 0, 'user.user_id');
 
 		$data = array(
-				'followers' => array(),
+				'users' => array(),
 		);
 
 		foreach ($followers as $follower)
 		{
-			$data['followers'][] = array('user_id' => $follower['user_id']);
+			$data['users'][] = array('user_id' => $follower['user_id']);
 		}
 
 		return $this->responseData('bdApi_ViewApi_User_Followers', $data);
@@ -227,12 +227,12 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		$followings = $userModel->getFollowedUserProfiles($user['user_id'], 0, 'user.user_id');
 
 		$data = array(
-				'followings' => array(),
+				'users' => array(),
 		);
 
 		foreach ($followings as $following)
 		{
-			$data['followings'][] = array('user_id' => $following['user_id']);
+			$data['users'][] = array('user_id' => $following['user_id']);
 		}
 
 		return $this->responseData('bdApi_ViewApi_User_Followings', $data);
