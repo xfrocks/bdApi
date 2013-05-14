@@ -227,8 +227,8 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			'post', $post, 'delete_' . $deleteType, array('reason' => $options['reason']), $thread
 			);
 		}
-
-		return $this->responseMessage(new XenForo_Phrase('bdapi_post_x_has_been_deleted', array('post_id' => $post['post_id'])));
+		
+		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
 	}
 
 	public function actionGetLikes()
@@ -284,7 +284,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			}
 		}
 
-		return $this->responseMessage(new XenForo_Phrase('bdapi_post_x_has_been_liked', array('post_id' => $post['post_id'])));
+		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
 	}
 
 	public function actionDeleteLikes()
@@ -312,7 +312,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			}
 		}
 
-		return $this->responseMessage(new XenForo_Phrase('bdapi_post_x_has_been_unliked', array('post_id' => $post['post_id'])));
+		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
 	}
 
 	public function actionPostAttachments()

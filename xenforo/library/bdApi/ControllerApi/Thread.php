@@ -229,7 +229,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		'thread', $thread, 'delete_' . $deleteType, array('reason' => $options['reason'])
 		);
 
-		return $this->responseMessage(new XenForo_Phrase('bdapi_thread_x_has_been_deleted', array('thread_id' => $thread['thread_id'])));
+		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
 	}
 
 	public function actionPostAttachments()

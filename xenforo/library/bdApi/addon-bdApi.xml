@@ -350,8 +350,6 @@ Arguments:
     <phrase title="bdapi_name" version_id="4" version_string="0.9-dev"><![CDATA[Client Name]]></phrase>
     <phrase title="bdapi_please_confirm_to_authorize_access" version_id="1" version_string="0.1"><![CDATA[Please confirm to authorize access to the listed client with below permissions.]]></phrase>
     <phrase title="bdapi_post_x_has_been_deleted" version_id="12" version_string="0.9-dev"><![CDATA[The post #{post_id} has been deleted.]]></phrase>
-    <phrase title="bdapi_post_x_has_been_liked" version_id="19" version_string="0.9.4"><![CDATA[Post #x has been liked.]]></phrase>
-    <phrase title="bdapi_post_x_has_been_unliked" version_id="19" version_string="0.9.4"><![CDATA[Post #x has been unliked.]]></phrase>
     <phrase title="bdapi_realm" global_cache="1" version_id="1" version_string="0.1"><![CDATA[{boardTitle} API]]></phrase>
     <phrase title="bdapi_redirect_uri" version_id="1" version_string="0.1"><![CDATA[Redirect Uri]]></phrase>
     <phrase title="bdapi_redirect_uri_must_be_valid" version_id="4" version_string="0.9-dev"><![CDATA[Redirect URI must be valid.]]></phrase>

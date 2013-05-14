@@ -183,7 +183,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
 		foreach ($followers as $follower)
 		{
-			$data['users'][] = array('user_id' => $follower['user_id']);
+			$data['users'][] = array(
+					'user_id' => $follower['user_id'],
+					'username' => $follower['username'],
+			);
 		}
 
 		return $this->responseData('bdApi_ViewApi_User_Followers', $data);
@@ -232,7 +235,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
 		foreach ($followings as $following)
 		{
-			$data['users'][] = array('user_id' => $following['user_id']);
+			$data['users'][] = array(
+					'user_id' => $following['user_id'],
+					'username' => $following['username'],
+			);
 		}
 
 		return $this->responseData('bdApi_ViewApi_User_Followings', $data);

@@ -255,7 +255,7 @@ Delete a thread.
 
     {
         status: "ok",
-        message: "Thread #x has been deleted."
+        message: "Changes Saved"
     }
 
 Parameters:
@@ -449,7 +449,7 @@ Delete a post.
 
     {
         status: "ok",
-        message: "Post #x has been deleted."
+        message: "Changes Saved"
     }
 
 Parameters:
@@ -486,7 +486,7 @@ Like a post.
 
     {
         status: "ok",
-        message: "Post #x has been liked."
+        message: "Changes Saved"
     }
 
 Parameters:
@@ -502,7 +502,7 @@ Unlike a post.
 
     {
         status: "ok",
-        message: "Post #x has been unliked."
+        message: "Changes Saved"
     }
 
 Parameters:
@@ -635,7 +635,8 @@ List of a user's followers
     {
         users: [
             {
-                user_id: (int)
+                user_id: (int),
+                username: (string)
             },
             ...
         ]
@@ -687,7 +688,8 @@ List of users whom are followed by a user.
     {
         users: [
             {
-                user_id: (int)
+                user_id: (int),
+                username: (string)
             },
             ...
         ]
