@@ -581,7 +581,10 @@ Detail information of a user.
             user_is_verified: (boolean),
             links: {
                 permalink: (uri),
-                detail: (uri)
+                detail: (uri),
+                avatar: (uri),
+                followers: (uri),
+                followings: (uri)
             }
         }
     }
