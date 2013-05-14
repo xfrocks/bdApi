@@ -649,6 +649,38 @@ Required scopes:
 
  * `read`
 
+### POST `users/:userId/followers`
+Follow a user.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+
+### DELETE `users/:userId/followers`
+Un-follow a user.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+
 ### GET `/users/:userId/followings`
 List of users whom are followed by a user.
 

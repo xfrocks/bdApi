@@ -189,6 +189,36 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_User_Followers', $data);
 	}
 
+	public function actionPostFollowers()
+	{
+		$user = $this->_getUserOrError();
+		$visitor = XenForo_Visitor::getInstance();
+
+		if (($user['user_id'] == $visitor->get('user_id')) OR !$visitor->canFollow())
+		{
+			return $this->responseNoPermission();
+		}
+
+		$this->_getUserModel()->follow($user);
+
+		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+	}
+
+	public function actionDeleteFollowers()
+	{
+		$user = $this->_getUserOrError();
+		$visitor = XenForo_Visitor::getInstance();
+
+		if (($user['user_id'] == $visitor->get('user_id')) OR !$visitor->canFollow())
+		{
+			return $this->responseNoPermission();
+		}
+
+		$this->_getUserModel()->unfollow($user['user_id']);
+
+		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+	}
+
 	public function actionGetFollowings()
 	{
 		$user = $this->_getUserOrError();

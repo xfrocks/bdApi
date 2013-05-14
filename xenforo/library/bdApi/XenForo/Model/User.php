@@ -25,6 +25,8 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 
 	public function prepareApiDataForUser(array $user)
 	{
+		$visitor = XenForo_Visitor::getInstance();
+
 		$publicKeys = array(
 				// xf_user
 				'user_id'			=> 'user_id',
@@ -35,7 +37,7 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 				'like_count'		=> 'user_like_count',
 		);
 
-		if ($user['user_id'] == XenForo_Visitor::getUserId())
+		if ($user['user_id'] == $visitor->get('user_id'))
 		{
 			$publicKeys = array_merge($publicKeys, array(
 					// xf_user
@@ -85,7 +87,11 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 				'followings' => bdApi_Link::buildApiLink('users/followings', $user),
 		);
 
-		if ($user['user_id'] == XenForo_Visitor::getUserId())
+		$data['permissions'] = array(
+				'follow' => ($user['user_id'] != $visitor->get('user_id')) AND $visitor->canFollow(),
+		);
+
+		if ($user['user_id'] == $visitor->get('user_id'))
 		{
 			if (isset($user['timezone']))
 			{
