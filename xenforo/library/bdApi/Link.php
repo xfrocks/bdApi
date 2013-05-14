@@ -232,7 +232,7 @@ class bdApi_Link extends XenForo_Link
 		}
 		else if (substr($uri, 0, 1) == '/')
 		{
-			return $boardUrlParsed['scheme'] . '://' . $boardUrlParsed['host'] . ($boardUrlParsed['port'] ? (':' . $boardUrlParsed) : '') . $uri;
+			return $boardUrlParsed['scheme'] . '://' . $boardUrlParsed['host'] . (isset($boardUrlParsed['port']) ? (':' . $boardUrlParsed) : '') . $uri;
 		}
 		else if (preg_match('#^[a-z0-9-]+://#i', $uri))
 		{
