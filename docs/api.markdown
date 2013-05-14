@@ -626,6 +626,46 @@ Required scopes:
 
  * `post`
 
+### GET `/users/:userId/followers`
+List of a user's followers
+
+    {
+        followers: [
+            {
+                user_id: (int)
+            },
+            ...
+        ]
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### GET `/users/:userId/followings`
+List of users whom are followed by a user.
+
+    {
+        followings: [
+            {
+                user_id: (int)
+            },
+            ...
+        ]
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
 ### GET `/users/me`
 Alias for GET `/users/:userId` for authorized user.
 
@@ -634,6 +674,12 @@ Alias for POST `/users/:userId/avatar` for authorized user.
 
 ### DELETE `/users/me/avatar`
 Alias for DELETE `/users/:userId/avatar` for authorized user.
+
+### GET `/users/me/followers`
+Alias for GET `/users/:userId/followers` for authorized user.
+
+### GET `/users/me/followings`
+Alias for GET `/users/:userId/followings` for authorized user.
 
 ## Searching
 

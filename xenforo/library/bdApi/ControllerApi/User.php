@@ -53,22 +53,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
 	public function actionGetSingle()
 	{
-		$userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
-
-		$userModel = $this->_getUserModel();
-
-		$user = $userModel->getUserById(
-				$userId,
-				$userModel->getFetchOptionsToPrepareApiData()
-		);
-
-		if (empty($user))
-		{
-			return $this->responseError(new XenForo_Phrase('requested_user_not_found'), 404);
-		}
+		$user = $this->_getUserOrError();
 
 		$data = array(
-				'user' => $this->_filterDataSingle($userModel->prepareApiDataForUser($user)),
+				'user' => $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user)),
 		);
 
 		return $this->responseData('bdApi_ViewApi_User_Single', $data);
@@ -182,22 +170,97 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
 	}
 
+	public function actionGetFollowers()
+	{
+		$user = $this->_getUserOrError();
+		$userModel = $this->_getUserModel();
+
+		$followers = $userModel->getUsersFollowingUserId($user['user_id'], 0, 'user.user_id');
+
+		$data = array(
+				'followers' => array(),
+		);
+
+		foreach ($followers as $follower)
+		{
+			$data['followers'][] = array('user_id' => $follower['user_id']);
+		}
+
+		return $this->responseData('bdApi_ViewApi_User_Followers', $data);
+	}
+
+	public function actionGetFollowings()
+	{
+		$user = $this->_getUserOrError();
+		$userModel = $this->_getUserModel();
+
+		$followings = $userModel->getFollowedUserProfiles($user['user_id'], 0, 'user.user_id');
+
+		$data = array(
+				'followings' => array(),
+		);
+
+		foreach ($followings as $following)
+		{
+			$data['followings'][] = array('user_id' => $following['user_id']);
+		}
+
+		return $this->responseData('bdApi_ViewApi_User_Followings', $data);
+	}
+
 	public function actionGetMe()
 	{
+		if (XenForo_Visitor::getUserId() == 0)
+		{
+			return $this->responseNoPermission();
+		}
+
 		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
 		return $this->responseReroute(__CLASS__, 'get-single');
 	}
 
 	public function actionPostMeAvatar()
 	{
+		if (XenForo_Visitor::getUserId() == 0)
+		{
+			return $this->responseNoPermission();
+		}
+
 		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
 		return $this->responseReroute(__CLASS__, 'post-avatar');
 	}
 
 	public function actionDeleteMeAvatar()
 	{
+		if (XenForo_Visitor::getUserId() == 0)
+		{
+			return $this->responseNoPermission();
+		}
+
 		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
 		return $this->responseReroute(__CLASS__, 'delete-avatar');
+	}
+
+	public function actionGetMeFollowers()
+	{
+		if (XenForo_Visitor::getUserId() == 0)
+		{
+			return $this->responseNoPermission();
+		}
+
+		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
+		return $this->responseReroute(__CLASS__, 'get-followers');
+	}
+
+	public function actionGetMeFollowings()
+	{
+		if (XenForo_Visitor::getUserId() == 0)
+		{
+			return $this->responseNoPermission();
+		}
+
+		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
+		return $this->responseReroute(__CLASS__, 'get-followings');
 	}
 
 	/**
@@ -206,6 +269,25 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 	protected function _getUserModel()
 	{
 		return $this->getModelFromCache('XenForo_Model_User');
+	}
+
+	protected function _getUserOrError(array $fetchOptions = array())
+	{
+		$userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+
+		$userModel = $this->_getUserModel();
+
+		$user = $userModel->getUserById(
+				$userId,
+				$userModel->getFetchOptionsToPrepareApiData($fetchOptions)
+		);
+
+		if (empty($user))
+		{
+			throw $this->responseException($this->responseError(new XenForo_Phrase('requested_user_not_found'), 404));
+		}
+
+		return $user;
 	}
 
 	protected function _getScopeForAction($action)
