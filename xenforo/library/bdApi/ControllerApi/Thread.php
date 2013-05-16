@@ -260,6 +260,65 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_Thread_Attachments', $data);
 	}
 
+	public function actionGetFollowers()
+	{
+		$threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
+
+		$ftpHelper = $this->getHelper('ForumThreadPost');
+		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
+
+		$followers = $this->getModelFromCache('XenForo_Model_ThreadWatch')->getUsersWatchingThread($thread['thread_id'], $forum['node_id']);
+
+		$data = array(
+				'users' => array(),
+		);
+
+		foreach ($followers as $follower)
+		{
+			$data['users'][] = array(
+					'user_id' => $follower['user_id'],
+					'username' => $follower['username'],
+			);
+		}
+
+		return $this->responseData('bdApi_ViewApi_Thread_Followers', $data);
+	}
+
+	public function actionPostFollowers()
+	{
+		$threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
+
+		$ftpHelper = $this->getHelper('ForumThreadPost');
+		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
+
+		if (!$this->_getThreadModel()->canWatchThread($thread, $forum))
+		{
+			return $this->responseNoPermission();
+		}
+
+		// TODO: parameter to watch with email?
+		$this->getModelFromCache('XenForo_Model_ThreadWatch')->setThreadWatchState(XenForo_Visitor::getUserId(), $thread['thread_id'], 'watch_no_email');
+
+		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+	}
+
+	public function actionDeleteFollowers()
+	{
+		$threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
+
+		$ftpHelper = $this->getHelper('ForumThreadPost');
+		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
+
+		if (!$this->_getThreadModel()->canWatchThread($thread, $forum))
+		{
+			return $this->responseNoPermission();
+		}
+
+		$this->getModelFromCache('XenForo_Model_ThreadWatch')->setThreadWatchState(XenForo_Visitor::getUserId(), $thread['thread_id'], '');
+
+		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+	}
+
 	public function actionGetNew()
 	{
 		$this->_assertRegistrationRequired();

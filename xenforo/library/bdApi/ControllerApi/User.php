@@ -173,9 +173,8 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 	public function actionGetFollowers()
 	{
 		$user = $this->_getUserOrError();
-		$userModel = $this->_getUserModel();
 
-		$followers = $userModel->getUsersFollowingUserId($user['user_id'], 0, 'user.user_id');
+		$followers = $this->_getUserModel()->getUsersFollowingUserId($user['user_id'], 0, 'user.user_id');
 
 		$data = array(
 				'users' => array(),
@@ -225,9 +224,8 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 	public function actionGetFollowings()
 	{
 		$user = $this->_getUserOrError();
-		$userModel = $this->_getUserModel();
 
-		$followings = $userModel->getFollowedUserProfiles($user['user_id'], 0, 'user.user_id');
+		$followings = $this->_getUserModel()->getFollowedUserProfiles($user['user_id'], 0, 'user.user_id');
 
 		$data = array(
 				'users' => array(),

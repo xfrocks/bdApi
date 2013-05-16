@@ -266,6 +266,59 @@ Required scopes:
 
  * `post`
 
+### GET `/threads/:threadId/followers`
+List of a thread's followers
+
+    {
+        users: [
+            {
+                user_id: (int),
+                username: (string)
+            },
+            ...
+        ]
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### POST `threads/:threadId/followers`
+Follow a thread.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+
+### DELETE `threads/:threadId/followers`
+Un-follow a thread.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+
 ### GET `/threads/new`
 List of unread threads (must be logged in).
 
