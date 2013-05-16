@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApi" title="[bd] API" version_string="0.9.8a" version_id="23" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApi" title="[bd] API" version_string="0.9.9" version_id="24" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdApi" parent_navigation_id="tools" display_order="9999" link="api-clients" admin_permission_id="bdApi" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_auth_codes" parent_navigation_id="bdApi" display_order="3000" link="api-auth-codes" admin_permission_id="" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_clients" parent_navigation_id="bdApi" display_order="1000" link="api-clients" admin_permission_id="" debug_only="0" hide_no_children="0"/>
+    <navigation navigation_id="bdApi_logs" parent_navigation_id="bdApi" display_order="9999" link="api-logs" admin_permission_id="" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_refresh_tokens" parent_navigation_id="bdApi" display_order="4000" link="api-refresh-tokens" admin_permission_id="" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_tokens" parent_navigation_id="bdApi" display_order="2000" link="api-tokens" admin_permission_id="" debug_only="0" hide_no_children="0"/>
   </admin_navigation>
@@ -13,6 +14,27 @@
   </admin_permissions>
   <admin_style_properties/>
   <admin_templates>
+    <template title="bdapi.css"><![CDATA[.bdApi_Log.serious h4 a em
+{
+	font-weight: bold;
+}
+
+.bdApi_Log.error
+{
+	background: #ff0000;
+}
+	.FilterList .listItem.bdApi_Log.error:hover h4
+	{
+		background: transparent;
+	}
+	.bdApi_Log.error h4 a em
+	{
+		color: white;
+	}
+	.bdApi_Log.error h4 a em strong
+	{
+		color: yellow;
+	}]]></template>
     <template title="bdapi_auth_code_delete"><![CDATA[<xen:title>{xen:phrase bdapi_auth_code_confirm_deletion}: {$authCode.auth_code_text}</xen:title>
 <xen:h1>{xen:phrase bdapi_auth_code_confirm_deletion}</xen:h1>
 
@@ -156,6 +178,90 @@
 		<div class="noResults">{xen:phrase bdapi_client_no_results}</div>
 	</xen:if>
 </xen:form>]]></template>
+    <template title="bdapi_log_detail"><![CDATA[<xen:title>{$log.request_method} {$log.request_uri}</xen:title>
+
+<div class="section">
+	<div class="overlayScroll">
+		<table width="100%">
+		<tr>
+			<th class="subHeading">
+				<xen:if is="{$log.client_id}">
+					{xen:phrase bdapi_client}:
+					
+					<xen:if is="{$client}">
+						<a href="{$client.redirect_uri}" target="_blank">{$client.name}</a>
+					<xen:else />
+						{$log.client_id}
+					</xen:if>
+				<xen:else />
+					{xen:phrase bdapi_log_no_client}
+				</xen:if>
+			</th>
+		</tr>
+		<tr>
+			<td class="primaryContent">
+				<span class="dimmed">
+					<xen:if is="{$user}">
+						{xen:phrase user}: {$user.username}
+					</xen:if>
+				</span>
+				<div class="muted">{$log.ip_address}, <xen:datetime time="{$log.request_date}" /></div>
+			</td>
+		</tr>
+		<tr>
+			<th class="subHeading">{xen:phrase bdapi_request}</th>
+		</tr>
+		<tr>
+			<td class="primaryContent"><pre>{xen:helper dump, $log.request_data}</pre></td>
+		</tr>
+		<tr>
+			<th class="subHeading">{xen:phrase bdapi_response} ({$log.response_code})</th>
+		</tr>
+		<tr>
+			<td class="primaryContent"><pre>{xen:helper dump, $log.response_output}</pre></td>
+		</tr>
+		</table>
+	</div>
+	<div class="sectionFooter overlayOnly">
+		<a class="button primary OverlayCloser">{xen:phrase close}</a>
+	</div>
+</div>]]></template>
+    <template title="bdapi_log_list"><![CDATA[<xen:title>{xen:phrase bdapi_logs}</xen:title>
+
+<xen:require css="bdapi.css" />
+<xen:require css="filter_list.css" />
+<xen:require js="js/xenforo/filter_list.js" />
+
+<xen:form action="{xen:adminlink 'api-logs'}" class="section bdApi_Logs">
+	<xen:if is="{$logs}">
+		<h2 class="subHeading">
+			<xen:include template="filter_list_controls" />
+			{xen:phrase bdapi_logs}
+		</h2>
+	
+		<ol class="FilterList Scrollable" data-ajaxFilter="true">
+			<xen:include template="bdapi_log_list_items" />
+		</ol>
+	
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:number {xen:count $logs}}</span>', 'total={xen:number $total}'}</p>
+	<xen:else />
+		<div class="noResults">{xen:phrase bdapi_log_no_results}</div>
+	</xen:if>
+</xen:form>
+
+{xen:adminpagenav $perPage, $total, $page, api-logs}]]></template>
+    <template title="bdapi_log_list_items"><![CDATA[<xen:foreach loop="$logs" value="$log">
+	<xen:listitem
+		id="{$log.log_id}"
+		href="{xen:adminlink 'api-logs/detail', $log}"
+		label="{$log.request_method} {$log.request_uri} ({$log.ip_address})" 
+		snippet="{xen:if '{$log.client_id}', '{$log.client_id}'}"
+		linkclass="OverlayTrigger"
+		class="bdApi_Log{xen:if '{$log.request_method} != "get"', ' serious'}{xen:if '{$log.response_code} != 200', ' error'}" />
+</xen:foreach>
+<xen:if is="{$filterMore}">
+	<li class="listNote">{xen:phrase more_records_matching_filter_more_specific}</li>
+</xen:if>]]></template>
     <template title="bdapi_refresh_token_delete"><![CDATA[<xen:title>{xen:phrase bdapi_refresh_token_confirm_deletion}: {$refreshToken.refresh_token_text}</xen:title>
 <xen:h1>{xen:phrase bdapi_refresh_token_confirm_deletion}</xen:h1>
 
@@ -305,6 +411,7 @@ Arguments:
     <phrase title="admin_navigation_bdApi" version_id="1" version_string="0.1"><![CDATA[[bd] API]]></phrase>
     <phrase title="admin_navigation_bdApi_auth_codes" version_id="1" version_string="0.1"><![CDATA[Authentication Codes]]></phrase>
     <phrase title="admin_navigation_bdApi_clients" version_id="1" version_string="0.1"><![CDATA[Clients]]></phrase>
+    <phrase title="admin_navigation_bdApi_logs" version_id="23" version_string="0.9.8a"><![CDATA[Logs]]></phrase>
     <phrase title="admin_navigation_bdApi_refresh_tokens" version_id="1" version_string="0.1"><![CDATA[Refresh Tokens]]></phrase>
     <phrase title="admin_navigation_bdApi_tokens" version_id="1" version_string="0.1"><![CDATA[Tokens]]></phrase>
     <phrase title="admin_permission_bdApi" version_id="1" version_string="0.1"><![CDATA[[bd] API: Manage the API]]></phrase>
@@ -329,6 +436,7 @@ Arguments:
     <phrase title="bdapi_client_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Client]]></phrase>
     <phrase title="bdapi_client_delete" version_id="1" version_string="0.1"><![CDATA[Delete Client]]></phrase>
     <phrase title="bdapi_client_edit" version_id="1" version_string="0.1"><![CDATA[Edit Client]]></phrase>
+    <phrase title="bdapi_client_id" version_id="23" version_string="0.9.8a"><![CDATA[Client Id]]></phrase>
     <phrase title="bdapi_client_ids_must_be_unique" version_id="4" version_string="0.9-dev"><![CDATA[API keys must be unique. The specified key is already in use.]]></phrase>
     <phrase title="bdapi_client_key" version_id="4" version_string="0.9-dev"><![CDATA[API Key]]></phrase>
     <phrase title="bdapi_client_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Client could not be found]]></phrase>
@@ -345,11 +453,15 @@ Arguments:
     <phrase title="bdapi_description" version_id="1" version_string="0.1"><![CDATA[Description]]></phrase>
     <phrase title="bdapi_expire_date" version_id="1" version_string="0.1"><![CDATA[Expire Date]]></phrase>
     <phrase title="bdapi_home" version_id="4" version_string="0.9-dev"><![CDATA[API Access]]></phrase>
+    <phrase title="bdapi_ip_address" version_id="23" version_string="0.9.8a"><![CDATA[Ip Address]]></phrase>
     <phrase title="bdapi_issue_date" version_id="4" version_string="0.9-dev"><![CDATA[Issue Date]]></phrase>
     <phrase title="bdapi_login_to_authorize_x" version_id="13" version_string="0.9-dev"><![CDATA[Please login to authorize access to {client}.]]></phrase>
+    <phrase title="bdapi_logs" version_id="23" version_string="0.9.8a"><![CDATA[Logs]]></phrase>
+    <phrase title="bdapi_log_not_found" version_id="23" version_string="0.9.8a"><![CDATA[The requested Log could not be found]]></phrase>
+    <phrase title="bdapi_log_no_client" version_id="23" version_string="0.9.8a"><![CDATA[Public Request (no client)]]></phrase>
+    <phrase title="bdapi_log_no_results" version_id="23" version_string="0.9.8a"><![CDATA[No logs to display...]]></phrase>
     <phrase title="bdapi_name" version_id="4" version_string="0.9-dev"><![CDATA[Client Name]]></phrase>
     <phrase title="bdapi_please_confirm_to_authorize_access" version_id="1" version_string="0.1"><![CDATA[Please confirm to authorize access to the listed client with below permissions.]]></phrase>
-    <phrase title="bdapi_post_x_has_been_deleted" version_id="12" version_string="0.9-dev"><![CDATA[The post #{post_id} has been deleted.]]></phrase>
     <phrase title="bdapi_realm" global_cache="1" version_id="1" version_string="0.1"><![CDATA[{boardTitle} API]]></phrase>
     <phrase title="bdapi_redirect_uri" version_id="1" version_string="0.1"><![CDATA[Redirect Uri]]></phrase>
     <phrase title="bdapi_redirect_uri_must_be_valid" version_id="4" version_string="0.9-dev"><![CDATA[Redirect URI must be valid.]]></phrase>
@@ -363,8 +475,13 @@ Arguments:
     <phrase title="bdapi_refresh_token_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following refresh token]]></phrase>
     <phrase title="bdapi_refresh_token_save" version_id="1" version_string="0.1"><![CDATA[Save Refresh Token]]></phrase>
     <phrase title="bdapi_refresh_token_text" version_id="1" version_string="0.1"><![CDATA[Refresh Token Text]]></phrase>
+    <phrase title="bdapi_request" version_id="23" version_string="0.9.8a"><![CDATA[Request]]></phrase>
     <phrase title="bdapi_requested_scopes" version_id="1" version_string="0.1"><![CDATA[Requested Permissions]]></phrase>
+    <phrase title="bdapi_request_date" version_id="23" version_string="0.9.8a"><![CDATA[Request Date]]></phrase>
+    <phrase title="bdapi_request_method" version_id="23" version_string="0.9.8a"><![CDATA[Request Method]]></phrase>
     <phrase title="bdapi_requires_upload_x" version_id="20" version_string="0.9.5"><![CDATA[This request requires file upload `{field}`.]]></phrase>
+    <phrase title="bdapi_response" version_id="23" version_string="0.9.8a"><![CDATA[Response]]></phrase>
+    <phrase title="bdapi_response_code" version_id="23" version_string="0.9.8a"><![CDATA[Response Code]]></phrase>
     <phrase title="bdapi_revoke" version_id="4" version_string="0.9-dev"><![CDATA[Revoke]]></phrase>
     <phrase title="bdapi_scope" version_id="1" version_string="0.1"><![CDATA[Scope]]></phrase>
     <phrase title="bdapi_scope_manage_account_settings" global_cache="1" version_id="1" version_string="0.1"><![CDATA[Change your account settings]]></phrase>
@@ -381,7 +498,6 @@ Arguments:
     <phrase title="bdapi_slash_search_requires_q" version_id="20" version_string="0.9.5"><![CDATA[/search requires `q`.]]></phrase>
     <phrase title="bdapi_slash_threads_attachments_requires_forum_id" version_id="20" version_string="0.9.5"><![CDATA[/threads/attachments requires `forum_id`.]]></phrase>
     <phrase title="bdapi_slash_threads_requires_forum_id" version_id="20" version_string="0.9.5"><![CDATA[/threads requires `forum_id`.]]></phrase>
-    <phrase title="bdapi_thread_x_has_been_deleted" version_id="12" version_string="0.9-dev"><![CDATA[Thread #{thread_id} has been deleted.]]></phrase>
     <phrase title="bdapi_token" version_id="1" version_string="0.1"><![CDATA[Token]]></phrase>
     <phrase title="bdapi_tokens" version_id="4" version_string="0.9-dev"><![CDATA[API Access Tokens]]></phrase>
     <phrase title="bdapi_token_add" version_id="1" version_string="0.1"><![CDATA[Add New Token]]></phrase>
@@ -394,6 +510,7 @@ Arguments:
     <phrase title="bdapi_token_save" version_id="1" version_string="0.1"><![CDATA[Save Token]]></phrase>
     <phrase title="bdapi_token_text" version_id="1" version_string="0.1"><![CDATA[Token Text]]></phrase>
     <phrase title="bdapi_ttl" version_id="11" version_string="0.9-dev"><![CDATA[Time To Live]]></phrase>
+    <phrase title="bdapi_user_id" version_id="23" version_string="0.9.8a"><![CDATA[User Id]]></phrase>
     <phrase title="bdappi_you_will_be_redirected_x" version_id="3" version_string="0.2.1"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
     <phrase title="cron_entry_bdApi_cleanUpExpired" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Clean Up Expired Data]]></phrase>
     <phrase title="permission_general_bdApi_clientNew" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Create Client]]></phrase>
@@ -402,6 +519,7 @@ Arguments:
     <route_type type="admin">
       <prefix original_prefix="api-auth-codes" class="bdApi_Route_PrefixAdmin_AuthCode" build_link="data_only"/>
       <prefix original_prefix="api-clients" class="bdApi_Route_PrefixAdmin_Client" build_link="data_only"/>
+      <prefix original_prefix="api-logs" class="bdApi_Route_PrefixAdmin_Log" build_link="data_only"/>
       <prefix original_prefix="api-refresh-tokens" class="bdApi_Route_PrefixAdmin_RefreshToken" build_link="data_only"/>
       <prefix original_prefix="api-tokens" class="bdApi_Route_PrefixAdmin_Token" build_link="data_only"/>
     </route_type>

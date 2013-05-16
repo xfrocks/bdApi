@@ -328,7 +328,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		$responseCode = $controllerResponse->responseCode;
 		$responseOutput = $this->_getResponseOutput($controllerResponse);
 
-		$this->getModelFromCache('bdApi_Model_Log')->logRequest($responseCode, $responseOutput);
+		if ($responseOutput !== false)
+		{
+			$this->getModelFromCache('bdApi_Model_Log')->logRequest($responseCode, $responseOutput);
+		}
 
 		return parent::_postDispatch($controllerResponse, $controllerName, $action);
 	}
@@ -356,6 +359,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 			$responseOutput = array(
 					'message' => $controllerResponse->message,
 			);
+		}
+		elseif ($controllerResponse instanceof XenForo_ControllerResponse_Reroute)
+		{
+			return false;
 		}
 
 		return $responseOutput;

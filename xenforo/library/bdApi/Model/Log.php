@@ -57,6 +57,12 @@ class bdApi_Model_Log extends XenForo_Model
 				$orderClause
 				", $limitOptions['limit'], $limitOptions['offset']
 		), 'log_id');
+		
+		foreach ($all as &$record)
+		{
+			$record['request_data'] = unserialize($record['request_data']);
+			$record['response_output'] = unserialize($record['response_output']);
+		}
 
 		return $all;
 	}
@@ -193,6 +199,24 @@ class bdApi_Model_Log extends XenForo_Model
 				$sqlConditions[] = "log.response_code = " . $db->quote($conditions['response_code']);
 			}
 		}
+		
+		if (!empty($conditions['filter']))
+		{
+			
+			if (is_array($conditions['filter']))
+			{
+				$filterQuoted = XenForo_Db::quoteLike($conditions['filter'][0], $conditions['filter'][1], $db);
+			}
+			else
+			{
+				$filterQuoted = XenForo_Db::quoteLike($conditions['filter'], 'lr', $db);
+			}
+			
+			$sqlConditions[] = sprintf(
+					'(log.ip_address LIKE %1$s OR log.request_uri LIKE %1$s)',
+					$filterQuoted
+			);
+		}
 
 		return $this->getConditionsForClause($sqlConditions);
 	}
@@ -211,6 +235,7 @@ class bdApi_Model_Log extends XenForo_Model
 	public function prepareLogOrderOptions(array $fetchOptions = array(), $defaultOrderSql = '')
 	{
 		$choices = array(
+				'request_date' => 'log.request_date',
 		);
 
 		return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
@@ -226,6 +251,8 @@ class bdApi_Model_Log extends XenForo_Model
 		{
 			$fullUri = substr($fullUri, 0, $pos);
 		}
+		
+		$fullUri = '/' . str_replace($requestPaths['fullBasePath'], '', $fullUri);
 		
 		return $fullUri;
 	}

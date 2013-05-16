@@ -130,8 +130,8 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base {
 			'files' => array(
 				'data_writer' => array('className' => 'bdApi_DataWriter_Log', 'hash' => 'c52e845427612ba05a46c935ad80c7db'),
 				'model' => array('className' => 'bdApi_Model_Log', 'hash' => 'cb3417127ecae72d04c607a18bf77853'),
-				'route_prefix_admin' => false,
-				'controller_admin' => false
+				'route_prefix_admin' => array('className' => 'bdApi_Route_PrefixAdmin_Log', 'hash' => 'cdc2b71157553793ce20112afcb1aa98'),
+				'controller_admin' => array('className' => 'bdApi_ControllerAdmin_Log', 'hash' => 'd2546249050e790a816e85a98c2f45b8')
 			)
 		)
 	);
