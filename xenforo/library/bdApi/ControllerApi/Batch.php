@@ -92,7 +92,7 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
 		$routeMatch = $fc->getDependencies()->route($request);
 		if (!$routeMatch OR !$routeMatch->getControllerName())
 		{
-			list($controllerName, $action) = $this->_dependencies->getNotFoundErrorRoute();
+			list($controllerName, $action) = $fc->getDependencies()->getNotFoundErrorRoute();
 			$routeMatch->setControllerName($controllerName);
 			$routeMatch->setAction($action);
 		}
