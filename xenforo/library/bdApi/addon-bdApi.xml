@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApi" title="[bd] API" version_string="0.9.9" version_id="24" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApi" title="[bd] API" version_string="1.0" version_id="25" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdApi" parent_navigation_id="tools" display_order="9999" link="api-clients" admin_permission_id="bdApi" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_auth_codes" parent_navigation_id="bdApi" display_order="3000" link="api-auth-codes" admin_permission_id="" debug_only="0" hide_no_children="0"/>
@@ -10,7 +10,6 @@
   </admin_navigation>
   <admin_permissions>
     <admin_permission admin_permission_id="bdApi" display_order="9999"/>
-    <admin_permission admin_permission_id="bdContentList_manage" display_order="9999"/>
   </admin_permissions>
   <admin_style_properties/>
   <admin_templates>
@@ -415,7 +414,6 @@ Arguments:
     <phrase title="admin_navigation_bdApi_refresh_tokens" version_id="1" version_string="0.1"><![CDATA[Refresh Tokens]]></phrase>
     <phrase title="admin_navigation_bdApi_tokens" version_id="1" version_string="0.1"><![CDATA[Tokens]]></phrase>
     <phrase title="admin_permission_bdApi" version_id="1" version_string="0.1"><![CDATA[[bd] API: Manage the API]]></phrase>
-    <phrase title="admin_permission_bdContentList_manage" version_id="19" version_string="0.9.4"><![CDATA[[bd] Content List: Manage]]></phrase>
     <phrase title="bdapi_authorize_access" version_id="1" version_string="0.1"><![CDATA[Authorize Access]]></phrase>
     <phrase title="bdapi_authorize_error_client_x_not_found" version_id="1" version_string="0.1"><![CDATA[Client {client} could not be found.]]></phrase>
     <phrase title="bdapi_authorize_error_invalid_or_expired_access_token" version_id="1" version_string="0.1"><![CDATA[Invalid or expired access token.]]></phrase>
@@ -511,7 +509,7 @@ Arguments:
     <phrase title="bdapi_token_text" version_id="1" version_string="0.1"><![CDATA[Token Text]]></phrase>
     <phrase title="bdapi_ttl" version_id="11" version_string="0.9-dev"><![CDATA[Time To Live]]></phrase>
     <phrase title="bdapi_user_id" version_id="23" version_string="0.9.8a"><![CDATA[User Id]]></phrase>
-    <phrase title="bdappi_you_will_be_redirected_x" version_id="3" version_string="0.2.1"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
+    <phrase title="bdapi_you_will_be_redirected_x" version_id="24" version_string="0.9.9"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
     <phrase title="cron_entry_bdApi_cleanUpExpired" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Clean Up Expired Data]]></phrase>
     <phrase title="permission_general_bdApi_clientNew" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Create Client]]></phrase>
   </phrases>
@@ -968,7 +966,7 @@ Arguments:
 	
 	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
 </form>]]></template>
-    <template title="bdapi_account_authorize" version_id="14" version_string="0.9.1"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
+    <template title="bdapi_account_authorize" version_id="24" version_string="0.9.9"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
 <form method="post" class="xenForm"
 	action="{xen:link
@@ -1011,7 +1009,7 @@ Arguments:
 		</dd>
 	</dl>
 	
-	<p>{xen:phrase bdappi_you_will_be_redirected_x, 'redirectUri={$authorizeRedirectUri}', 'clientName={$client.name}'}</p>
+	<p>{xen:phrase bdapi_you_will_be_redirected_x, 'redirectUri={$authorizeRedirectUri}', 'clientName={$client.name}'}</p>
 
 	<dl class="ctrlUnit submitUnit">
 		<dt></dt>
