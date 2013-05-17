@@ -12,7 +12,7 @@ class XenForo_Link extends _XenForo_Link
 	{
 		return bdApi_Link::buildPublicLink($type, $data, $extraParams, $skipPrepend);
 	}
-	
+
 	public static function convertUriToAbsoluteUri($uri, $includeHost = false, array $paths = null)
 	{
 		return bdApi_Link::convertUriToAbsoluteUri($uri, $includeHost, $paths);
@@ -242,5 +242,10 @@ class bdApi_Link extends XenForo_Link
 		{
 			return $boardUrl . '/' . $uri;
 		}
+	}
+
+	public static function convertApiUriToAbsoluteUri($uri, $includeHost = false, array $paths = null)
+	{
+		return _XenForo_Link::convertUriToAbsoluteUri($uri, $includeHost, $paths);
 	}
 }
