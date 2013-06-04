@@ -67,6 +67,15 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 				'provider' => $provider['name'],
 			)));
 		}
+		if (isset($externalVisitor['user_is_valid']) AND isset($externalVisitor['user_is_verified']))
+		{
+			if (empty($externalVisitor['user_is_valid']) OR empty($externalVisitor['user_is_verified']))
+			{
+				return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_account_not_good_standing', array(
+					'provider' => $provider['name'],
+				)));
+			}
+		}
 
 		$userModel = $this->_getUserModel();
 		$userExternalModel = $this->_getUserExternalModel();
@@ -185,6 +194,15 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_returned_unknown_error', array(
 				'provider' => $provider['name'],
 			)));
+		}
+		if (isset($externalVisitor['user_is_valid']) AND isset($externalVisitor['user_is_verified']))
+		{
+			if (empty($externalVisitor['user_is_valid']) OR empty($externalVisitor['user_is_verified']))
+			{
+				return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_account_not_good_standing', array(
+					'provider' => $provider['name'],
+				)));
+			}
 		}
 
 		$userModel = $this->_getUserModel();
