@@ -114,6 +114,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 				'thread'			=> bdApi_Link::buildApiLink('threads', $post),
 				'poster'			=> bdApi_Link::buildApiLink('users', $post),
 				'likes'				=> bdApi_Link::buildApiLink('posts/likes', $post),
+				'poster_avatar'		=> XenForo_Template_Helper_Core::callHelper('avatar', array($post, 'm', false, true)),
 		);
 
 		$data['permissions'] = array(

@@ -468,7 +468,8 @@ Detail information of a post.
                 detail: (uri),
                 thread: (uri),
                 poster: (uri),
-                likes: (uri)
+                likes: (uri),
+                poster_avatar: (uri)
             },
             permissions: {
                 view: (boolean),
