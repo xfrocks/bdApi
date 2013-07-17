@@ -9,9 +9,12 @@ class bdApi_Crypt
 		return self::AES128;
 	}
 
-	public static function encrypt($data, $algo)
+	public static function encrypt($data, $algo, $key = false)
 	{
-		$key = self::_getGet($algo);
+		if ($key === false)
+		{
+			$key = self::_getGet($algo);
+		}
 
 		switch ($algo)
 		{
@@ -25,10 +28,13 @@ class bdApi_Crypt
 		return $encrypted;
 	}
 
-	public static function decrypt($data, $algo)
+	public static function decrypt($data, $algo, $key = false)
 	{
-		$key = self::_getGet($algo);
-		
+		if ($key === false)
+		{
+			$key = self::_getGet($algo);
+		}
+
 		switch ($algo)
 		{
 			case self::AES128:
