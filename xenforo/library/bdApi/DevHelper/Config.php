@@ -149,7 +149,7 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base {
 			'bdapi_origin' => array('name' => 'bdapi_origin', 'type' => 'string', 'length' => 255, 'default' => '')
 		)
 	);
-	protected $_exportPath = '/Users/sondh/Dropbox/XenForo/bdApi';
+	protected $_exportPath = '/Users/sondh/XenForo/bdApi';
 	protected $_exportIncludes = array('api/index.php');
 	
 	/**

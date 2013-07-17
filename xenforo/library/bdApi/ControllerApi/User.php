@@ -68,6 +68,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 				'email' => XenForo_Input::STRING,
 				'username' => XenForo_Input::STRING,
 				'password' => XenForo_Input::STRING,
+				'password_algo' => XenForo_Input::STRING,
 				'user_dob_day' => XenForo_Input::UINT,
 				'user_dob_month' => XenForo_Input::UINT,
 				'user_dob_year' => XenForo_Input::UINT,
@@ -84,7 +85,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		}
 		$writer->set('email', $input['email']);
 		$writer->set('username', $input['username']);
-		$writer->setPassword($input['password'], $input['password']);
+
+		$password = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
+		$writer->setPassword($password, $password);
+
 		if ($options->gravatarEnable && XenForo_Model_Avatar::gravatarExists($input['email']))
 		{
 			$writer->set('gravatar', $input['email']);
@@ -122,10 +126,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
 	public function actionPostAvatar()
 	{
-		$userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+		$user = $this->_getUserOrError();
 		$visitor = XenForo_Visitor::getInstance();
 
-		if ($userId != $visitor->get('user_id'))
+		if ($user['user_id'] != $visitor->get('user_id'))
 		{
 			return $this->responseNoPermission();
 		}
@@ -152,10 +156,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
 	public function actionDeleteAvatar()
 	{
-		$userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+		$user = $this->_getUserOrError();
 		$visitor = XenForo_Visitor::getInstance();
 
-		if ($userId != $visitor->get('user_id'))
+		if ($user['user_id'] != $visitor->get('user_id'))
 		{
 			return $this->responseNoPermission();
 		}
@@ -242,6 +246,60 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_User_Followings', $data);
 	}
 
+	public function actionPostPassword()
+	{
+		$input = $this->_input->filter(array(
+				'password' => XenForo_Input::STRING,
+				'password_algo' => XenForo_Input::STRING,
+		));
+
+		$user = $this->_getUserOrError();
+		$visitor = XenForo_Visitor::getInstance();
+
+		if ($user['user_id'] != $visitor->get('user_id'))
+		{
+			return $this->responseNoPermission();
+		}
+
+		$password = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
+
+		$writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
+		$writer->setExistingData($user['user_id']);
+		$writer->setPassword($password, $password);
+		$writer->save();
+
+		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+	}
+
+	public function actionPostPasswordTest()
+	{
+		$input = $this->_input->filter(array(
+				'password' => XenForo_Input::STRING,
+				'password_algo' => XenForo_Input::STRING,
+				'decrypt' => XenForo_Input::UINT,
+		));
+
+		if (!XenForo_Application::debugMode())
+		{
+			return $this->respnoseNoPermission();
+		}
+
+		if (empty($input['decrypt']))
+		{
+			$result = bdApi_Crypt::encrypt($input['password'], $input['password_algo']);
+		}
+		else
+		{
+			$result = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
+		}
+
+		$data = array(
+				'result' => $result,
+		);
+
+		return $this->responseData('bdApi_ViewApi_User_PasswordTest', $data);
+	}
+
 	public function actionGetMe()
 	{
 		if (XenForo_Visitor::getUserId() == 0)
@@ -295,6 +353,17 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
 		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
 		return $this->responseReroute(__CLASS__, 'get-followings');
+	}
+
+	public function actionPostMePassword()
+	{
+		if (XenForo_Visitor::getUserId() == 0)
+		{
+			return $this->responseNoPermission();
+		}
+
+		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
+		return $this->responseReroute(__CLASS__, 'post-password');
 	}
 
 	/**

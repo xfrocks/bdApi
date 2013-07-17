@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApi" title="[bd] API" version_string="1.0" version_id="25" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApi" title="[bd] API" version_string="1.0.1" version_id="26" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdApi" parent_navigation_id="tools" display_order="9999" link="api-clients" admin_permission_id="bdApi" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_auth_codes" parent_navigation_id="bdApi" display_order="3000" link="api-auth-codes" admin_permission_id="" debug_only="0" hide_no_children="0"/>
@@ -376,6 +376,7 @@
 	</xen:if>
 </xen:form>]]></template>
   </admin_templates>
+  <admin_template_modifications/>
   <code_events>
     <event event_id="bdapi_setup_routes"><![CDATA[<p>Called after all default API routes have been registered.</p>
 <p>It's recommended to use <code>bdApi_Route_PrefixApi::addRoute</code> to register new route instead of adding it directly to the <code>$routes</code> array.</p>
@@ -386,18 +387,19 @@ Arguments:
 </ol>]]></event>
   </code_events>
   <code_event_listeners>
-    <listener event_id="file_health_check" execute_order="5" callback_class="bdApi_Listener" callback_method="file_health_check" active="1" description=""/>
-    <listener event_id="init_dependencies" execute_order="5" callback_class="bdApi_Listener" callback_method="init_dependencies" active="1" description=""/>
-    <listener event_id="load_class_controller" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" description=""/>
-    <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdApi_Listener" callback_method="load_class" active="1" description=""/>
-    <listener event_id="load_class_model" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" description=""/>
-    <listener event_id="template_create" execute_order="10" callback_class="bdApi_Listener" callback_method="template_create" active="1" description=""/>
-    <listener event_id="template_hook" execute_order="10" callback_class="bdApi_Listener" callback_method="template_hook" active="1" description=""/>
+    <listener event_id="file_health_check" execute_order="5" callback_class="bdApi_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
+    <listener event_id="init_dependencies" execute_order="5" callback_class="bdApi_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
+    <listener event_id="load_class_controller" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" hint="" description=""/>
+    <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdApi_Listener" callback_method="load_class" active="1" hint="" description=""/>
+    <listener event_id="load_class_model" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" hint="" description=""/>
+    <listener event_id="template_create" execute_order="10" callback_class="bdApi_Listener" callback_method="template_create" active="1" hint="" description=""/>
+    <listener event_id="template_hook" execute_order="10" callback_class="bdApi_Listener" callback_method="template_hook" active="1" hint="" description=""/>
   </code_event_listeners>
   <cron>
     <entry entry_id="bdApi_cleanUpExpired" cron_class="bdApi_CronEntry_CleanUp" cron_method="pruneExpired" active="1"><![CDATA[{"day_type":"dom","dom":["-1"],"hours":["6"],"minutes":["29"]}]]></entry>
   </cron>
   <email_templates/>
+  <email_template_modifications/>
   <optiongroups/>
   <permissions>
     <permission_groups/>
@@ -477,6 +479,9 @@ Arguments:
     <phrase title="bdapi_requested_scopes" version_id="1" version_string="0.1"><![CDATA[Requested Permissions]]></phrase>
     <phrase title="bdapi_request_date" version_id="23" version_string="0.9.8a"><![CDATA[Request Date]]></phrase>
     <phrase title="bdapi_request_method" version_id="23" version_string="0.9.8a"><![CDATA[Request Method]]></phrase>
+    <phrase title="bdapi_request_must_authorize_to_decrypt" version_id="25" version_string="1.0"><![CDATA[Request must be authorized to decrypt data.
+]]></phrase>
+    <phrase title="bdapi_request_must_authorize_to_encrypt" version_id="25" version_string="1.0"><![CDATA[Request must be authorized to encrypt data.]]></phrase>
     <phrase title="bdapi_requires_upload_x" version_id="20" version_string="0.9.5"><![CDATA[This request requires file upload `{field}`.]]></phrase>
     <phrase title="bdapi_response" version_id="23" version_string="0.9.8a"><![CDATA[Response]]></phrase>
     <phrase title="bdapi_response_code" version_id="23" version_string="0.9.8a"><![CDATA[Response Code]]></phrase>
@@ -1030,5 +1035,6 @@ Arguments:
 	<xen:set var="$text">{xen:phrase bdapi_login_to_authorize_x, 'client={$client.name}'}</xen:set>
 </xen:include>]]></template>
   </templates>
+  <public_template_modifications/>
   <bb_code_media_sites/>
 </addon>

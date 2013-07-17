@@ -9,6 +9,13 @@ class bdApi_Session extends XenForo_Session
 	 */
 	protected $_oauthToken = false;
 
+	/**
+	 * The effective OAuth client of current request.
+	 *
+	 * @var array|false
+	 */
+	protected $_oauthClient = false;
+
 	public function getOAuthClientId()
 	{
 		if (!empty($this->_oauthToken))
@@ -17,6 +24,21 @@ class bdApi_Session extends XenForo_Session
 		}
 
 		return '';
+	}
+
+	public function getOAuthClientSecret()
+	{
+		if (!empty($this->_oauthToken))
+		{
+			if (empty($this->_oauthClient))
+			{
+				$this->_oauthClient = XenForo_Model::create('bdApi_Model_Client')->getClientById($this->_oauthToken['client_id']);
+			}
+
+			return $this->_oauthClient['client_secret'];
+		}
+
+		return false;
 	}
 
 	/**

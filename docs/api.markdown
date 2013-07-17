@@ -33,6 +33,11 @@ For API method with resource data like a forum or a thread, the data can be filt
 ### Resource ordering
 For API method with list of resources, the resources can be ordered differently with the parameter `order`. List of supported orders will be specified for each method. The default order will always be `natural`. Most of the time, the natural order is the order of which each resource is added to the system (resource id for example).
 
+### Encryption
+For sensitive information like password, encryption can be used to increase data security. For all encryption with key support, the `client_secret` will be used as the key. List of supported encryptions:
+
+ * `aes128`: AES 128 bit encryption (mode: ECB, padding: PKCS5Padding). Because of algorithm limitation, the binary md5 hash of key will be used instead of the key itself.
+
 ## Categories
 
 ### GET `/categories`
@@ -650,7 +655,7 @@ Required scopes:
 
  * `read`
 
-### POST `users/:userId/avatar`
+### POST `/users/:userId/avatar`
 Upload avatar for a user.
 
     {
@@ -666,7 +671,7 @@ Required scopes:
 
  * `post`
 
-### DELETE `users/:userId/avatar`
+### DELETE `/users/:userId/avatar`
 Delete avatar for a user.
 
     {
@@ -703,7 +708,7 @@ Required scopes:
 
  * `read`
 
-### POST `users/:userId/followers`
+### POST `/users/:userId/followers`
 Follow a user.
 
     {
@@ -719,7 +724,7 @@ Required scopes:
 
  * `post`
 
-### DELETE `users/:userId/followers`
+### DELETE `/users/:userId/followers`
 Un-follow a user.
 
     {
@@ -756,6 +761,23 @@ Required scopes:
 
  * `read`
 
+### POST `/users/:userId/password`
+Change password of a user.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * `password` (__required__): data of the new password.
+ * `password_algo` (__optional__): algorithm used to encrypt the `password` parameter. See [Encryption](#encryption) section for more information.
+
+Required scopes:
+
+ * `post`
+
 ### GET `/users/me`
 Alias for GET `/users/:userId` for authorized user.
 
@@ -770,6 +792,9 @@ Alias for GET `/users/:userId/followers` for authorized user.
 
 ### GET `/users/me/followings`
 Alias for GET `/users/:userId/followings` for authorized user.
+
+### POST `/users/me/password`
+Alias for POST `/users/:userId/password` for authorized user.
 
 ## Searching
 
