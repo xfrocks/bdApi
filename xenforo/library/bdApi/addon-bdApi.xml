@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApi" title="[bd] API" version_string="1.0.1" version_id="26" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApi" title="[bd] API" version_string="1.0.2" version_id="27" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdApi" parent_navigation_id="tools" display_order="9999" link="api-clients" admin_permission_id="bdApi" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_auth_codes" parent_navigation_id="bdApi" display_order="3000" link="api-auth-codes" admin_permission_id="" debug_only="0" hide_no_children="0"/>
@@ -462,6 +462,8 @@ Arguments:
     <phrase title="bdapi_log_no_results" version_id="23" version_string="0.9.8a"><![CDATA[No logs to display...]]></phrase>
     <phrase title="bdapi_name" version_id="4" version_string="0.9-dev"><![CDATA[Client Name]]></phrase>
     <phrase title="bdapi_please_confirm_to_authorize_access" version_id="1" version_string="0.1"><![CDATA[Please confirm to authorize access to the listed client with below permissions.]]></phrase>
+    <phrase title="bdapi_post_slash_users_requires_client_id" version_id="26" version_string="1.0.1"><![CDATA[POST /users requires `client_id`.
+]]></phrase>
     <phrase title="bdapi_realm" global_cache="1" version_id="1" version_string="0.1"><![CDATA[{boardTitle} API]]></phrase>
     <phrase title="bdapi_redirect_uri" version_id="1" version_string="0.1"><![CDATA[Redirect Uri]]></phrase>
     <phrase title="bdapi_redirect_uri_must_be_valid" version_id="4" version_string="0.9-dev"><![CDATA[Redirect URI must be valid.]]></phrase>

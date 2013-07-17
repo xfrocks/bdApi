@@ -3,7 +3,7 @@
 class bdApi_Crypt
 {
 	const AES128 = 'aes128';
-	
+
 	public static function getDefaultAlgo()
 	{
 		return self::AES128;
@@ -13,7 +13,7 @@ class bdApi_Crypt
 	{
 		if ($key === false)
 		{
-			$key = self::_getGet($algo);
+			$key = self::_getKey();
 		}
 
 		switch ($algo)
@@ -32,7 +32,7 @@ class bdApi_Crypt
 	{
 		if ($key === false)
 		{
-			$key = self::_getGet($algo);
+			$key = self::_getKey();
 		}
 
 		switch ($algo)
@@ -47,21 +47,16 @@ class bdApi_Crypt
 		return $decrypted;
 	}
 	
-	protected static function _getGet($algo)
+	protected static function _getKey()
 	{
-		if (!empty($algo))
+		$session = XenForo_Application::getSession();
+		$clientSecret = $session->getOAuthClientSecret();
+		if (empty($clientSecret))
 		{
-			$session = XenForo_Application::getSession();
-			$clientSecret = $session->getOAuthClientSecret();
-			if (empty($clientSecret))
-			{
-				throw new XenForo_Exception(new XenForo_Phrase('bdapi_request_must_authorize_to_encrypt'), true);
-			}
-				
-			return $clientSecret;
+			throw new XenForo_Exception(new XenForo_Phrase('bdapi_request_must_authorize_to_encrypt'), true);
 		}
 		
-		return false;
+		return $clientSecret;
 	}
 
 	protected static function _aes128_encrypt($data, $key)

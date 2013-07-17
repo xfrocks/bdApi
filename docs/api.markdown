@@ -36,7 +36,7 @@ For API method with list of resources, the resources can be ordered differently 
 ### Encryption
 For sensitive information like password, encryption can be used to increase data security. For all encryption with key support, the `client_secret` will be used as the key. List of supported encryptions:
 
- * `aes128`: AES 128 bit encryption (mode: ECB, padding: PKCS5Padding). Because of algorithm limitation, the binary md5 hash of key will be used instead of the key itself.
+ * `aes128`: AES 128 bit encryption (mode: ECB, padding: PKCS#7). Because of algorithm limitation, the binary md5 hash of key will be used instead of the key itself.
 
 ## Categories
 
@@ -611,9 +611,11 @@ Parameters:
  * `email` (__required__): email of the new user.
  * `username` (__required__): username of the new user.
  * `password` (__required__): password of the new user.
+ * `password_algo` (_optional_): algorithm used to encrypt the `password` parameter. See [Encryption](#encryption) section for more information.
  * `user_dob_day` (_optional_): date of birth (day) of the new user.
  * `user_dob_month` (_optional_): date of birth (month) of the new user.
  * `user_dob_year` (_optional_): date of birth (year) of the new user.
+ * `client_id` (_optional_): client ID of the Client. This parameter is required if the request is unauthorized (no `oauth_token`).
 
 Required scopes:
 
@@ -772,7 +774,7 @@ Change password of a user.
 Parameters:
 
  * `password` (__required__): data of the new password.
- * `password_algo` (__optional__): algorithm used to encrypt the `password` parameter. See [Encryption](#encryption) section for more information.
+ * `password_algo` (_optional_): algorithm used to encrypt the `password` parameter. See [Encryption](#encryption) section for more information.
 
 Required scopes:
 

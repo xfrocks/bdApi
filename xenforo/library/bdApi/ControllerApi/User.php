@@ -86,7 +86,25 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		$writer->set('email', $input['email']);
 		$writer->set('username', $input['username']);
 
-		$password = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
+		try
+		{
+			$password = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
+		}
+		catch (XenForo_Exception $e)
+		{
+			// unable to decrypt automatically
+			$clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
+			$client = $this->getModelFromCache('bdApi_Model_Client')->getClientById($clientId);
+			if (!empty($client))
+			{
+				$password = bdApi_Crypt::decrypt($input['password'], $input['password_algo'], $client['client_secret']);
+			}
+			else
+			{
+				return $this->responseError(new XenForo_Phrase('bdapi_post_slash_users_requires_client_id'), 400);
+			}
+		}
+
 		$writer->setPassword($password, $password);
 
 		if ($options->gravatarEnable && XenForo_Model_Avatar::gravatarExists($input['email']))
