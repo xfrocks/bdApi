@@ -637,6 +637,7 @@ Detail information of a user.
             user_dob_month: (int),
             user_dob_year: (int),
             user_timezone_offset: (int),
+            user_has_password: (boolean),
             user_is_valid: (boolean),
             user_is_verified: (boolean),
             links: {
@@ -773,6 +774,7 @@ Change password of a user.
 
 Parameters:
 
+ * `password_old` (__required__): data of the existing password.
  * `password` (__required__): data of the new password.
  * `password_algo` (_optional_): algorithm used to encrypt the `password` parameter. See [Encryption](#encryption) section for more information.
 

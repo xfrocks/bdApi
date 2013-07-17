@@ -267,6 +267,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 	public function actionPostPassword()
 	{
 		$input = $this->_input->filter(array(
+				'password_old' => XenForo_Input::STRING,
 				'password' => XenForo_Input::STRING,
 				'password_algo' => XenForo_Input::STRING,
 		));
@@ -279,7 +280,18 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 			return $this->responseNoPermission();
 		}
 
+		$passwordOld = bdApi_Crypt::decrypt($input['password_old'], $input['password_algo']);
 		$password = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
+
+		$auth = $this->_getUserModel()->getUserAuthenticationObjectByUserId($user['user_id']);
+		if (empty($auth))
+		{
+			return $this->responseNoPermission();
+		}
+		if ($auth->hasPassword() AND !$auth->authenticate($user['user_id'], $passwordOld))
+		{
+			return $this->responseError(new XenForo_Phrase('your_existing_password_is_not_correct'));
+		}
 
 		$writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
 		$writer->setExistingData($user['user_id']);

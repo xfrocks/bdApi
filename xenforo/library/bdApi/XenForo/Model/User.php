@@ -99,6 +99,9 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 				$dt = new DateTime('now', $dtz);
 				$data['user_timezone_offset'] = $dtz->getOffset($dt);
 			}
+
+			$auth = $this->getUserAuthenticationObjectByUserId($user['user_id']);
+			$data['user_has_password'] = $auth->hasPassword();
 		}
 
 		return $data;
