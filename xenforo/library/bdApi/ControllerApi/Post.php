@@ -227,7 +227,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			'post', $post, 'delete_' . $deleteType, array('reason' => $options['reason']), $thread
 			);
 		}
-		
+
 		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
 	}
 
@@ -315,6 +315,56 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
 	}
 
+	public function actionGetAttachments()
+	{
+		$postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
+		$attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
+
+		$ftpHelper = $this->getHelper('ForumThreadPost');
+		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable(
+				$postId,
+				$this->_getPostModel()->getFetchOptionsToPrepareApiData()
+		);
+
+		$posts = array($post['post_id'] => $post);
+		$posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
+		$post = reset($posts);
+
+		$post = $this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum);
+		$attachments = isset($post['attachments']) ? $post['attachments'] : array();
+
+		if (empty($attachmentId))
+		{
+			$data = array(
+					'attachments' => $this->_filterDataMany($attachments),
+			);
+		}
+		else
+		{
+			$attachment = false;
+			foreach ($attachments as $_attachment)
+			{
+				if ($_attachment['attachment_id'] == $attachmentId)
+				{
+					$attachment = $_attachment;
+				}
+			}
+
+			if (!empty($attachment))
+			{
+				$data = array(
+						'attachment' => $this->_filterDataSingle($attachment),
+				);
+			}
+			else
+			{
+				return $this->responseError(new XenForo_Phrase('requested_attachment_not_found'), 404);
+			}
+		}
+
+		return $this->responseData('bdApi_ViewApi_Post_Attachments', $data);
+	}
+
 	public function actionPostAttachments()
 	{
 		$contentData = $this->_input->filter(array(
@@ -338,10 +388,28 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		}
 
 		$data = array(
-				'attachment' => $this->_getPostModel()->prepareApiDataForAttachment($response, $hash),
+				'attachment' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForAttachment(array('post_id' => 0), $response, $hash)),
 		);
 
 		return $this->responseData('bdApi_ViewApi_Post_Attachments', $data);
+	}
+
+	public function actionDeleteAttachments()
+	{
+		$postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
+		$attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
+		$hash = $this->_getAttachmentTempHash($post);
+
+		$ftpHelper = $this->getHelper('ForumThreadPost');
+		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId);
+
+		if (!$this->_getPostModel()->canEditPost($post, $thread, $forum, $errorPhraseKey))
+		{
+			throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+		}
+
+		$attachmentHelper = $this->_getAttachmentHelper();
+		return $attachmentHelper->doDelete($hash, $attachmentId);
 	}
 
 	/**

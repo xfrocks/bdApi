@@ -519,6 +519,55 @@ Required scopes:
 
  * `post`
 
+### GET `/posts/:postId/attachments`
+List of attachments of a post.
+
+    {
+        attachments: [
+            (post > attachment),
+            ...
+        ]
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### GET `/posts/:postId/attachments/:attachmentId`
+Detail information of a post's attachment.
+
+    {
+        attachment: (post > attachment)
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### DELETE `/posts/:postId/attachments/:attachmentId`
+Delete a post's attachment.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+
 ### GET `/posts/:postId/likes`
 List of users who liked a post.
 

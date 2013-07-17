@@ -47,6 +47,21 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 		return $attachmentModel->getAttachmentById($attachmentId);
 	}
 
+	public function doDelete($hash, $attachmentId)
+	{
+		$attachment = $this->_getAttachmentOrError($attachmentId);
+		if (!$this->_getAttachmentModel()->canDeleteAttachment($attachment, $hash))
+		{
+			return $this->_controller->responseNoPermission();
+		}
+
+		$dw = XenForo_DataWriter::create('XenForo_DataWriter_Attachment');
+		$dw->setExistingData($attachment, true);
+		$dw->delete();
+
+		return $this->_controller->responseMessage(new XenForo_Phrase('changes_saved'));
+	}
+
 	protected function _assertCanUploadAndManageAttachments($hash, $contentType, array $contentData)
 	{
 		if (!$hash)
@@ -59,6 +74,17 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 		{
 			throw $this->_controller->getNoPermissionResponseException();
 		}
+	}
+
+	protected function _getAttachmentOrError($attachmentId)
+	{
+		$attachment = $this->_getAttachmentModel()->getAttachmentById($attachmentId);
+		if (!$attachment)
+		{
+			throw $this->_controller->responseException($this->_controller->responseError(new XenForo_Phrase('requested_attachment_not_found'), 404));
+		}
+
+		return $attachment;
 	}
 
 	/**

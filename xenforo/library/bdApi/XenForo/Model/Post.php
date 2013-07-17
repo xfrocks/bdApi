@@ -105,7 +105,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
 		if (!empty($post['attachments']))
 		{
-			$data['attachments'] = $this->prepareApiDataForAttachments($post['attachments']);
+			$data['attachments'] = $this->prepareApiDataForAttachments($post, $post['attachments']);
 		}
 
 		$data['links'] = array(
@@ -117,6 +117,11 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 				'poster_avatar'		=> XenForo_Template_Helper_Core::callHelper('avatar', array($post, 'm', false, true)),
 		);
 
+		if (!empty($post['attach_count']))
+		{
+			$data['links']['attachments'] = bdApi_Link::buildApiLink('posts/attachments', $post);
+		}
+
 		$data['permissions'] = array(
 				'view'				=> $this->canViewPost($post, $thread, $forum),
 				'edit'				=> $this->canEditPost($post, $thread, $forum),
@@ -127,19 +132,19 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		return $data;
 	}
 
-	public function prepareApiDataForAttachments(array $attachments, $tempHash = '')
+	public function prepareApiDataForAttachments(array $post, array $attachments, $tempHash = '')	
 	{
 		$data = array();
 
 		foreach ($attachments as $key => $attachment)
 		{
-			$data[] = $this->prepareApiDataForAttachment($attachment, $tempHash);
+			$data[] = $this->prepareApiDataForAttachment($post, $attachment, $tempHash);
 		}
 
 		return $data;
 	}
 
-	public function prepareApiDataForAttachment(array $attachment, $tempHash = '')
+	public function prepareApiDataForAttachment(array $post, array $attachment, $tempHash = '')
 	{
 		$attachmentModel = $this->getModelFromCache('XenForo_Model_Attachment');
 		$attachment = $attachmentModel->prepareAttachment($attachment);
@@ -159,6 +164,8 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
 		$data['links'] = array(
 				'permalink'			=> bdApi_Link::buildPublicLink('attachments', $attachment),
+				'detail'			=> bdApi_Link::buildApiLink('posts/attachments', $post, array('attachment_id' => $attachment['attachment_id'])),
+				'post'				=> bdApi_Link::buildApiLink('posts', $post),
 				'thumbnail'			=> $thumbnailUrl,
 		);
 
