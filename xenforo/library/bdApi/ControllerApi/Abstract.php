@@ -255,11 +255,6 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		}
 	}
 
-	public function responseView($viewName, $templateName = 'DEFAULT', array $params = array(), array $containerParams = array())
-	{
-		throw new XenForo_Exception('bdApi_ControllerApi_Abstract::responseView() is not supported.');
-	}
-
 	public function responseRedirect($redirectType, $redirectTarget, $redirectMessage = null, array $redirectParams = array())
 	{
 		$data = array(

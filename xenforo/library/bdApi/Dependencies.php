@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_Dependencies extends XenForo_Dependencies_Public
+class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
 {
 	public function preLoadData()
 	{
@@ -40,39 +40,6 @@ class bdApi_Dependencies extends XenForo_Dependencies_Public
 		// new approach to disable XenForo_Link::buildPublicLink()
 		// let everything set, we will set it back to empty array later
 		XenForo_Link::setHandlerInfoForGroup('public', array());
-	}
-
-	public function route(Zend_Controller_Request_Http $request)
-	{
-		$router = new XenForo_Router();
-		$router->addRule(new XenForo_Route_ResponseSuffix(), 'ResponseSuffix')
-		->addRule(new bdApi_Route_PrefixApi(bdApi_Link::API_LINK_GROUP), 'Prefix');
-
-		$routeMatch = $router->match($request);
-
-		if (!empty($routeMatch))
-		{
-			$controllerName = $routeMatch->getControllerName();
-
-			switch ($controllerName)
-			{
-				case 'bdApi_ControllerApi_Error':
-					// ignore
-					break;
-				default:
-					$action = $routeMatch->getAction();
-					if (empty($action))
-					{
-						$action = 'index';
-					}
-
-					$method = $request->getMethod();
-
-					$routeMatch->setAction($method . '-' . $action);
-			}
-		}
-
-		return $routeMatch;
 	}
 
 	public function getNotFoundErrorRoute()
@@ -120,4 +87,76 @@ class bdApi_Dependencies extends XenForo_Dependencies_Public
 	{
 		return 'bdApi_ViewApi_Base';
 	}
+	
+	protected function _bdApi_reRoute(Zend_Controller_Request_Http $request, $routeMatch)
+	{
+		if (!empty($routeMatch))
+		{
+			$controllerName = $routeMatch->getControllerName();
+
+			switch ($controllerName)
+			{
+				case 'bdApi_ControllerApi_Error':
+					// ignore
+					break;
+				default:
+					$action = $routeMatch->getAction();
+					if (empty($action))
+					{
+						$action = 'index';
+					}
+
+					$method = $request->getMethod();
+
+					$routeMatch->setAction($method . '-' . $action);
+			}
+		}
+
+		return $routeMatch;
+	}
+}
+
+if (XenForo_Application::$versionId > 1020000)
+{
+	class bdApi_Dependencies extends bdApi_Dependencies_Base
+	{
+		public function route(Zend_Controller_Request_Http $request, $routePath = null)
+		{
+			$routeMatch = parent::route($request, $routePath);
+
+			$routeMatch = $this->_bdApi_reRoute($request, $routeMatch);
+
+			return $routeMatch;
+		}
+
+		public function getRouter()
+		{
+			$router = new XenForo_Router();
+			$router->addRule(new XenForo_Route_ResponseSuffix(), 'ResponseSuffix')->addRule(new bdApi_Route_PrefixApi(bdApi_Link::API_LINK_GROUP), 'Prefix');
+
+			return $router;
+		}
+
+	}
+
+}
+else
+{
+	class bdApi_Dependencies extends bdApi_Dependencies_Base
+	{
+
+		public function route(Zend_Controller_Request_Http $request)
+		{
+			$router = new XenForo_Router();
+			$router->addRule(new XenForo_Route_ResponseSuffix(), 'ResponseSuffix')->addRule(new bdApi_Route_PrefixApi(bdApi_Link::API_LINK_GROUP), 'Prefix');
+
+			$routeMatch = $router->match($request);
+
+			$routeMatch = $this->_bdApi_reRoute($request, $routeMatch);
+
+			return $routeMatch;
+		}
+
+	}
+
 }
