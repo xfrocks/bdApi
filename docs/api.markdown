@@ -932,6 +932,7 @@ Detail information of a conversation.
             conversation_create_date: (unix timestamp in seconds),
             conversation_update_date: (unix timestamp in seconds),
             conversation_message_count: (int),
+            conversation_has_new_message: (boolean),
             conversation_is_open: (boolean),
             conversation_is_deleted: (boolean),
             first_message: {conversation-message},
