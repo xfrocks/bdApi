@@ -176,7 +176,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		if (!empty($post['post_id']))
 		{
 			$data['links'] += array(
-				'detail' => bdApi_Link::buildApiLink('posts/attachments', $post, array('attachment_id' => $attachment['attachment_id'])),
+				'data' => bdApi_Link::buildApiLink('posts/attachments', $post, array('attachment_id' => $attachment['attachment_id'])),
 				'post' => bdApi_Link::buildApiLink('posts', $post),
 			);
 		}

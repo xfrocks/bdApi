@@ -297,16 +297,18 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
 		$post = reset($posts);
 
-		$post = $this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum);
-		$attachments = isset($post['attachments']) ? $post['attachments'] : array();
-
 		if (empty($attachmentId))
 		{
+			$post = $this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum);
+			$attachments = isset($post['attachments']) ? $post['attachments'] : array();
+
 			$data = array('attachments' => $this->_filterDataMany($attachments), );
 		}
 		else
 		{
+			$attachments = isset($post['attachments']) ? $post['attachments'] : array();
 			$attachment = false;
+
 			foreach ($attachments as $_attachment)
 			{
 				if ($_attachment['attachment_id'] == $attachmentId)
@@ -317,7 +319,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
 			if (!empty($attachment))
 			{
-				$data = array('attachment' => $this->_filterDataSingle($attachment), );
+				return $this->_getAttachmentHelper()->doData($attachment);
 			}
 			else
 			{

@@ -555,15 +555,13 @@ Required scopes:
  * `read`
 
 ### GET `/posts/:postId/attachments/:attachmentId`
-Detail information of a post's attachment.
-
-    {
-        attachment: (post > attachment)
-    }
+Binary data of a post's attachment.
 
 Parameters:
 
- * N/A
+ * `max_width` (_optional_): maximum width required (applicable for image attachment only).
+ * `max_height` (_optional_): maximum height required (applicable for image attachment only).
+ * `keep_ratio` (_optional_): whether to keep original ratio during resizing (applicable for image attachment only).
 
 Required scopes:
 

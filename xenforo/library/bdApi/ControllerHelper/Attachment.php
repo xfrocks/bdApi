@@ -62,6 +62,38 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 		return $this->_controller->responseMessage(new XenForo_Phrase('changes_saved'));
 	}
 
+	public function doData($attachment)
+	{
+		if (!$this->_getAttachmentModel()->canViewAttachment($attachment))
+		{
+			return $this->_controller->responseNoPermission();
+		}
+
+		$filePath = $this->_getAttachmentModel()->getAttachmentDataFilePath($attachment);
+		if (!file_exists($filePath) || !is_readable($filePath))
+		{
+			// TODO: add support for alternative attachment storage
+			return $this->responseError(new XenForo_Phrase('attachment_cannot_be_shown_at_this_time'));
+		}
+
+		$resize = $this->_controller->getInput()->filter(array(
+			'max_width' => XenForo_Input::UINT,
+			'max_height' => XenForo_Input::UINT,
+			'keep_ratio' => XenForo_Input::UINT,
+		));
+
+		$this->_controller->getRouteMatch()->setResponseType('raw');
+
+		$viewParams = array(
+			'attachment' => $attachment,
+			'attachmentFile' => $filePath,
+
+			'resize' => $resize,
+		);
+
+		return $this->_controller->responseData('bdApi_ViewApi_Helper_Attachment_Data', $viewParams);
+	}
+
 	public function getAttachmentTempHash($contentData)
 	{
 		$prefix = '';

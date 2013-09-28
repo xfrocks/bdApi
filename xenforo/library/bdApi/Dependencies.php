@@ -10,7 +10,7 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
 		}
 
 		$this->_dataPreLoadFromRegistry += array(
-				// TODO
+			// TODO
 		);
 
 		parent::preLoadData();
@@ -31,7 +31,8 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
 		XenForo_Link::setHandlerInfoForGroup(bdApi_Link::PUBLIC_LINK_GROUP, $data['routesPublic']);
 
 		// sondh@2013-03-19
-		// do not empty the routes public array, it will cause problem for other add-on that
+		// do not empty the routes public array, it will cause problem for other add-on
+		// that
 		// expects its route to exist (like XenPorta)
 		// $data['routesPublic'] = array();
 
@@ -44,50 +45,40 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
 
 	public function getNotFoundErrorRoute()
 	{
-		return array('bdApi_ControllerApi_Error', 'ErrorNotFound');
+		return array(
+			'bdApi_ControllerApi_Error',
+			'ErrorNotFound'
+		);
 	}
 
 	public function getServerErrorRoute()
 	{
-		return array('bdApi_ControllerApi_Error', 'ErrorServer');
+		return array(
+			'bdApi_ControllerApi_Error',
+			'ErrorServer'
+		);
 	}
 
 	public function getViewRenderer(Zend_Controller_Response_Http $response, $responseType, Zend_Controller_Request_Http $request)
 	{
-		/*
-		 $renderer = parent::getViewRenderer($response, $responseType, $request);
-
-		if (!$renderer OR $renderer instanceof XenForo_ViewRenderer_HtmlPublic)
+		switch ($responseType)
 		{
-		// change the default renderer
-		$renderer = new bdApi_ViewRenderer_Json($this, $response, $request);
+			case 'raw':
+				return new XenForo_ViewRenderer_Raw($this, $response, $request);
+			default:
+				// because the oauth2-php library only supports JSON
+				// it makes little sense for us to support anything else
+				// so for now, we will only use the JSON renderer...
+				// TODO: support XML?
+				return new Appforo_ViewRenderer_Json($this, $response, $request);
 		}
-		elseif ($renderer instanceof XenForo_ViewRenderer_Xml)
-		{
-		// force to use our own xml renderer
-		$renderer = new bdApi_ViewRenderer_Xml($this, $response, $request);
-		}
-		elseif ($renderer instanceof XenForo_ViewRenderer_Json)
-		{
-		// force to use our own json renderer
-		$renderer = new bdApi_ViewRenderer_Json($this, $response, $request);
-		}
-
-		return $renderer;
-		*/
-
-		// because the oauth2-php library only supports JSON
-		// it makes little sense for us to support anything else
-		// so for now, we will only use the JSON renderer...
-		// TODO: support XML?
-		return new bdApi_ViewRenderer_Json($this, $response, $request);
 	}
 
 	public function getBaseViewClassName()
 	{
 		return 'bdApi_ViewApi_Base';
 	}
-	
+
 	protected function _bdApi_reRoute(Zend_Controller_Request_Http $request, $routeMatch)
 	{
 		if (!empty($routeMatch))
@@ -114,6 +105,7 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
 
 		return $routeMatch;
 	}
+
 }
 
 if (XenForo_Application::$versionId > 1020000)
