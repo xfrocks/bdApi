@@ -14,7 +14,12 @@ class bdApi_Data_Helper_Core
 			$data['debug'] = XenForo_Debug::getDebugTemplateParams();
 		}
 
-		$data['system_info'] = array(
+		if (empty($data['system_info']))
+		{
+			$data['system_info'] = array();
+		}
+
+		$data['system_info'] += array(
 			'visitor_id' => XenForo_Visitor::getUserId(),
 			'time' => XenForo_Application::$time,
 		);

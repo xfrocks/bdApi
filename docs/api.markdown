@@ -22,6 +22,9 @@ The system follows OAuth2 specification [IETF draft v10](http://tools.ietf.org/h
  * Authorization URI: `/oauth/authorize`
  * Access token exchange URI: `/oauth/token`
 
+### Discoverability
+System information and availability can be determined by sending a GET request to `/` (index route). A list of resources will be returned. If the request is authenticated, the revisions of API system and installed modules will also made available for further inspection.
+
 ## Common Parameters
 
 ### Fields filtering

@@ -4,7 +4,19 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 {
 	public function actionGetIndex()
 	{
-		$data = array('links' => array(
+		$systemInfo = array();
+
+		if (XenForo_Visitor::getUserId() > 0)
+		{
+			$systemInfo = array(
+				// YYYYMMDD and 2 digits number (01-99), allowing maximum 99 revisions/day
+				'api_revision' => 2013092801,
+				'api_modules' => $this->_getModules(),
+			);
+		}
+
+		$data = array(
+			'links' => array(
 				'categories' => bdApi_Link::buildApiLink('categories'),
 				'conversations' => bdApi_Link::buildApiLink('conversations'),
 				'conversation-messages' => bdApi_Link::buildApiLink('conversation-messages'),
@@ -19,9 +31,19 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 
 				'oauth_authorize' => bdApi_Link::buildApiLink('oauth/authorize', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
 				'oauth_token' => bdApi_Link::buildApiLink('oauth/token', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
-			));
+			),
+			'system_info' => $systemInfo,
+		);
 
 		return $this->responseData('bdApi_ViewApi_Index', $data);
+	}
+
+	protected function _getModules()
+	{
+		return array(
+			'forum' => 2013092801,
+			'oauth2' => 2013092801,
+		);
 	}
 
 	protected function _getScopeForAction($action)
