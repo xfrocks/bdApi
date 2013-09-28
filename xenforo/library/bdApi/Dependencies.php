@@ -70,7 +70,7 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
 				// it makes little sense for us to support anything else
 				// so for now, we will only use the JSON renderer...
 				// TODO: support XML?
-				return new Appforo_ViewRenderer_Json($this, $response, $request);
+				return new bdApi_ViewRenderer_Json($this, $response, $request);
 		}
 	}
 

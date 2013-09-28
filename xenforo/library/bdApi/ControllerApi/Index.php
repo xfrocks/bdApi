@@ -6,12 +6,12 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 	{
 		$data = array('links' => array(
 				'categories' => bdApi_Link::buildApiLink('categories'),
-				'conversations' => Appforo_Link::buildAppforoLink('conversations'),
-				'conversation-messages' => Appforo_Link::buildAppforoLink('conversation-messages'),
+				'conversations' => bdApi_Link::buildApiLink('conversations'),
+				'conversation-messages' => bdApi_Link::buildApiLink('conversation-messages'),
 
 				'forums' => bdApi_Link::buildApiLink('forums'),
 				'posts' => bdApi_Link::buildApiLink('posts'),
-				'search' => Appforo_Link::buildAppforoLink('search'),
+				'search' => bdApi_Link::buildApiLink('search'),
 				'threads' => bdApi_Link::buildApiLink('threads'),
 				'threads/recent' => bdApi_Link::buildApiLink('threads/recent'),
 				'threads/new' => bdApi_Link::buildApiLink('threads/new'),

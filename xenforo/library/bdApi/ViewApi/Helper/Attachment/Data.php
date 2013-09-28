@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_ViewApi_Helper_Attachment_Data extends Appforo_ViewAppforo_Base
+class bdApi_ViewApi_Helper_Attachment_Data extends bdApi_ViewApi_Base
 {
 	public function renderRaw()
 	{
