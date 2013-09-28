@@ -16,6 +16,8 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 			return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_requires_forum_id'), 400);
 		}
 
+		$sticky = $this->_input->filterSingle('sticky', XenForo_Input::UINT);
+
 		$ftpHelper = $this->getHelper('ForumThreadPost');
 		$forum = $this->getHelper('ForumThreadPost')->assertForumValidAndViewable($forumId);
 
@@ -36,11 +38,19 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 			'deleted' => false,
 			'moderated' => false,
 			'node_id' => $forum['node_id'],
+			'sticky' => $sticky,
 		);
 		$fetchOptions = array(
 			'limit' => $limit,
 			'page' => $page
 		);
+
+		if ($sticky)
+		{
+			$limit = 0;
+			$pageNavParams['limit'] = 0;
+			$fetchOptions['limit'] = 0;
+		}
 
 		$order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
 		switch ($order)

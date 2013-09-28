@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApi" title="[bd] API" version_string="1.0.11" version_id="36" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApi" title="[bd] API" version_string="1.0.12" version_id="37" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdApi" parent_navigation_id="tools" display_order="9999" link="api-clients" admin_permission_id="bdApi" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_auth_codes" parent_navigation_id="bdApi" display_order="3000" link="api-auth-codes" admin_permission_id="" debug_only="0" hide_no_children="0"/>
