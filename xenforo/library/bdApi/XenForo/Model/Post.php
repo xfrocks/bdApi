@@ -60,7 +60,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
 		if (isset($post['message']))
 		{
-			$post['messagePlainText'] = XenForo_Template_Helper_Core::callHelper('snippet', array($post['message']));
+			$post['messagePlainText'] = bdApi_Data_Helper_Message::getPlainText($post['message']);
 		}
 
 		$publicKeys = array(
