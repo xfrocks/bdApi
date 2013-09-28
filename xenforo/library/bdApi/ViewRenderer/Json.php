@@ -9,9 +9,7 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
 			$error = array($error);
 		}
 
-		return self::jsonEncodeForOutput(array(
-			'errors' => $error
-		));
+		return self::jsonEncodeForOutput(array('errors' => $error));
 	}
 
 	public function renderMessage($message)
@@ -30,18 +28,17 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
 		{
 			return self::jsonEncodeForOutput($viewOutput);
 		}
-		else if ($viewOutput === null)
+		else
+		if ($viewOutput === null)
 		{
-			return self::jsonEncodeForOutput(
-				$this->getDefaultOutputArray($viewName, $params, $templateName)
-			);
+			return self::jsonEncodeForOutput($this->getDefaultOutputArray($viewName, $params, $templateName));
 		}
 		else
 		{
 			return $viewOutput;
 		}
 	}
-	
+
 	public function getDefaultOutputArray($viewName, $params, $templateName)
 	{
 		return $params;
@@ -53,12 +50,22 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
 		{
 			self::_addDefaultParams($input);
 		}
-		
+
+		foreach (array_keys($input) as $inputKey)
+		{
+			if (strpos($inputKey, '_WidgetFramework') === 0)
+			{
+				// filter out [bd] Widget Framework junk
+				unset($input[$inputKey]);
+			}
+		}
+
 		return XenForo_ViewRenderer_Json::jsonEncodeForOutput($input, false);
 	}
-	
+
 	protected static function _addDefaultParams(array &$params = array())
 	{
 		bdApi_Data_Helper_Core::addDefaultResponse($params);
 	}
+
 }
