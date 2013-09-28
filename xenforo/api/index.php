@@ -28,15 +28,28 @@ if ($fileDir === false)
 	die('XenForo path could not be figured out...');
 }
 
-require($fileDir . '/library/XenForo/Autoloader.php');
+require ($fileDir . '/library/XenForo/Autoloader.php');
 XenForo_Autoloader::getInstance()->setupAutoloader($fileDir . '/library');
 
-// PUT method support
-if (isset($_SERVER['REQUEST_METHOD'])
-AND ($_SERVER['REQUEST_METHOD'] === 'PUT'
-		OR $_SERVER['REQUEST_METHOD'] === 'DELETE'
-)
-)
+// method overriding support
+if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']) AND isset($_SERVER['REQUEST_METHOD']) AND $_SERVER['REQUEST_METHOD'] === 'POST')
+{
+	// support overriding via HTTP header
+	// but only with POST requests
+	if (in_array($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'], array(
+		'PUT',
+		'DELETE',
+	)))
+	{
+		$_SERVER['REQUEST_METHOD'] = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
+	}
+}
+
+// PUT, DELETE method support
+if (isset($_SERVER['REQUEST_METHOD']) AND in_array($_SERVER['REQUEST_METHOD'], array(
+	'PUT',
+	'DELETE',
+)))
 {
 	$input = file_get_contents('php://input');
 	$inputParams = array();
