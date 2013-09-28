@@ -64,17 +64,17 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		}
 
 		$publicKeys = array(
-				// xf_post
-				'post_id'			=> 'post_id',
-				'thread_id'			=> 'thread_id',
-				'user_id'			=> 'poster_user_id',
-				'username'			=> 'poster_username',
-				'post_date'			=> 'post_create_date',
-				'message'			=> 'post_body',
-				'messageHtml'		=> 'post_body_html',
-				'messagePlainText'	=> 'post_body_plain_text',
-				'likes'				=> 'post_like_count',
-				'attach_count'		=> 'post_attachment_count',
+			// xf_post
+			'post_id' => 'post_id',
+			'thread_id' => 'thread_id',
+			'user_id' => 'poster_user_id',
+			'username' => 'poster_username',
+			'post_date' => 'post_create_date',
+			'message' => 'post_body',
+			'messageHtml' => 'post_body_html',
+			'messagePlainText' => 'post_body_plain_text',
+			'likes' => 'post_like_count',
+			'attach_count' => 'post_attachment_count',
 		);
 
 		$data = bdApi_Data_Helper_Core::filter($post, $publicKeys);
@@ -109,12 +109,17 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		}
 
 		$data['links'] = array(
-				'permalink'			=> bdApi_Link::buildPublicLink('posts', $post),
-				'detail'			=> bdApi_Link::buildApiLink('posts', $post),
-				'thread'			=> bdApi_Link::buildApiLink('threads', $post),
-				'poster'			=> bdApi_Link::buildApiLink('users', $post),
-				'likes'				=> bdApi_Link::buildApiLink('posts/likes', $post),
-				'poster_avatar'		=> XenForo_Template_Helper_Core::callHelper('avatar', array($post, 'm', false, true)),
+			'permalink' => bdApi_Link::buildPublicLink('posts', $post),
+			'detail' => bdApi_Link::buildApiLink('posts', $post),
+			'thread' => bdApi_Link::buildApiLink('threads', $post),
+			'poster' => bdApi_Link::buildApiLink('users', $post),
+			'likes' => bdApi_Link::buildApiLink('posts/likes', $post),
+			'poster_avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array(
+				$post,
+				'm',
+				false,
+				true
+			)),
 		);
 
 		if (!empty($post['attach_count']))
@@ -123,16 +128,16 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		}
 
 		$data['permissions'] = array(
-				'view'				=> $this->canViewPost($post, $thread, $forum),
-				'edit'				=> $this->canEditPost($post, $thread, $forum),
-				'delete'			=> $this->canDeletePost($post, $thread, $forum),
-				'like'				=> $this->canLikePost($post, $thread, $forum),
+			'view' => $this->canViewPost($post, $thread, $forum),
+			'edit' => $this->canEditPost($post, $thread, $forum),
+			'delete' => $this->canDeletePost($post, $thread, $forum),
+			'like' => $this->canLikePost($post, $thread, $forum),
 		);
 
 		return $data;
 	}
 
-	public function prepareApiDataForAttachments(array $post, array $attachments, $tempHash = '')	
+	public function prepareApiDataForAttachments(array $post, array $attachments, $tempHash = '')
 	{
 		$data = array();
 
@@ -150,10 +155,10 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		$attachment = $attachmentModel->prepareAttachment($attachment);
 
 		$publicKeys = array(
-				// xf_attachment
-				'attachment_id'		=> 'attachment_id',
-				'content_id'		=> 'post_id',
-				'view_count'		=> 'attachment_download_count',
+			// xf_attachment
+			'attachment_id' => 'attachment_id',
+			'content_id' => 'post_id',
+			'view_count' => 'attachment_download_count',
 		);
 
 		$data = bdApi_Data_Helper_Core::filter($attachment, $publicKeys);
@@ -163,15 +168,21 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		$thumbnailUrl = bdApi_Link::convertUriToAbsoluteUri($attachment['thumbnailUrl'], true, $paths);
 
 		$data['links'] = array(
-				'permalink'			=> bdApi_Link::buildPublicLink('attachments', $attachment),
-				'detail'			=> bdApi_Link::buildApiLink('posts/attachments', $post, array('attachment_id' => $attachment['attachment_id'])),
-				'post'				=> bdApi_Link::buildApiLink('posts', $post),
-				'thumbnail'			=> $thumbnailUrl,
+			'permalink' => bdApi_Link::buildPublicLink('attachments', $attachment),
+			'detail' => bdApi_Link::buildApiLink('posts/attachments', $post, array('attachment_id' => $attachment['attachment_id'])),
+			'post' => bdApi_Link::buildApiLink('posts', $post),
+			'thumbnail' => $thumbnailUrl,
 		);
 
-		$data['permissions'] = array(
-				'view'				=> $attachmentModel->canViewAttachment($attachment, $tempHash),
-		);
+		if (!empty($post['post_id']))
+		{
+			$data['links'] += array(
+				'detail' => bdApi_Link::buildApiLink('posts/attachments', $post, array('attachment_id' => $attachment['attachment_id'])),
+				'post' => bdApi_Link::buildApiLink('posts', $post),
+			);
+		}
+
+		$data['permissions'] = array('view' => $attachmentModel->canViewAttachment($attachment, $tempHash), );
 
 		return $data;
 	}
@@ -187,4 +198,5 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
 		return new XenForo_BbCode_TextWrapper($post['message'], $bbCodeParser);
 	}
+
 }

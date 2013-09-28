@@ -17,11 +17,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		}
 
 		$ftpHelper = $this->getHelper('ForumThreadPost');
-		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable(
-				$threadId,
-				$this->_getThreadModel()->getFetchOptionsToPrepareApiData(),
-				$this->_getForumModel()->getFetchOptionsToPrepareApiData()
-		);
+		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId, $this->_getThreadModel()->getFetchOptionsToPrepareApiData(), $this->_getForumModel()->getFetchOptionsToPrepareApiData());
 
 		$visitor = XenForo_Visitor::getInstance();
 
@@ -34,10 +30,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			}
 			else
 			{
-				return $this->responseRedirect(
-						XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
-						$redirect['target_url']
-				);
+				return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $redirect['target_url']);
 			}
 		}
 
@@ -53,16 +46,13 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		}
 
 		$fetchOptions = array(
-				'deleted' => false,
-				'moderated' => false,
-				'limit' => $limit,
-				'page' => $page
+			'deleted' => false,
+			'moderated' => false,
+			'limit' => $limit,
+			'page' => $page
 		);
 
-		$posts = $this->_getPostModel()->getPostsInThread(
-				$threadId,
-				$this->_getPostModel()->getFetchOptionsToPrepareApiData($fetchOptions)
-		);
+		$posts = $this->_getPostModel()->getPostsInThread($threadId, $this->_getPostModel()->getFetchOptionsToPrepareApiData($fetchOptions));
 		if (!$this->_isFieldExcluded('attachments'))
 		{
 			$posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
@@ -71,12 +61,11 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$total = $thread['reply_count'] + 1;
 
 		$data = array(
-				'posts' => $this->_filterDataMany($this->_getPostModel()->prepareApiDataForPosts($posts, $thread, $forum)),
-				'posts_total' => $total,
+			'posts' => $this->_filterDataMany($this->_getPostModel()->prepareApiDataForPosts($posts, $thread, $forum)),
+			'posts_total' => $total,
 		);
 
-		bdApi_Data_Helper_Core::addPageLinks($data, $limit, $total, $page, 'posts',
-		array(), $pageNavParams);
+		bdApi_Data_Helper_Core::addPageLinks($data, $limit, $total, $page, 'posts', array(), $pageNavParams);
 
 		return $this->responseData('bdApi_ViewApi_Post_List', $data);
 	}
@@ -86,12 +75,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
 
 		$ftpHelper = $this->getHelper('ForumThreadPost');
-		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable(
-				$postId,
-				$this->_getPostModel()->getFetchOptionsToPrepareApiData(),
-				$this->_getThreadModel()->getFetchOptionsToPrepareApiData(),
-				$this->_getForumModel()->getFetchOptionsToPrepareApiData()
-		);
+		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId, $this->_getPostModel()->getFetchOptionsToPrepareApiData(), $this->_getThreadModel()->getFetchOptionsToPrepareApiData(), $this->_getForumModel()->getFetchOptionsToPrepareApiData());
 
 		if (!$this->_isFieldExcluded('attachments'))
 		{
@@ -100,9 +84,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			$post = reset($posts);
 		}
 
-		$data = array(
-				'post' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum)),
-		);
+		$data = array('post' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum)), );
 
 		return $this->responseData('bdApi_ViewApi_Post_Single', $data);
 	}
@@ -123,7 +105,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
 		// the routine is very similar to XenForo_ControllerPublic_Thread::actionAddReply
 		$input = $this->_input->filter(array(
-				// TODO
+			// TODO
 		));
 		$input['post_body'] = $this->getHelper('Editor')->getMessageText('post_body', $this->_input);
 		$input['post_body'] = XenForo_Helper_String::autoLinkBbCode($input['post_body']);
@@ -134,9 +116,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$writer->set('message', $input['post_body']);
 		$writer->set('message_state', $this->_getPostModel()->getPostInsertMessageState($thread, $forum));
 		$writer->set('thread_id', $thread['thread_id']);
-		$writer->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentTempHash(array(
-				'thread_id' => $thread['thread_id'],
-		)));
+		$writer->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($thread));
 		$writer->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
 
 		$clientId = XenForo_Application::getSession()->getOAuthClientId();
@@ -156,10 +136,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$post = $writer->getMergedData();
 
 		$this->_getThreadWatchModel()->setVisitorThreadWatchStateFromInput($thread['thread_id'], array(
-				// TODO
-				'watch_thread_state' => 0,
-				'watch_thread' => 0,
-				'watch_thread_email' => 0,
+			// TODO
+			'watch_thread_state' => 0,
+			'watch_thread' => 0,
+			'watch_thread_email' => 0,
 		));
 
 		$this->_request->setParam('post_id', $post['post_id']);
@@ -179,7 +159,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		}
 
 		$input = $this->_input->filter(array(
-				// TODO
+			// TODO
 		));
 		$input['post_body'] = $this->getHelper('Editor')->getMessageText('post_body', $this->_input);
 		$input['post_body'] = XenForo_Helper_String::autoLinkBbCode($input['post_body']);
@@ -187,9 +167,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$dw = XenForo_DataWriter::create('XenForo_DataWriter_DiscussionMessage_Post');
 		$dw->setExistingData($post['post_id']);
 		$dw->set('message', $input['post_body']);
-		$dw->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentTempHash(array(
-				'post_id' => $post['post_id'],
-		)));
+		$dw->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($post));
 		$dw->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
 		$dw->save();
 
@@ -204,9 +182,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId);
 
 		$deleteType = 'soft';
-		$options = array(
-				'reason' => '[bd] API',
-		);
+		$options = array('reason' => '[bd] API', );
 
 		if (!$this->_getPostModel()->canDeletePost($post, $thread, $forum, $deleteType, $errorPhraseKey))
 		{
@@ -217,15 +193,11 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
 		if ($post['post_id'] == $thread['first_post_id'])
 		{
-			XenForo_Model_Log::logModeratorAction(
-			'thread', $thread, 'delete_' . $deleteType, array('reason' => $options['reason'])
-			);
+			XenForo_Model_Log::logModeratorAction('thread', $thread, 'delete_' . $deleteType, array('reason' => $options['reason']));
 		}
 		else
 		{
-			XenForo_Model_Log::logModeratorAction(
-			'post', $post, 'delete_' . $deleteType, array('reason' => $options['reason']), $thread
-			);
+			XenForo_Model_Log::logModeratorAction('post', $post, 'delete_' . $deleteType, array('reason' => $options['reason']), $thread);
 		}
 
 		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
@@ -246,15 +218,13 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			foreach ($likes as $like)
 			{
 				$users[] = array(
-						'user_id' => $like['like_user_id'],
-						'username' => $like['username'],
+					'user_id' => $like['like_user_id'],
+					'username' => $like['username'],
 				);
 			}
 		}
 
-		$data = array(
-				'users' => $users,
-		);
+		$data = array('users' => $users, );
 
 		return $this->responseData('bdApi_ViewApi_Post_Likes', $data);
 	}
@@ -321,10 +291,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
 
 		$ftpHelper = $this->getHelper('ForumThreadPost');
-		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable(
-				$postId,
-				$this->_getPostModel()->getFetchOptionsToPrepareApiData()
-		);
+		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId, $this->_getPostModel()->getFetchOptionsToPrepareApiData());
 
 		$posts = array($post['post_id'] => $post);
 		$posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
@@ -335,9 +302,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
 		if (empty($attachmentId))
 		{
-			$data = array(
-					'attachments' => $this->_filterDataMany($attachments),
-			);
+			$data = array('attachments' => $this->_filterDataMany($attachments), );
 		}
 		else
 		{
@@ -352,9 +317,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
 			if (!empty($attachment))
 			{
-				$data = array(
-						'attachment' => $this->_filterDataSingle($attachment),
-				);
+				$data = array('attachment' => $this->_filterDataSingle($attachment), );
 			}
 			else
 			{
@@ -368,18 +331,17 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 	public function actionPostAttachments()
 	{
 		$contentData = $this->_input->filter(array(
-				'post_id'		=> XenForo_Input::UINT,
-				'thread_id'		=> XenForo_Input::UINT,
+			'post_id' => XenForo_Input::UINT,
+			'thread_id' => XenForo_Input::UINT,
 		));
 		if (empty($contentData['post_id']) AND empty($contentData['thread_id']))
 		{
-			return $this->responseError(new XenForo_Phrase(
-					'bdapi_slash_posts_attachments_requires_ids'
-			), 400);
+			return $this->responseError(new XenForo_Phrase('bdapi_slash_posts_attachments_requires_ids'), 400);
 		}
 		$hash = $this->_getAttachmentTempHash($contentData);
 
 		$attachmentHelper = $this->_getAttachmentHelper();
+		$hash = $attachmentHelper->getAttachmentTempHash($contentData);
 		$response = $attachmentHelper->doUpload('file', $hash, 'post', $contentData);
 
 		if ($response instanceof XenForo_ControllerResponse_Abstract)
@@ -387,28 +349,26 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			return $response;
 		}
 
-		$data = array(
-				'attachment' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForAttachment(array('post_id' => 0), $response, $hash)),
-		);
+		$data = array('attachment' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForAttachment(array('post_id' => 0), $response, $hash)), );
 
 		return $this->responseData('bdApi_ViewApi_Post_Attachments', $data);
 	}
 
 	public function actionDeleteAttachments()
 	{
-		$postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
-		$attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
-		$hash = $this->_getAttachmentTempHash($post);
-
-		$ftpHelper = $this->getHelper('ForumThreadPost');
-		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId);
-
-		if (!$this->_getPostModel()->canEditPost($post, $thread, $forum, $errorPhraseKey))
+		$contentData = $this->_input->filter(array(
+			'post_id' => XenForo_Input::UINT,
+			'thread_id' => XenForo_Input::UINT,
+		));
+		if (empty($contentData['post_id']) AND empty($contentData['thread_id']))
 		{
-			throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+			return $this->responseError(new XenForo_Phrase('bdapi_slash_posts_attachments_requires_ids'), 400);
 		}
 
+		$attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
+
 		$attachmentHelper = $this->_getAttachmentHelper();
+		$hash = $attachmentHelper->getAttachmentTempHash($contentData);
 		return $attachmentHelper->doDelete($hash, $attachmentId);
 	}
 
@@ -460,22 +420,4 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		return $this->getHelper('bdApi_ControllerHelper_Attachment');
 	}
 
-	protected function _getAttachmentTempHash($contentData)
-	{
-		$prefix = '';
-
-		if (!empty($contentData['post_id']))
-		{
-			$prefix = sprintf('post%d', $contentData['post_id']);
-		}
-		elseif (!empty($contentData['thread_id']))
-		{
-			$prefix = sprintf('thread%d', $contentData['thread_id']);
-		}
-
-		return md5(sprintf('%s%s',
-				$prefix,
-				XenForo_Application::getConfig()->get('globalSalt')
-		));
-	}
 }

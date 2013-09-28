@@ -4,16 +4,19 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 {
 	public function doUpload($formField, $hash, $contentType, array $contentData)
 	{
+		if (isset($contentData['forum_id']) AND !isset($contentData['node_id']))
+		{
+			$contentData['node_id'] = $contentData['forum_id'];
+		}
+
 		$this->_assertCanUploadAndManageAttachments($hash, $contentType, $contentData);
 
 		$attachmentModel = $this->_getAttachmentModel();
-		$attachmentHandler = $attachmentModel->getAttachmentHandler($contentType); // known to be valid
+		$attachmentHandler = $attachmentModel->getAttachmentHandler($contentType);
+		// known to be valid
 		$contentId = $attachmentHandler->getContentIdFromContentData($contentData);
 
-		$existingAttachments = ($contentId
-				? $attachmentModel->getAttachmentsByContentId($contentType, $contentId)
-				: array()
-		);
+		$existingAttachments = ($contentId ? $attachmentModel->getAttachmentsByContentId($contentType, $contentId) : array());
 		$newAttachments = $attachmentModel->getAttachmentsByTempHash($hash);
 
 		$attachmentConstraints = $attachmentHandler->getAttachmentConstraints();
@@ -23,10 +26,7 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 			$remainingUploads = $attachmentConstraints['count'] - (count($existingAttachments) + count($newAttachments));
 			if ($remainingUploads <= 0)
 			{
-				return $this->_controller->responseError(new XenForo_Phrase(
-						'you_may_not_upload_more_files_with_message_allowed_x',
-						array('total' => $attachmentConstraints['count'])
-				), 403);
+				return $this->_controller->responseError(new XenForo_Phrase('you_may_not_upload_more_files_with_message_allowed_x', array('total' => $attachmentConstraints['count'])), 403);
 			}
 		}
 
@@ -62,6 +62,32 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 		return $this->_controller->responseMessage(new XenForo_Phrase('changes_saved'));
 	}
 
+	public function getAttachmentTempHash($contentData)
+	{
+		$prefix = '';
+		if (!empty($contentData['post_id']))
+		{
+			$prefix = sprintf('post%d', $contentData['post_id']);
+		}
+		elseif (!empty($contentData['thread_id']))
+		{
+			$prefix = sprintf('thread%d', $contentData['thread_id']);
+		}
+		elseif (!empty($contentData['forum_id']))
+		{
+			$prefix = sprintf('node%d', $contentData['forum_id']);
+		}
+		elseif (!empty($contentData['node_id']))
+		{
+			$prefix = sprintf('node%d', $contentData['node_id']);
+		}
+
+		$session = XenForo_Application::getSession();
+		$clientId = $session->getOAuthClientId();
+
+		return md5(sprintf('%s%s%s', $prefix, $clientId, XenForo_Application::getConfig()->get('globalSalt')));
+	}
+
 	protected function _assertCanUploadAndManageAttachments($hash, $contentType, array $contentData)
 	{
 		if (!$hash)
@@ -94,4 +120,5 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 	{
 		return $this->_controller->getModelFromCache('XenForo_Model_Attachment');
 	}
+
 }

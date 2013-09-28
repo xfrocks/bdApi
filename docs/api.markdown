@@ -210,6 +210,23 @@ Required scopes:
 
 * `post`
 
+### DELETE `/threads/attachments`
+Delete an attachment for a thread.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * `forum_id` (__required__): id of the container forum of the target thread.
+ * `attachment_id` (__required__): id of the attachment.
+
+Required scopes:
+
+ * `post`
+
 ### GET `/threads/:threadId`
 Detail information of a thread.
 
@@ -562,7 +579,7 @@ Delete a post's attachment.
 
 Parameters:
 
- * N/A
+ * `thread_id` (_optional_): id of the container thread of the target post (use only if the attachment hasn't been associated with a post).
 
 Required scopes:
 
