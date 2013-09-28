@@ -65,7 +65,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			'posts_total' => $total,
 		);
 
-		bdApi_Data_Helper_Core::addPageLinks($data, $limit, $total, $page, 'posts', array(), $pageNavParams);
+		bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'posts', array(), $pageNavParams);
 
 		return $this->responseData('bdApi_ViewApi_Post_List', $data);
 	}

@@ -24,29 +24,25 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		}
 
 		$conditions = array(
-				'user_state' => 'valid',
-				'is_banned' => 0
+			'user_state' => 'valid',
+			'is_banned' => 0
 		);
 		$fetchOptions = array(
-				'limit' => $limit,
-				'page' => $page,
-				'order' => bdApi_XenForo_Model_User::ORDER_USER_ID,
+			'limit' => $limit,
+			'page' => $page,
+			'order' => bdApi_XenForo_Model_User::ORDER_USER_ID,
 		);
 
-		$users = $userModel->getUsers(
-				$conditions,
-				$userModel->getFetchOptionsToPrepareApiData($fetchOptions)
-		);
+		$users = $userModel->getUsers($conditions, $userModel->getFetchOptionsToPrepareApiData($fetchOptions));
 
 		$total = $userModel->countUsers($conditions);
 
 		$data = array(
-				'users' => $this->_filterDataMany($userModel->prepareApiDataForUsers($users)),
-				'users_total' => $total,
+			'users' => $this->_filterDataMany($userModel->prepareApiDataForUsers($users)),
+			'users_total' => $total,
 		);
 
-		bdApi_Data_Helper_Core::addPageLinks($data, $limit, $total, $page, 'users',
-		array(), $pageNavParams);
+		bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'users', array(), $pageNavParams);
 
 		return $this->responseData('bdApi_ViewApi_User_List', $data);
 	}
@@ -55,9 +51,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 	{
 		$user = $this->_getUserOrError();
 
-		$data = array(
-				'user' => $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user)),
-		);
+		$data = array('user' => $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user)), );
 
 		return $this->responseData('bdApi_ViewApi_User_Single', $data);
 	}
@@ -65,13 +59,13 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 	public function actionPostIndex()
 	{
 		$input = $this->_input->filter(array(
-				'email' => XenForo_Input::STRING,
-				'username' => XenForo_Input::STRING,
-				'password' => XenForo_Input::STRING,
-				'password_algo' => XenForo_Input::STRING,
-				'user_dob_day' => XenForo_Input::UINT,
-				'user_dob_month' => XenForo_Input::UINT,
-				'user_dob_year' => XenForo_Input::UINT,
+			'email' => XenForo_Input::STRING,
+			'username' => XenForo_Input::STRING,
+			'password' => XenForo_Input::STRING,
+			'password_algo' => XenForo_Input::STRING,
+			'user_dob_day' => XenForo_Input::UINT,
+			'user_dob_month' => XenForo_Input::UINT,
+			'user_dob_year' => XenForo_Input::UINT,
 		));
 		$userModel = $this->_getUserModel();
 		$options = XenForo_Application::getOptions();
@@ -163,11 +157,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 			return $this->responseError(new XenForo_Phrase('bdapi_requires_upload_x', array('field' => 'avatar')), 400);
 		}
 
-		$avatarData = $this->getModelFromCache('XenForo_Model_Avatar')->uploadAvatar(
-				$avatar,
-				$visitor->get('user_id'),
-				$visitor->getPermissions()
-		);
+		$avatarData = $this->getModelFromCache('XenForo_Model_Avatar')->uploadAvatar($avatar, $visitor->get('user_id'), $visitor->getPermissions());
 
 		return $this->responseMessage(new XenForo_Phrase('upload_completed_successfully'));
 	}
@@ -198,15 +188,13 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
 		$followers = $this->_getUserModel()->getUsersFollowingUserId($user['user_id'], 0, 'user.user_id');
 
-		$data = array(
-				'users' => array(),
-		);
+		$data = array('users' => array());
 
 		foreach ($followers as $follower)
 		{
 			$data['users'][] = array(
-					'user_id' => $follower['user_id'],
-					'username' => $follower['username'],
+				'user_id' => $follower['user_id'],
+				'username' => $follower['username'],
 			);
 		}
 
@@ -249,15 +237,13 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
 		$followings = $this->_getUserModel()->getFollowedUserProfiles($user['user_id'], 0, 'user.user_id');
 
-		$data = array(
-				'users' => array(),
-		);
+		$data = array('users' => array());
 
 		foreach ($followings as $following)
 		{
 			$data['users'][] = array(
-					'user_id' => $following['user_id'],
-					'username' => $following['username'],
+				'user_id' => $following['user_id'],
+				'username' => $following['username'],
 			);
 		}
 
@@ -267,9 +253,9 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 	public function actionPostPassword()
 	{
 		$input = $this->_input->filter(array(
-				'password_old' => XenForo_Input::STRING,
-				'password' => XenForo_Input::STRING,
-				'password_algo' => XenForo_Input::STRING,
+			'password_old' => XenForo_Input::STRING,
+			'password' => XenForo_Input::STRING,
+			'password_algo' => XenForo_Input::STRING,
 		));
 
 		$user = $this->_getUserOrError();
@@ -304,9 +290,9 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 	public function actionPostPasswordTest()
 	{
 		$input = $this->_input->filter(array(
-				'password' => XenForo_Input::STRING,
-				'password_algo' => XenForo_Input::STRING,
-				'decrypt' => XenForo_Input::UINT,
+			'password' => XenForo_Input::STRING,
+			'password_algo' => XenForo_Input::STRING,
+			'decrypt' => XenForo_Input::UINT,
 		));
 
 		if (!XenForo_Application::debugMode())
@@ -323,9 +309,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 			$result = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
 		}
 
-		$data = array(
-				'result' => $result,
-		);
+		$data = array('result' => $result);
 
 		return $this->responseData('bdApi_ViewApi_User_PasswordTest', $data);
 	}
@@ -410,10 +394,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
 		$userModel = $this->_getUserModel();
 
-		$user = $userModel->getUserById(
-				$userId,
-				$userModel->getFetchOptionsToPrepareApiData($fetchOptions)
-		);
+		$user = $userModel->getUserById($userId, $userModel->getFetchOptionsToPrepareApiData($fetchOptions));
 
 		if (empty($user))
 		{
@@ -438,4 +419,5 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
 		return parent::_getScopeForAction($action);
 	}
+
 }

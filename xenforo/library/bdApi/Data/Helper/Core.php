@@ -23,6 +23,7 @@ class bdApi_Data_Helper_Core
 	/**
 	 * Builds and adds the navigation for api data
 	 *
+	 * @param XenForo_Input $input
 	 * @param array $data
 	 * @param int $perPage
 	 * @param int $totalItems
@@ -32,7 +33,7 @@ class bdApi_Data_Helper_Core
 	 * @param array $linkParams
 	 * @param array $options
 	 */
-	public static function addPageLinks(array &$data, $perPage, $totalItems, $page, $linkType, $linkData = null, array $linkParams = array(), array $options = array())
+	public static function addPageLinks(XenForo_Input $input, array &$data, $perPage, $totalItems, $page, $linkType, $linkData = null, array $linkParams = array(), array $options = array())
 	{
 		if (empty($perPage))
 		{
@@ -41,13 +42,17 @@ class bdApi_Data_Helper_Core
 
 		$pageNav = array();
 
-		if (!empty($_REQUEST['fields_include']))
+		$inputData = $input->filter(array(
+			'fields_include' => XenForo_Input::STRING,
+			'fields_exclude' => XenForo_Input::STRING,
+		));
+		if (!empty($inputData['fields_include']))
 		{
-			$linkParams['fields_include'] = $_REQUEST['fields_include'];
+			$linkParams['fields_include'] = $inputData['fields_include'];
 		}
-		elseif (!empty($_REQUEST['fields_exclude']))
+		elseif (!empty($inputData['fields_exclude']))
 		{
-			$linkParams['fields_exclude'] = $_REQUEST['fields_exclude'];
+			$linkParams['fields_exclude'] = $inputData['fields_exclude'];
 		}
 
 		if (empty($page))

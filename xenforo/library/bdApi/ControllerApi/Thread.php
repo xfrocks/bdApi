@@ -102,7 +102,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 			'threads_total' => $total,
 		);
 
-		bdApi_Data_Helper_Core::addPageLinks($data, $limit, $total, $page, 'threads', array(), $pageNavParams);
+		bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'threads', array(), $pageNavParams);
 
 		return $this->responseData('bdApi_ViewApi_Thread_List', $data);
 	}
