@@ -712,6 +712,13 @@ Detail information of a user.
                 avatar: (uri),
                 followers: (uri),
                 followings: (uri)
+            },
+            permissions: {
+                follow: (boolean)
+            },
+            self_permissions: {
+                create_conversation: (boolean)
+
             }
         }
     }
@@ -865,6 +872,183 @@ Alias for GET `/users/:userId/followings` for authorized user.
 
 ### POST `/users/me/password`
 Alias for POST `/users/:userId/password` for authorized user.
+
+## Conversation
+
+### GET `/conversations`
+List of conversations (with pagination).
+
+    {
+        conversations: [
+            (conversation),
+            (conversation),
+            ...
+        ],
+        conversations_total: (int),
+        links: {
+            pages: (int),
+            next: (uri),
+            prev: (uri)
+        }
+    }
+
+Parameters:
+
+ * `page` (_optional_): page number of conversations.
+ * `limit` (_optional_): number of conversations in a page. Default value depends on the system configuration.
+
+Required scopes:
+
+ * `read`
+ * `conversate`
+
+### POST `/conversations`
+Create a new conversation.
+
+    {
+        conversation: (conversation)
+    }
+
+Parameters:
+
+ * `conversation_title` (__required__): title of the new conversation.
+ * `recipients` (__required__): usernames of recipients of the new conversation. Separated by comma.
+ * `message_body` (__required__): content of the new conversation.
+
+Required scopes:
+
+ * `post`
+ * `conversate`
+
+### GET `/conversations/:conversationId`
+Detail information of a conversation.
+
+    {
+        conversation: {
+            conversation_id: (int),
+            conversation_title: (string),
+            creator_user_id: (int),
+            creator_username: (string),
+            conversation_create_date: (unix timestamp in seconds),
+            conversation_update_date: (unix timestamp in seconds),
+            conversation_message_count: (int),
+            conversation_is_open: (boolean),
+            conversation_is_deleted: (boolean),
+            first_message: {conversation-message},
+            recipients: [
+                {
+                    user_id: (int),
+                    username: (string)
+                },
+                {
+                    user_id: (int),
+                    username: (string)
+                },
+                ...
+            ]
+            links: {
+                permalink: (uri),
+                detail: (uri),
+                messages: (uri)
+            },
+            permissions: {
+                reply: (boolean),
+                delete: (boolean)
+            }
+        }
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+ * `conversate`
+
+### DELETE `/conversations/:conversationId`
+Delete a conversation.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+ * `conversate`
+
+### GET `/conversation-messages`
+List of messages in a conversation (with pagination).
+
+    {
+        messages: [
+            (conversation-message),
+            (conversation-message),
+            ...
+        ],
+        messages_total: (int),
+        links: {
+            pages: (int),
+            next: (uri),
+            prev: (uri)
+        }
+    }
+
+Parameters:
+
+ * `conversation_id` (__required__): id of needed conversation.
+ * `page` (_optional_): page number of messages.
+ * `limit` (_optional_): number of messages in a page. Default value depends on the system configuration.
+
+Required scopes:
+
+ * `read`
+ * `conversate`
+
+### POST `/conversation-messages`
+Create a new conversation message.
+
+    {
+        message: (conversation-message)
+    }
+
+Parameters:
+
+ * `conversation_id` (__required__): id of the target conversation.
+ * `message_body` (__required__): content of the new message.
+
+Required scopes:
+
+ * `post`
+ * `conversate`
+
+### GET `/conversation-messages/:messageId`
+
+    {
+        message: {
+            message_id: (int),
+            conversation_id: (int),
+            creator_user_id: (int),
+            creator_username: (string),
+            message_create_date: (unix timestamp in seconds),
+            message_body: (string),
+            message_body_html: (string),
+            message_body_plain_text: (string),
+            links: {
+                detail: (uri),
+                conversation: (uri),
+                creator: (uri),
+                creator_avatar: (uri)
+            }
+        }
+    }
 
 ## Searching
 

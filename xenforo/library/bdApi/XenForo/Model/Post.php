@@ -55,7 +55,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
 		if (!isset($post['messageHtml']))
 		{
-			$post['messageHtml'] = $this->_renderMessage($post);
+			$post['messageHtml'] = $this->_renderApiMessage($post);
 		}
 
 		if (isset($post['message']))
@@ -186,7 +186,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		return $data;
 	}
 
-	protected function _renderMessage(array $post)
+	protected function _renderApiMessage(array $post)
 	{
 		static $bbCodeParser = false;
 

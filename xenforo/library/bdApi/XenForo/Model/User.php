@@ -28,24 +28,24 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 		$visitor = XenForo_Visitor::getInstance();
 
 		$publicKeys = array(
-				// xf_user
-				'user_id'			=> 'user_id',
-				'username'			=> 'username',
-				'custom_title'		=> 'user_title',
-				'message_count'		=> 'user_message_count',
-				'register_date'		=> 'user_register_date',
-				'like_count'		=> 'user_like_count',
+			// xf_user
+			'user_id' => 'user_id',
+			'username' => 'username',
+			'custom_title' => 'user_title',
+			'message_count' => 'user_message_count',
+			'register_date' => 'user_register_date',
+			'like_count' => 'user_like_count',
 		);
 
 		if ($user['user_id'] == $visitor->get('user_id'))
 		{
 			$publicKeys = array_merge($publicKeys, array(
-					// xf_user
-					'email'			=> 'user_email',
-					// xf_user_profile
-					'dob_day'		=> 'user_dob_day',
-					'dob_month'		=> 'user_dob_month',
-					'dob_year'		=> 'user_dob_year',
+				// xf_user
+				'email' => 'user_email',
+				// xf_user_profile
+				'dob_day' => 'user_dob_day',
+				'dob_month' => 'user_dob_month',
+				'dob_year' => 'user_dob_year',
 			));
 		}
 
@@ -80,16 +80,19 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 		}
 
 		$data['links'] = array(
-				'permalink' => bdApi_Link::buildPublicLink('members', $user),
-				'detail' => bdApi_Link::buildApiLink('users', $user),
-				'avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array($user, 'm', false, true)),
-				'followers' => bdApi_Link::buildApiLink('users/followers', $user),
-				'followings' => bdApi_Link::buildApiLink('users/followings', $user),
+			'permalink' => bdApi_Link::buildPublicLink('members', $user),
+			'detail' => bdApi_Link::buildApiLink('users', $user),
+			'avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array(
+				$user,
+				'm',
+				false,
+				true
+			)),
+			'followers' => bdApi_Link::buildApiLink('users/followers', $user),
+			'followings' => bdApi_Link::buildApiLink('users/followings', $user),
 		);
 
-		$data['permissions'] = array(
-				'follow' => ($user['user_id'] != $visitor->get('user_id')) AND $visitor->canFollow(),
-		);
+		$data['permissions'] = array('follow' => ($user['user_id'] != $visitor->get('user_id')) AND $visitor->canFollow());
 
 		if ($user['user_id'] == $visitor->get('user_id'))
 		{
@@ -102,6 +105,8 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 
 			$auth = $this->getUserAuthenticationObjectByUserId($user['user_id']);
 			$data['user_has_password'] = $auth->hasPassword();
+
+			$data['self_permissions'] = array('create_conversation' => $this->getModelFromCache('XenForo_Model_Conversation')->canStartConversations());
 		}
 
 		return $data;
@@ -113,4 +118,5 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 
 		return parent::getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
 	}
+
 }
