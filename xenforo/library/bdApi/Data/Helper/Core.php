@@ -38,6 +38,15 @@ class bdApi_Data_Helper_Core
 	{
 		$pageNav = array();
 		
+		if (!empty($_REQUEST['fields_include']))
+		{
+			$linkParams['fields_include'] = $_REQUEST['fields_include'];
+		}
+		elseif (!empty($_REQUEST['fields_exclude']))
+		{
+			$linkParams['fields_exclude'] = $_REQUEST['fields_exclude'];
+		}
+		
 		if (empty($page)) $page = 1;
 		
 		$pageNav['pages'] = ceil($totalItems / $perPage);
