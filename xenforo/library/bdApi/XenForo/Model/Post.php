@@ -165,14 +165,13 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
 		$paths = XenForo_Application::get('requestPaths');
 		$paths['fullBasePath'] = XenForo_Application::getOptions()->get('boardUrl') . '/';
-		$thumbnailUrl = bdApi_Link::convertUriToAbsoluteUri($attachment['thumbnailUrl'], true, $paths);
 
-		$data['links'] = array(
-			'permalink' => bdApi_Link::buildPublicLink('attachments', $attachment),
-			'detail' => bdApi_Link::buildApiLink('posts/attachments', $post, array('attachment_id' => $attachment['attachment_id'])),
-			'post' => bdApi_Link::buildApiLink('posts', $post),
-			'thumbnail' => $thumbnailUrl,
-		);
+		$data['links'] = array('permalink' => bdApi_Link::buildPublicLink('attachments', $attachment));
+
+		if (!empty($attachment['thumbnailUrl']))
+		{
+			$data['links']['thumbnail'] = bdApi_Link::convertUriToAbsoluteUri($attachment['thumbnailUrl'], true, $paths);
+		}
 
 		if (!empty($post['post_id']))
 		{
