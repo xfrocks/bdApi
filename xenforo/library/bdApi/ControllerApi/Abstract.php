@@ -17,7 +17,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 	 *
 	 * @param string $viewName
 	 * @param array $data
-	*/
+	 */
 	public function responseData($viewName, array $data = array())
 	{
 		return parent::responseView($viewName, 'DEFAULT', $data);
@@ -193,7 +193,8 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 	 *
 	 * @param string $action
 	 *
-	 * @return string required scope. One of the SCOPE_* constant in bdApi_Model_OAuth2
+	 * @return string required scope. One of the SCOPE_* constant in
+	 * bdApi_Model_OAuth2
 	 */
 	protected function _getScopeForAction($action)
 	{
@@ -242,27 +243,21 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		$oauthTokenText = $session->getOAuthTokenText();
 		if (empty($oauthTokenText))
 		{
-			throw $this->responseException(
-					$this->responseError(new XenForo_Phrase('bdapi_authorize_error_invalid_or_expired_access_token'), 403)
-			);
+			throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_authorize_error_invalid_or_expired_access_token'), 403));
 		}
 
 		if (!$session->checkScope($scope))
 		{
-			throw $this->responseException(
-					$this->responseError(new XenForo_Phrase('bdapi_authorize_error_scope_x_not_granted', array('scope' => $scope)), 403)
-			);
+			throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_authorize_error_scope_x_not_granted', array('scope' => $scope)), 403));
 		}
 	}
 
 	public function responseRedirect($redirectType, $redirectTarget, $redirectMessage = null, array $redirectParams = array())
 	{
-		$data = array(
-				'redirect' => array(
-						'type' => $redirectType,
-						'target' => $redirectTarget,
-				),
-		);
+		$data = array('redirect' => array(
+				'type' => $redirectType,
+				'target' => $redirectTarget,
+			));
 
 		if ($redirectMessage !== null)
 		{
@@ -287,9 +282,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 	{
 		if (!XenForo_Visitor::getUserId())
 		{
-			throw $this->responseException(
-					$this->responseReroute('bdApi_ControllerApi_Error', 'registrationRequired')
-			);
+			throw $this->responseException($this->responseReroute('bdApi_ControllerApi_Error', 'registrationRequired'));
 		}
 	}
 
@@ -320,15 +313,24 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
 	protected function _postDispatch($controllerResponse, $controllerName, $action)
 	{
+		$this->_logRequest($controllerResponse, $controllerName, $action);
+
+		return parent::_postDispatch($controllerResponse, $controllerName, $action);
+	}
+
+	protected function _logRequest($controllerResponse, $controllerName, $action)
+
+	{
+		$requestMethod = $this->_request->getMethod();
+		$requestUri = $this->_request->getRequestUri();
+		$requestData = $this->_request->getParams();
 		$responseCode = $controllerResponse->responseCode;
 		$responseOutput = $this->_getResponseOutput($controllerResponse);
 
 		if ($responseOutput !== false)
 		{
-			$this->getModelFromCache('bdApi_Model_Log')->logRequest($responseCode, $responseOutput);
+			$this->getModelFromCache('bdApi_Model_Log')->logRequest($requestMethod, $requestUri, $requestData, $responseCode, $responseOutput);
 		}
-
-		return parent::_postDispatch($controllerResponse, $controllerName, $action);
 	}
 
 	protected function _getResponseOutput(XenForo_ControllerResponse_Abstract $controllerResponse)
@@ -341,9 +343,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		}
 		elseif ($controllerResponse instanceof XenForo_ControllerResponse_Error)
 		{
-			$responseOutput = array(
-					'error' => $controllerResponse->errorText,
-			);
+			$responseOutput = array('error' => $controllerResponse->errorText, );
 		}
 		elseif ($controllerResponse instanceof XenForo_ControllerResponse_Exception)
 		{
@@ -351,9 +351,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		}
 		elseif ($controllerResponse instanceof XenForo_ControllerResponse_Message)
 		{
-			$responseOutput = array(
-					'message' => $controllerResponse->message,
-			);
+			$responseOutput = array('message' => $controllerResponse->message, );
 		}
 		elseif ($controllerResponse instanceof XenForo_ControllerResponse_Reroute)
 		{
@@ -362,4 +360,5 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
 		return $responseOutput;
 	}
+
 }

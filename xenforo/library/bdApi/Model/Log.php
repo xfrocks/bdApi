@@ -2,7 +2,7 @@
 
 class bdApi_Model_Log extends XenForo_Model
 {
-	public function logRequest($responseCode, array $responseOutput)
+	public function logRequest($requestMethod, $requestUri, array $requestData, $responseCode, array $responseOutput)
 	{
 		$session = XenForo_Application::getSession();
 		$visitor = XenForo_Visitor::getInstance();
@@ -12,9 +12,9 @@ class bdApi_Model_Log extends XenForo_Model
 		$dw->set('user_id', $visitor->get('user_id'));
 		$dw->set('ip_address', isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
 		$dw->set('request_date', XenForo_Application::$time);
-		$dw->set('request_method', isset($_SERVER['REQUEST_METHOD']) ? strtolower($_SERVER['REQUEST_METHOD']) : '');
-		$dw->set('request_uri', $this->_getRequestUri());
-		$dw->set('request_data', $this->_filterData($_REQUEST));
+		$dw->set('request_method', $requestMethod);
+		$dw->set('request_uri', $requestUri);
+		$dw->set('request_data', $requestData);
 		$dw->set('response_code', $responseCode);
 		$dw->set('response_output', $this->_filterData($responseOutput));
 
@@ -26,7 +26,8 @@ class bdApi_Model_Log extends XenForo_Model
 		$data = $this->getLogs($conditions, $fetchOptions);
 		$list = array();
 
-		foreach ($data as $id => $row) {
+		foreach ($data as $id => $row)
+		{
 			$list[$id] = $row['client_id'];
 		}
 
@@ -35,7 +36,7 @@ class bdApi_Model_Log extends XenForo_Model
 
 	public function getLogById($id, array $fetchOptions = array())
 	{
-		$data = $this->getLogs(array ('log_id' => $id), $fetchOptions);
+		$data = $this->getLogs(array('log_id' => $id), $fetchOptions);
 
 		return reset($data);
 	}
@@ -55,9 +56,8 @@ class bdApi_Model_Log extends XenForo_Model
 				$joinOptions[joinTables]
 				WHERE $whereConditions
 				$orderClause
-				", $limitOptions['limit'], $limitOptions['offset']
-		), 'log_id');
-		
+				", $limitOptions['limit'], $limitOptions['offset']), 'log_id');
+
 		foreach ($all as &$record)
 		{
 			$record['request_data'] = unserialize($record['request_data']);
@@ -199,10 +199,10 @@ class bdApi_Model_Log extends XenForo_Model
 				$sqlConditions[] = "log.response_code = " . $db->quote($conditions['response_code']);
 			}
 		}
-		
+
 		if (!empty($conditions['filter']))
 		{
-			
+
 			if (is_array($conditions['filter']))
 			{
 				$filterQuoted = XenForo_Db::quoteLike($conditions['filter'][0], $conditions['filter'][1], $db);
@@ -211,11 +211,8 @@ class bdApi_Model_Log extends XenForo_Model
 			{
 				$filterQuoted = XenForo_Db::quoteLike($conditions['filter'], 'lr', $db);
 			}
-			
-			$sqlConditions[] = sprintf(
-					'(log.ip_address LIKE %1$s OR log.request_uri LIKE %1$s)',
-					$filterQuoted
-			);
+
+			$sqlConditions[] = sprintf('(log.ip_address LIKE %1$s OR log.request_uri LIKE %1$s)', $filterQuoted);
 		}
 
 		return $this->getConditionsForClause($sqlConditions);
@@ -227,41 +224,23 @@ class bdApi_Model_Log extends XenForo_Model
 		$joinTables = '';
 
 		return array(
-				'selectFields' => $selectFields,
-				'joinTables'   => $joinTables
+			'selectFields' => $selectFields,
+			'joinTables' => $joinTables
 		);
 	}
 
 	public function prepareLogOrderOptions(array $fetchOptions = array(), $defaultOrderSql = '')
 	{
-		$choices = array(
-				'request_date' => 'log.request_date',
-		);
+		$choices = array('request_date' => 'log.request_date');
 
 		return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
-	}
-	
-	protected function _getRequestUri()
-	{
-		$requestPaths = XenForo_Application::get('requestPaths');
-		$fullUri = $requestPaths['fullUri'];
-		
-		$pos = strpos($fullUri, '?');
-		if ($pos !== false)
-		{
-			$fullUri = substr($fullUri, 0, $pos);
-		}
-		
-		$fullUri = '/' . str_replace($requestPaths['fullBasePath'], '', $fullUri);
-		
-		return $fullUri;
 	}
 
 	protected function _filterData(array &$data)
 	{
 		static $whitelistedKeys = array(
-				'error',
-				'message',
+			'error',
+			'message',
 		);
 
 		$filtered = array();
@@ -284,7 +263,8 @@ class bdApi_Model_Log extends XenForo_Model
 				}
 			}
 		}
- 
+
 		return $filtered;
 	}
+
 }

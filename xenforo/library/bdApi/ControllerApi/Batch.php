@@ -25,7 +25,10 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
 
 		foreach ($batchJobs as $batchJob)
 		{
-			if (empty($batchJob['uri'])) continue;
+			if (empty($batchJob['uri']))
+			{
+				continue;
+			}
 
 			if (empty($batchJob['id']))
 			{
@@ -43,7 +46,8 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
 					}
 
 					$number++;
-				} while (isset($jobsOutput[$id]));
+				}
+				while (isset($jobsOutput[$id]));
 			}
 			else
 			{
@@ -68,14 +72,27 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
 				$params = $batchJob['params'];
 			}
 
+			$params = array_merge($this->_extractUriParams($batchJob['uri']), $params);
+
 			$jobsOutput[$id] = $this->_doJob($fcTemp, $method, $batchJob['uri'], $params);
 		}
 
-		$data = array(
-				'jobs' => $jobsOutput,
-		);
+		$data = array('jobs' => $jobsOutput, );
 
 		return $this->responseData('bdApi_ViewApi_Batch_Index', $data);
+	}
+
+	protected function _extractUriParams(&$uri)
+	{
+		$params = array();
+
+		$parsed = parse_url($uri);
+		if (!empty($parsed['query']))
+		{
+			parse_str($parsed['query'], $params);
+		}
+
+		return $params;
 	}
 
 	protected function _doJob(XenForo_FrontController $fc, $method, $uri, array $params)
@@ -102,22 +119,22 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
 		if ($response instanceof XenForo_ControllerResponse_Error)
 		{
 			return array(
-					'_job_result' => 'error',
-					'_job_error' => $response->errorText,
+				'_job_result' => 'error',
+				'_job_error' => $response->errorText,
 			);
 		}
 		elseif ($response instanceof XenForo_ControllerResponse_Exception)
 		{
 			return array(
-					'_job_result' => 'error',
-					'_job_error' => $response->getMessage(),
+				'_job_result' => 'error',
+				'_job_error' => $response->getMessage(),
 			);
 		}
 		elseif ($response instanceof XenForo_ControllerResponse_Message)
 		{
 			return array(
-					'_job_result' => 'message',
-					'_job_message' => $response->message,
+				'_job_result' => 'message',
+				'_job_message' => $response->message,
 			);
 		}
 		elseif ($response instanceof XenForo_ControllerResponse_Redirect)
@@ -141,4 +158,16 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
 		// scope check will be perform by each individual controller later
 		return false;
 	}
+
+	protected function _logRequest($controllerResponse, $controllerName, $action)
+	{
+		// skip logging for successful /batch request
+		if ($controllerResponse instanceof XenForo_ControllerResponse_View)
+		{
+			return false;
+		}
+
+		return parent::_logRequest($controllerResponse, $controllerName, $action);
+	}
+
 }
