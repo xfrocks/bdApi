@@ -22,6 +22,7 @@ class bdApiConsumer_Listener
 	public static function init_dependencies(XenForo_Dependencies_Abstract $dependencies, array $data)
 	{
 		XenForo_Template_Helper_Core::$helperCallbacks['bdapiconsumer_getoption'] = array('bdApiConsumer_Option', 'get');
+		XenForo_Template_Helper_Core::$helperCallbacks['bdapiconsumer_getprovidersdkjs'] = array('bdApiConsumer_Helper_Template', 'getProviderSdkJs');
 	}
 
 	public static function front_controller_pre_view(XenForo_FrontController $fc, XenForo_ControllerResponse_Abstract &$controllerResponse, XenForo_ViewRenderer_Abstract &$viewRenderer, array &$containerParams)
