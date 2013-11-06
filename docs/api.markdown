@@ -701,14 +701,19 @@ Detail information of a user.
             user_message_count: (int),
             user_register_date: (unix timestamp in seconds),
             user_like_count: (int),
-            user_email: (email),
-            user_dob_day: (int),
-            user_dob_month: (int),
-            user_dob_year: (int),
-            user_timezone_offset: (int),
-            user_has_password: (boolean),
+            user_is_visitor: (boolean), // since 2013110601
+            user_email: (email), // user_is_visitor==true only
+            user_dob_day: (int), // user_is_visitor==true only
+            user_dob_month: (int), // user_is_visitor==true only
+            user_dob_year: (int), // user_is_visitor==true only
+            user_timezone_offset: (int), // user_is_visitor==true only
+            user_has_password: (boolean), // user_is_visitor==true only
             user_is_valid: (boolean),
             user_is_verified: (boolean),
+            user_custom_fields: { // user_is_visitor==true only, since 2013110601
+                field_id: (field_value),
+                ...
+            }
             links: {
                 permalink: (uri),
                 detail: (uri),
@@ -719,9 +724,8 @@ Detail information of a user.
             permissions: {
                 follow: (boolean)
             },
-            self_permissions: {
+            self_permissions: { // user_is_visitor==true only
                 create_conversation: (boolean)
-
             }
         }
     }

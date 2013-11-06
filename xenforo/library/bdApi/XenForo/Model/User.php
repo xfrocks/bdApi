@@ -96,6 +96,8 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 
 		if ($user['user_id'] == $visitor->get('user_id'))
 		{
+			$data['user_is_visitor'] = true;
+
 			if (isset($user['timezone']))
 			{
 				$dtz = new DateTimeZone($user['timezone']);
@@ -106,7 +108,13 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 			$auth = $this->getUserAuthenticationObjectByUserId($user['user_id']);
 			$data['user_has_password'] = $auth->hasPassword();
 
+			$data['user_custom_fields'] = !empty($user['custom_fields']) ? unserialize($user['custom_fields']) : array();
+
 			$data['self_permissions'] = array('create_conversation' => $this->getModelFromCache('XenForo_Model_Conversation')->canStartConversations());
+		}
+		else
+		{
+			$data['user_is_visitor'] = false;
 		}
 
 		return $data;
