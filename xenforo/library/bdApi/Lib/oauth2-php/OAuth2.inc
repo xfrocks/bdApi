@@ -983,7 +983,7 @@ abstract class OAuth2 {
    *
    * @ingroup oauth2_section_4
    */
-  public function grantAccessToken() {
+  public function grantAccessToken($sondhEdited = 20131106) {
     $filters = array(
       "grant_type" => array("filter" => FILTER_VALIDATE_REGEXP, "options" => array("regexp" => OAUTH2_GRANT_TYPE_REGEXP), "flags" => FILTER_REQUIRE_SCALAR),
       "scope" => array("flags" => FILTER_REQUIRE_SCALAR),
@@ -1075,11 +1075,23 @@ abstract class OAuth2 {
     }
 
     // Check scope, if provided
-    if ($input["scope"] && (!is_array($stored) || !isset($stored["scope"]) || !$this->checkScope($input["scope"], $stored["scope"])))
-      $this->errorJsonResponse(OAUTH2_HTTP_BAD_REQUEST, OAUTH2_ERROR_INVALID_SCOPE);
+    if (is_array($stored) && isset($stored["scope"])) {
+      $required_scope = !empty($input["scope"]) ? $input["scope"] : $stored["scope"];
+      if (!is_array($required_scope))
+        $required_scope = explode(" ", $required_scope);
+
+      $available_scope = $stored["scope"];
+      if (!is_array($available_scope))
+        $available_scope = explode(" ", $available_scope);
+
+      $usable_scope = array_intersect($available_scope, $required_scope);
+      $input["scope"] = implode(" ", $usable_scope);
+    } else {
+      $input["scope"] = NULL;
+    }
 
     if (!$input["scope"])
-      $input["scope"] = NULL;
+      $this->errorJsonResponse(OAUTH2_HTTP_BAD_REQUEST, OAUTH2_ERROR_INVALID_SCOPE);
 
     $token = $this->createAccessToken($client[0], $input["scope"]);
 

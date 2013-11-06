@@ -162,13 +162,7 @@ class bdApi_OAuth2 extends OAuth2
 		$dw->set('client_id', $clientId);
 		$dw->set('expire_date', $expireDate);
 		$dw->set('user_id', $this->_getUserId());
-
-		if ($scope === NULL)
-		{
-			// no scope, use all scopes available
-			$scope = bdApi_Template_Helper_Core::getInstance()->scopeJoin($this->_model->getSystemSupportedScopes());
-		}
-		$dw->set('scope', $scope);
+		$dw->set('scope', $scope ? $scope : '');
 
 		$dw->save();
 	}
@@ -218,7 +212,7 @@ class bdApi_OAuth2 extends OAuth2
 		$dw->set('redirect_uri', $redirectUri);
 		$dw->set('expire_date', $expireDate);
 		$dw->set('user_id', $this->_getUserId());
-		$dw->set('scope', $scope);
+		$dw->set('scope', $scope ? $scope : '');
 
 		$dw->save();
 	}
@@ -246,7 +240,7 @@ class bdApi_OAuth2 extends OAuth2
 		{
 			$this->_userId = $userId;
 
-			return array('scope' => bdApi_Template_Helper_Core::getInstance()->scopeJoin($this->_model->getSystemSupportedScopes()), );
+			return array('scope' => bdApi_Template_Helper_Core::getInstance()->scopeJoin($this->_model->getSystemSupportedScopes()));
 		}
 		else
 		{
@@ -280,13 +274,7 @@ class bdApi_OAuth2 extends OAuth2
 		$dw->set('client_id', $clientId);
 		$dw->set('expire_date', $expireDate);
 		$dw->set('user_id', $this->_getUserId());
-
-		if ($scope === NULL)
-		{
-			// no scope, use all scopes available
-			$scope = bdApi_Template_Helper_Core::getInstance()->scopeJoin($this->_model->getSystemSupportedScopes());
-		}
-		$dw->set('scope', $scope);
+		$dw->set('scope', $scope ? $scope : '');
 
 		$dw->save();
 	}
@@ -310,6 +298,12 @@ class bdApi_OAuth2 extends OAuth2
 	protected function getDefaultAuthenticationRealm()
 	{
 		return $this->_model->getSystemAuthenticationRealm();
+	}
+
+	public function grantAccessToken($sondhEdited = 20131106)
+	{
+		// extend to guard against future update of OAuth2 lib
+		return parent::grantAccessToken($sondhEdited);
 	}
 
 }
