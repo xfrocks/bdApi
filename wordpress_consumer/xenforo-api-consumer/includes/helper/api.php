@@ -38,6 +38,11 @@ function xfac_api_getAccessTokenFromCode($root, $clientId, $clientSecret, $code,
 
 	if (!empty($parts['access_token']))
 	{
+		if (!empty($parts['expires_in']))
+		{
+			$parts['expire_date'] = time() + $parts['expires_in'];
+		}
+
 		return $parts;
 	}
 	else
