@@ -38,9 +38,9 @@ function xfac_update_user_auth(WP_User $wfUser, $root, $xfUserId, array $xfUser,
 
 	$provider = '';
 
-	$wpdb->prepare("
+	$wpdb->query($wpdb->prepare("
 		REPLACE INTO {$wpdb->prefix}xfac_auth
 		(user_id, provider, identifier, profile, token)
 		VALUES (%d, %s, %s, %s, %s)
-	", $wfUser->ID, $provider, $xfUserId, serialize($xfUser), serialize($token));
+	", $wfUser->ID, $provider, $xfUserId, serialize($xfUser), serialize($token)));
 }
