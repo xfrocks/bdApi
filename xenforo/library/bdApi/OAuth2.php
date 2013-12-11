@@ -259,6 +259,7 @@ class bdApi_OAuth2 extends OAuth2
 		}
 
 		return array(
+			'token' => $token['refresh_token_text'],
 			'client_id' => $token['client_id'],
 			'expires' => $token['expire_date'],
 			'scope' => $token['scope'],
