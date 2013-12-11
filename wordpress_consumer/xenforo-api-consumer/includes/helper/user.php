@@ -6,7 +6,7 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
-function xfac_get_user_by_api_data($root, $xfUserId)
+function xfac_user_getUserByApiData($root, $xfUserId)
 {
 	global $wpdb;
 
@@ -32,7 +32,7 @@ function xfac_get_user_by_api_data($root, $xfUserId)
 	return $user;
 }
 
-function xfac_update_user_auth(WP_User $wfUser, $root, $xfUserId, array $xfUser, array $token)
+function xfac_user_updateAuth(WP_User $wfUser, $root, $xfUserId, array $xfUser, array $token)
 {
 	global $wpdb;
 
@@ -43,4 +43,50 @@ function xfac_update_user_auth(WP_User $wfUser, $root, $xfUserId, array $xfUser,
 		(user_id, provider, identifier, profile, token)
 		VALUES (%d, %s, %s, %s, %s)
 	", $wfUser->ID, $provider, $xfUserId, serialize($xfUser), serialize($token)));
+}
+
+function xfac_user_getAccessToken(WP_User $wfUser)
+{
+	global $wpdb;
+
+	$auth = $wpdb->get_row($wpdb->prepare("
+		SELECT *
+		FROM {$wpdb->prefix}xfac_auth
+		WHERE user_id = %d
+	", $wfUser->ID));
+
+	if (empty($auth))
+	{
+		return false;
+	}
+
+	$token = unserialize($auth->token);
+	if (!empty($token['expire_date']) AND $token['expire_date'] > time())
+	{
+		return $token['access_token'];
+	}
+
+	if (empty($token['refresh_token']))
+	{
+		return null;
+	}
+
+	$root = get_option('xfac_root');
+	$clientId = get_option('xfac_client_id');
+	$clientSecret = get_option('xfac_client_secret');
+	if (empty($root) OR empty($clientId) OR empty($clientSecret))
+	{
+		return null;
+	}
+
+	$newToken = xfac_api_getAccessTokenFromRefreshToken($root, $clientId, $clientSecret, $token['refresh_token'], $token['scope']);
+
+	if (empty($newToken))
+	{
+		return null;
+	}
+
+	xfac_user_updateAuth($wfUser, $root, $auth->identifier, unserialize($auth->profile), $newToken);
+
+	return $newToken['access_token'];
 }

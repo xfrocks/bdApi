@@ -77,7 +77,7 @@ function xfac_login_init()
 				}
 				$xfUser = $me['user'];
 
-				$wfUser = xfac_get_user_by_api_data($root, $xfUser['user_id']);
+				$wfUser = xfac_user_getUserByApiData($root, $xfUser['user_id']);
 
 				if (empty($wfUser))
 				{
@@ -108,7 +108,7 @@ function xfac_login_init()
 					$wfUser = new WP_User($newUserId);
 				}
 
-				xfac_update_user_auth($wfUser, $root, $xfUser['user_id'], $xfUser, $token);
+				xfac_user_updateAuth($wfUser, $root, $xfUser['user_id'], $xfUser, $token);
 
 				wp_set_auth_cookie($wfUser->ID, true);
 

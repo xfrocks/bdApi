@@ -14,6 +14,9 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
+define('XFAC_API_SCOPE', 'read post');
+define('XFAC_META_THREAD_IDS', 'xfac_thread_ids');
+
 function xfac_activate()
 {
 	if (!function_exists('register_post_status'))
@@ -41,3 +44,5 @@ if (is_admin())
 }
 
 require_once (dirname(__FILE__) . '/includes/ui/login.php');
+
+require_once (dirname(__FILE__) . '/includes/sync/post.php');

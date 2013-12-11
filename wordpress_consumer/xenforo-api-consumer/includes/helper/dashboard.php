@@ -13,6 +13,7 @@ function xfac_register_settings()
 	register_setting('xfac-settings', 'xfac_root');
 	register_setting('xfac-settings', 'xfac_client_id');
 	register_setting('xfac-settings', 'xfac_client_secret');
+	register_setting('xfac-settings', 'xfac_tag_forum_mappings');
 }
 
 add_action('admin_init', 'xfac_register_settings');
@@ -43,6 +44,7 @@ function xfac_whitelist_options($whitelist_options)
 	$whitelist_options['xfac'][] = 'xfac_root';
 	$whitelist_options['xfac'][] = 'xfac_client_id';
 	$whitelist_options['xfac'][] = 'xfac_client_secret';
+	$whitelist_options['xfac'][] = 'xfac_tag_forum_mappings';
 	
 	return $whitelist_options;
 }
