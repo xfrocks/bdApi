@@ -32,7 +32,7 @@ function xfac_user_getUserByApiData($root, $xfUserId)
 	return $user;
 }
 
-function xfac_user_updateAuth(WP_User $wfUser, $root, $xfUserId, array $xfUser, array $token)
+function xfac_user_updateAuth($wfUserId, $root, $xfUserId, array $xfUser, array $token)
 {
 	global $wpdb;
 
@@ -42,10 +42,10 @@ function xfac_user_updateAuth(WP_User $wfUser, $root, $xfUserId, array $xfUser, 
 		REPLACE INTO {$wpdb->prefix}xfac_auth
 		(user_id, provider, identifier, profile, token)
 		VALUES (%d, %s, %s, %s, %s)
-	", $wfUser->ID, $provider, $xfUserId, serialize($xfUser), serialize($token)));
+	", $wfUserId, $provider, $xfUserId, serialize($xfUser), serialize($token)));
 }
 
-function xfac_user_getAccessToken(WP_User $wfUser)
+function xfac_user_getAccessToken($wfUserId)
 {
 	global $wpdb;
 
@@ -53,7 +53,7 @@ function xfac_user_getAccessToken(WP_User $wfUser)
 		SELECT *
 		FROM {$wpdb->prefix}xfac_auth
 		WHERE user_id = %d
-	", $wfUser->ID));
+	", $wfUserId));
 
 	if (empty($auth))
 	{
@@ -86,7 +86,7 @@ function xfac_user_getAccessToken(WP_User $wfUser)
 		return null;
 	}
 
-	xfac_user_updateAuth($wfUser, $root, $auth->identifier, unserialize($auth->profile), $newToken);
+	xfac_user_updateAuth($wfUserId, $root, $auth->identifier, unserialize($auth->profile), $newToken);
 
 	return $newToken['access_token'];
 }

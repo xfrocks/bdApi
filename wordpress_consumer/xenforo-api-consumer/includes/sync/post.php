@@ -27,7 +27,7 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 
 		if (!empty($forumIds))
 		{
-			$accessToken = xfac_user_getAccessToken(wp_get_current_user());
+			$accessToken = xfac_user_getAccessToken($post->post_author);
 
 			if (!empty($accessToken))
 			{

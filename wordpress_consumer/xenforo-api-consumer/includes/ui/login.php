@@ -108,7 +108,7 @@ function xfac_login_init()
 					$wfUser = new WP_User($newUserId);
 				}
 
-				xfac_user_updateAuth($wfUser, $root, $xfUser['user_id'], $xfUser, $token);
+				xfac_user_updateAuth($wfUser->ID, $root, $xfUser['user_id'], $xfUser, $token);
 
 				wp_set_auth_cookie($wfUser->ID, true);
 

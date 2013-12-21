@@ -145,3 +145,30 @@ function xfac_api_postThread($root, $clientId, $clientSecret, $accessToken, $for
 		return false;
 	}
 }
+
+function xfac_api_postPost($root, $clientId, $clientSecret, $accessToken, $threadId, $postBody)
+{
+	$ch = curl_init();
+
+	curl_setopt($ch, CURLOPT_URL, sprintf('%s/posts/', $root));
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+		'oauth_token' => $accessToken,
+		'thread_id' => $threadId,
+		'post_body' => $postBody,
+	)));
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+	$body = curl_exec($ch);
+
+	$parts = @json_decode($body, true);
+
+	if (!empty($parts['post']))
+	{
+		return $parts;
+	}
+	else
+	{
+		return false;
+	}
+}
