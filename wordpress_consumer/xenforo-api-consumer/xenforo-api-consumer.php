@@ -15,10 +15,6 @@ if (!defined('ABSPATH'))
 }
 
 define('XFAC_API_SCOPE', 'read post');
-define('XFAC_META_THREAD_IDS', 'xfac_thread_ids');
-define('XFAC_META_PUSH_DATE', 'xfac_push_date');
-define('XFAC_META_PULL_DATE', 'xfac_pull_date');
-define('XFAC_META_POST_IDS', 'xfac_post_ids');
 
 function xfac_activate()
 {
@@ -48,5 +44,6 @@ if (is_admin())
 
 require_once (dirname(__FILE__) . '/includes/ui/login.php');
 
+require_once (dirname(__FILE__) . '/includes/helper/sync.php');
 require_once (dirname(__FILE__) . '/includes/sync/post.php');
 require_once (dirname(__FILE__) . '/includes/sync/comment.php');

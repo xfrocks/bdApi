@@ -10,45 +10,59 @@ function xfac_wp_update_comment_count($postId, $new, $old)
 {
 	if ($new > $old)
 	{
-		$threadIds = get_post_meta($postId, XFAC_META_THREAD_IDS, true);
+		$threadIds = array();
+		$syncDate = array();
+
+		$postSyncRecords = xfac_sync_getRecordsByProviderTypeAndSyncId('', 'thread', $postId);
+		foreach ($postSyncRecords as $postSyncRecord)
+		{
+			$threadIds[$postSyncRecord->syncData['forumId']] = $postSyncRecord->provider_content_id;
+			$syncDate[$postSyncRecord->provider_content_id] = $postSyncRecord->sync_date;
+		}
 		if (empty($threadIds))
 		{
 			return;
 		}
-		$threadIds = unserialize($threadIds);
 
-		$pushDate = intval(get_post_meta($postId, XFAC_META_PUSH_DATE, true));
 		$comments = get_approved_comments($postId);
-		$maxPushedCommentDateGmt = $pushDate;
+		$newSyncDate = array();
 
 		foreach ($comments as $comment)
 		{
 			$commentDateGmt = mysql2date('U', $comment->comment_date_gmt, false);
-			if ($commentDateGmt > $pushDate)
+			foreach ($threadIds as $forumId => $threadId)
 			{
-				// this comment hasn't been pushed yet, do it now
-				$postIds = array();
-
-				foreach ($threadIds as $threadId)
+				if ($commentDateGmt > $syncDate[$threadId])
 				{
+					// this comment hasn't been pushed yet, do it now
 					$xfPost = xfac_push_comment($threadId, $comment);
-					if (!empty($xfPost))
-					{
-						$postIds[$threadId] = $xfPost['post']['post_id'];
-					}
-				}
 
-				if (!empty($postIds))
-				{
-					update_comment_meta($comment->comment_ID, XFAC_META_POST_IDS, serialize($postIds));
-					$maxPushedCommentDateGmt = max($maxPushedCommentDateGmt, $commentDateGmt);
+					if (!empty($xfPost['post']['post_id']))
+					{
+						xfac_sync_updateRecord('', 'post', $xfPost['post']['post_id'], $comment->comment_ID, 0, array(
+							'forumId' => $forumId,
+							'threadId' => $threadId,
+							'post' => $xfPost,
+						));
+
+						$newSyncDate[$threadId] = true;
+					}
 				}
 			}
 		}
 
-		if ($maxPushedCommentDateGmt > $pushDate)
+		if (!empty($newSyncDate))
 		{
-			update_post_meta($postId, XFAC_META_PUSH_DATE, $maxPushedCommentDateGmt);
+			foreach ($newSyncDate as $threadId => $tmp)
+			{
+				foreach ($postSyncRecords as $postSyncRecord)
+				{
+					if ($threadId == $postSyncRecord->provider_content_id)
+					{
+						xfac_sync_updateRecordDate($postSyncRecord);
+					}
+				}
+			}
 		}
 	}
 }

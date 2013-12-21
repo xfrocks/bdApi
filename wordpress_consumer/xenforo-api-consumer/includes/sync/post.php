@@ -37,21 +37,17 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 
 				if (!empty($root) AND !empty($clientId) AND !empty($clientSecret))
 				{
-					$threadIds = array();
-
 					foreach ($forumIds as $forumId)
 					{
 						$thread = xfac_api_postThread($root, $clientId, $clientSecret, $accessToken, $forumId, $post->post_title, $post->post_content);
 
 						if (!empty($thread['thread']['thread_id']))
 						{
-							$threadIds[$forumId] = $thread['thread']['thread_id'];
+							xfac_sync_updateRecord('', 'thread', $thread['thread']['thread_id'], $post->ID, 0, array(
+								'forumId' => $forumId,
+								'thread' => $thread,
+							));
 						}
-					}
-
-					if (!empty($threadIds))
-					{
-						update_post_meta($post->ID, XFAC_META_THREAD_IDS, serialize($threadIds));
 					}
 				}
 			}
