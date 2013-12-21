@@ -8,8 +8,6 @@ if (!defined('ABSPATH'))
 
 function xfac_register_settings()
 {
-	wsl_register_components();
-
 	register_setting('xfac-settings', 'xfac_root');
 	register_setting('xfac-settings', 'xfac_client_id');
 	register_setting('xfac-settings', 'xfac_client_secret');
