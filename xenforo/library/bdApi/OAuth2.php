@@ -258,6 +258,9 @@ class bdApi_OAuth2 extends OAuth2
 			return NULL;
 		}
 
+		// store the user id to use later to create token/refresh_token
+		$this->_userId = $token['user_id'];
+
 		return array(
 			'token' => $token['refresh_token_text'],
 			'client_id' => $token['client_id'],
