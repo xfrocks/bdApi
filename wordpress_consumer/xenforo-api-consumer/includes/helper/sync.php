@@ -64,3 +64,23 @@ function xfac_sync_getRecordsByProviderTypeAndSyncId($provider, $cType, $syncId)
 
 	return $records;
 }
+
+function xfac_sync_getRecordsByProviderTypeAndIds($provider, $cType, array $cIds)
+{
+	global $wpdb;
+
+	$records = $wpdb->get_results($wpdb->prepare("
+		SELECT *
+		FROM {$wpdb->prefix}xfac_sync
+		WHERE provider = %s
+			AND provider_content_type = %s
+			AND provider_content_id IN (" . implode(',', array_map('intval', $cIds)) . ")
+	", $provider, $cType));
+
+	foreach ($records as &$record)
+	{
+		$record->syncData = unserialize($record->sync_data);
+	}
+
+	return $records;
+}

@@ -118,6 +118,22 @@ function xfac_api_getUsersMe($root, $clientId, $clientSecret, $accessToken)
 	}
 }
 
+function xfac_api_getThreadsInForum($root, $clientId, $clientSecret, $forumId, $accessToken = '')
+{
+	$body = file_get_contents(sprintf('%s/threads/?forum_id=%d&order=thread_create_date_reverse&oauth_token=%s', $root, $forumId, rawurlencode($accessToken)));
+
+	$parts = @json_decode($body, true);
+
+	if (!empty($parts['threads']))
+	{
+		return $parts;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 function xfac_api_postThread($root, $clientId, $clientSecret, $accessToken, $forumId, $threadTitle, $postBody)
 {
 	$ch = curl_init();

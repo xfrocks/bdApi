@@ -71,5 +71,15 @@ function xfac_install()
 	}
 }
 
+function xfac_setup_crons()
+{
+	$hourlyNext = wp_next_scheduled('xfac_cron_hourly');
+
+	if ($hourlyNext === false)
+	{
+		wp_schedule_event(time(), 'hourly', 'xfac_cron_hourly');
+	}
+}
+
 // TODO: drop this action? It is called within xfac_activate already
 add_action('plugins_loaded', 'xfac_install');

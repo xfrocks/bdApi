@@ -6,7 +6,7 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
-function xfac_user_getUserByApiData($root, $xfUserId)
+function xfac_user_getUserDataByApiData($root, $xfUserId)
 {
 	global $wpdb;
 
@@ -20,6 +20,18 @@ function xfac_user_getUserByApiData($root, $xfUserId)
 		ON (users.ID = auth.user_id)
 		WHERE auth.provider = %s AND auth.identifier = %s
 	", $provider, $xfUserId));
+
+	if (empty($userdata))
+	{
+		return false;
+	}
+
+	return $userdata;
+}
+
+function xfac_user_getUserByApiData($root, $xfUserId)
+{
+	$userdata = xfac_user_getUserDataByApiData($root, $xfUserId);
 
 	if (empty($userdata))
 	{
