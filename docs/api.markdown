@@ -411,7 +411,7 @@ Parameters:
  * `thread_id` (__required__): id of needed thread.
  * `page` (_optional_): page number of posts.
  * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.
- * `order` (_optional_): ordering of posts. Support `natural`, `natural_reverse`.
+ * `order` (_optional_, since forum-2013122401): ordering of posts. Support `natural`, `natural_reverse`.
 
 Required scopes:
 
@@ -469,6 +469,7 @@ Detail information of a post.
             post_attachment_count: (int),
             post_is_published: (boolean),
             post_is_deleted: (boolean),
+            post_is_first_post: (boolean), # since 2013122402
             post_is_liked: (boolean),
             attachments: {
                 {

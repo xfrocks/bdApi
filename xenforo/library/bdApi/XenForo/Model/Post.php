@@ -130,7 +130,12 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 			}
 		}
 
-		if (in_array('like_date', array_keys($post)))
+		if (isset($post['position']))
+		{
+			$data['post_is_first_post'] = (intval($post['position']) === 0);
+		}
+
+		if (isset($post['like_date']))
 		{
 			$data['post_is_liked'] = !empty($post['like_date']);
 		}

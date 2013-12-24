@@ -41,7 +41,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 	protected function _getModules()
 	{
 		return array(
-			'forum' => 2013122401,
+			'forum' => 2013122402,
 			'oauth2' => 2013092801,
 		);
 	}
