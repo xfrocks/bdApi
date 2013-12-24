@@ -8,6 +8,11 @@ if (!defined('ABSPATH'))
 
 function xfac_transition_post_status($newStatus, $oldStatus, $post)
 {
+	if (!empty($GLOBALS['XFAC_SKIP_xfac_transition_post_status']))
+	{
+		return;
+	}
+
 	if ($newStatus == 'publish')
 	{
 		// we need to make sure our crons are scheduled
@@ -173,13 +178,15 @@ function xfac_syncPost_pullPost($thread, $tags)
 		'post_content' => $thread['first_post']['post_body'],
 		'post_date' => $postDate,
 		'post_date_gmt' => $postDateGmt,
-		'post_status' => 'draft',
+		'post_status' => 'publish',
 		'post_title' => $thread['thread_title'],
 		'post_type' => 'post',
 		'tags_input' => implode(', ', $tags),
 	);
 
+	$GLOBALS['XFAC_SKIP_xfac_transition_post_status'] = true;
 	$wfPostId = wp_insert_post($wfPost);
+	$GLOBALS['XFAC_SKIP_xfac_transition_post_status'] = false;
 
 	if ($wfPostId > 0)
 	{
@@ -187,8 +194,6 @@ function xfac_syncPost_pullPost($thread, $tags)
 			'thread' => $thread,
 			'direction' => 'pull',
 		));
-
-		wp_publish_post($wfPostId);
 	}
 
 	return $wfPostId;
