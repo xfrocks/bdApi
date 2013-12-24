@@ -18,7 +18,7 @@ function xfac_login_form()
 	}
 
 	$loginUrl = site_url('wp-login.php', 'login_post');
-	$redirectTo = _xfac_getRedirectTo();
+	$redirectTo = _xfac_login_getRedirectTo();
 
 	$authenticateUrl = $loginUrl . (strpos($loginUrl, '?') !== false ? '&' : '?') . 'xfac=authorize';
 	$authenticateUrl .= '&redirect_to=' . urlencode($redirectTo);
@@ -51,7 +51,7 @@ function xfac_login_init()
 	}
 
 	$loginUrl = site_url('wp-login.php', 'login_post');
-	$redirectTo = _xfac_getRedirectTo();
+	$redirectTo = _xfac_login_getRedirectTo();
 
 	$redirectBaseUrl = $loginUrl . (strpos($loginUrl, '?') !== false ? '&' : '?') . 'redirect_to=' . urlencode($redirectTo);
 	$callbackUrl = $redirectBaseUrl . '&xfac=callback';
@@ -128,7 +128,7 @@ function xfac_login_init()
 
 add_action('login_init', 'xfac_login_init');
 
-function _xfac_getRedirectTo()
+function _xfac_login_getRedirectTo()
 {
 	if (!empty($_REQUEST['redirect_to']))
 	{

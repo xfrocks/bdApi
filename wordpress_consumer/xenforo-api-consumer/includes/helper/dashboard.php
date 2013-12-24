@@ -6,7 +6,7 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
-function xfac_register_settings()
+function xfac_admin_init()
 {
 	register_setting('xfac-settings', 'xfac_root');
 	register_setting('xfac-settings', 'xfac_client_id');
@@ -14,7 +14,7 @@ function xfac_register_settings()
 	register_setting('xfac-settings', 'xfac_tag_forum_mappings');
 }
 
-add_action('admin_init', 'xfac_register_settings');
+add_action('admin_init', 'xfac_admin_init');
 
 function xfac_admin_menu()
 {

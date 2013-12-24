@@ -11,7 +11,7 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 	if ($newStatus == 'publish')
 	{
 		// we need to make sure our crons are scheduled
-		xfac_setup_crons();
+		xfac_setupCrons();
 
 		$tagForumMappings = get_option('xfac_tag_forum_mappings');
 
@@ -72,7 +72,7 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 
 add_action('transition_post_status', 'xfac_transition_post_status', 10, 3);
 
-function xfac_sync_posts_from_xenforo()
+function xfac_syncPost_cron()
 {
 	$systemTags = get_terms('post_tag');
 	$mappedTags = array();
@@ -141,15 +141,15 @@ function xfac_sync_posts_from_xenforo()
 					}
 				}
 
-				$wfPostId = xfac_syncPost_pullThread($thread, $tagNames);
+				$wfPostId = xfac_syncPost_pullPost($thread, $tagNames);
 			}
 		}
 	}
 }
 
-add_action('xfac_cron_hourly', 'xfac_sync_posts_from_xenforo');
+add_action('xfac_cron_hourly', 'xfac_syncPost_cron');
 
-function xfac_syncPost_pullThread($thread, $tags)
+function xfac_syncPost_pullPost($thread, $tags)
 {
 	$postAuthor = 0;
 	$wfUserData = xfac_user_getUserDataByApiData(get_option('xfac_root'), $thread['creator_user_id']);

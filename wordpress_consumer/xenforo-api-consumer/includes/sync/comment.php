@@ -35,7 +35,7 @@ function xfac_wp_update_comment_count($postId, $new, $old)
 				if ($commentDateGmt > $syncDate[$threadId])
 				{
 					// this comment hasn't been pushed yet, do it now
-					$xfPost = xfac_push_comment($threadId, $comment);
+					$xfPost = xfac_syncComment_pushComment($threadId, $comment);
 
 					if (!empty($xfPost['post']['post_id']))
 					{
@@ -69,7 +69,7 @@ function xfac_wp_update_comment_count($postId, $new, $old)
 
 add_action('wp_update_comment_count', 'xfac_wp_update_comment_count', 10, 3);
 
-function xfac_push_comment($xfThreadId, $wfComment)
+function xfac_syncComment_pushComment($xfThreadId, $wfComment)
 {
 	$accessToken = xfac_user_getAccessToken($wfComment->user_id);
 
