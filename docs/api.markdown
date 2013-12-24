@@ -411,6 +411,7 @@ Parameters:
  * `thread_id` (__required__): id of needed thread.
  * `page` (_optional_): page number of posts.
  * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.
+ * `order` (_optional_): ordering of posts. Support `natural`, `natural_reverse`.
 
 Required scopes:
 

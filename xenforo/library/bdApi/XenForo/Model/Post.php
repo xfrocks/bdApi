@@ -2,6 +2,10 @@
 
 class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 {
+	const FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE = 'bdApi_postsInThread_orderReverse';
+
+	protected $_bdApi_postsInThread_orderReverse = false;
+
 	protected static $_bdApi_posts = array();
 
 	public function getPostsByIds(array $postIds, array $fetchOptions = array())
@@ -11,6 +15,34 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		self::$_bdApi_posts = $posts;
 
 		return $posts;
+	}
+
+	public function getPostsInThread($threadId, array $fetchOptions = array())
+	{
+		if (!empty($fetchOptions[self::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE]))
+		{
+			$this->_bdApi_postsInThread_orderReverse = true;
+		}
+
+		return parent::getPostsInThread($threadId, $fetchOptions);
+	}
+
+	public function fetchAllKeyed($sql, $key, $bind = array(), $nullPrefix = '')
+	{
+		if ($this->_bdApi_postsInThread_orderReverse)
+		{
+			$sql = str_replace('ORDER BY post.position ASC, post.post_date ASC', 'ORDER BY post.position DESC, post.post_date DESC', $sql, $count);
+
+			if (empty($count))
+			{
+				throw new XenForo_Exception('Fatal Conflict: Could not change ORDER BY statement');
+			}
+
+			// reset the flag
+			$this->_bdApi_postsInThread_orderReverse = false;
+		}
+
+		return parent::fetchAllKeyed($sql, $key, $bind, $nullPrefix);
 	}
 
 	public static function bdApi_getCachedPosts()

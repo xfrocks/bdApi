@@ -52,6 +52,17 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			'page' => $page
 		);
 
+		$order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
+		switch ($order)
+		{
+			case 'natural_reverse':
+				// load the class to make our constant accessible
+				$this->_getPostModel();
+				$fetchOptions[bdApi_XenForo_Model_Post::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE] = true;
+				$pageNavParams['order'] = $order;
+				break;
+		}
+
 		$posts = $this->_getPostModel()->getPostsInThread($threadId, $this->_getPostModel()->getFetchOptionsToPrepareApiData($fetchOptions));
 		if (!$this->_isFieldExcluded('attachments'))
 		{
