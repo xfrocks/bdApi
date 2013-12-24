@@ -61,6 +61,7 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 							xfac_sync_updateRecord('', 'thread', $thread['thread']['thread_id'], $post->ID, 0, array(
 								'forumId' => $forumId,
 								'thread' => $thread,
+								'direction' => 'push',
 							));
 						}
 					}
@@ -74,7 +75,7 @@ add_action('transition_post_status', 'xfac_transition_post_status', 10, 3);
 
 function xfac_syncPost_cron()
 {
-	$systemTags = get_terms('post_tag');
+	$systemTags = get_terms('post_tag', array('hide_empty' => false));
 	$mappedTags = array();
 
 	$tagForumMappings = get_option('xfac_tag_forum_mappings');
@@ -114,9 +115,14 @@ function xfac_syncPost_cron()
 
 	foreach ($mappedTags as $forumId => $tagNames)
 	{
+		$page = 1;
+
 		while (true)
 		{
-			$threads = xfac_api_getThreadsInForum($root, $clientId, $clientSecret, $forumId);
+			$threads = xfac_api_getThreadsInForum($root, $clientId, $clientSecret, $forumId, $page);
+
+			// increase page for next request
+			$page++;
 
 			if (empty($threads['threads']))
 			{
@@ -134,7 +140,7 @@ function xfac_syncPost_cron()
 			{
 				foreach ($syncRecords as $syncRecord)
 				{
-					if ($syncRecord->provider_content_id == $thread['thread_id'])
+					if ($syncRecord->provider_content_id == $thread['thread_id'] AND !empty($syncRecord->syncData['direction']) AND $syncRecord->syncData['direction'] === 'pull')
 					{
 						// stop the foreach and the outside while too
 						break 3;
@@ -160,10 +166,12 @@ function xfac_syncPost_pullPost($thread, $tags)
 	$postAuthor = $wfUserData->ID;
 
 	$postDateGmt = gmdate('Y-m-d H:i:s', $thread['thread_create_date']);
+	$postDate = get_date_from_gmt($postDateGmt);
 
 	$wfPost = array(
 		'post_author' => $postAuthor,
 		'post_content' => $thread['first_post']['post_body'],
+		'post_date' => $postDate,
 		'post_date_gmt' => $postDateGmt,
 		'post_status' => 'draft',
 		'post_title' => $thread['thread_title'],
@@ -178,6 +186,7 @@ function xfac_syncPost_pullPost($thread, $tags)
 		xfac_sync_updateRecord('', 'thread', $thread['thread_id'], $wfPostId, $thread['thread_create_date'], array(
 			'forumId' => $thread['forum_id'],
 			'thread' => $thread,
+			'direction' => 'pull',
 		));
 
 		wp_publish_post($wfPostId);

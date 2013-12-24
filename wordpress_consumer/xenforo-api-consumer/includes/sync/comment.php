@@ -43,6 +43,7 @@ function xfac_wp_update_comment_count($postId, $new, $old)
 							'forumId' => $forumId,
 							'threadId' => $threadId,
 							'post' => $xfPost,
+							'direction' => 'push',
 						));
 
 						$newSyncDate[$threadId] = true;

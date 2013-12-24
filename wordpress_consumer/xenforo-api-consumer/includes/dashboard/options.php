@@ -13,7 +13,7 @@ function xfac_options_init()
 	$clientSecret = get_option('xfac_client_secret');
 
 	$tagForumMappings = get_option('xfac_tag_forum_mappings');
-	$tags = get_terms(array('post_tag'), array('hide_empty' => false));
+	$tags = get_terms('post_tag', array('hide_empty' => false));
 
 	if (!empty($root) AND !empty($clientId) AND !empty($clientSecret))
 	{	

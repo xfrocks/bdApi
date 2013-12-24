@@ -118,9 +118,9 @@ function xfac_api_getUsersMe($root, $clientId, $clientSecret, $accessToken)
 	}
 }
 
-function xfac_api_getThreadsInForum($root, $clientId, $clientSecret, $forumId, $accessToken = '')
+function xfac_api_getThreadsInForum($root, $clientId, $clientSecret, $forumId, $page = 1, $accessToken = '')
 {
-	$body = file_get_contents(sprintf('%s/threads/?forum_id=%d&order=thread_create_date_reverse&oauth_token=%s', $root, $forumId, rawurlencode($accessToken)));
+	$body = file_get_contents(sprintf('%s/threads/?forum_id=%d&page=%d&order=thread_create_date_reverse&oauth_token=%s', $root, $forumId, $page, rawurlencode($accessToken)));
 
 	$parts = @json_decode($body, true);
 
