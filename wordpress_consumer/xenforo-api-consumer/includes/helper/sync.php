@@ -57,10 +57,7 @@ function xfac_sync_getRecordsByProviderTypeAndSyncId($provider, $cType, $syncId)
 			AND sync_id = %d
 	", $provider, $cType, $syncId));
 
-	foreach ($records as &$record)
-	{
-		$record->syncData = unserialize($record->sync_data);
-	}
+	_xfac_sync_prepareRecords($records);
 
 	return $records;
 }
@@ -77,10 +74,32 @@ function xfac_sync_getRecordsByProviderTypeAndIds($provider, $cType, array $cIds
 			AND provider_content_id IN (" . implode(',', array_map('intval', $cIds)) . ")
 	", $provider, $cType));
 
+	_xfac_sync_prepareRecords($records);
+
+	return $records;
+}
+
+function xfac_sync_getRecordsByProviderTypeAndRecent($provider, $cType, $recentThreshold = 604800)
+{
+	global $wpdb;
+
+	$records = $wpdb->get_results($wpdb->prepare("
+		SELECT *
+		FROM {$wpdb->prefix}xfac_sync
+		WHERE provider = %s
+			AND provider_content_type = %s
+			AND sync_date > %d
+	", $provider, $cType, time() - $recentThreshold));
+
+	_xfac_sync_prepareRecords($records);
+
+	return $records;
+}
+
+function _xfac_sync_prepareRecords(&$records)
+{
 	foreach ($records as &$record)
 	{
 		$record->syncData = unserialize($record->sync_data);
 	}
-
-	return $records;
 }
