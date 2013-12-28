@@ -73,7 +73,7 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 		if (!file_exists($filePath) || !is_readable($filePath))
 		{
 			// TODO: add support for alternative attachment storage
-			return $this->responseError(new XenForo_Phrase('attachment_cannot_be_shown_at_this_time'));
+			return $this->_controller->responseError(new XenForo_Phrase('attachment_cannot_be_shown_at_this_time'));
 		}
 
 		$resize = $this->_controller->getInput()->filter(array(
