@@ -194,7 +194,8 @@ class bdApi_OAuth2 extends OAuth2
 		// store the user id to use later to create token/refresh_token
 		$this->_userId = $authCode['user_id'];
 
-		return array(
+		return $authCode + array(
+			'code' => $authCode['auth_code_text'],
 			'client_id' => $authCode['client_id'],
 			'redirect_uri' => $authCode['redirect_uri'],
 			'expires' => $authCode['expire_date'],
@@ -248,24 +249,24 @@ class bdApi_OAuth2 extends OAuth2
 		}
 	}
 
-	protected function getRefreshToken($refreshToken)
+	protected function getRefreshToken($refreshTokenText)
 	{
-		$token = $this->_model->getRefreshTokenModel()->getRefreshTokenByText($refreshToken);
+		$refreshToken = $this->_model->getRefreshTokenModel()->getRefreshTokenByText($refreshTokenText);
 
-		if (empty($token))
+		if (empty($refreshToken))
 		{
 			// refresh token not found
 			return NULL;
 		}
 
 		// store the user id to use later to create token/refresh_token
-		$this->_userId = $token['user_id'];
+		$this->_userId = $refreshToken['user_id'];
 
-		return array(
-			'token' => $token['refresh_token_text'],
-			'client_id' => $token['client_id'],
-			'expires' => $token['expire_date'],
-			'scope' => $token['scope'],
+		return $refreshToken + array(
+			'token' => $refreshToken['refresh_token_text'],
+			'client_id' => $refreshToken['client_id'],
+			'expires' => $refreshToken['expire_date'],
+			'scope' => $refreshToken['scope'],
 		);
 	}
 
