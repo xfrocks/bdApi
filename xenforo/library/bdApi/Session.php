@@ -82,9 +82,9 @@ class bdApi_Session extends XenForo_Session
 	}
 
 	/**
-	 * Starts running the API session handler. This will automatically log in the user via
-	 * OAuth if needed, and setup the visitor object. The session will be registered in the
-	 * registry.
+	 * Starts running the API session handler. This will automatically log in the
+	 * user via OAuth if needed, and setup the visitor object. The session will be
+	 * registered in the registry.
 	 *
 	 * @param Zend_Controller_Request_Http|null $request
 	 *
@@ -134,7 +134,7 @@ class bdApi_Session extends XenForo_Session
 		return false;
 	}
 
-	public function deleteSessionFromSource($sessionId)
+	public function save()
 	{
 		// do nothing
 	}
@@ -143,4 +143,15 @@ class bdApi_Session extends XenForo_Session
 	{
 		// do nothing
 	}
+
+	public function delete()
+	{
+		// do nothing
+	}
+
+	public function deleteSessionFromSource($sessionId)
+	{
+		// do nothing
+	}
+
 }
