@@ -95,7 +95,7 @@ class bdApi_Link extends XenForo_Link
 			}
 			else
 			{
-				$outputLink = 'index.php' .  $append;
+				$outputLink = 'index.php' . $append;
 			}
 		}
 
@@ -199,7 +199,7 @@ class bdApi_Link extends XenForo_Link
 			}
 			else
 			{
-				$outputLink = 'index.php' .  $append;
+				$outputLink = 'index.php' . $append;
 			}
 		}
 
@@ -223,18 +223,19 @@ class bdApi_Link extends XenForo_Link
 
 		if ($uri == '.')
 		{
-			$uri = ''; // current directory
+			// current directory
+			$uri = '';
 		}
 
 		if (substr($uri, 0, 2) == '//')
 		{
 			return $boardUrlParsed['scheme'] . ':' . $uri;
 		}
-		else if (substr($uri, 0, 1) == '/')
+		elseif (substr($uri, 0, 1) == '/')
 		{
 			return $boardUrlParsed['scheme'] . '://' . $boardUrlParsed['host'] . (isset($boardUrlParsed['port']) ? (':' . $boardUrlParsed) : '') . $uri;
 		}
-		else if (preg_match('#^[a-z0-9-]+://#i', $uri))
+		elseif (preg_match('#^[a-z0-9-]+://#i', $uri))
 		{
 			return $uri;
 		}
@@ -248,4 +249,23 @@ class bdApi_Link extends XenForo_Link
 	{
 		return _XenForo_Link::convertUriToAbsoluteUri($uri, $includeHost, $paths);
 	}
+
+	protected static function _checkForFullLink($type, &$fullLink, &$fullLinkPrefix)
+	{
+		$type = XenForo_Link::_checkForFullLink($type, $fullLink, $fullLinkPrefix);
+
+		if (!empty($fullLinkPrefix))
+		{
+			// fix issue with HTTPS requests
+			$paths = XenForo_Application::get('requestPaths');
+
+			if ($paths['protocol'] === 'https' AND parse_url($fullLinkPrefix, PHP_URL_SCHEME) === 'http')
+			{
+				$fullLinkPrefix = str_replace('http://', 'https://', $fullLinkPrefix);
+			}
+		}
+
+		return $type;
+	}
+
 }
