@@ -56,65 +56,57 @@ function xfac_login_init()
 	$redirectBaseUrl = $loginUrl . (strpos($loginUrl, '?') !== false ? '&' : '?') . 'redirect_to=' . urlencode($redirectTo);
 	$callbackUrl = $redirectBaseUrl . '&xfac=callback';
 
+	$token = false;
+	$associateConfirmed = false;
+
 	switch ($_REQUEST['xfac'])
 	{
 		case 'callback':
 			if (!empty($_REQUEST['code']))
 			{
 				$token = xfac_api_getAccessTokenFromCode($root, $clientId, $clientSecret, $_REQUEST['code'], $callbackUrl);
-
-				if (empty($token))
-				{
-					wp_redirect($redirectBaseUrl . '&xfac_error=no_token');
-					exit();
-				}
-
-				$me = xfac_api_getUsersMe($root, $clientId, $clientSecret, $token['access_token']);
-				if (empty($me['user']))
-				{
-					wp_redirect($redirectBaseUrl . '&xfac_error=no_read_scope');
-					exit();
-				}
-				$xfUser = $me['user'];
-
-				$wfUser = xfac_user_getUserByApiData($root, $xfUser['user_id']);
-
-				if (empty($wfUser))
-				{
-					// no user with the API data found
-					// find user with matching email...
-					if (!empty($xfUser['user_email']))
-					{
-						$wfUserEmail = get_user_by('email', $xfUser['user_email']);
-						if (!empty($wfUserEmail))
-						{
-							// user with matching email found
-							// TODO: check for existing auth record?
-							$wfUser = $wfUserEmail;
-						}
-					}
-				}
-
-				if (empty($wfUser))
-				{
-					// no matching user found, register new
-					$newUserId = register_new_user($xfUser['username'], $xfUser['user_email']);
-					if (is_wp_error($newUserId))
-					{
-						wp_redirect($redirectBaseUrl . '&xfac_error=cannot_register');
-						exit();
-					}
-
-					$wfUser = new WP_User($newUserId);
-				}
-
-				xfac_user_updateAuth($wfUser->ID, $root, $xfUser['user_id'], $xfUser, $token);
-
-				wp_set_auth_cookie($wfUser->ID, true);
-
-				wp_redirect($redirectTo);
+			}
+			break;
+		case 'associate':
+			$wpUser = wp_get_current_user();
+			if (empty($wpUser))
+			{
+				wp_redirect($redirectBaseUrl . '&xfac_error=no_user');
 				exit();
 			}
+
+			if (empty($_REQUEST['refresh_token']))
+			{
+				wp_redirect($redirectBaseUrl . '&xfac_error=no_refresh_token');
+				exit();
+			}
+			if (empty($_REQUEST['scope']))
+			{
+				wp_redirect($redirectBaseUrl . '&xfac_error=no_scope');
+				exit();
+			}
+			if (empty($_REQUEST['xf_user']) OR !is_array($_REQUEST['xf_user']))
+			{
+				wp_redirect($redirectBaseUrl . '&xfac_error=no_request_xf_user');
+				exit();
+			}
+
+			if (empty($_REQUEST['pwd']))
+			{
+				_xfac_login_renderAssociateForm($wpUser, $_REQUEST['xf_user'], $_REQUEST['refresh_token'], $_REQUEST['scope'], $redirectTo);
+				exit();
+			}
+			$password = $_REQUEST['pwd'];
+
+			$authenticatedUser = apply_filters('authenticate', null, $wpUser->user_login, $password);
+			if (empty($authenticatedUser->ID) OR $authenticatedUser->ID != $wpUser->ID)
+			{
+				_xfac_login_renderAssociateForm($wpUser, $_REQUEST['xf_user'], $_REQUEST['refresh_token'], $_REQUEST['scope'], $redirectTo);
+				exit();
+			}
+
+			$token = xfac_api_getAccessTokenFromRefreshToken($root, $clientId, $clientSecret, $_REQUEST['refresh_token'], $_REQUEST['scope']);
+			$associateConfirmed = true;
 			break;
 		case 'authorize':
 		default:
@@ -124,6 +116,90 @@ function xfac_login_init()
 			exit();
 	}
 
+	if (empty($token))
+	{
+		wp_redirect($redirectBaseUrl . '&xfac_error=no_token');
+		exit();
+	}
+	if (empty($token['scope']))
+	{
+		wp_redirect($redirectBaseUrl . '&xfac_error=no_scope');
+		exit();
+	}
+
+	$me = xfac_api_getUsersMe($root, $clientId, $clientSecret, $token['access_token']);
+	if (empty($me['user']))
+	{
+		wp_redirect($redirectBaseUrl . '&xfac_error=no_xf_user');
+		exit();
+	}
+	$xfUser = $me['user'];
+
+	$wfUser = xfac_user_getUserByApiData($root, $xfUser['user_id']);
+
+	if (empty($wfUser))
+	{
+		// no user with the API data found
+		// find user with matching email...
+		if (!empty($xfUser['user_email']))
+		{
+			$wfUserEmail = get_user_by('email', $xfUser['user_email']);
+			if (!empty($wfUserEmail))
+			{
+				// user with matching email found
+				// TODO: check for existing auth record?
+				$wfUser = $wfUserEmail;
+			}
+		}
+	}
+
+	if (empty($wfUser))
+	{
+		$currentWfUser = wp_get_current_user();
+
+		if (!empty($currentWfUser) AND $currentWfUser->ID > 0)
+		{
+			// a user is currently logged in, try to associate now
+			if (!$associateConfirmed)
+			{
+				_xfac_login_renderAssociateForm($currentWfUser, $xfUser, $token['refresh_token'], $token['scope'], $redirectTo);
+				exit();
+			}
+			else
+			{
+				// association has been confirmed
+				$wfUser = $currentWfUser;
+
+				if ($redirectTo == admin_url('profile.php'))
+				{
+					// redirect target is profile.php page, it will alter it a bit
+					$redirectTo = admin_url('profile.php?xfac=associated');
+				}
+			}
+		}
+		else
+		{
+			// no matching user found, register new
+			$newUserId = register_new_user($xfUser['username'], $xfUser['user_email']);
+			if (is_wp_error($newUserId))
+			{
+				wp_redirect($redirectBaseUrl . '&xfac_error=cannot_register');
+				exit();
+			}
+
+			$wfUser = new WP_User($newUserId);
+		}
+	}
+
+	if (!empty($wfUser))
+	{
+		xfac_user_updateAuth($wfUser->ID, $root, $xfUser['user_id'], $xfUser, $token);
+
+		wp_set_auth_cookie($wfUser->ID, true);
+
+		wp_redirect($redirectTo);
+		exit();
+	}
 }
 
 add_action('login_init', 'xfac_login_init');
@@ -156,4 +232,41 @@ function _xfac_login_getRedirectTo()
 	}
 
 	return $redirectTo;
+}
+
+function _xfac_login_renderAssociateForm(WP_User $wpUser, array $xfUser, $refreshToken, $scope, $redirectTo)
+{
+	$title = __('Associate Account', 'xenforo-api-consumer');
+	$message =  sprintf(__('Enter your password to associate the account "%1$s" with your profile.', 'xenforo-api-consumer'), $xfUser['username']);
+
+	login_header($title, '<p class="message">' . $message . '</p>');
+?>
+
+<form id="associateform" action="<?php echo esc_url(site_url('wp-login.php?xfac=associate', 'login_post')); ?>" method="post">
+	<p>
+		<label for="user_login" >
+			<?php _e('Username', 'xenforo-api-consumer') ?><br />
+			<input type="text" name="user_login" id="user_login" class="input" value="<?php echo esc_attr($wpUser->user_login); ?>" size="20" disabled="disabled" />
+ 		</label>
+	</p>
+	<p>
+		<label for="user_pass">
+			<?php _e('Password', 'xenforo-api-consumer') ?><br />
+			<input type="password" name="pwd" id="user_pass" class="input" value="" size="20" />
+		</label>
+	</p>
+
+	<input type="hidden" name="xf_user[username]" value="<?php echo esc_attr($xfUser['username']) ?>" />
+	<input type="hidden" name="refresh_token" value="<?php echo esc_attr($refreshToken) ?>" />
+	<input type="hidden" name="scope" value="<?php echo esc_attr($scope) ?>" />
+	<input type="hidden" name="redirect_to" value="<?php echo esc_attr($redirectTo) ?>" />
+
+	<p class="submit">
+		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary button-large"
+			value="<?php esc_attr_e('Associate Account', 'xenforo-api-consumer'); ?>" />
+	</p>
+</form>
+
+<?php
+	login_footer('user_login');
 }

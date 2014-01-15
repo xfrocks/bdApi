@@ -6,6 +6,25 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
+function xfac_user_getApiRecordsByUserId($wfUserId)
+{
+	global $wpdb;
+
+	$records = $wpdb->get_results($wpdb->prepare("
+		SELECT *
+		FROM {$wpdb->prefix}xfac_auth
+		WHERE user_id = %d
+	", $wfUserId));
+
+	foreach ($records as &$record)
+	{
+		$record->profile = unserialize($record->profile);
+		$record->token = unserialize($record->token);
+	}
+
+	return $records;
+}
+
 function xfac_user_getUserDataByApiData($root, $xfUserId)
 {
 	global $wpdb;
@@ -55,6 +74,13 @@ function xfac_user_updateAuth($wfUserId, $root, $xfUserId, array $xfUser, array 
 		(user_id, provider, identifier, profile, token)
 		VALUES (%d, %s, %s, %s, %s)
 	", $wfUserId, $provider, $xfUserId, serialize($xfUser), serialize($token)));
+}
+
+function xfac_user_deleteAuthById($authId)
+{
+	global $wpdb;
+
+	return $wpdb->delete($wpdb->prefix . 'xfac_auth', array('id' => $authId));
 }
 
 function xfac_user_getAccessToken($wfUserId)
