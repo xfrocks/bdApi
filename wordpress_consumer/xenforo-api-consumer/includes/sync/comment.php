@@ -34,7 +34,7 @@ function xfac_wp_update_comment_count($postId, $new, $old)
 
 		foreach ($comments as $comment)
 		{
-			$commentDateGmt = mysql2date('U', $comment->comment_date_gmt, false);
+			$commentDateGmt = xfac_sync_mysqlDateToGmtTimestamp($comment->comment_date_gmt);
 			foreach ($threadIds as $forumId => $threadId)
 			{
 				if ($commentDateGmt > $syncDate[$threadId])

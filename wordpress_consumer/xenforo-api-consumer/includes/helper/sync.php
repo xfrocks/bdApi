@@ -6,6 +6,16 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
+function xfac_sync_mysqlDateToGmtTimestamp($string)
+{
+	if (preg_match('/^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)$/', trim($string), $m))
+	{
+		return gmmktime($m[4], $m[5], $m[6], $m[2], $m[3], $m[1]);
+	}
+	
+	return 0;
+}
+
 function xfac_sync_updateRecord($provider, $cType, $cId, $syncId, $syncDate = 0, $syncData = array())
 {
 	global $wpdb;
