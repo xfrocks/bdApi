@@ -143,16 +143,27 @@ function xfac_syncPost_cron()
 
 			foreach ($threads['threads'] as $thread)
 			{
+				$synced = false;
+
 				foreach ($syncRecords as $syncRecord)
 				{
-					if ($syncRecord->provider_content_id == $thread['thread_id'] AND !empty($syncRecord->syncData['direction']) AND $syncRecord->syncData['direction'] === 'pull')
+					if ($syncRecord->provider_content_id == $thread['thread_id'])
 					{
-						// stop the foreach and the outside while too
-						break 3;
+						$synced = true;
+
+						if (!empty($syncRecord->syncData['direction']) AND $syncRecord->syncData['direction'] === 'pull')
+						{
+							// reach where we were pulling before
+							// stop the foreach and the outside while too
+							break 3;
+						}
 					}
 				}
 
-				$wfPostId = xfac_syncPost_pullPost($thread, $tagNames);
+				if (!$synced)
+				{
+					$wfPostId = xfac_syncPost_pullPost($thread, $tagNames);
+				}
 			}
 		}
 	}
