@@ -2,6 +2,21 @@
 
 class bdApi_DataWriter_Log extends XenForo_DataWriter {
 
+	protected function _beginDbTransaction()
+	{
+		return false;
+	}
+
+	protected function _commitDbTransaction()
+	{
+		return false;
+	}
+
+	protected function _rollbackDbTransaction()
+	{
+		return false;
+	}
+
 /* Start auto-generated lines of code. Change made will be overwriten... */
 
 	protected function _getFields() {
