@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.5b" version_id="12" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.5c" version_id="13" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -39,19 +39,21 @@
 
 ]]></template>
   </admin_templates>
+  <admin_template_modifications/>
   <code_events/>
   <code_event_listeners>
-    <listener event_id="file_health_check" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="file_health_check" active="1" description=""/>
-    <listener event_id="front_controller_pre_view" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="front_controller_pre_view" active="1" description=""/>
-    <listener event_id="init_dependencies" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="init_dependencies" active="1" description=""/>
-    <listener event_id="load_class_controller" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="load_class" active="1" description=""/>
-    <listener event_id="load_class_model" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="load_class" active="1" description=""/>
-    <listener event_id="template_create" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_create" active="1" description=""/>
-    <listener event_id="template_hook" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_hook" active="1" description=""/>
-    <listener event_id="template_post_render" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_post_render" active="1" description=""/>
+    <listener event_id="file_health_check" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
+    <listener event_id="front_controller_pre_view" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="front_controller_pre_view" active="1" hint="" description=""/>
+    <listener event_id="init_dependencies" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="load_class" active="1" hint="" description=""/>
+    <listener event_id="load_class_model" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="load_class" active="1" hint="" description=""/>
+    <listener event_id="template_create" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_create" active="1" hint="" description=""/>
+    <listener event_id="template_hook" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_hook" active="1" hint="" description=""/>
+    <listener event_id="template_post_render" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_post_render" active="1" hint="" description=""/>
   </code_event_listeners>
   <cron/>
   <email_templates/>
+  <email_template_modifications/>
   <optiongroups>
     <group group_id="bdApiConsumer" display_order="9999" debug_only="0"/>
     <option option_id="bdapi_consumer_autoLogin" edit_format="radio" data_type="string" can_backup="1">
@@ -236,7 +238,7 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
 	<xen:set var="$eAuth">1</xen:set>
 </xen:if>]]></template>
     <template title="bdapi_consumer_navigation_visitor_tab_links1" version_id="8" version_string="0.9.2"><![CDATA[<xen:if is="{$providers}"><li><a href="{xen:link account/external}">{xen:phrase bdapi_consumer_external}</a></li></xen:if>]]></template>
-    <template title="bdapi_consumer_page_container_head" version_id="11" version_string="0.9.5"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} != '0'
+    <template title="bdapi_consumer_page_container_head" version_id="12" version_string="0.9.5b"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} != '0'
 	AND empty({$bdApiConsumer_logoutTime})
 	AND ({$debugMode} OR {$session.sessionStart} == {$serverTime})
 	AND {$visitor.user_id} == 0
@@ -261,6 +263,7 @@ window['{$provider.code}Init'] = function()
 		if (isAuthorized)
 		{
 			var loginData = {
+				'location': window.location.href,
 				'provider': '{$provider.code}',
 				'external_user_id': apiData['user_id']
 			};
@@ -277,13 +280,17 @@ window['{$provider.code}Init'] = function()
 				{
 					if (ajaxData._redirectMessage)
 					{
-						// auto login succeeded!
+						// auto login succeeded with redirect
 						XenForo.alert(ajaxData._redirectMessage, '', 2000);
-						<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} == 'hard_refresh'">
+
 						setTimeout(function() {
-							document.location.reload();
+							document.location = ajaxData._redirectTarget;
 						}, 500);
-						</xen:if>
+					}
+					else if (ajaxData.status == 'ok' && ajaxData.message)
+					{
+						// auto login succeeded with message only (no redirect)
+						XenForo.alert(ajaxData.message, '', 2000);
 					}
 				}
 			);
@@ -396,5 +403,6 @@ window['{$provider.code}Init'] = function()
 <input type="hidden" name="externalToken" value="{$externalToken}" />
 </form>]]></template>
   </templates>
+  <public_template_modifications/>
   <bb_code_media_sites/>
 </addon>
