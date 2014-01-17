@@ -3,7 +3,7 @@
  Plugin Name: XenForo API Consumer
  Plugin URI: https://xfrocks.com/api-support/
  Description: Connects to XenForo API system.
- Version: 0.9-dev1
+ Version: 0.9-dev2
  Author: XFROCKS
  Author URI: https://xfrocks.com
  */
