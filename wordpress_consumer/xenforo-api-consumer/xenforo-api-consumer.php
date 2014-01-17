@@ -48,3 +48,5 @@ require_once (dirname(__FILE__) . '/includes/ui/login.php');
 require_once (dirname(__FILE__) . '/includes/helper/sync.php');
 require_once (dirname(__FILE__) . '/includes/sync/post.php');
 require_once (dirname(__FILE__) . '/includes/sync/comment.php');
+
+require_once (dirname(__FILE__) . '/includes/widget/threads.php');
