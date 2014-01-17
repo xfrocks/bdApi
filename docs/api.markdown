@@ -171,7 +171,7 @@ List of threads in a forum (with pagination).
 
 Parameters:
 
- * `forum_id` (__required__): id of needed forum.
+ * `forum_id` (__required__): ids of needed forums (separated by comma). Support for multiple ids were added in forum-2014011801.
  * `sticky` (_optional_): filter to get sticky threads only. If `sticky` = 1, `page` and `limit` parameters will be ignored.
  * `page` (_optional_): page number of threads.
  * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.

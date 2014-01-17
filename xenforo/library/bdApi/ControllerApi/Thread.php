@@ -10,20 +10,45 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 			return $this->responseReroute(__CLASS__, 'get-single');
 		}
 
-		$forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
-		if (empty($forumId))
+		$forumIdInput = $this->_input->filterSingle('forum_id', XenForo_Input::STRING);
+		if (strlen($forumIdInput) === 0)
 		{
 			return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_requires_forum_id'), 400);
+		}
+		$forumIdInput = explode(',', $forumIdInput);
+		$forumIdInput = array_map('intval', $forumIdInput);
+
+		$forumIdArray = array();
+		$viewableNodes = $this->_getNodeModel()->getViewableNodeList();
+		if (in_array(0, $forumIdInput, true))
+		{
+			// accept 0 as a valid forum id
+			// TODO: support `child_forums` param
+			$forumIdArray[] = 0;
+		}
+		foreach ($viewableNodes as $viewableNode)
+		{
+			if (in_array(intval($viewableNode['node_id']), $forumIdInput, true))
+			{
+				$forumIdArray[] = $forumIdInput;
+			}
+		}
+		if (empty($forumIdArray))
+		{
+			return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_requires_forum_id'), 400);
+		}
+		$forumIdArray = array_unique($forumIdArray);
+
+		$visitor = XenForo_Visitor::getInstance();
+		$nodePermissions = $this->_getNodeModel()->getNodePermissionsForPermissionCombination();
+		foreach ($nodePermissions as $nodeId => $permissions)
+		{
+			$visitor->setNodePermissions($nodeId, $permissions);
 		}
 
 		$sticky = $this->_input->filterSingle('sticky', XenForo_Input::UINT);
 
-		$ftpHelper = $this->getHelper('ForumThreadPost');
-		$forum = $this->getHelper('ForumThreadPost')->assertForumValidAndViewable($forumId);
-
-		$visitor = XenForo_Visitor::getInstance();
-
-		$pageNavParams = array('forum_id' => $forum['node_id'], );
+		$pageNavParams = array('forum_id' => $forumIdArray);
 		$page = $this->_input->filterSingle('page', XenForo_Input::UINT);
 		$limit = XenForo_Application::get('options')->discussionsPerPage;
 
@@ -37,7 +62,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		$conditions = array(
 			'deleted' => false,
 			'moderated' => false,
-			'node_id' => $forum['node_id'],
+			'node_id' => $forumIdArray,
 			'sticky' => $sticky,
 		);
 		$fetchOptions = array(
@@ -75,9 +100,36 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 				$fetchOptions['orderDirection'] = 'desc';
 				$pageNavParams['order'] = $order;
 				break;
+			case 'thread_view_count':
+				$fetchOptions['order'] = 'view_count';
+				$fetchOptions['orderDirection'] = 'asc';
+				$pageNavParams['order'] = $order;
+				break;
+			case 'thread_view_count_reverse':
+				$fetchOptions['order'] = 'view_count';
+				$fetchOptions['orderDirection'] = 'desc';
+				$pageNavParams['order'] = $order;
+				break;
+			case 'thread_post_count':
+				$fetchOptions['order'] = 'reply_count';
+				$fetchOptions['orderDirection'] = 'asc';
+				$pageNavParams['order'] = $order;
+				break;
+			case 'thread_post_count_reverse':
+				$fetchOptions['order'] = 'reply_count';
+				$fetchOptions['orderDirection'] = 'desc';
+				$pageNavParams['order'] = $order;
+				break;
 		}
 
 		$threads = $this->_getThreadModel()->getThreads($conditions, $this->_getThreadModel()->getFetchOptionsToPrepareApiData($fetchOptions));
+		foreach (array_keys($threads) as $threadId)
+		{
+			if (!$this->_getThreadModel()->canViewThread($threads[$threadId], $threads[$threadId]))
+			{
+				unset($threads[$threadId]);
+			}
+		}
 
 		$total = $this->_getThreadModel()->countThreads($conditions);
 
@@ -97,8 +149,20 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 			}
 		}
 
+		$data = array();
+		foreach (array_keys($threads) as $threadId)
+		{
+			$firstPost = array();
+			if (isset($firstPosts[$threads[$threadId]['first_post_id']]))
+			{
+				$firstPost = $firstPosts[$threads[$threadId]['first_post_id']];
+			}
+
+			$data[] = $this->_getThreadModel()->prepareApiDataForThread($threads[$threadId], $threads[$threadId], $firstPost);
+		}
+
 		$data = array(
-			'threads' => $this->_filterDataMany($this->_getThreadModel()->prepareApiDataForThreads($threads, $forum, $firstPosts)),
+			'threads' => $this->_filterDataMany($data),
 			'threads_total' => $total,
 		);
 
@@ -417,6 +481,14 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		$data = array('threads' => $results, );
 
 		return $this->responseData('bdApi_ViewApi_Thread_NewOrRecent', $data);
+	}
+
+	/**
+	 * @return XenForo_Model_Node
+	 */
+	protected function _getNodeModel()
+	{
+		return $this->getModelFromCache('XenForo_Model_Node');
 	}
 
 	/**
