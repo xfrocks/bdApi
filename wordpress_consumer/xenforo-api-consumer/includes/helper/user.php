@@ -10,9 +10,11 @@ function xfac_user_getApiRecordsByUserId($wfUserId)
 {
 	global $wpdb;
 
+	$tblAuth = xfac_getTableAuth();
+
 	$records = $wpdb->get_results($wpdb->prepare("
 		SELECT *
-		FROM {$wpdb->prefix}xfac_auth
+		FROM {$tblAuth}
 		WHERE user_id = %d
 	", $wfUserId));
 
@@ -29,12 +31,12 @@ function xfac_user_getUserDataByApiData($root, $xfUserId)
 {
 	global $wpdb;
 
-	// TODO: support multiple providers?
+	$tblAuth = xfac_getTableAuth();
 	$provider = '';
 
 	$userdata = $wpdb->get_row($wpdb->prepare("
 		SELECT users.*
-		FROM {$wpdb->prefix}xfac_auth AS auth
+		FROM {$tblAuth} AS auth
 		INNER JOIN $wpdb->users AS users
 		ON (users.ID = auth.user_id)
 		WHERE auth.provider = %s AND auth.identifier = %s
@@ -67,10 +69,11 @@ function xfac_user_updateAuth($wfUserId, $root, $xfUserId, array $xfUser, array 
 {
 	global $wpdb;
 
+	$tblAuth = xfac_getTableAuth();
 	$provider = '';
 
 	$wpdb->query($wpdb->prepare("
-		REPLACE INTO {$wpdb->prefix}xfac_auth
+		REPLACE INTO {$tblAuth}
 		(user_id, provider, identifier, profile, token)
 		VALUES (%d, %s, %s, %s, %s)
 	", $wfUserId, $provider, $xfUserId, serialize($xfUser), serialize($token)));
@@ -80,16 +83,20 @@ function xfac_user_deleteAuthById($authId)
 {
 	global $wpdb;
 
-	return $wpdb->delete($wpdb->prefix . 'xfac_auth', array('id' => $authId));
+	$tblAuth = xfac_getTableAuth();
+
+	return $wpdb->delete($tblAuth, array('id' => $authId));
 }
 
 function xfac_user_getAccessToken($wfUserId)
 {
 	global $wpdb;
 
+	$tblAuth = xfac_getTableAuth();
+
 	$auth = $wpdb->get_row($wpdb->prepare("
 		SELECT *
-		FROM {$wpdb->prefix}xfac_auth
+		FROM {$tblAuth}
 		WHERE user_id = %d
 	", $wfUserId));
 
@@ -109,22 +116,20 @@ function xfac_user_getAccessToken($wfUserId)
 		return null;
 	}
 
-	$root = get_option('xfac_root');
-	$clientId = get_option('xfac_client_id');
-	$clientSecret = get_option('xfac_client_secret');
-	if (empty($root) OR empty($clientId) OR empty($clientSecret))
+	$config = xfac_option_getConfig();
+	if (empty($config))
 	{
 		return null;
 	}
 
-	$newToken = xfac_api_getAccessTokenFromRefreshToken($root, $clientId, $clientSecret, $token['refresh_token'], $token['scope']);
+	$newToken = xfac_api_getAccessTokenFromRefreshToken($config, $token['refresh_token'], $token['scope']);
 
 	if (empty($newToken))
 	{
 		return null;
 	}
 
-	xfac_user_updateAuth($wfUserId, $root, $auth->identifier, unserialize($auth->profile), $newToken);
+	xfac_user_updateAuth($wfUserId, $config['root'], $auth->identifier, unserialize($auth->profile), $newToken);
 
 	return $newToken['access_token'];
 }

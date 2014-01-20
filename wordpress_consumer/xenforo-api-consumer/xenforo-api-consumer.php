@@ -18,7 +18,7 @@ define('XFAC_API_SCOPE', 'read post');
 
 function xfac_activate()
 {
-	if (!function_exists('register_post_status'))
+	if (!function_exists('is_multisite'))
 	{
 		// requires WordPress v3.0+
 		deactivate_plugins(basename(dirname(__FILE__)) . '/' . basename(__FILE__));
@@ -35,6 +35,7 @@ register_activation_hook(__FILE__, 'xfac_activate');
 require_once (dirname(__FILE__) . '/includes/helper/api.php');
 require_once (dirname(__FILE__) . '/includes/helper/dashboard.php');
 require_once (dirname(__FILE__) . '/includes/helper/installer.php');
+require_once (dirname(__FILE__) . '/includes/helper/option.php');
 require_once (dirname(__FILE__) . '/includes/helper/user.php');
 
 if (is_admin())

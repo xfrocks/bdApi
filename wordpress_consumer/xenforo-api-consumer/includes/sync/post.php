@@ -39,11 +39,9 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 
 			if (!empty($accessToken))
 			{
-				$root = get_option('xfac_root');
-				$clientId = get_option('xfac_client_id');
-				$clientSecret = get_option('xfac_client_secret');
+				$config = xfac_option_getConfig();
 
-				if (!empty($root) AND !empty($clientId) AND !empty($clientSecret))
+				if (!empty($config))
 				{
 					$postSyncRecords = xfac_sync_getRecordsByProviderTypeAndSyncId('', 'thread', $post->ID);
 					foreach (array_keys($forumIds) as $key)
@@ -59,7 +57,7 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 
 					foreach ($forumIds as $forumId)
 					{
-						$thread = xfac_api_postThread($root, $clientId, $clientSecret, $accessToken, $forumId, $post->post_title, $post->post_content);
+						$thread = xfac_api_postThread($config, $accessToken, $forumId, $post->post_title, $post->post_content);
 
 						if (!empty($thread['thread']['thread_id']))
 						{
@@ -109,11 +107,8 @@ function xfac_syncPost_cron()
 		return;
 	}
 
-	$root = get_option('xfac_root');
-	$clientId = get_option('xfac_client_id');
-	$clientSecret = get_option('xfac_client_secret');
-
-	if (empty($root) OR empty($clientId) OR empty($clientSecret))
+	$config = xfac_option_getConfig();
+	if (empty($config))
 	{
 		return;
 	}
@@ -124,7 +119,7 @@ function xfac_syncPost_cron()
 
 		while (true)
 		{
-			$threads = xfac_api_getThreadsInForum($root, $clientId, $clientSecret, $forumId, $page);
+			$threads = xfac_api_getThreadsInForum($config, $forumId, $page);
 
 			// increase page for next request
 			$page++;
@@ -173,8 +168,14 @@ add_action('xfac_cron_hourly', 'xfac_syncPost_cron');
 
 function xfac_syncPost_pullPost($thread, $tags)
 {
+	$config = xfac_option_getConfig();
+	if (empty($config))
+	{
+		return 0;
+	}
+	
 	$postAuthor = 0;
-	$wfUserData = xfac_user_getUserDataByApiData(get_option('xfac_root'), $thread['creator_user_id']);
+	$wfUserData = xfac_user_getUserDataByApiData($config['root'], $thread['creator_user_id']);
 	if (empty($wfUserData))
 	{
 		return 0;

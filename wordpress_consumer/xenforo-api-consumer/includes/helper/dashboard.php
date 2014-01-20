@@ -8,9 +8,13 @@ if (!defined('ABSPATH'))
 
 function xfac_admin_init()
 {
-	register_setting('xfac-settings', 'xfac_root');
-	register_setting('xfac-settings', 'xfac_client_id');
-	register_setting('xfac-settings', 'xfac_client_secret');
+	if (xfac_option_getWorkingMode() === 'blog')
+	{
+		register_setting('xfac-settings', 'xfac_root');
+		register_setting('xfac-settings', 'xfac_client_id');
+		register_setting('xfac-settings', 'xfac_client_secret');
+	}
+
 	register_setting('xfac-settings', 'xfac_tag_forum_mappings');
 }
 
@@ -39,11 +43,15 @@ add_filter('plugin_action_links', 'xfac_plugin_action_links', 10, 2);
 
 function xfac_whitelist_options($whitelist_options)
 {
-	$whitelist_options['xfac'][] = 'xfac_root';
-	$whitelist_options['xfac'][] = 'xfac_client_id';
-	$whitelist_options['xfac'][] = 'xfac_client_secret';
+	if (xfac_option_getWorkingMode() === 'blog')
+	{
+		$whitelist_options['xfac'][] = 'xfac_root';
+		$whitelist_options['xfac'][] = 'xfac_client_id';
+		$whitelist_options['xfac'][] = 'xfac_client_secret';
+	}
+
 	$whitelist_options['xfac'][] = 'xfac_tag_forum_mappings';
-	
+
 	return $whitelist_options;
 }
 

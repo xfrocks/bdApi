@@ -15,13 +15,11 @@ class XFAC_Widget_Threads extends WP_Widget
 
 	function form($instance)
 	{
-		$root = get_option('xfac_root');
-		$clientId = get_option('xfac_client_id');
-		$clientSecret = get_option('xfac_client_secret');
+		$config = xfac_option_getConfig();
 
-		if (!empty($root) AND !empty($clientId) AND !empty($clientSecret))
+		if (!empty($config))
 		{
-			$forums = xfac_api_getForums($root, $clientId, $clientSecret);
+			$forums = xfac_api_getForums($config);
 		}
 		else
 		{
@@ -163,12 +161,10 @@ class XFAC_Widget_Threads extends WP_Widget
 		}
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
 		
-		$root = get_option('xfac_root');
-		$clientId = get_option('xfac_client_id');
-		$clientSecret = get_option('xfac_client_secret');
+		$config = xfac_option_getConfig();
 		$threads = array();
 
-		if (!empty($root) AND !empty($clientId) AND !empty($clientSecret) AND !empty($instance['forumIds']))
+		if (!empty($config) AND !empty($instance['forumIds']))
 		{
 			$forumId = implode(',', $instance['forumIds']);
 			
@@ -190,7 +186,7 @@ class XFAC_Widget_Threads extends WP_Widget
 			}
 			$extraParams = http_build_query($extraParams);
 			
-			$results = xfac_api_getThreadsInForum($root, $clientId, $clientSecret, $forumId, 1, '', $extraParams);
+			$results = xfac_api_getThreadsInForum($config, $forumId, 1, '', $extraParams);
 			
 			if (!empty($results['threads']))
 			{

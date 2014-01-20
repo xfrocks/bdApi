@@ -13,7 +13,7 @@ function xfac_install()
 	$currentVersion = 3;
 	$installedVersion = intval(get_option('xfac_version'));
 
-	$tblAuth = $wpdb->prefix . 'xfac_auth';
+	$tblAuth = xfac_getTableAuth();
 	$tblSync = $wpdb->prefix . 'xfac_sync';
 
 	if ($installedVersion < 1)
@@ -57,7 +57,7 @@ function xfac_install()
 				PRIMARY KEY (provider, provider_content_type, provider_content_id, sync_id)
 			);
 		');
-		
+
 		xfac_setupCrons();
 	}
 
@@ -78,6 +78,20 @@ function xfac_setupCrons()
 	if ($hourlyNext === false)
 	{
 		wp_schedule_event(time(), 'hourly', 'xfac_cron_hourly');
+	}
+}
+
+function xfac_getTableAuth()
+{
+	global $wpdb;
+
+	if (xfac_option_getWorkingMode() === 'network')
+	{
+		return $wpdb->base_prefix . 'xfac_auth';
+	}
+	else
+	{
+		return $wpdb->prefix . 'xfac_auth';
 	}
 }
 

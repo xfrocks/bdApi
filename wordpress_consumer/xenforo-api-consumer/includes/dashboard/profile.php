@@ -8,8 +8,14 @@ if (!defined('ABSPATH'))
 
 function xfac_show_user_profile($wfUser)
 {
+	$config = xfac_option_getConfig();
+	if (empty($config))
+	{
+		return;
+	}
+
 	$apiRecords = xfac_user_getApiRecordsByUserId($wfUser->ID);
-	
+
 	$connectUrl = site_url('wp-login.php?xfac=authorize&redirect_to=' . rawurlencode(admin_url('profile.php')), 'login_post');
 
 ?>

@@ -6,27 +6,31 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
-function xfac_api_getAuthorizeUrl($root, $clientId, $clientSecret, $redirectUri)
+function xfac_api_getAuthorizeUrl($config, $redirectUri)
 {
 	return call_user_func_array('sprintf', array(
-		'%s/oauth/authorize/?client_id=%s&redirect_uri=%s&response_type=code&scope=%s',
-		$root,
-		rawurlencode($clientId),
+		'%s/index.php?oauth/authorize/&client_id=%s&redirect_uri=%s&response_type=code&scope=%s',
+		rtrim($config['root'], '/'),
+		rawurlencode($config['clientId']),
 		rawurlencode($redirectUri),
 		rawurlencode(XFAC_API_SCOPE),
 	));
 }
 
-function xfac_api_getAccessTokenFromCode($root, $clientId, $clientSecret, $code, $redirectUri)
+function xfac_api_getAccessTokenFromCode($config, $code, $redirectUri)
 {
 	$ch = curl_init();
 
-	curl_setopt($ch, CURLOPT_URL, sprintf('%s/oauth/token/', $root));
+	curl_setopt($ch, CURLOPT_URL, call_user_func_array('sprintf', array(
+		'%s/index.php?oauth/token/',
+		rtrim($config['root'], '/')
+	)));
+
 	curl_setopt($ch, CURLOPT_POST, true);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
 		'grant_type' => 'authorization_code',
-		'client_id' => $clientId,
-		'client_secret' => $clientSecret,
+		'client_id' => $config['clientId'],
+		'client_secret' => $config['clientSecret'],
 		'code' => $code,
 		'redirect_uri' => $redirectUri,
 		'scope' => XFAC_API_SCOPE,
@@ -52,16 +56,20 @@ function xfac_api_getAccessTokenFromCode($root, $clientId, $clientSecret, $code,
 	}
 }
 
-function xfac_api_getAccessTokenFromRefreshToken($root, $clientId, $clientSecret, $refreshToken, $scope)
+function xfac_api_getAccessTokenFromRefreshToken($config, $refreshToken, $scope)
 {
 	$ch = curl_init();
 
-	curl_setopt($ch, CURLOPT_URL, sprintf('%s/oauth/token/', $root));
+	curl_setopt($ch, CURLOPT_URL, call_user_func_array('sprintf', array(
+		'%s/index.php?oauth/token/',
+		rtrim($config['root'], '/')
+	)));
+
 	curl_setopt($ch, CURLOPT_POST, true);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
 		'grant_type' => 'refresh_token',
-		'client_id' => $clientId,
-		'client_secret' => $clientSecret,
+		'client_id' => $config['clientId'],
+		'client_secret' => $config['clientSecret'],
 		'refresh_token' => $refreshToken,
 		'scope' => $scope,
 	)));
@@ -86,9 +94,13 @@ function xfac_api_getAccessTokenFromRefreshToken($root, $clientId, $clientSecret
 	}
 }
 
-function xfac_api_getForums($root, $clientId, $clientSecret, $accessToken = '')
+function xfac_api_getForums($config, $accessToken = '')
 {
-	$body = file_get_contents(sprintf('%s/forums/?oauth_token=%s', $root, rawurlencode($accessToken)));
+	$body = file_get_contents(call_user_func_array('sprintf', array(
+		'%s/index.php?forums/&oauth_token=%s',
+		rtrim($config['root'], '/'),
+		rawurlencode($accessToken)
+	)));
 
 	$parts = @json_decode($body, true);
 
@@ -102,9 +114,13 @@ function xfac_api_getForums($root, $clientId, $clientSecret, $accessToken = '')
 	}
 }
 
-function xfac_api_getUsersMe($root, $clientId, $clientSecret, $accessToken)
+function xfac_api_getUsersMe($config, $accessToken)
 {
-	$body = file_get_contents(sprintf('%s/users/me/?oauth_token=%s', $root, rawurlencode($accessToken)));
+	$body = file_get_contents(call_user_func_array('sprintf', array(
+		'%s/index.php?users/me/&oauth_token=%s',
+		rtrim($config['root'], '/'),
+		rawurlencode($accessToken)
+	)));
 
 	$parts = @json_decode($body, true);
 
@@ -118,9 +134,16 @@ function xfac_api_getUsersMe($root, $clientId, $clientSecret, $accessToken)
 	}
 }
 
-function xfac_api_getThreadsInForum($root, $clientId, $clientSecret, $forumId, $page = 1, $accessToken = '', $extraParams = '')
+function xfac_api_getThreadsInForum($config, $forumId, $page = 1, $accessToken = '', $extraParams = '')
 {
-	$body = file_get_contents(sprintf('%s/threads/?forum_id=%d&page=%d&order=thread_create_date_reverse&oauth_token=%s%s', $root, $forumId, $page, rawurlencode($accessToken), !empty($extraParams) ? '&' . $extraParams : ''));
+	$body = file_get_contents(call_user_func_array('sprintf', array(
+		'%s/index.php?threads/&forum_id=%d&page=%d&order=thread_create_date_reverse&oauth_token=%s%s',
+		rtrim($config['root'], '/'),
+		$forumId,
+		$page,
+		rawurlencode($accessToken),
+		!empty($extraParams) ? '&' . $extraParams : ''
+	)));
 
 	$parts = @json_decode($body, true);
 
@@ -134,9 +157,15 @@ function xfac_api_getThreadsInForum($root, $clientId, $clientSecret, $forumId, $
 	}
 }
 
-function xfac_api_getPostsInThread($root, $clientId, $clientSecret, $threadId, $page = 1, $accessToken = '')
+function xfac_api_getPostsInThread($config, $threadId, $page = 1, $accessToken = '')
 {
-	$body = file_get_contents(sprintf('%s/posts/?thread_id=%d&page=%d&order=natural_reverse&oauth_token=%s', $root, $threadId, $page, rawurlencode($accessToken)));
+	$body = file_get_contents(call_user_func_array('sprintf', array(
+		'%s/index.php?posts/&thread_id=%d&page=%d&order=natural_reverse&oauth_token=%s',
+		rtrim($config['root'], '/'),
+		$threadId,
+		$page,
+		rawurlencode($accessToken)
+	)));
 
 	$parts = @json_decode($body, true);
 
@@ -150,11 +179,15 @@ function xfac_api_getPostsInThread($root, $clientId, $clientSecret, $threadId, $
 	}
 }
 
-function xfac_api_postThread($root, $clientId, $clientSecret, $accessToken, $forumId, $threadTitle, $postBody)
+function xfac_api_postThread($config, $accessToken, $forumId, $threadTitle, $postBody)
 {
 	$ch = curl_init();
 
-	curl_setopt($ch, CURLOPT_URL, sprintf('%s/threads/', $root));
+	curl_setopt($ch, CURLOPT_URL, call_user_func_array('sprintf', array(
+		'%s/index.php?threads/',
+		rtrim($config['root'], '/')
+	)));
+
 	curl_setopt($ch, CURLOPT_POST, true);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
 		'oauth_token' => $accessToken,
@@ -178,11 +211,15 @@ function xfac_api_postThread($root, $clientId, $clientSecret, $accessToken, $for
 	}
 }
 
-function xfac_api_postPost($root, $clientId, $clientSecret, $accessToken, $threadId, $postBody)
+function xfac_api_postPost($config, $accessToken, $threadId, $postBody)
 {
 	$ch = curl_init();
 
-	curl_setopt($ch, CURLOPT_URL, sprintf('%s/posts/', $root));
+	curl_setopt($ch, CURLOPT_URL, call_user_func_array('sprintf', array(
+		'%s/index.php?posts/',
+		rtrim($config['root'], '/')
+	)));
+
 	curl_setopt($ch, CURLOPT_POST, true);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
 		'oauth_token' => $accessToken,

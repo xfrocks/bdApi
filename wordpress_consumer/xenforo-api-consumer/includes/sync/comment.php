@@ -84,27 +84,21 @@ function xfac_syncComment_pushComment($xfThreadId, $wfComment)
 		return false;
 	}
 
-	$root = get_option('xfac_root');
-	$clientId = get_option('xfac_client_id');
-	$clientSecret = get_option('xfac_client_secret');
-
-	if (empty($root) OR empty($clientId) OR empty($clientSecret))
+	$config = xfac_option_getConfig();
+	if (empty($config))
 	{
 		return false;
 	}
-
-	return xfac_api_postPost($root, $clientId, $clientSecret, $accessToken, $xfThreadId, $wfComment->comment_content);
+	
+	return xfac_api_postPost($config, $accessToken, $xfThreadId, $wfComment->comment_content);
 }
 
 function xfac_syncComment_cron()
 {
-	$root = get_option('xfac_root');
-	$clientId = get_option('xfac_client_id');
-	$clientSecret = get_option('xfac_client_secret');
-
-	if (empty($root) OR empty($clientId) OR empty($clientSecret))
+	$config = xfac_option_getConfig();
+	if (empty($config))
 	{
-		return;
+		return false;
 	}
 
 	$postSyncRecords = xfac_sync_getRecordsByProviderTypeAndRecent('', 'thread');
@@ -122,7 +116,7 @@ function xfac_syncComment_cron()
 
 		while (true)
 		{
-			$xfPosts = xfac_api_getPostsInThread($root, $clientId, $clientSecret, $postSyncRecord->provider_content_id, $page);
+			$xfPosts = xfac_api_getPostsInThread($config, $postSyncRecord->provider_content_id, $page);
 
 			// increase page for next request
 			$page++;
@@ -176,7 +170,13 @@ add_action('xfac_cron_hourly', 'xfac_syncComment_cron');
 
 function xfac_syncPost_pullComment($xfPost, $wfPostId)
 {
-	$wfUserData = xfac_user_getUserDataByApiData(get_option('xfac_root'), $xfPost['poster_user_id']);
+	$config = xfac_option_getConfig();
+	if (empty($config))
+	{
+		return 0;
+	}
+	
+	$wfUserData = xfac_user_getUserDataByApiData($config['root'], $xfPost['poster_user_id']);
 	if (empty($wfUserData))
 	{
 		return 0;

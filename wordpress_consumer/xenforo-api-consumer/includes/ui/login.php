@@ -8,11 +8,8 @@ if (!defined('ABSPATH'))
 
 function xfac_login_form()
 {
-	$root = get_option('xfac_root');
-	$clientId = get_option('xfac_client_id');
-	$clientSecret = get_option('xfac_client_secret');
-
-	if (empty($root) OR empty($clientId) OR empty($clientSecret))
+	$config = xfac_option_getConfig();
+	if (empty($config))
 	{
 		return;
 	}
@@ -42,10 +39,8 @@ function xfac_login_init()
 		return;
 	}
 
-	$root = get_option('xfac_root');
-	$clientId = get_option('xfac_client_id');
-	$clientSecret = get_option('xfac_client_secret');
-	if (empty($root) OR empty($clientId) OR empty($clientSecret))
+	$config = xfac_option_getConfig();
+	if (empty($config))
 	{
 		return;
 	}
@@ -64,7 +59,7 @@ function xfac_login_init()
 		case 'callback':
 			if (!empty($_REQUEST['code']))
 			{
-				$token = xfac_api_getAccessTokenFromCode($root, $clientId, $clientSecret, $_REQUEST['code'], $callbackUrl);
+				$token = xfac_api_getAccessTokenFromCode($config, $_REQUEST['code'], $callbackUrl);
 			}
 			break;
 		case 'associate':
@@ -105,12 +100,12 @@ function xfac_login_init()
 				exit();
 			}
 
-			$token = xfac_api_getAccessTokenFromRefreshToken($root, $clientId, $clientSecret, $_REQUEST['refresh_token'], $_REQUEST['scope']);
+			$token = xfac_api_getAccessTokenFromRefreshToken($config, $_REQUEST['refresh_token'], $_REQUEST['scope']);
 			$associateConfirmed = true;
 			break;
 		case 'authorize':
 		default:
-			$authorizeUrl = xfac_api_getAuthorizeUrl($root, $clientId, $clientSecret, $callbackUrl);
+			$authorizeUrl = xfac_api_getAuthorizeUrl($config, $callbackUrl);
 
 			wp_redirect($authorizeUrl);
 			exit();
@@ -127,7 +122,7 @@ function xfac_login_init()
 		exit();
 	}
 
-	$me = xfac_api_getUsersMe($root, $clientId, $clientSecret, $token['access_token']);
+	$me = xfac_api_getUsersMe($config, $token['access_token']);
 	if (empty($me['user']))
 	{
 		wp_redirect($redirectBaseUrl . '&xfac_error=no_xf_user');
@@ -135,7 +130,7 @@ function xfac_login_init()
 	}
 	$xfUser = $me['user'];
 
-	$wfUser = xfac_user_getUserByApiData($root, $xfUser['user_id']);
+	$wfUser = xfac_user_getUserByApiData($config['root'], $xfUser['user_id']);
 
 	if (empty($wfUser))
 	{
@@ -193,7 +188,7 @@ function xfac_login_init()
 
 	if (!empty($wfUser))
 	{
-		xfac_user_updateAuth($wfUser->ID, $root, $xfUser['user_id'], $xfUser, $token);
+		xfac_user_updateAuth($wfUser->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
 
 		wp_set_auth_cookie($wfUser->ID, true);
 
