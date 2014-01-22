@@ -44,7 +44,7 @@ function xfac_show_user_profile($wfUser)
 			<div style="margin-left: 36px">
 			<?php else: ?>
 			<div>
-			<? endif; ?>
+			<?php endif; ?>
 
 				<a href="<?php echo $apiRecord->profile['links']['permalink']; ?>" target="_blank"><?php echo $apiRecord->profile['username']; ?></a><br />
 				<?php echo $apiRecord->profile['user_email']; ?>
