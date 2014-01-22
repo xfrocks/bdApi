@@ -167,8 +167,12 @@ class XFAC_Widget_Threads extends WP_Widget
 		if (!empty($config) AND !empty($instance['forumIds']))
 		{
 			$forumId = implode(',', $instance['forumIds']);
-			
-			$extraParams = array('limit' => $limit);
+
+			$extraParams = array(
+				'_xfac' => 'threads.php',
+				'limit' => $limit,
+			);
+
 			switch ($instance['type'])
 			{
 				case 'recent':
@@ -182,7 +186,8 @@ class XFAC_Widget_Threads extends WP_Widget
 					break;
 				case 'new':
 				default:
-					$extraParams['order'] = 'thread_create_date_reverse';
+					// this is the default order
+					// $extraParams['order'] = 'thread_create_date_reverse';
 			}
 			$extraParams = http_build_query($extraParams);
 			
