@@ -120,11 +120,11 @@ function xfac_options_init()
 
 						if (empty($tags))
 						{
-							_e('No tags found', 'xenforo-api-consumer');
+							_e('No WordPress tags found', 'xenforo-api-consumer');
 						}
 						elseif (empty($forums))
 						{
-							_e('No forums found', 'xenforo-api-consumer');
+							_e('No XenForo forums found', 'xenforo-api-consumer');
 						}
 						else
 						{
