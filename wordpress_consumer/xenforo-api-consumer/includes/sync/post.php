@@ -192,7 +192,7 @@ function xfac_syncPost_pullPost($thread, $tags)
 	$postDate = get_date_from_gmt($postDateGmt);
 
 	$postStatus = 'draft';
-	if (intval(get_option('xfac_sync_comment_xf_wp')) > 0)
+	if (intval(get_option('xfac_sync_post_xf_wp_publish')) > 0)
 	{
 		$postStatus = 'publish';
 	}
