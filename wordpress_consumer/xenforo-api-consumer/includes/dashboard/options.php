@@ -53,13 +53,13 @@ function xfac_options_init()
 				</td>
 			</tr>
 			<tr valign="top">
-				<th scope="row"><label for="xfac_client_id"><?php _e('Client ID', 'xenforo-api-consumer'); ?></label></th>
+				<th scope="row"><label for="xfac_client_id"><?php _e('API Key', 'xenforo-api-consumer'); ?></label></th>
 				<td>
 				<input name="xfac_client_id" type="text" id="xfac_client_id" value="<?php echo esc_attr($config['clientId']); ?>" class="regular-text" />
 				</td>
 			</tr>
 			<tr valign="top">
-				<th scope="row"><label for="xfac_client_secret"><?php _e('Client Secret', 'xenforo-api-consumer'); ?></label></th>
+				<th scope="row"><label for="xfac_client_secret"><?php _e('API Secret', 'xenforo-api-consumer'); ?></label></th>
 				<td>
 				<input name="xfac_client_secret" type="text" id="xfac_client_secret" value="<?php echo esc_attr($config['clientSecret']); ?>" class="regular-text" />
 				</td>
@@ -198,13 +198,13 @@ function xfac_wpmu_options()
 		</td>
 	</tr>
 	<tr valign="top">
-		<th scope="row"><label for="xfac_client_id"><?php _e('Client ID', 'xenforo-api-consumer'); ?></label></th>
+		<th scope="row"><label for="xfac_client_id"><?php _e('API Key', 'xenforo-api-consumer'); ?></label></th>
 		<td>
 		<input name="xfac_client_id" type="text" id="xfac_client_id" value="<?php echo esc_attr($config['clientId']); ?>" class="regular-text" />
 		</td>
 	</tr>
 	<tr valign="top">
-		<th scope="row"><label for="xfac_client_secret"><?php _e('Client Secret', 'xenforo-api-consumer'); ?></label></th>
+		<th scope="row"><label for="xfac_client_secret"><?php _e('API Secret', 'xenforo-api-consumer'); ?></label></th>
 		<td>
 		<input name="xfac_client_secret" type="text" id="xfac_client_secret" value="<?php echo esc_attr($config['clientSecret']); ?>" class="regular-text" />
 		</td>
