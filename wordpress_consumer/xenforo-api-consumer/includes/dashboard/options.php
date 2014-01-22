@@ -9,6 +9,7 @@ if (!defined('ABSPATH'))
 function xfac_options_init()
 {
 	$config = xfac_option_getConfig();
+	$hourlyNext = wp_next_scheduled('xfac_cron_hourly');
 	
 	$tagForumMappings = get_option('xfac_tag_forum_mappings');
 	if (!is_array($tagForumMappings))
@@ -68,6 +69,10 @@ function xfac_options_init()
 			<tr valign="top">
 				<th scope="row">
 					<?php _e('Synchronization', 'xenforo-api-consumer'); ?><br />
+					
+					<?php _e('Next Run', 'xenforo-api-consumer'); ?>:
+					<?php echo date_i18n('H:i', $hourlyNext + get_option('gmt_offset') * HOUR_IN_SECONDS); ?>
+					(<a href="options-general.php?page=xfac&cron=hourly"><?php _e('Sync Now', 'xenforo-api-consumer'); ?></a>)
 				</th>
 				<td>
 					<fieldset>
@@ -80,7 +85,7 @@ function xfac_options_init()
 					<fieldset>
 						<label for="xfac_sync_post_xf_wp">
 							<input name="xfac_sync_post_xf_wp" type="checkbox" id="xfac_sync_post_xf_wp" value="1" <?php checked('1', get_option('xfac_sync_post_xf_wp')); ?> />
-							<?php _e('Thread from XenForo to WordPress (as post)', 'xenforo-api-consumer'); ?>
+							<?php _e('Thread from XenForo to WordPress (as draft post)', 'xenforo-api-consumer'); ?>
 						</label><br />
 						<label for="xfac_sync_post_xf_wp_publish" style="margin-left: 20px;">
 							<input name="xfac_sync_post_xf_wp_publish" type="checkbox" id="xfac_sync_post_xf_wp_publish" value="1" <?php checked('1', get_option('xfac_sync_post_xf_wp_publish')); ?> />
@@ -108,7 +113,7 @@ function xfac_options_init()
 				<th scope="row"><label for="xfac_tag_forum_mappings"><?php _e('Tag / Forum Mappings', 'xenforo-api-consumer'); ?></label></th>
 				<td>
 					<?php
-						foreach(array_values($tagForumMappings) as $i => $tagForumMapping)
+						foreach (array_values($tagForumMappings) as $i => $tagForumMapping)
 						{
 							if (empty($tagForumMapping['term_id']) OR empty($tagForumMapping['forum_id']))
 							{
@@ -155,19 +160,24 @@ function _xfac_options_renderTagForumMapping($tags, $forums, $i, $tagForumMappin
 			'forum_title' => '#' . $tagForumMapping['forum_id'],
 		)));
 	}
-	
 ?>
-<div class="<?php echo ($tagForumMapping ? 'TagForumMapping_Record' : 'TagForumMapping_Template'); ?>" data-i="<?php echo $i; ?>">
+<div class="<?php echo($tagForumMapping ? 'TagForumMapping_Record' : 'TagForumMapping_Template'); ?>" data-i="<?php echo $i; ?>">
 	<select name="xfac_tag_forum_mappings[<?php echo $i; ?>][term_id]">
 		<option value="0">&nbsp;</option>
 		<?php foreach ($tags as $tag): ?>
-			<option value="<?php echo esc_attr($tag->term_id); ?>"<?php if (!empty($tagForumMapping['term_id']) AND $tagForumMapping['term_id'] == $tag->term_id) echo ' selected="selected"'; ?>><?php echo esc_html($tag->name); ?></option>
+			<option value="<?php echo esc_attr($tag->term_id); ?>"
+				<?php if (!empty($tagForumMapping['term_id']) AND $tagForumMapping['term_id'] == $tag->term_id) echo ' selected="selected"';?>>
+				<?php echo esc_html($tag->name); ?>
+			</option>
 		<?php endforeach; ?>
 	</select>
 	<select name="xfac_tag_forum_mappings[<?php echo $i; ?>][forum_id]">
 		<option value="0">&nbsp;</option>
 		<?php foreach ($forums['forums'] as $forum): ?>
-			<option value="<?php echo esc_attr($forum['forum_id']); ?>"<?php if (!empty($tagForumMapping['term_id']) AND $tagForumMapping['forum_id'] == $forum['forum_id']) echo ' selected="selected"'; ?>><?php echo esc_html($forum['forum_title']); ?></option>
+			<option value="<?php echo esc_attr($forum['forum_id']); ?>"
+				<?php if (!empty($tagForumMapping['term_id']) AND $tagForumMapping['forum_id'] == $forum['forum_id']) echo ' selected="selected"';?>>
+				<?php echo esc_html($forum['forum_title']); ?>
+			</option>
 		<?php endforeach; ?>
 	</select>
 </div>
@@ -177,7 +187,6 @@ function _xfac_options_renderTagForumMapping($tags, $forums, $i, $tagForumMappin
 function xfac_wpmu_options()
 {
 	$config = xfac_option_getConfig();
-	
 ?>
 
 <h3><?php _e('XenForo API Consumer', 'xenforo-api-consumer'); ?></h3>
@@ -226,3 +235,30 @@ function xfac_update_wpmu_options()
 	}
 }
 add_action('update_wpmu_options', 'xfac_update_wpmu_options');
+
+function xfac_dashboardOptions_admin_init()
+{
+	if (empty($_REQUEST['page']))
+	{
+		return;
+	}
+	if ($_REQUEST['page'] !== 'xfac')
+	{
+		return;
+	}
+	
+	if (empty($_REQUEST['cron']))
+	{
+		return;
+	}
+
+	switch ($_REQUEST['cron'])
+	{
+		case 'hourly':
+			do_action('xfac_cron_hourly');
+			wp_redirect(admin_url('options-general.php?page=xfac&ran=hourly'));
+			exit;
+	}
+}
+add_action('admin_init', 'xfac_dashboardOptions_admin_init');
+

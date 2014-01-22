@@ -59,7 +59,6 @@ function xfac_install()
 		');
 	}
 
-		xfac_setupCrons();
 	if ($installedVersion < 4)
 	{
 		update_option('xfac_sync_post_wp_xf', 1);
@@ -76,13 +75,15 @@ function xfac_install()
 	{
 		add_option('xfac_version', $currentVersion);
 	}
+
+	xfac_setupCrons();
 }
 
 function xfac_setupCrons()
 {
 	$hourlyNext = wp_next_scheduled('xfac_cron_hourly');
 
-	if ($hourlyNext === false)
+	if ($hourlyNext === false OR $hourlyNext < time())
 	{
 		wp_schedule_event(time(), 'hourly', 'xfac_cron_hourly');
 	}

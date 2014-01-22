@@ -63,7 +63,7 @@ function xfac_show_user_profile($wfUser)
 
 add_action('show_user_profile', 'xfac_show_user_profile');
 
-function xfac_login_admin_init()
+function xfac_dashboardProfile_admin_init()
 {
 	if (!defined('IS_PROFILE_PAGE'))
 	{
@@ -110,4 +110,4 @@ function xfac_login_admin_init()
 			break;
 	}
 }
-add_action('admin_init', 'xfac_login_admin_init');
+add_action('admin_init', 'xfac_dashboardProfile_admin_init');
