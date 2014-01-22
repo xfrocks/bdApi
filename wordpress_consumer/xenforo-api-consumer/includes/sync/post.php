@@ -74,7 +74,10 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 	}
 }
 
-add_action('transition_post_status', 'xfac_transition_post_status', 10, 3);
+if (intval(get_option('xfac_sync_post_wp_xf')) > 0)
+{
+	add_action('transition_post_status', 'xfac_transition_post_status', 10, 3);
+}
 
 function xfac_syncPost_cron()
 {
@@ -164,7 +167,10 @@ function xfac_syncPost_cron()
 	}
 }
 
-add_action('xfac_cron_hourly', 'xfac_syncPost_cron');
+if (intval(get_option('xfac_sync_post_xf_wp')) > 0)
+{
+	add_action('xfac_cron_hourly', 'xfac_syncPost_cron');
+}
 
 function xfac_syncPost_pullPost($thread, $tags)
 {
@@ -173,7 +179,7 @@ function xfac_syncPost_pullPost($thread, $tags)
 	{
 		return 0;
 	}
-	
+
 	$postAuthor = 0;
 	$wfUserData = xfac_user_getUserDataByApiData($config['root'], $thread['creator_user_id']);
 	if (empty($wfUserData))
@@ -185,12 +191,18 @@ function xfac_syncPost_pullPost($thread, $tags)
 	$postDateGmt = gmdate('Y-m-d H:i:s', $thread['thread_create_date']);
 	$postDate = get_date_from_gmt($postDateGmt);
 
+	$postStatus = 'draft';
+	if (intval(get_option('xfac_sync_comment_xf_wp')) > 0)
+	{
+		$postStatus = 'publish';
+	}
+
 	$wfPost = array(
 		'post_author' => $postAuthor,
 		'post_content' => $thread['first_post']['post_body'],
 		'post_date' => $postDate,
 		'post_date_gmt' => $postDateGmt,
-		'post_status' => 'publish',
+		'post_status' => $postStatus,
 		'post_title' => $thread['thread_title'],
 		'post_type' => 'post',
 		'tags_input' => implode(', ', $tags),

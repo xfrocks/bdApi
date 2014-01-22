@@ -10,7 +10,7 @@ function xfac_install()
 {
 	global $wpdb;
 
-	$currentVersion = 3;
+	$currentVersion = 4;
 	$installedVersion = intval(get_option('xfac_version'));
 
 	$tblAuth = xfac_getTableAuth();
@@ -57,8 +57,15 @@ function xfac_install()
 				PRIMARY KEY (provider, provider_content_type, provider_content_id, sync_id)
 			);
 		');
+	}
 
 		xfac_setupCrons();
+	if ($installedVersion < 4)
+	{
+		update_option('xfac_sync_post_wp_xf', 1);
+		update_option('xfac_sync_post_xf_wp', 1);
+		update_option('xfac_sync_comment_wp_xf', 1);
+		update_option('xfac_sync_comment_xf_wp', 1);
 	}
 
 	if ($installedVersion > 0)

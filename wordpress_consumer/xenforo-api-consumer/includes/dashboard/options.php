@@ -66,6 +66,45 @@ function xfac_options_init()
 			<?php endif; ?>
 
 			<tr valign="top">
+				<th scope="row">
+					<?php _e('Synchronization', 'xenforo-api-consumer'); ?><br />
+				</th>
+				<td>
+					<fieldset>
+						<label for="xfac_sync_post_wp_xf">
+							<input name="xfac_sync_post_wp_xf" type="checkbox" id="xfac_sync_post_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_post_wp_xf')); ?> />
+							<?php _e('Post from WordPress to XenForo (as thread)', 'xenforo-api-consumer'); ?>
+						</label>
+					</fieldset>
+
+					<fieldset>
+						<label for="xfac_sync_post_xf_wp">
+							<input name="xfac_sync_post_xf_wp" type="checkbox" id="xfac_sync_post_xf_wp" value="1" <?php checked('1', get_option('xfac_sync_post_xf_wp')); ?> />
+							<?php _e('Thread from XenForo to WordPress (as post)', 'xenforo-api-consumer'); ?>
+						</label><br />
+						<label for="xfac_sync_post_xf_wp_publish" style="margin-left: 20px;">
+							<input name="xfac_sync_post_xf_wp_publish" type="checkbox" id="xfac_sync_post_xf_wp_publish" value="1" <?php checked('1', get_option('xfac_sync_post_xf_wp_publish')); ?> />
+							<?php _e('Auto-publish synchronized post', 'xenforo-api-consumer'); ?>
+						</label><br />
+					</fieldset>
+
+					<fieldset>
+						<label for="xfac_sync_comment_wp_xf">
+							<input name="xfac_sync_comment_wp_xf" type="checkbox" id="xfac_sync_comment_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_comment_wp_xf')); ?> />
+							<?php _e('Comment from WordPress to XenForo (as reply)', 'xenforo-api-consumer'); ?>
+						</label>
+					</fieldset>
+
+					<fieldset>
+						<label for="xfac_sync_comment_xf_wp">
+							<input name="xfac_sync_comment_xf_wp" type="checkbox" id="xfac_sync_comment_xf_wp" value="1" <?php checked('1', get_option('xfac_sync_comment_xf_wp')); ?> />
+							<?php _e('Reply from XenForo to WordPress (as comment)', 'xenforo-api-consumer'); ?>
+						</label>
+					</fieldset>
+				</td>
+			</tr>
+
+			<tr valign="top">
 				<th scope="row"><label for="xfac_tag_forum_mappings"><?php _e('Tag / Forum Mappings', 'xenforo-api-consumer'); ?></label></th>
 				<td>
 					<?php

@@ -73,7 +73,10 @@ function xfac_wp_update_comment_count($postId, $new, $old)
 	}
 }
 
-add_action('wp_update_comment_count', 'xfac_wp_update_comment_count', 10, 3);
+if (intval(get_option('xfac_sync_comment_wp_xf')) > 0)
+{
+	add_action('wp_update_comment_count', 'xfac_wp_update_comment_count', 10, 3);
+}
 
 function xfac_syncComment_pushComment($xfThreadId, $wfComment)
 {
@@ -89,7 +92,7 @@ function xfac_syncComment_pushComment($xfThreadId, $wfComment)
 	{
 		return false;
 	}
-	
+
 	return xfac_api_postPost($config, $accessToken, $xfThreadId, $wfComment->comment_content);
 }
 
@@ -107,7 +110,7 @@ function xfac_syncComment_cron()
 	{
 		$page = 1;
 		$pulledSomething = false;
-		
+
 		if (time() - $postSyncRecord->sync_date < 60)
 		{
 			// do not try to sync every minute...
@@ -166,7 +169,10 @@ function xfac_syncComment_cron()
 	}
 }
 
-add_action('xfac_cron_hourly', 'xfac_syncComment_cron');
+if (intval(get_option('xfac_sync_comment_xf_wp')) > 0)
+{
+	add_action('xfac_cron_hourly', 'xfac_syncComment_cron');
+}
 
 function xfac_syncPost_pullComment($xfPost, $wfPostId)
 {
@@ -175,7 +181,7 @@ function xfac_syncPost_pullComment($xfPost, $wfPostId)
 	{
 		return 0;
 	}
-	
+
 	$wfUserData = xfac_user_getUserDataByApiData($config['root'], $xfPost['poster_user_id']);
 	if (empty($wfUserData))
 	{
