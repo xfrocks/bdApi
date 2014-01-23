@@ -109,6 +109,13 @@ function xfac_options_init()
 							<?php _e('Reply from XenForo to WordPress (as comment)', 'xenforo-api-consumer'); ?>
 						</label>
 					</fieldset>
+
+					<fieldset>
+						<label for="xfac_sync_avatar_xf_wp">
+							<input name="xfac_sync_avatar_xf_wp" type="checkbox" id="xfac_sync_avatar_xf_wp" value="1" <?php checked('1', get_option('xfac_sync_avatar_xf_wp')); ?> />
+							<?php _e('Avatar from XenForo to WordPress', 'xenforo-api-consumer'); ?>
+						</label>
+					</fieldset>
 				</td>
 			</tr>
 

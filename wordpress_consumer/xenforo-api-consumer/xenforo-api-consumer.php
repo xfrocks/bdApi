@@ -47,6 +47,7 @@ if (is_admin())
 require_once (dirname(__FILE__) . '/includes/ui/login.php');
 
 require_once (dirname(__FILE__) . '/includes/helper/sync.php');
+require_once (dirname(__FILE__) . '/includes/sync/avatar.php');
 require_once (dirname(__FILE__) . '/includes/sync/post.php');
 require_once (dirname(__FILE__) . '/includes/sync/comment.php');
 
