@@ -144,20 +144,30 @@ function xfac_syncComment_cron()
 					continue;
 				}
 
+				$synced = false;
+
 				foreach ($commentSyncRecords as $commentSyncRecord)
 				{
-					if ($commentSyncRecord->provider_content_id == $xfPost['post_id'] AND !empty($commentSyncRecord->syncData['direction']) AND $commentSyncRecord->syncData['direction'] === 'pull')
+					if ($commentSyncRecord->provider_content_id == $xfPost['post_id'])
 					{
-						// stop the foreach and the outside while too
-						break 3;
+						$synced = true;
+
+						if (!empty($commentSyncRecord->syncData['direction']) AND $commentSyncRecord->syncData['direction'] === 'pull')
+						{
+							// stop the foreach and the outside while too
+							break 3;
+						}
 					}
 				}
 
-				$commentId = xfac_syncPost_pullComment($xfPost, $postSyncRecord->sync_id);
-
-				if ($commentId > 0)
+				if (!$synced)
 				{
-					$pulledSomething = true;
+					$commentId = xfac_syncPost_pullComment($xfPost, $postSyncRecord->sync_id);
+
+					if ($commentId > 0)
+					{
+						$pulledSomething = true;
+					}
 				}
 			}
 		}
