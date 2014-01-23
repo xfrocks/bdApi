@@ -86,11 +86,14 @@ function xfac_options_init()
 						<label for="xfac_sync_post_xf_wp">
 							<input name="xfac_sync_post_xf_wp" type="checkbox" id="xfac_sync_post_xf_wp" value="1" <?php checked('1', get_option('xfac_sync_post_xf_wp')); ?> />
 							<?php _e('Thread from XenForo to WordPress (as draft post)', 'xenforo-api-consumer'); ?>
-						</label><br />
-						<label for="xfac_sync_post_xf_wp_publish" style="margin-left: 20px;">
-							<input name="xfac_sync_post_xf_wp_publish" type="checkbox" id="xfac_sync_post_xf_wp_publish" value="1" <?php checked('1', get_option('xfac_sync_post_xf_wp_publish')); ?> />
-							<?php _e('Auto-publish synchronized post', 'xenforo-api-consumer'); ?>
-						</label><br />
+						</label>
+
+						<div style="margin-left: 20px;">
+							<label for="xfac_sync_post_xf_wp_publish">
+								<input name="xfac_sync_post_xf_wp_publish" type="checkbox" id="xfac_sync_post_xf_wp_publish" value="1" <?php checked('1', get_option('xfac_sync_post_xf_wp_publish')); ?> />
+								<?php _e('Auto-publish synchronized post', 'xenforo-api-consumer'); ?>
+							</label>
+						</div>
 					</fieldset>
 
 					<fieldset>
