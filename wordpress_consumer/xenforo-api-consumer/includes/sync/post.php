@@ -160,6 +160,12 @@ function xfac_syncPost_cron()
 					$wfPostId = xfac_syncPost_pullPost($thread, $tagNames);
 				}
 			}
+
+			if (empty($threads['links']['next']))
+			{
+				// there is no next page, stop
+				break;
+			}
 		}
 	}
 }

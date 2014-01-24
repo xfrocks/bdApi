@@ -12,7 +12,7 @@ function xfac_sync_mysqlDateToGmtTimestamp($string)
 	{
 		return gmmktime($m[4], $m[5], $m[6], $m[2], $m[3], $m[1]);
 	}
-	
+
 	return 0;
 }
 
@@ -91,6 +91,8 @@ function xfac_sync_getRecordsByProviderTypeAndIds($provider, $cType, array $cIds
 
 function xfac_sync_getRecordsByProviderTypeAndRecent($provider, $cType, $recentThreshold = 604800)
 {
+	// 604800 equals 7 days, we only sync data that was updated within a week
+
 	global $wpdb;
 
 	$records = $wpdb->get_results($wpdb->prepare("

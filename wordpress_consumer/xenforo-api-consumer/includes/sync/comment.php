@@ -170,6 +170,12 @@ function xfac_syncComment_cron()
 					}
 				}
 			}
+			
+			if (empty($xfPosts['links']['next']))
+			{
+				// there is no next page, stop
+				break;
+			}
 		}
 
 		if ($pulledSomething)
