@@ -223,7 +223,7 @@ function _xfac_login_getRedirectTo()
 
 	if (strpos($redirectTo, 'wp-login.php') !== false)
 	{
-		$redirectTo = site_url();
+		$redirectTo = home_url();
 	}
 
 	return $redirectTo;
