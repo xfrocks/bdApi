@@ -10,7 +10,7 @@ function xfac_install()
 {
 	global $wpdb;
 
-	$currentVersion = 6;
+	$currentVersion = 7;
 	$installedVersion = intval(get_option('xfac_version'));
 
 	$tblAuth = xfac_getTableAuth();
@@ -84,7 +84,7 @@ function xfac_setupCrons()
 {
 	$hourlyNext = wp_next_scheduled('xfac_cron_hourly');
 
-	if ($hourlyNext === false OR $hourlyNext < time())
+	if ($hourlyNext === false)
 	{
 		wp_schedule_event(time(), 'hourly', 'xfac_cron_hourly');
 	}

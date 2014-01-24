@@ -15,9 +15,6 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 
 	if ($newStatus == 'publish')
 	{
-		// we need to make sure our crons are scheduled
-		xfac_setupCrons();
-
 		$tagForumMappings = get_option('xfac_tag_forum_mappings');
 
 		$forumIds = array();
