@@ -215,6 +215,7 @@ function xfac_syncPost_pullPost($thread, $tags)
 	if ($wfPostId > 0)
 	{
 		xfac_sync_updateRecord('', 'thread', $thread['thread_id'], $wfPostId, $thread['thread_create_date'], array(
+			'forumId' => $thread['forum_id'],
 			'thread' => $thread,
 			'direction' => 'pull',
 		));
