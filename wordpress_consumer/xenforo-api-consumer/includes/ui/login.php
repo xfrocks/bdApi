@@ -130,40 +130,40 @@ function xfac_login_init()
 	}
 	$xfUser = $me['user'];
 
-	$wfUser = xfac_user_getUserByApiData($config['root'], $xfUser['user_id']);
+	$wpUser = xfac_user_getUserByApiData($config['root'], $xfUser['user_id']);
 
-	if (empty($wfUser))
+	if (empty($wpUser))
 	{
 		// no user with the API data found
 		// find user with matching email...
 		if (!empty($xfUser['user_email']))
 		{
-			$wfUserEmail = get_user_by('email', $xfUser['user_email']);
-			if (!empty($wfUserEmail))
+			$wpUserEmail = get_user_by('email', $xfUser['user_email']);
+			if (!empty($wpUserEmail))
 			{
 				// user with matching email found
 				// TODO: check for existing auth record?
-				$wfUser = $wfUserEmail;
+				$wpUser = $wpUserEmail;
 			}
 		}
 	}
 
-	if (empty($wfUser))
+	if (empty($wpUser))
 	{
-		$currentWfUser = wp_get_current_user();
+		$currentWpUser = wp_get_current_user();
 
-		if (!empty($currentWfUser) AND $currentWfUser->ID > 0)
+		if (!empty($currentWpUser) AND $currentWpUser->ID > 0)
 		{
 			// a user is currently logged in, try to associate now
 			if (!$associateConfirmed)
 			{
-				_xfac_login_renderAssociateForm($currentWfUser, $xfUser, $token['refresh_token'], $token['scope'], $redirectTo);
+				_xfac_login_renderAssociateForm($currentWpUser, $xfUser, $token['refresh_token'], $token['scope'], $redirectTo);
 				exit();
 			}
 			else
 			{
 				// association has been confirmed
-				$wfUser = $currentWfUser;
+				$wpUser = $currentWpUser;
 
 				if ($redirectTo == admin_url('profile.php'))
 				{
@@ -184,7 +184,7 @@ function xfac_login_init()
 					exit();
 				}
 
-				$wfUser = new WP_User($newUserId);
+				$wpUser = new WP_User($newUserId);
 			}
 			else
 			{
@@ -194,11 +194,11 @@ function xfac_login_init()
 		}
 	}
 
-	if (!empty($wfUser))
+	if (!empty($wpUser))
 	{
-		xfac_user_updateAuth($wfUser->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
+		xfac_user_updateAuth($wpUser->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
 
-		wp_set_auth_cookie($wfUser->ID, true);
+		wp_set_auth_cookie($wpUser->ID, true);
 
 		wp_redirect($redirectTo);
 		exit();

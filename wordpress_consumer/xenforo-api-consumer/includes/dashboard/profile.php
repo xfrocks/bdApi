@@ -6,7 +6,7 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
-function xfac_show_user_profile($wfUser)
+function xfac_show_user_profile($wpUser)
 {
 	$config = xfac_option_getConfig();
 	if (empty($config))
@@ -14,7 +14,7 @@ function xfac_show_user_profile($wfUser)
 		return;
 	}
 
-	$apiRecords = xfac_user_getApiRecordsByUserId($wfUser->ID);
+	$apiRecords = xfac_user_getApiRecordsByUserId($wpUser->ID);
 
 	$connectUrl = site_url('wp-login.php?xfac=authorize&redirect_to=' . rawurlencode(admin_url('profile.php')), 'login_post');
 

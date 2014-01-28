@@ -78,9 +78,9 @@ if (intval(get_option('xfac_sync_comment_wp_xf')) > 0)
 	add_action('wp_update_comment_count', 'xfac_wp_update_comment_count', 10, 3);
 }
 
-function xfac_syncComment_pushComment($xfThreadId, $wfComment)
+function xfac_syncComment_pushComment($xfThreadId, $wpComment)
 {
-	$accessToken = xfac_user_getAccessToken($wfComment->user_id);
+	$accessToken = xfac_user_getAccessToken($wpComment->user_id);
 
 	if (empty($accessToken))
 	{
@@ -93,7 +93,7 @@ function xfac_syncComment_pushComment($xfThreadId, $wfComment)
 		return false;
 	}
 
-	return xfac_api_postPost($config, $accessToken, $xfThreadId, $wfComment->comment_content);
+	return xfac_api_postPost($config, $accessToken, $xfThreadId, $wpComment->comment_content);
 }
 
 function xfac_syncComment_cron()
@@ -190,7 +190,7 @@ if (intval(get_option('xfac_sync_comment_xf_wp')) > 0)
 	add_action('xfac_cron_hourly', 'xfac_syncComment_cron');
 }
 
-function xfac_syncPost_pullComment($xfPost, $wfPostId)
+function xfac_syncPost_pullComment($xfPost, $wpPostId)
 {
 	$config = xfac_option_getConfig();
 	if (empty($config))
@@ -202,8 +202,8 @@ function xfac_syncPost_pullComment($xfPost, $wfPostId)
 	$wpUserEmail = false;
 	$wpUserUrl = home_url();
 	$wpUserId = 0;
-	$wfUserData = xfac_user_getUserDataByApiData($config['root'], $xfPost['poster_user_id']);
-	if (empty($wfUserData))
+	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $xfPost['poster_user_id']);
+	if (empty($wpUserData))
 	{
 		if (intval(get_option('xfac_sync_comment_xf_wp_as_guest')) == 0)
 		{
@@ -217,17 +217,17 @@ function xfac_syncPost_pullComment($xfPost, $wfPostId)
 	}
 	else
 	{
-		$wpDisplayName = $wfUserData->display_name;
-		$wpUserEmail = $wfUserData->user_email;
-		$wpUserUrl = $wfUserData->user_url;
-		$wpUserId = $wfUserData->ID;
+		$wpDisplayName = $wpUserData->display_name;
+		$wpUserEmail = $wpUserData->user_email;
+		$wpUserUrl = $wpUserData->user_url;
+		$wpUserId = $wpUserData->ID;
 	}
 
 	$commentDateGmt = gmdate('Y-m-d H:i:s', $xfPost['post_create_date']);
 	$commentDate = get_date_from_gmt($commentDateGmt);
 
 	$comment = array(
-		'comment_post_ID' => $wfPostId,
+		'comment_post_ID' => $wpPostId,
 		'comment_author' => $wpDisplayName,
 		'comment_author_email' => $wpUserEmail,
 		'comment_author_url' => $wpUserUrl,

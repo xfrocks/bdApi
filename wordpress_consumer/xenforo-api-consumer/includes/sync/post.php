@@ -157,7 +157,7 @@ function xfac_syncPost_cron()
 
 				if (!$synced)
 				{
-					$wfPostId = xfac_syncPost_pullPost($thread, $tagNames);
+					$wpPostId = xfac_syncPost_pullPost($thread, $tagNames);
 				}
 			}
 
@@ -184,12 +184,12 @@ function xfac_syncPost_pullPost($thread, $tags)
 	}
 
 	$postAuthor = 0;
-	$wfUserData = xfac_user_getUserDataByApiData($config['root'], $thread['creator_user_id']);
-	if (empty($wfUserData))
+	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $thread['creator_user_id']);
+	if (empty($wpUserData))
 	{
 		return 0;
 	}
-	$postAuthor = $wfUserData->ID;
+	$postAuthor = $wpUserData->ID;
 
 	$postDateGmt = gmdate('Y-m-d H:i:s', $thread['thread_create_date']);
 	$postDate = get_date_from_gmt($postDateGmt);
@@ -200,7 +200,7 @@ function xfac_syncPost_pullPost($thread, $tags)
 		$postStatus = 'publish';
 	}
 
-	$wfPost = array(
+	$wpPost = array(
 		'post_author' => $postAuthor,
 		'post_content' => $thread['first_post']['post_body_html'],
 		'post_date' => $postDate,
@@ -212,17 +212,17 @@ function xfac_syncPost_pullPost($thread, $tags)
 	);
 
 	$GLOBALS['XFAC_SKIP_xfac_transition_post_status'] = true;
-	$wfPostId = wp_insert_post($wfPost);
+	$wpPostId = wp_insert_post($wpPost);
 	$GLOBALS['XFAC_SKIP_xfac_transition_post_status'] = false;
 
-	if ($wfPostId > 0)
+	if ($wpPostId > 0)
 	{
-		xfac_sync_updateRecord('', 'thread', $thread['thread_id'], $wfPostId, $thread['thread_create_date'], array(
+		xfac_sync_updateRecord('', 'thread', $thread['thread_id'], $wpPostId, $thread['thread_create_date'], array(
 			'forumId' => $thread['forum_id'],
 			'thread' => $thread,
 			'direction' => 'pull',
 		));
 	}
 
-	return $wfPostId;
+	return $wpPostId;
 }

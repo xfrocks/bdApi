@@ -6,7 +6,7 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
-function xfac_user_getApiRecordsByUserId($wfUserId)
+function xfac_user_getApiRecordsByUserId($wpUserId)
 {
 	global $wpdb;
 
@@ -16,7 +16,7 @@ function xfac_user_getApiRecordsByUserId($wfUserId)
 		SELECT *
 		FROM {$tblAuth}
 		WHERE user_id = %d
-	", $wfUserId));
+	", $wpUserId));
 
 	foreach ($records as &$record)
 	{
@@ -65,7 +65,7 @@ function xfac_user_getUserByApiData($root, $xfUserId)
 	return $user;
 }
 
-function xfac_user_updateAuth($wfUserId, $root, $xfUserId, array $xfUser, array $token)
+function xfac_user_updateAuth($wpUserId, $root, $xfUserId, array $xfUser, array $token)
 {
 	global $wpdb;
 
@@ -76,7 +76,7 @@ function xfac_user_updateAuth($wfUserId, $root, $xfUserId, array $xfUser, array 
 		REPLACE INTO {$tblAuth}
 		(user_id, provider, identifier, profile, token)
 		VALUES (%d, %s, %s, %s, %s)
-	", $wfUserId, $provider, $xfUserId, serialize($xfUser), serialize($token)));
+	", $wpUserId, $provider, $xfUserId, serialize($xfUser), serialize($token)));
 }
 
 function xfac_user_deleteAuthById($authId)
@@ -88,7 +88,7 @@ function xfac_user_deleteAuthById($authId)
 	return $wpdb->delete($tblAuth, array('id' => $authId));
 }
 
-function xfac_user_getAccessToken($wfUserId)
+function xfac_user_getAccessToken($wpUserId)
 {
 	global $wpdb;
 
@@ -98,7 +98,7 @@ function xfac_user_getAccessToken($wfUserId)
 		SELECT *
 		FROM {$tblAuth}
 		WHERE user_id = %d
-	", $wfUserId));
+	", $wpUserId));
 
 	if (empty($auth))
 	{
@@ -129,7 +129,7 @@ function xfac_user_getAccessToken($wfUserId)
 		return null;
 	}
 
-	xfac_user_updateAuth($wfUserId, $config['root'], $auth->identifier, unserialize($auth->profile), $newToken);
+	xfac_user_updateAuth($wpUserId, $config['root'], $auth->identifier, unserialize($auth->profile), $newToken);
 
 	return $newToken['access_token'];
 }
