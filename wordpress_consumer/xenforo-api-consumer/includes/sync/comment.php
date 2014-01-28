@@ -231,7 +231,7 @@ function xfac_syncPost_pullComment($xfPost, $wfPostId)
 		'comment_author' => $wpDisplayName,
 		'comment_author_email' => $wpUserEmail,
 		'comment_author_url' => $wpUserUrl,
-		'comment_content' => $xfPost['post_body'],
+		'comment_content' => $xfPost['post_body_html'],
 		'user_id' => $wpUserId,
 		'comment_date_gmt' => $commentDateGmt,
 		'comment_date' => $commentDate,

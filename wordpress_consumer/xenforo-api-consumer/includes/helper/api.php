@@ -224,7 +224,7 @@ function xfac_api_postPost($config, $accessToken, $threadId, $postBody)
 	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
 		'oauth_token' => $accessToken,
 		'thread_id' => $threadId,
-		'post_body' => $postBody,
+		'post_body_html' => $postBody,
 	)));
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
