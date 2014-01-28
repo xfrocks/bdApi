@@ -170,7 +170,7 @@ function xfac_syncComment_cron()
 					}
 				}
 			}
-			
+
 			if (empty($xfPosts['links']['next']))
 			{
 				// there is no next page, stop
@@ -198,10 +198,29 @@ function xfac_syncPost_pullComment($xfPost, $wfPostId)
 		return 0;
 	}
 
+	$wpDisplayName = false;
+	$wpUserEmail = false;
+	$wpUserUrl = home_url();
+	$wpUserId = 0;
 	$wfUserData = xfac_user_getUserDataByApiData($config['root'], $xfPost['poster_user_id']);
 	if (empty($wfUserData))
 	{
-		return 0;
+		if (intval(get_option('xfac_sync_comment_xf_wp_as_guest')) == 0)
+		{
+			return 0;
+		}
+
+		// no wordpress user found but as_guest option is enabled
+		// sync as guest now
+		$wpDisplayName = $xfPost['poster_username'];
+		$wpUserEmail = sprintf('%s-%d@xenforo-api.com', $xfPost['poster_username'], $xfPost['poster_user_id']);
+	}
+	else
+	{
+		$wpDisplayName = $wfUserData->display_name;
+		$wpUserEmail = $wfUserData->user_email;
+		$wpUserUrl = $wfUserData->user_url;
+		$wpUserId = $wfUserData->ID;
 	}
 
 	$commentDateGmt = gmdate('Y-m-d H:i:s', $xfPost['post_create_date']);
@@ -209,11 +228,11 @@ function xfac_syncPost_pullComment($xfPost, $wfPostId)
 
 	$comment = array(
 		'comment_post_ID' => $wfPostId,
-		'comment_author' => $wfUserData->display_name,
-		'comment_author_email' => $wfUserData->user_email,
-		'comment_author_url' => $wfUserData->user_url,
+		'comment_author' => $wpDisplayName,
+		'comment_author_email' => $wpUserEmail,
+		'comment_author_url' => $wpUserUrl,
 		'comment_content' => $xfPost['post_body'],
-		'user_id' => $wfUserData->ID,
+		'user_id' => $wpUserId,
 		'comment_date_gmt' => $commentDateGmt,
 		'comment_date' => $commentDate,
 		'comment_approved' => 1,
