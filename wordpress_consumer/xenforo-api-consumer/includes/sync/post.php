@@ -202,7 +202,7 @@ function xfac_syncPost_pullPost($thread, $tags)
 
 	$wfPost = array(
 		'post_author' => $postAuthor,
-		'post_content' => $thread['first_post']['post_body'],
+		'post_content' => $thread['first_post']['post_body_html'],
 		'post_date' => $postDate,
 		'post_date_gmt' => $postDateGmt,
 		'post_status' => $postStatus,
