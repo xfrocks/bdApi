@@ -174,15 +174,23 @@ function xfac_login_init()
 		}
 		else
 		{
-			// no matching user found, register new
-			$newUserId = register_new_user($xfUser['username'], $xfUser['user_email']);
-			if (is_wp_error($newUserId))
+			// no matching user found, try to register
+			if (intval(get_option('users_can_register')))
 			{
-				wp_redirect($redirectBaseUrl . '&xfac_error=cannot_register');
+				$newUserId = register_new_user($xfUser['username'], $xfUser['user_email']);
+				if (is_wp_error($newUserId))
+				{
+					wp_redirect($redirectBaseUrl . '&xfac_error=register_error&message=' . urlencode($newUserId->get_error_message()));
+					exit();
+				}
+
+				$wfUser = new WP_User($newUserId);
+			}
+			else
+			{
+				wp_redirect($redirectBaseUrl . '&xfac_error=users_cannot_register');
 				exit();
 			}
-
-			$wfUser = new WP_User($newUserId);
 		}
 	}
 
