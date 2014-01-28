@@ -193,7 +193,7 @@ function xfac_api_postThread($config, $accessToken, $forumId, $threadTitle, $pos
 		'oauth_token' => $accessToken,
 		'forum_id' => $forumId,
 		'thread_title' => $threadTitle,
-		'post_body' => $postBody,
+		'post_body_html' => $postBody,
 	)));
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
