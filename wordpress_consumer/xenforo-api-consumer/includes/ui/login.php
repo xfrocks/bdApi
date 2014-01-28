@@ -63,13 +63,6 @@ function xfac_login_init()
 			}
 			break;
 		case 'associate':
-			$wpUser = wp_get_current_user();
-			if (empty($wpUser))
-			{
-				wp_redirect($redirectBaseUrl . '&xfac_error=no_user');
-				exit();
-			}
-
 			if (empty($_REQUEST['refresh_token']))
 			{
 				wp_redirect($redirectBaseUrl . '&xfac_error=no_refresh_token');
@@ -86,22 +79,29 @@ function xfac_login_init()
 				exit();
 			}
 
+			if (empty($_REQUEST['user_login']))
+			{
+				wp_redirect($redirectBaseUrl . '&xfac_error=no_user_login');
+				exit();
+			}
+			$wpUserForAssociate = get_user_by('login', $_REQUEST['user_login']);
+
 			if (empty($_REQUEST['pwd']))
 			{
-				_xfac_login_renderAssociateForm($wpUser, $_REQUEST['xf_user'], $_REQUEST['refresh_token'], $_REQUEST['scope'], $redirectTo);
+				_xfac_login_renderAssociateForm($wpUserForAssociate, $_REQUEST['xf_user'], $_REQUEST['refresh_token'], $_REQUEST['scope'], $redirectTo);
 				exit();
 			}
 			$password = $_REQUEST['pwd'];
 
-			$authenticatedUser = apply_filters('authenticate', null, $wpUser->user_login, $password);
-			if (empty($authenticatedUser->ID) OR $authenticatedUser->ID != $wpUser->ID)
+			$authenticatedUser = apply_filters('authenticate', null, $wpUserForAssociate->user_login, $password);
+			if (empty($authenticatedUser->ID) OR $authenticatedUser->ID != $wpUserForAssociate->ID)
 			{
-				_xfac_login_renderAssociateForm($wpUser, $_REQUEST['xf_user'], $_REQUEST['refresh_token'], $_REQUEST['scope'], $redirectTo);
+				_xfac_login_renderAssociateForm($wpUserForAssociate, $_REQUEST['xf_user'], $_REQUEST['refresh_token'], $_REQUEST['scope'], $redirectTo);
 				exit();
 			}
 
 			$token = xfac_api_getAccessTokenFromRefreshToken($config, $_REQUEST['refresh_token'], $_REQUEST['scope']);
-			$associateConfirmed = true;
+			$associateConfirmed = $wpUserForAssociate->ID;
 			break;
 		case 'authorize':
 		default:
@@ -138,12 +138,20 @@ function xfac_login_init()
 		// find user with matching email...
 		if (!empty($xfUser['user_email']))
 		{
-			$wpUserEmail = get_user_by('email', $xfUser['user_email']);
-			if (!empty($wpUserEmail))
+			$wpUserMatchingEmail = get_user_by('email', $xfUser['user_email']);
+			if (!empty($wpUserMatchingEmail))
 			{
 				// user with matching email found
-				// TODO: check for existing auth record?
-				$wpUser = $wpUserEmail;
+				if (!$associateConfirmed)
+				{
+					_xfac_login_renderAssociateForm($wpUserMatchingEmail, $xfUser, $token['refresh_token'], $token['scope'], $redirectTo);
+					exit();
+				}
+				elseif ($associateConfirmed == $wpUserMatchingEmail->ID)
+				{
+					// association has been confirmed
+					$wpUser = $wpUserMatchingEmail;
+				}
 			}
 		}
 	}
@@ -160,7 +168,7 @@ function xfac_login_init()
 				_xfac_login_renderAssociateForm($currentWpUser, $xfUser, $token['refresh_token'], $token['scope'], $redirectTo);
 				exit();
 			}
-			else
+			elseif ($associateConfirmed == $currentWpUser->ID)
 			{
 				// association has been confirmed
 				$wpUser = $currentWpUser;
@@ -249,7 +257,7 @@ function _xfac_login_renderAssociateForm(WP_User $wpUser, array $xfUser, $refres
 	<p>
 		<label for="user_login" >
 			<?php _e('Username', 'xenforo-api-consumer') ?><br />
-			<input type="text" name="user_login" id="user_login" class="input" value="<?php echo esc_attr($wpUser->user_login); ?>" size="20" disabled="disabled" />
+			<input type="text" name="user_login" id="user_login" class="input" value="<?php echo esc_attr($wpUser->user_login); ?>" size="20" />
  		</label>
 	</p>
 	<p>
