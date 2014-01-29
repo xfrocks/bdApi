@@ -200,7 +200,7 @@ function xfac_syncPost_pullComment($xfPost, $wpPostId)
 
 	$wpDisplayName = false;
 	$wpUserEmail = false;
-	$wpUserUrl = home_url();
+	$wpUserUrl = '';
 	$wpUserId = 0;
 	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $xfPost['poster_user_id']);
 	if (empty($wpUserData))
