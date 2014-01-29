@@ -6,6 +6,8 @@
  Version: 0.9-dev4
  Author: XFROCKS
  Author URI: https://xfrocks.com
+ Text Domain: xenforo-api-consumer
+ Domain Path: /lang
  */
 
 // Exit if accessed directly
@@ -31,6 +33,13 @@ function xfac_activate()
 }
 
 register_activation_hook(__FILE__, 'xfac_activate');
+
+function xfac_init()
+{
+	$loaded = load_plugin_textdomain('xenforo-api-consumer', false, 'xenforo-api-consumer/lang/');
+}
+
+add_action('init', 'xfac_init');
 
 require_once (dirname(__FILE__) . '/includes/helper/api.php');
 require_once (dirname(__FILE__) . '/includes/helper/dashboard.php');
