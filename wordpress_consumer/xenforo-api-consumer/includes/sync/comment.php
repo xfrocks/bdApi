@@ -226,12 +226,14 @@ function xfac_syncPost_pullComment($xfPost, $wpPostId)
 	$commentDateGmt = gmdate('Y-m-d H:i:s', $xfPost['post_create_date']);
 	$commentDate = get_date_from_gmt($commentDateGmt);
 
+	$commentContent = xfac_api_filterHtmlFromXenForo($xfPost['post_body_html']);
+
 	$comment = array(
 		'comment_post_ID' => $wpPostId,
 		'comment_author' => $wpDisplayName,
 		'comment_author_email' => $wpUserEmail,
 		'comment_author_url' => $wpUserUrl,
-		'comment_content' => $xfPost['post_body_html'],
+		'comment_content' => $commentContent,
 		'user_id' => $wpUserId,
 		'comment_date_gmt' => $commentDateGmt,
 		'comment_date' => $commentDate,

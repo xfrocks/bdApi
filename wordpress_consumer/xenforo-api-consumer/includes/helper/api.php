@@ -241,3 +241,23 @@ function xfac_api_postPost($config, $accessToken, $threadId, $postBody)
 		return false;
 	}
 }
+
+function xfac_api_filterHtmlFromXenForo($html)
+{
+	$offset = 0;
+	while (true)
+	{
+		if (preg_match('#<img[^>]+mceSmilie[^>]+alt="([^"]+)"[^>]+>#', $html, $matches, PREG_OFFSET_CAPTURE, $offset))
+		{
+			// replace smilies with their text representation
+			$html = substr_replace($html, $matches[1][0], $matches[0][1], strlen($matches[0][0]));
+			$offset = $matches[0][1] + 1;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	return $html;
+}

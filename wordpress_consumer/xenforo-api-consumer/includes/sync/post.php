@@ -200,9 +200,11 @@ function xfac_syncPost_pullPost($thread, $tags)
 		$postStatus = 'publish';
 	}
 
+	$postContent = xfac_api_filterHtmlFromXenForo($thread['first_post']['post_body_html']);
+
 	$wpPost = array(
 		'post_author' => $postAuthor,
-		'post_content' => $thread['first_post']['post_body_html'],
+		'post_content' => $postContent,
 		'post_date' => $postDate,
 		'post_date_gmt' => $postDateGmt,
 		'post_status' => $postStatus,
