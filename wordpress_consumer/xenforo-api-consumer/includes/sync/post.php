@@ -115,6 +115,37 @@ function xfac_syncPost_cron()
 
 	foreach ($mappedTags as $forumId => $tagNames)
 	{
+		// sync sticky threads first
+		$stickyThreads = xfac_api_getThreadsInForum($config, $forumId, 1, '', 'sticky=1');
+		if (!empty($stickyThreads['threads']))
+		{
+			$threadIds = array();
+			foreach ($stickyThreads['threads'] as $thread)
+			{
+				$threadIds[] = $thread['thread_id'];
+			}
+			$syncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'thread', $threadIds);
+
+			foreach ($stickyThreads['threads'] as $thread)
+			{
+				$synced = false;
+
+				foreach ($syncRecords as $syncRecord)
+				{
+					if ($syncRecord->provider_content_id == $thread['thread_id'])
+					{
+						$synced = true;
+					}
+				}
+
+				if (!$synced)
+				{
+					$wpPostId = xfac_syncPost_pullPost($thread, $tagNames);
+				}
+			}
+		}
+
+		// now start syncing normal threads
 		$page = 1;
 
 		while (true)
@@ -146,7 +177,7 @@ function xfac_syncPost_cron()
 					{
 						$synced = true;
 
-						if (!empty($syncRecord->syncData['direction']) AND $syncRecord->syncData['direction'] === 'pull')
+						if (!empty($syncRecord->syncData['direction']) AND $syncRecord->syncData['direction'] === 'pull' AND empty($syncRecord->syncData['sticky']))
 						{
 							// reach where we were pulling before
 							// stop the foreach and the outside while too
@@ -190,7 +221,7 @@ function xfac_syncPost_pullPost($thread, $tags)
 		return 0;
 	}
 	$postAuthor = $wpUserData->ID;
-	
+
 	$wpUser = new WP_User($wpUserData);
 	$postTypeObj = get_post_type_object('post');
 	if (empty($postTypeObj))
@@ -236,6 +267,7 @@ function xfac_syncPost_pullPost($thread, $tags)
 			'forumId' => $thread['forum_id'],
 			'thread' => $thread,
 			'direction' => 'pull',
+			'sticky' => !empty($thread['thread_is_sticky']),
 		));
 	}
 
