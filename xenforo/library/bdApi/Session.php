@@ -65,12 +65,6 @@ class bdApi_Session extends XenForo_Session
 	 */
 	public function checkScope($scope)
 	{
-		if (empty($this->_oauthToken))
-		{
-			// no token, obviously no scope
-			return false;
-		}
-
 		$scopes = $this->get('scopes');
 		if (empty($scopes))
 		{
@@ -115,6 +109,15 @@ class bdApi_Session extends XenForo_Session
 
 		$visitor = XenForo_Visitor::setup($session->get('user_id'), $options);
 
+		if (empty($visitor['user_id']))
+		{
+			$guestUsername = $request->getParam('guestUsername');
+			if (!empty($guestUsername))
+			{
+				$visitor['username'] = $guestUsername;
+			}
+		}
+
 		return $session;
 	}
 
@@ -125,14 +128,87 @@ class bdApi_Session extends XenForo_Session
 		/* @var $oauth2Model bdApi_Model_OAuth2 */
 		$oauth2Model = XenForo_Model::create('bdApi_Model_OAuth2');
 
+		$helper = bdApi_Template_Helper_Core::getInstance();
+
 		$this->_oauthToken = $oauth2Model->getServer()->getEffectiveToken();
 
-		if (!empty($this->_oauthToken) AND !empty($this->_oauthToken['user_id']))
+		if (empty($this->_oauthToken) AND isset($_REQUEST['oauth_token']))
 		{
-			$this->changeUserId($this->_oauthToken['user_id']);
+			// added support for one time oauth token
+			$parts = explode(',', $_REQUEST['oauth_token']);
+			$timestamp = 0;
+			$client = null;
 
-			$scopes = bdApi_Template_Helper_Core::getInstance()->scopeSplit($this->_oauthToken['scope']);
+			if (count($parts) == 4)
+			{
+				$userId = intval($parts[0]);
+				$timestamp = intval($parts[1]);
+				$once = $parts[2];
+
+				if ($timestamp >= XenForo_Application::$time OR true)
+				{
+					$client = $oauth2Model->getModelFromCache('bdApi_Model_Client')->getClientById($parts[3]);
+				}
+			}
+
+			if (!empty($client))
+			{
+				if ($userId == 0)
+				{
+					// guest
+					if ($once == md5($userId . $timestamp . $client['client_secret']))
+					{
+						// make up fake token with full scopes for guest
+						$this->_oauthToken = array(
+							'token_id' => 0,
+							'client_id' => $client['client_id'],
+							'token_text' => '',
+							'expire_date' => XenForo_Application::$time,
+							'issue_date' => XenForo_Application::$time,
+							'user_id' => $userId,
+							'scope' => $helper->scopeJoin($oauth2Model->getSystemSupportedScopes()),
+						);
+					}
+				}
+				else
+				{
+					// user
+					$userTokens = $oauth2Model->getModelFromCache('bdApi_Model_Token')->getTokens(array('user_id' => $userId));
+					foreach ($userTokens as $userToken)
+					{
+						if ($userToken['expire_date'] >= XenForo_Application::$time)
+						{
+							if ($once == md5($userId . $timestamp . $userToken['token_text'] . $client['client_secret']))
+							{
+								$this->_oauthToken = $userToken;
+							}
+						}
+					}
+				}
+
+				if (!empty($this->_oauthToken))
+				{
+					// oauth token is set using one time token
+					// update the token text to avoid exposing real access token
+					$this->_oauthToken['token_text'] = $_REQUEST['oauth_token'];
+				}
+			}
+		}
+
+		if (!empty($this->_oauthToken))
+		{
+			if (!empty($this->_oauthToken['user_id']))
+			{
+				$this->changeUserId($this->_oauthToken['user_id']);
+			}
+
+			$scopes = $helper->scopeSplit($this->_oauthToken['scope']);
 			$this->set('scopes', $scopes);
+		}
+		else
+		{
+			$guestScopes = array(bdApi_Model_OAuth2::SCOPE_READ);
+			$this->set('scopes', $guestScopes);
 		}
 	}
 

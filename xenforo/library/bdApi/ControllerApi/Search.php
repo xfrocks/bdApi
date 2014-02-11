@@ -122,18 +122,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 		return $searcher->searchType($typeHandler, $input['keywords'], $constraints, 'relevance', false, $maxResults);
 	}
 
-	protected function _getScopeForAction($action)
-	{
-		if (XenForo_Visitor::getUserId() > 0)
-		{
-			return bdApi_Model_OAuth2::SCOPE_READ;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
 	/**
 	 * @return XenForo_Model_Search
 	 */

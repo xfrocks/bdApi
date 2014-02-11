@@ -214,14 +214,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		}
 		else
 		{
-			if (XenForo_Visitor::getUserId() > 0)
-			{
-				return bdApi_Model_OAuth2::SCOPE_READ;
-			}
-			else
-			{
-				return false;
-			}
+			return bdApi_Model_OAuth2::SCOPE_READ;
 		}
 	}
 
@@ -240,14 +233,14 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		/* @var $session bdApi_Session */
 		$session = XenForo_Application::get('session');
 
-		$oauthTokenText = $session->getOAuthTokenText();
-		if (empty($oauthTokenText))
-		{
-			throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_authorize_error_invalid_or_expired_access_token'), 403));
-		}
-
 		if (!$session->checkScope($scope))
 		{
+			$oauthTokenText = $session->getOAuthTokenText();
+			if (empty($oauthTokenText))
+			{
+				throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_authorize_error_invalid_or_expired_access_token'), 403));
+			}
+
 			throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_authorize_error_scope_x_not_granted', array('scope' => $scope)), 403));
 		}
 	}

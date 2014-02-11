@@ -15,6 +15,20 @@ The system follows OAuth2 specification [IETF draft v10](http://tools.ietf.org/h
  * User credentials (username / password)
  * Refresh token
 
+### One Time Token
+Any client can generate one time token (OTT) using existing token. The format for OTT is as follow:
+
+    user_id,timestamp,once,client_id
+
+With `user_id` is the ID of authenticated user; `timestamp` is the unix timestamp for OTT expire time, the OTT will work as long as indicated by `timestamp` or by token expire date, whatever comes first; `client_id` is the client ID; `once` is md5 of a concentration of `user_id`, `timestamp`, a valid existing token and the client secret. Example code to generate an OTT:
+
+    <?php
+
+    $timestamp = time() + $ttl;
+    $once = md5($userId . $timestamp . $accessToken . $clientSecret);
+
+    $ott = sprintf('%d,%d,%s,%s', $userId, $timestamp, $once, $clientId);
+
 ### Configuration
  * TTL of access token: 1 hour
  * TTL of authorization code: 30 seconds
