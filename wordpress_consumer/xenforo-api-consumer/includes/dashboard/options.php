@@ -101,6 +101,13 @@ function xfac_options_init()
 							<input name="xfac_sync_comment_wp_xf" type="checkbox" id="xfac_sync_comment_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_comment_wp_xf')); ?> />
 							<?php _e('Comment from WordPress to XenForo (as reply)', 'xenforo-api-consumer'); ?>
 						</label>
+
+						<div style="margin-left: 20px;">
+							<label for="xfac_sync_comment_wp_xf_as_guest">
+								<input name="xfac_sync_comment_wp_xf_as_guest" type="checkbox" id="xfac_sync_comment_wp_xf_as_guest" value="1" <?php checked('1', get_option('xfac_sync_comment_wp_xf_as_guest')); ?> />
+								<?php _e('Sync as guest if account is not connected', 'xenforo-api-consumer'); ?>
+							</label>
+						</div>
 					</fieldset>
 
 					<fieldset>

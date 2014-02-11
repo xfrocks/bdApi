@@ -94,6 +94,14 @@ function xfac_api_getAccessTokenFromRefreshToken($config, $refreshToken, $scope)
 	}
 }
 
+function xfac_api_generateOneTimeToken($config, $userId = 0, $accessToken = '', $ttl = 10)
+{
+	$timestamp = time() + $ttl;
+	$once = md5($userId . $timestamp . $accessToken . $config['clientSecret']);
+
+	return sprintf('%d,%d,%s,%s', $userId, $timestamp, $once, $config['clientId']);
+}
+
 function xfac_api_getForums($config, $accessToken = '')
 {
 	$body = file_get_contents(call_user_func_array('sprintf', array(
@@ -211,7 +219,7 @@ function xfac_api_postThread($config, $accessToken, $forumId, $threadTitle, $pos
 	}
 }
 
-function xfac_api_postPost($config, $accessToken, $threadId, $postBody)
+function xfac_api_postPost($config, $accessToken, $threadId, $postBody, array $extraParams = array())
 {
 	$ch = curl_init();
 
@@ -221,11 +229,11 @@ function xfac_api_postPost($config, $accessToken, $threadId, $postBody)
 	)));
 
 	curl_setopt($ch, CURLOPT_POST, true);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query( array(
 		'oauth_token' => $accessToken,
 		'thread_id' => $threadId,
 		'post_body_html' => $postBody,
-	)));
+	) + $extraParams));
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 	$body = curl_exec($ch);
