@@ -190,6 +190,19 @@ function xfac_syncPost_pullPost($thread, $tags)
 		return 0;
 	}
 	$postAuthor = $wpUserData->ID;
+	
+	$wpUser = new WP_User($wpUserData);
+	$postTypeObj = get_post_type_object('post');
+	if (empty($postTypeObj))
+	{
+		// no post type object?!
+		return 0;
+	}
+	if (!$wpUser->has_cap($postTypeObj->cap->create_posts))
+	{
+		// no permission to create posts
+		return 0;
+	}
 
 	$postDateGmt = gmdate('Y-m-d H:i:s', $thread['thread_create_date']);
 	$postDate = get_date_from_gmt($postDateGmt);
