@@ -3,7 +3,7 @@ class bdApiConsumer_Helper_Api
 {
 	public static function getRequestUrl(array $provider, $redirectUri)
 	{
-		return sprintf('%s/oauth/authorize/?client_id=%s&redirect_uri=%s&response_type=code&scope=read',
+		return sprintf('%s/index.php?oauth/authorize/&client_id=%s&redirect_uri=%s&response_type=code&scope=read',
 			$provider['root'],
 			rawurlencode($provider['client_id']),
 			rawurlencode($redirectUri)
@@ -14,7 +14,7 @@ class bdApiConsumer_Helper_Api
 	{
 		try
 		{
-			$uri = sprintf('%s/oauth/token/', $provider['root']);
+			$uri = sprintf('%s/index.php?oauth/token/', $provider['root']);
 			$client = XenForo_Helper_Http::getClient($uri);
 			$client->setParameterPost(array(
 				'grant_type' => 'authorization_code',
@@ -51,7 +51,7 @@ class bdApiConsumer_Helper_Api
 	{
 		try
 		{
-			$uri = sprintf('%s/users/me/', $provider['root']);
+			$uri = sprintf('%s/index.php?users/me/', $provider['root']);
 			$client = XenForo_Helper_Http::getClient($uri);
 			$client->setParameterGet(array(
 				'oauth_token' => $accessToken,

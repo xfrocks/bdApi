@@ -19,7 +19,7 @@ class bdApiConsumer_Helper_Template
 			}
 		}
 
-		return sprintf('%s/assets/sdk.js?prefix=%s', $root, $prefix);
+		return sprintf('%s/index.php?assets/sdk.js&prefix=%s', $root, $prefix);
 	}
 
 }
