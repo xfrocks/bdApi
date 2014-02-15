@@ -86,21 +86,32 @@ function xfac_syncComment_pushComment($xfThreadId, $wpComment)
 		return false;
 	}
 
-	$accessToken = xfac_user_getAccessToken($wpComment->user_id);
+	$accessToken = false;
 	$extraParams = array();
-	
-	if (empty($accessToken))
+
+	if ($wpComment->user_id > 0)
 	{
-		if (intval(get_option('xfac_sync_comment_wp_xf_as_guest')) > 0)
+		$accessToken = xfac_user_getAccessToken($wpComment->user_id);
+	}
+
+	if (empty($accessToken) AND intval(get_option('xfac_sync_comment_wp_xf_as_guest')) > 0)
+	{
+		if (intval(get_option('xfac_xf_guest_account')) > 0)
 		{
-			// sync to XenForo as guest post
-			$accessToken = xfac_api_generateOneTimeToken($config);
-			$extraParams['guestUsername'] = $wpComment->comment_author;
+			// use pre-configured guest account
+			$accessToken = xfac_user_getAccessToken(0);
 		}
 		else
 		{
-			return false;
+			// use one time token for guest
+			$accessToken = xfac_api_generateOneTimeToken($config);
+			$extraParams['guestUsername'] = $wpComment->comment_author;
 		}
+	}
+
+	if (empty($accessToken))
+	{
+		return false;
 	}
 
 	return xfac_api_postPost($config, $accessToken, $xfThreadId, $wpComment->comment_content, $extraParams);

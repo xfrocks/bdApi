@@ -11,6 +11,8 @@ function xfac_options_init()
 	$config = xfac_option_getConfig();
 	$hourlyNext = wp_next_scheduled('xfac_cron_hourly');
 	
+	$xfGuestRecords = xfac_user_getApiRecordsByUserId(0);
+	
 	$tagForumMappings = get_option('xfac_tag_forum_mappings');
 	if (!is_array($tagForumMappings))
 	{
@@ -130,6 +132,42 @@ function xfac_options_init()
 							<?php _e('Avatar from XenForo to WordPress', 'xenforo-api-consumer'); ?>
 						</label>
 					</fieldset>
+				</td>
+			</tr>
+
+			<tr valign="top">
+				<th scope="row">
+					<?php _e('XenForo Guest Account', 'xenforo-api-consumer'); ?>
+				</th>
+				<td>
+					<?php if (!empty($config)): ?>
+					<?php $callbackUrl = admin_url('options-general.php?page=xfac&do=xfac_xf_guest_account'); ?> 
+					<?php $authorizeUrl = xfac_api_getAuthorizeUrl($config, $callbackUrl); ?>
+					<?php endif; ?>
+
+					<?php if (!empty($xfGuestRecords)): ?>
+						<?php foreach($xfGuestRecords as $xfGuestRecord): ?>
+							<label for="xfac_xf_guest_account_<?php echo $xfGuestRecord->id; ?>">
+								<input name="xfac_xf_guest_account" type="checkbox" id="xfac_xf_guest_account_<?php echo $xfGuestRecord->id; ?>" value="<?php echo $xfGuestRecord->id; ?>" <?php checked($xfGuestRecord->id, get_option('xfac_xf_guest_account')); ?> />
+								<?php echo $xfGuestRecord->profile['username']; ?>
+								<?php if (!empty($authorizeUrl)): ?>
+								(<a href="<?php echo $authorizeUrl; ?>"><?php _e('change', 'xenforo-api-consumer'); ?></a>)
+								<?php endif; ?>
+							</label>
+							<p class="description"><?php _e('The guest account will be used when contents need to be sync\'d but no connected account can be found.', 'xenforo-api-consumer'); ?></p>
+						<?php endforeach; ?>
+					<?php else: ?>
+					<label for="xfac_xf_guest_account">
+						<input name="xfac_xf_guest_account" type="hidden" value="0" />
+						<input name="xfac_xf_guest_account" type="checkbox" id="xfac_xf_guest_account" value="1" disabled="disabled" />
+
+						<?php if (!empty($authorizeUrl)): ?>
+						<a href="<?php echo $authorizeUrl; ?>"><?php _e('Connect a XenForo account as Guest account', 'xenforo-api-consumer'); ?></a>
+						<?php else: ?>
+						<?php _e('Configure API Client first', 'xenforo-api-consumer'); ?>
+						<?php endif; ?>
+					</label>
+					<?php endif; ?>
 				</td>
 			</tr>
 
@@ -271,17 +309,44 @@ function xfac_dashboardOptions_admin_init()
 		return;
 	}
 	
-	if (empty($_REQUEST['cron']))
+	if (!empty($_REQUEST['cron']))
 	{
-		return;
+		switch ($_REQUEST['cron'])
+		{
+			case 'hourly':
+				do_action('xfac_cron_hourly');
+				wp_redirect(admin_url('options-general.php?page=xfac&ran=hourly'));
+				exit;
+		}
 	}
-
-	switch ($_REQUEST['cron'])
+	elseif (!empty($_REQUEST['do']))
 	{
-		case 'hourly':
-			do_action('xfac_cron_hourly');
-			wp_redirect(admin_url('options-general.php?page=xfac&ran=hourly'));
-			exit;
+		switch ($_REQUEST['do'])
+		{
+			case 'xfac_xf_guest_account':
+				$config = xfac_option_getConfig();
+				$callbackUrl = admin_url('options-general.php?page=xfac&do=xfac_xf_guest_account');
+
+				if (empty($_REQUEST['code']))
+				{
+					wp_die('no_code');
+				}
+				$token = xfac_api_getAccessTokenFromCode($config, $_REQUEST['code'], $callbackUrl);
+
+				if (empty($token))
+				{
+					wp_die('no_token');
+				}
+				$guest = xfac_api_getUsersMe($config, $token['access_token']);
+
+				if (empty($guest['user']))
+				{
+					wp_die('no_xf_user');
+				}
+				xfac_user_updateAuth(0, $config['root'], $guest['user']['user_id'], $guest['user'], $token);
+				wp_redirect(admin_url('options-general.php?page=xfac&done=xfac_xf_guest_account'));
+				break;
+		}
 	}
 }
 add_action('admin_init', 'xfac_dashboardOptions_admin_init');
