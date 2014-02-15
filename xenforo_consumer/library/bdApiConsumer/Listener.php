@@ -35,35 +35,9 @@ class bdApiConsumer_Listener
 	{
 		if (empty(self::$_commonTemplatesPreloaded))
 		{
-			$template->preloadTemplate('bdapi_consumer_login_bar_eauth_items');
-			$template->preloadTemplate('bdapi_consumer_login_bar_eauth_set');
+			$template->preloadTemplate('bdapi_consumer_providers');
 			$template->preloadTemplate('bdapi_consumer_page_container_head');
-			$template->preloadTemplate('bdapi_consumer_navigation_visitor_tab_links1');
 			self::$_commonTemplatesPreloaded = true;
-		}
-
-		if ($templateName === 'PAGE_CONTAINER')
-		{
-			if (bdApiConsumer_Option::get('_activated'))
-			{
-				// setting $eAuth in hook position login_bar_eauth_set doens't work
-				// so we have to do it here. Risk: it will not work if the container template is changed
-				// TODO: find a better way to do this
-				$params['eAuth'] = 1;
-			}
-		}
-		
-		switch ($templateName)
-		{
-			case 'login':
-			case 'error_with_login':
-				$template->preloadTemplate('bdapi_consumer_' . $templateName);
-				break;
-		}
-
-		if ($templateName == 'account_wrapper')
-		{
-			$template->preloadTemplate('bdapi_consumer_account_wrapper_sidebar_settings');
 		}
 	}
 
@@ -71,31 +45,18 @@ class bdApiConsumer_Listener
 	{
 		switch ($hookName)
 		{
-			case 'account_wrapper_sidebar_settings':
-			case 'login_bar_eauth_items':
-			case 'login_bar_eauth_set':
-			case 'navigation_visitor_tab_links1':
+			case 'bdapi_consumer_providers':
+				$params = array_merge($template->getParams(), $hookParams);
+				$params['providers'] = bdApiConsumer_Option::getProviders();
+				$ourTemplate = $template->create($hookName, $params);
+				$contents = $ourTemplate->render();
+				break;
 			case 'page_container_head':
 				$ourTemplate = $template->create('bdapi_consumer_' . $hookName, $template->getParams());
 				$ourTemplate->setParam('providers', bdApiConsumer_Option::getProviders());
 
 				$rendered = $ourTemplate->render();
 				$contents .= $rendered;
-				break;
-		}
-	}
-	
-	public static function template_post_render($templateName, &$content, array &$containerData, XenForo_Template_Abstract $template)
-	{
-		switch ($templateName)
-		{
-			case 'login':
-			case 'error_with_login':
-				$ourTemplate = $template->create('bdapi_consumer_' . $templateName, $template->getParams());
-				$ourTemplate->setParam('providers', bdApiConsumer_Option::getProviders());
-
-				$rendered = $ourTemplate->render();
-				$content .= $rendered;
 				break;
 		}
 	}

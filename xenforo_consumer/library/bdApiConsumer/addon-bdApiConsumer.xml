@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.5c" version_id="13" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.6" version_id="14" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -49,7 +49,6 @@
     <listener event_id="load_class_model" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="template_create" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_create" active="1" hint="" description=""/>
     <listener event_id="template_hook" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_hook" active="1" hint="" description=""/>
-    <listener event_id="template_post_render" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_post_render" active="1" hint="" description=""/>
   </code_event_listeners>
   <cron/>
   <email_templates/>
@@ -134,7 +133,7 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
   <route_prefixes/>
   <style_properties/>
   <templates>
-    <template title="bdapi_consumer.css" version_id="6" version_string="0.9-dev"><![CDATA[#loginBar .bdApiConsumer_LoginForm_Provider a
+    <template title="bdapi_consumer.css" version_id="13" version_string="0.9.5c"><![CDATA[#loginBar .bdApiConsumer_Provider a
 {
 	color: {xen:property button.color};
 }]]></template>
@@ -194,7 +193,7 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
 		</form>
 	</xen:if>
 </xen:foreach>]]></template>
-    <template title="bdapi_consumer_account_wrapper_sidebar_settings" version_id="8" version_string="0.9.2"><![CDATA[<xen:if is="{$providers}">
+    <template title="bdapi_consumer_account_wrapper_sidebar_settings" version_id="13" version_string="0.9.5c"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
 	<li>
 		<a class="{xen:if "{$selectedKey} == 'account/bdApiConsumer'", 'secondaryContent', 'primaryContent'}"
 			href="{xen:link account/external}">
@@ -202,42 +201,9 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
 		</a>
 	</li>
 </xen:if>]]></template>
-    <template title="bdapi_consumer_error_with_login" version_id="1" version_string="0.9-dev"><![CDATA[<xen:include template="bdapi_consumer_helper_login_form" />]]></template>
-    <template title="bdapi_consumer_helper_login_form" version_id="1" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
-<div class="xenForm">
-	<dl class="ctrlUnit">
-		<dt>&nbsp;</dt>
-		<dd>
-			<ul>
-				<xen:foreach loop="$providers" value="$provider">
-					<li id="provider-{$provider.code}" class="bdApiConsumer_LoginForm_Provider">
-						<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1', 'redirect={xen:if $redirect, $redirect, $requestPaths.requestUri}'}" tabindex="110">
-							<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
-						</a>
-					</li>
-				</xen:foreach>
-			</ul>
-		</dd>
-	</dl>
-</div>
+    <template title="bdapi_consumer_navigation_visitor_tab_links1" version_id="13" version_string="0.9.5c"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
+	<li><a href="{xen:link account/external}">{xen:phrase bdapi_consumer_external}</a></li>
 </xen:if>]]></template>
-    <template title="bdapi_consumer_login" version_id="1" version_string="0.9-dev"><![CDATA[<xen:include template="bdapi_consumer_helper_login_form" />]]></template>
-    <template title="bdapi_consumer_login_bar_eauth_items" version_id="6" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
-	<xen:require css="bdapi_consumer.css" />
-
-	<xen:foreach loop="$providers" value="$provider">
-		<li id="provider-{$provider.code}" class="bdApiConsumer_LoginForm_Provider">
-			<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1'}" tabindex="110" class="button">
-				<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
-			</a>
-		</li>
-	</xen:foreach>
-</xen:if>]]></template>
-    <template title="bdapi_consumer_login_bar_eauth_set" version_id="1" version_string="0.9-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
-	<xen:comment>Setting $eAuth here doesn't work, the real set is done in bdApiConsumer_Listener::template_create</xen:comment>
-	<xen:set var="$eAuth">1</xen:set>
-</xen:if>]]></template>
-    <template title="bdapi_consumer_navigation_visitor_tab_links1" version_id="8" version_string="0.9.2"><![CDATA[<xen:if is="{$providers}"><li><a href="{xen:link account/external}">{xen:phrase bdapi_consumer_external}</a></li></xen:if>]]></template>
     <template title="bdapi_consumer_page_container_head" version_id="12" version_string="0.9.5b"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} != '0'
 	AND empty({$bdApiConsumer_logoutTime})
 	AND ({$debugMode} OR {$session.sessionStart} == {$serverTime})
@@ -300,6 +266,36 @@ window['{$provider.code}Init'] = function()
 </script>
 		</xen:if>
 	</xen:foreach>
+</xen:if>]]></template>
+    <template title="bdapi_consumer_providers" version_id="13" version_string="0.9.5c"><![CDATA[<xen:require css="bdapi_consumer.css" />
+
+<xen:if is="{$from} == 'login_bar'">
+
+	<xen:foreach loop="{$providers}" value="$provider">
+		<li id="provider-{$provider.code}" class="bdApiConsumer_Provider {$provider.code}">
+			<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1'}" tabindex="110" class="button">
+				<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
+			</a>
+		</li>
+	</xen:foreach>
+
+<xen:elseif is="{$from} == 'login_form'" />
+
+	<dl class="ctrlUnit">
+		<dt>&nbsp;</dt>
+		<dd>
+			<ul>
+				<xen:foreach loop="$providers" value="$provider">
+					<li id="provider-{$provider.code}" class="bdApiConsumer_Provider {$provider.code}">
+						<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1', 'redirect={xen:if $redirect, $redirect, $requestPaths.requestUri}'}" tabindex="110">
+							<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
+						</a>
+					</li>
+				</xen:foreach>
+			</ul>
+		</dd>
+	</dl>
+
 </xen:if>]]></template>
     <template title="bdapi_consumer_register" version_id="4" version_string="0.9-dev"><![CDATA[<xen:title>{xen:phrase bdapi_consumer_sign_up_with_x, 'provider={$provider.name}'}</xen:title>
 	
@@ -403,6 +399,45 @@ window['{$provider.code}Init'] = function()
 <input type="hidden" name="externalToken" value="{$externalToken}" />
 </form>]]></template>
   </templates>
-  <public_template_modifications/>
+  <public_template_modifications>
+    <modification template="account_wrapper" modification_key="bdapi_consumer_account_wrapper_sidebar_settings" description="Insert Account sidebar link" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#<li><a[^>]+>{xen:phrase password}</a></li>#]]></find>
+      <replace><![CDATA[<xen:include template="bdapi_consumer_account_wrapper_sidebar_settings" />
+
+$0]]></replace>
+    </modification>
+    <modification template="helper_login_form" modification_key="bdapi_consumer_login" description="Insert providers" execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[</form>]]></find>
+      <replace><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
+	<xen:hook name="bdapi_consumer_providers" params="{xen:array 'from=login_form'}" />
+</xen:if>
+
+$0]]></replace>
+    </modification>
+    <modification template="login_bar_form" modification_key="bdapi_consumer_login_bar_eauth_items" description="Insert providers" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#(<xen:hook name="login_bar_eauth_items">.+?)(</xen:hook>)#s]]></find>
+      <replace><![CDATA[$1
+
+<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
+	<xen:hook name="bdapi_consumer_providers" params="{xen:array 'from=login_bar'}" />
+</xen:if>
+
+$2]]></replace>
+    </modification>
+    <modification template="login_bar_form" modification_key="bdapi_consumer_login_bar_eauth_set" description="set $eAuth=1" execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<xen:hook name="login_bar_eauth_set">]]></find>
+      <replace><![CDATA[$0
+
+<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
+	<xen:set var="$eAuth">1</xen:set>
+</xen:if>]]></replace>
+    </modification>
+    <modification template="navigation_visitor_tab" modification_key="bdapi_consumer_navigation_visitor_tab_links1" description="Insert visitor navtab link" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#<li><a[^>]+>{xen:phrase password}</a></li>#]]></find>
+      <replace><![CDATA[<xen:include template="bdapi_consumer_navigation_visitor_tab_links1" />
+
+$0]]></replace>
+    </modification>
+  </public_template_modifications>
   <bb_code_media_sites/>
 </addon>
