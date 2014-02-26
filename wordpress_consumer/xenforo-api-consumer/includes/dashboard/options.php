@@ -18,12 +18,19 @@ function xfac_options_init()
 	{
 		$tagForumMappings = array();
 	}
+	
+	$optionTopBarForums = get_option('xfac_top_bar_forums');
+	if (!is_array($optionTopBarForums))
+	{
+		$optionTopBarForums = array();
+	}
 
 	$tags = get_terms('post_tag', array('hide_empty' => false));
 
 	if (!empty($config))
 	{
-		$forums = xfac_api_getForums($config);
+		$meta = xfac_option_getMeta($config);
+		$forums = $meta['forums'];
 	}
 	else
 	{
@@ -130,6 +137,42 @@ function xfac_options_init()
 						<label for="xfac_sync_avatar_xf_wp">
 							<input name="xfac_sync_avatar_xf_wp" type="checkbox" id="xfac_sync_avatar_xf_wp" value="1" <?php checked('1', get_option('xfac_sync_avatar_xf_wp')); ?> />
 							<?php _e('Avatar from XenForo to WordPress', 'xenforo-api-consumer'); ?>
+						</label>
+					</fieldset>
+				</td>
+			</tr>
+
+			<tr valign="top">
+				<th scope="row">
+					<?php _e('Top Bar', 'xenforo-api-consumer'); ?>
+				</th>
+				<td>
+					<fieldset>
+						<label for="xfac_top_bar_forums_0">
+							<input name="xfac_top_bar_forums[]" type="checkbox" id="xfac_top_bar_forums_0" value="0" <?php checked(true, in_array(0, $optionTopBarForums)); ?> />
+							<?php _e('Show Forums link', 'xenforo-api-consumer'); ?>
+						</label>
+
+						<div style="margin-left: 20px;">
+							<?php foreach ($forums as $forum): ?>
+								<label for="xfac_top_bar_forums_<?php echo $forum['forum_id']; ?>">
+									<input name="xfac_top_bar_forums[]" type="checkbox" id="xfac_top_bar_forums_<?php echo $forum['forum_id']; ?>" value="<?php echo $forum['forum_id']; ?>" <?php checked(true, in_array($forum['forum_id'], $optionTopBarForums)); ?> />
+									<?php echo $forum['forum_title']; ?>
+								</label>
+							<?php endforeach; ?>
+						</div>
+					</fieldset>
+
+					<fieldset>
+						<label for="xfac_top_bar_notifications">
+							<input name="xfac_top_bar_notifications" type="checkbox" id="xfac_top_bar_notifications" value="1" <?php checked('1', get_option('xfac_top_bar_notifications')); ?> />
+							<?php _e('Show Alerts link', 'xenforo-api-consumer'); ?>
+						</label>
+					</fieldset>
+					<fieldset>
+						<label for="xfac_top_bar_conversations">
+							<input name="xfac_top_bar_conversations" type="checkbox" id="xfac_top_bar_conversations" value="1" <?php checked('1', get_option('xfac_top_bar_conversations')); ?> />
+							<?php _e('Show Conversations link', 'xenforo-api-consumer'); ?>
 						</label>
 					</fieldset>
 				</td>
@@ -350,4 +393,3 @@ function xfac_dashboardOptions_admin_init()
 	}
 }
 add_action('admin_init', 'xfac_dashboardOptions_admin_init');
-

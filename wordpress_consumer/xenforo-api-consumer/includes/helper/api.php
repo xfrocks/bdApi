@@ -17,6 +17,45 @@ function xfac_api_getAuthorizeUrl($config, $redirectUri)
 	));
 }
 
+function xfac_api_getSdkJsUrl($config)
+{
+	return call_user_func_array('sprintf', array(
+		'%s/index.php?assets/sdk&prefix=xfac',
+		rtrim($config['root'], '/'),
+	));
+}
+
+function xfac_api_getPublicLink($config, $route)
+{
+	$ch = curl_init();
+
+	curl_setopt($ch, CURLOPT_URL, call_user_func_array('sprintf', array(
+		'%s/index.php?tools/link',
+		rtrim($config['root'], '/')
+	)));
+
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+		'oauth_token' => xfac_api_generateOneTimeToken($config),
+		'type' => 'public',
+		'route' => $route,
+	)));
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+	$body = curl_exec($ch);
+
+	$parts = @json_decode($body, true);
+
+	if (!empty($parts['link']))
+	{
+		return $parts['link'];
+	}
+	else
+	{
+		return false;
+	}
+}
+
 function xfac_api_getAccessTokenFromCode($config, $code, $redirectUri)
 {
 	$ch = curl_init();
@@ -102,12 +141,13 @@ function xfac_api_generateOneTimeToken($config, $userId = 0, $accessToken = '', 
 	return sprintf('%d,%d,%s,%s', $userId, $timestamp, $once, $config['clientId']);
 }
 
-function xfac_api_getForums($config, $accessToken = '')
+function xfac_api_getForums($config, $accessToken = '', $extraParams = '')
 {
 	$body = file_get_contents(call_user_func_array('sprintf', array(
-		'%s/index.php?forums/&oauth_token=%s',
+		'%s/index.php?forums/&oauth_token=%s%s',
 		rtrim($config['root'], '/'),
-		rawurlencode($accessToken)
+		rawurlencode($accessToken),
+		!empty($extraParams) ? '&' . $extraParams : '',
 	)));
 
 	$parts = @json_decode($body, true);

@@ -25,6 +25,10 @@ function xfac_admin_init()
 	register_setting('xfac-settings', 'xfac_sync_comment_xf_wp_as_guest');
 	register_setting('xfac-settings', 'xfac_sync_avatar_xf_wp');
 
+	register_setting('xfac-settings', 'xfac_top_bar_forums');
+	register_setting('xfac-settings', 'xfac_top_bar_notifications');
+	register_setting('xfac-settings', 'xfac_top_bar_conversations');
+
 	register_setting('xfac-settings', 'xfac_xf_guest_account');
 }
 
@@ -69,6 +73,10 @@ function xfac_whitelist_options($whitelist_options)
 	$whitelist_options['xfac'][] = 'xfac_sync_comment_xf_wp';
 	$whitelist_options['xfac'][] = 'xfac_sync_comment_xf_wp_as_guest';
 	$whitelist_options['xfac'][] = 'xfac_sync_avatar_xf_wp';
+
+	$whitelist_options['xfac'][] = 'xfac_top_bar_forums';
+	$whitelist_options['xfac'][] = 'xfac_top_bar_notifications';
+	$whitelist_options['xfac'][] = 'xfac_top_bar_conversations';
 
 	$whitelist_options['xfac'][] = 'xfac_xf_guest_account';
 

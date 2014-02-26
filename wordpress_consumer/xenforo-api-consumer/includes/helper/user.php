@@ -90,22 +90,21 @@ function xfac_user_deleteAuthById($authId)
 
 function xfac_user_getAccessToken($wpUserId)
 {
-	global $wpdb;
-
-	$tblAuth = xfac_getTableAuth();
-
-	$auth = $wpdb->get_row($wpdb->prepare("
-		SELECT *
-		FROM {$tblAuth}
-		WHERE user_id = %d
-	", $wpUserId));
-
-	if (empty($auth))
+	$records = xfac_user_getApiRecordsByUserId($wpUserId);
+	if (empty($records))
 	{
-		return false;
+		return null;
 	}
 
-	$token = unserialize($auth->token);
+	$record = reset($records);
+
+	return xfac_user_getAccessTokenForRecord($record);
+}
+
+function xfac_user_getAccessTokenForRecord($record)
+{
+	$token = $record->token;
+
 	if (!empty($token['expire_date']) AND $token['expire_date'] > time())
 	{
 		return $token['access_token'];
@@ -129,7 +128,7 @@ function xfac_user_getAccessToken($wpUserId)
 		return null;
 	}
 
-	xfac_user_updateAuth($wpUserId, $config['root'], $auth->identifier, unserialize($auth->profile), $newToken);
+	xfac_user_updateAuth($record->user_id, $config['root'], $record->identifier, $record->profile, $newToken);
 
 	return $newToken['access_token'];
 }

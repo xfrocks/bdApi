@@ -16,7 +16,9 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
-define('XFAC_API_SCOPE', 'read post');
+define('XFAC_API_SCOPE', 'read post conversate');
+define('XFAC_PLUGIN_PATH', WP_PLUGIN_DIR . '/xenforo-api-consumer');
+define('XFAC_PLUGIN_URL', WP_PLUGIN_URL . '/xenforo-api-consumer');
 
 function xfac_activate()
 {
@@ -52,8 +54,11 @@ if (is_admin())
 	require_once (dirname(__FILE__) . '/includes/dashboard/options.php');
 	require_once (dirname(__FILE__) . '/includes/dashboard/profile.php');
 }
-
-require_once (dirname(__FILE__) . '/includes/ui/login.php');
+else
+{
+	require_once (dirname(__FILE__) . '/includes/ui/login.php');
+	require_once (dirname(__FILE__) . '/includes/ui/top_bar.php');
+}
 
 require_once (dirname(__FILE__) . '/includes/helper/sync.php');
 require_once (dirname(__FILE__) . '/includes/sync/avatar.php');
