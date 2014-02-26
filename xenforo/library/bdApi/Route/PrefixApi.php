@@ -27,6 +27,7 @@ class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
 		self::addRoute($routes, 'users', 'bdApi_Route_PrefixApi_Users', 'data_only');
 		self::addRoute($routes, 'conversations', 'bdApi_Route_PrefixApi_Conversations', 'data_only');
 		self::addRoute($routes, 'conversation-messages', 'bdApi_Route_PrefixApi_ConversationMessages', 'data_only');
+		self::addRoute($routes, 'notifications', 'bdApi_Route_PrefixApi_Notifications');
 
 		self::addRoute($routes, 'search', 'bdApi_Route_PrefixApi_Search');
 

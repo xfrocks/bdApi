@@ -1075,6 +1075,29 @@ Required scopes:
         }
     }
 
+## Notifications
+
+### GET `/notifications`
+List of conversations (with pagination). Since forum-2014022602.
+
+    {
+        notifications: [
+            {
+                notification_id: (int),
+                notification_create_date: (unix timestamp in seconds),
+                creator_user_id: (int),
+                creator_username: (string),
+                notification_html: (string)
+            },
+            ...
+        ]
+    }
+
+Required scopes:
+
+ * `read`
+
+
 ## Searching
 
 ### POST `/search/threads`

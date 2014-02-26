@@ -20,6 +20,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 				'categories' => bdApi_Link::buildApiLink('categories'),
 				'conversations' => bdApi_Link::buildApiLink('conversations'),
 				'conversation-messages' => bdApi_Link::buildApiLink('conversation-messages'),
+				'notifications' => bdApi_Link::buildApiLink('notifications'),
 
 				'forums' => bdApi_Link::buildApiLink('forums'),
 				'posts' => bdApi_Link::buildApiLink('posts'),
@@ -41,7 +42,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 	protected function _getModules()
 	{
 		return array(
-			'forum' => 2014022601,
+			'forum' => 2014022602,
 			'oauth2' => 2014021201,
 		);
 	}
