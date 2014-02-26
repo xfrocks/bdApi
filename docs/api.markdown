@@ -724,6 +724,7 @@ Detail information of a user.
             user_dob_year: (int), // user_is_visitor==true only
             user_timezone_offset: (int), // user_is_visitor==true only
             user_has_password: (boolean), // user_is_visitor==true only
+            user_unread_conversation_count: (int), // since 2014022601, user_is_visitor==true only, requires conversate scope
             user_is_valid: (boolean),
             user_is_verified: (boolean),
             user_custom_fields: { // user_is_visitor==true only, since 2013110601

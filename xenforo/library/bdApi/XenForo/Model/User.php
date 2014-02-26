@@ -47,6 +47,12 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 				'dob_month' => 'user_dob_month',
 				'dob_year' => 'user_dob_year',
 			));
+
+			if (XenForo_Application::getSession()->checkScope(bdApi_Model_OAuth2::SCOPE_PARTICIPATE_IN_CONVERSATIONS))
+			{
+				// xf_user
+				$publicKeys['conversations_unread'] = 'user_unread_conversation_count';
+			}
 		}
 
 		$data = bdApi_Data_Helper_Core::filter($user, $publicKeys);
