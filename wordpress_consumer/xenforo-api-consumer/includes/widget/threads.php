@@ -46,54 +46,15 @@ class XFAC_Widget_Threads extends WP_Widget
 			$limit = esc_attr($instance['limit']);
 		}
 
-?>
-<p>
-	<label for="<?php echo $this->get_field_id('title'); ?>">
-		<?php _e('Title:'); ?>
-	</label>
-	<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
-</p>
-
-<p>
-	<label for="<?php echo $this->get_field_id('forumIds'); ?>">
-		<?php _e('Forums:', 'xenforo-api-consumer'); ?>
-	</label>
-	<select class="widefat" id="<?php echo $this->get_field_id('forumIds'); ?>" name="<?php echo $this->get_field_name('forumIds'); ?>[]" multiple="multiple" rows="5">
-		<?php if (!empty($forums)): ?>
-			<?php foreach($forums['forums'] as $forum): ?>
-				<option value="<?php echo $forum['forum_id']; ?>"<?php if (in_array($forum['forum_id'], $forumIds)) echo ' selected="selected"'; ?>><?php echo $forum['forum_title']; ?></option>
-			<?php endforeach; ?>
-		<?php endif; ?>
-	</select>
-</p>
-
-<p>
-	<label for="<?php echo $this->get_field_id('type'); ?>">
-		<?php _e('Type:', 'xenforo-api-consumer'); ?>
-	</label>
-	<select class="widefat" id="<?php echo $this->get_field_id('type'); ?>" name="<?php echo $this->get_field_name('type'); ?>">
-		<?php foreach($availableTypes as $typeValue => $typeText): ?>
-			<option value="<?php echo $typeValue; ?>"<?php if ($type == $typeValue) echo ' selected="selected"'; ?>><?php echo $typeText; ?></option>
-		<?php endforeach; ?>
-	</select>
-</p>
-
-<p>
-	<label for="<?php echo $this->get_field_id('limit'); ?>">
-		<?php _e('Limit:', 'xenforo-api-consumer'); ?>
-	</label>
-	<input class="widefat" id="<?php echo $this->get_field_id('limit'); ?>" name="<?php echo $this->get_field_name('limit'); ?>" type="text" value="<?php echo $limit; ?>" />
-</p>
-
-<?php
+		require (xfac_template_locateTemplate('widget_threads_form.php'));
 	}
 
 	function update($newInstance, $oldInstance)
 	{
 		$instance = $oldInstance;
-		
+
 		$instance['title'] = strip_tags($newInstance['title']);
-		
+
 		$instance['forumIds'] = array();
 		foreach ($newInstance['forumIds'] as $forumId)
 		{
@@ -102,7 +63,7 @@ class XFAC_Widget_Threads extends WP_Widget
 				$instance['forumIds'][] = $forumId;
 			}
 		}
-		
+
 		$availableTypeValues = array_keys($this->_getAvailableTypes());
 		if (in_array($newInstance['type'], $availableTypeValues))
 		{
@@ -115,13 +76,14 @@ class XFAC_Widget_Threads extends WP_Widget
 
 		$instance['limit'] = intval($newInstance['limit']);
 
+		wp_cache_delete(__CLASS__);
+
 		return $instance;
 	}
 
 	function widget($args, $instance)
 	{
-		$cache = wp_cache_get(__CLASS__, 'widget');
-
+		$cache = wp_cache_get(__CLASS__);
 		if (!is_array($cache))
 		{
 			$cache = array();
@@ -137,7 +99,7 @@ class XFAC_Widget_Threads extends WP_Widget
 			echo $cache[$args['widget_id']];
 			return;
 		}
-		
+
 		ob_start();
 		extract($args);
 
@@ -146,7 +108,7 @@ class XFAC_Widget_Threads extends WP_Widget
 		{
 			$limit = 5;
 		}
-		
+
 		$title = (!empty($instance['title'])) ? $instance['title'] : false;
 		$availableTypes = $this->_getAvailableTypes();
 		if (empty($instance['type']) OR !in_array($instance['type'], $availableTypes))
@@ -154,13 +116,13 @@ class XFAC_Widget_Threads extends WP_Widget
 			$tmp = array_keys($availableTypes);
 			$instance['type'] = reset($tmp);
 		}
-		
+
 		if ($title === false)
 		{
 			$title = $availableTypes[$instance['type']];
 		}
 		$title = apply_filters('widget_title', $title, $instance, $this->id_base);
-		
+
 		$config = xfac_option_getConfig();
 		$threads = array();
 
@@ -188,37 +150,24 @@ class XFAC_Widget_Threads extends WP_Widget
 				default:
 					// this is the default order
 					// $extraParams['order'] = 'thread_create_date_reverse';
+					break;
 			}
 			$extraParams = http_build_query($extraParams);
-			
+
 			$results = xfac_api_getThreadsInForum($config, $forumId, 1, '', $extraParams);
-			
+
 			if (!empty($results['threads']))
 			{
 				$threads = $results['threads'];
 			}
 		}
 
-?>
-		<?php echo $before_widget; ?>
-		<?php if ($title) echo $before_title . $title . $after_title; ?>
-		<ul>
-		<?php foreach($threads as $thread): ?>
-			<li>
-				<a href="<?php echo($thread['links']['permalink']) ?>">
-					<?php echo($thread['thread_title']) ?>
-				</a>
-				<span class="post-date"><?php echo date_i18n(get_option('date_format'), $thread['thread_create_date']) ?></span>
-			</li>
-		<?php endforeach; ?>
-		</ul>
-		<?php echo $after_widget; ?>
-<?php
-		
+		require (xfac_template_locateTemplate('widget_threads.php'));
+
 		$cache[$args['widget_id']] = ob_get_flush();
-		//wp_cache_set(__CLASS__, $cache, 'widget');
+		wp_cache_set(__CLASS__, $cache);
 	}
-	
+
 	protected function _getAvailableTypes()
 	{
 		return array(

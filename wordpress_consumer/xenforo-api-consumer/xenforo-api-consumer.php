@@ -47,6 +47,7 @@ require_once (dirname(__FILE__) . '/includes/helper/api.php');
 require_once (dirname(__FILE__) . '/includes/helper/dashboard.php');
 require_once (dirname(__FILE__) . '/includes/helper/installer.php');
 require_once (dirname(__FILE__) . '/includes/helper/option.php');
+require_once (dirname(__FILE__) . '/includes/helper/template.php');
 require_once (dirname(__FILE__) . '/includes/helper/user.php');
 
 if (is_admin())
