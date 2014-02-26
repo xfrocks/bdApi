@@ -63,6 +63,8 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
 	{
 		switch ($responseType)
 		{
+			case 'jsonp':
+				return new bdApi_ViewRenderer_Jsonp($this, $response, $request);
 			case 'raw':
 				return new XenForo_ViewRenderer_Raw($this, $response, $request);
 			default:

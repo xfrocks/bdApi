@@ -2,6 +2,7 @@
 !function($, window, document, _undefined)
 {
 	var dataUri = '{data_uri}';
+	var requestBaseUri = '{request_uri}';
 
 	window['{prefix}SDK'] = {};
 	var SDK = window['{prefix}SDK'];
@@ -47,6 +48,67 @@
 						}
 					}
 				}
+			);
+		},
+		
+		request: function(route, callback, accessToken, method, data)
+		{
+			// callback = function(apiData) {};
+			var uri = requestBaseUri + '?' + route + '&_xfResponseType=jsonp';
+
+			var ajaxOptions =
+			{
+				dataType: 'jsonp',
+				success: function(data, textStatus)
+				{
+					if (typeof callback != 'function')
+					{
+						return;
+					}
+
+					callback(data);
+				}
+			};
+
+			if (method != _undefined)
+			{
+				ajaxOptions.type = method;
+			}
+			else
+			{
+				ajaxOptions.type = 'GET';
+			}
+
+			if (accessToken != _undefined)
+			{
+				if (ajaxOptions.type == 'GET')
+				{
+					uri += '&oauth_token=' + accessToken;
+				}
+				else
+				{
+					if (data != _undefined)
+					{
+						data.oauth_token = accessToken;
+					}
+					else
+					{
+						data =
+						{
+							oauth_token: accessToken
+						};
+					}
+				}
+			}
+
+			if (data != _undefined)
+			{
+				ajaxOptions.data = data;
+			}
+			
+			$.ajax(
+				uri,
+				ajaxOptions
 			);
 		}
 	});
