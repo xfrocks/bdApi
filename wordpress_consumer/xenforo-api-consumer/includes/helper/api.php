@@ -25,6 +25,26 @@ function xfac_api_getSdkJsUrl($config)
 	));
 }
 
+function xfac_api_getLoginLink($config, $accessToken, $redirectUri)
+{
+	return call_user_func_array('sprintf', array(
+		'%s/index.php?tools/login&oauth_token=%s&redirect_uri=%s',
+		rtrim($config['root'], '/'),
+		rawurlencode($accessToken),
+		rawurlencode($redirectUri),
+	));
+}
+
+function xfac_api_getLogoutLink($config, $accessToken, $redirectUri)
+{
+	return call_user_func_array('sprintf', array(
+		'%s/index.php?tools/logout&oauth_token=%s&redirect_uri=%s',
+		rtrim($config['root'], '/'),
+		rawurlencode($accessToken),
+		rawurlencode($redirectUri),
+	));
+}
+
 function xfac_api_getPublicLink($config, $route)
 {
 	$ch = curl_init();
@@ -129,7 +149,7 @@ function xfac_api_getAccessTokenFromUsernamePassword($config, $username, $passwo
 
 	$body = curl_exec($ch);
 	curl_close($ch);
-	
+
 	return _xfac_api_prepareAccessTokenBody($body);
 }
 

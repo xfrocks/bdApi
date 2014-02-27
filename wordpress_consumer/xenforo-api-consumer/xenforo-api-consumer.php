@@ -59,6 +59,7 @@ else
 {
 	require_once (dirname(__FILE__) . '/includes/ui/login.php');
 	require_once (dirname(__FILE__) . '/includes/ui/top_bar.php');
+	require_once (dirname(__FILE__) . '/includes/sync/login.php');
 }
 
 require_once (dirname(__FILE__) . '/includes/helper/sync.php');

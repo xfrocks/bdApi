@@ -149,6 +149,13 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 							<?php _e('Avatar from XenForo to WordPress', 'xenforo-api-consumer'); ?>
 						</label>
 					</fieldset>
+
+					<fieldset>
+						<label for="xfac_sync_login">
+							<input name="xfac_sync_login" type="checkbox" id="xfac_sync_login" value="1" <?php checked('1', get_option('xfac_sync_login')); ?> />
+							<?php _e('Login/Logout', 'xenforo-api-consumer'); ?>
+						</label>
+					</fieldset>
 				</td>
 			</tr>
 

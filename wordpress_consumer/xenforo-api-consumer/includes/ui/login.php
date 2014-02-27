@@ -47,6 +47,7 @@ function xfac_login_init()
 
 	$loginUrl = site_url('wp-login.php', 'login_post');
 	$redirectTo = _xfac_login_getRedirectTo();
+	$redirectToRequested = isset($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : '';
 
 	$redirectBaseUrl = $loginUrl . (strpos($loginUrl, '?') !== false ? '&' : '?') . 'redirect_to=' . urlencode($redirectTo);
 	$callbackUrl = $redirectBaseUrl . '&xfac=callback';
@@ -57,12 +58,14 @@ function xfac_login_init()
 	switch ($_REQUEST['xfac'])
 	{
 		case 'callback':
+			define('XFAC_SYNC_LOGIN_SKIP_REDIRECT', 1);
 			if (!empty($_REQUEST['code']))
 			{
 				$token = xfac_api_getAccessTokenFromCode($config, $_REQUEST['code'], $callbackUrl);
 			}
 			break;
 		case 'associate':
+			define('XFAC_SYNC_LOGIN_SKIP_REDIRECT', 1);
 			if (empty($_REQUEST['refresh_token']))
 			{
 				wp_redirect($redirectBaseUrl . '&xfac_error=no_refresh_token');
@@ -126,10 +129,11 @@ function xfac_login_init()
 			if (!is_wp_error($authenticatedUser))
 			{
 				// logged in with WordPress username/password
-				wp_redirect($redirectTo);
+				$redirectToFiltered = apply_filters('login_redirect', $redirectTo, $redirectToRequested, $authenticatedUser);
+				wp_redirect($redirectToFiltered);
 				exit();
 			}
-			
+
 			$token = xfac_api_getAccessTokenFromUsernamePassword($config, $userLogin, $password);
 			break;
 		case 'authorize':
@@ -237,7 +241,8 @@ function xfac_login_init()
 
 		wp_set_auth_cookie($wpUser->ID, true);
 
-		wp_redirect($redirectTo);
+		$redirectToFiltered = apply_filters('login_redirect', $redirectTo, $redirectToRequested, $wpUser);
+		wp_redirect($redirectToFiltered);
 		exit();
 	}
 }
