@@ -73,10 +73,7 @@ class bdApiConsumer_Installer
 
 	private static function installCustomized($existingAddOn, $addOnData)
 	{
-		if (XenForo_Application::$versionId < 1020000)
-		{
-			throw new XenForo_Exception('[bd] API Consumer add-on requires XenForo 1.2.0+');
-		}
+		// customized install script goes here
 	}
 
 	private static function uninstallCustomized()

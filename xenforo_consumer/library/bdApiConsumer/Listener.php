@@ -1,4 +1,5 @@
 <?php
+
 class bdApiConsumer_Listener
 {
 	protected static $_commonTemplatesPreloaded = false;
@@ -21,8 +22,14 @@ class bdApiConsumer_Listener
 
 	public static function init_dependencies(XenForo_Dependencies_Abstract $dependencies, array $data)
 	{
-		XenForo_Template_Helper_Core::$helperCallbacks['bdapiconsumer_getoption'] = array('bdApiConsumer_Option', 'get');
-		XenForo_Template_Helper_Core::$helperCallbacks['bdapiconsumer_getprovidersdkjs'] = array('bdApiConsumer_Helper_Template', 'getProviderSdkJs');
+		XenForo_Template_Helper_Core::$helperCallbacks['bdapiconsumer_getoption'] = array(
+			'bdApiConsumer_Option',
+			'get'
+		);
+		XenForo_Template_Helper_Core::$helperCallbacks['bdapiconsumer_getprovidersdkjs'] = array(
+			'bdApiConsumer_Helper_Template',
+			'getProviderSdkJs'
+		);
 	}
 
 	public static function front_controller_pre_view(XenForo_FrontController $fc, XenForo_ControllerResponse_Abstract &$controllerResponse, XenForo_ViewRenderer_Abstract &$viewRenderer, array &$containerParams)
@@ -37,7 +44,29 @@ class bdApiConsumer_Listener
 		{
 			$template->preloadTemplate('bdapi_consumer_providers');
 			$template->preloadTemplate('bdapi_consumer_page_container_head');
+
+			if (!bdApiConsumer_Option::get('_is120+'))
+			{
+				$template->preloadTemplate('bdapi_consumer_navigation_visitor_tab_links1');
+			}
+
 			self::$_commonTemplatesPreloaded = true;
+		}
+
+		if ($templateName === 'PAGE_CONTAINER' AND !bdApiConsumer_Option::get('_is120+'))
+		{
+			if (bdApiConsumer_Option::get('_activated'))
+			{
+				// setting $eAuth in hook position login_bar_eauth_set doens't work
+				// so we have to do it here. Risk: won't work if the container template changes
+				// this is bad but it only runs in XenForo 1.1.x
+				$params['eAuth'] = 1;
+			}
+		}
+
+		if ($templateName == 'account_wrapper' AND !bdApiConsumer_Option::get('_is120+'))
+		{
+			$template->preloadTemplate('bdapi_consumer_account_wrapper_sidebar_settings');
 		}
 	}
 
@@ -48,21 +77,65 @@ class bdApiConsumer_Listener
 			case 'bdapi_consumer_providers':
 				$params = array_merge($template->getParams(), $hookParams);
 				$params['providers'] = bdApiConsumer_Option::getProviders();
+
 				$ourTemplate = $template->create($hookName, $params);
 				$contents = $ourTemplate->render();
 				break;
-			case 'page_container_head':
-				$ourTemplate = $template->create('bdapi_consumer_' . $hookName, $template->getParams());
-				$ourTemplate->setParam('providers', bdApiConsumer_Option::getProviders());
 
-				$rendered = $ourTemplate->render();
-				$contents .= $rendered;
+			case 'page_container_head':
+				$params = $template->getParams();
+				$params['providers'] = bdApiConsumer_Option::getProviders();
+
+				$ourTemplate = $template->create('bdapi_consumer_' . $hookName, $params);
+				$contents .= $ourTemplate->render();
+				break;
+			case 'login_bar_eauth_items':
+				if (!bdApiConsumer_Option::get('_is120+'))
+				{
+					// XenForo 1.1.x compatibility
+					$params = array_merge($template->getParams(), $hookParams);
+					$params['providers'] = bdApiConsumer_Option::getProviders();
+					$params['from'] = 'login_bar';
+
+					$ourTemplate = $template->create('bdapi_consumer_providers', $params);
+					$contents = $ourTemplate->render();
+				}
+				break;
+			case 'account_wrapper_sidebar_settings':
+			case 'navigation_visitor_tab_links1':
+				if (!bdApiConsumer_Option::get('_is120+'))
+				{
+					// XenForo 1.1.x compatibility
+					$ourTemplate = $template->create('bdapi_consumer_' . $hookName, $template->getParams());
+					$contents .= $ourTemplate->render();
+				}
 				break;
 		}
 	}
-	
+
+	public static function template_post_render($templateName, &$content, array &$containerData, XenForo_Template_Abstract $template)
+	{
+		switch ($templateName)
+		{
+			case 'login':
+			case 'error_with_login':
+				if (!bdApiConsumer_Option::get('_is120+'))
+				{
+					// XenForo 1.1.x compatibility
+					$params = $template->getParams();
+					$params['providers'] = bdApiConsumer_Option::getProviders();
+					$params['from'] = 'login_form';
+
+					$ourTemplate = $template->create('bdapi_consumer_providers', $template->getParams());
+					$content .= $ourTemplate->render();
+				}
+				break;
+		}
+	}
+
 	public static function file_health_check(XenForo_ControllerAdmin_Abstract $controller, array &$hashes)
 	{
 		$hashes += bdApiConsumer_FileSums::getHashes();
 	}
+
 }

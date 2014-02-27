@@ -7,6 +7,10 @@ class bdApiConsumer_Option
 
 		switch ($key)
 		{
+			case '_is120+':
+				return XenForo_Application::$versionId >= 1020000;
+			case '_is130+':
+				return XenForo_Application::$versionId >= 1030000;
 			case '_activated':
 				$providers = self::getProviders();
 				return !empty($providers);

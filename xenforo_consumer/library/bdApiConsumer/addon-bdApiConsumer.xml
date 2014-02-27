@@ -49,6 +49,7 @@
     <listener event_id="load_class_model" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="template_create" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_create" active="1" hint="" description=""/>
     <listener event_id="template_hook" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_hook" active="1" hint="" description=""/>
+    <listener event_id="template_post_render" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_post_render" active="1" hint="" description=""/>
   </code_event_listeners>
   <cron/>
   <email_templates/>
@@ -440,4 +441,5 @@ $0]]></replace>
     </modification>
   </public_template_modifications>
   <bb_code_media_sites/>
+  <bb_codes/>
 </addon>
