@@ -93,8 +93,8 @@ function xfac_login_init()
 			}
 			$password = $_REQUEST['pwd'];
 
-			$authenticatedUser = apply_filters('authenticate', null, $wpUserForAssociate->user_login, $password);
-			if (empty($authenticatedUser->ID) OR $authenticatedUser->ID != $wpUserForAssociate->ID)
+			$authenticatedUser = wp_authenticate($wpUserForAssociate->user_login, $password);
+			if (is_wp_error($authenticatedUser) OR $authenticatedUser->ID != $wpUserForAssociate->ID)
 			{
 				_xfac_login_renderAssociateForm($wpUserForAssociate, $_REQUEST['xf_user'], $_REQUEST['refresh_token'], $_REQUEST['scope'], $redirectTo);
 				exit();
@@ -102,6 +102,35 @@ function xfac_login_init()
 
 			$token = xfac_api_getAccessTokenFromRefreshToken($config, $_REQUEST['refresh_token'], $_REQUEST['scope']);
 			$associateConfirmed = $wpUserForAssociate->ID;
+			break;
+		case 'top_bar':
+			if (empty($_REQUEST['user_login']))
+			{
+				wp_redirect($redirectBaseUrl . '&xfac_error=no_user_login');
+				exit();
+			}
+			$userLogin = $_REQUEST['user_login'];
+
+			if (empty($_REQUEST['pwd']))
+			{
+				wp_redirect($redirectBaseUrl . '&xfac_error=no_pwd');
+				exit();
+			}
+			$password = $_REQUEST['pwd'];
+
+			$authenticatedUser = wp_signon(array(
+				'user_login' => $userLogin,
+				'user_password' => $password,
+				'remember' => true
+			));
+			if (!is_wp_error($authenticatedUser))
+			{
+				// logged in with WordPress username/password
+				wp_redirect($redirectTo);
+				exit();
+			}
+			
+			$token = xfac_api_getAccessTokenFromUsernamePassword($config, $userLogin, $password);
 			break;
 		case 'authorize':
 		default:

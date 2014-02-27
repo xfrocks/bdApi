@@ -10,7 +10,7 @@ function xfac_install()
 {
 	global $wpdb;
 
-	$currentVersion = 7;
+	$currentVersion = 8;
 	$installedVersion = intval(get_option('xfac_version'));
 
 	$tblAuth = xfac_getTableAuth();

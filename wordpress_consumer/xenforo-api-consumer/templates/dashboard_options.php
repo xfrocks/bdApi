@@ -185,6 +185,21 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 							<?php _e('Show Conversations link', 'xenforo-api-consumer'); ?>
 						</label>
 					</fieldset>
+
+					<fieldset>
+						<label for="xfac_top_bar_replace">
+							<input name="xfac_top_bar_replace" type="checkbox" id="xfac_top_bar_replace" value="1" <?php checked('1', get_option('xfac_top_bar_replace')); ?> />
+							<?php _e('Replace Admin Bar', 'xenforo-api-consumer'); ?>
+						</label>
+						<p class="description"><?php _e('Enable to let the Top Bar replace WordPress Admin Bar completely (instead of merging together).', 'xenforo-api-consumer'); ?></p>
+					</fieldset>
+					<fieldset>
+						<label for="xfac_top_bar_always">
+							<input name="xfac_top_bar_always" type="checkbox" id="xfac_top_bar_always" value="1" <?php checked('1', get_option('xfac_top_bar_always')); ?> />
+							<?php _e('Always Show', 'xenforo-api-consumer'); ?>
+						</label>
+						<p class="description"><?php _e('Enable to let the Top Bar appear even for guests.', 'xenforo-api-consumer'); ?></p>
+					</fieldset>
 				</td>
 			</tr>
 

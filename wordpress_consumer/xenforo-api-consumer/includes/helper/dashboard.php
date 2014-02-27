@@ -28,6 +28,8 @@ function xfac_admin_init()
 	register_setting('xfac-settings', 'xfac_top_bar_forums');
 	register_setting('xfac-settings', 'xfac_top_bar_notifications');
 	register_setting('xfac-settings', 'xfac_top_bar_conversations');
+	register_setting('xfac-settings', 'xfac_top_bar_replace');
+	register_setting('xfac-settings', 'xfac_top_bar_always');
 
 	register_setting('xfac-settings', 'xfac_xf_guest_account');
 }
@@ -77,6 +79,8 @@ function xfac_whitelist_options($whitelist_options)
 	$whitelist_options['xfac'][] = 'xfac_top_bar_forums';
 	$whitelist_options['xfac'][] = 'xfac_top_bar_notifications';
 	$whitelist_options['xfac'][] = 'xfac_top_bar_conversations';
+	$whitelist_options['xfac'][] = 'xfac_top_bar_replace';
+	$whitelist_options['xfac'][] = 'xfac_top_bar_always';
 
 	$whitelist_options['xfac'][] = 'xfac_xf_guest_account';
 

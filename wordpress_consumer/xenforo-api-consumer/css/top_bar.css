@@ -19,3 +19,8 @@
 		background: red;
 		color: white;
 	}
+
+#wpadminbar #wp-admin-bar-xfac-loginForm .ab-item
+{
+	height: auto;
+}

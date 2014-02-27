@@ -43,6 +43,7 @@ function xfac_api_getPublicLink($config, $route)
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 	$body = curl_exec($ch);
+	curl_close($ch);
 
 	$parts = @json_decode($body, true);
 
@@ -77,22 +78,9 @@ function xfac_api_getAccessTokenFromCode($config, $code, $redirectUri)
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 	$body = curl_exec($ch);
+	curl_close($ch);
 
-	$parts = @json_decode($body, true);
-
-	if (!empty($parts['access_token']))
-	{
-		if (!empty($parts['expires_in']))
-		{
-			$parts['expire_date'] = time() + $parts['expires_in'];
-		}
-
-		return $parts;
-	}
-	else
-	{
-		return false;
-	}
+	return _xfac_api_prepareAccessTokenBody($body);
 }
 
 function xfac_api_getAccessTokenFromRefreshToken($config, $refreshToken, $scope)
@@ -115,22 +103,34 @@ function xfac_api_getAccessTokenFromRefreshToken($config, $refreshToken, $scope)
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 	$body = curl_exec($ch);
+	curl_close($ch);
 
-	$parts = @json_decode($body, true);
+	return _xfac_api_prepareAccessTokenBody($body);
+}
 
-	if (!empty($parts['access_token']))
-	{
-		if (!empty($parts['expires_in']))
-		{
-			$parts['expire_date'] = time() + $parts['expires_in'];
-		}
+function xfac_api_getAccessTokenFromUsernamePassword($config, $username, $password)
+{
+	$ch = curl_init();
 
-		return $parts;
-	}
-	else
-	{
-		return false;
-	}
+	curl_setopt($ch, CURLOPT_URL, call_user_func_array('sprintf', array(
+		'%s/index.php?oauth/token/',
+		rtrim($config['root'], '/')
+	)));
+
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+		'grant_type' => 'password',
+		'client_id' => $config['clientId'],
+		'client_secret' => $config['clientSecret'],
+		'username' => $username,
+		'password' => $password,
+	)));
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+	$body = curl_exec($ch);
+	curl_close($ch);
+	
+	return _xfac_api_prepareAccessTokenBody($body);
 }
 
 function xfac_api_generateOneTimeToken($config, $userId = 0, $accessToken = '', $ttl = 10)
@@ -246,6 +246,7 @@ function xfac_api_postThread($config, $accessToken, $forumId, $threadTitle, $pos
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 	$body = curl_exec($ch);
+	curl_close($ch);
 
 	$parts = @json_decode($body, true);
 
@@ -277,6 +278,7 @@ function xfac_api_postPost($config, $accessToken, $threadId, $postBody, array $e
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 	$body = curl_exec($ch);
+	curl_close($ch);
 
 	$parts = @json_decode($body, true);
 
@@ -308,4 +310,23 @@ function xfac_api_filterHtmlFromXenForo($html)
 	}
 
 	return $html;
+}
+
+function _xfac_api_prepareAccessTokenBody($body)
+{
+	$parts = @json_decode($body, true);
+
+	if (!empty($parts['access_token']))
+	{
+		if (!empty($parts['expires_in']))
+		{
+			$parts['expire_date'] = time() + $parts['expires_in'];
+		}
+
+		return $parts;
+	}
+	else
+	{
+		return false;
+	}
 }

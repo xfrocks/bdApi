@@ -93,6 +93,7 @@ function xfac_option_getMeta($config)
 		$meta['linkIndex'] = xfac_api_getPublicLink($config, 'index');
 		$meta['linkAlerts'] = xfac_api_getPublicLink($config, 'account/alerts');
 		$meta['linkConversations'] = xfac_api_getPublicLink($config, 'conversations');
+		$meta['linkRegister'] = xfac_api_getPublicLink($config, 'register');
 
 		$forums = xfac_api_getForums($config, '');
 		if (!empty($forums['forums']))
