@@ -113,6 +113,7 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
     <phrase title="bdapi_consumer_root" version_id="1" version_string="0.9-dev"><![CDATA[http://domain.com/xenforo/api]]></phrase>
     <phrase title="bdapi_consumer_sign_up_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Sign Up with {provider}]]></phrase>
     <phrase title="bdapi_consumer_x_account_not_good_standing" version_id="10" version_string="0.9.4"><![CDATA[The connected {provider}'s account status is not in good standing. You may need to complete verification steps at {provider} before trying again.]]></phrase>
+    <phrase title="bdapi_consumer_x_integration" version_id="15" version_string="0.9.6b"><![CDATA[{provider} Integration]]></phrase>
     <phrase title="bdapi_consumer_x_returned_unknown_error" version_id="1" version_string="0.9-dev"><![CDATA[{provider} returned an unknown error. Please try again later.]]></phrase>
     <phrase title="bdapi_consumer_you_not_associated_with_x_account" version_id="8" version_string="0.9.2"><![CDATA[Your account is not currently associated with a {provider} account.]]></phrase>
     <phrase title="option_bdapi_consumer_autoLogin" version_id="4" version_string="0.9-dev"><![CDATA[Auto Login]]></phrase>
@@ -134,76 +135,104 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
   <route_prefixes/>
   <style_properties/>
   <templates>
-    <template title="bdapi_consumer.css" version_id="13" version_string="0.9.5c"><![CDATA[#loginBar .bdApiConsumer_Provider a
+    <template title="bdapi_consumer.css" version_id="15" version_string="0.9.6b"><![CDATA[#loginBar .bdApiConsumer_Provider a
 {
 	color: {xen:property button.color};
-}]]></template>
-    <template title="bdapi_consumer_account_external" version_id="8" version_string="0.9.2"><![CDATA[<xen:title>{xen:phrase bdapi_consumer_external}</xen:title>
+}
 
-<xen:foreach loop="$providers" value="$provider">
+<xen:if is="{xen:helper bdApiConsumer_getOption, '_is130+'}">
+.bdApiConsumer_Provider a,
+#loginBar .bdApiConsumer_Provider a
+{
+	display: inline-block;
+	width: {xen:property eAuthButtonWidth};
+	height: 22px;
+	box-sizing: border-box;
+	cursor: pointer;
+}
+</xen:if>]]></template>
+    <template title="bdapi_consumer_account_external" version_id="15" version_string="0.9.6b"><![CDATA[<xen:if is="!{$bdApiConsumer_noTitle}">
+	<xen:title>{xen:phrase bdapi_consumer_external}</xen:title>
+</xen:if>
+
+<xen:foreach loop="$bdApiConsumer_providers" value="$provider">
 	<xen:set var="$authProviderCode">bdapi_{$provider.code}</xen:set>
-	<xen:if is="{$externalAuths.{$authProviderCode}}">
-		<form action="{xen:link account/external}" method="post" class="xenForm">
-			
-			<xen:hook name="bdapi_consumer_account_external_associated" params="{xen:array 'provider={$provider}'}">
-			<dl class="ctrlUnit">
-				<dt>{xen:phrase bdapi_consumer_associated_x_account, 'provider={$provider.name}'}:</dt>
-				<dd>
-					<xen:if is="{$externalAuths.{$authProviderCode}.extra_data}">
-						<a href="{xen:raw {$externalAuths.{$authProviderCode}.extra_data.links.permalink}}" target="_blank">{$externalAuths.{$authProviderCode}.extra_data.username}</a>
-					<xen:else />
-						{$externalAuths.{$authProviderCode}.provider_key}
-					</xen:if>
-				</dd>
-			</dl>
-			</xen:hook>
-			
-			<dl class="ctrlUnit submitUnit">
-				<dt></dt>
-				<dd><ul>
-					<li>
-						<label><input type="checkbox" name="disassociate" value="1" id="ctrl_disassociate_{$provider.code}" class="Disabler" /> {xen:phrase bdapi_consumer_disassociate_x_account, 'provider={$provider.name}'}</label>
-						<ul id="ctrl_disassociate_{$provider.code}_Disabler">
-							<li><input type="submit" class="button" name="disassociate_confirm" value="{xen:phrase confirm_disassociation}" /></li>
-						</ul>
-						<xen:if is="!{$hasPassword}">
-							<p class="explain">{xen:phrase bdapi_consumer_disassociating_with_x_reset_password_email_y, 'provider={$provider.name}', 'email={$visitor.email}'}</p>
-						</xen:if>
-					</li>
-				</ul></dd>
-			</dl>
 
-			<input type="hidden" name="provider" value="{$provider.code}" />
-			<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
-			<input type="hidden" name="_xfConfirm" value="1" />
-		</form>
-	<xen:else />
-		<form action="{xen:link account}" method="post" class="xenForm">
-		
+	<form action="{xen:link account/external-accounts/disassociate}" method="post" class="xenForm">
+
+		<h3 class="textHeading">{xen:phrase bdapi_consumer_x_integration, 'provider={$provider.name}'}</h3>
+
+		<xen:if is="{$bdApiConsumer_externalAuths.{$authProviderCode}}">
+
+			<xen:include template="bdapi_consumer_account_external_associated">
+				<xen:map from="$bdApiConsumer_externalAuths.{$authProviderCode}" to="$auth" />
+			</xen:include>
+
+		<xen:else />
+
 			<xen:hook name="bdapi_consumer_account_external_not_associated" params="{xen:array 'provider={$provider}'}">
 			<dl class="ctrlUnit">
 				<dt></dt>
 				<dd>{xen:phrase bdapi_consumer_you_not_associated_with_x_account, 'provider={$provider.name}'}</dd>
 			</dl>
 			</xen:hook>
-			
+
 			<dl class="ctrlUnit submitUnit">
 				<dt></dt>
 				<dd><a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1', 'assoc={$visitor.user_id}'}" class="button primary">{xen:phrase bdapi_consumer_associate_with_x, 'provider={$provider.name}'}</a></dd>
 			</dl>
-		</form>
-	</xen:if>
+
+		</xen:if>
+		
+		<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+		<input type="hidden" name="_xfConfirm" value="1" />
+		<input type="hidden" name="account" value="{$authProviderCode}" />
+	</form>
 </xen:foreach>]]></template>
-    <template title="bdapi_consumer_account_wrapper_sidebar_settings" version_id="13" version_string="0.9.5c"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
+    <template title="bdapi_consumer_account_external_associated" version_id="15" version_string="0.9.6b"><![CDATA[<xen:hook name="bdapi_consumer_account_external_associated" params="{xen:array 'provider={$provider}'}">
+<dl class="ctrlUnit">
+	<dt>{xen:phrase bdapi_consumer_associated_x_account, 'provider={$provider.name}'}:</dt>
+	<dd>
+		<xen:if is="{$auth.extra_data}">
+			<a href="{xen:raw {$auth.extra_data.links.permalink}}" target="_blank">
+				{$auth.extra_data.username}
+			</a>
+		<xen:else />
+			#{$auth.provider_key}
+		</xen:if>
+	</dd>
+</dl>
+</xen:hook>
+
+<dl class="ctrlUnit submitUnit">
+	<dt></dt>
+	<dd><ul>
+		<li>
+			<label for="ctrl_disassociate_{$authProviderCode}">
+				<input type="checkbox" name="disassociate" value="1" id="ctrl_disassociate_{$authProviderCode}" class="Disabler" />
+				{xen:phrase bdapi_consumer_disassociate_x_account, 'provider={$provider.name}'}
+			</label>
+
+			<ul id="ctrl_disassociate_{$authProviderCode}_Disabler">
+				<li><input type="submit" class="button" name="disassociate_confirm" value="{xen:phrase confirm_disassociation}" /></li>
+			</ul>
+
+			<xen:if is="!{$hasPassword}">
+				<p class="explain">{xen:phrase bdapi_consumer_disassociating_with_x_reset_password_email_y, 'provider={$provider.name}', 'email={$visitor.email}'}</p>
+			</xen:if>
+		</li>
+	</ul></dd>
+</dl>]]></template>
+    <template title="bdapi_consumer_account_wrapper_sidebar_settings" version_id="15" version_string="0.9.6b"><![CDATA[<xen:if is="!{xen:helper bdApiConsumer_getOption, '_is130+'} AND {xen:helper bdApiConsumer_getOption, _activated}">
 	<li>
 		<a class="{xen:if "{$selectedKey} == 'account/bdApiConsumer'", 'secondaryContent', 'primaryContent'}"
-			href="{xen:link account/external}">
+			href="{xen:link account/external-accounts}">
 			{xen:phrase bdapi_consumer_external}
 		</a>
 	</li>
 </xen:if>]]></template>
-    <template title="bdapi_consumer_navigation_visitor_tab_links1" version_id="13" version_string="0.9.5c"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
-	<li><a href="{xen:link account/external}">{xen:phrase bdapi_consumer_external}</a></li>
+    <template title="bdapi_consumer_navigation_visitor_tab_links1" version_id="15" version_string="0.9.6b"><![CDATA[<xen:if is="!{xen:helper bdApiConsumer_getOption, '_is130+'} AND {xen:helper bdApiConsumer_getOption, _activated}">
+	<li><a href="{xen:link account/external-accounts}">{xen:phrase bdapi_consumer_external}</a></li>
 </xen:if>]]></template>
     <template title="bdapi_consumer_page_container_head" version_id="12" version_string="0.9.5b"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} != '0'
 	AND empty({$bdApiConsumer_logoutTime})
@@ -407,6 +436,10 @@ window['{$provider.code}Init'] = function()
 
 $0]]></replace>
     </modification>
+    <modification template="account_wrapper" modification_key="bdapi_consumer_account_wrapper_xf13" description="Enable account/externalAccounts link (XenForo 1.3+)" execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[{$xenOptions.facebookAppId} OR]]></find>
+      <replace><![CDATA[$0 {xen:helper bdApiConsumer_getOption, _activated} OR]]></replace>
+    </modification>
     <modification template="helper_login_form" modification_key="bdapi_consumer_login" description="Insert providers" execution_order="10" enabled="1" action="str_replace">
       <find><![CDATA[</form>]]></find>
       <replace><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
@@ -438,6 +471,18 @@ $2]]></replace>
       <replace><![CDATA[<xen:include template="bdapi_consumer_navigation_visitor_tab_links1" />
 
 $0]]></replace>
+    </modification>
+    <modification template="navigation_visitor_tab" modification_key="bdapi_consumer_navigation_visitor_tab_xf13" description="Enable account/externalAccounts link (XenForo 1.3+)" execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[{$xenOptions.facebookAppId} OR]]></find>
+      <replace><![CDATA[$0 {xen:helper bdApiConsumer_getOption, _activated} OR]]></replace>
+    </modification>
+    <modification template="account_external_accounts" modification_key="bdapiconsumer_account_external_accounts" description="Merge our page with system External Accounts page (XenForo 1.3+)" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#.+#s]]></find>
+      <replace><![CDATA[$0
+
+<xen:include template="bdapi_consumer_account_external">
+	<xen:set var="$bdApiConsumer_noTitle">1</xen:set>
+</xen:include>]]></replace>
     </modification>
   </public_template_modifications>
   <bb_code_media_sites/>

@@ -1,12 +1,29 @@
 <?php
 class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_XenForo_ControllerPublic_Account
 {
-	public function actionExternal()
+	public function actionExternalAccounts()
 	{
+		$response = null;
+
+		if (bdApiConsumer_Option::get('_is130+'))
+		{
+			$response = parent::actionExternalAccounts();
+
+			if ($response instanceof XenForo_ControllerResponse_View OR empty($response->subView))
+			{
+				// good
+			}
+			else
+			{
+				// not a view? return it asap
+				return $response;
+			}
+		}
+
 		$visitor = XenForo_Visitor::getInstance();
 
-		/* var $userExternalModel XenForo_Model_UserExternal */
-		$userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
+		/* var $externalAuthModel XenForo_Model_UserExternal */
+		$externalAuthModel = $this->getModelFromCache('XenForo_Model_UserExternal');
 
 		$auth = $this->_getUserModel()->getUserAuthenticationObjectByUserId($visitor['user_id']);
 		if (!$auth)
@@ -14,70 +31,77 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
 			return $this->responseNoPermission();
 		}
 
-		$externalAuths = $userExternalModel->bdApiConsumer_getExternalAuthAssociations($visitor['user_id']);
+		$externalAuths = $externalAuthModel->bdApiConsumer_getExternalAuthAssociations($visitor['user_id']);
 
-		if ($this->isConfirmedPost())
+		$providers = bdApiConsumer_Option::getProviders();
+
+		$viewParams = array(
+			'hasPassword' => $auth->hasPassword(),
+
+			'bdApiConsumer_externalAuths' => $externalAuths,
+			'bdApiConsumer_providers' => $providers,
+		);
+
+		if ($response == null)
 		{
-			$disassociate = $this->_input->filter(array(
-				'provider' => XenForo_Input::STRING,
-				'disassociate' => XenForo_Input::STRING,
-				'disassociate_confirm' => XenForo_Input::STRING
-			));
-
-			$provider = bdApiConsumer_Option::getProviderByCode($disassociate['provider']);
-			if (empty($provider))
-			{
-				return $this->responseNoPermission();
-			}
-
-			$externalAuth = false;
-			foreach ($externalAuths as $_externalAuth)
-			{
-				if ($_externalAuth['provider'] == $userExternalModel->bdApiConsumer_getProviderCode($provider))
-				{
-					$externalAuth = $_externalAuth;
-				}
-			}
-			if (empty($externalAuth))
-			{
-				return $this->responseNoPermission();
-			}
-
-			if ($disassociate['disassociate'] && $disassociate['disassociate_confirm'])
-			{
-				$userExternalModel->deleteExternalAuthAssociation(
-					$externalAuth['provider'],
-					$externalAuth['provider_key'],
-					$visitor['user_id'],
-					$userExternalModel->bdApiConsumer_getUserProfileField()
-				);
-
-				if (!$auth->hasPassword())
-				{
-					$this->getModelFromCache('XenForo_Model_UserConfirmation')->resetPassword($visitor['user_id']);
-				}
-			}
-
-			return $this->responseRedirect(
-				XenForo_ControllerResponse_Redirect::SUCCESS,
-				XenForo_Link::buildPublicLink('account/external')
-			);
+			$response = $this->_getWrapper('account', 'bdApiConsumer', $this->responseView('bdApiConsumer_ViewPublic_Account_External', 'bdapi_consumer_account_external', $viewParams));
 		}
 		else
 		{
-			$providers = bdApiConsumer_Option::getProviders();
-
-			$viewParams = array(
-				'hasPassword' => $auth->hasPassword(),
-
-				'externalAuths' => $externalAuths,
-				'providers' => $providers,
-			);
-
-			return $this->_getWrapper(
-				'account', 'bdApiConsumer',
-				$this->responseView('bdApiConsumer_ViewPublic_Account_External', 'bdapi_consumer_account_external', $viewParams)
-			);
+			$response->subView->params += $viewParams;
 		}
+
+		return $response;
 	}
+
+	public function actionExternalAccountsDisassociate()
+	{
+		if (bdApiConsumer_Option::get('_is130+'))
+		{
+			return parent::actionExternalAccountsDisassociate();
+		}
+
+		$this->_assertPostOnly();
+
+		$visitor = XenForo_Visitor::getInstance();
+
+		$auth = $this->_getUserModel()->getUserAuthenticationObjectByUserId($visitor['user_id']);
+		if (!$auth)
+		{
+			return $this->responseNoPermission();
+		}
+
+		/** @var XenForo_Model_UserExternal $externalAuthModel */
+		$externalAuthModel = $this->getModelFromCache('XenForo_Model_UserExternal');
+
+		$input = $this->_input->filter(array(
+			'disassociate' => XenForo_Input::STRING,
+			'account' => XenForo_Input::STRING
+		));
+		if ($input['disassociate'] && $input['account'])
+		{
+			$externalAuths = $externalAuthModel->bdApiConsumer_getExternalAuthAssociations($visitor['user_id']);
+
+			foreach ($externalAuths as $externalAuth)
+			{
+				if ($externalAuth['provider'] === $input['account'])
+				{
+					$externalAuthModel->bdApiConsumer_deleteExternalAuthAssociation($externalAuth['provider'], $externalAuth['provider_key'], $visitor['user_id']);
+				}
+			}
+
+			if (!$auth->hasPassword() && !$externalAuthModel->getExternalAuthAssociationsForUser($visitor['user_id']))
+			{
+				$this->getModelFromCache('XenForo_Model_UserConfirmation')->resetPassword($visitor['user_id']);
+			}
+		}
+
+		return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildPublicLink('account/external-accounts'));
+	}
+
+	public function actionExternal()
+	{
+		return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, XenForo_Link::buildPublicLink('account/external-accounts'));
+	}
+
 }

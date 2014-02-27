@@ -28,6 +28,18 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
 		}
 	}
 
+	public function bdApiConsumer_deleteExternalAuthAssociation($provider, $providerKey, $userId)
+	{
+		if (XenForo_Application::$versionId >= 1030000)
+		{
+			return $this->deleteExternalAuthAssociation($provider, $providerKey, $userId);
+		}
+		else
+		{
+			return $this->deleteExternalAuthAssociation($provider, $providerKey, $userId, $this->bdApiConsumer_getUserProfileField());
+		}
+	}
+
 	public function bdApiConsumer_getExternalAuthAssociations($userId)
 	{
 		$externalAuths = $this->fetchAllKeyed('
