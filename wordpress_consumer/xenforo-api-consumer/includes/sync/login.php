@@ -74,10 +74,54 @@ function xfac_wp_logout()
 	}
 }
 
+function xfac_syncLogin_wp_enqueue_scripts()
+{
+	$config = xfac_option_getConfig();
+	if (empty($config))
+	{
+		// do nothing
+		return;
+	}
+
+	$wpUser = wp_get_current_user();
+	if ($wpUser->ID > 0)
+	{
+		// don't add ajax login for users
+		return;
+	}
+
+	wp_enqueue_script('jquery');
+	wp_enqueue_script('xfac-sdk', xfac_api_getSdkJsUrl($config));
+	wp_enqueue_script('xfac-login.js', XFAC_PLUGIN_URL . '/js/login.js');
+}
+
+function xfac_syncLogin_wp_head()
+{
+	$config = xfac_option_getConfig();
+	if (empty($config))
+	{
+		// do nothing
+		return;
+	}
+
+	$wpUser = wp_get_current_user();
+	if ($wpUser->ID > 0)
+	{
+		// don't add ajax login for users
+		return;
+	}
+
+	echo '<script>window.xfacClientId = "' . $config['clientId'] . '"</script>';
+	echo '<script>window.xfacWpLogin = "' . site_url('wp-login.php?xfac=1') . '"</script>';
+}
+
 if (!!get_option('xfac_sync_login'))
 {
 	add_filter('login_redirect', 'xfac_login_redirect', 10, 3);
 
 	add_filter('allowed_redirect_hosts', 'xfac_allowed_redirect_hosts', 10, 1);
 	add_action('wp_logout', 'xfac_wp_logout');
+
+	add_action('wp_enqueue_scripts', 'xfac_syncLogin_wp_enqueue_scripts');
+	add_action('wp_head', 'xfac_syncLogin_wp_head');
 }

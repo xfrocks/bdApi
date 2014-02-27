@@ -1,5 +1,4 @@
-/** @param {jQuery} $ jQuery Object */
-!function($, window, document, _undefined)
+! function($, window, document, _undefined)
 {
 	var updateJsCount = function(conversationCount, notificationCount)
 	{
@@ -52,8 +51,7 @@
 				}
 
 				updateJsCount(conversationCount, notificationCount);
-			}, token); 
+			}, token);
 		}
 	};
-}
-(jQuery, this, document);
+}(jQuery, this, document); 
