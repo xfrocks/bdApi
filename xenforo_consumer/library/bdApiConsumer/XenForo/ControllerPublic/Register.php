@@ -233,11 +233,10 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 				return $this->responseError($error);
 			}
 
-			$userExternalModel->updateExternalAuthAssociation(
+			$userExternalModel->bdApiConsumer_updateExternalAuthAssociation(
 				$userExternalModel->bdApiConsumer_getProviderCode($provider),
 				$externalVisitor['user_id'],
 				$userId,
-				$userExternalModel->bdApiConsumer_getUserProfileField(),
 				$externalVisitor
 			);
 
@@ -357,11 +356,10 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		
 		$user = $writer->getMergedData();
 
-		$this->_getUserExternalModel()->updateExternalAuthAssociation(
+		$this->_getUserExternalModel()->bdApiConsumer_updateExternalAuthAssociation(
 			$this->_getUserExternalModel()->bdApiConsumer_getProviderCode($provider),
 			$externalVisitor['user_id'],
 			$user['user_id'],
-			$this->_getUserExternalModel()->bdApiConsumer_getUserProfileField(),
 			$externalVisitor
 		);
 
