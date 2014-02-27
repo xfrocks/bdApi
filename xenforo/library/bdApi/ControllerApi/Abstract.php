@@ -245,21 +245,6 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		}
 	}
 
-	public function responseRedirect($redirectType, $redirectTarget, $redirectMessage = null, array $redirectParams = array())
-	{
-		$data = array('redirect' => array(
-				'type' => $redirectType,
-				'target' => $redirectTarget,
-			));
-
-		if ($redirectMessage !== null)
-		{
-			$data['redirect']['message'] = $redirectMessage;
-		}
-
-		return $this->responseData('', $data);
-	}
-
 	public function responseNoPermission()
 	{
 		return $this->responseReroute('bdApi_ControllerApi_Error', 'noPermission');

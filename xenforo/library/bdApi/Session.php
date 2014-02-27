@@ -55,6 +55,21 @@ class bdApi_Session extends XenForo_Session
 		return false;
 	}
 
+	public function isValidRedirectUri($uri)
+	{
+		$this->getOAuthClientSecret();
+
+		if (!empty($this->_oauthClient['redirect_uri']))
+		{
+			if (strpos($uri, $this->_oauthClient['redirect_uri']) !== 0)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	/**
 	 * Checks for the specified scope to see if the effective scopes
 	 * contain it.

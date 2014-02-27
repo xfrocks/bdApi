@@ -23,15 +23,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
 		if ($this->_getThreadModel()->isRedirect($thread))
 		{
-			$redirect = $this->getModelFromCache('XenForo_Model_ThreadRedirect')->getThreadRedirectById($thread['thread_id']);
-			if (!$redirect)
-			{
-				return $this->responseNoPermission();
-			}
-			else
-			{
-				return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $redirect['target_url']);
-			}
+			return $this->responseError(new XenForo_Phrase('requested_thread_not_found'), 404);
 		}
 
 		$pageNavParams = array('thread_id' => $thread['thread_id']);

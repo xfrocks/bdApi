@@ -2,6 +2,62 @@
 
 class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 {
+	public function actionGetLogin()
+	{
+		$input = $this->_input->filter(array(
+			'oauth_token' => XenForo_Input::STRING,
+			'redirect_uri' => XenForo_Input::STRING,
+		));
+
+		if (empty($input['redirect_uri']))
+		{
+			return $this->responseError(new XenForo_Phrase('bdapi_slash_tools_login_requires_redirect_uri'), 400);
+		}
+		if (!XenForo_Application::getSession()->isValidRedirectUri($input['redirect_uri']))
+		{
+			return $this->responseNoPermission();
+		}
+
+		$loginLinkData = array(
+			'redirect' => $input['redirect_uri'],
+			'timestamp' => XenForo_Application::$time + 10,
+		);
+
+		$loginLinkData['user_id'] = bdApi_Crypt::encryptTypeOne(XenForo_Visitor::getUserId(), $loginLinkData['timestamp']);
+
+		$loginLink = bdApi_Link::buildPublicLink('login/api', '', $loginLinkData);
+
+		return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $loginLink);
+	}
+
+	public function actionGetLogout()
+	{
+		$input = $this->_input->filter(array(
+			'oauth_token' => XenForo_Input::STRING,
+			'redirect_uri' => XenForo_Input::STRING,
+		));
+
+		if (empty($input['redirect_uri']))
+		{
+			return $this->responseError(new XenForo_Phrase('bdapi_slash_tools_login_requires_redirect_uri'), 400);
+		}
+		if (!XenForo_Application::getSession()->isValidRedirectUri($input['redirect_uri']))
+		{
+			return $this->responseNoPermission();
+		}
+
+		$logoutLinkData = array(
+			'redirect' => $input['redirect_uri'],
+			'_xfToken' => XenForo_Visitor::getInstance()->get('csrf_token_page'),
+			'timestamp' => XenForo_Application::$time + 10,
+		);
+
+		$logoutLinkData['md5'] = bdApi_Crypt::encryptTypeOne(md5($logoutLinkData['redirect']), $logoutLinkData['timestamp']);
+
+		$logoutLink = bdApi_Link::buildPublicLink('logout', '', $logoutLinkData);
+
+		return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $logoutLink);
+	}
 
 	public function actionPostLink()
 	{

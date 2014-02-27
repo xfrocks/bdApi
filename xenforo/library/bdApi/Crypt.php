@@ -46,7 +46,26 @@ class bdApi_Crypt
 
 		return $decrypted;
 	}
-	
+
+	public static function encryptTypeOne($data, $timestamp)
+	{
+		$algo = self::getDefaultAlgo();
+		$key = $timestamp . XenForo_Application::getConfig()->get('globalSalt');
+		return self::encrypt($data, $algo, $key);
+	}
+
+	public static function decryptTypeOne($data, $timestamp)
+	{
+		if ($timestamp < XenForo_Application::$time)
+		{
+			throw new XenForo_Exception('$timestamp has expired', false);
+		}
+
+		$algo = self::getDefaultAlgo();
+		$key = $timestamp . XenForo_Application::getConfig()->get('globalSalt');
+		return self::decrypt($data, $algo, $key);
+	}
+
 	protected static function _getKey()
 	{
 		$session = XenForo_Application::getSession();
@@ -55,7 +74,7 @@ class bdApi_Crypt
 		{
 			throw new XenForo_Exception(new XenForo_Phrase('bdapi_request_must_authorize_to_encrypt'), true);
 		}
-		
+
 		return $clientSecret;
 	}
 
@@ -74,4 +93,5 @@ class bdApi_Crypt
 		$padding = ord($data[strlen($data) - 1]);
 		return substr($data, 0, -$padding);
 	}
+
 }

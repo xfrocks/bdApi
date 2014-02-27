@@ -20,6 +20,33 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
 		));
 	}
 
+	public function renderRedirect($redirectType, $redirectTarget, $redirectMessage = null, array $redirectParams = array())
+	{
+		switch ($redirectType)
+		{
+			case XenForo_ControllerResponse_Redirect::RESOURCE_CREATED:
+			case XenForo_ControllerResponse_Redirect::RESOURCE_UPDATED:
+			case XenForo_ControllerResponse_Redirect::SUCCESS:
+				$this->_response->setRedirect($redirectTarget, 303);
+				break;
+
+			case XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL:
+				$this->_response->setRedirect($redirectTarget, 307);
+				break;
+
+			case XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT:
+				$this->_response->setRedirect($redirectTarget, 301);
+				break;
+
+			default:
+				throw new XenForo_Exception('Unknown redirect type');
+		}
+
+		$this->_needsContainer = false;
+
+		return '';
+	}
+
 	public function renderView($viewName, array $params = array(), $templateName = '', XenForo_ControllerResponse_View $subView = null)
 	{
 		$viewOutput = $this->renderViewObject($viewName, 'Json', $params, $templateName);
