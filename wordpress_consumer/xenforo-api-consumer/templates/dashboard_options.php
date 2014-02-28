@@ -153,8 +153,15 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 					<fieldset>
 						<label for="xfac_sync_login">
 							<input name="xfac_sync_login" type="checkbox" id="xfac_sync_login" value="1" <?php checked('1', get_option('xfac_sync_login')); ?> />
-							<?php _e('Login/Logout', 'xenforo-api-consumer'); ?>
+							<?php _e('Logged-in Cookie', 'xenforo-api-consumer'); ?>
 						</label>
+
+						<div style="margin-left: 20px;">
+							<label for="xfac_bypass_users_can_register">
+								<input name="xfac_bypass_users_can_register" type="checkbox" id="xfac_bypass_users_can_register" value="1" <?php checked('1', get_option('xfac_bypass_users_can_register')); ?> />
+								<?php _e('Always create new WordPress account for XenForo user (bypass "Anyone can register")', 'xenforo-api-consumer'); ?>
+							</label>
+						</div>
 					</fieldset>
 				</td>
 			</tr>

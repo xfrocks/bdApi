@@ -186,7 +186,7 @@ function xfac_login_init()
 		else
 		{
 			// no matching user found, try to register
-			if (intval(get_option('users_can_register')))
+			if (!!get_option('users_can_register') OR !!get_option('xfac_bypass_users_can_register'))
 			{
 				$newUserId = wp_create_user($xfUser['username'], wp_generate_password(), $xfUser['user_email']);
 				if (is_wp_error($newUserId))
