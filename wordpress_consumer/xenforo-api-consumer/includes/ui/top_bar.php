@@ -157,22 +157,31 @@ function xfac_admin_bar_login_menu($wpAdminBar)
 		));
 	}
 
-	$wpAdminBar->add_menu(array(
-		'id' => 'xfac-login',
-		'parent' => 'top-secondary',
-		'title' => __('Log in', 'xenforo-api-consumer'),
-		'href' => site_url('wp-login.php'),
-	));
+	if (!empty($meta['linkLogin']))
+	{
+		$wpAdminBar->add_menu(array(
+			'id' => 'xfac-login',
+			'parent' => 'top-secondary',
+			'title' => __('Log in', 'xenforo-api-consumer'),
+			'href' => $meta['linkLogin'],
+		));
 
-	ob_start();
-	require (xfac_template_locateTemplate('top_bar_login_form.php'));
-	$loginForm = ob_get_clean();
+		if (!empty($meta['linkLoginLogin']))
+		{
+			$loginFormAction = $meta['linkLoginLogin'];
+			$redirect = site_url('wp-login.php?xfac=1');
 
-	$wpAdminBar->add_menu(array(
-		'id' => 'xfac-loginForm',
-		'parent' => 'xfac-login',
-		'title' => $loginForm,
-	));
+			ob_start();
+			require (xfac_template_locateTemplate('top_bar_login_form.php'));
+			$loginForm = ob_get_clean();
+
+			$wpAdminBar->add_menu(array(
+				'id' => 'xfac-loginForm',
+				'parent' => 'xfac-login',
+				'title' => $loginForm,
+			));
+		}
+	}
 }
 
 function xfac_admin_bar_remove_menus($wpAdminBar)

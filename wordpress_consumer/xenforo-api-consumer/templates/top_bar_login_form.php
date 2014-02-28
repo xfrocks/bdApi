@@ -7,22 +7,23 @@ if (!defined('ABSPATH'))
 }
 ?>
 
-<form id="xfacTopBarLoginForm" action="<?php echo esc_url(site_url('wp-login.php?xfac=top_bar', 'login_post')); ?>" method="post">
+<form id="xfacTopBarLoginForm" action="<?php echo esc_url($loginFormAction); ?>" method="post">
 	<p>
-		<label for="user_login">
+		<label for="login">
 			<?php _e('Username', 'xenforo-api-consumer') ?><br />
-			<input type="text" name="user_login" id="user_login" class="input" size="20" />
+			<input type="text" name="login" id="login" class="input" size="20" />
  		</label>
 	</p>
 	<p>
-		<label for="user_pass">
+		<label for="password">
 			<?php _e('Password', 'xenforo-api-consumer') ?><br />
-			<input type="password" name="pwd" id="user_pass" class="input" value="" size="20" />
+			<input type="password" name="password" id="password" class="input" value="" size="20" />
 		</label>
 	</p>
 
 	<p class="submit">
-		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary button-large"
-			value="<?php esc_attr_e('Log in', 'xenforo-api-consumer'); ?>" />
+		<input type="submit" class="button button-primary button-large" value="<?php esc_attr_e('Log in', 'xenforo-api-consumer'); ?>" />
 	</p>
+	
+	<input type="hidden" name="redirect" value="<?php echo esc_attr($redirect); ?>" />
 </form>

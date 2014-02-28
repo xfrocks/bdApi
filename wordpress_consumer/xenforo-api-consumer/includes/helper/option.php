@@ -70,7 +70,7 @@ function xfac_option_getMeta($config)
 	$meta = get_option('xfac_meta');
 	$rebuild = false;
 
-	if (empty($meta))
+	if (empty($meta) OR empty($meta['linkIndex']))
 	{
 		$rebuild = true;
 	}
@@ -93,6 +93,8 @@ function xfac_option_getMeta($config)
 		$meta['linkIndex'] = xfac_api_getPublicLink($config, 'index');
 		$meta['linkAlerts'] = xfac_api_getPublicLink($config, 'account/alerts');
 		$meta['linkConversations'] = xfac_api_getPublicLink($config, 'conversations');
+		$meta['linkLogin'] = xfac_api_getPublicLink($config, 'login');
+		$meta['linkLoginLogin'] = xfac_api_getPublicLink($config, 'login/login');
 		$meta['linkRegister'] = xfac_api_getPublicLink($config, 'register');
 
 		$forums = xfac_api_getForums($config, '');
