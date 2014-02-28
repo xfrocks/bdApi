@@ -67,7 +67,7 @@ function xfac_wp_logout()
 		$accessToken = xfac_user_getAccessTokenForRecord($record);
 		$ott = xfac_api_generateOneTimeToken($config, $record->identifier, $accessToken);
 
-		$redirectTo = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : site_url('wp-login.php?loggedout=true');
+		$redirectTo = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : home_url();
 		$newRedirectTo = xfac_api_getLogoutLink($config, $ott, $redirectTo);
 
 		$_REQUEST['redirect_to'] = $newRedirectTo;
