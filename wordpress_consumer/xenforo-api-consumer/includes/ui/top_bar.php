@@ -86,7 +86,7 @@ function xfac_admin_bar_jscount_menu($wpAdminBar)
 		return;
 	}
 
-	$records = xfac_user_getApiRecordsByUserId($wpUser->ID);
+	$records = xfac_user_getRecordsByUserId($wpUser->ID);
 	if (empty($records))
 	{
 		// don't add menu for not-connected users

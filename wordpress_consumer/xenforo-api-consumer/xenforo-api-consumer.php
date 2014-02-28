@@ -20,6 +20,9 @@ define('XFAC_API_SCOPE', 'read post conversate');
 define('XFAC_PLUGIN_PATH', WP_PLUGIN_DIR . '/xenforo-api-consumer');
 define('XFAC_PLUGIN_URL', WP_PLUGIN_URL . '/xenforo-api-consumer');
 
+define('XFAC_CACHE_RECORDS_BY_USER_ID', 'xfacCRBUI');
+define('XFAC_CACHE_RECORDS_BY_USER_ID_TTL', 3600);
+
 function xfac_activate()
 {
 	if (!function_exists('is_multisite'))

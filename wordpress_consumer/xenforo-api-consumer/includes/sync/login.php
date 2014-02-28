@@ -12,7 +12,7 @@ function xfac_login_redirect($redirectTo, $redirectToRequested, $wpUser)
 
 	if (!defined('XFAC_SYNC_LOGIN_SKIP_REDIRECT') AND !empty($config) AND !empty($wpUser->ID))
 	{
-		$records = xfac_user_getApiRecordsByUserId($wpUser->ID);
+		$records = xfac_user_getRecordsByUserId($wpUser->ID);
 		if (!empty($records))
 		{
 			$record = reset($records);
@@ -59,7 +59,7 @@ function xfac_wp_logout()
 		return;
 	}
 
-	$records = xfac_user_getApiRecordsByUserId($wpUser->ID);
+	$records = xfac_user_getRecordsByUserId($wpUser->ID);
 	if (!empty($records))
 	{
 		$record = reset($records);
@@ -120,7 +120,7 @@ function xfac_edit_profile_url($url, $user, $scheme)
 	$wpUser = wp_get_current_user();
 	if ($user == $wpUser->ID AND $wpUser->has_cap('subscriber'))
 	{
-		$records = xfac_user_getApiRecordsByUserId($wpUser->ID);
+		$records = xfac_user_getRecordsByUserId($wpUser->ID);
 		if (!empty($records))
 		{
 			$record = reset($records);

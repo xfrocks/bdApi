@@ -12,7 +12,7 @@ function xfac_options_init()
 	$config = xfac_option_getConfig();
 	$hourlyNext = wp_next_scheduled('xfac_cron_hourly');
 
-	$xfGuestRecords = xfac_user_getApiRecordsByUserId(0);
+	$xfGuestRecords = xfac_user_getRecordsByUserId(0);
 
 	$tagForumMappings = get_option('xfac_tag_forum_mappings');
 	if (!is_array($tagForumMappings))
@@ -120,7 +120,7 @@ function xfac_dashboardOptions_admin_init()
 				{
 					wp_die('no_xf_user');
 				}
-				xfac_user_updateAuth(0, $config['root'], $guest['user']['user_id'], $guest['user'], $token);
+				xfac_user_updateRecord(0, $config['root'], $guest['user']['user_id'], $guest['user'], $token);
 				wp_redirect(admin_url('options-general.php?page=xfac&done=xfac_xf_guest_account'));
 				break;
 		}

@@ -27,7 +27,7 @@ function xfac_get_avatar($avatar = '', $id_or_email, $size = 96, $default = '', 
 		return $avatar;
 	}
 
-	$apiRecords = xfac_user_getApiRecordsByUserId($wpUserId);
+	$apiRecords = xfac_user_getRecordsByUserId($wpUserId);
 	if (empty($apiRecords))
 	{
 		// no api records

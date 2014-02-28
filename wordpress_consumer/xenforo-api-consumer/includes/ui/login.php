@@ -207,7 +207,7 @@ function xfac_login_init()
 
 	if (!empty($wpUser))
 	{
-		xfac_user_updateAuth($wpUser->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
+		xfac_user_updateRecord($wpUser->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
 
 		wp_set_auth_cookie($wpUser->ID, true);
 

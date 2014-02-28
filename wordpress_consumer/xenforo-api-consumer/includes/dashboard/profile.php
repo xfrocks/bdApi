@@ -14,7 +14,7 @@ function xfac_show_user_profile($wpUser)
 		return;
 	}
 
-	$apiRecords = xfac_user_getApiRecordsByUserId($wpUser->ID);
+	$apiRecords = xfac_user_getRecordsByUserId($wpUser->ID);
 
 	$connectUrl = site_url('wp-login.php?xfac=authorize&redirect_to=' . rawurlencode(admin_url('profile.php')), 'login_post');
 
@@ -50,7 +50,7 @@ function xfac_dashboardProfile_admin_init()
 				return;
 			}
 
-			$apiRecords = xfac_user_getApiRecordsByUserId($wpUser->ID);
+			$apiRecords = xfac_user_getRecordsByUserId($wpUser->ID);
 			$requestedRecord = false;
 			foreach ($apiRecords as $apiRecord)
 			{
@@ -64,7 +64,7 @@ function xfac_dashboardProfile_admin_init()
 				return;
 			}
 
-			xfac_user_deleteAuthById($requestedRecord->id);
+			xfac_user_deleteRecord($requestedRecord);
 			wp_redirect('profile.php?xfac=disconnected');
 			exit();
 			break;

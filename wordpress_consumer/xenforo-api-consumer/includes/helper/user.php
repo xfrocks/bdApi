@@ -6,9 +6,15 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
-function xfac_user_getApiRecordsByUserId($wpUserId)
+function xfac_user_getRecordsByUserId($wpUserId)
 {
 	global $wpdb;
+
+	$cache = wp_cache_get($wpUserId, XFAC_CACHE_RECORDS_BY_USER_ID);
+	if (is_array($cache))
+	{
+		return $cache;
+	}
 
 	$tblAuth = xfac_getTableAuth();
 
@@ -23,6 +29,8 @@ function xfac_user_getApiRecordsByUserId($wpUserId)
 		$record->profile = unserialize($record->profile);
 		$record->token = unserialize($record->token);
 	}
+
+	wp_cache_set($wpUserId, $records, XFAC_CACHE_RECORDS_BY_USER_ID, XFAC_CACHE_RECORDS_BY_USER_ID_TTL);
 
 	return $records;
 }
@@ -65,32 +73,36 @@ function xfac_user_getUserByApiData($root, $xfUserId)
 	return $user;
 }
 
-function xfac_user_updateAuth($wpUserId, $root, $xfUserId, array $xfUser, array $token)
+function xfac_user_updateRecord($wpUserId, $root, $xfUserId, array $xfUser, array $token)
 {
 	global $wpdb;
 
 	$tblAuth = xfac_getTableAuth();
 	$provider = '';
 
-	$wpdb->query($wpdb->prepare("
+	wp_cache_delete($wpUserId, XFAC_CACHE_RECORDS_BY_USER_ID);
+
+	return $wpdb->query($wpdb->prepare("
 		REPLACE INTO {$tblAuth}
 		(user_id, provider, identifier, profile, token)
 		VALUES (%d, %s, %s, %s, %s)
 	", $wpUserId, $provider, $xfUserId, serialize($xfUser), serialize($token)));
 }
 
-function xfac_user_deleteAuthById($authId)
+function xfac_user_deleteRecord($record)
 {
 	global $wpdb;
 
 	$tblAuth = xfac_getTableAuth();
 
-	return $wpdb->delete($tblAuth, array('id' => $authId));
+	wp_cache_delete($record->user_id, XFAC_CACHE_RECORDS_BY_USER_ID);
+
+	return $wpdb->delete($tblAuth, array('id' => $record->id));
 }
 
 function xfac_user_getAccessToken($wpUserId)
 {
-	$records = xfac_user_getApiRecordsByUserId($wpUserId);
+	$records = xfac_user_getRecordsByUserId($wpUserId);
 	if (empty($records))
 	{
 		return null;
@@ -128,7 +140,7 @@ function xfac_user_getAccessTokenForRecord($record)
 		return null;
 	}
 
-	xfac_user_updateAuth($record->user_id, $config['root'], $record->identifier, $record->profile, $newToken);
+	xfac_user_updateRecord($record->user_id, $config['root'], $record->identifier, $record->profile, $newToken);
 
 	return $newToken['access_token'];
 }
