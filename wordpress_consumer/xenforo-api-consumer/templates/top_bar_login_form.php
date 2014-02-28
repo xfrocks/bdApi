@@ -21,6 +21,13 @@ if (!defined('ABSPATH'))
 		</label>
 	</p>
 
+	<p>
+		<label for="remember">
+			<input type="checkbox" name="remember" id="remember" value="1" />
+			<?php _e('Stay logged in', 'xenforo-api-consumer') ?><br />
+		</label>
+	</p>
+
 	<p class="submit">
 		<input type="submit" class="button button-primary button-large" value="<?php esc_attr_e('Log in', 'xenforo-api-consumer'); ?>" />
 	</p>
