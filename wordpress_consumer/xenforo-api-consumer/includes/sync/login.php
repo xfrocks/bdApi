@@ -115,13 +115,34 @@ function xfac_syncLogin_wp_head()
 	echo '<script>window.xfacWpLogin = "' . site_url('wp-login.php?xfac=1') . '"</script>';
 }
 
+function xfac_edit_profile_url($url, $user, $scheme)
+{
+	$wpUser = wp_get_current_user();
+	if ($user == $wpUser->ID AND $wpUser->has_cap('subscriber'))
+	{
+		$records = xfac_user_getApiRecordsByUserId($wpUser->ID);
+		if (!empty($records))
+		{
+			$record = reset($records);
+			if (!empty($record->profile['links']['permalink']))
+			{
+				$url = $record->profile['links']['permalink'];
+			}
+		}
+	}
+
+	return $url;
+}
+
 if (!!get_option('xfac_sync_login'))
 {
 	add_filter('login_redirect', 'xfac_login_redirect', 10, 3);
 
-	add_filter('allowed_redirect_hosts', 'xfac_allowed_redirect_hosts', 10, 1);
+	add_filter('allowed_redirect_hosts', 'xfac_allowed_redirect_hosts');
 	add_action('wp_logout', 'xfac_wp_logout');
 
 	add_action('wp_enqueue_scripts', 'xfac_syncLogin_wp_enqueue_scripts');
 	add_action('wp_head', 'xfac_syncLogin_wp_head');
+
+	add_filter('edit_profile_url', 'xfac_edit_profile_url', 10, 3);
 }
