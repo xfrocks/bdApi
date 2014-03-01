@@ -47,6 +47,7 @@ function xfac_options_init()
 function xfac_wpmu_options()
 {
 	$config = xfac_option_getConfig();
+	$meta = xfac_option_getMeta($config);
 
 	require (xfac_template_locateTemplate('dashboard_wpmu_options.php'));
 }

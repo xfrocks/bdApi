@@ -61,30 +61,31 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 			<tr valign="top">
 				<th scope="row"><label for="xfac_root"><?php _e('API Root', 'xenforo-api-consumer'); ?></label></th>
 				<td>
-				<input name="xfac_root" type="text" id="xfac_root" value="<?php echo esc_attr($config['root']); ?>" class="regular-text" disabled="disabled" />
+					<input name="xfac_root" type="text" id="xfac_root" value="<?php echo esc_attr($config['root']); ?>" class="regular-text" disabled="disabled" />
 				</td>
 			</tr>
 			<?php else: ?>
 			<tr valign="top">
 				<th scope="row"><label for="xfac_root"><?php _e('API Root', 'xenforo-api-consumer'); ?></label></th>
 				<td>
-				<input name="xfac_root" type="text" id="xfac_root" value="<?php echo esc_attr($config['root']); ?>" class="regular-text" />
+					<input name="xfac_root" type="text" id="xfac_root" value="<?php echo esc_attr($config['root']); ?>" class="regular-text" />
 				</td>
 			</tr>
 			<tr valign="top">
 				<th scope="row"><label for="xfac_client_id"><?php _e('API Key', 'xenforo-api-consumer'); ?></label></th>
 				<td>
-				<input name="xfac_client_id" type="text" id="xfac_client_id" value="<?php echo esc_attr($config['clientId']); ?>" class="regular-text" />
+					<input name="xfac_client_id" type="text" id="xfac_client_id" value="<?php echo esc_attr($config['clientId']); ?>" class="regular-text" />
 				</td>
 			</tr>
 			<tr valign="top">
 				<th scope="row"><label for="xfac_client_secret"><?php _e('API Secret', 'xenforo-api-consumer'); ?></label></th>
 				<td>
-				<input name="xfac_client_secret" type="text" id="xfac_client_secret" value="<?php echo esc_attr($config['clientSecret']); ?>" class="regular-text" />
+					<input name="xfac_client_secret" type="text" id="xfac_client_secret" value="<?php echo esc_attr($config['clientSecret']); ?>" class="regular-text" />
 				</td>
 			</tr>
 			<?php endif; ?>
 
+			<?php if (!empty($meta['linkIndex'])): ?>
 			<tr valign="top">
 				<th scope="row">
 					<?php _e('Synchronization', 'xenforo-api-consumer'); ?><br />
@@ -177,14 +178,16 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 							<?php _e('Show Forums link', 'xenforo-api-consumer'); ?>
 						</label>
 
-						<div style="margin-left: 20px;">
-							<?php foreach ($forums as $forum): ?>
-								<label for="xfac_top_bar_forums_<?php echo $forum['forum_id']; ?>">
-									<input name="xfac_top_bar_forums[]" type="checkbox" id="xfac_top_bar_forums_<?php echo $forum['forum_id']; ?>" value="<?php echo $forum['forum_id']; ?>" <?php checked(true, in_array($forum['forum_id'], $optionTopBarForums)); ?> />
-									<?php echo $forum['forum_title']; ?>
-								</label>
-							<?php endforeach; ?>
-						</div>
+						<?php if (!empty($forums)): ?>
+							<div style="margin-left: 20px;">
+								<?php foreach ($forums as $forum): ?>
+									<label for="xfac_top_bar_forums_<?php echo $forum['forum_id']; ?>">
+										<input name="xfac_top_bar_forums[]" type="checkbox" id="xfac_top_bar_forums_<?php echo $forum['forum_id']; ?>" value="<?php echo $forum['forum_id']; ?>" <?php checked(true, in_array($forum['forum_id'], $optionTopBarForums)); ?> />
+										<?php echo $forum['forum_title']; ?>
+									</label>
+								<?php endforeach; ?>
+							</div>
+						<?php endif; ?>
 					</fieldset>
 
 					<fieldset>
@@ -253,6 +256,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 				<td>
 					<?php
 
+					$i = -1;
 					foreach (array_values($tagForumMappings) as $i => $tagForumMapping)
 					{
 						if (empty($tagForumMapping['term_id']) OR empty($tagForumMapping['forum_id']))
@@ -278,6 +282,8 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 					?>
 				</td>
 			</tr>
+			<?php endif; ?>
+
 		</table>
 
 		<p class="submit">

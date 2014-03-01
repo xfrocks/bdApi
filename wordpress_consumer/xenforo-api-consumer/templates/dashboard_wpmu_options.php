@@ -28,4 +28,14 @@ if (!defined('ABSPATH'))
 		<input name="xfac_client_secret" type="text" id="xfac_client_secret" value="<?php echo esc_attr($config['clientSecret']); ?>" class="regular-text" />
 		</td>
 	</tr>
+	
+	<?php if (!empty($meta['linkIndex'])): ?>
+	<tr valign="top">
+		<th scope="row">&nbsp;</th>
+		<td>
+			<?php _e('Successfully connected to XenForo at:', 'xenforo-api-consumer'); ?>
+			<a href="<?php echo esc_attr($meta['linkIndex']); ?>" target="_blank"><?php echo $meta['linkIndex']; ?></a>
+		</td>
+	</tr>
+	<?php endif; ?>
 </table>

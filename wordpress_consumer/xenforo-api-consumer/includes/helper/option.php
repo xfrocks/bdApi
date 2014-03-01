@@ -67,6 +67,11 @@ function xfac_option_getConfig()
 
 function xfac_option_getMeta($config)
 {
+	if (empty($config))
+	{
+		return array();
+	}
+
 	$meta = get_option('xfac_meta');
 	$rebuild = false;
 
@@ -91,16 +96,21 @@ function xfac_option_getMeta($config)
 		$meta = $config;
 
 		$meta['linkIndex'] = xfac_api_getPublicLink($config, 'index');
-		$meta['linkAlerts'] = xfac_api_getPublicLink($config, 'account/alerts');
-		$meta['linkConversations'] = xfac_api_getPublicLink($config, 'conversations');
-		$meta['linkLogin'] = xfac_api_getPublicLink($config, 'login');
-		$meta['linkLoginLogin'] = xfac_api_getPublicLink($config, 'login/login');
-		$meta['linkRegister'] = xfac_api_getPublicLink($config, 'register');
+		$meta['forums'] = array();
 
-		$forums = xfac_api_getForums($config, '');
-		if (!empty($forums['forums']))
+		if (!empty($meta['linkIndex']))
 		{
-			$meta['forums'] = $forums['forums'];
+			$meta['linkAlerts'] = xfac_api_getPublicLink($config, 'account/alerts');
+			$meta['linkConversations'] = xfac_api_getPublicLink($config, 'conversations');
+			$meta['linkLogin'] = xfac_api_getPublicLink($config, 'login');
+			$meta['linkLoginLogin'] = xfac_api_getPublicLink($config, 'login/login');
+			$meta['linkRegister'] = xfac_api_getPublicLink($config, 'register');
+
+			$forums = xfac_api_getForums($config, '');
+			if (!empty($forums['forums']))
+			{
+				$meta['forums'] = $forums['forums'];
+			}
 		}
 
 		update_option('xfac_meta', $meta);

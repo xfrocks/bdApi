@@ -15,25 +15,30 @@ function xfac_admin_init()
 		register_setting('xfac-settings', 'xfac_client_secret');
 	}
 
-	register_setting('xfac-settings', 'xfac_tag_forum_mappings');
-	register_setting('xfac-settings', 'xfac_sync_post_wp_xf');
-	register_setting('xfac-settings', 'xfac_sync_post_xf_wp');
-	register_setting('xfac-settings', 'xfac_sync_post_xf_wp_publish');
-	register_setting('xfac-settings', 'xfac_sync_comment_wp_xf');
-	register_setting('xfac-settings', 'xfac_sync_comment_wp_xf_as_guest');
-	register_setting('xfac-settings', 'xfac_sync_comment_xf_wp');
-	register_setting('xfac-settings', 'xfac_sync_comment_xf_wp_as_guest');
-	register_setting('xfac-settings', 'xfac_sync_avatar_xf_wp');
-	register_setting('xfac-settings', 'xfac_sync_login');
-	register_setting('xfac-settings', 'xfac_bypass_users_can_register');
+	$config = xfac_option_getConfig();
+	$meta = xfac_option_getMeta($config);
+	if (!empty($meta['linkIndex']))
+	{
+		register_setting('xfac-settings', 'xfac_tag_forum_mappings');
+		register_setting('xfac-settings', 'xfac_sync_post_wp_xf');
+		register_setting('xfac-settings', 'xfac_sync_post_xf_wp');
+		register_setting('xfac-settings', 'xfac_sync_post_xf_wp_publish');
+		register_setting('xfac-settings', 'xfac_sync_comment_wp_xf');
+		register_setting('xfac-settings', 'xfac_sync_comment_wp_xf_as_guest');
+		register_setting('xfac-settings', 'xfac_sync_comment_xf_wp');
+		register_setting('xfac-settings', 'xfac_sync_comment_xf_wp_as_guest');
+		register_setting('xfac-settings', 'xfac_sync_avatar_xf_wp');
+		register_setting('xfac-settings', 'xfac_sync_login');
+		register_setting('xfac-settings', 'xfac_bypass_users_can_register');
 
-	register_setting('xfac-settings', 'xfac_top_bar_forums');
-	register_setting('xfac-settings', 'xfac_top_bar_notifications');
-	register_setting('xfac-settings', 'xfac_top_bar_conversations');
-	register_setting('xfac-settings', 'xfac_top_bar_replace');
-	register_setting('xfac-settings', 'xfac_top_bar_always');
+		register_setting('xfac-settings', 'xfac_top_bar_forums');
+		register_setting('xfac-settings', 'xfac_top_bar_notifications');
+		register_setting('xfac-settings', 'xfac_top_bar_conversations');
+		register_setting('xfac-settings', 'xfac_top_bar_replace');
+		register_setting('xfac-settings', 'xfac_top_bar_always');
 
-	register_setting('xfac-settings', 'xfac_xf_guest_account');
+		register_setting('xfac-settings', 'xfac_xf_guest_account');
+	}
 }
 
 add_action('admin_init', 'xfac_admin_init');
@@ -68,25 +73,30 @@ function xfac_whitelist_options($whitelist_options)
 		$whitelist_options['xfac'][] = 'xfac_client_secret';
 	}
 
-	$whitelist_options['xfac'][] = 'xfac_tag_forum_mappings';
-	$whitelist_options['xfac'][] = 'xfac_sync_post_wp_xf';
-	$whitelist_options['xfac'][] = 'xfac_sync_post_xf_wp';
-	$whitelist_options['xfac'][] = 'xfac_sync_post_xf_wp_publish';
-	$whitelist_options['xfac'][] = 'xfac_sync_comment_wp_xf';
-	$whitelist_options['xfac'][] = 'xfac_sync_comment_wp_xf_as_guest';
-	$whitelist_options['xfac'][] = 'xfac_sync_comment_xf_wp';
-	$whitelist_options['xfac'][] = 'xfac_sync_comment_xf_wp_as_guest';
-	$whitelist_options['xfac'][] = 'xfac_sync_avatar_xf_wp';
-	$whitelist_options['xfac'][] = 'xfac_sync_login';
-	$whitelist_options['xfac'][] = 'xfac_bypass_users_can_register';
+	$config = xfac_option_getConfig();
+	$meta = xfac_option_getMeta($config);
+	if (!empty($meta['linkIndex']))
+	{
+		$whitelist_options['xfac'][] = 'xfac_tag_forum_mappings';
+		$whitelist_options['xfac'][] = 'xfac_sync_post_wp_xf';
+		$whitelist_options['xfac'][] = 'xfac_sync_post_xf_wp';
+		$whitelist_options['xfac'][] = 'xfac_sync_post_xf_wp_publish';
+		$whitelist_options['xfac'][] = 'xfac_sync_comment_wp_xf';
+		$whitelist_options['xfac'][] = 'xfac_sync_comment_wp_xf_as_guest';
+		$whitelist_options['xfac'][] = 'xfac_sync_comment_xf_wp';
+		$whitelist_options['xfac'][] = 'xfac_sync_comment_xf_wp_as_guest';
+		$whitelist_options['xfac'][] = 'xfac_sync_avatar_xf_wp';
+		$whitelist_options['xfac'][] = 'xfac_sync_login';
+		$whitelist_options['xfac'][] = 'xfac_bypass_users_can_register';
 
-	$whitelist_options['xfac'][] = 'xfac_top_bar_forums';
-	$whitelist_options['xfac'][] = 'xfac_top_bar_notifications';
-	$whitelist_options['xfac'][] = 'xfac_top_bar_conversations';
-	$whitelist_options['xfac'][] = 'xfac_top_bar_replace';
-	$whitelist_options['xfac'][] = 'xfac_top_bar_always';
+		$whitelist_options['xfac'][] = 'xfac_top_bar_forums';
+		$whitelist_options['xfac'][] = 'xfac_top_bar_notifications';
+		$whitelist_options['xfac'][] = 'xfac_top_bar_conversations';
+		$whitelist_options['xfac'][] = 'xfac_top_bar_replace';
+		$whitelist_options['xfac'][] = 'xfac_top_bar_always';
 
-	$whitelist_options['xfac'][] = 'xfac_xf_guest_account';
+		$whitelist_options['xfac'][] = 'xfac_xf_guest_account';
+	}
 
 	return $whitelist_options;
 }
