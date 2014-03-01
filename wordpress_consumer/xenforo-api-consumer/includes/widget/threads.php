@@ -28,8 +28,8 @@ class XFAC_Widget_Threads extends WP_Widget
 
 		$availableTypes = $this->_getAvailableTypes();
 
-		$title = esc_attr($instance['title']);
-		$type = esc_attr($instance['type']);
+		$title = !empty($instance['title']) ? esc_attr($instance['title']) : '';
+		$type = !empty($instance['type']) ? esc_attr($instance['type']) : '';
 
 		$forumIds = array();
 		if (!empty($instance['forumIds']))
