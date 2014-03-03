@@ -34,7 +34,7 @@ function xfac_admin_bar_forums_menu($wpAdminBar)
 		$wpAdminBar->add_menu(array(
 			'id' => 'xfac-forums',
 			'title' => __('Forums', 'xenforo-api-consumer'),
-			'href' => 'http://blah',
+			'href' => $meta['linkIndex'],
 		));
 
 		foreach ($optionTopBarForums as $forumId)
