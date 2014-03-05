@@ -30,8 +30,10 @@ function xfac_admin_init()
 		register_setting('xfac-settings', 'xfac_sync_comment_xf_wp');
 		register_setting('xfac-settings', 'xfac_sync_comment_xf_wp_as_guest');
 		register_setting('xfac-settings', 'xfac_sync_avatar_xf_wp');
-		register_setting('xfac-settings', 'xfac_sync_login');
+
 		register_setting('xfac-settings', 'xfac_bypass_users_can_register');
+		register_setting('xfac-settings', 'xfac_sync_password');
+		register_setting('xfac-settings', 'xfac_sync_login');
 
 		register_setting('xfac-settings', 'xfac_top_bar_forums');
 		register_setting('xfac-settings', 'xfac_top_bar_notifications');
@@ -90,8 +92,10 @@ function xfac_whitelist_options($whitelist_options)
 		$whitelist_options['xfac'][] = 'xfac_sync_comment_xf_wp';
 		$whitelist_options['xfac'][] = 'xfac_sync_comment_xf_wp_as_guest';
 		$whitelist_options['xfac'][] = 'xfac_sync_avatar_xf_wp';
-		$whitelist_options['xfac'][] = 'xfac_sync_login';
+
 		$whitelist_options['xfac'][] = 'xfac_bypass_users_can_register';
+		$whitelist_options['xfac'][] = 'xfac_sync_password';
+		$whitelist_options['xfac'][] = 'xfac_sync_login';
 
 		$whitelist_options['xfac'][] = 'xfac_top_bar_forums';
 		$whitelist_options['xfac'][] = 'xfac_top_bar_notifications';

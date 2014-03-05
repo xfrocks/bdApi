@@ -8,6 +8,12 @@ if (!defined('ABSPATH'))
 
 function xfac_login_form()
 {
+	if (!!get_option('xfac_sync_password'))
+	{
+		// password sync is enabled, do not inert our link
+		return;
+	}
+
 	$config = xfac_option_getConfig();
 	if (empty($config))
 	{
@@ -23,11 +29,7 @@ function xfac_login_form()
 	$href = esc_url($authenticateUrl);
 	$text = __('Login with XenForo', 'xenforo-api-consumer');
 
-	echo <<<EOF
-<div>
-	<a href="$href">$text</a>
-</div>
-EOF;
+	echo "<div>\n\t<a href=\"$href\">{$text}</a>\n</div>\n";
 }
 
 add_action('login_form', 'xfac_login_form');

@@ -146,3 +146,71 @@ if (!!get_option('xfac_sync_login'))
 
 	add_filter('edit_profile_url', 'xfac_edit_profile_url', 10, 3);
 }
+
+function xfac_authenticate($user, $username, $password)
+{
+	if (is_a($user, 'WP_User'))
+	{
+		return $user;
+	}
+
+	if (empty($username) OR empty($password))
+	{
+		return $user;
+	}
+
+	$config = xfac_option_getConfig();
+	if (empty($config))
+	{
+		return $user;
+	}
+
+	$token = xfac_api_getAccessTokenFromUsernamePassword($config, $username, $password);
+	if (empty($token))
+	{
+		return $user;
+	}
+
+	$me = xfac_api_getUsersMe($config, $token['access_token']);
+	if (empty($me['user']))
+	{
+		return $user;
+	}
+	$xfUser = $me['user'];
+
+	$wpUser = xfac_user_getUserByApiData($config['root'], $xfUser['user_id']);
+	if (!empty($wpUser))
+	{
+		// yay, found an associated user!
+		xfac_user_updateRecord($newUserId, $config['root'], $xfUser['user_id'], $xfUser, $token);
+
+		return $wpUser;
+	}
+
+	$wpUserMatchingEmail = get_user_by('email', $xfUser['user_email']);
+	if (!empty($wpUserMatchingEmail))
+	{
+		// this is not good, an user with matched email
+		// this user will have to associate manually
+		return $user;
+	}
+
+	if (!!get_option('users_can_register') OR !!get_option('xfac_bypass_users_can_register'))
+	{
+		// try to register if possible
+		$newUserId = wp_create_user($xfUser['username'], wp_generate_password(), $xfUser['user_email']);
+		if (!is_wp_error($newUserId))
+		{
+			xfac_user_updateRecord($newUserId, $config['root'], $xfUser['user_id'], $xfUser, $token);
+
+			return new WP_User($newUserId);
+		}
+	}
+
+	return $user;
+}
+
+if (!!get_option('xfac_sync_password'))
+{
+	add_filter('authenticate', 'xfac_authenticate', PHP_INT_MAX, 3);
+}

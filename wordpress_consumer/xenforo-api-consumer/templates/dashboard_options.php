@@ -164,15 +164,22 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 					</fieldset>
 
 					<fieldset>
-						<label for="xfac_sync_login">
-							<input name="xfac_sync_login" type="checkbox" id="xfac_sync_login" value="1" <?php checked('1', get_option('xfac_sync_login')); ?> />
-							<?php _e('Logged-in Cookie', 'xenforo-api-consumer'); ?>
-						</label>
+						<p><strong><?php _e('User Authentication', 'xenforo-api-consumer'); ?></strong></p>
 
 						<div style="margin-left: 20px;">
 							<label for="xfac_bypass_users_can_register">
 								<input name="xfac_bypass_users_can_register" type="checkbox" id="xfac_bypass_users_can_register" value="1" <?php checked('1', get_option('xfac_bypass_users_can_register')); ?> />
 								<?php _e('Always create new WordPress account for XenForo user (bypass "Anyone can register")', 'xenforo-api-consumer'); ?>
+							</label>
+
+							<br /><label for="xfac_sync_password">
+								<input name="xfac_sync_password" type="checkbox" id="xfac_sync_password" value="1" <?php checked('1', get_option('xfac_sync_password')); ?> />
+								<?php _e('Accept XenForo username/password for login', 'xenforo-api-consumer'); ?>
+							</label>
+
+							<br /><label for="xfac_sync_login">
+								<input name="xfac_sync_login" type="checkbox" id="xfac_sync_login" value="1" <?php checked('1', get_option('xfac_sync_login')); ?> />
+								<?php _e('Sync logged-in cookie', 'xenforo-api-consumer'); ?>
 							</label>
 						</div>
 					</fieldset>
