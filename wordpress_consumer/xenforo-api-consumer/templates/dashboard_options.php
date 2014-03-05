@@ -100,6 +100,18 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 							<input name="xfac_sync_post_wp_xf" type="checkbox" id="xfac_sync_post_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_post_wp_xf')); ?> />
 							<?php _e('Post from WordPress to XenForo (as thread)', 'xenforo-api-consumer'); ?>
 						</label>
+
+						<div style="margin-left: 20px;">
+							<label for="xfac_sync_post_wp_xf_excerpt">
+								<input name="xfac_sync_post_wp_xf_excerpt" type="checkbox" id="xfac_sync_post_wp_xf_excerpt" value="1" <?php checked('1', get_option('xfac_sync_post_wp_xf_excerpt')); ?> />
+								<?php _e('Sync excerpt only', 'xenforo-api-consumer'); ?>
+							</label>
+
+							<br /><label for="xfac_sync_post_wp_xf_link">
+								<input name="xfac_sync_post_wp_xf_link" type="checkbox" id="xfac_sync_post_wp_xf_link" value="1" <?php checked('1', get_option('xfac_sync_post_wp_xf_link')); ?> />
+								<?php _e('Include post link', 'xenforo-api-consumer'); ?>
+							</label>
+						</div>
 					</fieldset>
 
 					<fieldset>

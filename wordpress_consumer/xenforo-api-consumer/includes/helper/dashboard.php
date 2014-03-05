@@ -21,6 +21,8 @@ function xfac_admin_init()
 	{
 		register_setting('xfac-settings', 'xfac_tag_forum_mappings');
 		register_setting('xfac-settings', 'xfac_sync_post_wp_xf');
+		register_setting('xfac-settings', 'xfac_sync_post_wp_xf_excerpt');
+		register_setting('xfac-settings', 'xfac_sync_post_wp_xf_link');
 		register_setting('xfac-settings', 'xfac_sync_post_xf_wp');
 		register_setting('xfac-settings', 'xfac_sync_post_xf_wp_publish');
 		register_setting('xfac-settings', 'xfac_sync_comment_wp_xf');
@@ -79,6 +81,8 @@ function xfac_whitelist_options($whitelist_options)
 	{
 		$whitelist_options['xfac'][] = 'xfac_tag_forum_mappings';
 		$whitelist_options['xfac'][] = 'xfac_sync_post_wp_xf';
+		$whitelist_options['xfac'][] = 'xfac_sync_post_wp_xf_excerpt';
+		$whitelist_options['xfac'][] = 'xfac_sync_post_wp_xf_link';
 		$whitelist_options['xfac'][] = 'xfac_sync_post_xf_wp';
 		$whitelist_options['xfac'][] = 'xfac_sync_post_xf_wp_publish';
 		$whitelist_options['xfac'][] = 'xfac_sync_comment_wp_xf';

@@ -54,7 +54,9 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 
 					foreach ($forumIds as $forumId)
 					{
-						$thread = xfac_api_postThread($config, $accessToken, $forumId, $post->post_title, $post->post_content);
+						$postBody = _xfac_syncPost_getPostBody($post);
+
+						$thread = xfac_api_postThread($config, $accessToken, $forumId, $post->post_title, $postBody);
 
 						if (!empty($thread['thread']['thread_id']))
 						{
@@ -272,4 +274,44 @@ function xfac_syncPost_pullPost($thread, $tags)
 	}
 
 	return $wpPostId;
+}
+
+function _xfac_syncPost_getPostBody($post)
+{
+	if (!!get_option('xfac_sync_post_wp_xf_excerpt'))
+	{
+		// this method is implemented with ideas from get_the_excerpt()
+		$text = $post->post_excerpt;
+
+		if (empty($text))
+		{
+			$text = $post->post_content;
+
+			$text = strip_shortcodes($text);
+
+			$text = apply_filters('the_content', $text);
+			$text = str_replace(']]>', ']]&gt;', $text);
+
+			$excerptLength = apply_filters('excerpt_length', 55);
+
+			$excerptMore = apply_filters('excerpt_more', ' ' . '[&hellip;]');
+			$text = wp_trim_words($text, $excerptLength, $excerptMore);
+		}
+
+		$text = apply_filters('wp_trim_excerpt', $text, $raw_excerpt);
+	}
+	else
+	{
+		$text = $post->post_content;
+
+		$text = apply_filters('the_content', $text);
+		$text = str_replace(']]>', ']]&gt;', $text);
+	}
+
+	if (!!get_option('xfac_sync_post_wp_xf_link'))
+	{
+		$text .= '<br /><br /><a href="' . get_permalink($post->ID) . '">' . __('Read the whole post here.', 'xenforo-api-consumer') . '</a>';
+	}
+
+	return $text;
 }
