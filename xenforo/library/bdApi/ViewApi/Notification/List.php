@@ -13,7 +13,7 @@ class bdApi_ViewApi_Notification_List extends bdApi_ViewApi_Base
 			$notification['notification_html'] = strval($templates[$notification['notification_id']]['template']);
 		}
 
-		return array($notifications);
+		return array('notifications' => $notifications);
 	}
 
 }
