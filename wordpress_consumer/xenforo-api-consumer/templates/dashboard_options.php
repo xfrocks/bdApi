@@ -69,6 +69,8 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 				<th scope="row"><label for="xfac_root"><?php _e('API Root', 'xenforo-api-consumer'); ?></label></th>
 				<td>
 					<input name="xfac_root" type="text" id="xfac_root" value="<?php echo esc_attr($config['root']); ?>" class="regular-text" />
+
+					<p class="description"><?php echo xfac_api_getVersionSuggestionText($config, $meta); ?></p>
 				</td>
 			</tr>
 			<tr valign="top">

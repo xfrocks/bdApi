@@ -96,10 +96,12 @@ function xfac_option_getMeta($config)
 		$meta = $config;
 
 		$meta['linkIndex'] = xfac_api_getPublicLink($config, 'index');
+		$meta['modules'] = array();
 		$meta['forums'] = array();
 
 		if (!empty($meta['linkIndex']))
 		{
+			$meta['modules'] = xfac_api_getModules($config);
 			$meta['linkAlerts'] = xfac_api_getPublicLink($config, 'account/alerts');
 			$meta['linkConversations'] = xfac_api_getPublicLink($config, 'conversations');
 			$meta['linkLogin'] = xfac_api_getPublicLink($config, 'login');

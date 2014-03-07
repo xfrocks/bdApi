@@ -16,6 +16,70 @@ function xfac_api_getLastErrors()
 	return false;
 }
 
+function xfac_api_getModules($config)
+{
+	$body = file_get_contents(call_user_func_array('sprintf', array(
+		'%s/index.php?oauth_token=%s',
+		rtrim($config['root'], '/'),
+		rawurlencode(xfac_api_generateOneTimeToken($config)),
+	)));
+
+	$parts = @json_decode($body, true);
+
+	if (!empty($parts['system_info']['api_modules']))
+	{
+		return $parts['system_info']['api_modules'];
+	}
+	else
+	{
+		return _xfac_api_getFailedResponse($parts);
+	}
+}
+
+function xfac_api_getVersionSuggestionText($config, $meta)
+{
+	$requiredModules = array(
+		'forum' => 2014022602,
+		'oauth2' => 2014030701,
+	);
+
+	if (empty($meta['modules']))
+	{
+		return __('Unable to determine API version.', 'xenforo-api-consumer');
+	}
+
+	$problems = array();
+
+	foreach ($requiredModules as $module => $moduleVersion)
+	{
+		if (empty($meta['modules'][$module]))
+		{
+			$problems[] = call_user_func_array('sprintf', array(
+				__('Required module %$1s not found.', 'xenforo-api-consumer'),
+				$module
+			));
+		}
+		elseif ($meta['modules'][$module] < $moduleVersion)
+		{
+			$problems[] = call_user_func_array('sprintf', array(
+				__('Module %1$s is too old (%3$s < %2$s).', 'xenforo-api-consumer'),
+				$module,
+				$moduleVersion,
+				$meta['modules'][$module],
+			));
+		}
+	}
+
+	if (!empty($problems))
+	{
+		return implode('<br />', $problems);
+	}
+	else
+	{
+		return __('All required API modules have been found.', 'xenforo-api-consumer');
+	}
+}
+
 function xfac_api_getAuthorizeUrl($config, $redirectUri)
 {
 	return call_user_func_array('sprintf', array(
