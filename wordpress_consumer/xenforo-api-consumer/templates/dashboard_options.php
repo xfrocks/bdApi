@@ -181,6 +181,11 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 								<input name="xfac_sync_login" type="checkbox" id="xfac_sync_login" value="1" <?php checked('1', get_option('xfac_sync_login')); ?> />
 								<?php _e('Sync logged-in cookie', 'xenforo-api-consumer'); ?>
 							</label>
+
+							<br /><label for="xfac_sync_user_wp_xf">
+								<input name="xfac_sync_user_wp_xf" type="checkbox" id="xfac_sync_user_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_user_wp_xf')); ?> />
+								<?php _e('Create XenForo account for WordPress user', 'xenforo-api-consumer'); ?>
+							</label>
 						</div>
 					</fieldset>
 				</td>

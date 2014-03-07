@@ -214,3 +214,58 @@ if (!!get_option('xfac_sync_password'))
 {
 	add_filter('authenticate', 'xfac_authenticate', PHP_INT_MAX, 3);
 }
+
+function xfac_authenticate_syncUserWpXf($user, $username, $password)
+{
+	if (!is_a($user, 'WP_User'))
+	{
+		return $user;
+	}
+
+	$config = xfac_option_getConfig();
+	if (empty($config))
+	{
+		return $user;
+	}
+
+	$records = xfac_user_getRecordsByUserId($user->ID);
+	if (!empty($records))
+	{
+		return $user;
+	}
+
+	$result = xfac_api_postUser($config, $user->user_email, $user->user_login, $password);
+	if (!empty($result))
+	{
+		// yay! new account has been created in XenForo
+		$xfUser = $result['user'];
+		$token = $result['token'];
+		xfac_user_updateRecord($user->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
+	}
+	else
+	{
+		$errors = xfac_api_getLastErrors();
+		if (!empty($errors['username']))
+		{
+			// special case, a XenForo account with same username has already existed
+			// TODO: improve this, there are other kind of username errors actually
+			$token = xfac_api_getAccessTokenFromUsernamePassword($config, $username, $password);
+			if (!empty($token))
+			{
+				$me = xfac_api_getUsersMe($config, $token['access_token']);
+				if (!empty($me['user']))
+				{
+					$xfUser = $me['user'];
+					xfac_user_updateRecord($user->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
+				}
+			}
+		}
+	}
+
+	return $user;
+}
+
+if (!!get_option('xfac_sync_user_wp_xf'))
+{
+	add_filter('authenticate', 'xfac_authenticate_syncUserWpXf', PHP_INT_MAX - 1, 3);
+}

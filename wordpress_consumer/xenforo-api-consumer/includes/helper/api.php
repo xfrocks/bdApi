@@ -6,6 +6,16 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
+function xfac_api_getLastErrors()
+{
+	if (!empty($GLOBALS['_xfac_api_lastErrors']))
+	{
+		return $GLOBALS['_xfac_api_lastErrors'];
+	}
+
+	return false;
+}
+
 function xfac_api_getAuthorizeUrl($config, $redirectUri)
 {
 	return call_user_func_array('sprintf', array(
@@ -73,7 +83,7 @@ function xfac_api_getPublicLink($config, $route)
 	}
 	else
 	{
-		return false;
+		return _xfac_api_getFailedResponse($parts);
 	}
 }
 
@@ -178,7 +188,7 @@ function xfac_api_getForums($config, $accessToken = '', $extraParams = '')
 	}
 	else
 	{
-		return false;
+		return _xfac_api_getFailedResponse($parts);
 	}
 }
 
@@ -198,7 +208,7 @@ function xfac_api_getUsersMe($config, $accessToken)
 	}
 	else
 	{
-		return false;
+		return _xfac_api_getFailedResponse($parts);
 	}
 }
 
@@ -221,7 +231,7 @@ function xfac_api_getThreadsInForum($config, $forumId, $page = 1, $accessToken =
 	}
 	else
 	{
-		return false;
+		return _xfac_api_getFailedResponse($parts);
 	}
 }
 
@@ -243,7 +253,7 @@ function xfac_api_getPostsInThread($config, $threadId, $page = 1, $accessToken =
 	}
 	else
 	{
-		return false;
+		return _xfac_api_getFailedResponse($parts);
 	}
 }
 
@@ -276,7 +286,7 @@ function xfac_api_postThread($config, $accessToken, $forumId, $threadTitle, $pos
 	}
 	else
 	{
-		return false;
+		return _xfac_api_getFailedResponse($parts);
 	}
 }
 
@@ -308,7 +318,49 @@ function xfac_api_postPost($config, $accessToken, $threadId, $postBody, array $e
 	}
 	else
 	{
-		return false;
+		return _xfac_api_getFailedResponse($parts);
+	}
+}
+
+function xfac_api_postUser($config, $email, $username, $password, $accessToken = '', array $extraParams = array())
+{
+	$ch = curl_init();
+
+	curl_setopt($ch, CURLOPT_URL, call_user_func_array('sprintf', array(
+		'%s/index.php?users/',
+		rtrim($config['root'], '/')
+	)));
+
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+	$params = array(
+		'email' => $email,
+		'username' => $username,
+	) + $extraParams;
+	if (empty($accessToken))
+	{
+		$params['client_id'] = $config['clientId'];
+	}
+	else
+	{
+		$params['oauth_token'] = $accessToken;
+	}
+	$params = _xfac_api_encrypt($config, $params, 'password', $password);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+
+	$body = curl_exec($ch);
+	curl_close($ch);
+
+	$parts = @json_decode($body, true);
+
+	if (!empty($parts['user']))
+	{
+		return $parts;
+	}
+	else
+	{
+		return _xfac_api_getFailedResponse($parts);
 	}
 }
 
@@ -332,6 +384,16 @@ function xfac_api_filterHtmlFromXenForo($html)
 	return $html;
 }
 
+function _xfac_api_getFailedResponse($json)
+{
+	if (isset($json['errors']))
+	{
+		$GLOBALS['_xfac_api_lastErrors'] = $json['errors'];
+	}
+
+	return false;
+}
+
 function _xfac_api_prepareAccessTokenBody($body)
 {
 	$parts = @json_decode($body, true);
@@ -347,6 +409,27 @@ function _xfac_api_prepareAccessTokenBody($body)
 	}
 	else
 	{
-		return false;
+		return _xfac_api_getFailedResponse($parts);
 	}
+}
+
+function _xfac_api_encrypt($config, $array, $arrayKey, $data)
+{
+	if (!function_exists('mcrypt_encrypt'))
+	{
+		$array[$key] = $value;
+		return $array;
+	}
+
+	$encryptKey = $config['clientSecret'];
+	$encryptKey = md5($encryptKey, true);
+	$padding = 16 - (strlen($data) % 16);
+	$data .= str_repeat(chr($padding), $padding);
+
+	$encrypted = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $encryptKey, $data, MCRYPT_MODE_ECB);
+	$encrypted = base64_encode($encrypted);
+
+	$array[$arrayKey] = $encrypted;
+	$array[sprintf('%s_algo', $arrayKey)] = 'aes128';
+	return $array;
 }
