@@ -111,7 +111,7 @@ class XFAC_Widget_Threads extends WP_Widget
 
 		$title = (!empty($instance['title'])) ? $instance['title'] : false;
 		$availableTypes = $this->_getAvailableTypes();
-		if (empty($instance['type']) OR !in_array($instance['type'], $availableTypes))
+		if (empty($instance['type']) OR !isset($availableTypes[$instance['type']]))
 		{
 			$tmp = array_keys($availableTypes);
 			$instance['type'] = reset($tmp);
