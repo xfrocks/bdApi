@@ -15,15 +15,13 @@ class XFAC_Widget_Threads extends WP_Widget
 
 	function form($instance)
 	{
+		static $forums = null;
+
 		$config = xfac_option_getConfig();
 
-		if (!empty($config))
+		if (!empty($config) AND $forums === null)
 		{
 			$forums = xfac_api_getForums($config);
-		}
-		else
-		{
-			$forums = null;
 		}
 
 		$availableTypes = $this->_getAvailableTypes();
