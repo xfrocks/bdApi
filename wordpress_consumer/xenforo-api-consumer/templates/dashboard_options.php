@@ -314,6 +314,8 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 
 		<p class="submit">
 			<input type="submit" name="submit" id="submit" class="button button-primary" value="<?php _e('Save Changes'); ?>"  />
+
+			<a href="<?php echo admin_url('options-general.php?page=xfac&do=xfac_meta'); ?>"><?php _e('Reload System Info', 'xenforo-api-consumer'); ?></a>
 		</p>
 	</form>
 
