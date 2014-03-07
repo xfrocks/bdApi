@@ -6,11 +6,11 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 	{
 		$systemInfo = array();
 
-		if (XenForo_Visitor::getUserId() > 0)
+		if (XenForo_Application::getSession()->checkScope(bdApi_Model_OAuth2::SCOPE_POST))
 		{
 			$systemInfo = array(
 				// YYYYMMDD and 2 digits number (01-99), allowing maximum 99 revisions/day
-				'api_revision' => 2013092801,
+				'api_revision' => 2014030701,
 				'api_modules' => $this->_getModules(),
 			);
 		}
