@@ -59,12 +59,12 @@ class bdApi_OAuth2 extends OAuth2
 	/**
 	 * Exposes createAccessToken with visibility public.
 	 *
-	 * @param string $client_id
+	 * @param string $clientId
 	 * @param string $scope
 	 */
-	public function createAccessTokenPublic($client_id, $scope = NULL)
+	public function createAccessTokenPublic($clientId, $scope = NULL)
 	{
-		return $this->createAccessToken($client_id, $scope);
+		return $this->createAccessToken($clientId, $scope);
 	}
 
 	/**
@@ -73,6 +73,33 @@ class bdApi_OAuth2 extends OAuth2
 	public function genAccessTokenPublic()
 	{
 		return $this->genAccessToken();
+	}
+
+	/**
+	 * Sets effective user id of the current request.
+	 *
+	 * @param int $userId
+	 */
+	public function setUserId($userId)
+	{
+		$this->_userId = $userId;
+	}
+
+	/**
+	 * Gets the effective user id of the current request.
+	 *
+	 * @return unsigned int the effective user id
+	 */
+	public function getUserId()
+	{
+		if ($this->_userId > 0)
+		{
+			return $this->_userId;
+		}
+		else
+		{
+			return XenForo_Visitor::getUserId();
+		}
 	}
 
 	/**
@@ -85,23 +112,6 @@ class bdApi_OAuth2 extends OAuth2
 		parent::__construct();
 
 		$this->_model = $model;
-	}
-
-	/**
-	 * Gets the effective user id of the current request.
-	 *
-	 * @return unsigned int the effective user id
-	 */
-	protected function _getUserId()
-	{
-		if ($this->_userId > 0)
-		{
-			return $this->_userId;
-		}
-		else
-		{
-			return XenForo_Visitor::getUserId();
-		}
 	}
 
 	protected function checkClientCredentials($clientId, $clientSecret = NULL)
@@ -161,7 +171,7 @@ class bdApi_OAuth2 extends OAuth2
 		$dw->set('token_text', $oauthToken);
 		$dw->set('client_id', $clientId);
 		$dw->set('expire_date', $expireDate);
-		$dw->set('user_id', $this->_getUserId());
+		$dw->set('user_id', $this->getUserId());
 		$dw->set('scope', $scope ? $scope : '');
 
 		$dw->save();
@@ -192,7 +202,7 @@ class bdApi_OAuth2 extends OAuth2
 		}
 
 		// store the user id to use later to create token/refresh_token
-		$this->_userId = $authCode['user_id'];
+		$this->setUserId($authCode['user_id']);
 
 		return $authCode + array(
 			'code' => $authCode['auth_code_text'],
@@ -212,7 +222,7 @@ class bdApi_OAuth2 extends OAuth2
 		$dw->set('client_id', $clientId);
 		$dw->set('redirect_uri', $redirectUri);
 		$dw->set('expire_date', $expireDate);
-		$dw->set('user_id', $this->_getUserId());
+		$dw->set('user_id', $this->getUserId());
 		$dw->set('scope', $scope ? $scope : '');
 
 		$dw->save();
@@ -239,7 +249,7 @@ class bdApi_OAuth2 extends OAuth2
 
 		if (!empty($userId) AND $userId > 0)
 		{
-			$this->_userId = $userId;
+			$this->setUserId($userId);
 
 			return array('scope' => bdApi_Template_Helper_Core::getInstance()->scopeJoin($this->_model->getSystemSupportedScopes()));
 		}
@@ -260,7 +270,7 @@ class bdApi_OAuth2 extends OAuth2
 		}
 
 		// store the user id to use later to create token/refresh_token
-		$this->_userId = $refreshToken['user_id'];
+		$this->setUserId($refreshToken['user_id']);
 
 		return $refreshToken + array(
 			'token' => $refreshToken['refresh_token_text'],
@@ -278,7 +288,7 @@ class bdApi_OAuth2 extends OAuth2
 		$dw->set('refresh_token_text', $refreshToken);
 		$dw->set('client_id', $clientId);
 		$dw->set('expire_date', $expireDate);
-		$dw->set('user_id', $this->_getUserId());
+		$dw->set('user_id', $this->getUserId());
 		$dw->set('scope', $scope ? $scope : '');
 
 		$dw->save();

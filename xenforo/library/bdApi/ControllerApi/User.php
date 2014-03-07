@@ -51,13 +51,27 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 	{
 		$user = $this->_getUserOrError();
 
-		$data = array('user' => $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user)), );
+		$data = array('user' => $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user)));
 
 		return $this->responseData('bdApi_ViewApi_User_Single', $data);
 	}
 
 	public function actionPostIndex()
 	{
+		$session = XenForo_Application::getSession();
+		$clientId = $session->getOAuthClientId();
+		$clientSecret = $session->getOAuthClientSecret();
+		if (empty($clientId) OR empty($clientSecret))
+		{
+			$clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
+			$client = $this->getModelFromCache('bdApi_Model_Client')->getClientById($clientId);
+			if (empty($client))
+			{
+				return $this->responseError(new XenForo_Phrase('bdapi_post_slash_users_requires_client_id'), 400);
+			}
+			$clientSecret = $client['client_secret'];
+		}
+
 		$input = $this->_input->filter(array(
 			'email' => XenForo_Input::STRING,
 			'username' => XenForo_Input::STRING,
@@ -80,25 +94,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		$writer->set('email', $input['email']);
 		$writer->set('username', $input['username']);
 
-		try
-		{
-			$password = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
-		}
-		catch (XenForo_Exception $e)
-		{
-			// unable to decrypt automatically
-			$clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
-			$client = $this->getModelFromCache('bdApi_Model_Client')->getClientById($clientId);
-			if (!empty($client))
-			{
-				$password = bdApi_Crypt::decrypt($input['password'], $input['password_algo'], $client['client_secret']);
-			}
-			else
-			{
-				return $this->responseError(new XenForo_Phrase('bdapi_post_slash_users_requires_client_id'), 400);
-			}
-		}
-
+		$password = bdApi_Crypt::decrypt($input['password'], $input['password_algo'], $clientSecret);
 		$writer->setPassword($password, $password);
 
 		if ($options->gravatarEnable && XenForo_Model_Avatar::gravatarExists($input['email']))
@@ -132,8 +128,24 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 			$this->getModelFromCache('XenForo_Model_UserConfirmation')->sendEmailConfirmation($user);
 		}
 
-		$this->_request->setParam('user_id', $user['user_id']);
-		return $this->responseReroute(__CLASS__, 'get-single');
+		$oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
+		$oauth2Server = $oauth2Model->getServer();
+		$oauth2ServerUserId = $oauth2Server->getUserId();
+
+		$scopes = $oauth2Model->getSystemSupportedScopes();
+		$scopes = bdApi_Template_Helper_Core::getInstance()->scopeJoin($scopes);
+
+		$oauth2Server->setUserId($user['user_id']);
+		$token = $oauth2Server->createAccessTokenPublic($clientId, $scopes);
+		$oauth2Server->setUserId($oauth2ServerUserId);
+
+		$user = $userModel->getUserById($user['user_id'], $userModel->getFetchOptionsToPrepareApiData());
+		$data = array(
+			'user' => $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user)),
+			'token' => $token,
+		);
+
+		return $this->responseData('bdApi_ViewApi_User_Single', $data);
 	}
 
 	public function actionPostAvatar()

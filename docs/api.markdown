@@ -688,7 +688,8 @@ Required scopes:
 Create a new user.
 
     {
-        user: (user)
+        user: (user),
+        token: (token)
     }
 
 Parameters:
