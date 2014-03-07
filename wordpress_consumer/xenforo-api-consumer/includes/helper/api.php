@@ -279,7 +279,7 @@ function xfac_api_getUsersMe($config, $accessToken)
 function xfac_api_getThreadsInForum($config, $forumId, $page = 1, $accessToken = '', $extraParams = '')
 {
 	$body = file_get_contents(call_user_func_array('sprintf', array(
-		'%s/index.php?threads/&forum_id=%d&page=%d&order=thread_create_date_reverse&oauth_token=%s%s',
+		'%s/index.php?threads/&forum_id=%s&page=%d&order=thread_create_date_reverse&oauth_token=%s%s',
 		rtrim($config['root'], '/'),
 		$forumId,
 		$page,
