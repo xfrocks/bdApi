@@ -108,7 +108,7 @@ function xfac_option_getMeta($config)
 			$meta['linkLoginLogin'] = xfac_api_getPublicLink($config, 'login/login');
 			$meta['linkRegister'] = xfac_api_getPublicLink($config, 'register');
 
-			$forums = xfac_api_getForums($config, '');
+			$forums = xfac_api_getForums($config);
 			if (!empty($forums['forums']))
 			{
 				$meta['forums'] = $forums['forums'];

@@ -27,18 +27,20 @@ function xfac_options_init()
 	}
 
 	$tags = get_terms('post_tag', array('hide_empty' => false));
+	$forums = array();
 
 	if (!empty($config))
 	{
 		$meta = xfac_option_getMeta($config);
-		$forums = $meta['forums'];
+
+		$apiForums = xfac_api_getForums($config);
+		if (!empty($apiForums['forums']))
+		{
+			$forums = $apiForums['forums'];
+		}
 
 		$callbackUrl = admin_url('options-general.php?page=xfac&do=xfac_xf_guest_account');
 		$authorizeUrl = xfac_api_getAuthorizeUrl($config, $callbackUrl);
-	}
-	else
-	{
-		$forums = null;
 	}
 
 	require (xfac_template_locateTemplate('dashboard_options.php'));
