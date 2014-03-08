@@ -41,6 +41,10 @@ function xfac_admin_bar_forums_menu($wpAdminBar)
 		{
 			$forum = false;
 
+			if (empty($meta['forums']))
+			{
+				continue;
+			}
 			foreach ($meta['forums'] as $_forum)
 			{
 				if ($_forum['forum_id'] == $forumId)

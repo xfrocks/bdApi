@@ -51,6 +51,11 @@ function xfac_dashboardProfile_admin_init()
 			}
 
 			$apiRecords = xfac_user_getRecordsByUserId($wpUser->ID);
+			if (empty($apiRecords))
+			{
+				return;
+			}
+
 			$requestedRecord = false;
 			foreach ($apiRecords as $apiRecord)
 			{

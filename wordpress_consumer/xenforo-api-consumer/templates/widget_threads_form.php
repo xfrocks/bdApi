@@ -20,7 +20,7 @@ if (!defined('ABSPATH'))
 		<?php _e('Forums:', 'xenforo-api-consumer'); ?>
 	</label>
 	<select class="widefat" id="<?php echo $this->get_field_id('forumIds'); ?>" name="<?php echo $this->get_field_name('forumIds'); ?>[]" multiple="multiple" rows="5">
-		<?php if (!empty($forums)): ?>
+		<?php if (!empty($forums['forums'])): ?>
 			<?php foreach($forums['forums'] as $forum): ?>
 				<option value="<?php echo $forum['forum_id']; ?>"<?php if (in_array($forum['forum_id'], $forumIds)) echo ' selected="selected"'; ?>><?php echo $forum['forum_title']; ?></option>
 			<?php endforeach; ?>

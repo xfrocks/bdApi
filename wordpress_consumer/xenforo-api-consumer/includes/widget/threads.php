@@ -54,11 +54,14 @@ class XFAC_Widget_Threads extends WP_Widget
 		$instance['title'] = strip_tags($newInstance['title']);
 
 		$instance['forumIds'] = array();
-		foreach ($newInstance['forumIds'] as $forumId)
+		if (!empty($newInstance['forumIds']) AND is_array($newInstance['forumIds']))
 		{
-			if (is_numeric($forumId))
+			foreach ($newInstance['forumIds'] as $forumId)
 			{
-				$instance['forumIds'][] = $forumId;
+				if (is_numeric($forumId))
+				{
+					$instance['forumIds'][] = $forumId;
+				}
 			}
 		}
 

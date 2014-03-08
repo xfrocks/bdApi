@@ -16,6 +16,10 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 	if ($newStatus == 'publish')
 	{
 		$tagForumMappings = get_option('xfac_tag_forum_mappings');
+		if (empty($tagForumMappings))
+		{
+			return;
+		}
 
 		$forumIds = array();
 
@@ -80,10 +84,25 @@ if (intval(get_option('xfac_sync_post_wp_xf')) > 0)
 
 function xfac_syncPost_cron()
 {
+	$config = xfac_option_getConfig();
+	if (empty($config))
+	{
+		return;
+	}
+
 	$systemTags = get_terms('post_tag', array('hide_empty' => false));
-	$mappedTags = array();
+	if (empty($systemTags))
+	{
+		return;
+	}
 
 	$tagForumMappings = get_option('xfac_tag_forum_mappings');
+	if (empty($tagForumMappings))
+	{
+		return;
+	}
+
+	$mappedTags = array();
 	foreach ($tagForumMappings as $tagForumMapping)
 	{
 		if (!empty($tagForumMapping['forum_id']))
@@ -105,12 +124,6 @@ function xfac_syncPost_cron()
 	}
 
 	if (empty($mappedTags))
-	{
-		return;
-	}
-
-	$config = xfac_option_getConfig();
-	if (empty($config))
 	{
 		return;
 	}

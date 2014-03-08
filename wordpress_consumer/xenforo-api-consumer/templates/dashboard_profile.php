@@ -21,8 +21,7 @@ if (!defined('ABSPATH'))
 			</p>
 		</td>
 	</tr>
-<?php endif; ?>
-
+<?php else: ?>
 <?php foreach ($apiRecords as $apiRecord): ?>
 	<tr>
 		<th>
@@ -43,5 +42,6 @@ if (!defined('ABSPATH'))
 		</td>
 	</tr>
 <?php endforeach; ?>
+<?php endif; ?>
 
 </table>
