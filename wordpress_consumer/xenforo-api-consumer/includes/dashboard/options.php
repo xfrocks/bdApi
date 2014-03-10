@@ -128,6 +128,11 @@ function xfac_dashboardOptions_admin_init()
 					wp_die('no_xf_user');
 				}
 				xfac_user_updateRecord(0, $config['root'], $guest['user']['user_id'], $guest['user'], $token);
+
+				$records = xfac_user_getRecordsByUserId(0);
+				$record = reset($records);
+				update_option('xfac_xf_guest_account', $record->id);
+
 				wp_redirect(admin_url('options-general.php?page=xfac&done=xfac_xf_guest_account'));
 				break;
 		}
