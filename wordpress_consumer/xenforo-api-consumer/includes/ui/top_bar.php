@@ -107,7 +107,19 @@ function xfac_admin_bar_jscount_menu($wpAdminBar)
 	if (!!get_option('xfac_top_bar_notifications') AND !empty($meta['linkAlerts']))
 	{
 		$notificationsTitle = __('Alerts', 'xenforo-api-consumer');
-		$notificationsTitle .= ' <span id="xfacNotificationCount" class="xfacJsCount"></span>';
+
+		if (!isset($_COOKIE['notificationCount']))
+		{
+			$notificationsTitle .= ' <span id="xfacNotificationCount" class="xfacJsCount"></span>';
+		}
+		else
+		{
+			$notificationsTitle .= call_user_func_array('sprintf', array(
+				' <span id="xfacNotificationCount" class="xfacJsCount updated%s">%d</span>',
+				$_COOKIE['notificationCount'] > 0 ? ' unread' : '',
+				$_COOKIE['notificationCount'],
+			));
+		}
 
 		$wpAdminBar->add_menu(array(
 			'id' => 'xfac-notifications',
@@ -121,7 +133,19 @@ function xfac_admin_bar_jscount_menu($wpAdminBar)
 	if (!!get_option('xfac_top_bar_conversations') AND !empty($meta['linkConversations']))
 	{
 		$conversationTitle = __('Conversations', 'xenforo-api-consumer');
-		$conversationTitle .= ' <span id="xfacConversationCount" class="xfacJsCount"></span>';
+
+		if (!isset($_COOKIE['conversationCount']))
+		{
+			$conversationTitle .= ' <span id="xfacConversationCount" class="xfacJsCount"></span>';
+		}
+		else
+		{
+			$conversationTitle .= call_user_func_array('sprintf', array(
+				' <span id="xfacConversationCount" class="xfacJsCount updated%s">%d</span>',
+				$_COOKIE['conversationCount'] > 0 ? ' unread' : '',
+				$_COOKIE['conversationCount'],
+			));
+		}
 
 		$wpAdminBar->add_menu(array(
 			'id' => 'xfac-conversations',
