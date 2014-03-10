@@ -222,8 +222,18 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 								<input name="xfac_sync_user_wp_xf" type="checkbox" id="xfac_sync_user_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_user_wp_xf')); ?> />
 								<?php _e('Create XenForo account for WordPress user', 'xenforo-api-consumer'); ?>
 							</label>
-							<p class="description"><?php _e('Try to create XenForo account for WordPress user if he/she has\'t have a XenForo account yet. '
-								. 'This is done everytime user logs into WordPress using a WordPress credential.', 'xenforo-api-consumer'); ?></p>
+							<p class="description">
+								<?php _e('Try to create XenForo account for WordPress user if he/she has\'t have a XenForo account yet. '
+									. 'This is done everytime user logs into WordPress using a WordPress credential.', 'xenforo-api-consumer'); ?>
+
+								<?php if (isset($meta['modules']['oauth2']) AND $meta['modules']['oauth2'] < 2014030701): ?>
+									<span style="color: red"><?php echo sprintf(
+										__('This feature requires %s-%s, it will not work until API server is updated.', 'xenforo-api-consumer'),
+										'oauth2',
+										2014030701
+									); ?></span>
+								<?php endif; ?> 
+							</p>
 						</div>
 					</fieldset>
 				</td>
