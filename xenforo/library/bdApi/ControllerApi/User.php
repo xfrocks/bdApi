@@ -127,6 +127,11 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		{
 			$this->getModelFromCache('XenForo_Model_UserConfirmation')->sendEmailConfirmation($user);
 		}
+		
+		if (XenForo_Visitor::getUserId() == 0)
+		{
+			XenForo_Visitor::setup($user['user_id']);
+		}
 
 		$oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
 		$oauth2Server = $oauth2Model->getServer();
