@@ -240,6 +240,19 @@ function xfac_authenticate_syncUserWpXf($user, $username, $password)
 		// yay! new account has been created in XenForo
 		$xfUser = $result['user'];
 		$token = $result['token'];
+
+		if (!isset($xfUser['user_email']))
+		{
+			// for some reason, user_email is not populated
+			// we have to call another API request to get it
+			// this is required to have all vital information regarding user
+			$me = xfac_api_getUsersMe($config, $token['access_token']);
+			if (!empty($me['user']))
+			{
+				$xfUser = $me['user'];
+			}
+		}
+
 		xfac_user_updateRecord($user->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
 	}
 	else
