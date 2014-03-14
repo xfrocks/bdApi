@@ -28,9 +28,10 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		}
 		foreach ($viewableNodes as $viewableNode)
 		{
-			if (in_array(intval($viewableNode['node_id']), $forumIdInput, true))
+			$viewableNode['node_id'] = intval($viewableNode['node_id']);
+			if (in_array($viewableNode['node_id'], $forumIdInput, true))
 			{
-				$forumIdArray[] = $forumIdInput;
+				$forumIdArray[] = $viewableNode['node_id'];
 			}
 		}
 		if (empty($forumIdArray))
@@ -38,6 +39,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 			return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_requires_forum_id'), 400);
 		}
 		$forumIdArray = array_unique($forumIdArray);
+		asort($forumIdArray);
 
 		$visitor = XenForo_Visitor::getInstance();
 		$nodePermissions = $this->_getNodeModel()->getNodePermissionsForPermissionCombination();
@@ -48,7 +50,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
 		$sticky = $this->_input->filterSingle('sticky', XenForo_Input::UINT);
 
-		$pageNavParams = array('forum_id' => $forumIdArray);
+		$pageNavParams = array('forum_id' => implode(',', $forumIdArray));
 		$page = $this->_input->filterSingle('page', XenForo_Input::UINT);
 		$limit = XenForo_Application::get('options')->discussionsPerPage;
 
