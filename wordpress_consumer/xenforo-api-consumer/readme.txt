@@ -13,3 +13,12 @@ Connects to XenForo API system.
 
 You can find [howto](https://xfrocks.com/api-support/threads/177/), [FAQ](https://xfrocks.com/api-support/threads/178/) and more detailed information about XenForo API Consumer on [xfrocks.com](https://xfrocks.com/forums/16/).
 
+== Changelog ==
+
+= 1.1.0 =
+
+* Added options to control how posts are pushed to XenForo
+* Added options to improve seamless login
+* Improved notification and conversation bubbles
+* Improved option explain text
+* Bug fixes
