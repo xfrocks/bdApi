@@ -400,7 +400,16 @@ Arguments:
   </cron>
   <email_templates/>
   <email_template_modifications/>
-  <optiongroups/>
+  <optiongroups>
+    <group group_id="bdApi" display_order="9999" debug_only="0"/>
+    <option option_id="bdApi_logRetentionDays" edit_format="spinbox" data_type="unsigned_integer" can_backup="1">
+      <default_value>90</default_value>
+      <edit_format_params>min=0
+step=30</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApi" display_order="1000"/>
+    </option>
+  </optiongroups>
   <permissions>
     <permission_groups/>
     <permissions>
@@ -520,6 +529,10 @@ Arguments:
     <phrase title="bdapi_user_id" version_id="23" version_string="0.9.8a"><![CDATA[User Id]]></phrase>
     <phrase title="bdapi_you_will_be_redirected_x" version_id="24" version_string="0.9.9"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
     <phrase title="cron_entry_bdApi_cleanUpExpired" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Clean Up Expired Data]]></phrase>
+    <phrase title="option_bdApi_logRetentionDays" version_id="50" version_string="1.2.1b"><![CDATA[Log Retention]]></phrase>
+    <phrase title="option_bdApi_logRetentionDays_explain" version_id="50" version_string="1.2.1b"><![CDATA[Enter the number of days to keep API log entries. If you don't want to log anything, enter 0 (zero).]]></phrase>
+    <phrase title="option_group_bdApi" version_id="50" version_string="1.2.1b"><![CDATA[[bd] API]]></phrase>
+    <phrase title="option_group_bdApi_description" version_id="50" version_string="1.2.1b"><![CDATA[]]></phrase>
     <phrase title="permission_general_bdApi_clientNew" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Create Client]]></phrase>
   </phrases>
   <route_prefixes>

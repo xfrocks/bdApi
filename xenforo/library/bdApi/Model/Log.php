@@ -2,8 +2,22 @@
 
 class bdApi_Model_Log extends XenForo_Model
 {
+	public function pruneExpired()
+	{
+		$days = bdApi_Option::get('logRetentionDays');
+		$cutoff = XenForo_Application::$time - $days * 86400;
+
+		return $this->_getDb()->query('DELETE FROM xf_bdapi_log WHERE request_date < ?', $cutoff);
+	}
+
 	public function logRequest($requestMethod, $requestUri, array $requestData, $responseCode, array $responseOutput)
 	{
+		$days = bdApi_Option::get('logRetentionDays');
+		if ($days == 0)
+		{
+			return false;
+		}
+
 		$session = XenForo_Application::getSession();
 		$visitor = XenForo_Visitor::getInstance();
 
@@ -18,7 +32,7 @@ class bdApi_Model_Log extends XenForo_Model
 		$dw->set('response_code', $responseCode);
 		$dw->set('response_output', $this->_filterData($responseOutput));
 
-		$dw->save();
+		return $dw->save();
 	}
 
 	public function getList(array $conditions = array(), array $fetchOptions = array())
