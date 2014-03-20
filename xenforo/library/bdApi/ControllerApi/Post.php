@@ -343,7 +343,6 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		{
 			return $this->responseError(new XenForo_Phrase('bdapi_slash_posts_attachments_requires_ids'), 400);
 		}
-		$hash = $this->_getAttachmentTempHash($contentData);
 
 		$attachmentHelper = $this->_getAttachmentHelper();
 		$hash = $attachmentHelper->getAttachmentTempHash($contentData);
