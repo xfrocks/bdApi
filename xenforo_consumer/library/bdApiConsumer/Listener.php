@@ -32,10 +32,12 @@ class bdApiConsumer_Listener
 		);
 	}
 
-	public static function front_controller_pre_view(XenForo_FrontController $fc, XenForo_ControllerResponse_Abstract &$controllerResponse, XenForo_ViewRenderer_Abstract &$viewRenderer, array &$containerParams)
+	public static function controller_post_dispatch(XenForo_Controller $controller, $controllerResponse, $controllerName, $action)
 	{
-		$cookieLogoutTime = XenForo_Helper_Cookie::getCookie('bdApiConsumer_logoutTime', $fc->getRequest());
-		$containerParams['bdApiConsumer_logoutTime'] = $cookieLogoutTime;
+		if (bdApiConsumer_Option::get('autoLogin') AND $controllerResponse instanceof XenForo_ControllerResponse_Redirect)
+		{
+			bdApiConsumer_Helper_AutoLogin::updateResponseRedirect($controller, $controllerResponse);
+		}
 	}
 
 	public static function template_create($templateName, array &$params, XenForo_Template_Abstract $template)

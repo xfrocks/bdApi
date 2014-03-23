@@ -42,8 +42,8 @@
   <admin_template_modifications/>
   <code_events/>
   <code_event_listeners>
+    <listener event_id="controller_post_dispatch" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="controller_post_dispatch" active="1" hint="" description=""/>
     <listener event_id="file_health_check" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
-    <listener event_id="front_controller_pre_view" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="front_controller_pre_view" active="1" hint="" description=""/>
     <listener event_id="init_dependencies" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
     <listener event_id="load_class_controller" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="load_class_model" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="load_class" active="1" hint="" description=""/>
@@ -56,11 +56,10 @@
   <email_template_modifications/>
   <optiongroups>
     <group group_id="bdApiConsumer" display_order="9999" debug_only="0"/>
-    <option option_id="bdapi_consumer_autoLogin" edit_format="radio" data_type="string" can_backup="1">
+    <option option_id="bdapi_consumer_autoLogin" edit_format="radio" data_type="unsigned_integer" can_backup="1">
       <default_value>1</default_value>
-      <edit_format_params>0 = {xen:phrase bdapi_consumer_auto_login_off}
-1 = {xen:phrase bdapi_consumer_auto_login_on}
-hard_refresh = {xen:phrase bdapi_consumer_auto_login_hard_refresh}</edit_format_params>
+      <edit_format_params>1 = {xen:phrase yes}
+0 = {xen:phrase no}</edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdApiConsumer" display_order="110"/>
     </option>
@@ -93,9 +92,6 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
   <phrases>
     <phrase title="bdapi_consumer_associated_x_account" version_id="8" version_string="0.9.2"><![CDATA[Associated {provider} Account]]></phrase>
     <phrase title="bdapi_consumer_associate_with_x" version_id="8" version_string="0.9.2"><![CDATA[Associate with {provider}]]></phrase>
-    <phrase title="bdapi_consumer_auto_login_hard_refresh" version_id="9" version_string="0.9.3"><![CDATA[Enabled with hard refresh]]></phrase>
-    <phrase title="bdapi_consumer_auto_login_off" version_id="9" version_string="0.9.3"><![CDATA[Disabled]]></phrase>
-    <phrase title="bdapi_consumer_auto_login_on" version_id="9" version_string="0.9.3"><![CDATA[Enabled]]></phrase>
     <phrase title="bdapi_consumer_auto_login_with_x_failed" version_id="3" version_string="0.9-dev"><![CDATA[Attempt to auto login with {provider} has been failed.]]></phrase>
     <phrase title="bdapi_consumer_auto_login_with_x_succeeded_y" version_id="3" version_string="0.9-dev"><![CDATA[Welcome back {username}, you have been logged in via {provider}.]]></phrase>
     <phrase title="bdapi_consumer_auto_register_id_sync" version_id="7" version_string="0.9.1"><![CDATA[Enabled with ID sync]]></phrase>
@@ -116,8 +112,8 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
     <phrase title="bdapi_consumer_x_integration" version_id="15" version_string="0.9.6b"><![CDATA[{provider} Integration]]></phrase>
     <phrase title="bdapi_consumer_x_returned_unknown_error" version_id="1" version_string="0.9-dev"><![CDATA[{provider} returned an unknown error. Please try again later.]]></phrase>
     <phrase title="bdapi_consumer_you_not_associated_with_x_account" version_id="8" version_string="0.9.2"><![CDATA[Your account is not currently associated with a {provider} account.]]></phrase>
-    <phrase title="option_bdapi_consumer_autoLogin" version_id="4" version_string="0.9-dev"><![CDATA[Auto Login]]></phrase>
-    <phrase title="option_bdapi_consumer_autoLogin_explain" version_id="7" version_string="0.9.1"><![CDATA[Enable this option to auto detect logged in user in external site (via JavaScript) and automatically setup user session in the background if an associated account is available.]]></phrase>
+    <phrase title="option_bdapi_consumer_autoLogin" version_id="16" version_string="0.9.7"><![CDATA[Sync logged-in cookie]]></phrase>
+    <phrase title="option_bdapi_consumer_autoLogin_explain" version_id="16" version_string="0.9.7"><![CDATA[Use JavaScript to detect external logged-in status and let user login automatically.]]></phrase>
     <phrase title="option_bdapi_consumer_autoRegister" version_id="7" version_string="0.9.1"><![CDATA[Auto Register]]></phrase>
     <phrase title="option_bdapi_consumer_autoRegister_explain" version_id="7" version_string="0.9.1"><![CDATA[Enable this option to auto register external user after successful authentication. There are 3 modes available:<br/>
 <br/>
@@ -234,9 +230,7 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
     <template title="bdapi_consumer_navigation_visitor_tab_links1" version_id="15" version_string="0.9.6b"><![CDATA[<xen:if is="!{xen:helper bdApiConsumer_getOption, '_is130+'} AND {xen:helper bdApiConsumer_getOption, _activated}">
 	<li><a href="{xen:link account/external-accounts}">{xen:phrase bdapi_consumer_external}</a></li>
 </xen:if>]]></template>
-    <template title="bdapi_consumer_page_container_head" version_id="12" version_string="0.9.5b"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} != '0'
-	AND empty({$bdApiConsumer_logoutTime})
-	AND ({$debugMode} OR {$session.sessionStart} == {$serverTime})
+    <template title="bdapi_consumer_page_container_head" version_id="16" version_string="0.9.7"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} != '0'
 	AND {$visitor.user_id} == 0
 	AND {$controllerName} != 'XenForo_ControllerPublic_Register'">
 	<xen:foreach loop="$providers" value="$provider">
@@ -252,14 +246,10 @@ window['{$provider.code}Init'] = function()
 	});
 	SDK.isAuthorized('read', function(isAuthorized, apiData)
 	{
-		<xen:if is="{$debugMode}">
-		console.log('isAuthorized', isAuthorized, apiData);
-		</xen:if>
-		
 		if (isAuthorized)
 		{
 			var loginData = {
-				'location': window.location.href,
+				'redirect': window.location.href,
 				'provider': '{$provider.code}',
 				'external_user_id': apiData['user_id']
 			};
@@ -274,19 +264,10 @@ window['{$provider.code}Init'] = function()
 				loginData,
 				function(ajaxData, textStatus)
 				{
-					if (ajaxData._redirectMessage)
+					if (ajaxData._redirectMessage && ajaxData._redirectTarget)
 					{
-						// auto login succeeded with redirect
 						XenForo.alert(ajaxData._redirectMessage, '', 2000);
-
-						setTimeout(function() {
-							document.location = ajaxData._redirectTarget;
-						}, 500);
-					}
-					else if (ajaxData.status == 'ok' && ajaxData.message)
-					{
-						// auto login succeeded with message only (no redirect)
-						XenForo.alert(ajaxData.message, '', 2000);
+						document.location = ajaxData._redirectTarget;
 					}
 				}
 			);

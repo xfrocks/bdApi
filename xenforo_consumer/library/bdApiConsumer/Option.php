@@ -18,16 +18,21 @@ class bdApiConsumer_Option
 
 		return $options->get('bdapi_consumer_' . $key);
 	}
-	
+
 	public static function getProviders()
 	{
 		return self::get('providers');
 	}
-	
+
 	public static function getProviderByCode($code)
 	{
 		$providers = self::getProviders();
-		
+
+		if (strpos($code, 'bdapi_') === 0)
+		{
+			$code = substr($code, 6);
+		}
+
 		foreach ($providers as $provider)
 		{
 			if ($provider['code'] === $code)
@@ -35,10 +40,10 @@ class bdApiConsumer_Option
 				return $provider;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	public static function renderOptionProviders(XenForo_View $view, $fieldPrefix, array $preparedOption, $canEdit)
 	{
 		$providers = self::getProviders();
@@ -58,22 +63,22 @@ class bdApiConsumer_Option
 			'providers' => $providers
 		));
 	}
-	
+
 	public static function verifyOptionProviders(array &$providers, XenForo_DataWriter $dw, $fieldName)
 	{
 		$output = array();
-		
+
 		foreach ($providers as $provider)
 		{
 			if (!empty($provider['root']))
 			{
 				$provider['root'] = rtrim($provider['root'], '/');
 			}
-			
+
 			if (!empty($provider['name']) AND !empty($provider['root']) AND !empty($provider['client_id']) AND !empty($provider['client_secret']))
 			{
 				$code = substr(md5($provider['root'] . $provider['client_id'] . $provider['client_secret']), -5);
-				
+
 				$output[$code] = array(
 					'code' => $code,
 					'name' => $provider['name'],
@@ -83,8 +88,9 @@ class bdApiConsumer_Option
 				);
 			}
 		}
-		
+
 		$providers = $output;
 		return true;
 	}
+
 }

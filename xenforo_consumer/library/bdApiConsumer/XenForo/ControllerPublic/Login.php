@@ -1,15 +1,24 @@
 <?php
+
 class bdApiConsumer_XenForo_ControllerPublic_Login extends XFCP_bdApiConsumer_XenForo_ControllerPublic_Login
 {
+	protected $_bdApiConsumer_beforeLoginVisitorId = 0;
+
+	public function bdApiConsumer_getBeforeLoginVisitorId()
+	{
+		return $this->_bdApiConsumer_beforeLoginVisitorId;
+	}
+
+	protected function _preDispatch($action)
+	{
+		$this->_bdApiConsumer_beforeLoginVisitorId = XenForo_Visitor::getUserId();
+
+		return parent::_preDispatch($action);
+	}
+
 	public function actionExternal()
 	{
 		$this->_assertPostOnly();
-
-		$location = $this->_input->filterSingle('location', XenForo_Input::STRING);
-		if (empty($location))
-		{
-			return $this->responseNoPermission();
-		}
 
 		$providerCode = $this->_input->filterSingle('provider', XenForo_Input::STRING);
 		$provider = bdApiConsumer_Option::getProviderByCode($providerCode);
@@ -44,16 +53,16 @@ class bdApiConsumer_XenForo_ControllerPublic_Login extends XFCP_bdApiConsumer_Xe
 				return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildPublicLink('canonical:register/external', null, array(
 					'provider' => $providerCode,
 					'reg' => 1,
-					'redirect' => $location,
+					'redirect' => $this->getDynamicRedirect(),
 				)), new XenForo_Phrase('bdapi_consumer_being_auto_login_auto_register_x', array('provider' => $provider['name'])));
 			}
 		}
 
-		if ($existingAssoc && ($user = $userModel->getUserById($existingAssoc['user_id'])))
+		if ($existingAssoc AND ($user = $userModel->getUserById($existingAssoc['user_id'])))
 		{
 			$userModel->setUserRememberCookie($user['user_id']);
 
-			XenForo_Model_Ip::log($user['user_id'], 'user', $user['user_id'], 'login');
+			XenForo_Model_Ip::log($user['user_id'], 'user', $user['user_id'], 'login_api_consumer');
 
 			$userModel->deleteSessionActivity(0, $this->_request->getClientIp(false));
 
@@ -67,18 +76,11 @@ class bdApiConsumer_XenForo_ControllerPublic_Login extends XFCP_bdApiConsumer_Xe
 				'username' => $user['username']
 			));
 
-			if (bdApiConsumer_Option::get('autoLogin') === 'hard_refresh')
-			{
-				return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, $location, $message);
-			}
-			else
-			{
-				return $this->responseMessage($message);
-			}
+			return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, $this->getDynamicRedirect(), $message);
 		}
 		else
 		{
-			return $this->responseError(new XenForo_Phrase('bdapi_consumer_auto_login_with_x_failed', array('provider' => $provider['name'], )));
+			return $this->responseError(new XenForo_Phrase('bdapi_consumer_auto_login_with_x_failed', array('provider' => $provider['name'])));
 		}
 	}
 
