@@ -454,6 +454,14 @@ function _xfac_api_getFailedResponse($json)
 	{
 		$GLOBALS['_xfac_api_lastErrors'] = $json['errors'];
 	}
+	elseif (isset($json['error']))
+	{
+		$GLOBALS['_xfac_api_lastErrors'] = array($json['error']);
+	}
+	else
+	{
+		$GLOBALS['_xfac_api_lastErrors'] = $json;
+	}
 
 	return false;
 }
