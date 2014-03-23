@@ -83,6 +83,14 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
       <sub_options>*</sub_options>
       <relation group_id="bdApiConsumer" display_order="10"/>
     </option>
+    <option option_id="bdapi_consumer_takeOver" edit_format="checkbox" data_type="array" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params>login = {xen:phrase bdapi_consumer_take_over_login}
+register = {xen:phrase bdapi_consumer_take_over_register}
+profile = {xen:phrase bdapi_consumer_take_over_profile}</edit_format_params>
+      <sub_options>*</sub_options>
+      <relation group_id="bdApiConsumer" display_order="200"/>
+    </option>
   </optiongroups>
   <permissions>
     <permission_groups/>
@@ -108,6 +116,9 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
     <phrase title="bdapi_consumer_name" version_id="1" version_string="0.9-dev"><![CDATA[Provider Name]]></phrase>
     <phrase title="bdapi_consumer_root" version_id="1" version_string="0.9-dev"><![CDATA[http://domain.com/xenforo/api]]></phrase>
     <phrase title="bdapi_consumer_sign_up_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Sign Up with {provider}]]></phrase>
+    <phrase title="bdapi_consumer_take_over_login" version_id="16" version_string="0.9.7"><![CDATA[Login]]></phrase>
+    <phrase title="bdapi_consumer_take_over_profile" version_id="16" version_string="0.9.7"><![CDATA[User Profile]]></phrase>
+    <phrase title="bdapi_consumer_take_over_register" version_id="16" version_string="0.9.7"><![CDATA[Register]]></phrase>
     <phrase title="bdapi_consumer_x_account_not_good_standing" version_id="10" version_string="0.9.4"><![CDATA[The connected {provider}'s account status is not in good standing. You may need to complete verification steps at {provider} before trying again.]]></phrase>
     <phrase title="bdapi_consumer_x_integration" version_id="15" version_string="0.9.6b"><![CDATA[{provider} Integration]]></phrase>
     <phrase title="bdapi_consumer_x_returned_unknown_error" version_id="1" version_string="0.9-dev"><![CDATA[{provider} returned an unknown error. Please try again later.]]></phrase>
@@ -124,6 +135,12 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
     <phrase title="option_bdapi_consumer_bypassRegistrationActive_explain" version_id="2" version_string="0.9-dev"><![CDATA[Enabling this option will allow users who came from external sites to register regardless of the <a href="admin.php?options/list/usersAndRegistration" target="_blank" tabindex="-1">"Enable Registration" option</a>.]]></phrase>
     <phrase title="option_bdapi_consumer_providers" version_id="1" version_string="0.9-dev"><![CDATA[Providers]]></phrase>
     <phrase title="option_bdapi_consumer_providers_explain" version_id="1" version_string="0.9-dev"><![CDATA[Enter providers' information to authenticate against. All fields are required for each providers.]]></phrase>
+    <phrase title="option_bdapi_consumer_takeOver" version_id="16" version_string="0.9.7"><![CDATA[Take Over]]></phrase>
+    <phrase title="option_bdapi_consumer_takeOver_explain" version_id="16" version_string="0.9.7"><![CDATA[External site can take over some functionalities, enable them as needed.<br/>
+<br/>
+- Login: login information is forwarded, login-with-provider links are hidden, password management tools are redirected.<br/>
+- Register: registration form is disabled.<br />
+- User Profile: profile pages are redirected.<br />]]></phrase>
     <phrase title="option_group_bdApiConsumer" version_id="1" version_string="0.9-dev"><![CDATA[[bd] API Consumer]]></phrase>
     <phrase title="option_group_bdApiConsumer_description" version_id="1" version_string="0.9-dev"><![CDATA[]]></phrase>
     <phrase title="password_of_x_account_wish_to_associate_with_not_y" version_id="1" version_string="0.9-dev"><![CDATA[This is the password of the {board_title} account that you wish to associate with. It is not your {provider} password.]]></phrase>
@@ -278,10 +295,13 @@ window['{$provider.code}Init'] = function()
 		</xen:if>
 	</xen:foreach>
 </xen:if>]]></template>
-    <template title="bdapi_consumer_providers" version_id="13" version_string="0.9.5c"><![CDATA[<xen:require css="bdapi_consumer.css" />
+    <template title="bdapi_consumer_providers" version_id="16" version_string="0.9.7"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, takeOver,login}">
 
-<xen:if is="{$from} == 'login_bar'">
+	<xen:comment>takeOver.login, hide all buttons</xen:comment>
+	
+<xen:elseif is="{$from} == 'login_bar'" />
 
+	<xen:require css="bdapi_consumer.css" />
 	<xen:foreach loop="{$providers}" value="$provider">
 		<li id="provider-{$provider.code}" class="bdApiConsumer_Provider {$provider.code}">
 			<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1'}" tabindex="110" class="button">
@@ -292,6 +312,7 @@ window['{$provider.code}Init'] = function()
 
 <xen:elseif is="{$from} == 'login_form'" />
 
+	<xen:require css="bdapi_consumer.css" />
 	<dl class="ctrlUnit">
 		<dt>&nbsp;</dt>
 		<dd>
@@ -443,7 +464,7 @@ $2]]></replace>
       <find><![CDATA[<xen:hook name="login_bar_eauth_set">]]></find>
       <replace><![CDATA[$0
 
-<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
+<xen:if is="{xen:helper bdApiConsumer_getOption, _activated} AND !{xen:helper bdApiConsumer_getOption, takeOver, login}">
 	<xen:set var="$eAuth">1</xen:set>
 </xen:if>]]></replace>
     </modification>

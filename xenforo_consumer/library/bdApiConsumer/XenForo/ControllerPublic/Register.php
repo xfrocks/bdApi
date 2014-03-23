@@ -1,4 +1,5 @@
 <?php
+
 class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer_XenForo_ControllerPublic_Register
 {
 	const SESSION_KEY_REDIRECT = 'bdApiConsumer_redirect';
@@ -34,29 +35,29 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		$externalCode = $this->_input->filterSingle('code', XenForo_Input::STRING);
 		if (empty($externalCode))
 		{
-			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array('provider' => $provider['name'], )));
+			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array('provider' => $provider['name'])));
 		}
 
 		$externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromCode($provider, $externalCode, $externalRedirectUri);
 		if (empty($externalToken))
 		{
-			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array('provider' => $provider['name'], )));
+			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array('provider' => $provider['name'])));
 		}
 
 		$externalVisitor = bdApiConsumer_Helper_Api::getVisitor($provider, $externalToken['access_token']);
 		if (empty($externalVisitor))
 		{
-			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array('provider' => $provider['name'], )));
+			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array('provider' => $provider['name'])));
 		}
 		if (empty($externalVisitor['user_email']))
 		{
-			return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_returned_unknown_error', array('provider' => $provider['name'], )));
+			return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_returned_unknown_error', array('provider' => $provider['name'])));
 		}
 		if (isset($externalVisitor['user_is_valid']) AND isset($externalVisitor['user_is_verified']))
 		{
 			if (empty($externalVisitor['user_is_valid']) OR empty($externalVisitor['user_is_verified']))
 			{
-				return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_account_not_good_standing', array('provider' => $provider['name'], )));
+				return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_account_not_good_standing', array('provider' => $provider['name'])));
 			}
 		}
 
@@ -138,13 +139,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			$this->_assertRegistrationActive();
 		}
 
-		// give a unique username suggestion
-		$i = 2;
-		$origName = $externalVisitor['username'];
-		while ($userModel->getUserByName($externalVisitor['username']))
-		{
-			$externalVisitor['username'] = $origName . ' ' . $i++;
-		}
+		$externalVisitor['username'] = bdApiConsumer_Helper_AutoRegister::suggestUserName($externalVisitor['username'], $userModel);
 
 		return $this->responseView('bdApiConsumer_ViewPublic_Register_External', 'bdapi_consumer_register', array(
 			'provider' => $provider,
@@ -175,17 +170,17 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		$externalVisitor = bdApiConsumer_Helper_Api::getVisitor($provider, $externalToken);
 		if (empty($externalVisitor))
 		{
-			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array('provider' => $provider['name'], )));
+			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array('provider' => $provider['name'])));
 		}
 		if (empty($externalVisitor['user_email']))
 		{
-			return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_returned_unknown_error', array('provider' => $provider['name'], )));
+			return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_returned_unknown_error', array('provider' => $provider['name'])));
 		}
 		if (isset($externalVisitor['user_is_valid']) AND isset($externalVisitor['user_is_verified']))
 		{
 			if (empty($externalVisitor['user_is_valid']) OR empty($externalVisitor['user_is_verified']))
 			{
-				return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_account_not_good_standing', array('provider' => $provider['name'], )));
+				return $this->responseError(new XenForo_Phrase('bdapi_consumer_x_account_not_good_standing', array('provider' => $provider['name'])));
 			}
 		}
 
@@ -244,12 +239,14 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			'timezone' => XenForo_Input::STRING,
 		));
 
+		// TODO: custom fields
+
 		if (XenForo_Dependencies_Public::getTosUrl() && !$this->_input->filterSingle('agree', XenForo_Input::UINT))
 		{
 			return $this->responseError(new XenForo_Phrase('you_must_agree_to_terms_of_service'));
 		}
 
-		$user = $this->_bdApiConsumer_createUser($data, $provider, $externalToken, $externalVisitor);
+		$user = bdApiConsumer_Helper_AutoRegister::createUser($data, $provider, $externalToken, $externalVisitor, $this->_getUserExternalModel());
 
 		XenForo_Application::get('session')->changeUserId($user['user_id']);
 		XenForo_Visitor::setup($user['user_id']);
@@ -262,74 +259,6 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		);
 
 		return $this->responseView('XenForo_ViewPublic_Register_Process', 'register_process', $viewParams, $this->_getRegistrationContainerParams());
-	}
-
-	protected function _bdApiConsumer_createUser(array $data, $provider, $externalToken, array $externalVisitor)
-	{
-		$options = XenForo_Application::get('options');
-
-		$writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
-		if ($options->registrationDefaults)
-		{
-			$writer->bulkSet($options->registrationDefaults, array('ignoreInvalidFields' => true));
-		}
-
-		if (!empty($data['user_id']))
-		{
-			$writer->setImportMode(true);
-		}
-		$writer->bulkSet($data);
-		if (!empty($data['user_id']))
-		{
-			$writer->setImportMode(false);
-		}
-
-		$writer->set('email', $externalVisitor['user_email']);
-
-		if (!empty($externalVisitor['user_gender']))
-		{
-			$writer->set('gender', $externalVisitor['user_gender']);
-		}
-
-		if (!empty($externalVisitor['user_dob_day']) AND !empty($externalVisitor['user_dob_month']) AND !empty($externalVisitor['user_dob_year']))
-		{
-			$writer->set('dob_day', $externalVisitor['user_dob_day']);
-			$writer->set('dob_month', $externalVisitor['user_dob_month']);
-			$writer->set('dob_year', $externalVisitor['user_dob_year']);
-		}
-
-		if (!empty($externalVisitor['user_register_date']))
-		{
-			$writer->set('register_date', $externalVisitor['user_register_date']);
-		}
-
-		$this->_getUserExternalModel()->bdApiConsumer_syncUpOnRegistration($writer, $externalToken, $externalVisitor);
-
-		$auth = XenForo_Authentication_Abstract::create('XenForo_Authentication_NoPassword');
-		$writer->set('scheme_class', $auth->getClassName());
-		$writer->set('data', $auth->generate(''), 'xf_user_authenticate');
-
-		$writer->set('user_group_id', XenForo_Model_User::$defaultRegisteredGroupId);
-		$writer->set('language_id', XenForo_Visitor::getInstance()->get('language_id'));
-
-		$customFields = $this->_input->filterSingle('custom_fields', XenForo_Input::ARRAY_SIMPLE);
-		$customFieldsShown = $this->_input->filterSingle('custom_fields_shown', XenForo_Input::STRING, array('array' => true));
-		$writer->setCustomFields($customFields, $customFieldsShown);
-
-		$writer->advanceRegistrationUserState(false);
-		$writer->preSave();
-
-		// TODO: option for extra user group
-
-		$writer->save();
-
-		$user = $writer->getMergedData();
-
-		$this->_getUserExternalModel()->bdApiConsumer_updateExternalAuthAssociation($provider, $externalVisitor['user_id'], $user['user_id'], $externalVisitor + array('token' => $externalToken));
-
-		XenForo_Model_Ip::log($user['user_id'], 'user', $user['user_id'], 'register_api_consumer');
-
-		return $user;
 	}
 
 	protected function _bdApiConsumer_autoRegister($provider, $externalToken, array $externalVisitor)
@@ -364,17 +293,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			$data['user_id'] = $externalVisitor['user_id'];
 		}
 
-		if (isset($externalVisitor['user_timezone_offset']))
-		{
-			$tzOffset = $externalVisitor['user_timezone_offset'];
-			$tzName = timezone_name_from_abbr('', $tzOffset, 1);
-			if ($tzName !== false)
-			{
-				$data['timezone'] = $tzName;
-			}
-		}
-
-		$user = $this->_bdApiConsumer_createUser($data, $provider, $externalToken, $externalVisitor);
+		$user = bdApiConsumer_Helper_AutoRegister::createUser($data, $provider, $externalToken, $externalVisitor, $this->_getUserExternalModel());
 
 		if (empty($user))
 		{

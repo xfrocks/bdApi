@@ -1,7 +1,7 @@
 <?php
 class bdApiConsumer_Option
 {
-	public static function get($key)
+	public static function get($key, $subKey = null)
 	{
 		$options = XenForo_Application::getOptions();
 
@@ -16,7 +16,7 @@ class bdApiConsumer_Option
 				return !empty($providers);
 		}
 
-		return $options->get('bdapi_consumer_' . $key);
+		return $options->get('bdapi_consumer_' . $key, $subKey);
 	}
 
 	public static function getProviders()
@@ -79,13 +79,10 @@ class bdApiConsumer_Option
 			{
 				$code = substr(md5($provider['root'] . $provider['client_id'] . $provider['client_secret']), -5);
 
-				$output[$code] = array(
+				$output[$code] = array_merge($provider, array(
 					'code' => $code,
-					'name' => $provider['name'],
-					'root' => $provider['root'],
-					'client_id' => $provider['client_id'],
-					'client_secret' => $provider['client_secret'],
-				);
+					'verified' => XenForo_Application::$time,
+				));
 			}
 		}
 

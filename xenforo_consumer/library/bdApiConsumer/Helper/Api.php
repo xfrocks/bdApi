@@ -31,6 +31,42 @@ class bdApiConsumer_Helper_Api
 		));
 	}
 
+	public static function getPublicLink(array $provider, $route)
+	{
+		try
+		{
+			$uri = call_user_func_array('sprintf', array(
+				'%s/index.php?tools/link',
+				rtrim($provider['root'], '/')
+			));
+			$client = XenForo_Helper_Http::getClient($uri);
+			$client->setParameterPost(array(
+				'oauth_token' => self::generateOneTimeToken($provider),
+				'type' => 'public',
+				'route' => $route,
+			));
+			$response = $client->request('POST');
+
+			$body = $response->getBody();
+			$parts = @json_decode($body, true);
+
+			if (!empty($parts['link']))
+			{
+				return $parts['link'];
+			}
+			else
+			{
+				XenForo_Error::logException(new XenForo_Exception(sprintf('Unable to parse `link` from `%s`', $body)), false);
+				return false;
+			}
+		}
+		catch (Zend_Http_Client_Exception $e)
+		{
+			XenForo_Error::logException($e, false);
+			return false;
+		}
+	}
+
 	public static function getAccessTokenFromCode(array $provider, $code, $redirectUri)
 	{
 		try
@@ -54,7 +90,7 @@ class bdApiConsumer_Helper_Api
 			$body = $response->getBody();
 			$parts = @json_decode($body, true);
 
-			if (!empty($parts) AND !empty($parts['access_token']))
+			if (!empty($parts['access_token']))
 			{
 				return $parts;
 			}
@@ -93,7 +129,45 @@ class bdApiConsumer_Helper_Api
 			$body = $response->getBody();
 			$parts = @json_decode($body, true);
 
-			if (!empty($parts) AND !empty($parts['access_token']))
+			if (!empty($parts['access_token']))
+			{
+				return $parts;
+			}
+			else
+			{
+				XenForo_Error::logException(new XenForo_Exception(sprintf('Unable to parse `access_token` from `%s`', $body)), false);
+				return false;
+			}
+		}
+		catch (Zend_Http_Client_Exception $e)
+		{
+			XenForo_Error::logException($e, false);
+			return false;
+		}
+	}
+
+	public static function getAccessTokenFromUsernamePassword(array $provider, $username, $password)
+	{
+		try
+		{
+			$uri = call_user_func_array('sprintf', array(
+				'%s/index.php?oauth/token/',
+				rtrim($provider['root'], '/')
+			));
+			$client = XenForo_Helper_Http::getClient($uri);
+			$client->setParameterPost(array(
+				'grant_type' => 'password',
+				'client_id' => $provider['client_id'],
+				'client_secret' => $provider['client_secret'],
+				'username' => $username,
+				'password' => $password,
+			));
+			$response = $client->request('POST');
+
+			$body = $response->getBody();
+			$parts = @json_decode($body, true);
+
+			if (!empty($parts['access_token']))
 			{
 				return $parts;
 			}

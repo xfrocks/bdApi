@@ -1,6 +1,37 @@
 <?php
+
 class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_XenForo_ControllerPublic_Account
 {
+	public function actionSecurity()
+	{
+		$response = parent::actionSecurity();
+
+		if (bdApiConsumer_Option::get('takeOver', 'login'))
+		{
+			if ($response instanceof XenForo_ControllerResponse_View AND !empty($response->subView) AND empty($response->subView->params['hasPassword']))
+			{
+				$userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
+				$auths = $userExternalModel->bdApiConsumer_getExternalAuthAssociations(XenForo_Visitor::getUserId());
+
+				if (!empty($auths))
+				{
+					foreach ($auths as $auth)
+					{
+						$provider = bdApiConsumer_Option::getProviderByCode($auth['provider']);
+						$link = bdApiConsumer_Helper_Provider::getAccountSecurityLink($provider);
+
+						if (!empty($link))
+						{
+							return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, $link);
+						}
+					}
+				}
+			}
+		}
+
+		return $response;
+	}
+
 	public function actionExternalAccounts()
 	{
 		$response = null;

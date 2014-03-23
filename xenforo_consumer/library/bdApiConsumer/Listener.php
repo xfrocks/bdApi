@@ -10,7 +10,9 @@ class bdApiConsumer_Listener
 			'XenForo_ControllerPublic_Account',
 			'XenForo_ControllerPublic_Login',
 			'XenForo_ControllerPublic_Logout',
+			'XenForo_ControllerPublic_Member',
 			'XenForo_ControllerPublic_Register',
+			'XenForo_Model_User',
 			'XenForo_Model_UserExternal',
 		);
 
@@ -30,6 +32,13 @@ class bdApiConsumer_Listener
 			'bdApiConsumer_Helper_Template',
 			'getProviderSdkJs'
 		);
+
+		if (bdApiConsumer_Option::get('takeOver', 'register'))
+		{
+			$options = XenForo_Application::getOptions();
+			$options->set('registrationSetup', 'enabled', 0);
+			$options->set('bdapi_consumer_bypassRegistrationActive', 1);
+		}
 	}
 
 	public static function controller_post_dispatch(XenForo_Controller $controller, $controllerResponse, $controllerName, $action)
@@ -57,7 +66,7 @@ class bdApiConsumer_Listener
 
 		if ($templateName === 'PAGE_CONTAINER' AND !bdApiConsumer_Option::get('_is120+'))
 		{
-			if (bdApiConsumer_Option::get('_activated'))
+			if (bdApiConsumer_Option::get('_activated') AND !bdApiConsumer_Option::get('takeOver', 'login'))
 			{
 				// setting $eAuth in hook position login_bar_eauth_set doens't work
 				// so we have to do it here. Risk: won't work if the container template changes
