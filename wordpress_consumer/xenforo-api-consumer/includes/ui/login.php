@@ -112,7 +112,11 @@ function xfac_login_init()
 		default:
 			$authorizeUrl = xfac_api_getAuthorizeUrl($config, $callbackUrl);
 
-			wp_redirect($authorizeUrl);
+			// wp_redirect($authorizeUrl);
+			// cannot use wp_redirect because wp_sanitize_redirect changes our url
+			// issues: it removes basic auth (http://user:password@path)
+			// TODO: find better way to do this
+			header("Location: $authorizeUrl", true, 302);
 			exit();
 	}
 
