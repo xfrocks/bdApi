@@ -160,7 +160,7 @@ class bdApi_Session extends XenForo_Session
 				$timestamp = intval($parts[1]);
 				$once = $parts[2];
 
-				if ($timestamp >= XenForo_Application::$time OR true)
+				if ($timestamp >= XenForo_Application::$time)
 				{
 					$client = $oauth2Model->getModelFromCache('bdApi_Model_Client')->getClientById($parts[3]);
 				}
