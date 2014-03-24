@@ -59,6 +59,17 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 		return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $logoutLink);
 	}
 
+	public function actionPostPasswordResetRequest()
+	{
+		$this->_assertRegistrationRequired();
+
+		$user = XenForo_Visitor::getInstance()->toArray();
+
+		$this->getModelFromCache('XenForo_Model_UserConfirmation')->sendPasswordResetRequest($user);
+
+		return $this->responseMessage(new XenForo_Phrase('password_reset_request_has_been_emailed_to_you'));
+	}
+
 	public function actionPostLink()
 	{
 		$type = $this->_input->filterSingle('type', XenForo_Input::STRING, array('default' => 'public'));
@@ -82,6 +93,11 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 		);
 
 		return $this->responseData('bdApi_ViewApi_Tool_Link', $data);
+	}
+
+	protected function _getScopeForAction($action)
+	{
+		return false;
 	}
 
 	/**
