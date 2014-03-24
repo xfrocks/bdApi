@@ -13,6 +13,7 @@ class bdApiConsumer_Listener
 			'XenForo_ControllerPublic_Member',
 			'XenForo_ControllerPublic_Register',
 			'XenForo_Model_User',
+			'XenForo_Model_UserConfirmation',
 			'XenForo_Model_UserExternal',
 		);
 

@@ -208,9 +208,42 @@ class bdApiConsumer_Helper_Api
 			$body = $response->getBody();
 			$parts = @json_decode($body, true);
 
-			if (!empty($parts) AND !empty($parts['user']))
+			if (!empty($parts['user']))
 			{
 				return $parts['user'];
+			}
+			else
+			{
+				XenForo_Error::logException(new XenForo_Exception(sprintf('Unable to get user info from `%s`', $body)), false);
+				return false;
+			}
+		}
+		catch (Zend_Http_Client_Exception $e)
+		{
+			XenForo_Error::logException($e, false);
+			return false;
+		}
+	}
+
+	public static function postPasswordResetRequest(array $provider, $accessToken)
+	{
+		try
+		{
+			$uri = call_user_func_array('sprintf', array(
+				'%s/index.php?tools/password-reset-request/',
+				rtrim($provider['root'], '/'),
+			));
+			$client = XenForo_Helper_Http::getClient($uri);
+			$client->setParameterPost(array('oauth_token' => $accessToken));
+
+			$response = $client->request('POST');
+
+			$body = $response->getBody();
+			$parts = @json_decode($body, true);
+
+			if (!empty($parts['status']))
+			{
+				return $parts;
 			}
 			else
 			{
