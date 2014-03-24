@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.8-dev" version_id="17" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.8-dev" version_id="18" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -329,7 +329,7 @@ window['{$provider.code}Init'] = function()
 	</dl>
 
 </xen:if>]]></template>
-    <template title="bdapi_consumer_register" version_id="4" version_string="0.9-dev"><![CDATA[<xen:title>{xen:phrase bdapi_consumer_sign_up_with_x, 'provider={$provider.name}'}</xen:title>
+    <template title="bdapi_consumer_register" version_id="17" version_string="0.9.8-dev"><![CDATA[<xen:title>{xen:phrase bdapi_consumer_sign_up_with_x, 'provider={$provider.name}'}</xen:title>
 	
 <form action="{xen:link 'register/external/register'}" method="post" class="xenForm AutoValidator"
 	data-fieldValidatorUrl="{xen:link register/validate-field}"
@@ -428,7 +428,8 @@ window['{$provider.code}Init'] = function()
 <input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
 <input type="hidden" name="redirect" value="{$redirect}" />
 <input type="hidden" name="provider" value="{$provider.code}" />
-<input type="hidden" name="externalToken" value="{$externalToken}" />
+<input type="hidden" name="refresh_token" value="{$externalToken.refresh_token}" />
+<input type="hidden" name="scope" value="{$externalToken.scope}" />
 </form>]]></template>
   </templates>
   <public_template_modifications>
