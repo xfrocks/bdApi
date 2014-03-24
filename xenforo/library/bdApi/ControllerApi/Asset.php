@@ -14,7 +14,7 @@ class bdApi_ControllerApi_Asset extends bdApi_ControllerApi_Abstract
 		$sdk = str_replace('{request_uri}', bdApi_Link::buildApiLink('index'), $sdk);
 
 		header('Content-Type: application/x-javascript; charset=utf-8');
-		header('Cache-Control: public, max-age=3600');
+		header('Cache-Control: public, max-age=31536000');
 		header(sprintf('Last-Modified: %s', gmstrftime("%a, %d %b %Y %T %Z", filemtime($sdkPath))));
 		die($sdk);
 	}
