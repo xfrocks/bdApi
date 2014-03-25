@@ -52,7 +52,7 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
 
 		if (empty($node) OR !$this->_isViewable($node))
 		{
-			return $this->_responseNodeNotFound();
+			return $this->_responseErrorNotFound();
 		}
 
 		$data = array(
