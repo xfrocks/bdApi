@@ -26,4 +26,21 @@ class bdApiConsumer_XenForo_ControllerPublic_Member extends XFCP_bdApiConsumer_X
 		return $response;
 	}
 
+	public function actionExternalAvatar()
+	{
+		$userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+
+		$auths = $this->getModelFromCache('XenForo_Model_UserExternal')->bdApiConsumer_getExternalAuthAssociations($userId);
+		foreach ($auths as $auth)
+		{
+			$avatarUrl = bdApiConsumer_Helper_Avatar::getAvatarUrlFromAuthExtra($auth['extra_data']);
+			if (!empty($avatarUrl))
+			{
+				return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL, $avatarUrl);
+			}
+		}
+
+		return $this->responseNoPermission();
+	}
+
 }

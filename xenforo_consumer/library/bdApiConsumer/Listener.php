@@ -12,6 +12,7 @@ class bdApiConsumer_Listener
 			'XenForo_ControllerPublic_Logout',
 			'XenForo_ControllerPublic_Member',
 			'XenForo_ControllerPublic_Register',
+			'XenForo_Model_Avatar',
 			'XenForo_Model_User',
 			'XenForo_Model_UserConfirmation',
 			'XenForo_Model_UserExternal',
@@ -39,6 +40,22 @@ class bdApiConsumer_Listener
 			$options = XenForo_Application::getOptions();
 			$options->set('registrationSetup', 'enabled', 0);
 			$options->set('bdapi_consumer_bypassRegistrationActive', 1);
+		}
+
+		if (bdApiConsumer_Option::get('takeOver', 'avatar'))
+		{
+			bdApiConsumer_Helper_Avatar::setupHelper();
+		}
+	}
+
+	public static function visitor_setup(XenForo_Visitor &$visitor)
+	{
+		if (bdApiConsumer_Option::get('takeOver', 'avatar'))
+		{
+			// disable user ability to change avatar completely
+			$permissions = $visitor['permissions'];
+			$permissions['avatar']['allowed'] = false;
+			$visitor['permissions'] = $permissions;
 		}
 	}
 

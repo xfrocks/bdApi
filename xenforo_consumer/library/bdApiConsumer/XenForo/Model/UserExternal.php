@@ -58,6 +58,15 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
 			$extra['token']['expire_date'] = time() + $extra['token']['expires_in'];
 		}
 
+		if (bdApiConsumer_Option::get('takeOver', 'avatar'))
+		{
+			$avatarUrl = bdApiConsumer_Helper_Avatar::getAvatarUrlFromAuthExtra($extra);
+			if (!empty($avatarUrl))
+			{
+				$this->getModelFromCache('XenForo_Model_Avatar')->bdApiConsumer_applyAvatar($userId, $avatarUrl);
+			}
+		}
+
 		if (XenForo_Application::$versionId >= 1030000)
 		{
 			return $this->updateExternalAuthAssociation($providerCode, $providerKey, $userId, $extra);

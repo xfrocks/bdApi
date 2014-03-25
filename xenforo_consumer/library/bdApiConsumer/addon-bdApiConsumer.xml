@@ -50,6 +50,7 @@
     <listener event_id="template_create" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_create" active="1" hint="" description=""/>
     <listener event_id="template_hook" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_hook" active="1" hint="" description=""/>
     <listener event_id="template_post_render" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_post_render" active="1" hint="" description=""/>
+    <listener event_id="visitor_setup" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="visitor_setup" active="1" hint="" description=""/>
   </code_event_listeners>
   <cron/>
   <email_templates/>
@@ -87,7 +88,8 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
       <default_value></default_value>
       <edit_format_params>login = {xen:phrase bdapi_consumer_take_over_login}
 register = {xen:phrase bdapi_consumer_take_over_register}
-profile = {xen:phrase bdapi_consumer_take_over_profile}</edit_format_params>
+profile = {xen:phrase bdapi_consumer_take_over_profile}
+avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
       <sub_options>*</sub_options>
       <relation group_id="bdApiConsumer" display_order="200"/>
     </option>
@@ -116,6 +118,7 @@ profile = {xen:phrase bdapi_consumer_take_over_profile}</edit_format_params>
     <phrase title="bdapi_consumer_name" version_id="1" version_string="0.9-dev"><![CDATA[Provider Name]]></phrase>
     <phrase title="bdapi_consumer_root" version_id="1" version_string="0.9-dev"><![CDATA[http://domain.com/xenforo/api]]></phrase>
     <phrase title="bdapi_consumer_sign_up_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Sign Up with {provider}]]></phrase>
+    <phrase title="bdapi_consumer_take_over_avatar" version_id="19" version_string="0.9.8-dev"><![CDATA[Avatar]]></phrase>
     <phrase title="bdapi_consumer_take_over_login" version_id="16" version_string="0.9.7"><![CDATA[Login]]></phrase>
     <phrase title="bdapi_consumer_take_over_profile" version_id="16" version_string="0.9.7"><![CDATA[User Profile]]></phrase>
     <phrase title="bdapi_consumer_take_over_register" version_id="16" version_string="0.9.7"><![CDATA[Register]]></phrase>
@@ -136,11 +139,12 @@ profile = {xen:phrase bdapi_consumer_take_over_profile}</edit_format_params>
     <phrase title="option_bdapi_consumer_providers" version_id="1" version_string="0.9-dev"><![CDATA[Providers]]></phrase>
     <phrase title="option_bdapi_consumer_providers_explain" version_id="1" version_string="0.9-dev"><![CDATA[Enter providers' information to authenticate against. All fields are required for each providers.]]></phrase>
     <phrase title="option_bdapi_consumer_takeOver" version_id="16" version_string="0.9.7"><![CDATA[Take Over]]></phrase>
-    <phrase title="option_bdapi_consumer_takeOver_explain" version_id="16" version_string="0.9.7"><![CDATA[External site can take over some functionalities, enable them as needed.<br/>
+    <phrase title="option_bdapi_consumer_takeOver_explain" version_id="19" version_string="0.9.8-dev"><![CDATA[External site can take over some functionalities, enable them as needed.<br/>
 <br/>
 - Login: login information is forwarded, login-with-provider links are hidden, password management tools are redirected.<br/>
 - Register: registration form is disabled.<br />
-- User Profile: profile pages are redirected.<br />]]></phrase>
+- User Profile: profile pages are redirected.<br />
+- Avatar: avatars are set automatically to mirror external site's.<br />]]></phrase>
     <phrase title="option_group_bdApiConsumer" version_id="1" version_string="0.9-dev"><![CDATA[[bd] API Consumer]]></phrase>
     <phrase title="option_group_bdApiConsumer_description" version_id="1" version_string="0.9-dev"><![CDATA[]]></phrase>
     <phrase title="password_of_x_account_wish_to_associate_with_not_y" version_id="1" version_string="0.9-dev"><![CDATA[This is the password of the {board_title} account that you wish to associate with. It is not your {provider} password.]]></phrase>
