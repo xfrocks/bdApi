@@ -95,6 +95,12 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 				false,
 				true
 			)),
+			'avatar_big' => XenForo_Template_Helper_Core::callHelper('avatar', array(
+				$user,
+				'l',
+				false,
+				true
+			)),
 			'followers' => bdApi_Link::buildApiLink('users/followers', $user),
 			'followings' => bdApi_Link::buildApiLink('users/followings', $user),
 		);
