@@ -84,7 +84,7 @@ class bdApiConsumer_Listener
 
 		if ($templateName === 'PAGE_CONTAINER' AND !bdApiConsumer_Option::get('_is120+'))
 		{
-			if (bdApiConsumer_Option::get('_activated') AND !bdApiConsumer_Option::get('takeOver', 'login'))
+			if (bdApiConsumer_Option::get('_showButtons'))
 			{
 				// setting $eAuth in hook position login_bar_eauth_set doens't work
 				// so we have to do it here. Risk: won't work if the container template changes
@@ -106,6 +106,24 @@ class bdApiConsumer_Listener
 			case 'bdapi_consumer_providers':
 				$params = array_merge($template->getParams(), $hookParams);
 				$params['providers'] = bdApiConsumer_Option::getProviders();
+
+				$loginFacebook = bdApiConsumer_Option::get('loginFacebook');
+				if (isset($params['providers'][$loginFacebook]))
+				{
+					$params['loginFacebookProvider'] = $params['providers'][$loginFacebook];
+				}
+
+				$loginTwitter = bdApiConsumer_Option::get('loginTwitter');
+				if (isset($params['providers'][$loginTwitter]))
+				{
+					$params['loginTwitterProvider'] = $params['providers'][$loginTwitter];
+				}
+
+				$loginGoogle = bdApiConsumer_Option::get('loginGoogle');
+				if (isset($params['providers'][$loginGoogle]))
+				{
+					$params['loginGoogleProvider'] = $params['providers'][$loginGoogle];
+				}
 
 				$ourTemplate = $template->create($hookName, $params);
 				$contents = $ourTemplate->render();

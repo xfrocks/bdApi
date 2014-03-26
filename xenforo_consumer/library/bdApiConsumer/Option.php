@@ -1,6 +1,11 @@
 <?php
+
 class bdApiConsumer_Option
 {
+	protected static $_providers = null;
+	protected static $_activated = null;
+	protected static $_showButtons = null;
+
 	public static function get($key, $subKey = null)
 	{
 		$options = XenForo_Application::getOptions();
@@ -12,11 +17,44 @@ class bdApiConsumer_Option
 			case '_is130+':
 				return XenForo_Application::$versionId >= 1030000;
 			case '_activated':
-				$providers = self::getProviders();
-				return !empty($providers);
+				if (self::$_activated === null)
+				{
+					$providers = self::getProviders();
+					self::$_activated = !empty($providers);
+				}
+				return self::$_activated;
+			case '_showButtons':
+				if (self::$_showButtons === null)
+				{
+					self::$_showButtons = false;
+
+					if (!self::get('takeOver', 'login'))
+					{
+						// no login take over, show the provider buttons
+						self::$_showButtons = true;
+					}
+
+					if (self::get('loginFacebook') OR self::get('loginTwitter') OR self::get('loginGoogle'))
+					{
+						// show social buttons
+						self::$_showButtons = true;
+					}
+				}
+				return self::$_showButtons;
+			case 'providers':
+				if (self::$_providers === null)
+				{
+					self::$_providers = $options->get('bdapi_consumer_providers');
+				}
+				return self::$_providers;
 		}
 
 		return $options->get('bdapi_consumer_' . $key, $subKey);
+	}
+
+	public static function setProviders($providers)
+	{
+		self::$_providers = $providers;
 	}
 
 	public static function getProviders()
@@ -88,6 +126,48 @@ class bdApiConsumer_Option
 
 		$providers = $output;
 		return true;
+	}
+
+	public static function renderOptionLoginSocial(XenForo_View $view, $fieldPrefix, array $preparedOption, $canEdit)
+	{
+		$providers = self::getProviders();
+
+		switch ($preparedOption['option_id'])
+		{
+			case 'bdapi_consumer_loginFacebook':
+				$social = 'facebook';
+				break;
+			case 'bdapi_consumer_loginTwitter':
+				if (self::get('_is130+'))
+				{
+					$social = 'twitter';
+				}
+				break;
+			case 'bdapi_consumer_loginGoogle':
+				if (self::get('_is130+'))
+				{
+					$social = 'google';
+				}
+				break;
+		}
+		if (empty($social))
+		{
+			// unrecognized option
+			return '';
+		}
+
+		$choices = array('' => '');
+		foreach ($providers as $provider)
+		{
+			$providerLoginSocial = bdApiConsumer_Helper_Provider::getLoginSocial($provider);
+			if (!empty($providerLoginSocial['social']) AND in_array($social, $providerLoginSocial['social'], true))
+			{
+				$choices[$provider['code']] = $provider['name'];
+			}
+		}
+		$preparedOption['formatParams'] = $choices;
+
+		return XenForo_ViewAdmin_Helper_Option::renderOptionTemplateInternal('option_list_option_select', $view, $fieldPrefix, $preparedOption, $canEdit);
 	}
 
 }

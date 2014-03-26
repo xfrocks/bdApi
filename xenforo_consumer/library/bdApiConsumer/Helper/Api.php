@@ -1,14 +1,21 @@
 <?php
 class bdApiConsumer_Helper_Api
 {
-	public static function getRequestUrl(array $provider, $redirectUri)
+	public static function getRequestUrl(array $provider, $redirectUri, array $extraParams = array())
 	{
-		return call_user_func_array('sprintf', array(
+		$url = call_user_func_array('sprintf', array(
 			'%s/index.php?oauth/authorize/&client_id=%s&redirect_uri=%s&response_type=code&scope=read',
 			rtrim($provider['root'], '/'),
 			rawurlencode($provider['client_id']),
 			rawurlencode($redirectUri)
 		));
+
+		foreach ($extraParams as $key => $value)
+		{
+			$url .= sprintf('&%s=%s', $key, rawurlencode($value));
+		}
+
+		return $url;
 	}
 
 	public static function getLoginLink(array $provider, $accessToken, $redirectUri)
@@ -33,155 +40,51 @@ class bdApiConsumer_Helper_Api
 
 	public static function getPublicLink(array $provider, $route)
 	{
-		try
-		{
-			$uri = call_user_func_array('sprintf', array(
-				'%s/index.php?tools/link',
-				rtrim($provider['root'], '/')
-			));
-			$client = XenForo_Helper_Http::getClient($uri);
-			$client->setParameterPost(array(
-				'oauth_token' => self::generateOneTimeToken($provider),
-				'type' => 'public',
-				'route' => $route,
-			));
-			$response = $client->request('POST');
+		$json = self::_post($provider, 'tools/link/', self::generateOneTimeToken($provider), 'link', array(
+			'type' => 'public',
+			'route' => $route,
+		));
 
-			$body = $response->getBody();
-			$parts = @json_decode($body, true);
-
-			if (!empty($parts['link']))
-			{
-				return $parts['link'];
-			}
-			else
-			{
-				XenForo_Error::logException(new XenForo_Exception(sprintf('Unable to parse `link` from `%s`', $body)), false);
-				return false;
-			}
-		}
-		catch (Zend_Http_Client_Exception $e)
+		if (!empty($json['link']))
 		{
-			XenForo_Error::logException($e, false);
-			return false;
+			return $json['link'];
 		}
+
+		return false;
 	}
 
 	public static function getAccessTokenFromCode(array $provider, $code, $redirectUri)
 	{
-		try
-		{
-			$uri = call_user_func_array('sprintf', array(
-				'%s/index.php?oauth/token/',
-				rtrim($provider['root'], '/'),
-			));
-			$client = XenForo_Helper_Http::getClient($uri);
-			$client->setParameterPost(array(
-				'grant_type' => 'authorization_code',
-				'client_id' => $provider['client_id'],
-				'client_secret' => $provider['client_secret'],
-				'code' => $code,
-				'redirect_uri' => $redirectUri,
-				'scope' => 'read',
-			));
-
-			$response = $client->request('POST');
-
-			$body = $response->getBody();
-			$parts = @json_decode($body, true);
-
-			if (!empty($parts['access_token']))
-			{
-				return $parts;
-			}
-			else
-			{
-				XenForo_Error::logException(new XenForo_Exception(sprintf('Unable to parse `access_token` from `%s`', $body)), false);
-				return false;
-			}
-		}
-		catch (Zend_Http_Client_Exception $e)
-		{
-			XenForo_Error::logException($e, false);
-			return false;
-		}
+		return self::_post($provider, 'oauth/token/', '', 'access_token', array(
+			'grant_type' => 'authorization_code',
+			'client_id' => $provider['client_id'],
+			'client_secret' => $provider['client_secret'],
+			'code' => $code,
+			'redirect_uri' => $redirectUri,
+			'scope' => 'read',
+		));
 	}
 
 	public static function getAccessTokenFromRefreshToken(array $provider, $refreshToken, $scope)
 	{
-		try
-		{
-			$uri = call_user_func_array('sprintf', array(
-				'%s/index.php?oauth/token/',
-				rtrim($provider['root'], '/')
-			));
-			$client = XenForo_Helper_Http::getClient($uri);
-			$client->setParameterPost(array(
-				'grant_type' => 'refresh_token',
-				'client_id' => $provider['client_id'],
-				'client_secret' => $provider['client_secret'],
-				'refresh_token' => $refreshToken,
-				'scope' => $scope,
-			));
-
-			$response = $client->request('POST');
-
-			$body = $response->getBody();
-			$parts = @json_decode($body, true);
-
-			if (!empty($parts['access_token']))
-			{
-				return $parts;
-			}
-			else
-			{
-				XenForo_Error::logException(new XenForo_Exception(sprintf('Unable to parse `access_token` from `%s`', $body)), false);
-				return false;
-			}
-		}
-		catch (Zend_Http_Client_Exception $e)
-		{
-			XenForo_Error::logException($e, false);
-			return false;
-		}
+		return self::_post($provider, 'oauth/token/', '', 'access_token', array(
+			'grant_type' => 'refresh_token',
+			'client_id' => $provider['client_id'],
+			'client_secret' => $provider['client_secret'],
+			'refresh_token' => $refreshToken,
+			'scope' => $scope,
+		));
 	}
 
 	public static function getAccessTokenFromUsernamePassword(array $provider, $username, $password)
 	{
-		try
-		{
-			$uri = call_user_func_array('sprintf', array(
-				'%s/index.php?oauth/token/',
-				rtrim($provider['root'], '/')
-			));
-			$client = XenForo_Helper_Http::getClient($uri);
-			$client->setParameterPost(array(
-				'grant_type' => 'password',
-				'client_id' => $provider['client_id'],
-				'client_secret' => $provider['client_secret'],
-				'username' => $username,
-				'password' => $password,
-			));
-			$response = $client->request('POST');
-
-			$body = $response->getBody();
-			$parts = @json_decode($body, true);
-
-			if (!empty($parts['access_token']))
-			{
-				return $parts;
-			}
-			else
-			{
-				XenForo_Error::logException(new XenForo_Exception(sprintf('Unable to parse `access_token` from `%s`', $body)), false);
-				return false;
-			}
-		}
-		catch (Zend_Http_Client_Exception $e)
-		{
-			XenForo_Error::logException($e, false);
-			return false;
-		}
+		return self::_post($provider, 'oauth/token/', '', 'access_token', array(
+			'grant_type' => 'password',
+			'client_id' => $provider['client_id'],
+			'client_secret' => $provider['client_secret'],
+			'username' => $username,
+			'password' => $password,
+		));
 	}
 
 	public static function generateOneTimeToken(array $provider, $userId = 0, $accessToken = '', $ttl = 10)
@@ -194,68 +97,24 @@ class bdApiConsumer_Helper_Api
 
 	public static function getVisitor(array $provider, $accessToken)
 	{
-		try
+		$json = self::_get($provider, 'users/me/', $accessToken, 'user');
+
+		if (!empty($json['user']))
 		{
-			$uri = call_user_func_array('sprintf', array(
-				'%s/index.php?users/me/',
-				rtrim($provider['root'], '/'),
-			));
-			$client = XenForo_Helper_Http::getClient($uri);
-			$client->setParameterGet(array('oauth_token' => $accessToken));
-
-			$response = $client->request('GET');
-
-			$body = $response->getBody();
-			$parts = @json_decode($body, true);
-
-			if (!empty($parts['user']))
-			{
-				return $parts['user'];
-			}
-			else
-			{
-				XenForo_Error::logException(new XenForo_Exception(sprintf('Unable to get user info from `%s`', $body)), false);
-				return false;
-			}
+			return $json['user'];
 		}
-		catch (Zend_Http_Client_Exception $e)
-		{
-			XenForo_Error::logException($e, false);
-			return false;
-		}
+
+		return false;
+	}
+
+	public static function postLoginSocial(array $provider)
+	{
+		return self::_post($provider, 'tools/login-social/', self::generateOneTimeToken($provider), 'social');
 	}
 
 	public static function postPasswordResetRequest(array $provider, $accessToken)
 	{
-		try
-		{
-			$uri = call_user_func_array('sprintf', array(
-				'%s/index.php?tools/password-reset-request/',
-				rtrim($provider['root'], '/'),
-			));
-			$client = XenForo_Helper_Http::getClient($uri);
-			$client->setParameterPost(array('oauth_token' => $accessToken));
-
-			$response = $client->request('POST');
-
-			$body = $response->getBody();
-			$parts = @json_decode($body, true);
-
-			if (!empty($parts['status']))
-			{
-				return $parts;
-			}
-			else
-			{
-				XenForo_Error::logException(new XenForo_Exception(sprintf('Unable to get user info from `%s`', $body)), false);
-				return false;
-			}
-		}
-		catch (Zend_Http_Client_Exception $e)
-		{
-			XenForo_Error::logException($e, false);
-			return false;
-		}
+		return self::_post($provider, 'tools/password-reset-request/', $accessToken, 'status');
 	}
 
 	public static function verifyJsSdkSignature(array $provider, array $data, $prefix = '_api_data_')
@@ -287,6 +146,96 @@ class bdApiConsumer_Helper_Api
 		$signature = md5($str);
 
 		return isset($data[$prefix . 'signature']) AND ($signature === $data[$prefix . 'signature']);
+	}
+
+	protected static function _get(array $provider, $path, $accessToken = false, $expectedKey = false, array $params = array())
+	{
+		try
+		{
+			$uri = call_user_func_array('sprintf', array(
+				'%s/index.php?%s',
+				rtrim($provider['root'], '/'),
+				$path,
+			));
+			$client = XenForo_Helper_Http::getClient($uri);
+
+			if ($accessToken !== false AND !isset($params['oauth_token']))
+			{
+				$params['oauth_token'] = $accessToken;
+			}
+			$client->setParameterGet($params);
+
+			$response = $client->request('GET');
+
+			$body = $response->getBody();
+			$json = @json_decode($body, true);
+
+			if (!is_array($json))
+			{
+				return false;
+			}
+
+			if ($expectedKey !== false)
+			{
+				if (!isset($json[$expectedKey]))
+				{
+					XenForo_Error::logException(sprintf('Key "%s" not found in GET `%s`: %s', $expectedKey, $path, $body), false);
+					return false;
+				}
+			}
+
+			return $json;
+		}
+		catch (Zend_Http_Client_Exception $e)
+		{
+			XenForo_Error::logException($e, false);
+			return false;
+		}
+	}
+
+	protected static function _post(array $provider, $path, $accessToken = false, $expectedKey = false, array $params = array())
+	{
+		try
+		{
+			$uri = call_user_func_array('sprintf', array(
+				'%s/index.php?%s',
+				rtrim($provider['root'], '/'),
+				$path,
+			));
+			$client = XenForo_Helper_Http::getClient($uri);
+
+			if ($accessToken !== false AND !isset($params['oauth_token']))
+			{
+				$params['oauth_token'] = $accessToken;
+			}
+			$client->setParameterPost($params);
+
+			$response = $client->request('POST');
+
+			$body = $response->getBody();
+			$json = @json_decode($body, true);
+
+			if (!is_array($json))
+			{
+				return false;
+			}
+
+			if ($expectedKey !== false)
+			{
+				if (!isset($json[$expectedKey]))
+				{
+					XenForo_Error::logException(sprintf('Key "%s" not found in GET `%s`: %s', $expectedKey, $path, $body), false);
+					return false;
+				}
+			}
+
+			return $json;
+		}
+		catch (Zend_Http_Client_Exception $e)
+		{
+			XenForo_Error::logException($e, false);
+			return false;
+		}
 	}
 
 }

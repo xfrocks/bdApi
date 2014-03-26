@@ -27,7 +27,10 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			$redirect = XenForo_Link::convertUriToAbsoluteUri($this->getDynamicRedirect());
 			XenForo_Application::get('session')->set(self::SESSION_KEY_REDIRECT, $redirect);
 
-			return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL, bdApiConsumer_Helper_Api::getRequestUrl($provider, $externalRedirectUri));
+			$social = $this->_input->filterSingle('social', XenForo_Input::STRING);
+			$requestUrl = bdApiConsumer_Helper_Api::getRequestUrl($provider, $externalRedirectUri, array('social' => $social));
+
+			return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL, $requestUrl);
 		}
 
 		// try to use the non-standard query parameter `t` first,
