@@ -158,11 +158,37 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 	{
 		$this->_assertPostOnly();
 
+		$userModel = $this->_getUserModel();
+		$userExternalModel = $this->_getUserExternalModel();
+
 		$providerCode = $this->_input->filterSingle('provider', XenForo_Input::STRING);
 		$provider = bdApiConsumer_Option::getProviderByCode($providerCode);
 		if (empty($provider))
 		{
 			return $this->responseNoPermission();
+		}
+
+		$doAssoc = ($this->_input->filterSingle('associate', XenForo_Input::STRING) || $this->_input->filterSingle('force_assoc', XenForo_Input::UINT));
+		if ($doAssoc)
+		{
+			$associate = $this->_input->filter(array(
+				'associate_login' => XenForo_Input::STRING,
+				'associate_password' => XenForo_Input::STRING
+			));
+
+			$loginModel = $this->_getLoginModel();
+
+			if ($loginModel->requireLoginCaptcha($associate['associate_login']))
+			{
+				return $this->responseError(new XenForo_Phrase('your_account_has_temporarily_been_locked_due_to_failed_login_attempts'));
+			}
+
+			$userId = $userModel->validateAuthentication($associate['associate_login'], $associate['associate_password'], $error);
+			if (!$userId)
+			{
+				$loginModel->logLoginAttempt($associate['associate_login']);
+				return $this->responseError($error);
+			}
 		}
 
 		$refreshToken = $this->_input->filterSingle('refresh_token', XenForo_Input::STRING);
@@ -190,32 +216,8 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 			}
 		}
 
-		$userModel = $this->_getUserModel();
-		$userExternalModel = $this->_getUserExternalModel();
-
-		$doAssoc = ($this->_input->filterSingle('associate', XenForo_Input::STRING) || $this->_input->filterSingle('force_assoc', XenForo_Input::UINT));
-
 		if ($doAssoc)
 		{
-			$associate = $this->_input->filter(array(
-				'associate_login' => XenForo_Input::STRING,
-				'associate_password' => XenForo_Input::STRING
-			));
-
-			$loginModel = $this->_getLoginModel();
-
-			if ($loginModel->requireLoginCaptcha($associate['associate_login']))
-			{
-				return $this->responseError(new XenForo_Phrase('your_account_has_temporarily_been_locked_due_to_failed_login_attempts'));
-			}
-
-			$userId = $userModel->validateAuthentication($associate['associate_login'], $associate['associate_password'], $error);
-			if (!$userId)
-			{
-				$loginModel->logLoginAttempt($associate['associate_login']);
-				return $this->responseError($error);
-			}
-
 			$userExternalModel->bdApiConsumer_updateExternalAuthAssociation($provider, $externalVisitor['user_id'], $userId, $externalVisitor + array('token' => $externalToken));
 
 			$redirect = XenForo_Application::get('session')->get(self::SESSION_KEY_REDIRECT);
