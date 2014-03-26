@@ -28,13 +28,13 @@
 	</xen:html>
 </xen:controlunit>]]></template>
     <template title="bdapi_consumer_option_providers_single"><![CDATA[<xen:if is="{$counter} > 0"><hr /></xen:if>
-<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][name]" value="{$provider.name}"
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][name]" value="{xen:if '{$provider.name}', $provider.name}"
 	size="20" placeholder="{xen:phrase bdapi_consumer_name}" />
-<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][root]" value="{$provider.root}"
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][root]" value="{xen:if '{$provider.root}', $provider.root}"
 	placeholder="{xen:phrase bdapi_consumer_root}" />
-<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][client_id]" value="{$provider.client_id}"
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][client_id]" value="{xen:if '{$provider.client_id}', $provider.client_id}"
 	placeholder="{xen:phrase bdapi_consumer_client_id}" />
-<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][client_secret]" value="{$provider.client_secret}"
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][client_secret]" value="{xen:if '{$provider.client_secret}', $provider.client_secret}"
 	placeholder="{xen:phrase bdapi_consumer_client_secret}" />
 
 ]]></template>
