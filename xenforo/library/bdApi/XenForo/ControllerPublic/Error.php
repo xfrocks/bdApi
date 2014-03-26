@@ -1,8 +1,27 @@
 <?php
+
 class bdApi_XenForo_ControllerPublic_Error extends XFCP_bdApi_XenForo_ControllerPublic_Error
 {
 	public function actionAuthorizeGuest()
 	{
+		$requestPaths = XenForo_Application::get('requestPaths');
+		$social = $this->_input->filterSingle('social', XenForo_Input::STRING);
+		switch ($social)
+		{
+			case 'facebook':
+				$facebookLink = XenForo_Link::buildPublicLink('full:register/facebook', null, array(
+					'reg' => 1,
+					'redirect' => $requestPaths['fullUri'],
+				));
+				return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, $facebookLink);
+			case 'twitter':
+				$twitterLink = XenForo_Link::buildPublicLink('full:register/twitter', null, array(
+					'reg' => 1,
+					'redirect' => $requestPaths['fullUri'],
+				));
+				return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, $twitterLink);
+		}
+
 		/* @var $oauth2Model bdApi_Model_OAuth2 */
 		$oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
 
@@ -18,7 +37,8 @@ class bdApi_XenForo_ControllerPublic_Error extends XFCP_bdApi_XenForo_Controller
 		}
 
 		$viewParams = array(
-				'client' => $client,
+			'client' => $client,
+			'social' => $social,
 		);
 
 		$view = $this->responseView('bdApi_ViewPublic_Error_AuthorizeGuest', 'bdapi_error_authorize_guest', $viewParams);
@@ -26,4 +46,5 @@ class bdApi_XenForo_ControllerPublic_Error extends XFCP_bdApi_XenForo_Controller
 
 		return $view;
 	}
+
 }

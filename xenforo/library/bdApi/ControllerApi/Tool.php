@@ -30,6 +30,30 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 		return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $loginLink);
 	}
 
+	public function actionPostLoginSocial()
+	{
+		$social = array();
+
+		$options = XenForo_Application::getOptions();
+
+		if ($options->get('facebookAppId'))
+		{
+			$social[] = 'facebook';
+		}
+
+		if ($options->get('twitterAppKey'))
+		{
+			$social[] = 'twitter';
+		}
+
+		if ($options->get('googleClientId'))
+		{
+			$social[] = 'google';
+		}
+
+		return $this->responseData('bdApi_ViewApi_Tool_LoginSocial', array('social' => $social));
+	}
+
 	public function actionGetLogout()
 	{
 		$input = $this->_input->filter(array(

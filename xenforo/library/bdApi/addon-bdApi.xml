@@ -486,6 +486,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_ip_address" version_id="23" version_string="0.9.8a"><![CDATA[Ip Address]]></phrase>
     <phrase title="bdapi_issue_date" version_id="4" version_string="0.9-dev"><![CDATA[Issue Date]]></phrase>
     <phrase title="bdapi_login_to_authorize_x" version_id="13" version_string="0.9-dev"><![CDATA[Please login to authorize access to {client}.]]></phrase>
+    <phrase title="bdapi_login_to_authorize_x_google" version_id="50" version_string="1.2.1b"><![CDATA[Click "{login_with_google}" to continue with {client}.]]></phrase>
     <phrase title="bdapi_logs" version_id="23" version_string="0.9.8a"><![CDATA[Logs]]></phrase>
     <phrase title="bdapi_log_not_found" version_id="23" version_string="0.9.8a"><![CDATA[The requested Log could not be found]]></phrase>
     <phrase title="bdapi_log_no_client" version_id="23" version_string="0.9.8a"><![CDATA[Public Request (no client)]]></phrase>
@@ -1073,12 +1074,19 @@ step=3600</edit_format_params>
     <template title="bdapi_account_wrapper_sidebar" version_id="6" version_string="0.9-dev"><![CDATA[<li><a
 	class="{xen:if "{$selectedKey} == 'account/bdApi'", 'secondaryContent', 'primaryContent'}"
 	href="{xen:link account/api}">{xen:phrase bdapi_home}</a></li>]]></template>
-    <template title="bdapi_error_authorize_guest" version_id="13" version_string="0.9-dev"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
+    <template title="bdapi_error_authorize_guest" version_id="50" version_string="1.2.1b"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
-<xen:include template="helper_login_form">
-	<xen:set var="$text">{xen:phrase bdapi_login_to_authorize_x, 'client={$client.name}'}</xen:set>
-</xen:include>]]></template>
+<xen:set var="$text">{xen:phrase bdapi_login_to_authorize_x, 'client={$client.name}'}</xen:set>
+
+<xen:if is="{$social} == 'google'">
+	<xen:set var="$text">{xen:phrase bdapi_login_to_authorize_x_google,
+		'login_with_google={xen:phrase login_with_google}',
+		'client={$client.name}'}</xen:set>
+</xen:if>
+
+<xen:include template="helper_login_form" />]]></template>
   </templates>
   <public_template_modifications/>
   <bb_code_media_sites/>
+  <bb_codes/>
 </addon>
