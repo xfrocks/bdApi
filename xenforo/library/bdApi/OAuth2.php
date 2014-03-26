@@ -109,7 +109,11 @@ class bdApi_OAuth2 extends OAuth2
 	 */
 	public function __construct(bdApi_Model_OAuth2 $model)
 	{
-		parent::__construct();
+		parent::__construct(array(
+			'auth_code_lifetime' => bdApi_Option::get('authCodeTTL'),
+			'access_token_lifetime' => bdApi_Option::get('tokenTTL'),
+			'refresh_token_lifetime' => bdApi_Option::get('refreshTokenTTLDays') * 86400,
+		));
 
 		$this->_model = $model;
 	}
