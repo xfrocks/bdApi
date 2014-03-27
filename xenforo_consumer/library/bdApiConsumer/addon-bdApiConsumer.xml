@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.8-dev" version_id="20" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.8-dev" version_id="21" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -78,6 +78,24 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdApiConsumer" display_order="100"/>
     </option>
+    <option option_id="bdapi_consumer_loginFacebook" edit_format="callback" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params>bdApiConsumer_Option::renderOptionLoginSocial</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApiConsumer" display_order="210"/>
+    </option>
+    <option option_id="bdapi_consumer_loginGoogle" edit_format="callback" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params>bdApiConsumer_Option::renderOptionLoginSocial</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApiConsumer" display_order="220"/>
+    </option>
+    <option option_id="bdapi_consumer_loginTwitter" edit_format="callback" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params>bdApiConsumer_Option::renderOptionLoginSocial</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApiConsumer" display_order="215"/>
+    </option>
     <option option_id="bdapi_consumer_providers" edit_format="callback" data_type="array" can_backup="1" validation_class="bdApiConsumer_Option" validation_method="verifyOptionProviders">
       <default_value></default_value>
       <edit_format_params>bdApiConsumer_Option::renderOptionProviders</edit_format_params>
@@ -136,6 +154,12 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 &nbsp;- Enabled with ID sync: similar to `Enabled` but external user ID will be included in conflict check.]]></phrase>
     <phrase title="option_bdapi_consumer_bypassRegistrationActive" version_id="2" version_string="0.9-dev"><![CDATA[Bypass Registration Active Check]]></phrase>
     <phrase title="option_bdapi_consumer_bypassRegistrationActive_explain" version_id="2" version_string="0.9-dev"><![CDATA[Enabling this option will allow users who came from external sites to register regardless of the <a href="admin.php?options/list/usersAndRegistration" target="_blank" tabindex="-1">"Enable Registration" option</a>.]]></phrase>
+    <phrase title="option_bdapi_consumer_loginFacebook" version_id="20" version_string="0.9.8-dev"><![CDATA[Facebook Login]]></phrase>
+    <phrase title="option_bdapi_consumer_loginFacebook_explain" version_id="20" version_string="0.9.8-dev"><![CDATA[Choose a provider to let users who login via Facebook go through.]]></phrase>
+    <phrase title="option_bdapi_consumer_loginGoogle" version_id="20" version_string="0.9.8-dev"><![CDATA[Google Login]]></phrase>
+    <phrase title="option_bdapi_consumer_loginGoogle_explain" version_id="20" version_string="0.9.8-dev"><![CDATA[Choose a provider to let users who login via Google go through.]]></phrase>
+    <phrase title="option_bdapi_consumer_loginTwitter" version_id="20" version_string="0.9.8-dev"><![CDATA[Twitter Login]]></phrase>
+    <phrase title="option_bdapi_consumer_loginTwitter_explain" version_id="20" version_string="0.9.8-dev"><![CDATA[Choose a provider to let users who login via Twitter go through.]]></phrase>
     <phrase title="option_bdapi_consumer_providers" version_id="1" version_string="0.9-dev"><![CDATA[Providers]]></phrase>
     <phrase title="option_bdapi_consumer_providers_explain" version_id="1" version_string="0.9-dev"><![CDATA[Enter providers' information to authenticate against. All fields are required for each providers.]]></phrase>
     <phrase title="option_bdapi_consumer_takeOver" version_id="16" version_string="0.9.7"><![CDATA[Take Over]]></phrase>
@@ -152,7 +176,8 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
   <route_prefixes/>
   <style_properties/>
   <templates>
-    <template title="bdapi_consumer.css" version_id="15" version_string="0.9.6b"><![CDATA[#loginBar .bdApiConsumer_Provider a
+    <template title="bdapi_consumer.css" version_id="20" version_string="0.9.8-dev"><![CDATA[.bdApiConsumer_Provider a,
+#loginBar .bdApiConsumer_Provider a
 {
 	color: {xen:property button.color};
 }
@@ -299,38 +324,100 @@ window['{$provider.code}Init'] = function()
 		</xen:if>
 	</xen:foreach>
 </xen:if>]]></template>
-    <template title="bdapi_consumer_providers" version_id="16" version_string="0.9.7"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, takeOver,login}">
+    <template title="bdapi_consumer_providers" version_id="20" version_string="0.9.8-dev"><![CDATA[<xen:if is="{$from} == 'login_bar'" >
+	<xen:edithint template="login_bar_form" />
 
-	<xen:comment>takeOver.login, hide all buttons</xen:comment>
-	
-<xen:elseif is="{$from} == 'login_bar'" />
-
-	<xen:require css="bdapi_consumer.css" />
-	<xen:foreach loop="{$providers}" value="$provider">
-		<li id="provider-{$provider.code}" class="bdApiConsumer_Provider {$provider.code}">
-			<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1'}" tabindex="110" class="button">
-				<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
+	<xen:if is="{$loginFacebookProvider}">
+		<xen:require css="facebook.css" />
+		<li id="provider-{$loginFacebookProvider.code}-facebook" class="bdApiConsumer_Provider {$loginFacebookProvider.code} facebook">
+			<a href="{xen:link register/external, '', 'provider={$loginFacebookProvider.code}', 'reg=1', 'social=facebook'}" class="fbLogin" tabindex="10">
+				<span>{xen:phrase login_with_facebook}</span>
 			</a>
 		</li>
-	</xen:foreach>
+	</xen:if>
+
+	<xen:if is="{$loginTwitterProvider} AND {xen:helper bdApiConsumer_getOption, '_is130+'}">
+		<xen:require css="twitter.css" />
+		<li id="provider-{$loginTwitterProvider.code}-twitter" class="bdApiConsumer_Provider {$loginTwitterProvider.code} twitter">
+			<a href="{xen:link register/external, '', 'provider={$loginTwitterProvider.code}', 'reg=1', 'social=twitter'}" class="twitterLogin" tabindex="10">
+				<span>{xen:phrase login_with_twitter}</span>
+			</a>
+		</li>
+	</xen:if>
+
+	<xen:if is="{$loginGoogleProvider} AND {xen:helper bdApiConsumer_getOption, '_is130+'}">
+		<xen:require css="google.css" />
+		<li id="provider-{$loginGoogleProvider.code}-google" class="bdApiConsumer_Provider {$loginGoogleProvider.code} google">
+			<a href="{xen:link register/external, '', 'provider={$loginGoogleProvider.code}', 'reg=1', 'social=google'}" class="googleLogin" tabindex="10">
+				<span>{xen:phrase login_with_google}</span>
+			</a>
+		</li>
+	</xen:if>
+
+	<xen:if is="!{xen:helper bdApiConsumer_getOption, takeOver,login}">
+		<xen:require css="bdapi_consumer.css" />
+		<xen:foreach loop="{$providers}" value="$provider">
+			<li id="provider-{$provider.code}" class="bdApiConsumer_Provider {$provider.code}">
+				<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1'}" tabindex="110" class="button">
+					<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
+				</a>
+			</li>
+		</xen:foreach>
+	</xen:if>
 
 <xen:elseif is="{$from} == 'login_form'" />
+	<xen:edithint template="helper_login_form" />
+	<xen:set var="$redirect">{xen:if $redirect, $redirect, $requestPaths.fullUri}</xen:set>
 
-	<xen:require css="bdapi_consumer.css" />
-	<dl class="ctrlUnit">
-		<dt>&nbsp;</dt>
-		<dd>
-			<ul>
-				<xen:foreach loop="$providers" value="$provider">
-					<li id="provider-{$provider.code}" class="bdApiConsumer_Provider {$provider.code}">
-						<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1', 'redirect={xen:if $redirect, $redirect, $requestPaths.requestUri}'}" tabindex="110">
-							<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
-						</a>
-					</li>
-				</xen:foreach>
-			</ul>
-		</dd>
-	</dl>
+	<xen:if is="{$loginFacebookProvider}">
+		<xen:require css="facebook.css" />
+		<dl id="provider-{$loginFacebookProvider.code}-facebook" class="ctrlUnit bdApiConsumer_Provider {$loginFacebookProvider.code} facebook">
+			<dt></dt>
+			<dd>
+				<a href="{xen:link register/external, '', 'provider={$loginFacebookProvider.code}', 'reg=1', 'redirect={$redirect}', 'social=facebook'}" class="fbLogin" tabindex="10">
+					<span>{xen:phrase login_with_facebook}</span>
+				</a>
+			</dd>
+		</dl>
+	</xen:if>
+
+	<xen:if is="{$loginTwitterProvider} AND {xen:helper bdApiConsumer_getOption, '_is130+'}">
+		<xen:require css="twitter.css" />
+		<dl id="provider-{$loginTwitterProvider.code}-twitter" class="ctrlUnit bdApiConsumer_Provider {$loginTwitterProvider.code} twitter">
+			<dt></dt>
+			<dd>
+				<a href="{xen:link register/external, '', 'provider={$loginTwitterProvider.code}', 'reg=1', 'redirect={$redirect}', 'social=twitter'}" class="twitterLogin" tabindex="10">
+					<span>{xen:phrase login_with_twitter}</span>
+				</a>
+			</dd>
+		</dl>
+	</xen:if>
+
+	<xen:if is="{$loginGoogleProvider} AND {xen:helper bdApiConsumer_getOption, '_is130+'}">
+		<xen:require css="google.css" />
+		<dl id="provider-{$loginGoogleProvider.code}-google" class="ctrlUnit bdApiConsumer_Provider {$loginGoogleProvider.code} google">
+			<dt></dt>
+			<dd>
+				<a href="{xen:link register/external, '', 'provider={$loginGoogleProvider.code}', 'reg=1', 'redirect={$redirect}', 'social=google'}" class="googleLogin" tabindex="10">
+					<span>{xen:phrase login_with_google}</span>
+				</a>
+			</dd>
+		</dl>
+	</xen:if>
+
+	<xen:if is="!{xen:helper bdApiConsumer_getOption, takeOver,login}">
+		<xen:foreach loop="$providers" value="$provider">
+			<xen:require css="bdapi_consumer.css" />
+			<dl id="provider-{$provider.code}" class="ctrlUnit bdApiConsumer_Provider {$provider.code}">
+				<dt></dt>
+				<dd>
+					<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1', 'redirect={$redirect}'}" tabindex="110" class="button">
+						<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
+					</a>
+				</dd>
+			</dl>
+		</xen:foreach>
+	</xen:if>
 
 </xen:if>]]></template>
     <template title="bdapi_consumer_register" version_id="17" version_string="0.9.8-dev"><![CDATA[<xen:title>{xen:phrase bdapi_consumer_sign_up_with_x, 'provider={$provider.name}'}</xen:title>
@@ -469,7 +556,7 @@ $2]]></replace>
       <find><![CDATA[<xen:hook name="login_bar_eauth_set">]]></find>
       <replace><![CDATA[$0
 
-<xen:if is="{xen:helper bdApiConsumer_getOption, _activated} AND !{xen:helper bdApiConsumer_getOption, takeOver, login}">
+<xen:if is="{xen:helper bdApiConsumer_getOption, _showButtons}">
 	<xen:set var="$eAuth">1</xen:set>
 </xen:if>]]></replace>
     </modification>
