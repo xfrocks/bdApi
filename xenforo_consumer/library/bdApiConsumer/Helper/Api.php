@@ -224,7 +224,7 @@ class bdApiConsumer_Helper_Api
 			{
 				if (!isset($json[$expectedKey]))
 				{
-					XenForo_Error::logException(sprintf('Key "%s" not found in GET `%s`: %s', $expectedKey, $path, $body), false);
+					XenForo_Error::logException(new XenForo_Exception(sprintf('Key "%s" not found in GET `%s`: %s', $expectedKey, $path, $body)), false);
 					return false;
 				}
 			}
