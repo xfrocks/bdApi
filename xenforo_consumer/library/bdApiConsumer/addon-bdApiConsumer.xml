@@ -8,8 +8,9 @@
 	<xen:explain>{xen:raw $preparedOption.explain}</xen:explain>
 	<xen:html>
 		<ul>
-			<xen:foreach loop="$providers" key="$counter" value="$provider">
+			<xen:foreach loop="$providers" i="$i" value="$provider">
 			<li>
+				<xen:set var="$counter">{xen:calc '{$i} - 1'}</xen:set>
 				<xen:include template="bdapi_consumer_option_providers_single">
 				</xen:include>
 			</li>
@@ -28,13 +29,13 @@
 	</xen:html>
 </xen:controlunit>]]></template>
     <template title="bdapi_consumer_option_providers_single"><![CDATA[<xen:if is="{$counter} > 0"><hr /></xen:if>
-<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][name]" value="{xen:if '{$provider.name}', $provider.name}"
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][name]" value="{xen:if '{$provider}', $provider.name}"
 	size="20" placeholder="{xen:phrase bdapi_consumer_name}" />
-<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][root]" value="{xen:if '{$provider.root}', $provider.root}"
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][root]" value="{xen:if '{$provider}', $provider.root}"
 	placeholder="{xen:phrase bdapi_consumer_root}" />
-<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][client_id]" value="{xen:if '{$provider.client_id}', $provider.client_id}"
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][client_id]" value="{xen:if '{$provider}', $provider.client_id}"
 	placeholder="{xen:phrase bdapi_consumer_client_id}" />
-<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][client_secret]" value="{xen:if '{$provider.client_secret}', $provider.client_secret}"
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][client_secret]" value="{xen:if '{$provider}', $provider.client_secret}"
 	placeholder="{xen:phrase bdapi_consumer_client_secret}" />
 
 ]]></template>
