@@ -43,6 +43,16 @@ class bdApiConsumer_XenForo_ControllerPublic_Login extends XFCP_bdApiConsumer_Xe
 
 		$existingAssoc = $userExternalModel->getExternalAuthAssociation($userExternalModel->bdApiConsumer_getProviderCode($provider), $externalUserId);
 
+		if (!empty($existingAssoc))
+		{
+			$accessToken = $userExternalModel->bdApiConsumer_getAccessTokenFromAuth($provider, $existingAssoc);
+			if (empty($accessToken))
+			{
+				// no access token in the auth, consider no auth at all
+				$existingAssoc = null;
+			}
+		}
+
 		if (empty($existingAssoc))
 		{
 			$autoRegister = bdApiConsumer_Option::get('autoRegister');

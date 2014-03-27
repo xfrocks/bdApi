@@ -1,4 +1,5 @@
 <?php
+
 class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenForo_Model_UserExternal
 {
 	public function bdApiConsumer_getProviderCode(array $provider)
@@ -18,6 +19,11 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
 
 	public function bdApiConsumer_getAccessTokenFromAuth(array $provider, array $auth)
 	{
+		if (!is_array($auth['extra_data']))
+		{
+			$auth['extra_data'] = @unserialize($auth['extra_data']);
+		}
+
 		if (empty($auth['extra_data']['token']['access_token']))
 		{
 			// old version...
