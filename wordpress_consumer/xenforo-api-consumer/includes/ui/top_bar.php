@@ -273,7 +273,7 @@ function xfac_add_admin_bar_menus()
 		wp_enqueue_style('xfac-top_bar.css', XFAC_PLUGIN_URL . '/css/top_bar.css');
 		add_action('admin_bar_menu', 'xfac_admin_bar_login_menu', 7);
 
-		add_action('admin_bar_menu', 'xfac_admin_bar_remove_menus', PHP_INT_MAX);
+		add_action('admin_bar_menu', 'xfac_admin_bar_remove_menus', PHP_INT_MAX - 1);
 	}
 }
 
