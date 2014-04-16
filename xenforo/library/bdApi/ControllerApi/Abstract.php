@@ -250,6 +250,30 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		return $this->responseReroute('bdApi_ControllerApi_Error', 'noPermission');
 	}
 
+	protected function _executePromotionUpdate($force = false)
+	{
+		// disable promotion
+		return;
+	}
+
+	protected function _updateDismissedNoticeSessionCache()
+	{
+		// disable dismissed notice cache
+		return;
+	}
+
+	protected function _updateModeratorSessionCaches()
+	{
+		// disable moderator cache
+		return;
+	}
+
+	protected function _updateAdminSessionCaches()
+	{
+		// disable admin cache
+		return;
+	}
+
 	public function updateSessionActivity($controllerResponse, $controllerName, $action)
 	{
 		// disable session activity for api requests
