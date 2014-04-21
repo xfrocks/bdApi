@@ -4,23 +4,44 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
 {
 	protected function _getFields()
 	{
-		return array(
-			'xf_bdapi_client' => array(
-				'name' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true, 'maxLength' => 255),
-				'description' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true),	
+		return array('xf_bdapi_client' => array(
+				'name' => array(
+					'type' => XenForo_DataWriter::TYPE_STRING,
+					'required' => true,
+					'maxLength' => 255
+				),
+				'description' => array(
+					'type' => XenForo_DataWriter::TYPE_STRING,
+					'required' => true
+				),
 				'client_id' => array(
-					'type' => XenForo_DataWriter::TYPE_STRING, 'required' => true, 'maxLength' => 255,
-					'verification' => array('$this', '_verifyClientId'),
+					'type' => XenForo_DataWriter::TYPE_STRING,
+					'required' => true,
+					'maxLength' => 255,
+					'verification' => array(
+						'$this',
+						'_verifyClientId'
+					),
 				),
-				'client_secret' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true, 'maxLength' => 255),
+				'client_secret' => array(
+					'type' => XenForo_DataWriter::TYPE_STRING,
+					'required' => true,
+					'maxLength' => 255
+				),
 				'redirect_uri' => array(
-					'type' => XenForo_DataWriter::TYPE_STRING, 'required' => true,
-					'verification' => array('$this', '_verifyRedirectUri'),
+					'type' => XenForo_DataWriter::TYPE_STRING,
+					'required' => true,
+					'verification' => array(
+						'$this',
+						'_verifyRedirectUri'
+					),
 				),
-				'user_id' => array('type' => XenForo_DataWriter::TYPE_UINT, 'required' => true),
+				'user_id' => array(
+					'type' => XenForo_DataWriter::TYPE_UINT,
+					'required' => true
+				),
 				'options' => array('type' => XenForo_DataWriter::TYPE_SERIALIZED)
-			)
-		);
+			));
 	}
 
 	protected function _getExistingData($data)
@@ -36,20 +57,27 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
 	protected function _getUpdateCondition($tableName)
 	{
 		$conditions = array();
-		
+
 		foreach (array('client_id') as $field)
 		{
 			$conditions[] = $field . ' = ' . $this->_db->quote($this->getExisting($field));
 		}
-		
+
 		return implode(' AND ', $conditions);
 	}
-	
+
 	protected function _verifyClientId(&$clientId)
 	{
 		if ($this->isUpdate() && $clientId === $this->getExisting('client_id'))
 		{
-			return true; // unchanged, always pass
+			// unchanged, always pass
+			return true;
+		}
+
+		if (!preg_match('#^[a-z0-9]+$#', $clientId))
+		{
+			$this->error(new XenForo_Phrase('bdapi_client_id_must_be_az09'), 'client_id');
+			return false;
 		}
 
 		$existingClient = $this->_getClientModel()->getClientById($clientId);
@@ -61,7 +89,7 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
 
 		return true;
 	}
-	
+
 	protected function _verifyRedirectUri(&$redirectUri)
 	{
 		if (!Zend_Uri::check($redirectUri))
@@ -72,7 +100,7 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
 
 		return true;
 	}
-	
+
 	protected function _postDelete()
 	{
 		// delete associated authentication codes
@@ -83,7 +111,7 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
 			$authCodeDw->setExistingData($authCode, true);
 			$authCodeDw->delete();
 		}
-		
+
 		// delete associated tokens
 		$tokens = $this->getModelFromCache('bdApi_Model_Token')->getTokens(array('client_id' => $this->get('client_id')));
 		foreach ($tokens as $token)
@@ -92,7 +120,7 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
 			$tokenDw->setExistingData($token, true);
 			$tokenDw->delete();
 		}
-		
+
 		// delete associated refresh tokens
 		$refreshTokens = $this->getModelFromCache('bdApi_Model_RefreshToken')->getRefreshTokens(array('client_id' => $this->get('client_id')));
 		foreach ($refreshTokens as $refreshToken)
@@ -101,10 +129,10 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
 			$refreshTokenDw->setExistingData($refreshToken, true);
 			$refreshTokenDw->delete();
 		}
-		
+
 		return parent::_postDelete();
 	}
-	
+
 	/**
 	 * @return bdApi_Model_Client
 	 */
@@ -112,4 +140,5 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
 	{
 		return $this->getModelFromCache('bdApi_Model_Client');
 	}
+
 }
