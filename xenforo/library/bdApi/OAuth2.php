@@ -128,7 +128,7 @@ class bdApi_OAuth2 extends OAuth2
 			return false;
 		}
 
-		if ($clientSecret !== NULL AND !$this->_model->getClientModel()->verifySecret($client, $clientSecret))
+		if (!$this->_model->getClientModel()->verifySecret($client, $clientSecret))
 		{
 			// the secret exists but not valid
 			return false;
