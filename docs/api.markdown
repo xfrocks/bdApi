@@ -490,6 +490,7 @@ Detail information of a post.
                     attachment_id: (int),
                     post_id: (int),
                     attachment_download_count: (int),
+                    filename: (string), # since 2014052201
                     links: {
                         permalink: (uri),
                         thumbnail: (uri)

@@ -196,6 +196,8 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 			'attachment_id' => 'attachment_id',
 			'content_id' => 'post_id',
 			'view_count' => 'attachment_download_count',
+			// xf_attachment_data
+			'filename' => 'filename',
 		);
 
 		$data = bdApi_Data_Helper_Core::filter($attachment, $publicKeys);
