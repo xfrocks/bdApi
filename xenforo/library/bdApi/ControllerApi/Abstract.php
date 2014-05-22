@@ -326,8 +326,16 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		$requestMethod = $this->_request->getMethod();
 		$requestUri = $this->_request->getRequestUri();
 		$requestData = $this->_request->getParams();
-		$responseCode = $controllerResponse->responseCode;
-		$responseOutput = $this->_getResponseOutput($controllerResponse);
+		if ($controllerResponse instanceof XenForo_ControllerResponse_Abstract)
+		{
+			$responseCode = $controllerResponse->responseCode;
+			$responseOutput = $this->_getResponseOutput($controllerResponse);
+		}
+		else
+		{
+			$responseCode = $this->_response->getHttpResponseCode();
+			$responseOutput = array('raw' => $controllerResponse);
+		}
 
 		if ($responseOutput !== false)
 		{
