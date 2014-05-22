@@ -45,13 +45,32 @@ if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']) AND isset($_SERVER['REQUEST_M
 	}
 }
 
-// PUT, DELETE method support
-if (isset($_SERVER['REQUEST_METHOD']) AND in_array($_SERVER['REQUEST_METHOD'], array(
+$input = file_get_contents('php://input');
+
+$inputJson = false;
+if (isset($_SERVER['REQUEST_METHOD']) AND $_SERVER['REQUEST_METHOD'] === 'POST')
+{
+	$inputJson = @json_decode($input, true);
+}
+
+if (!empty($inputJson))
+{
+	// because PHP parse input incorrectly with json payload
+	// we have to reset $_POST/$_REQUEST for them
+	foreach ($_POST as $postKey => $postValue)
+	{
+		unset($_REQUEST[$postKey]);
+	}
+	$_POST = array();
+}
+elseif (isset($_SERVER['REQUEST_METHOD']) AND in_array($_SERVER['REQUEST_METHOD'], array(
 	'PUT',
 	'DELETE',
 )))
 {
-	$input = file_get_contents('php://input');
+	// PUT, DELETE method support
+	// PHP does not parse input unless it is POST request...
+	// TODO: security check
 	$inputParams = array();
 	parse_str($input, $inputParams);
 	foreach ($inputParams as $key => $value)
