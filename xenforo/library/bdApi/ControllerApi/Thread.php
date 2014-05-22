@@ -284,7 +284,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
 	public function actionPostAttachments()
 	{
-		$contentData = $this->_input->filter(array('forum_id' => XenForo_Input::UINT, ));
+		$contentData = $this->_input->filter(array('forum_id' => XenForo_Input::UINT));
 		if (empty($contentData['forum_id']))
 		{
 			return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_attachments_requires_forum_id'), 400);
@@ -299,14 +299,14 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 			return $response;
 		}
 
-		$data = array('attachment' => $this->_getPostModel()->prepareApiDataForAttachment(array('post_id' => 0), $response, $hash), );
+		$data = array('attachment' => $this->_getPostModel()->prepareApiDataForAttachment(array('post_id' => 0), $response, $hash));
 
 		return $this->responseData('bdApi_ViewApi_Thread_Attachments', $data);
 	}
 
 	public function actionDeleteAttachments()
 	{
-		$contentData = $this->_input->filter(array('forum_id' => XenForo_Input::UINT, ));
+		$contentData = $this->_input->filter(array('forum_id' => XenForo_Input::UINT));
 		if (empty($contentData['forum_id']))
 		{
 			return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_attachments_requires_forum_id'), 400);

@@ -97,7 +97,14 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 	public function getAttachmentTempHash($contentData)
 	{
 		$prefix = '';
-		if (!empty($contentData['post_id']))
+
+		$inputHash = $this->_controller->getInput()->filterSingle('attachment_hash', XenForo_Input::STRING);
+
+		if (!empty($inputHash))
+		{
+			$prefix = sprintf('hash%s', $inputHash);
+		}
+		elseif (!empty($contentData['post_id']))
 		{
 			$prefix = sprintf('post%d', $contentData['post_id']);
 		}
@@ -116,8 +123,9 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 
 		$session = XenForo_Application::getSession();
 		$clientId = $session->getOAuthClientId();
+		$visitorUserId = XenForo_Visitor::getUserId();
 
-		return md5(sprintf('%s%s%s', $prefix, $clientId, XenForo_Application::getConfig()->get('globalSalt')));
+		return md5(sprintf('prefix%s_client%s_visitor%d_salt%s', $prefix, $clientId, $visitorUserId, XenForo_Application::getConfig()->get('globalSalt')));
 	}
 
 	protected function _assertCanUploadAndManageAttachments($hash, $contentType, array $contentData)

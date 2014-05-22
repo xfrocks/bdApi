@@ -223,6 +223,7 @@ Parameters:
 
 * `file` (__required__): binary data of the attachment.
 * `forum_id` (__required__): id of the container forum of the target thread.
+* `attachment_hash` (_optional_, since forum-2014052202): a unique hash value.
 
 Required scopes:
 
@@ -240,6 +241,7 @@ Parameters:
 
  * `forum_id` (__required__): id of the container forum of the target thread.
  * `attachment_id` (__required__): id of the attachment.
+ * `attachment_hash` (_optional_, since forum-2014052202): the hash that was used when the attachment was uploaded (use only if the attachment hasn't been associated with a thread).
 
 Required scopes:
 
@@ -459,6 +461,7 @@ Parameters:
  * `file` (__required__): binary data of the attachment.
  * `thread_id` (_optional_): id of the container thread of the target post.
  * `post_id` (_optional_): id of the target post.
+ * `attachment_hash` (_optional_, since forum-2014052202): a unique hash.
 
 Parameters Note: either `thread_id` or `post_id` parameter must has a valid id. Simply speaking, `thread_id` must be used with POST `/posts` (creating a new post) while `post_id` must be used with PUT `/posts/:postId` (editing a post).
 
@@ -599,6 +602,7 @@ Delete a post's attachment.
 Parameters:
 
  * `thread_id` (_optional_): id of the container thread of the target post (use only if the attachment hasn't been associated with a post).
+ * `attachment_hash` (_optional_, since forum-2014052202): the hash that was used when the attachment was uploaded (use only if the attachment hasn't been associated with a post).
 
 Required scopes:
 
