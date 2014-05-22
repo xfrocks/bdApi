@@ -167,12 +167,34 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$input['post_body'] = $this->getHelper('Editor')->getMessageText('post_body', $this->_input);
 		$input['post_body'] = XenForo_Helper_String::autoLinkBbCode($input['post_body']);
 
+		XenForo_Db::beginTransaction();
+
 		$dw = XenForo_DataWriter::create('XenForo_DataWriter_DiscussionMessage_Post');
-		$dw->setExistingData($post['post_id']);
+		$dw->setExistingData($post, true);
 		$dw->set('message', $input['post_body']);
 		$dw->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($post));
 		$dw->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
 		$dw->save();
+
+		if ($post['post_id'] == $thread['first_post_id'] AND $this->_getThreadModel()->canEditThread($thread, $forum))
+		{
+			$threadInput = $this->_input->filter(array('thread_title' => XenForo_Input::STRING));
+
+			$threadDw = XenForo_DataWriter::create('XenForo_DataWriter_Discussion_Thread');
+			$threadDw->setExistingData($thread, true);
+
+			if (!empty($threadInput['thread_title']))
+			{
+				$threadDw->set('title', $threadInput['thread_title']);
+			}
+
+			if ($threadDw->hasChanges())
+			{
+				$threadDw->save();
+			}
+		}
+
+		XenForo_Db::commit();
 
 		return $this->responseReroute(__CLASS__, 'get-single');
 	}

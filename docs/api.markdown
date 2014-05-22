@@ -539,6 +539,7 @@ Edit a post.
 Parameters:
 
  * `post_body` (__required__): new content of the post.
+ * `thread_title` (_optional_, since forum-2014052203): new title of the thread (only used if the post is the first post in the thread and the user can edit thread).
 
 Required scopes:
 
