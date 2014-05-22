@@ -125,11 +125,33 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		}
 
 		$threads = $this->_getThreadModel()->getThreads($conditions, $this->_getThreadModel()->getFetchOptionsToPrepareApiData($fetchOptions));
+
+		$forumIds = array();
+		foreach ($threads as $thread)
+		{
+			$forumIds[$thread['node_id']] = true;
+		}
+		if (!empty($forumIds))
+		{
+			$forums = $this->_getForumModel()->getForumsByIds(array_keys($forumIds));
+		}
+
 		foreach (array_keys($threads) as $threadId)
 		{
-			if (!$this->_getThreadModel()->canViewThread($threads[$threadId], $threads[$threadId]))
+			if (!empty($forums[$threads[$threadId]['node_id']]))
+			{
+				$threads[$threadId]['forum'] = $forums[$threads[$threadId]['node_id']];
+			}
+			else
 			{
 				unset($threads[$threadId]);
+				continue;
+			}
+
+			if (!$this->_getThreadModel()->canViewThread($threads[$threadId], $threads[$threadId]['forum']))
+			{
+				unset($threads[$threadId]);
+				continue;
 			}
 		}
 
@@ -160,7 +182,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 				$firstPost = $firstPosts[$threads[$threadId]['first_post_id']];
 			}
 
-			$data[] = $this->_getThreadModel()->prepareApiDataForThread($threads[$threadId], $threads[$threadId], $firstPost);
+			$data[] = $this->_getThreadModel()->prepareApiDataForThread($threads[$threadId], $threads[$threadId]['forum'], $firstPost);
 		}
 
 		$data = array(
@@ -193,7 +215,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 			}
 		}
 
-		$data = array('thread' => $this->_filterDataSingle($this->_getThreadModel()->prepareApiDataForThread($thread, $forum, $firstPost)), );
+		$data = array('thread' => $this->_filterDataSingle($this->_getThreadModel()->prepareApiDataForThread($thread, $forum, $firstPost)));
 
 		return $this->responseData('bdApi_ViewApi_Thread_Single', $data);
 	}
