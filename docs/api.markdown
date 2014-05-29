@@ -516,6 +516,7 @@ Detail information of a post.
                 view: (boolean),
                 edit: (boolean),
                 delete: (boolean),
+                reply: (boolean), #since forum-2014052901
                 like: (boolean)
             }
         }
