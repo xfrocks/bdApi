@@ -2,11 +2,14 @@
 
 class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 {
+	const FETCH_IS_FOLLOWED = 'bdApi_followedUserId';
 	const ORDER_USER_ID = 'bdApi_user_id';
 
 	public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
 	{
 		$fetchOptions['join'] = XenForo_Model_User::FETCH_USER_FULL;
+
+		$fetchOptions[self::FETCH_IS_FOLLOWED] = XenForo_Visitor::getUserId();
 
 		return $fetchOptions;
 	}

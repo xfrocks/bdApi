@@ -735,6 +735,7 @@ Detail information of a user.
             user_unread_conversation_count: (int), // since 2014022601, user_is_visitor==true only, requires conversate scope
             user_is_valid: (boolean),
             user_is_verified: (boolean),
+            user_is_followed: (boolean), // since forum-2014052902
             user_custom_fields: { // user_is_visitor==true only, since 2013110601
                 field_id: (field_value),
                 ...
