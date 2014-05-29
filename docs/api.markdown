@@ -264,6 +264,7 @@ Detail information of a thread.
             thread_is_published: (boolean),
             thread_is_deleted: (boolean),
             thread_is_sticky: (boolean),
+            thread_is_followed: (boolean), // since forum-2014052903
             first_post: (post),
             links: {
                 permalink: (uri),
@@ -279,6 +280,7 @@ Detail information of a thread.
                 view: (boolean),
                 edit: (boolean),
                 delete: (boolean),
+                follow: (boolean), // since forum-2014052903
                 post: (boolean)
             }
         }
