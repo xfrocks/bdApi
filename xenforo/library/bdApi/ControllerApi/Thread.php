@@ -125,68 +125,12 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		}
 
 		$threads = $this->_getThreadModel()->getThreads($conditions, $this->_getThreadModel()->getFetchOptionsToPrepareApiData($fetchOptions));
-
-		$forumIds = array();
-		foreach ($threads as $thread)
-		{
-			$forumIds[$thread['node_id']] = true;
-		}
-		if (!empty($forumIds))
-		{
-			$forums = $this->_getForumModel()->getForumsByIds(array_keys($forumIds));
-		}
-
-		foreach (array_keys($threads) as $threadId)
-		{
-			if (!empty($forums[$threads[$threadId]['node_id']]))
-			{
-				$threads[$threadId]['forum'] = $forums[$threads[$threadId]['node_id']];
-			}
-			else
-			{
-				unset($threads[$threadId]);
-				continue;
-			}
-
-			if (!$this->_getThreadModel()->canViewThread($threads[$threadId], $threads[$threadId]['forum']))
-			{
-				unset($threads[$threadId]);
-				continue;
-			}
-		}
+		$threadsData = $this->_prepareThreads($threads);
 
 		$total = $this->_getThreadModel()->countThreads($conditions);
 
-		$firstPostIds = array();
-		$firstPosts = array();
-		if (!$this->_isFieldExcluded('first_post'))
-		{
-			foreach ($threads as $thread)
-			{
-				$firstPostIds[] = $thread['first_post_id'];
-			}
-			$firstPosts = $this->_getPostModel()->getPostsByIds($firstPostIds, $this->_getPostModel()->getFetchOptionsToPrepareApiData());
-
-			if (!$this->_isFieldExcluded('first_post.attachments'))
-			{
-				$firstPosts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($firstPosts);
-			}
-		}
-
-		$data = array();
-		foreach (array_keys($threads) as $threadId)
-		{
-			$firstPost = array();
-			if (isset($firstPosts[$threads[$threadId]['first_post_id']]))
-			{
-				$firstPost = $firstPosts[$threads[$threadId]['first_post_id']];
-			}
-
-			$data[] = $this->_getThreadModel()->prepareApiDataForThread($threads[$threadId], $threads[$threadId]['forum'], $firstPost);
-		}
-
 		$data = array(
-			'threads' => $this->_filterDataMany($data),
+			'threads' => $this->_filterDataMany($threadsData),
 			'threads_total' => $total,
 		);
 
@@ -341,6 +285,30 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		return $attachmentHelper->doDelete($hash, $attachmentId);
 	}
 
+	public function actionGetFollowed()
+	{
+		$threadWatchModel = $this->getModelFromCache('XenForo_Model_ThreadWatch');
+
+		$fetchOptions = $this->_getThreadModel()->getFetchOptionsToPrepareApiData();
+		$threadWatches = $threadWatchModel->getThreadsWatchedByUser(XenForo_Visitor::getUserId(), false, $fetchOptions);
+		$threadsData = $this->_prepareThreads($threadWatches);
+
+		foreach ($threadWatches as $threadWatch)
+		{
+			foreach ($threadsData as &$threadData)
+			{
+				if ($threadWatch['thread_id'] == $threadData['thread_id'])
+				{
+					$threadData = $threadWatchModel->prepareApiDataForThreadWatches($threadData, $threadWatch);
+				}
+			}
+		}
+
+		$data = array('threads' => $this->_filterDataMany($threadsData));
+
+		return $this->responseData('bdApi_ViewApi_Thread_Followed', $data);
+	}
+
 	public function actionGetFollowers()
 	{
 		$threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
@@ -350,15 +318,28 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
 		$followers = $this->getModelFromCache('XenForo_Model_ThreadWatch')->getUsersWatchingThread($thread['thread_id'], $forum['node_id']);
 
-		$data = array('users' => array(), );
+		$users = array();
 
-		foreach ($followers as $follower)
+		if ($this->_getThreadModel()->canWatchThread($thread, $forum))
 		{
-			$data['users'][] = array(
-				'user_id' => $follower['user_id'],
-				'username' => $follower['username'],
-			);
+			$visitor = XenForo_Visitor::getInstance();
+			$threadWatchModel = $this->getModelFromCache('XenForo_Model_ThreadWatch');
+			$threadWatch = $threadWatchModel->getUserThreadWatchByThreadId($visitor['user_id'], $thread['thread_id']);
+
+			if (!empty($threadWatch))
+			{
+				$user = array(
+					'user_id' => $visitor['user_id'],
+					'username' => $visitor['username'],
+				);
+
+				$user = $threadWatchModel->prepareApiDataForThreadWatches($user, $threadWatch);
+
+				$users[] = $user;
+			}
 		}
+
+		$data = array('users' => $this->_filterDataMany($users));
 
 		return $this->responseData('bdApi_ViewApi_Thread_Followers', $data);
 	}
@@ -366,6 +347,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 	public function actionPostFollowers()
 	{
 		$threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
+		$email = $this->_input->filterSingle('email', XenForo_Input::UINT);
 
 		$ftpHelper = $this->getHelper('ForumThreadPost');
 		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
@@ -375,8 +357,8 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 			return $this->responseNoPermission();
 		}
 
-		// TODO: parameter to watch with email?
-		$this->getModelFromCache('XenForo_Model_ThreadWatch')->setThreadWatchState(XenForo_Visitor::getUserId(), $thread['thread_id'], 'watch_no_email');
+		$state = ($email > 0 ? 'watch_email' : 'watch_no_email');
+		$this->getModelFromCache('XenForo_Model_ThreadWatch')->setThreadWatchState(XenForo_Visitor::getUserId(), $thread['thread_id'], $state);
 
 		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
 	}
@@ -385,15 +367,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 	{
 		$threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
 
-		$ftpHelper = $this->getHelper('ForumThreadPost');
-		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
-
-		if (!$this->_getThreadModel()->canWatchThread($thread, $forum))
-		{
-			return $this->responseNoPermission();
-		}
-
-		$this->getModelFromCache('XenForo_Model_ThreadWatch')->setThreadWatchState(XenForo_Visitor::getUserId(), $thread['thread_id'], '');
+		$this->getModelFromCache('XenForo_Model_ThreadWatch')->setThreadWatchState(XenForo_Visitor::getUserId(), $threadId, '');
 
 		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
 	}
@@ -476,6 +450,68 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		$threadIds = array_keys($threadModel->getThreads($conditions, $fetchOptions));
 
 		return $this->_getNewOrRecentResponse($threadIds);
+	}
+
+	protected function _prepareThreads(array $threads)
+	{
+		$forumIds = array();
+		foreach ($threads as $thread)
+		{
+			$forumIds[$thread['node_id']] = true;
+		}
+		if (!empty($forumIds))
+		{
+			$forums = $this->_getForumModel()->getForumsByIds(array_keys($forumIds));
+		}
+
+		foreach (array_keys($threads) as $threadId)
+		{
+			if (!empty($forums[$threads[$threadId]['node_id']]))
+			{
+				$threads[$threadId]['forum'] = $forums[$threads[$threadId]['node_id']];
+			}
+			else
+			{
+				unset($threads[$threadId]);
+				continue;
+			}
+
+			if (!$this->_getThreadModel()->canViewThread($threads[$threadId], $threads[$threadId]['forum']))
+			{
+				unset($threads[$threadId]);
+				continue;
+			}
+		}
+
+		$firstPostIds = array();
+		$firstPosts = array();
+		if (!$this->_isFieldExcluded('first_post'))
+		{
+			foreach ($threads as $thread)
+			{
+				$firstPostIds[] = $thread['first_post_id'];
+			}
+			$firstPosts = $this->_getPostModel()->getPostsByIds($firstPostIds, $this->_getPostModel()->getFetchOptionsToPrepareApiData());
+
+			if (!$this->_isFieldExcluded('first_post.attachments'))
+			{
+				$firstPosts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($firstPosts);
+			}
+		}
+
+		$threadsData = array();
+		foreach (array_keys($threads) as $threadId)
+		{
+			$firstPost = array();
+			if (isset($firstPosts[$threads[$threadId]['first_post_id']]))
+			{
+				$firstPost = $firstPosts[$threads[$threadId]['first_post_id']];
+			}
+
+			$threadsData[] = $this->_getThreadModel()->prepareApiDataForThread($threads[$threadId], $threads[$threadId]['forum'], $firstPost);
+		}
+
+		return $threadsData;
 	}
 
 	protected function _getNewOrRecentResponse(array $threadIds)

@@ -20,6 +20,7 @@ class bdApi_Listener
 				'XenForo_Model_ForumWatch',
 				'XenForo_Model_Post',
 				'XenForo_Model_Thread',
+				'XenForo_Model_ThreadWatch',
 				'XenForo_Model_User',
 
 				'XenForo_Search_DataHandler_Post',

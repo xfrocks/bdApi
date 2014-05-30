@@ -398,13 +398,17 @@ Required scopes:
  * `post`
 
 ### GET `/threads/:threadId/followers`
-List of a thread's followers
+List of a thread's followers. For privacy reason, only the current user will be included in the list (if the user follows the specified thread). The privacy change was put in place since forum-2014053001, earlier versions return all followers of the thread.
 
     {
         users: [
             {
                 user_id: (int),
-                username: (string)
+                username: (string),
+                follow: {
+                    alert: (boolean:true),
+                    email: (boolean),
+                }
             },
             ...
         ]
@@ -428,7 +432,7 @@ Follow a thread.
 
 Parameters:
 
- * N/A
+ * `email` (_optional_): whether to receive notification as email. Default value: 0. Since forum-2014053002.
 
 Required scopes:
 
@@ -449,6 +453,29 @@ Parameters:
 Required scopes:
 
  * `post`
+
+### GET `/threads/followed`
+List of followed threads by current user. Since forum-2014053002.
+
+    {
+        threads: [
+            (thread) + {
+                follow: {
+                    alert: (boolean:true),
+                    email: (boolean)
+                }
+            },
+            ...
+        ]
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
 
 ### GET `/threads/new`
 List of unread threads (must be logged in).
