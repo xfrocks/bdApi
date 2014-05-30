@@ -141,9 +141,11 @@ Detail information of a category.
             forum_description: (string),
             forum_thread_count: (int),
             forum_post_count: (int),
+            forum_is_follow: (boolean), // since forum-2014053001
             links: {
                 permalink: (uri),
                 detail: (uri),
+                followers: (uri), // since forum-2014053001
                 sub-categories: (uri),
                 sub-forums: (uri),
                 threads: (uri)
@@ -152,9 +154,94 @@ Detail information of a category.
                 view: (boolean),
                 edit: (boolean),
                 delete: (boolean),
+                follow: (boolean), // since forum-2014053001
                 create_thread: (boolean)
             }
         }
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### GET `/forums/:forumId/followers`
+List of a forum's followers. For privacy reason, only the current user will be included in the list (if the user follows the specified forum). Since forum-2014053001.
+
+    {
+        users: [
+            {
+                user_id: (int),
+                username: (string),
+                follow: {
+                    post: (boolean),
+                    alert: (boolean),
+                    email: (alert)
+                }
+            },
+            ...
+        ]
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### POST `/forums/:forumId/followers`
+Follow a forum.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * `post` (_optional_): whether to receive notification for post (value = 1) or just thread (value = 0). Default value: 0.
+ * `alert` (_optional_): whether to receive notification as alert. Default value: 1.
+ * `email` (_optional_): whether to receive notification as email. Default value: 0.
+
+Required scopes:
+
+ * `post`
+
+### DELETE `/forums/:forumId/followers`
+Un-follow a forum.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+
+### GET `/forums/followed`
+List of followed forums by current user. Since forum-2014053001.
+
+    {
+        forums: [
+            (forum) + {
+                follow: {
+                    post: (boolean),
+                    alert: (boolean),
+                    email: (alert)
+                }
+            },
+            ...
+        ]
     }
 
 Parameters:
@@ -331,7 +418,7 @@ Required scopes:
 
  * `read`
 
-### POST `threads/:threadId/followers`
+### POST `/threads/:threadId/followers`
 Follow a thread.
 
     {
@@ -347,7 +434,7 @@ Required scopes:
 
  * `post`
 
-### DELETE `threads/:threadId/followers`
+### DELETE `/threads/:threadId/followers`
 Un-follow a thread.
 
     {
