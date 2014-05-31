@@ -110,6 +110,7 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
 
 		$messageDw = $conversationDw->getFirstMessageDw();
 		$messageDw->set('message', $input['message_body']);
+		$messageDw->setExtraData(XenForo_DataWriter_ConversationMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash());
 
 		$conversationDw->preSave();
 
@@ -134,6 +135,31 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
 		$this->_getConversationModel()->deleteConversationForUser($conversationId, XenForo_Visitor::getUserId(), 'deleted');
 
 		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+	}
+
+	public function actionPostAttachments()
+	{
+		$attachmentHelper = $this->_getAttachmentHelper();
+		$hash = $attachmentHelper->getAttachmentTempHash();
+		$response = $attachmentHelper->doUpload('file', $hash, 'conversation_message');
+
+		if ($response instanceof XenForo_ControllerResponse_Abstract)
+		{
+			return $response;
+		}
+
+		$data = array('attachment' => $this->_getConversationModel()->prepareApiDataForAttachment(array('message_id' => 0), $response, $hash));
+
+		return $this->responseData('bdApi_ViewApi_Conversation_Attachments', $data);
+	}
+
+	public function actionDeleteAttachments()
+	{
+		$attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
+
+		$attachmentHelper = $this->_getAttachmentHelper();
+		$hash = $attachmentHelper->getAttachmentTempHash();
+		return $attachmentHelper->doDelete($hash, $attachmentId);
 	}
 
 	protected function _getConversationOrError($conversationId, array $fetchOptions = array())

@@ -604,7 +604,7 @@ Detail information of a post.
             post_is_deleted: (boolean),
             post_is_first_post: (boolean), # since 2013122402
             post_is_liked: (boolean),
-            attachments: {
+            attachments: [
                 {
                     attachment_id: (int),
                     post_id: (int),
@@ -612,6 +612,7 @@ Detail information of a post.
                     filename: (string), # since 2014052201
                     links: {
                         permalink: (uri),
+                        data: (uri),
                         thumbnail: (uri)
                     },
                     permissions: {
@@ -619,7 +620,7 @@ Detail information of a post.
                     }
                 },
                 ...
-            },
+            ],
             links: {
                 permalink: (uri),
                 detail: (uri),
@@ -1134,6 +1135,39 @@ Required scopes:
  * `post`
  * `conversate`
 
+### POST `/conversations/attachments`
+Upload an attachment for a conversation. Since forum-2014053003.
+
+    {
+        attachment: (conversation-message > attachment)
+    }
+
+Parameters:
+
+* `file` (__required__): binary data of the attachment.
+* `attachment_hash` (_optional_): a unique hash value.
+
+Required scopes:
+
+* `post`
+
+### DELETE `/conversations/attachments`
+Delete an attachment for a conversation. Since forum-2014053003.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * `attachment_id` (__required__): id of the attachment.
+ * `attachment_hash` (_optional_): the hash that was used when the attachment was uploaded (use only if the attachment hasn't been associated with a conversation).
+
+Required scopes:
+
+ * `post`
+
 ### GET `/conversation-messages`
 List of messages in a conversation (with pagination).
 
@@ -1179,7 +1213,28 @@ Required scopes:
  * `post`
  * `conversate`
 
+### POST `/conversation-messages/attachments`
+Upload an attachment for a message. The attachment will be associated after the message is saved. Since forum-2014053003.
+
+    {
+        attachment: (conversation-message > attachment)
+    }
+
+Parameters:
+
+ * `file` (__required__): binary data of the attachment.
+ * `conversation_id` (_optional_): id of the container conversation of the target message.
+ * `message_id` (_optional_): id of the target message.
+ * `attachment_hash` (_optional_): a unique hash.
+
+Parameters Note: either `conversation_id` or `message_id` parameter must has a valid id. Simply speaking, `conversation_id` must be used with POST `/conversation-message` (creating a new message) while `message_id` must be used with PUT `/conversation-messages/:messageId` (editing a message).
+
+Required scopes:
+
+* `post`
+
 ### GET `/conversation-messages/:messageId`
+Detail information of a message.
 
     {
         message: {
@@ -1191,6 +1246,23 @@ Required scopes:
             message_body: (string),
             message_body_html: (string),
             message_body_plain_text: (string),
+            attachments: [  # since forum-2014053003
+                {
+                    attachment_id: (int),
+                    message_id: (int),
+                    attachment_download_count: (int),
+                    filename: (string),
+                    links: {
+                        permalink: (uri),
+                        data: (uri),
+                        thumbnail: (uri)
+                    },
+                    permissions: {
+                        view: (boolean)
+                    }
+                },
+                ...
+            ],
             links: {
                 detail: (uri),
                 conversation: (uri),
@@ -1199,6 +1271,54 @@ Required scopes:
             }
         }
     }
+
+### GET `/conversation-messages/:messageId/attachments`
+List of attachments of a message. Since forum-2014053003.
+
+    {
+        attachments: [
+            (conversation-message > attachment),
+            ...
+        ]
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### GET `/conversation-messages/:messageId/attachments/:attachmentId`
+Binary data of a message's attachment. Since forum-2014053003.
+
+Parameters:
+
+ * `max_width` (_optional_): maximum width required (applicable for image attachment only).
+ * `max_height` (_optional_): maximum height required (applicable for image attachment only).
+ * `keep_ratio` (_optional_): whether to keep original ratio during resizing (applicable for image attachment only).
+
+Required scopes:
+
+ * `read`
+
+### DELETE `/conversation-messages/:messageId/attachments/:attachmentId`
+Delete a message's attachment. Since forum-2014053003.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * `conversation_id` (_optional_): id of the container thread of the target post (use only if the attachment hasn't been associated with a message).
+ * `attachment_hash` (_optional_): the hash that was used when the attachment was uploaded (use only if the attachment hasn't been associated with a message).
+
+Required scopes:
+
+ * `post`
 
 ## Notifications
 

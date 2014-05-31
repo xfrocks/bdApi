@@ -2,7 +2,7 @@
 
 class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstract
 {
-	public function doUpload($formField, $hash, $contentType, array $contentData)
+	public function doUpload($formField, $hash, $contentType, array $contentData = array())
 	{
 		if (isset($contentData['forum_id']) AND !isset($contentData['node_id']))
 		{
@@ -94,7 +94,7 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 		return $this->_controller->responseData('bdApi_ViewApi_Helper_Attachment_Data', $viewParams);
 	}
 
-	public function getAttachmentTempHash($contentData)
+	public function getAttachmentTempHash(array $contentData = array())
 	{
 		$prefix = '';
 
@@ -119,6 +119,14 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 		elseif (!empty($contentData['node_id']))
 		{
 			$prefix = sprintf('node%d', $contentData['node_id']);
+		}
+		elseif (!empty($contentData['conversation_id']))
+		{
+			$prefix = sprintf('conversation%d', $contentData['conversation_id']);
+		}
+		elseif (!empty($contentData['message_id']))
+		{
+			$prefix = sprintf('message%d', $contentData['message_id']);
 		}
 
 		$session = XenForo_Application::getSession();

@@ -327,7 +327,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			$post = $this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum);
 			$attachments = isset($post['attachments']) ? $post['attachments'] : array();
 
-			$data = array('attachments' => $this->_filterDataMany($attachments), );
+			$data = array('attachments' => $this->_filterDataMany($attachments));
 		}
 		else
 		{

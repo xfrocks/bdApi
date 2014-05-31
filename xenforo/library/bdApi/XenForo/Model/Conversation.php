@@ -157,10 +157,16 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 			'message_date' => 'message_create_date',
 			'message' => 'message_body',
 			'messageHtml' => 'message_body_html',
-			'messagePlainText' => 'message_body_plain_text'
+			'messagePlainText' => 'message_body_plain_text',
+			'attach_count' => 'message_attachment_count',
 		);
 
 		$data = bdApi_Data_Helper_Core::filter($message, $publicKeys);
+
+		if (!empty($message['attachments']))
+		{
+			$data['attachments'] = $this->prepareApiDataForAttachments($message, $message['attachments']);
+		}
 
 		$data['links'] = array(
 			'detail' => bdApi_Link::buildApiLink('conversation-messages', $message),
@@ -173,6 +179,58 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 				true
 			))
 		);
+
+		return $data;
+	}
+
+	public function prepareApiDataForAttachments(array $message, array $attachments, $tempHash = '')
+	{
+		$data = array();
+
+		foreach ($attachments as $key => $attachment)
+		{
+			$data[] = $this->prepareApiDataForAttachment($message, $attachment, $tempHash);
+		}
+
+		return $data;
+	}
+
+	public function prepareApiDataForAttachment(array $message, array $attachment, $tempHash = '')
+	{
+		$attachmentModel = $this->getModelFromCache('XenForo_Model_Attachment');
+		$attachment = $attachmentModel->prepareAttachment($attachment);
+
+		$publicKeys = array(
+			// xf_attachment
+			'attachment_id' => 'attachment_id',
+			'content_id' => 'message_id',
+			'view_count' => 'attachment_download_count',
+
+			// xf_attachment_data
+			'filename' => 'filename',
+		);
+
+		$data = bdApi_Data_Helper_Core::filter($attachment, $publicKeys);
+
+		$paths = XenForo_Application::get('requestPaths');
+		$paths['fullBasePath'] = XenForo_Application::getOptions()->get('boardUrl') . '/';
+
+		$data['links'] = array('permalink' => bdApi_Link::buildPublicLink('attachments', $attachment));
+
+		if (!empty($attachment['thumbnailUrl']))
+		{
+			$data['links']['thumbnail'] = bdApi_Link::convertUriToAbsoluteUri($attachment['thumbnailUrl'], true, $paths);
+		}
+
+		if (!empty($message['message_id']))
+		{
+			$data['links'] += array(
+				'data' => bdApi_Link::buildApiLink('conversation-messages/attachments', $message, array('attachment_id' => $attachment['attachment_id'])),
+				'message' => bdApi_Link::buildApiLink('conversation-messages', $message),
+			);
+		}
+
+		$data['permissions'] = array('view' => $attachmentModel->canViewAttachment($attachment, $tempHash));
 
 		return $data;
 	}
