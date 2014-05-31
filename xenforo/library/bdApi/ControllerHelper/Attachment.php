@@ -120,13 +120,13 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 		{
 			$prefix = sprintf('node%d', $contentData['node_id']);
 		}
-		elseif (!empty($contentData['conversation_id']))
-		{
-			$prefix = sprintf('conversation%d', $contentData['conversation_id']);
-		}
 		elseif (!empty($contentData['message_id']))
 		{
 			$prefix = sprintf('message%d', $contentData['message_id']);
+		}
+		elseif (!empty($contentData['conversation_id']))
+		{
+			$prefix = sprintf('conversation%d', $contentData['conversation_id']);
 		}
 
 		$session = XenForo_Application::getSession();

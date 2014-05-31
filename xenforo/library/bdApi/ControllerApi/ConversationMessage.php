@@ -120,6 +120,46 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 		return $this->responseReroute(__CLASS__, 'get-single');
 	}
 
+	public function actionPutIndex()
+	{
+		$messageId = $this->_input->filterSingle('message_id', XenForo_Input::UINT);
+
+		$message = $this->_getMessageOrError($messageId);
+		$conversation = $this->_getConversationOrError($message['conversation_id']);
+
+		if (!$this->_getConversationModel()->canEditMessage($message, $conversation, $errorPhraseKey))
+		{
+			throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+		}
+
+		$input = $this->_input->filter(array(
+			// TODO
+		));
+		$input['message_body'] = $this->getHelper('Editor')->getMessageText('message_body', $this->_input);
+		$input['message_body'] = XenForo_Helper_String::autoLinkBbCode($input['message_body']);
+
+		$visitor = XenForo_Visitor::getInstance();
+
+		$messageDw = XenForo_DataWriter::create('XenForo_DataWriter_ConversationMessage');
+		$messageDw->setExistingData($message, true);
+		$messageDw->set('message', $input['message_body']);
+		$messageDw->setExtraData(XenForo_DataWriter_ConversationMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($message));
+		$messageDw->save();
+
+		return $this->responseReroute(__CLASS__, 'get-single');
+	}
+
+	public function actionDeleteIndex()
+	{
+		$messageId = $this->_input->filterSingle('message_id', XenForo_Input::UINT);
+
+		$message = $this->_getMessageOrError($messageId);
+		$conversation = $this->_getConversationOrError($message['conversation_id']);
+
+		// XenForo does not support message deletion
+		return $this->responseNoPermission();
+	}
+
 	public function actionGetAttachments()
 	{
 		$messageId = $this->_input->filterSingle('message_id', XenForo_Input::UINT);

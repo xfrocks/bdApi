@@ -1268,9 +1268,46 @@ Detail information of a message.
                 conversation: (uri),
                 creator: (uri),
                 creator_avatar: (uri)
+            },
+            permissions: { # since forum-2014053101
+                view: (boolean),
+                edit: (boolean),
+                delete: (boolean),
+                reply: (boolean)
             }
         }
     }
+
+### PUT `/conversation-messages/:messageId`
+Edit a message. Since forum-2014053101.
+
+    {
+        message: (convesation-message)
+    }
+
+Parameters:
+
+ * `message_body` (__required__): new content of the message.
+
+Required scopes:
+
+ * `post`
+
+### DELETE `/conversation-messages/:messageId`
+Delete a message.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
 
 ### GET `/conversation-messages/:messageId/attachments`
 List of attachments of a message. Since forum-2014053003.

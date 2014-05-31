@@ -180,6 +180,13 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 			))
 		);
 
+		$data['permissions'] = array(
+			'view' => true,
+			'edit' => $this->canEditMessage($message, $conversation),
+			'delete' => false,
+			'reply' => $this->canReplyToConversation($conversation),
+		);
+
 		return $data;
 	}
 

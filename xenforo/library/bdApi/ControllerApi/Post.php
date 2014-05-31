@@ -207,7 +207,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId);
 
 		$deleteType = 'soft';
-		$options = array('reason' => '[bd] API', );
+		$options = array('reason' => '[bd] API');
 
 		if (!$this->_getPostModel()->canDeletePost($post, $thread, $forum, $deleteType, $errorPhraseKey))
 		{
