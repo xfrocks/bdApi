@@ -126,7 +126,10 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 			$auth = $this->getUserAuthenticationObjectByUserId($user['user_id']);
 			$data['user_has_password'] = $auth->hasPassword();
 
-			$data['user_custom_fields'] = !empty($user['custom_fields']) ? unserialize($user['custom_fields']) : array();
+			if (!empty($user['custom_fields']))
+			{
+				$data['user_custom_fields'] = unserialize($user['custom_fields']);
+			}
 
 			$data['self_permissions'] = array('create_conversation' => $this->getModelFromCache('XenForo_Model_Conversation')->canStartConversations());
 		}
@@ -138,12 +141,12 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 		return $data;
 	}
 
-public function prepareUserFetchOptions(array $fetchOptions)
-{
-	$prepared = parent::prepareUserFetchOptions( $fetchOptions);
-	extract($prepared);
-	
-	if (isset($fetchOptions[self::FETCH_IS_FOLLOWED]))
+	public function prepareUserFetchOptions(array $fetchOptions)
+	{
+		$prepared = parent::prepareUserFetchOptions($fetchOptions);
+		extract($prepared);
+
+		if (isset($fetchOptions[self::FETCH_IS_FOLLOWED]))
 		{
 			$fetchOptions[self::FETCH_IS_FOLLOWED] = intval($fetchOptions[self::FETCH_IS_FOLLOWED]);
 			if ($fetchOptions[self::FETCH_IS_FOLLOWED])
@@ -161,9 +164,9 @@ public function prepareUserFetchOptions(array $fetchOptions)
 					0 AS bdapi_user_is_followed';
 			}
 		}
-	
-	return compact(array_keys($prepared));
-}
+
+		return compact(array_keys($prepared));
+	}
 
 	public function getOrderByClause(array $choices, array $fetchOptions, $defaultOrderSql = '')
 	{
