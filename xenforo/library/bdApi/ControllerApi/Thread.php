@@ -289,17 +289,31 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 	{
 		$threadWatchModel = $this->getModelFromCache('XenForo_Model_ThreadWatch');
 
-		$fetchOptions = $this->_getThreadModel()->getFetchOptionsToPrepareApiData();
-		$threadWatches = $threadWatchModel->getThreadsWatchedByUser(XenForo_Visitor::getUserId(), false, $fetchOptions);
-		$threadsData = $this->_prepareThreads($threadWatches);
+		$threadWatches = $threadWatchModel->getThreadsWatchedByUser(XenForo_Visitor::getUserId(), false);
+		$threadsData = array();
+		$threads = array();
+
+		if (!empty($threadWatches))
+		{
+			$threadIds = array();
+			foreach ($threadWatches as $threadWatch)
+			{
+				$threadIds[] = $threadWatch['thread_id'];
+			}
+
+			$fetchOptions = $this->_getThreadModel()->getFetchOptionsToPrepareApiData();
+			$threads = $this->_getThreadModel()->getThreadsByIds($threadIds, $fetchOptions);
+			$threads = $this->_prepareThreads($threads);
+		}
 
 		foreach ($threadWatches as $threadWatch)
 		{
-			foreach ($threadsData as &$threadData)
+			foreach ($threads as &$threadData)
 			{
 				if ($threadWatch['thread_id'] == $threadData['thread_id'])
 				{
 					$threadData = $threadWatchModel->prepareApiDataForThreadWatches($threadData, $threadWatch);
+					$threadsData[] = $threadData;
 				}
 			}
 		}
