@@ -1246,6 +1246,7 @@ Detail information of a message.
             message_body: (string),
             message_body_html: (string),
             message_body_plain_text: (string),
+            message_account_count: (int),
             attachments: [  # since forum-2014053003
                 {
                     attachment_id: (int),
