@@ -129,6 +129,10 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 			if (!empty($user['custom_fields']))
 			{
 				$data['user_custom_fields'] = unserialize($user['custom_fields']);
+				if (empty($data['user_custom_fields']))
+				{
+					unset($data['user_custom_fields']);
+				}
 			}
 
 			$data['self_permissions'] = array('create_conversation' => $this->getModelFromCache('XenForo_Model_Conversation')->canStartConversations());
