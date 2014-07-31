@@ -12,7 +12,7 @@ class bdApi_DataWriter_RefreshToken extends XenForo_DataWriter
 				'expire_date' => array('type' => XenForo_DataWriter::TYPE_UINT, 'required' => true),
 				'issue_date' => array('type' => XenForo_DataWriter::TYPE_UINT, 'required' => true),
 				'user_id' => array('type' => XenForo_DataWriter::TYPE_UINT, 'required' => true),
-				'scope' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true)
+				'scope' => array('type' => XenForo_DataWriter::TYPE_STRING, 'default' => ''),
 			)
 		);
 	}

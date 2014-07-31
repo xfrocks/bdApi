@@ -104,6 +104,35 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base {
 				'route_prefix_admin' => array('className' => 'bdApi_Route_PrefixAdmin_RefreshToken', 'hash' => '785792de37c97cca302374430d5c5063'),
 				'controller_admin' => array('className' => 'bdApi_ControllerAdmin_RefreshToken', 'hash' => '395fece4ddeab05829611c375694ebec')
 			)
+		),
+		'log' => array(
+			'name' => 'log',
+			'camelCase' => 'Log',
+			'camelCasePlural' => 'Logs',
+			'camelCaseWSpace' => 'Log',
+			'fields' => array(
+				'log_id' => array('name' => 'log_id', 'type' => 'uint', 'autoIncrement' => true),
+				'client_id' => array('name' => 'client_id', 'type' => 'string', 'length' => 255, 'required' => true),
+				'user_id' => array('name' => 'user_id', 'type' => 'uint', 'required' => true),
+				'ip_address' => array('name' => 'ip_address', 'type' => 'string', 'length' => 50, 'required' => true),
+				'request_date' => array('name' => 'request_date', 'type' => 'uint', 'required' => true),
+				'request_method' => array('name' => 'request_method', 'type' => 'string', 'length' => 10, 'required' => true),
+				'request_uri' => array('name' => 'request_uri', 'type' => 'string'),
+				'request_data' => array('name' => 'request_data', 'type' => 'serialized'),
+				'response_code' => array('name' => 'response_code', 'type' => 'uint', 'required' => true),
+				'response_output' => array('name' => 'response_output', 'type' => 'serialized')
+			),
+			'phrases' => array(),
+			'id_field' => 'log_id',
+			'title_field' => 'client_id',
+			'primaryKey' => array('log_id'),
+			'indeces' => array(),
+			'files' => array(
+				'data_writer' => array('className' => 'bdApi_DataWriter_Log', 'hash' => 'c52e845427612ba05a46c935ad80c7db'),
+				'model' => array('className' => 'bdApi_Model_Log', 'hash' => 'cb3417127ecae72d04c607a18bf77853'),
+				'route_prefix_admin' => array('className' => 'bdApi_Route_PrefixAdmin_Log', 'hash' => 'cdc2b71157553793ce20112afcb1aa98'),
+				'controller_admin' => array('className' => 'bdApi_ControllerAdmin_Log', 'hash' => 'd2546249050e790a816e85a98c2f45b8')
+			)
 		)
 	);
 	protected $_dataPatches = array(
@@ -120,7 +149,7 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base {
 			'bdapi_origin' => array('name' => 'bdapi_origin', 'type' => 'string', 'length' => 255, 'default' => '')
 		)
 	);
-	protected $_exportPath = '/Users/sondh/Dropbox/XenForo/bdApi';
+	protected $_exportPath = '/Users/sondh/XenForo/bdApi';
 	protected $_exportIncludes = array('api/index.php');
 	
 	/**

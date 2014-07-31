@@ -56,6 +56,10 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
 			$dw->setExistingData($id);
 		}
 		$dw->bulkSet($dwInput);
+		if (!$dw->get('user_id'))
+		{
+			$dw->set('user_id', XenForo_Visitor::getUserId());
+		}
 		
 		$dw->save();
 

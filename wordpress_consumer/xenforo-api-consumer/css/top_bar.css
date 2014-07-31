@@ -1,0 +1,26 @@
+#wpadminbar .xfacJsCount
+{
+	color: #eee;
+	display: none;
+	margin-left: 5px;
+	padding-left: 5px;
+	padding-right: 5px;
+
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+	#wpadminbar .xfacJsCount.updated
+	{
+		display: inline;
+	}
+	#wpadminbar .xfacJsCount.unread
+	{
+		background: red;
+		color: white;
+	}
+
+#wpadminbar #wp-admin-bar-xfac-loginForm .ab-item
+{
+	height: auto;
+}

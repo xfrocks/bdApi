@@ -46,7 +46,7 @@ class bdApi_ControllerApi_Error extends bdApi_ControllerApi_Abstract
 
 	public function actionRegistrationRequired()
 	{
-		return $this->actionNoPermission();
+		return $this->responseError(new XenForo_Phrase('must_be_registered'), 403);
 	}
 
 	public function actionBanned()

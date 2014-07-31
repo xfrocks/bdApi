@@ -7,14 +7,20 @@ class bdApi_Listener
 		static $classes = array(
 				'XenForo_ControllerPublic_Account',
 				'XenForo_ControllerPublic_Error',
+				'XenForo_ControllerPublic_Login',
+				'XenForo_ControllerPublic_Logout',
 				'XenForo_ControllerPublic_Register',
 
 				'XenForo_DataWriter_DiscussionMessage_Post',
 
+				'XenForo_Model_Alert',
 				'XenForo_Model_Category',
+				'XenForo_Model_Conversation',
 				'XenForo_Model_Forum',
+				'XenForo_Model_ForumWatch',
 				'XenForo_Model_Post',
 				'XenForo_Model_Thread',
+				'XenForo_Model_ThreadWatch',
 				'XenForo_Model_User',
 
 				'XenForo_Search_DataHandler_Post',

@@ -6,7 +6,7 @@ class bdApiConsumer_DevHelper_Config extends DevHelper_Config_Base {
 			'bdapiconsumer_unused' => array('name' => 'bdapiconsumer_unused', 'type' => 'string', 'length' => '255')
 		)
 	);
-	protected $_exportPath = '/Users/sondh/Dropbox/XenForo/bdApiConsumer/';
+	protected $_exportPath = '/Users/sondh/XenForo/bdApiConsumer/';
 	protected $_exportIncludes = array();
 	
 	/**

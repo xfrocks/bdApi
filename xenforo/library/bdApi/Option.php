@@ -12,6 +12,6 @@ class bdApi_Option
 			case 'secretLength': return 15;
 		}
 		
-		return $options->get('bdapi_' . $key);
+		return $options->get('bdApi_' . $key);
 	}
 }

@@ -15,7 +15,7 @@ class bdApi_Model_RefreshToken extends XenForo_Model
 	
 	public function getRefreshTokenByText($refreshTokenText, array $fetchOptions = array())
 	{
-		$refreshTokens = $this->getAuthCodes(array('refresh_token_text' => $refreshTokenText), $fetchOptions);
+		$refreshTokens = $this->getRefreshTokens(array('refresh_token_text' => $refreshTokenText), $fetchOptions);
 		
 		return reset($refreshTokens);
 	}

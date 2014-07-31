@@ -3,3 +3,5 @@
 xenforo/library/bdApi/DevHelper/Generated/*
 xenforo_consumer/library/bdApiConsumer/DevHelper/Generated/*
 
+xenforo/library/bdApi/FileSums.php
+xenforo_consumer/library/bdApiConsumer/FileSums.php

@@ -25,10 +25,15 @@ class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
 		self::addRoute($routes, 'posts', 'bdApi_Route_PrefixApi_Posts', 'data_only');
 		self::addRoute($routes, 'threads', 'bdApi_Route_PrefixApi_Threads', 'data_only');
 		self::addRoute($routes, 'users', 'bdApi_Route_PrefixApi_Users', 'data_only');
+		self::addRoute($routes, 'conversations', 'bdApi_Route_PrefixApi_Conversations', 'data_only');
+		self::addRoute($routes, 'conversation-messages', 'bdApi_Route_PrefixApi_ConversationMessages', 'data_only');
+		self::addRoute($routes, 'notifications', 'bdApi_Route_PrefixApi_Notifications');
 
-		self::addRoute($routes, 'search', 'bdApi_Route_PrefixApi_Search', 'none');
+		self::addRoute($routes, 'search', 'bdApi_Route_PrefixApi_Search');
 
 		self::addRoute($routes, 'assets', 'bdApi_Route_PrefixApi_Assets');
+		self::addRoute($routes, 'batch', 'bdApi_Route_PrefixApi_Batch');
+		self::addRoute($routes, 'tools', 'bdApi_Route_PrefixApi_Tools');
 
 		XenForo_CodeEvent::fire('bdapi_setup_routes', array(&$routes));
 	}
