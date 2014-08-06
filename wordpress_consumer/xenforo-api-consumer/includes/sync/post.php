@@ -321,9 +321,12 @@ function _xfac_syncPost_getPostBody($post)
 		$text = str_replace(']]>', ']]&gt;', $text);
 	}
 
+	// fix paragraph spacing from WordPress to XenForo
+	$text = str_replace('</p>', '</p><br />', $text);
+
 	if (!!get_option('xfac_sync_post_wp_xf_link'))
 	{
-		$text .= '<br /><br /><a href="' . get_permalink($post->ID) . '">' . __('Read the whole post here.', 'xenforo-api-consumer') . '</a>';
+		$text .= '<br /><a href="' . get_permalink($post->ID) . '">' . __('Read the whole post here.', 'xenforo-api-consumer') . '</a>';
 	}
 
 	return $text;
