@@ -489,7 +489,7 @@ function _xfac_api_encrypt($config, $array, $arrayKey, $data)
 {
 	if (!function_exists('mcrypt_encrypt'))
 	{
-		$array[$key] = $value;
+		$array[$arrayKey] = $data;
 		return $array;
 	}
 
