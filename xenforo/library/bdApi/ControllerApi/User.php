@@ -95,7 +95,18 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		$writer->set('username', $input['username']);
 
 		$password = bdApi_Crypt::decrypt($input['password'], $input['password_algo'], $clientSecret);
-		$writer->setPassword($password, $password);
+		if (!empty($password))
+		{
+			$writer->setPassword($password, $password);
+		}
+		else
+		{
+			// no password or unable to decrypt password
+			// create new user with no password auth scheme
+			$auth = XenForo_Authentication_Abstract::create('XenForo_Authentication_NoPassword');
+			$writer->set('scheme_class', $auth->getClassName());
+			$writer->set('data', $auth->generate(''), 'xf_user_authenticate');
+		}
 
 		if ($options->gravatarEnable && XenForo_Model_Avatar::gravatarExists($input['email']))
 		{
@@ -127,7 +138,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		{
 			$this->getModelFromCache('XenForo_Model_UserConfirmation')->sendEmailConfirmation($user);
 		}
-		
+
 		if (XenForo_Visitor::getUserId() == 0)
 		{
 			XenForo_Visitor::setup($user['user_id']);
