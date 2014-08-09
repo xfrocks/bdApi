@@ -1370,6 +1370,7 @@ List of conversations (with pagination). Since forum-2014022602.
                 notification_create_date: (unix timestamp in seconds),
                 creator_user_id: (int),
                 creator_username: (string),
+                notification_type: (string), # since forum-2014080901
                 notification_html: (string)
             },
             ...
