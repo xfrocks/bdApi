@@ -66,6 +66,8 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$data = array(
 			'posts' => $this->_filterDataMany($this->_getPostModel()->prepareApiDataForPosts($posts, $thread, $forum)),
 			'posts_total' => $total,
+
+			'_thread' => $thread,
 		);
 
 		bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'posts', array(), $pageNavParams);

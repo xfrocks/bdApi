@@ -1471,3 +1471,11 @@ Parameters (for a single job):
 Required scopes:
 
  * N/A
+
+## Subscriptions
+Clients can subscribe to certain events to receive real time ping when data is changed within the system. The subscription system uses the [PubSubHubbub protocol](https://code.google.com/p/pubsubhubbub/) to communicate with hubs and/or subscribers. Since subscription-2014081001.
+
+List of supported topics:
+
+ * `user_notification_x` (x is the user_id of the interested user): receives ping when user gets a new notification. Notification data will be included in the ping.
+ * `thread_post_x` (x is the thread_id of the interested thread): receives ping when a post in the thread is inserted, updated or deleted.

@@ -80,9 +80,9 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
 
 		foreach (array_keys($input) as $inputKey)
 		{
-			if (strpos($inputKey, '_WidgetFramework') === 0)
+			if (strpos($inputKey, '_') === 0)
 			{
-				// filter out [bd] Widget Framework junk
+				// filter out internal params
 				unset($input[$inputKey]);
 			}
 		}

@@ -30,6 +30,9 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 				'threads/new' => bdApi_Link::buildApiLink('threads/new'),
 				'users' => bdApi_Link::buildApiLink('users'),
 
+				'batch' => bdApi_Link::buildApiLink('batch'),
+				'subscriptions' => bdApi_Link::buildApiLink('subscriptions'),
+
 				'oauth_authorize' => bdApi_Link::buildApiLink('oauth/authorize', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
 				'oauth_token' => bdApi_Link::buildApiLink('oauth/token', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
 			),
@@ -44,6 +47,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 		return array(
 			'forum' => 2014080901,
 			'oauth2' => 2014030701,
+			'subscription' => 2014081001,
 		);
 	}
 

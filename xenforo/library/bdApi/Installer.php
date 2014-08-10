@@ -1,5 +1,6 @@
 <?php
-class bdApi_Installer {
+class bdApi_Installer
+{
 	/* Start auto-generated lines of code. Change made will be overwriten... */
 
 	protected static $_tables = array(
@@ -15,7 +16,7 @@ class bdApi_Installer {
 				, PRIMARY KEY (`client_id`)
 				
 			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
-			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_client`'
+			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_client`',
 		),
 		'token' => array(
 			'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_token` (
@@ -28,7 +29,7 @@ class bdApi_Installer {
 				, PRIMARY KEY (`token_id`)
 				,UNIQUE INDEX `token_text` (`token_text`)
 			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
-			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_token`'
+			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_token`',
 		),
 		'auth_code' => array(
 			'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_auth_code` (
@@ -42,7 +43,7 @@ class bdApi_Installer {
 				, PRIMARY KEY (`auth_code_id`)
 				,UNIQUE INDEX `auth_code_text` (`auth_code_text`)
 			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
-			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_auth_code`'
+			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_auth_code`',
 		),
 		'refresh_token' => array(
 			'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_refresh_token` (
@@ -55,7 +56,7 @@ class bdApi_Installer {
 				, PRIMARY KEY (`refresh_token_id`)
 				,UNIQUE INDEX `refresh_token_text` (`refresh_token_text`)
 			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
-			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_refresh_token`'
+			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_refresh_token`',
 		),
 		'log' => array(
 			'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_log` (
@@ -72,8 +73,22 @@ class bdApi_Installer {
 				, PRIMARY KEY (`log_id`)
 				
 			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
-			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_log`'
-		)
+			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_log`',
+		),
+		'subscription' => array(
+			'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_subscription` (
+				`subscription_id` INT(10) UNSIGNED AUTO_INCREMENT
+				,`client_id` VARCHAR(255) NOT NULL
+				,`callback` TEXT
+				,`topic` VARCHAR(255) NOT NULL
+				,`subscribe_date` INT(10) UNSIGNED NOT NULL
+				,`expire_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'
+				, PRIMARY KEY (`subscription_id`)
+				, INDEX `client_id` (`client_id`)
+				, INDEX `topic` (`topic`)
+			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
+			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_subscription`',
+		),
 	);
 	protected static $_patches = array(
 		array(
@@ -82,7 +97,7 @@ class bdApi_Installer {
 			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_bdapi_token\'',
 			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_bdapi_token` LIKE \'issue_date\'',
 			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_bdapi_token` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
-			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_token` DROP COLUMN `issue_date`'
+			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_token` DROP COLUMN `issue_date`',
 		),
 		array(
 			'table' => 'xf_bdapi_auth_code',
@@ -90,7 +105,7 @@ class bdApi_Installer {
 			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_bdapi_auth_code\'',
 			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_bdapi_auth_code` LIKE \'issue_date\'',
 			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_bdapi_auth_code` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
-			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_auth_code` DROP COLUMN `issue_date`'
+			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_auth_code` DROP COLUMN `issue_date`',
 		),
 		array(
 			'table' => 'xf_bdapi_refresh_token',
@@ -98,7 +113,7 @@ class bdApi_Installer {
 			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_bdapi_refresh_token\'',
 			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_bdapi_refresh_token` LIKE \'issue_date\'',
 			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
-			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` DROP COLUMN `issue_date`'
+			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` DROP COLUMN `issue_date`',
 		),
 		array(
 			'table' => 'xf_post',
@@ -106,62 +121,109 @@ class bdApi_Installer {
 			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_post\'',
 			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_post` LIKE \'bdapi_origin\'',
 			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_post` ADD COLUMN `bdapi_origin` VARCHAR(255) DEFAULT \'\'',
-			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_post` DROP COLUMN `bdapi_origin`'
-		)
+			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_post` DROP COLUMN `bdapi_origin`',
+		),
+		array(
+			'table' => 'xf_user_option',
+			'field' => 'bdapi_user_notification',
+			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_user_option\'',
+			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_user_option` LIKE \'bdapi_user_notification\'',
+			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_user_option` ADD COLUMN `bdapi_user_notification` MEDIUMBLOB',
+			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_user_option` DROP COLUMN `bdapi_user_notification`',
+		),
+		array(
+			'table' => 'xf_thread',
+			'field' => 'bdapi_thread_post',
+			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_thread\'',
+			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_thread` LIKE \'bdapi_thread_post\'',
+			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_thread` ADD COLUMN `bdapi_thread_post` MEDIUMBLOB',
+			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_thread` DROP COLUMN `bdapi_thread_post`',
+		),
 	);
 
-	public static function install() {
+	public static function install($existingAddOn, $addOnData)
+	{
 		$db = XenForo_Application::get('db');
 
-		foreach (self::$_tables as $table) {
+		foreach (self::$_tables as $table)
+		{
 			$db->query($table['createQuery']);
 		}
-		
-		foreach (self::$_patches as $patch) {
+
+		foreach (self::$_patches as $patch)
+		{
 			$tableExisted = $db->fetchOne($patch['showTablesQuery']);
-			if (empty($tableExisted)) {
+			if (empty($tableExisted))
+			{
 				continue;
 			}
-			
+
 			$existed = $db->fetchOne($patch['showColumnsQuery']);
-			if (empty($existed)) {
+			if (empty($existed))
+			{
 				$db->query($patch['alterTableAddColumnQuery']);
 			}
 		}
 		
-		self::installCustomized();
+		self::installCustomized($existingAddOn, $addOnData);
 	}
-	
-	public static function uninstall() {
+
+	public static function uninstall()
+	{
 		$db = XenForo_Application::get('db');
-		
-		foreach (self::$_patches as $patch) {
+
+		foreach (self::$_patches as $patch)
+		{
 			$tableExisted = $db->fetchOne($patch['showTablesQuery']);
-			if (empty($tableExisted)) {
+			if (empty($tableExisted))
+			{
 				continue;
 			}
-			
+
 			$existed = $db->fetchOne($patch['showColumnsQuery']);
-			if (!empty($existed)) {
+			if (!empty($existed))
+			{
 				$db->query($patch['alterTableDropColumnQuery']);
 			}
 		}
-		
-		foreach (self::$_tables as $table) {
+
+		foreach (self::$_tables as $table)
+		{
 			$db->query($table['dropQuery']);
 		}
-		
+
 		self::uninstallCustomized();
 	}
 
 	/* End auto-generated lines of code. Feel free to make changes below */
-	
-	private static function installCustomized() {
-		// customized install script goes here
+
+	private static function installCustomized($existingAddOn, $addOnData)
+	{
+		$db = XenForo_Application::getDb();
+		
+		if (XenForo_Application::$versionId < 1020000)
+		{
+			throw new XenForo_Exception('XenForo 1.2.0+ is required.');
+		}
+
+		$db->query('CREATE TABLE IF NOT EXISTS `xf_bdapi_ping_queue` (
+			`ping_queue_id` INT(10) UNSIGNED AUTO_INCREMENT,
+			`callback_md5` VARCHAR(32),
+			`callback` TEXT,
+			`object_type` VARBINARY(25) NOT NULL,
+			`data` MEDIUMBLOB,
+			`queue_date` INT(10) UNSIGNED NOT NULL,
+			`expire_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\',
+			PRIMARY KEY (`ping_queue_id`),
+			INDEX `callback_md5` (`callback_md5`)
+		) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;');
 	}
-	
-	private static function uninstallCustomized() {
-		// customized uninstall script goes here
+
+	private static function uninstallCustomized()
+	{
+		$db = XenForo_Application::getDb();
+
+		$db->query('DROP TABLE IF EXISTS `xf_bdapi_ping_queue`');
 	}
-	
+
 }

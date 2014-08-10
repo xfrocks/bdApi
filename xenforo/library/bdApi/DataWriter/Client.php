@@ -130,6 +130,15 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
 			$refreshTokenDw->delete();
 		}
 
+		// delete associated subscriptions
+		$subscriptions = $this->getModelFromCache('bdApi_Model_Subscription')->getSubscriptions(array('client_id' => $this->get('client_id')));
+		foreach ($subscriptions as $subscription)
+		{
+			$subscriptionDw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription');
+			$subscriptionDw->setExistingData($subscription, true);
+			$subscriptionDw->delete();
+		}
+
 		return parent::_postDelete();
 	}
 
