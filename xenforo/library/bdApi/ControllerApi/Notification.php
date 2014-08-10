@@ -28,8 +28,9 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
 
 		$data = array(
 			'notifications' => $this->_filterDataMany($this->_getAlertModel()->prepareApiDataForAlerts($alerts)),
-			'alerts' => $alerts,
-			'alertHandlers' => $alertResults['alertHandlers'],
+
+			'_alerts' => $alerts,
+			'_alertHandlers' => $alertResults['alertHandlers'],
 		);
 
 		return $this->responseData('bdApi_ViewApi_Notification_List', $data);

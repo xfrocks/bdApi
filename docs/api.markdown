@@ -535,7 +535,8 @@ List of posts in a thread (with pagination).
             pages: (int),
             next: (uri),
             prev: (uri)
-        }
+        },
+        subscription_callback: (uri) # since subscription-2014081002
     }
 
 Parameters:
@@ -1374,7 +1375,8 @@ List of conversations (with pagination). Since forum-2014022602.
                 notification_html: (string)
             },
             ...
-        ]
+        ],
+        subscription_callback: (uri) # since subscription-2014081002
     }
 
 Required scopes:
@@ -1477,5 +1479,5 @@ Clients can subscribe to certain events to receive real time ping when data is c
 
 List of supported topics:
 
- * `user_notification_x` (x is the user_id of the interested user): receives ping when user gets a new notification. Notification data will be included in the ping.
- * `thread_post_x` (x is the thread_id of the interested thread): receives ping when a post in the thread is inserted, updated or deleted.
+ * `user_notification_x` (x is the user_id of the interested user): receives ping when user gets a new notification. Notification data will be included in the ping. The registered callback will be included in GET `/notifications` as parameter `subscription_callback`.
+ * `thread_post_x` (x is the thread_id of the interested thread): receives ping when a post in the thread is inserted, updated or deleted. The registered callback will be included in GET `/posts?thread_id=x` as parameter `subscription_callback`.
