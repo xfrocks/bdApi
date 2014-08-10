@@ -19,9 +19,15 @@ class bdApi_Model_Subscription extends XenForo_Model
 			case self::TYPE_NOTIFICATION:
 				if (!empty($subscriptions))
 				{
+					$link = null;
+					if (XenForo_Application::isRegistered('_bdApi_fc'))
+					{
+						$link = bdApi_Link::buildApiLink('notifications', null, array(OAUTH2_TOKEN_PARAM_NAME => ''));
+					}
+
 					$userOption = array(
 						'topic' => $topic,
-						'link' => bdApi_Link::buildApiLink('notifications', null, array(OAUTH2_TOKEN_PARAM_NAME => '')),
+						'link' => $link,
 						'subscriptions' => $subscriptions,
 					);
 				}
@@ -35,12 +41,18 @@ class bdApi_Model_Subscription extends XenForo_Model
 			case self::TYPE_THREAD_POST:
 				if (!empty($subscriptions))
 				{
-					$threadOption = array(
-						'topic' => $topic,
-						'link' => bdApi_Link::buildApiLink('posts', null, array(
+					$link = null;
+					if (XenForo_Application::isRegistered('_bdApi_fc'))
+					{
+						$link = bdApi_Link::buildApiLink('posts', null, array(
 							'thread_id' => $id,
 							OAUTH2_TOKEN_PARAM_NAME => '',
-						)),
+						));
+					}
+
+					$threadOption = array(
+						'topic' => $topic,
+						'link' => $link,
 						'subscriptions' => $subscriptions,
 					);
 				}
@@ -56,7 +68,7 @@ class bdApi_Model_Subscription extends XenForo_Model
 
 	public function ping(array $option, $action, $objectType, $objectData)
 	{
-		if (empty($option['topic']) OR empty($option['link']) OR empty($option['subscriptions']))
+		if (empty($option['topic']) OR empty($option['subscriptions']))
 		{
 			return false;
 		}
@@ -81,10 +93,14 @@ class bdApi_Model_Subscription extends XenForo_Model
 			$pingData = array(
 				'client_id' => $subscription['client_id'],
 				'topic' => $option['topic'],
-				'link' => $option['link'],
 				'action' => $action,
 				'object_data' => $objectData,
 			);
+
+			if (!empty($option['link']))
+			{
+				$pingData['link'] = $option['link'];
+			}
 
 			$this->getModelFromCache('bdApi_Model_PingQueue')->insertQueue($subscription['callback'], $objectType, $pingData, $subscription['expire_date']);
 		}
