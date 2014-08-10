@@ -428,6 +428,38 @@ function xfac_api_postUser($config, $email, $username, $password, $accessToken =
 	}
 }
 
+function xfac_api_putPost($config, $accessToken, $postId, $postBody, array $extraParams = array())
+{
+	$ch = curl_init();
+
+	curl_setopt($ch, CURLOPT_URL, call_user_func_array('sprintf', array(
+		'%s/index.php?posts/%d',
+		rtrim($config['root'], '/'),
+		$postId,
+	)));
+
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array_merge(array(
+		'oauth_token' => $accessToken,
+		'post_body_html' => $postBody,
+	), $extraParams)));
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+	$body = curl_exec($ch);
+	curl_close($ch);
+
+	$parts = @json_decode($body, true);
+
+	if (!empty($parts['post']))
+	{
+		return $parts;
+	}
+	else
+	{
+		return _xfac_api_getFailedResponse($parts);
+	}
+}
+
 function xfac_api_filterHtmlFromXenForo($html)
 {
 	$offset = 0;

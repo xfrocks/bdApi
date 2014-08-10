@@ -6,14 +6,14 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
-function xfac_transition_post_status($newStatus, $oldStatus, $post)
+function xfac_save_post($postId, WP_Post $post, $update)
 {
-	if (!empty($GLOBALS['XFAC_SKIP_xfac_transition_post_status']))
+	if (!empty($GLOBALS['XFAC_SKIP_xfac_save_post']))
 	{
 		return;
 	}
 
-	if ($newStatus == 'publish')
+	if ($post->post_status == 'publish')
 	{
 		$tagForumMappings = get_option('xfac_tag_forum_mappings');
 		if (empty($tagForumMappings))
@@ -45,6 +45,7 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 				if (!empty($config))
 				{
 					$postSyncRecords = xfac_sync_getRecordsByProviderTypeAndSyncId('', 'thread', $post->ID);
+					$existingSyncRecords = array();
 					foreach (array_keys($forumIds) as $key)
 					{
 						foreach ($postSyncRecords as $postSyncRecord)
@@ -52,14 +53,15 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 							if (!empty($postSyncRecord->syncData['forumId']) AND $postSyncRecord->syncData['forumId'] == $forumIds[$key])
 							{
 								unset($forumIds[$key]);
+								$existingSyncRecords[] = $postSyncRecord;
 							}
 						}
 					}
 
+					$postBody = _xfac_syncPost_getPostBody($post);
+
 					foreach ($forumIds as $forumId)
 					{
-						$postBody = _xfac_syncPost_getPostBody($post);
-
 						$thread = xfac_api_postThread($config, $accessToken, $forumId, $post->post_title, $postBody);
 
 						if (!empty($thread['thread']['thread_id']))
@@ -71,6 +73,26 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 							));
 						}
 					}
+
+					foreach ($existingSyncRecords as $existingSyncRecord)
+					{
+						if (empty($existingSyncRecord->syncData['thread']['first_post']['post_id']))
+						{
+							// no information about first post to update
+							continue;
+						}
+
+						$xfPost = xfac_api_putPost($config, $accessToken, $existingSyncRecord->syncData['thread']['first_post']['post_id'], $postBody, array('thread_title' => $post->post_title));
+
+						if (!empty($xfPost['post_id']))
+						{
+							$syncData = $existingSyncRecord->syncData;
+							$syncData['direction'] = 'push';
+							$syncData['thread']['first_post'] = $xfPost;
+
+							xfac_sync_updateRecord('', 'thread', $xfPost['thread_id'], $post->ID, 0, $syncData);
+						}
+					}
 				}
 			}
 		}
@@ -79,7 +101,7 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 
 if (intval(get_option('xfac_sync_post_wp_xf')) > 0)
 {
-	add_action('transition_post_status', 'xfac_transition_post_status', 10, 3);
+	add_action('save_post', 'xfac_save_post', 10, 3);
 }
 
 function xfac_syncPost_cron()
@@ -272,9 +294,9 @@ function xfac_syncPost_pullPost($thread, $tags)
 		'tags_input' => implode(', ', $tags),
 	);
 
-	$GLOBALS['XFAC_SKIP_xfac_transition_post_status'] = true;
+	$GLOBALS['XFAC_SKIP_xfac_save_post'] = true;
 	$wpPostId = wp_insert_post($wpPost);
-	$GLOBALS['XFAC_SKIP_xfac_transition_post_status'] = false;
+	$GLOBALS['XFAC_SKIP_xfac_save_post'] = false;
 
 	if ($wpPostId > 0)
 	{
