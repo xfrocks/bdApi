@@ -239,21 +239,20 @@ class bdApi_Model_Subscription extends XenForo_Model
 		return false;
 	}
 
-	public function verifyIntentOfSubscriber($callback, $mode, $topic, $leaseSeconds)
+	public function verifyIntentOfSubscriber($callback, $mode, $topic, $leaseSeconds, array $extraParams = array())
 	{
 		$challenge = md5(XenForo_Application::$time . $callback . $mode . $topic . $leaseSeconds);
 		$challenge = md5($challenge . XenForo_Application::getConfig()->get('globalSalt'));
 
 		$client = XenForo_Helper_Http::getClient($callback);
-		$client->setParameterGet(array(
+		$client->setParameterGet(array_merge(array(
 			'hub.mode' => $mode,
 			'hub.topic' => $topic,
 			'hub.lease_seconds' => $leaseSeconds,
 			'hub.challenge' => $challenge,
-		));
+		), $extraParams));
 
-		$response = $client->request('POST');
-
+		$response = $client->request('GET');
 		$body = trim($response->getBody());
 		if ($body !== $challenge)
 		{
@@ -473,4 +472,5 @@ class bdApi_Model_Subscription extends XenForo_Model
 			$id
 		);
 	}
+
 }

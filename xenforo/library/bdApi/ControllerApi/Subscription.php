@@ -38,7 +38,7 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
 			return $this->_responseError(new XenForo_Phrase('bdapi_subscription_topic_not_recognized'));
 		}
 
-		if ($this->_getSubscriptionModel()->verifyIntentOfSubscriber($input['hub_callback'], $input['hub_mode'], $input['hub_topic'], $input['hub_lease_seconds']))
+		if ($this->_getSubscriptionModel()->verifyIntentOfSubscriber($input['hub_callback'], $input['hub_mode'], $input['hub_topic'], $input['hub_lease_seconds'], array('client_id' => $this->_getClientId())))
 		{
 			switch ($input['hub_mode'])
 			{
