@@ -129,80 +129,7 @@ function xfac_syncComment_cron()
 
 	foreach ($postSyncRecords as $postSyncRecord)
 	{
-		$page = 1;
-		$pulledSomething = false;
-
-		if (time() - $postSyncRecord->sync_date < 60)
-		{
-			// do not try to sync every minute...
-			continue;
-		}
-
-		while (true)
-		{
-			$xfPosts = xfac_api_getPostsInThread($config, $postSyncRecord->provider_content_id, $page);
-
-			// increase page for next request
-			$page++;
-
-			if (empty($xfPosts['posts']))
-			{
-				break;
-			}
-
-			$xfPostIds = array();
-			foreach ($xfPosts['posts'] as $xfPost)
-			{
-				$xfPostIds[] = $xfPost['post_id'];
-			}
-			$commentSyncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'post', $xfPostIds);
-
-			foreach ($xfPosts['posts'] as $xfPost)
-			{
-				if (!empty($xfPost['post_is_first_post']))
-				{
-					// do not pull first post
-					continue;
-				}
-
-				$synced = false;
-
-				foreach ($commentSyncRecords as $commentSyncRecord)
-				{
-					if ($commentSyncRecord->provider_content_id == $xfPost['post_id'])
-					{
-						$synced = true;
-
-						if (!empty($commentSyncRecord->syncData['direction']) AND $commentSyncRecord->syncData['direction'] === 'pull')
-						{
-							// stop the foreach and the outside while too
-							break 3;
-						}
-					}
-				}
-
-				if (!$synced)
-				{
-					$commentId = xfac_syncPost_pullComment($xfPost, $postSyncRecord->sync_id);
-
-					if ($commentId > 0)
-					{
-						$pulledSomething = true;
-					}
-				}
-			}
-
-			if (empty($xfPosts['links']['next']))
-			{
-				// there is no next page, stop
-				break;
-			}
-		}
-
-		if ($pulledSomething)
-		{
-			xfac_sync_updateRecordDate($postSyncRecord);
-		}
+		xfac_syncComment_processPostSyncRecord($config, $postSyncRecord);
 	}
 }
 
@@ -211,14 +138,109 @@ if (intval(get_option('xfac_sync_comment_xf_wp')) > 0)
 	add_action('xfac_cron_hourly', 'xfac_syncComment_cron');
 }
 
-function xfac_syncPost_pullComment($xfPost, $wpPostId)
+function xfac_syncComment_processPostSyncRecord($config, $postSyncRecord)
 {
-	$config = xfac_option_getConfig();
-	if (empty($config))
+	$page = 1;
+	$pulledSomething = false;
+
+	if (time() - $postSyncRecord->sync_date < 60)
 	{
-		return 0;
+		// do not try to sync every minute...
+		return false;
 	}
 
+	if (!empty($postSyncRecord->syncData['subscribed']))
+	{
+		if (time() - $postSyncRecord->sync_date < 86400)
+		{
+			// do not try to sync every day with subscribed thread
+			return false;
+		}
+	}
+
+	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $postSyncRecord->syncData['thread']['creator_user_id']);
+	$accessToken = xfac_user_getAccessToken($wpUserData->ID);
+
+	while (true)
+	{
+		$xfPosts = xfac_api_getPostsInThread($config, $postSyncRecord->provider_content_id, $page, $accessToken);
+
+		if ($page == 1 AND empty($xfPosts['subscription_callback']) AND !empty($xfPosts['_headerLinkHub']))
+		{
+			if (xfac_api_postSubscription($config, $accessToken, $xfPosts['_headerLinkHub']))
+			{
+				$postSyncRecord->syncData['subscribed'] = time();
+				xfac_sync_updateRecord('', $postSyncRecord->provider_content_type, $postSyncRecord->provider_content_id, $postSyncRecord->sync_id, 0, $postSyncRecord->syncData);
+			}
+		}
+
+		// increase page for next request
+		$page++;
+
+		if (empty($xfPosts['posts']))
+		{
+			break;
+		}
+
+		$xfPostIds = array();
+		foreach ($xfPosts['posts'] as $xfPost)
+		{
+			$xfPostIds[] = $xfPost['post_id'];
+		}
+		$commentSyncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'post', $xfPostIds);
+
+		foreach ($xfPosts['posts'] as $xfPost)
+		{
+			if (!empty($xfPost['post_is_first_post']))
+			{
+				// do not pull first post
+				continue;
+			}
+
+			$synced = false;
+
+			foreach ($commentSyncRecords as $commentSyncRecord)
+			{
+				if ($commentSyncRecord->provider_content_id == $xfPost['post_id'])
+				{
+					$synced = true;
+
+					if (!empty($commentSyncRecord->syncData['direction']) AND $commentSyncRecord->syncData['direction'] === 'pull')
+					{
+						// stop the foreach and the outside while too
+						break 3;
+					}
+				}
+			}
+
+			if (!$synced)
+			{
+				$commentId = xfac_syncComment_pullComment($config, $xfPost, $postSyncRecord->sync_id);
+
+				if ($commentId > 0)
+				{
+					$pulledSomething = true;
+				}
+			}
+		}
+
+		if (empty($xfPosts['links']['next']))
+		{
+			// there is no next page, stop
+			break;
+		}
+	}
+
+	if ($pulledSomething)
+	{
+		xfac_sync_updateRecordDate($postSyncRecord);
+	}
+	
+	return $pulledSomething;
+}
+
+function xfac_syncComment_pullComment($config, $xfPost, $wpPostId, $direction = 'pull')
+{
 	$wpDisplayName = false;
 	$wpUserEmail = false;
 	$wpUserUrl = '';
@@ -269,7 +291,7 @@ function xfac_syncPost_pullComment($xfPost, $wpPostId)
 	{
 		xfac_sync_updateRecord('', 'post', $xfPost['post_id'], $commentId, 0, array(
 			'post' => $xfPost,
-			'direction' => 'pull',
+			'direction' => $direction,
 		));
 	}
 
