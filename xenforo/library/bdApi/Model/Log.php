@@ -10,7 +10,7 @@ class bdApi_Model_Log extends XenForo_Model
 		return $this->_getDb()->query('DELETE FROM xf_bdapi_log WHERE request_date < ?', $cutoff);
 	}
 
-	public function logRequest($requestMethod, $requestUri, array $requestData, $responseCode, array $responseOutput)
+	public function logRequest($requestMethod, $requestUri, array $requestData, $responseCode, array $responseOutput, array $bulkSet = array())
 	{
 		$days = bdApi_Option::get('logRetentionDays');
 		if ($days == 0)
@@ -18,13 +18,24 @@ class bdApi_Model_Log extends XenForo_Model
 			return false;
 		}
 
-		$session = XenForo_Application::getSession();
-		$visitor = XenForo_Visitor::getInstance();
-
 		$dw = XenForo_DataWriter::create('bdApi_DataWriter_Log');
-		$dw->set('client_id', $session->getOAuthClientId());
-		$dw->set('user_id', $visitor->get('user_id'));
-		$dw->set('ip_address', isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
+
+		$dw->bulkSet($bulkSet);
+		if (!isset($bulkSet['client_id']))
+		{
+			$session = XenForo_Application::getSession();
+			$dw->set('client_id', $session->getOAuthClientId());
+		}
+		if (!isset($bulkSet['user_id']))
+		{
+			$visitor = XenForo_Visitor::getInstance();
+			$dw->set('user_id', $visitor->get('user_id'));
+		}
+		if (!isset($bulkSet['ip_address']))
+		{
+			$dw->set('ip_address', isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
+		}
+
 		$dw->set('request_date', XenForo_Application::$time);
 		$dw->set('request_method', $requestMethod);
 		$dw->set('request_uri', $requestUri);

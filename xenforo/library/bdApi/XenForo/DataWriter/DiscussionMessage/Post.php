@@ -1,4 +1,5 @@
 <?php
+
 class bdApi_XenForo_DataWriter_DiscussionMessage_Post extends XFCP_bdApi_XenForo_DataWriter_DiscussionMessage_Post
 {
 	protected function _getFields()
@@ -6,11 +7,64 @@ class bdApi_XenForo_DataWriter_DiscussionMessage_Post extends XFCP_bdApi_XenForo
 		$fields = parent::_getFields();
 
 		$fields['xf_post']['bdapi_origin'] = array(
-				'type' 			=> XenForo_DataWriter::TYPE_STRING,
-				'maxLength' 	=> 255,
-				'default' 		=> '',
+			'type' => XenForo_DataWriter::TYPE_STRING,
+			'maxLength' => 255,
+			'default' => '',
 		);
 
 		return $fields;
 	}
+
+	protected function _messagePostSave()
+	{
+		if ($this->isInsert())
+		{
+			if ($this->get('message_state') == 'visible')
+			{
+				$this->_bdApi_pingThreadPost('insert');
+			}
+		}
+		elseif ($this->isChanged('message_state'))
+		{
+			if ($this->get('message_state') == 'visible')
+			{
+				$this->_bdApi_pingThreadPost('insert');
+			}
+			elseif ($this->getExisting('message_state') == 'visible')
+			{
+				$this->_bdApi_pingThreadPost('delete');
+			}
+		}
+		else
+		{
+			$this->_bdApi_pingThreadPost('update');
+		}
+
+		return parent::_messagePostSave();
+	}
+
+	protected function _messagePostDelete()
+	{
+		if ($this->getExisting('message_state') == 'visible')
+		{
+			$this->_bdApi_pingThreadPost('delete');
+		}
+
+		return parent::_messagePostDelete();
+	}
+
+	protected function _bdApi_pingThreadPost($action)
+	{
+		$thread = $this->getDiscussionData();
+		if (!empty($thread['bdapi_thread_post']))
+		{
+			$threadOption = @unserialize($thread['bdapi_thread_post']);
+
+			if (!empty($threadOption))
+			{
+				$this->getModelFromCache('bdApi_Model_Subscription')->ping($threadOption, $action, bdApi_Model_Subscription::TYPE_THREAD_POST, $this->get('post_id'));
+			}
+		}
+	}
+
 }

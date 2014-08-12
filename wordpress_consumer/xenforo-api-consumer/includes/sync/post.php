@@ -6,14 +6,14 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
-function xfac_transition_post_status($newStatus, $oldStatus, $post)
+function xfac_save_post($postId, WP_Post $post, $update)
 {
-	if (!empty($GLOBALS['XFAC_SKIP_xfac_transition_post_status']))
+	if (!empty($GLOBALS['XFAC_SKIP_xfac_save_post']))
 	{
 		return;
 	}
 
-	if ($newStatus == 'publish')
+	if ($post->post_status == 'publish')
 	{
 		$tagForumMappings = get_option('xfac_tag_forum_mappings');
 		if (empty($tagForumMappings))
@@ -45,6 +45,7 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 				if (!empty($config))
 				{
 					$postSyncRecords = xfac_sync_getRecordsByProviderTypeAndSyncId('', 'thread', $post->ID);
+					$existingSyncRecords = array();
 					foreach (array_keys($forumIds) as $key)
 					{
 						foreach ($postSyncRecords as $postSyncRecord)
@@ -52,14 +53,15 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 							if (!empty($postSyncRecord->syncData['forumId']) AND $postSyncRecord->syncData['forumId'] == $forumIds[$key])
 							{
 								unset($forumIds[$key]);
+								$existingSyncRecords[] = $postSyncRecord;
 							}
 						}
 					}
 
+					$postBody = _xfac_syncPost_getPostBody($post);
+
 					foreach ($forumIds as $forumId)
 					{
-						$postBody = _xfac_syncPost_getPostBody($post);
-
 						$thread = xfac_api_postThread($config, $accessToken, $forumId, $post->post_title, $postBody);
 
 						if (!empty($thread['thread']['thread_id']))
@@ -71,6 +73,26 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 							));
 						}
 					}
+
+					foreach ($existingSyncRecords as $existingSyncRecord)
+					{
+						if (empty($existingSyncRecord->syncData['thread']['first_post']['post_id']))
+						{
+							// no information about first post to update
+							continue;
+						}
+
+						$xfPost = xfac_api_putPost($config, $accessToken, $existingSyncRecord->syncData['thread']['first_post']['post_id'], $postBody, array('thread_title' => $post->post_title));
+
+						if (!empty($xfPost['post_id']))
+						{
+							$syncData = $existingSyncRecord->syncData;
+							$syncData['direction'] = 'push';
+							$syncData['thread']['first_post'] = $xfPost;
+
+							xfac_sync_updateRecord('', 'thread', $xfPost['thread_id'], $post->ID, 0, $syncData);
+						}
+					}
 				}
 			}
 		}
@@ -79,7 +101,7 @@ function xfac_transition_post_status($newStatus, $oldStatus, $post)
 
 if (intval(get_option('xfac_sync_post_wp_xf')) > 0)
 {
-	add_action('transition_post_status', 'xfac_transition_post_status', 10, 3);
+	add_action('save_post', 'xfac_save_post', 10, 3);
 }
 
 function xfac_syncPost_cron()
@@ -90,19 +112,107 @@ function xfac_syncPost_cron()
 		return;
 	}
 
+	$mappedTags = xfac_syncPost_getMappedTags();
+	if (empty($mappedTags))
+	{
+		return;
+	}
+
+	$forumFollowedSyncRecords = xfac_sync_getRecordsByProviderTypeAndSyncId('', 'forums/followed', 0);
+	if (empty($forumFollowedSyncRecords) OR (time() - $forumFollowedSyncRecords[0]->sync_date > 86400))
+	{
+		xfac_update_option_tag_forum_mappings('xfac_tag_forum_mappings', null, get_option('xfac_tag_forum_mappings'));
+	}
+
+	$forumIds = array_keys($mappedTags);
+
+	// sync sticky threads first
+	$stickyThreads = xfac_api_getThreadsInForums($config, $forumIds, '', 'sticky=1');
+	if (!empty($stickyThreads['threads']))
+	{
+		xfac_syncPost_processThreads($config, $stickyThreads['threads']);
+	}
+
+	// now start syncing normal threads
+	$threads = xfac_api_getThreadsInForums($config, $forumIds);
+	if (!empty($threads['threads']))
+	{
+		xfac_syncPost_processThreads($config, $threads['threads']);
+	}
+}
+
+function xfac_update_option_tag_forum_mappings($option, $oldValue, $newValue)
+{
+	if ($option === 'xfac_tag_forum_mappings')
+	{
+		$forumIds = array();
+		foreach ($newValue as $tagForumMapping)
+		{
+			if (!empty($tagForumMapping['term_id']) AND !empty($tagForumMapping['forum_id']))
+			{
+				$forumIds[] = intval($tagForumMapping['forum_id']);
+			}
+		}
+
+		$config = xfac_option_getConfig();
+		if (!empty($config))
+		{
+			$accessToken = xfac_user_getSystemAccessToken($config);
+			if (!empty($accessToken))
+			{
+				$forumFollowed = xfac_api_getForumFollowed($config, $accessToken);
+				$followedForumIds = array();
+
+				foreach ($forumFollowed['forums'] as $forumFollowedOne)
+				{
+					$followedForumIds[] = intval($forumFollowedOne['forum_id']);
+				}
+				foreach (array_diff($forumIds, $followedForumIds) as $forumId)
+				{
+					// follow the forum to get thread notification
+					xfac_api_postForumFollower($config, $accessToken, $forumId);
+				}
+				foreach (array_diff($followedForumIds, $forumIds) as $forumId)
+				{
+					// unfollow the forum to save server resources
+					xfac_api_deleteForumFollower($config, $accessToken, $forumId);
+				}
+
+				// make sure we subscribed for notification callback
+				$notifications = xfac_api_getNotifications($config, $accessToken);
+				if (empty($notifications['subscription_callback']) AND !empty($notifications['_headerLinkHub']))
+				{
+					xfac_api_postSubscription($config, $accessToken, $notifications['_headerLinkHub']);
+				}
+
+				xfac_sync_updateRecord('', 'forums/followed', 0, 0);
+			}
+		}
+	}
+}
+
+if (intval(get_option('xfac_sync_post_xf_wp')) > 0)
+{
+	add_action('xfac_cron_hourly', 'xfac_syncPost_cron');
+	add_action('update_option', 'xfac_update_option_tag_forum_mappings', 10, 3);
+}
+
+function xfac_syncPost_getMappedTags($forumId = 0)
+{
+	$mappedTags = array();
+
 	$systemTags = get_terms('post_tag', array('hide_empty' => false));
 	if (empty($systemTags))
 	{
-		return;
+		return $mappedTags;
 	}
 
 	$tagForumMappings = get_option('xfac_tag_forum_mappings');
 	if (empty($tagForumMappings))
 	{
-		return;
+		return $mappedTags;
 	}
 
-	$mappedTags = array();
 	foreach ($tagForumMappings as $tagForumMapping)
 	{
 		if (!empty($tagForumMapping['forum_id']))
@@ -123,112 +233,51 @@ function xfac_syncPost_cron()
 		}
 	}
 
-	if (empty($mappedTags))
+	if ($forumId === 0)
 	{
-		return;
+		// get tags for all forums
+		return $mappedTags;
 	}
-
-	foreach ($mappedTags as $forumId => $tagNames)
+	if (isset($mappedTags[$forumId]))
 	{
-		// sync sticky threads first
-		$stickyThreads = xfac_api_getThreadsInForum($config, $forumId, 1, '', 'sticky=1');
-		if (!empty($stickyThreads['threads']))
+		return $mappedTags[$forumId];
+	}
+	else
+	{
+		return array();
+	}
+}
+
+function xfac_syncPost_processThreads($config, array $threads)
+{
+	$threadIds = array();
+	foreach ($threads as $thread)
+	{
+		$threadIds[] = $thread['thread_id'];
+	}
+	$syncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'thread', $threadIds);
+
+	foreach ($threads as $thread)
+	{
+		$synced = false;
+
+		foreach ($syncRecords as $syncRecord)
 		{
-			$threadIds = array();
-			foreach ($stickyThreads['threads'] as $thread)
+			if ($syncRecord->provider_content_id == $thread['thread_id'])
 			{
-				$threadIds[] = $thread['thread_id'];
-			}
-			$syncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'thread', $threadIds);
-
-			foreach ($stickyThreads['threads'] as $thread)
-			{
-				$synced = false;
-
-				foreach ($syncRecords as $syncRecord)
-				{
-					if ($syncRecord->provider_content_id == $thread['thread_id'])
-					{
-						$synced = true;
-					}
-				}
-
-				if (!$synced)
-				{
-					$wpPostId = xfac_syncPost_pullPost($thread, $tagNames);
-				}
+				$synced = true;
 			}
 		}
 
-		// now start syncing normal threads
-		$page = 1;
-
-		while (true)
+		if (!$synced)
 		{
-			$threads = xfac_api_getThreadsInForum($config, $forumId, $page);
-
-			// increase page for next request
-			$page++;
-
-			if (empty($threads['threads']))
-			{
-				break;
-			}
-
-			$threadIds = array();
-			foreach ($threads['threads'] as $thread)
-			{
-				$threadIds[] = $thread['thread_id'];
-			}
-			$syncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'thread', $threadIds);
-
-			foreach ($threads['threads'] as $thread)
-			{
-				$synced = false;
-
-				foreach ($syncRecords as $syncRecord)
-				{
-					if ($syncRecord->provider_content_id == $thread['thread_id'])
-					{
-						$synced = true;
-
-						if (!empty($syncRecord->syncData['direction']) AND $syncRecord->syncData['direction'] === 'pull' AND empty($syncRecord->syncData['sticky']))
-						{
-							// reach where we were pulling before
-							// stop the foreach and the outside while too
-							break 3;
-						}
-					}
-				}
-
-				if (!$synced)
-				{
-					$wpPostId = xfac_syncPost_pullPost($thread, $tagNames);
-				}
-			}
-
-			if (empty($threads['links']['next']))
-			{
-				// there is no next page, stop
-				break;
-			}
+			$wpPostId = xfac_syncPost_pullPost($config, $thread, $tagNames);
 		}
 	}
 }
 
-if (intval(get_option('xfac_sync_post_xf_wp')) > 0)
+function xfac_syncPost_pullPost($config, $thread, $tags, $direction = 'pull')
 {
-	add_action('xfac_cron_hourly', 'xfac_syncPost_cron');
-}
-
-function xfac_syncPost_pullPost($thread, $tags)
-{
-	$config = xfac_option_getConfig();
-	if (empty($config))
-	{
-		return 0;
-	}
-
 	$postAuthor = 0;
 	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $thread['creator_user_id']);
 	if (empty($wpUserData))
@@ -272,17 +321,36 @@ function xfac_syncPost_pullPost($thread, $tags)
 		'tags_input' => implode(', ', $tags),
 	);
 
-	$GLOBALS['XFAC_SKIP_xfac_transition_post_status'] = true;
+	$GLOBALS['XFAC_SKIP_xfac_save_post'] = true;
 	$wpPostId = wp_insert_post($wpPost);
-	$GLOBALS['XFAC_SKIP_xfac_transition_post_status'] = false;
+	$GLOBALS['XFAC_SKIP_xfac_save_post'] = false;
 
 	if ($wpPostId > 0)
 	{
+		$subscribed = 0;
+
+		if (intval(get_option('xfac_sync_comment_xf_wp')) > 0)
+		{
+			$accessToken = xfac_user_getAccessToken($wpUser->ID);
+			if (!empty($accessToken))
+			{
+				$xfPosts = xfac_api_getPostsInThread($config, $thread['thread_id'], $accessToken);
+				if (empty($xfPosts['subscription_callback']) AND !empty($xfPosts['_headerLinkHub']))
+				{
+					if (xfac_api_postSubscription($config, $accessToken, $xfPosts['_headerLinkHub']))
+					{
+						$subscribed = time();
+					}
+				}
+			}
+		}
+
 		xfac_sync_updateRecord('', 'thread', $thread['thread_id'], $wpPostId, $thread['thread_create_date'], array(
 			'forumId' => $thread['forum_id'],
 			'thread' => $thread,
-			'direction' => 'pull',
+			'direction' => $direction,
 			'sticky' => !empty($thread['thread_is_sticky']),
+			'subscribed' => $subscribed,
 		));
 	}
 

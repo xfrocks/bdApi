@@ -6,6 +6,7 @@
     <navigation navigation_id="bdApi_clients" parent_navigation_id="bdApi" display_order="1000" link="api-clients" admin_permission_id="" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_logs" parent_navigation_id="bdApi" display_order="9999" link="api-logs" admin_permission_id="" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_refresh_tokens" parent_navigation_id="bdApi" display_order="4000" link="api-refresh-tokens" admin_permission_id="" debug_only="0" hide_no_children="0"/>
+    <navigation navigation_id="bdApi_subscriptions" parent_navigation_id="bdApi" display_order="5000" link="api-subscriptions" admin_permission_id="" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_tokens" parent_navigation_id="bdApi" display_order="2000" link="api-tokens" admin_permission_id="" debug_only="0" hide_no_children="0"/>
   </admin_navigation>
   <admin_permissions>
@@ -306,6 +307,71 @@
 		<div class="noResults">{xen:phrase bdapi_refresh_token_no_results}</div>
 	</xen:if>
 </xen:form>]]></template>
+    <template title="bdapi_subscription_delete"><![CDATA[<xen:title>{xen:phrase bdapi_subscription_confirm_deletion}: {$subscription.client_id}</xen:title>
+<xen:h1>{xen:phrase bdapi_subscription_confirm_deletion}</xen:h1>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:adminlink 'api-subscriptions/edit', $subscription}">{$subscription.client_id}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:require css="delete_confirmation.css" />
+
+<xen:form action="{xen:adminlink 'api-subscriptions/delete', $subscription}" class="deleteConfirmForm formOverlay">
+
+	<p>{xen:phrase bdapi_subscription_please_confirm}:</p>
+	<strong><a href="{xen:adminlink 'api-subscriptions/edit', $subscription}">{$subscription.client_id}</a></strong>
+
+	<xen:submitunit save="{xen:phrase bdapi_subscription_delete}" />
+
+	<input type="hidden" name="_xfConfirm" value="1" />
+</xen:form>]]></template>
+    <template title="bdapi_subscription_details"><![CDATA[<xen:navigation>
+	<xen:breadcrumb href="{xen:adminlink api-subscriptions}">{xen:phrase admin_navigation_bdApi_subscriptions}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:title>{xen:phrase bdapi_subscription_details} #{$subscription.subscription_id}</xen:title>
+
+<xen:form action="{xen:adminlink 'api-subscriptions'}">
+
+	<xen:controlunit label="{xen:phrase bdapi_client}:">{$subscription.client_id}</xen:controlunit>
+
+	<xen:controlunit label="{xen:phrase bdapi_topic}:">{$subscription.topic}</xen:controlunit>
+
+	<xen:if is="{$subscription.expire_date} > 0">
+		<xen:controlunit label="{xen:phrase bdapi_expire_date}:"><xen:datetime time="{$subscription.expire_date}" /></xen:controlunit>
+	</xen:if>
+
+</xen:form>]]></template>
+    <template title="bdapi_subscription_list"><![CDATA[<xen:title>{xen:phrase bdapi_subscriptions}</xen:title>
+
+<xen:require css="filter_list.css" />
+<xen:require js="js/xenforo/filter_list.js" />
+
+<xen:form action="{xen:adminlink 'api-subscriptions'}" class="section">
+	<xen:if is="{$subscriptions}">
+		<h2 class="subHeading">
+			<xen:include template="filter_list_controls" />
+			{xen:phrase bdapi_subscriptions}
+		</h2>
+
+		<ol class="FilterList Scrollable">
+			<xen:include template="bdapi_subscription_list_items" />
+		</ol>
+
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $subscriptions}</span>', 'total={xen:count $subscriptions}'}</p>
+	<xen:else />
+		<div class="noResults">{xen:phrase bdapi_subscription_no_results}</div>
+	</xen:if>
+</xen:form>]]></template>
+    <template title="bdapi_subscription_list_items"><![CDATA[<xen:foreach loop="$subscriptions" value="$subscription">
+	<xen:listitem
+		id="{$subscription.subscription_id}"
+		href="{xen:adminlink 'api-subscriptions/details', $subscription}"
+		delete="{xen:adminlink 'api-subscriptions/delete', $subscription}">
+		<xen:label>{$subscription.topic}</xen:label>
+		<xen:snippet>{$subscription.client_id}</xen:snippet>
+	</xen:listitem>
+</xen:foreach>]]></template>
     <template title="bdapi_token_add"><![CDATA[<xen:title>{xen:phrase bdapi_token_add}</xen:title>
 
 <xen:form action="{xen:adminlink 'api-tokens/add'}" class="section AutoValidator" data-redirect="yes">
@@ -444,6 +510,7 @@ step=3600</edit_format_params>
     <phrase title="admin_navigation_bdApi_clients" version_id="1" version_string="0.1"><![CDATA[Clients]]></phrase>
     <phrase title="admin_navigation_bdApi_logs" version_id="23" version_string="0.9.8a"><![CDATA[Logs]]></phrase>
     <phrase title="admin_navigation_bdApi_refresh_tokens" version_id="1" version_string="0.1"><![CDATA[Refresh Tokens]]></phrase>
+    <phrase title="admin_navigation_bdApi_subscriptions" version_id="50" version_string="1.2.1b"><![CDATA[PubSubHubbub]]></phrase>
     <phrase title="admin_navigation_bdApi_tokens" version_id="1" version_string="0.1"><![CDATA[Tokens]]></phrase>
     <phrase title="admin_permission_bdApi" version_id="1" version_string="0.1"><![CDATA[[bd] API: Manage the API]]></phrase>
     <phrase title="bdapi_authorize_access" version_id="1" version_string="0.1"><![CDATA[Authorize Access]]></phrase>
@@ -535,9 +602,27 @@ step=3600</edit_format_params>
     <phrase title="bdapi_slash_posts_requires_thread_id" version_id="20" version_string="0.9.5"><![CDATA[/posts requires `thread_id`.]]></phrase>
     <phrase title="bdapi_slash_search_only_accepts_post_requests" version_id="16" version_string="0.9.3"><![CDATA[/search only accepts POST requests.]]></phrase>
     <phrase title="bdapi_slash_search_requires_q" version_id="20" version_string="0.9.5"><![CDATA[/search requires `q`.]]></phrase>
+    <phrase title="bdapi_slash_subscription_only_accepts_post_requests" version_id="50" version_string="1.2.1b"><![CDATA[/subscription only accepts POST requests.]]></phrase>
     <phrase title="bdapi_slash_threads_attachments_requires_forum_id" version_id="20" version_string="0.9.5"><![CDATA[/threads/attachments requires `forum_id`.]]></phrase>
     <phrase title="bdapi_slash_threads_requires_forum_id" version_id="20" version_string="0.9.5"><![CDATA[/threads requires `forum_id`.]]></phrase>
     <phrase title="bdapi_slash_tools_login_requires_redirect_uri" version_id="45" version_string="1.1.6"><![CDATA[/tools/login requires `redirect_uri`.]]></phrase>
+    <phrase title="bdapi_subscribe_date" version_id="50" version_string="1.2.1b"><![CDATA[Subscribe Date]]></phrase>
+    <phrase title="bdapi_subscription" version_id="50" version_string="1.2.1b"><![CDATA[Subscription]]></phrase>
+    <phrase title="bdapi_subscriptions" version_id="50" version_string="1.2.1b"><![CDATA[Subscriptions]]></phrase>
+    <phrase title="bdapi_subscription_add" version_id="50" version_string="1.2.1b"><![CDATA[Add New Subscription]]></phrase>
+    <phrase title="bdapi_subscription_callback_is_required" version_id="50" version_string="1.2.1b"><![CDATA[`hub.callback` is required.]]></phrase>
+    <phrase title="bdapi_subscription_callback_must_match" version_id="50" version_string="1.2.1b"><![CDATA[`hub.callback` must match client redirect URI.]]></phrase>
+    <phrase title="bdapi_subscription_cannot_verify_intent_of_subscriber" version_id="50" version_string="1.2.1b"><![CDATA[Cannot verify intent of subscriber.]]></phrase>
+    <phrase title="bdapi_subscription_confirm_deletion" version_id="50" version_string="1.2.1b"><![CDATA[Confirm Deletion of Subscription]]></phrase>
+    <phrase title="bdapi_subscription_delete" version_id="50" version_string="1.2.1b"><![CDATA[Delete Subscription]]></phrase>
+    <phrase title="bdapi_subscription_details" version_id="50" version_string="1.2.1b"><![CDATA[Subscription Details]]></phrase>
+    <phrase title="bdapi_subscription_edit" version_id="50" version_string="1.2.1b"><![CDATA[Edit Subscription]]></phrase>
+    <phrase title="bdapi_subscription_mode_must_valid" version_id="50" version_string="1.2.1b"><![CDATA[`hub.mode` must be either "subscribe" or "unsubscribe".]]></phrase>
+    <phrase title="bdapi_subscription_not_found" version_id="50" version_string="1.2.1b"><![CDATA[The requested subscription could not be found]]></phrase>
+    <phrase title="bdapi_subscription_no_results" version_id="50" version_string="1.2.1b"><![CDATA[No subscription could be found...]]></phrase>
+    <phrase title="bdapi_subscription_please_confirm" version_id="50" version_string="1.2.1b"><![CDATA[Please confirm that you want to delete the following subscription]]></phrase>
+    <phrase title="bdapi_subscription_save" version_id="50" version_string="1.2.1b"><![CDATA[Save Subscription]]></phrase>
+    <phrase title="bdapi_subscription_topic_not_recognized" version_id="50" version_string="1.2.1b"><![CDATA[`hub.topic` could not be recognized.]]></phrase>
     <phrase title="bdapi_token" version_id="1" version_string="0.1"><![CDATA[Token]]></phrase>
     <phrase title="bdapi_tokens" version_id="4" version_string="0.9-dev"><![CDATA[API Access Tokens]]></phrase>
     <phrase title="bdapi_token_add" version_id="1" version_string="0.1"><![CDATA[Add New Token]]></phrase>
@@ -549,6 +634,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_token_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to revoke the following token]]></phrase>
     <phrase title="bdapi_token_save" version_id="1" version_string="0.1"><![CDATA[Save Token]]></phrase>
     <phrase title="bdapi_token_text" version_id="1" version_string="0.1"><![CDATA[Token Text]]></phrase>
+    <phrase title="bdapi_topic" version_id="50" version_string="1.2.1b"><![CDATA[Topic]]></phrase>
     <phrase title="bdapi_ttl" version_id="11" version_string="0.9-dev"><![CDATA[Time To Live]]></phrase>
     <phrase title="bdapi_user_id" version_id="23" version_string="0.9.8a"><![CDATA[User Id]]></phrase>
     <phrase title="bdapi_you_will_be_redirected_x" version_id="24" version_string="0.9.9"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
@@ -571,6 +657,7 @@ step=3600</edit_format_params>
       <prefix original_prefix="api-clients" class="bdApi_Route_PrefixAdmin_Client" build_link="data_only"/>
       <prefix original_prefix="api-logs" class="bdApi_Route_PrefixAdmin_Log" build_link="data_only"/>
       <prefix original_prefix="api-refresh-tokens" class="bdApi_Route_PrefixAdmin_RefreshToken" build_link="data_only"/>
+      <prefix original_prefix="api-subscriptions" class="bdApi_Route_PrefixAdmin_Subscription" build_link="data_only"/>
       <prefix original_prefix="api-tokens" class="bdApi_Route_PrefixAdmin_Token" build_link="data_only"/>
     </route_type>
   </route_prefixes>

@@ -5,26 +5,29 @@ class bdApi_Listener
 	public static function load_class($class, array &$extend)
 	{
 		static $classes = array(
-				'XenForo_ControllerPublic_Account',
-				'XenForo_ControllerPublic_Error',
-				'XenForo_ControllerPublic_Login',
-				'XenForo_ControllerPublic_Logout',
-				'XenForo_ControllerPublic_Register',
+			'XenForo_ControllerPublic_Account',
+			'XenForo_ControllerPublic_Error',
+			'XenForo_ControllerPublic_Login',
+			'XenForo_ControllerPublic_Logout',
+			'XenForo_ControllerPublic_Register',
 
-				'XenForo_DataWriter_DiscussionMessage_Post',
+			'XenForo_DataWriter_Alert',
+			'XenForo_DataWriter_Discussion_Thread',
+			'XenForo_DataWriter_DiscussionMessage_Post',
+			'XenForo_DataWriter_User',
 
-				'XenForo_Model_Alert',
-				'XenForo_Model_Category',
-				'XenForo_Model_Conversation',
-				'XenForo_Model_Forum',
-				'XenForo_Model_ForumWatch',
-				'XenForo_Model_Post',
-				'XenForo_Model_Thread',
-				'XenForo_Model_ThreadWatch',
-				'XenForo_Model_User',
+			'XenForo_Model_Alert',
+			'XenForo_Model_Category',
+			'XenForo_Model_Conversation',
+			'XenForo_Model_Forum',
+			'XenForo_Model_ForumWatch',
+			'XenForo_Model_Post',
+			'XenForo_Model_Thread',
+			'XenForo_Model_ThreadWatch',
+			'XenForo_Model_User',
 
-				'XenForo_Search_DataHandler_Post',
-				'XenForo_Search_DataHandler_Thread',
+			'XenForo_Search_DataHandler_Post',
+			'XenForo_Search_DataHandler_Thread',
 		);
 
 		if (in_array($class, $classes))
@@ -36,7 +39,8 @@ class bdApi_Listener
 	public static function init_dependencies(XenForo_Dependencies_Abstract $dependencies, array $data)
 	{
 		// initializes the core template helper object
-		// in the future, we may have different template helpers for public/admin/api context
+		// in the future, we may have different template helpers for public/admin/api
+		// context
 		$templateHelper = bdApi_Template_Helper_Core::getInstance();
 
 		// register the helper methods in the format `bdApi_<method_name>`
@@ -44,8 +48,7 @@ class bdApi_Listener
 		$methods = $templateHelperReflector->getMethods();
 		foreach ($methods as $method)
 		{
-			if (!($method->getModifiers() & ReflectionMethod::IS_PUBLIC)
-			OR ($method->getModifiers() & ReflectionMethod::IS_STATIC))
+			if (!($method->getModifiers() & ReflectionMethod::IS_PUBLIC) OR ($method->getModifiers() & ReflectionMethod::IS_STATIC))
 			{
 				// ignore non-public instance methods
 				continue;
@@ -53,7 +56,10 @@ class bdApi_Listener
 
 			$methodName = $method->getName();
 			$helperCallbackName = utf8_strtolower('bdApi_' . $methodName);
-			XenForo_Template_Helper_Core::$helperCallbacks[$helperCallbackName] = array($templateHelper, $methodName);
+			XenForo_Template_Helper_Core::$helperCallbacks[$helperCallbackName] = array(
+				$templateHelper,
+				$methodName
+			);
 		}
 	}
 
@@ -82,4 +88,5 @@ class bdApi_Listener
 		$ourHashes = bdApi_FileSums::getHashes();
 		$hashes += $ourHashes;
 	}
+
 }
