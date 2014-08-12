@@ -294,13 +294,12 @@ function xfac_api_getThreadsInForums($config, $forumIds, $accessToken = '', $ext
 	}
 }
 
-function xfac_api_getPostsInThread($config, $threadId, $page = 1, $accessToken = '')
+function xfac_api_getPostsInThread($config, $threadId, $accessToken = '')
 {
 	$curl = _xfac_api_curl(call_user_func_array('sprintf', array(
-		'%s/index.php?posts/&thread_id=%d&page=%d&order=natural_reverse&oauth_token=%s',
+		'%s/index.php?posts/&thread_id=%d&order=natural_reverse&oauth_token=%s',
 		rtrim($config['root'], '/'),
 		$threadId,
-		$page,
 		rawurlencode($accessToken)
 	)));
 	extract($curl);

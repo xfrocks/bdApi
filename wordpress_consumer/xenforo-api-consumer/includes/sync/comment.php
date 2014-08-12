@@ -182,79 +182,61 @@ function xfac_syncComment_processPostSyncRecord($config, $postSyncRecord)
 	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $postSyncRecord->syncData['thread']['creator_user_id']);
 	$accessToken = xfac_user_getAccessToken($wpUserData->ID);
 
-	while (true)
+	$xfPosts = xfac_api_getPostsInThread($config, $postSyncRecord->provider_content_id, $accessToken);
+
+	if (empty($xfPosts['subscription_callback']) AND !empty($xfPosts['_headerLinkHub']))
 	{
-		$xfPosts = xfac_api_getPostsInThread($config, $postSyncRecord->provider_content_id, $page, $accessToken);
-
-		if ($page == 1 AND empty($xfPosts['subscription_callback']) AND !empty($xfPosts['_headerLinkHub']))
+		if (xfac_api_postSubscription($config, $accessToken, $xfPosts['_headerLinkHub']))
 		{
-			if (xfac_api_postSubscription($config, $accessToken, $xfPosts['_headerLinkHub']))
-			{
-				$postSyncRecord->syncData['subscribed'] = time();
-				xfac_sync_updateRecord('', $postSyncRecord->provider_content_type, $postSyncRecord->provider_content_id, $postSyncRecord->sync_id, 0, $postSyncRecord->syncData);
-			}
+			$postSyncRecord->syncData['subscribed'] = time();
+			xfac_sync_updateRecord('', $postSyncRecord->provider_content_type, $postSyncRecord->provider_content_id, $postSyncRecord->sync_id, 0, $postSyncRecord->syncData);
+		}
+	}
+
+	if (empty($xfPosts['posts']))
+	{
+		return false;
+	}
+
+	$xfPostIds = array();
+	foreach ($xfPosts['posts'] as $xfPost)
+	{
+		$xfPostIds[] = $xfPost['post_id'];
+	}
+	$commentSyncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'post', $xfPostIds);
+
+	foreach ($xfPosts['posts'] as $xfPost)
+	{
+		if (!empty($xfPost['post_is_first_post']))
+		{
+			// do not pull first post
+			continue;
 		}
 
-		// increase page for next request
-		$page++;
+		$synced = false;
 
-		if (empty($xfPosts['posts']))
+		foreach ($commentSyncRecords as $commentSyncRecord)
 		{
-			break;
-		}
-
-		$xfPostIds = array();
-		foreach ($xfPosts['posts'] as $xfPost)
-		{
-			$xfPostIds[] = $xfPost['post_id'];
-		}
-		$commentSyncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'post', $xfPostIds);
-
-		foreach ($xfPosts['posts'] as $xfPost)
-		{
-			if (!empty($xfPost['post_is_first_post']))
+			if ($commentSyncRecord->provider_content_id == $xfPost['post_id'])
 			{
-				// do not pull first post
-				continue;
-			}
+				$synced = true;
 
-			$synced = false;
-
-			foreach ($commentSyncRecords as $commentSyncRecord)
-			{
-				if ($commentSyncRecord->provider_content_id == $xfPost['post_id'])
+				if (!empty($commentSyncRecord->syncData['direction']) AND $commentSyncRecord->syncData['direction'] === 'pull')
 				{
-					$synced = true;
-
-					if (!empty($commentSyncRecord->syncData['direction']) AND $commentSyncRecord->syncData['direction'] === 'pull')
-					{
-						// stop the foreach and the outside while too
-						break 3;
-					}
-				}
-			}
-
-			if (!$synced)
-			{
-				$commentId = xfac_syncComment_pullComment($config, $xfPost, $postSyncRecord->sync_id);
-
-				if ($commentId > 0)
-				{
-					$pulledSomething = true;
+					// stop the foreach and the outside while too
+					break 3;
 				}
 			}
 		}
 
-		if (empty($xfPosts['links']['next']))
+		if (!$synced)
 		{
-			// there is no next page, stop
-			break;
-		}
-		
-		if (!empty($xfPosts['subscription_callback']))
-		{
-			// callback subscribed, we should not go further than page 1
-			break;
+			$commentId = xfac_syncComment_pullComment($config, $xfPost, $postSyncRecord->sync_id);
+
+			if ($commentId > 0)
+			{
+				$pulledSomething = true;
+			}
 		}
 	}
 

@@ -336,7 +336,7 @@ function xfac_syncPost_pullPost($config, $thread, $tags, $direction = 'pull')
 			$accessToken = xfac_user_getAccessToken($wpUser->ID);
 			if (!empty($accessToken))
 			{
-				$xfPosts = xfac_api_getPostsInThread($config, $thread['thread_id'], 1, $accessToken);
+				$xfPosts = xfac_api_getPostsInThread($config, $thread['thread_id'], $accessToken);
 				if (empty($xfPosts['subscription_callback']) AND !empty($xfPosts['_headerLinkHub']))
 				{
 					if (xfac_api_postSubscription($config, $accessToken, $xfPosts['_headerLinkHub']))
