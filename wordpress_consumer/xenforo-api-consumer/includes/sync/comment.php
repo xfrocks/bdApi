@@ -220,12 +220,6 @@ function xfac_syncComment_processPostSyncRecord($config, $postSyncRecord)
 			if ($commentSyncRecord->provider_content_id == $xfPost['post_id'])
 			{
 				$synced = true;
-
-				if (!empty($commentSyncRecord->syncData['direction']) AND $commentSyncRecord->syncData['direction'] === 'pull')
-				{
-					// stop the foreach and the outside while too
-					break 3;
-				}
 			}
 		}
 
