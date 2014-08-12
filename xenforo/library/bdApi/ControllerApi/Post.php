@@ -174,6 +174,23 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		$dw = XenForo_DataWriter::create('XenForo_DataWriter_DiscussionMessage_Post');
 		$dw->setExistingData($post, true);
 		$dw->set('message', $input['post_body']);
+
+		switch ($post['message_state'])
+		{
+			case 'deleted':
+				if ($this->_getPostModel()->canUndeletePost($post, $thread, $forum))
+				{
+					$dw->set('message_state', 'visible');
+				}
+				break;
+			case 'moderated':
+				if ($this->_getPostModel()->canApproveUnapprovePost($post, $thread, $forum))
+				{
+					$dw->set('message_state', 'visible');
+				}
+				break;
+		}
+
 		$dw->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($post));
 		$dw->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
 		$dw->save();
