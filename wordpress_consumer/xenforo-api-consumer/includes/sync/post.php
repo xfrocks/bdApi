@@ -118,91 +118,27 @@ function xfac_syncPost_cron()
 		return;
 	}
 
-	foreach ($mappedTags as $forumId => $tagNames)
+	$forumFollowedSyncRecords = xfac_sync_getRecordsByProviderTypeAndSyncId('', 'forums/followed', 0);
+	if (empty($forumFollowedSyncRecords) OR (time() - $forumFollowedSyncRecords[0]->sync_date > 86400))
 	{
-		// sync sticky threads first
-		$stickyThreads = xfac_api_getThreadsInForum($config, $forumId, 1, '', 'sticky=1');
-		if (!empty($stickyThreads['threads']))
-		{
-			$threadIds = array();
-			foreach ($stickyThreads['threads'] as $thread)
-			{
-				$threadIds[] = $thread['thread_id'];
-			}
-			$syncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'thread', $threadIds);
+		xfac_update_option_tag_forum_mappings('xfac_tag_forum_mappings', null, get_option('xfac_tag_forum_mappings'));
+	}
 
-			foreach ($stickyThreads['threads'] as $thread)
-			{
-				$synced = false;
+	$accessToken = xfac_user_getSystemAccessToken(true);
+	$forumIds = array_keys($mappedTags);
 
-				foreach ($syncRecords as $syncRecord)
-				{
-					if ($syncRecord->provider_content_id == $thread['thread_id'])
-					{
-						$synced = true;
-					}
-				}
+	// sync sticky threads first
+	$stickyThreads = xfac_api_getThreadsInForums($config, $forumIds, $accessToken, 'sticky=1');
+	if (!empty($stickyThreads['threads']))
+	{
+		xfac_syncPost_processThreads($config, $stickyThreads['threads']);
+	}
 
-				if (!$synced)
-				{
-					$wpPostId = xfac_syncPost_pullPost($thread, $tagNames);
-				}
-			}
-		}
-
-		// now start syncing normal threads
-		$page = 1;
-
-		while (true)
-		{
-			$threads = xfac_api_getThreadsInForum($config, $forumId, $page);
-
-			// increase page for next request
-			$page++;
-
-			if (empty($threads['threads']))
-			{
-				break;
-			}
-
-			$threadIds = array();
-			foreach ($threads['threads'] as $thread)
-			{
-				$threadIds[] = $thread['thread_id'];
-			}
-			$syncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'thread', $threadIds);
-
-			foreach ($threads['threads'] as $thread)
-			{
-				$synced = false;
-
-				foreach ($syncRecords as $syncRecord)
-				{
-					if ($syncRecord->provider_content_id == $thread['thread_id'])
-					{
-						$synced = true;
-
-						if (!empty($syncRecord->syncData['direction']) AND $syncRecord->syncData['direction'] === 'pull' AND empty($syncRecord->syncData['sticky']))
-						{
-							// reach where we were pulling before
-							// stop the foreach and the outside while too
-							break 3;
-						}
-					}
-				}
-
-				if (!$synced)
-				{
-					$wpPostId = xfac_syncPost_pullPost($thread, $tagNames);
-				}
-			}
-
-			if (empty($threads['links']['next']))
-			{
-				// there is no next page, stop
-				break;
-			}
-		}
+	// now start syncing normal threads
+	$threads = xfac_api_getThreadsInForums($config, $forumIds, $accessToken);
+	if (!empty($threads['threads']))
+	{
+		xfac_syncPost_processThreads($config, $threads['threads']);
 	}
 }
 
@@ -250,6 +186,8 @@ function xfac_update_option_tag_forum_mappings($option, $oldValue, $newValue)
 				{
 					xfac_api_postSubscription($config, $accessToken, $notifications['_headerLinkHub']);
 				}
+
+				xfac_sync_updateRecord('', 'forums/followed', 0, 0);
 			}
 		}
 	}
@@ -312,14 +250,36 @@ function xfac_syncPost_getMappedTags($forumId = 0)
 	}
 }
 
-function xfac_syncPost_pullPost($thread, $tags, $direction = 'pull')
+function xfac_syncPost_processThreads($config, array $threads)
 {
-	$config = xfac_option_getConfig();
-	if (empty($config))
+	$threadIds = array();
+	foreach ($threads as $thread)
 	{
-		return 0;
+		$threadIds[] = $thread['thread_id'];
 	}
+	$syncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'thread', $threadIds);
 
+	foreach ($threads as $thread)
+	{
+		$synced = false;
+
+		foreach ($syncRecords as $syncRecord)
+		{
+			if ($syncRecord->provider_content_id == $thread['thread_id'])
+			{
+				$synced = true;
+			}
+		}
+
+		if (!$synced)
+		{
+			$wpPostId = xfac_syncPost_pullPost($config, $thread, $tagNames);
+		}
+	}
+}
+
+function xfac_syncPost_pullPost($config, $thread, $tags, $direction = 'pull')
+{
 	$postAuthor = 0;
 	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $thread['creator_user_id']);
 	if (empty($wpUserData))

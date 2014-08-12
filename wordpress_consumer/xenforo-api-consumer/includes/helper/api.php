@@ -273,13 +273,12 @@ function xfac_api_getUsersMe($config, $accessToken)
 	}
 }
 
-function xfac_api_getThreadsInForum($config, $forumId, $page = 1, $accessToken = '', $extraParams = '')
+function xfac_api_getThreadsInForums($config, $forumIds, $accessToken = '', $extraParams = '')
 {
 	$curl = _xfac_api_curl(call_user_func_array('sprintf', array(
-		'%s/index.php?threads/&forum_id=%s&page=%d&order=thread_create_date_reverse&oauth_token=%s%s',
+		'%s/index.php?threads/&forum_id=%s&order=thread_create_date_reverse&oauth_token=%s%s',
 		rtrim($config['root'], '/'),
-		$forumId,
-		$page,
+		is_array($forumIds) ? implode(',', $forumIds) : $forumIds,
 		rawurlencode($accessToken),
 		!empty($extraParams) ? '&' . $extraParams : ''
 	)));

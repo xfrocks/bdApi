@@ -273,7 +273,7 @@ function _xfac_subscription_handleCallback_userNotification($config, $ping)
 		return false;
 	}
 
-	$wpPostId = xfac_syncPost_pullPost($xfThread['thread'], $wpTags, 'subscription');
+	$wpPostId = xfac_syncPost_pullPost($config, $xfThread['thread'], $wpTags, 'subscription');
 	if ($wpPostId > 0)
 	{
 		return 'created new post';
