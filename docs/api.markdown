@@ -616,7 +616,8 @@ Detail information of a post.
                         thumbnail: (uri)
                     },
                     permissions: {
-                        view: (boolean)
+                        view: (boolean),
+                        delete: (boolean) # since forum-2014081201
                     }
                 },
                 ...

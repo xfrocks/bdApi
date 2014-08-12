@@ -221,7 +221,10 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 			);
 		}
 
-		$data['permissions'] = array('view' => $attachmentModel->canViewAttachment($attachment, $tempHash), );
+		$data['permissions'] = array(
+			'view' => $attachmentModel->canViewAttachment($attachment, $tempHash),
+			'delete' => $attachmentModel->canDeleteAttachment($attachment, $tempHash),
+		);
 
 		return $data;
 	}
