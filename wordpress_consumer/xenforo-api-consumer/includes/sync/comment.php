@@ -129,7 +129,7 @@ function xfac_syncComment_pushComment($wpComment, $postSyncRecord, $commentSyncR
 	{
 		if (!empty($commentSyncRecord))
 		{
-			xfac_sync_deleteRecordDate($commentSyncRecord);
+			xfac_sync_deleteRecord($commentSyncRecord);
 		}
 	}
 
