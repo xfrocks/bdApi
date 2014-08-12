@@ -170,6 +170,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 			'delete' => $this->canDeletePost($post, $thread, $forum),
 			'reply' => $this->getModelFromCache('XenForo_Model_Thread')->canReplyToThread($thread, $forum),
 			'like' => $this->canLikePost($post, $thread, $forum),
+			'upload_attachment' => $this->canEditPost($post, $thread, $forum) AND $this->getModelFromCache('XenForo_Model_Forum')->canUploadAndManageAttachment($forum),
 		);
 
 		return $data;

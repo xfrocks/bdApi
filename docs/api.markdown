@@ -637,7 +637,8 @@ Detail information of a post.
                 edit: (boolean),
                 delete: (boolean),
                 reply: (boolean), #since forum-2014052901
-                like: (boolean)
+                like: (boolean),
+                upload_attachment: (boolean) # since forum-2014081204
             }
         }
     }
