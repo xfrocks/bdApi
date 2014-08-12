@@ -250,6 +250,12 @@ function xfac_syncComment_processPostSyncRecord($config, $postSyncRecord)
 			// there is no next page, stop
 			break;
 		}
+		
+		if (!empty($xfPosts['subscription_callback']))
+		{
+			// callback subscribed, we should not go further than page 1
+			break;
+		}
 	}
 
 	if ($pulledSomething)
