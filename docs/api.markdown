@@ -155,7 +155,8 @@ Detail information of a category.
                 edit: (boolean),
                 delete: (boolean),
                 follow: (boolean), // since forum-2014053001
-                create_thread: (boolean)
+                create_thread: (boolean),
+                upload_attachment: (boolean) # since forum-2014081202
             }
         }
     }

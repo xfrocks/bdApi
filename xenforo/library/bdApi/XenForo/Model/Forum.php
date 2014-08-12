@@ -5,6 +5,7 @@ class bdApi_XenForo_Model_Forum extends XFCP_bdApi_XenForo_Model_Forum
 	public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
 	{
 		$fetchOptions['watchUserId'] = XenForo_Visitor::getUserId();
+		$fetchOptions['permissionCombinationId'] = XenForo_Visitor::getInstance()->get('permission_combination_id');
 
 		return $fetchOptions;
 	}
@@ -23,6 +24,11 @@ class bdApi_XenForo_Model_Forum extends XFCP_bdApi_XenForo_Model_Forum
 
 	public function prepareApiDataForForum(array $forum)
 	{
+		if (!empty($forum['node_permission_cache']))
+		{
+			XenForo_Visitor::getInstance()->setNodePermissions($forum['node_id'], $forum['node_permission_cache']);
+		}
+
 		$publicKeys = array(
 			// xf_node
 			'node_id' => 'forum_id',
@@ -49,6 +55,7 @@ class bdApi_XenForo_Model_Forum extends XFCP_bdApi_XenForo_Model_Forum
 			'edit' => XenForo_Visitor::getInstance()->hasAdminPermission('node'),
 			'delete' => XenForo_Visitor::getInstance()->hasAdminPermission('node'),
 			'create_thread' => $this->canPostThreadInForum($forum),
+			'upload_attachment' => $this->canUploadAndManageAttachment($forum),
 		);
 
 		if (XenForo_Application::$versionId >= 1020000)
