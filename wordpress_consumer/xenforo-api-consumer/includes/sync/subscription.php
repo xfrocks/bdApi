@@ -63,17 +63,22 @@ function xfac_subscription_handleCallback(array $json)
 		switch ($pingRef['topic_type'])
 		{
 			case 'thread_post':
-				$xfThreadIds[] = $pingRef['topic_id'];
-				$xfPostIds[] = $pingRef['object_data'];
+				if (intval(get_option('xfac_sync_comment_xf_wp')) > 0)
+				{
+					$xfThreadIds[] = $pingRef['topic_id'];
+					$xfPostIds[] = $pingRef['object_data'];
+				}
 				break;
 		}
 	}
 
 	// phrase 2: fetch sync records
+	$postSyncRecords = array();
 	if (!empty($xfPostIds))
 	{
 		$postSyncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'thread', $xfThreadIds);
 	}
+	$commentSyncRecords = array();
 	if (!empty($xfPostIds))
 	{
 		$commentSyncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'post', $xfPostIds);
@@ -125,7 +130,10 @@ function xfac_subscription_handleCallback(array $json)
 				}
 				break;
 			case 'user_notification':
-				$pingRef['result'] = _xfac_subscription_handleCallback_userNotification($config, $pingRef);
+				if (intval(get_option('xfac_sync_post_xf_wp')) > 0)
+				{
+					$pingRef['result'] = _xfac_subscription_handleCallback_userNotification($config, $pingRef);
+				}
 				break;
 		}
 	}
