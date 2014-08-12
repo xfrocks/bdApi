@@ -464,6 +464,27 @@ function xfac_api_putPost($config, $accessToken, $postId, $postBody, array $extr
 	}
 }
 
+function xfac_api_deletePost($config, $accessToken, $postId)
+{
+	$url = call_user_func_array('sprintf', array(
+		'%s/index.php?posts/%d',
+		rtrim($config['root'], '/'),
+		$postId,
+	));
+	$postFields = array('oauth_token' => $accessToken);
+	$curl = _xfac_api_curl($url, 'DELETE', $postFields);
+	extract($curl);
+
+	if (isset($parts['post']))
+	{
+		return $parts;
+	}
+	else
+	{
+		return _xfac_api_getFailedResponse($curl);
+	}
+}
+
 function xfac_api_filterHtmlFromXenForo($html)
 {
 	$offset = 0;

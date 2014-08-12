@@ -36,6 +36,17 @@ function xfac_sync_updateRecord($provider, $cType, $cId, $syncId, $syncDate = 0,
 	", $provider, $cType, $cId, $syncId, $syncDate, serialize($syncData)));
 }
 
+function xfac_sync_deleteRecord($record)
+{
+	return $wpdb->query($wpdb->prepare("
+		DELETE FROM {$wpdb->prefix}xfac_sync
+		WHERE provider = %s
+			AND provider_content_type = %s
+			AND provider_content_id = %s
+			AND sync_id = %d
+	", $record->provider, $record->provider_content_type, $record->provider_content_id, $record->sync_id));
+}
+
 function xfac_sync_updateRecordDate($record, $syncDate = 0)
 {
 	global $wpdb;

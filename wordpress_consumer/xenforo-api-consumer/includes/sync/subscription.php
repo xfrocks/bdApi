@@ -44,7 +44,6 @@ function xfac_subscription_handleCallback(array $json)
 
 	$xfThreadIds = array();
 	$xfPostIds = array();
-	$xfThreadIdsSynced = array();
 
 	// phrase 1: preparation
 	foreach ($json as &$pingRef)
@@ -91,71 +90,81 @@ function xfac_subscription_handleCallback(array $json)
 		switch ($pingRef['topic_type'])
 		{
 			case 'thread_post':
-				if (_xfac_subscription_handleCallback_threadPost($config, $pingRef, $postSyncRecords, $commentSyncRecords))
+				$postSyncRecord = null;
+				$commentSyncRecord = null;
+
+				foreach ($postSyncRecords as $_postSyncRecord)
 				{
-					$xfThreadIdsSynced[] = $pingRef['topic_id'];
+					if ($_postSyncRecord->provider_content_id == $pingRef['topic_id'])
+					{
+						$postSyncRecord = $_postSyncRecord;
+					}
+				}
+
+				if (!empty($postSyncRecord))
+				{
+					foreach ($commentSyncRecords as $_commentSyncRecord)
+					{
+						if ($_commentSyncRecord->provider_content_id == $pingRef['object_data'])
+						{
+							$commentSyncRecord = $_commentSyncRecord;
+						}
+					}
+
+					$pingRef['result'] = _xfac_subscription_handleCallback_threadPost($config, $pingRef, $postSyncRecord, $commentSyncRecord);
+
+					if (!empty($pingRef['result']))
+					{
+						xfac_sync_updateRecordDate($postSyncRecord);
+
+						if (!empty($commentSyncRecord))
+						{
+							xfac_sync_updateRecordDate($commentSyncRecord);
+						}
+					}
 				}
 				break;
 		}
 	}
 
-	// phrase 3: update sync record
-	foreach ($postSyncRecords as $postSyncRecord)
+	// phrase 4: output results
+	$results = array();
+	foreach ($json as $ping)
 	{
-		if (in_array($postSyncRecord->provider_content_id, $xfThreadIdsSynced))
+		if (!empty($ping['result']))
 		{
-			xfac_sync_updateRecordDate($postSyncRecord);
+			$results[] = $ping;
 		}
 	}
+	echo json_encode($results);
 }
 
-function _xfac_subscription_handleCallback_threadPost($config, array $ping, array $postSyncRecords, array $commentSyncRecords)
+function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncRecord, $commentSyncRecord)
 {
-	$postSyncRecord = null;
-	$commentSyncRecord = null;
-
-	foreach ($postSyncRecords as $_postSyncRecord)
-	{
-		if ($_postSyncRecord->provider_content_id == $ping['topic_id'])
-		{
-			$postSyncRecord = $_postSyncRecord;
-		}
-	}
-	if (empty($postSyncRecord))
-	{
-		return false;
-	}
-
-	foreach ($commentSyncRecords as $_commentSyncRecord)
-	{
-		if ($_commentSyncRecord->provider_content_id == $ping['object_data'])
-		{
-			$commentSyncRecord = $_commentSyncRecord;
-		}
-	}
-
 	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $postSyncRecord->syncData['thread']['creator_user_id']);
 	$accessToken = xfac_user_getAccessToken($wpUserData->ID);
+
 	$xfPost = xfac_api_getPost($config, $ping['object_data'], $accessToken);
+	$xfPostIsDeleted = (empty($xfPost['post']) OR !empty($xfPost['post']['post_is_deleted']));
 
 	if (empty($commentSyncRecord))
 	{
-		if ($ping['action'] == 'insert' AND !empty($xfPost['post']))
+		if (!$xfPostIsDeleted)
 		{
 			if (empty($xfPost['post']['post_is_first_post']))
 			{
-				// new XenForo post, create a new comment
-				return xfac_syncComment_pullComment($config, $xfPost['post'], $postSyncRecord->sync_id, 'subscription') > 0;
+				// create a new comment
+				if (xfac_syncComment_pullComment($config, $xfPost['post'], $postSyncRecord->sync_id, 'subscription') > 0)
+				{
+					return 'created new comment';
+				}
 			}
-		}
-		elseif ($ping['action'] == 'update' AND !empty($xfPost['post']))
-		{
-			if (!empty($xfPost['post']['post_is_first_post']))
+			else
 			{
-				// editing the first post from XenForo
+				// update the WordPress post
 				$postContent = xfac_api_filterHtmlFromXenForo($xfPost['post']['post_body_html']);
 
-				// remove the link back
+				// remove the link back, if any
 				$wfPostLink = get_permalink($postSyncRecord->sync_id);
 				$postContent = preg_replace('#<a href="' . preg_quote($wfPostLink, '#') . '"[^>]*>[^<]+</a>$#', '', $postContent);
 
@@ -166,34 +175,53 @@ function _xfac_subscription_handleCallback_threadPost($config, array $ping, arra
 				));
 				$GLOBALS['XFAC_SKIP_xfac_save_post'] = false;
 
-				return is_int($postUpdated) AND $postUpdated > 0;
-			}
-			else
-			{
-				// we missed the XenForo post or something, try to create a new comment now
-				return xfac_syncComment_pullComment($config, $xfPost['post'], $postSyncRecord->sync_id, 'subscription') > 0;
+				if (is_int($postUpdated) AND $postUpdated > 0)
+				{
+					return 'updated post';
+				}
 			}
 		}
 	}
 	else
 	{
-		if ($ping['action'] == 'delete' AND (empty($xfPost['post']) OR !empty($xfPost['post']['post_is_deleted'])))
+		if (!$xfPostIsDeleted)
 		{
-			return wp_update_comment(array(
-				'comment_ID' => $commentSyncRecord->sync_id,
-				'comment_content' => $commentContent,
-				'comment_approved' => 0,
-			)) == 1;
-		}
-		elseif (($ping['action'] == 'insert' OR $ping['action'] == 'update') AND !empty($xfPost['post']))
-		{
+			// update comment content and approve it automatically
 			$commentContent = xfac_api_filterHtmlFromXenForo($xfPost['post']['post_body_html']);
 
-			return wp_update_comment(array(
+			$GLOBALS['XFAC_SKIP_xfac_save_comment'] = true;
+			$commentUpdated = wp_update_comment(array(
 				'comment_ID' => $commentSyncRecord->sync_id,
 				'comment_content' => $commentContent,
 				'comment_approved' => 1,
-			)) == 1;
+			));
+			$GLOBALS['XFAC_SKIP_xfac_save_comment'] = false;
+
+			if ($commentUpdated == 1)
+			{
+				return 'updated comment';
+			}
+		}
+		else
+		{
+			// check for comment current status and unapprove it
+			$wpComment = get_comment($commentSyncRecord->sync_id);
+
+			if (!empty($wpComment->comment_approved))
+			{
+				$GLOBALS['XFAC_SKIP_xfac_save_comment'] = true;
+				$commentUpdated = wp_update_comment(array(
+					'comment_ID' => $commentSyncRecord->sync_id,
+					'comment_approved' => 0,
+				));
+				$GLOBALS['XFAC_SKIP_xfac_save_comment'] = false;
+
+				return 'unapproved comment';
+			}
+			else
+			{
+				return 'comment is unapproved';
+			}
 		}
 	}
 
