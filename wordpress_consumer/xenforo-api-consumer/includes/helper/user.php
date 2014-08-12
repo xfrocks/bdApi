@@ -100,7 +100,7 @@ function xfac_user_deleteRecord($record)
 	return $wpdb->delete($tblAuth, array('id' => $record->id));
 }
 
-function xfac_user_getSystemAccessToken($generateOneTimeToken = false, &$isOneTime = false)
+function xfac_user_getSystemAccessToken($config, $generateOneTimeToken = false, &$isOneTime = false)
 {
 	$accessToken = null;
 

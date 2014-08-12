@@ -120,25 +120,17 @@ function xfac_api_getLogoutLink($config, $accessToken, $redirectUri)
 
 function xfac_api_getPublicLink($config, $route)
 {
-	$ch = curl_init();
-
-	curl_setopt($ch, CURLOPT_URL, call_user_func_array('sprintf', array(
+	$curl = call_user_func_array('sprintf', array(
 		'%s/index.php?tools/link',
 		rtrim($config['root'], '/')
-	)));
-
-	curl_setopt($ch, CURLOPT_POST, true);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+	));
+	$postFields = array(
 		'oauth_token' => xfac_api_generateOneTimeToken($config),
 		'type' => 'public',
 		'route' => $route,
-	)));
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-	$body = curl_exec($ch);
-	curl_close($ch);
-
-	$parts = @json_decode($body, true);
+	);
+	$curl = _xfac_api_curl($url, 'POST', $postFields);
+	extract($curl);
 
 	if (!empty($parts['link']))
 	{
@@ -236,6 +228,11 @@ function xfac_api_generateOneTimeToken($config, $userId = 0, $accessToken = '', 
 
 function xfac_api_getForums($config, $accessToken = '', $extraParams = '')
 {
+	if ($accessToken === '')
+	{
+		$accessToken = xfac_user_getSystemAccessToken($config, true);
+	}
+
 	$curl = _xfac_api_curl(call_user_func_array('sprintf', array(
 		'%s/index.php?forums/&oauth_token=%s%s',
 		rtrim($config['root'], '/'),
@@ -275,6 +272,11 @@ function xfac_api_getUsersMe($config, $accessToken)
 
 function xfac_api_getThreadsInForums($config, $forumIds, $accessToken = '', $extraParams = '')
 {
+	if ($accessToken === '')
+	{
+		$accessToken = xfac_user_getSystemAccessToken($config, true);
+	}
+
 	$curl = _xfac_api_curl(call_user_func_array('sprintf', array(
 		'%s/index.php?threads/&forum_id=%s&order=thread_create_date_reverse&oauth_token=%s%s',
 		rtrim($config['root'], '/'),
@@ -296,6 +298,11 @@ function xfac_api_getThreadsInForums($config, $forumIds, $accessToken = '', $ext
 
 function xfac_api_getPostsInThread($config, $threadId, $accessToken = '')
 {
+	if ($accessToken === '')
+	{
+		$accessToken = xfac_user_getSystemAccessToken($config, true);
+	}
+
 	$curl = _xfac_api_curl(call_user_func_array('sprintf', array(
 		'%s/index.php?posts/&thread_id=%d&order=natural_reverse&oauth_token=%s',
 		rtrim($config['root'], '/'),
@@ -318,6 +325,11 @@ function xfac_api_getPostsInThread($config, $threadId, $accessToken = '')
 
 function xfac_api_getPost($config, $postId, $accessToken = '')
 {
+	if ($accessToken === '')
+	{
+		$accessToken = xfac_user_getSystemAccessToken($config, true);
+	}
+
 	$curl = _xfac_api_curl(call_user_func_array('sprintf', array(
 		'%s/index.php?posts/%d/&oauth_token=%s',
 		rtrim($config['root'], '/'),
@@ -378,6 +390,11 @@ function xfac_api_getNotifications($config, $accessToken)
 
 function xfac_api_getThread($config, $threadId, $accessToken = '')
 {
+	if ($accessToken === '')
+	{
+		$accessToken = xfac_user_getSystemAccessToken($config, true);
+	}
+
 	$curl = _xfac_api_curl(call_user_func_array('sprintf', array(
 		'%s/index.php?threads/%d/&oauth_token=%s',
 		rtrim($config['root'], '/'),
@@ -445,7 +462,7 @@ function xfac_api_postPost($config, $accessToken, $threadId, $postBody, array $e
 	}
 }
 
-function xfac_api_postUser($config, $email, $username, $password, $accessToken = '', array $extraParams = array())
+function xfac_api_postUser($config, $email, $username, $password, array $extraParams = array())
 {
 	$url = call_user_func_array('sprintf', array(
 		'%s/index.php?users/',
@@ -455,13 +472,9 @@ function xfac_api_postUser($config, $email, $username, $password, $accessToken =
 		'email' => $email,
 		'username' => $username,
 	), $extraParams);
-	if (empty($accessToken))
+	if (empty($postFields['oauth_token']))
 	{
 		$postFields['client_id'] = $config['clientId'];
-	}
-	else
-	{
-		$postFields['oauth_token'] = $accessToken;
 	}
 	$postFields = _xfac_api_encrypt($config, $postFields, 'password', $password);
 

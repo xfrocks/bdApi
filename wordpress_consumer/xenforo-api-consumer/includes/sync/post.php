@@ -124,18 +124,17 @@ function xfac_syncPost_cron()
 		xfac_update_option_tag_forum_mappings('xfac_tag_forum_mappings', null, get_option('xfac_tag_forum_mappings'));
 	}
 
-	$accessToken = xfac_user_getSystemAccessToken(true);
 	$forumIds = array_keys($mappedTags);
 
 	// sync sticky threads first
-	$stickyThreads = xfac_api_getThreadsInForums($config, $forumIds, $accessToken, 'sticky=1');
+	$stickyThreads = xfac_api_getThreadsInForums($config, $forumIds, '', 'sticky=1');
 	if (!empty($stickyThreads['threads']))
 	{
 		xfac_syncPost_processThreads($config, $stickyThreads['threads']);
 	}
 
 	// now start syncing normal threads
-	$threads = xfac_api_getThreadsInForums($config, $forumIds, $accessToken);
+	$threads = xfac_api_getThreadsInForums($config, $forumIds);
 	if (!empty($threads['threads']))
 	{
 		xfac_syncPost_processThreads($config, $threads['threads']);
@@ -155,12 +154,11 @@ function xfac_update_option_tag_forum_mappings($option, $oldValue, $newValue)
 			}
 		}
 
-		$accessToken = xfac_user_getSystemAccessToken();
-
-		if (!empty($accessToken))
+		$config = xfac_option_getConfig();
+		if (!empty($config))
 		{
-			$config = xfac_option_getConfig();
-			if (!empty($config))
+			$accessToken = xfac_user_getSystemAccessToken($config);
+			if (!empty($accessToken))
 			{
 				$forumFollowed = xfac_api_getForumFollowed($config, $accessToken);
 				$followedForumIds = array();

@@ -233,7 +233,7 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
 
 function _xfac_subscription_handleCallback_userNotification($config, $ping)
 {
-	$accessToken = xfac_user_getSystemAccessToken();
+	$accessToken = xfac_user_getSystemAccessToken($config);
 	if (empty($accessToken))
 	{
 		return false;
