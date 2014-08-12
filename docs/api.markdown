@@ -369,7 +369,8 @@ Detail information of a thread.
                 edit: (boolean),
                 delete: (boolean),
                 follow: (boolean), // since forum-2014052903
-                post: (boolean)
+                post: (boolean),
+                upload_attachment: (boolean) # since forum-2014081203
             }
         }
     }

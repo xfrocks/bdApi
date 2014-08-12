@@ -119,6 +119,7 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 			'delete' => $this->canDeleteThread($thread, $forum),
 			'follow' => $this->canWatchThread($thread, $forum),
 			'post' => $this->canReplyToThread($thread, $forum),
+			'upload_attachment' => $this->getModelFromCache('XenForo_Model_Forum')->canUploadAndManageAttachment($forum),
 		);
 
 		return $data;
