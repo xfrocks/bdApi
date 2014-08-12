@@ -112,39 +112,7 @@ function xfac_syncPost_cron()
 		return;
 	}
 
-	$systemTags = get_terms('post_tag', array('hide_empty' => false));
-	if (empty($systemTags))
-	{
-		return;
-	}
-
-	$tagForumMappings = get_option('xfac_tag_forum_mappings');
-	if (empty($tagForumMappings))
-	{
-		return;
-	}
-
-	$mappedTags = array();
-	foreach ($tagForumMappings as $tagForumMapping)
-	{
-		if (!empty($tagForumMapping['forum_id']))
-		{
-			if (empty($mappedTags[$tagForumMapping['forum_id']]))
-			{
-				$mappedTags[$tagForumMapping['forum_id']] = array();
-			}
-
-			foreach ($systemTags as $systemTag)
-			{
-				if ($systemTag->term_id == $tagForumMapping['term_id'])
-				{
-					$mappedTags[$tagForumMapping['forum_id']][] = $systemTag->name;
-				}
-			}
-
-		}
-	}
-
+	$mappedTags = xfac_syncPost_getMappedTags();
 	if (empty($mappedTags))
 	{
 		return;
@@ -238,12 +206,113 @@ function xfac_syncPost_cron()
 	}
 }
 
+function xfac_update_option_tag_forum_mappings($option, $oldValue, $newValue)
+{
+	if ($option === 'xfac_tag_forum_mappings')
+	{
+		$forumIds = array();
+		foreach ($newValue as $tagForumMapping)
+		{
+			if (!empty($tagForumMapping['term_id']) AND !empty($tagForumMapping['forum_id']))
+			{
+				$forumIds[] = intval($tagForumMapping['forum_id']);
+			}
+		}
+
+		$accessToken = xfac_user_getSystemAccessToken();
+
+		if (!empty($accessToken))
+		{
+			$config = xfac_option_getConfig();
+			if (!empty($config))
+			{
+				$forumFollowed = xfac_api_getForumFollowed($config, $accessToken);
+				$followedForumIds = array();
+
+				foreach ($forumFollowed['forums'] as $forumFollowedOne)
+				{
+					$followedForumIds[] = intval($forumFollowedOne['forum_id']);
+				}
+				foreach (array_diff($forumIds, $followedForumIds) as $forumId)
+				{
+					// follow the forum to get thread notification
+					xfac_api_postForumFollower($config, $accessToken, $forumId);
+				}
+				foreach (array_diff($followedForumIds, $forumIds) as $forumId)
+				{
+					// unfollow the forum to save server resources
+					xfac_api_deleteForumFollower($config, $accessToken, $forumId);
+				}
+
+				// make sure we subscribed for notification callback
+				$notifications = xfac_api_getNotifications($config, $accessToken);
+				if (empty($notifications['subscription_callback']) AND !empty($notifications['_headerLinkHub']))
+				{
+					xfac_api_postSubscription($config, $accessToken, $notifications['_headerLinkHub']);
+				}
+			}
+		}
+	}
+}
+
 if (intval(get_option('xfac_sync_post_xf_wp')) > 0)
 {
 	add_action('xfac_cron_hourly', 'xfac_syncPost_cron');
+	add_action('update_option', 'xfac_update_option_tag_forum_mappings', 10, 3);
 }
 
-function xfac_syncPost_pullPost($thread, $tags)
+function xfac_syncPost_getMappedTags($forumId = 0)
+{
+	$mappedTags = array();
+
+	$systemTags = get_terms('post_tag', array('hide_empty' => false));
+	if (empty($systemTags))
+	{
+		return $mappedTags;
+	}
+
+	$tagForumMappings = get_option('xfac_tag_forum_mappings');
+	if (empty($tagForumMappings))
+	{
+		return $mappedTags;
+	}
+
+	foreach ($tagForumMappings as $tagForumMapping)
+	{
+		if (!empty($tagForumMapping['forum_id']))
+		{
+			if (empty($mappedTags[$tagForumMapping['forum_id']]))
+			{
+				$mappedTags[$tagForumMapping['forum_id']] = array();
+			}
+
+			foreach ($systemTags as $systemTag)
+			{
+				if ($systemTag->term_id == $tagForumMapping['term_id'])
+				{
+					$mappedTags[$tagForumMapping['forum_id']][] = $systemTag->name;
+				}
+			}
+
+		}
+	}
+
+	if ($forumId === 0)
+	{
+		// get tags for all forums
+		return $mappedTags;
+	}
+	if (isset($mappedTags[$forumId]))
+	{
+		return $mappedTags[$forumId];
+	}
+	else
+	{
+		return array();
+	}
+}
+
+function xfac_syncPost_pullPost($thread, $tags, $direction = 'pull')
 {
 	$config = xfac_option_getConfig();
 	if (empty($config))
@@ -300,11 +369,30 @@ function xfac_syncPost_pullPost($thread, $tags)
 
 	if ($wpPostId > 0)
 	{
+		$subscribed = 0;
+
+		if (intval(get_option('xfac_sync_comment_xf_wp')) > 0)
+		{
+			$accessToken = xfac_user_getAccessToken($wpUser->ID);
+			if (!empty($accessToken))
+			{
+				$xfPosts = xfac_api_getPostsInThread($config, $thread['thread_id'], 1, $accessToken);
+				if (empty($xfPosts['subscription_callback']) AND !empty($xfPosts['_headerLinkHub']))
+				{
+					if (xfac_api_postSubscription($config, $accessToken, $xfPosts['_headerLinkHub']))
+					{
+						$subscribed = time();
+					}
+				}
+			}
+		}
+
 		xfac_sync_updateRecord('', 'thread', $thread['thread_id'], $wpPostId, $thread['thread_create_date'], array(
 			'forumId' => $thread['forum_id'],
 			'thread' => $thread,
-			'direction' => 'pull',
+			'direction' => $direction,
 			'sticky' => !empty($thread['thread_is_sticky']),
+			'subscribed' => $subscribed,
 		));
 	}
 

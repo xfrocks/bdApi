@@ -308,15 +308,7 @@ function xfac_api_getPostsInThread($config, $threadId, $page = 1, $accessToken =
 
 	if (isset($parts['posts']))
 	{
-		$headerLinks = _xfac_api_getHeader($curl, 'Link');
-		$headerLinkHub = null;
-		foreach ($headerLinks as $headerLink)
-		{
-			if (preg_match('/<(?<url>[^>]+)>; rel=hub/', $headerLink, $matches))
-			{
-				$parts['_headerLinkHub'] = $matches['url'];
-			}
-		}
+		$parts['_headerLinkHub'] = _xfac_api_getHeaderLinkHub($curl);
 
 		return $parts;
 	}
@@ -337,6 +329,66 @@ function xfac_api_getPost($config, $postId, $accessToken = '')
 	extract($curl);
 
 	if (isset($parts['post']))
+	{
+		return $parts;
+	}
+	else
+	{
+		return _xfac_api_getFailedResponse($curl);
+	}
+}
+
+function xfac_api_getForumFollowed($config, $accessToken)
+{
+	$curl = _xfac_api_curl(call_user_func_array('sprintf', array(
+		'%s/index.php?forums/followed&oauth_token=%s',
+		rtrim($config['root'], '/'),
+		rawurlencode($accessToken),
+	)));
+	extract($curl);
+
+	if (isset($parts['forums']))
+	{
+		return $parts;
+	}
+	else
+	{
+		return _xfac_api_getFailedResponse($curl);
+	}
+}
+
+function xfac_api_getNotifications($config, $accessToken)
+{
+	$curl = _xfac_api_curl(call_user_func_array('sprintf', array(
+		'%s/index.php?notifications&oauth_token=%s',
+		rtrim($config['root'], '/'),
+		rawurlencode($accessToken),
+	)));
+	extract($curl);
+
+	if (isset($parts['notifications']))
+	{
+		$parts['_headerLinkHub'] = _xfac_api_getHeaderLinkHub($curl);
+
+		return $parts;
+	}
+	else
+	{
+		return _xfac_api_getFailedResponse($curl);
+	}
+}
+
+function xfac_api_getThread($config, $threadId, $accessToken = '')
+{
+	$curl = _xfac_api_curl(call_user_func_array('sprintf', array(
+		'%s/index.php?threads/%d/&oauth_token=%s',
+		rtrim($config['root'], '/'),
+		$threadId,
+		rawurlencode($accessToken)
+	)));
+	extract($curl);
+
+	if (isset($parts['thread']))
 	{
 		return $parts;
 	}
@@ -440,6 +492,27 @@ function xfac_api_postSubscription($config, $accessToken, $url)
 	return $curl['http_code'] == 202;
 }
 
+function xfac_api_postForumFollower($config, $accessToken, $forumId)
+{
+	$url = call_user_func_array('sprintf', array(
+		'%s/index.php?forums/%d/followers',
+		rtrim($config['root'], '/'),
+		$forumId,
+	));
+	$postFields = array('oauth_token' => $accessToken);
+	$curl = _xfac_api_curl($url, 'POST', $postFields);
+	extract($curl);
+
+	if (isset($parts['status']) AND $parts['status'] == 'ok')
+	{
+		return true;
+	}
+	else
+	{
+		return _xfac_api_getFailedResponse($curl);
+	}
+}
+
 function xfac_api_putPost($config, $accessToken, $postId, $postBody, array $extraParams = array())
 {
 	$url = call_user_func_array('sprintf', array(
@@ -478,6 +551,27 @@ function xfac_api_deletePost($config, $accessToken, $postId)
 	if (isset($parts['post']))
 	{
 		return $parts;
+	}
+	else
+	{
+		return _xfac_api_getFailedResponse($curl);
+	}
+}
+
+function xfac_api_deleteForumFollower($config, $accessToken, $forumId)
+{
+	$url = call_user_func_array('sprintf', array(
+		'%s/index.php?forums/%d/followers',
+		rtrim($config['root'], '/'),
+		$forumId,
+	));
+	$postFields = array('oauth_token' => $accessToken);
+	$curl = _xfac_api_curl($url, 'DELETE', $postFields);
+	extract($curl);
+
+	if (isset($parts['status']) AND $parts['status'] == 'ok')
+	{
+		return true;
 	}
 	else
 	{
@@ -587,6 +681,21 @@ function _xfac_api_getHeader($curl, $headerName)
 	}
 
 	return $headerValues;
+}
+
+function _xfac_api_getHeaderLinkHub($curl)
+{
+	$headerLinks = _xfac_api_getHeader($curl, 'Link');
+	$headerLinkHub = null;
+	foreach ($headerLinks as $headerLink)
+	{
+		if (preg_match('/<(?<url>[^>]+)>; rel=hub/', $headerLink, $matches))
+		{
+			return $matches['url'];
+		}
+	}
+
+	return null;
 }
 
 function _xfac_api_getFailedResponse($curl)

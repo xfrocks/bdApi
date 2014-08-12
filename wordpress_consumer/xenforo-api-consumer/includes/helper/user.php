@@ -100,6 +100,25 @@ function xfac_user_deleteRecord($record)
 	return $wpdb->delete($tblAuth, array('id' => $record->id));
 }
 
+function xfac_user_getSystemAccessToken($generateOneTimeToken = false, &$isOneTime = false)
+{
+	$accessToken = null;
+
+	if (intval(get_option('xfac_xf_guest_account')) > 0)
+	{
+		// use pre-configured system account
+		$accessToken = xfac_user_getAccessToken(0);
+	}
+	elseif ($generateOneTimeToken)
+	{
+		// use one time token for guest
+		$accessToken = xfac_api_generateOneTimeToken($config);
+		$isOneTime = true;
+	}
+
+	return $accessToken;
+}
+
 function xfac_user_getAccessToken($wpUserId)
 {
 	$records = xfac_user_getRecordsByUserId($wpUserId);

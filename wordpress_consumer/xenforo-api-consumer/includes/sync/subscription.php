@@ -124,6 +124,9 @@ function xfac_subscription_handleCallback(array $json)
 					}
 				}
 				break;
+			case 'user_notification':
+				$pingRef['result'] = _xfac_subscription_handleCallback_userNotification($config, $pingRef);
+				break;
 		}
 	}
 
@@ -223,6 +226,57 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
 				return 'comment is unapproved';
 			}
 		}
+	}
+
+	return false;
+}
+
+function _xfac_subscription_handleCallback_userNotification($config, $ping)
+{
+	$accessToken = xfac_user_getSystemAccessToken();
+	if (empty($accessToken))
+	{
+		return false;
+	}
+
+	if (empty($ping['object_data']['notification_id']))
+	{
+		return false;
+	}
+	$notification = $ping['object_data'];
+
+	if (empty($notification['notification_type']))
+	{
+		return false;
+	}
+	if (!preg_match('/^post_(?<postId>\d+)_insert$/', $notification['notification_type'], $matches))
+	{
+		return false;
+	}
+	$postId = $matches['postId'];
+
+	$xfPost = xfac_api_getPost($config, $postId, $accessToken);
+	if (empty($xfPost['post']['thread_id']))
+	{
+		return false;
+	}
+
+	$xfThread = xfac_api_getThread($config, $xfPost['post']['thread_id'], $accessToken);
+	if (empty($xfThread['thread']))
+	{
+		return false;
+	}
+
+	$wpTags = xfac_syncPost_getMappedTags($xfThread['thread']['forum_id']);
+	if (empty($wpTags))
+	{
+		return false;
+	}
+
+	$wpPostId = xfac_syncPost_pullPost($xfThread['thread'], $wpTags, 'subscription');
+	if ($wpPostId > 0)
+	{
+		return 'created new post';
 	}
 
 	return false;
