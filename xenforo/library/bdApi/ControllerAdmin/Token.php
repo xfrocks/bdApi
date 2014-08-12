@@ -52,7 +52,7 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
 	{
 		if ($this->isConfirmedPost())
 		{
-			$clientId = $this->_input->filterSingle('client_id', XenForo_Input::UINT);
+			$clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
 			$client = $this->_getClientOrError($clientId);
 
 			$username = $this->_input->filterSingle('username', XenForo_Input::STRING);
