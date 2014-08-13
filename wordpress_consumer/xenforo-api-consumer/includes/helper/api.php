@@ -120,7 +120,7 @@ function xfac_api_getLogoutLink($config, $accessToken, $redirectUri)
 
 function xfac_api_getPublicLink($config, $route)
 {
-	$curl = call_user_func_array('sprintf', array(
+	$url = call_user_func_array('sprintf', array(
 		'%s/index.php?tools/link',
 		rtrim($config['root'], '/')
 	));
