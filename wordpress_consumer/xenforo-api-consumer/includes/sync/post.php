@@ -66,10 +66,25 @@ function xfac_save_post($postId, WP_Post $post, $update)
 
 						if (!empty($thread['thread']['thread_id']))
 						{
+							$subscribed = 0;
+
+							if (intval(get_option('xfac_sync_comment_xf_wp')) > 0)
+							{
+								$xfPosts = xfac_api_getPostsInThread($config, $thread['thread']['thread_id'], $accessToken);
+								if (empty($xfPosts['subscription_callback']) AND !empty($xfPosts['_headerLinkHub']))
+								{
+									if (xfac_api_postSubscription($config, $accessToken, $xfPosts['_headerLinkHub']))
+									{
+										$subscribed = time();
+									}
+								}
+							}
+
 							xfac_sync_updateRecord('', 'thread', $thread['thread']['thread_id'], $post->ID, 0, array(
 								'forumId' => $forumId,
 								'thread' => $thread['thread'],
 								'direction' => 'push',
+								'subscribed' => $subscribed,
 							));
 						}
 					}
