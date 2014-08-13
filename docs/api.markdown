@@ -1373,8 +1373,8 @@ List of conversations (with pagination). Since forum-2014022602.
             {
                 notification_id: (int),
                 notification_create_date: (unix timestamp in seconds),
-                creator_user_id: (int),
-                creator_username: (string),
+                creator_user_id: (int), # since subscription-2014081001
+                creator_username: (string), # since subscription-2014081001
                 notification_type: (string), # since forum-2014080901
                 notification_html: (string)
             },

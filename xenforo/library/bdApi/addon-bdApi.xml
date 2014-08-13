@@ -606,22 +606,17 @@ step=3600</edit_format_params>
     <phrase title="bdapi_slash_threads_attachments_requires_forum_id" version_id="20" version_string="0.9.5"><![CDATA[/threads/attachments requires `forum_id`.]]></phrase>
     <phrase title="bdapi_slash_threads_requires_forum_id" version_id="20" version_string="0.9.5"><![CDATA[/threads requires `forum_id`.]]></phrase>
     <phrase title="bdapi_slash_tools_login_requires_redirect_uri" version_id="45" version_string="1.1.6"><![CDATA[/tools/login requires `redirect_uri`.]]></phrase>
-    <phrase title="bdapi_subscribe_date" version_id="50" version_string="1.2.1b"><![CDATA[Subscribe Date]]></phrase>
-    <phrase title="bdapi_subscription" version_id="50" version_string="1.2.1b"><![CDATA[Subscription]]></phrase>
     <phrase title="bdapi_subscriptions" version_id="50" version_string="1.2.1b"><![CDATA[Subscriptions]]></phrase>
-    <phrase title="bdapi_subscription_add" version_id="50" version_string="1.2.1b"><![CDATA[Add New Subscription]]></phrase>
     <phrase title="bdapi_subscription_callback_is_required" version_id="50" version_string="1.2.1b"><![CDATA[`hub.callback` is required.]]></phrase>
     <phrase title="bdapi_subscription_callback_must_match" version_id="50" version_string="1.2.1b"><![CDATA[`hub.callback` must match client redirect URI.]]></phrase>
     <phrase title="bdapi_subscription_cannot_verify_intent_of_subscriber" version_id="50" version_string="1.2.1b"><![CDATA[Cannot verify intent of subscriber.]]></phrase>
     <phrase title="bdapi_subscription_confirm_deletion" version_id="50" version_string="1.2.1b"><![CDATA[Confirm Deletion of Subscription]]></phrase>
     <phrase title="bdapi_subscription_delete" version_id="50" version_string="1.2.1b"><![CDATA[Delete Subscription]]></phrase>
     <phrase title="bdapi_subscription_details" version_id="50" version_string="1.2.1b"><![CDATA[Subscription Details]]></phrase>
-    <phrase title="bdapi_subscription_edit" version_id="50" version_string="1.2.1b"><![CDATA[Edit Subscription]]></phrase>
     <phrase title="bdapi_subscription_mode_must_valid" version_id="50" version_string="1.2.1b"><![CDATA[`hub.mode` must be either "subscribe" or "unsubscribe".]]></phrase>
     <phrase title="bdapi_subscription_not_found" version_id="50" version_string="1.2.1b"><![CDATA[The requested subscription could not be found]]></phrase>
     <phrase title="bdapi_subscription_no_results" version_id="50" version_string="1.2.1b"><![CDATA[No subscription could be found...]]></phrase>
     <phrase title="bdapi_subscription_please_confirm" version_id="50" version_string="1.2.1b"><![CDATA[Please confirm that you want to delete the following subscription]]></phrase>
-    <phrase title="bdapi_subscription_save" version_id="50" version_string="1.2.1b"><![CDATA[Save Subscription]]></phrase>
     <phrase title="bdapi_subscription_topic_not_recognized" version_id="50" version_string="1.2.1b"><![CDATA[`hub.topic` could not be recognized.]]></phrase>
     <phrase title="bdapi_token" version_id="1" version_string="0.1"><![CDATA[Token]]></phrase>
     <phrase title="bdapi_tokens" version_id="4" version_string="0.9-dev"><![CDATA[API Access Tokens]]></phrase>

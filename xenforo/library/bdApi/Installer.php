@@ -200,11 +200,6 @@ class bdApi_Installer
 	private static function installCustomized($existingAddOn, $addOnData)
 	{
 		$db = XenForo_Application::getDb();
-		
-		if (XenForo_Application::$versionId < 1020000)
-		{
-			throw new XenForo_Exception('XenForo 1.2.0+ is required.');
-		}
 
 		$db->query('CREATE TABLE IF NOT EXISTS `xf_bdapi_ping_queue` (
 			`ping_queue_id` INT(10) UNSIGNED AUTO_INCREMENT,
