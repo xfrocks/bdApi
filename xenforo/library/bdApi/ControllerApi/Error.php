@@ -4,6 +4,12 @@ class bdApi_ControllerApi_Error extends bdApi_ControllerApi_Abstract
 {
 	public function actionErrorNotFound()
 	{
+		if (is_callable(array($this, 'getNotFoundResponse')))
+		{
+			// XenForo 1.2.0+ has this
+			return $this->getNotFoundResponse();
+		}
+
 		if (XenForo_Application::debugMode())
 		{
 			$controllerName = $this->_request->getParam('_controllerName');

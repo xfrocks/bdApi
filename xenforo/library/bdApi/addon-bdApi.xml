@@ -518,22 +518,17 @@ step=3600</edit_format_params>
     <phrase title="bdapi_authorize_error_invalid_or_expired_access_token" version_id="1" version_string="0.1"><![CDATA[Invalid or expired access token.]]></phrase>
     <phrase title="bdapi_authorize_error_scope_x_not_granted" version_id="1" version_string="0.1"><![CDATA[Scope {scope} has not been granted.]]></phrase>
     <phrase title="bdapi_auth_code" version_id="1" version_string="0.1"><![CDATA[Authentication Code]]></phrase>
-    <phrase title="bdapi_auth_code_add" version_id="1" version_string="0.1"><![CDATA[Add New Authentication Code]]></phrase>
     <phrase title="bdapi_auth_code_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Authentication Code]]></phrase>
     <phrase title="bdapi_auth_code_delete" version_id="1" version_string="0.1"><![CDATA[Delete Authentication Code]]></phrase>
-    <phrase title="bdapi_auth_code_edit" version_id="1" version_string="0.1"><![CDATA[Edit Authentication Code]]></phrase>
     <phrase title="bdapi_auth_code_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Authentication Code could not be found]]></phrase>
     <phrase title="bdapi_auth_code_no_results" version_id="1" version_string="0.1"><![CDATA[No authentication codes to display...]]></phrase>
     <phrase title="bdapi_auth_code_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following authentication code]]></phrase>
-    <phrase title="bdapi_auth_code_save" version_id="1" version_string="0.1"><![CDATA[Save Authentication Code]]></phrase>
-    <phrase title="bdapi_auth_code_text" version_id="1" version_string="0.1"><![CDATA[Authentication Code Text]]></phrase>
     <phrase title="bdapi_client" version_id="1" version_string="0.1"><![CDATA[Client]]></phrase>
     <phrase title="bdapi_clients" version_id="4" version_string="0.9-dev"><![CDATA[API Clients]]></phrase>
     <phrase title="bdapi_client_add" version_id="1" version_string="0.1"><![CDATA[Add New Client]]></phrase>
     <phrase title="bdapi_client_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Client]]></phrase>
     <phrase title="bdapi_client_delete" version_id="1" version_string="0.1"><![CDATA[Delete Client]]></phrase>
     <phrase title="bdapi_client_edit" version_id="1" version_string="0.1"><![CDATA[Edit Client]]></phrase>
-    <phrase title="bdapi_client_id" version_id="23" version_string="0.9.8a"><![CDATA[Client Id]]></phrase>
     <phrase title="bdapi_client_ids_must_be_unique" version_id="4" version_string="0.9-dev"><![CDATA[API keys must be unique. The specified key is already in use.]]></phrase>
     <phrase title="bdapi_client_id_must_be_az09" version_id="50" version_string="1.2.1b"><![CDATA[API key must consist of alphanumeric characters (letters or numbers) only.]]></phrase>
     <phrase title="bdapi_client_key" version_id="4" version_string="0.9-dev"><![CDATA[API Key]]></phrase>
@@ -551,7 +546,6 @@ step=3600</edit_format_params>
     <phrase title="bdapi_description" version_id="1" version_string="0.1"><![CDATA[Description]]></phrase>
     <phrase title="bdapi_expire_date" version_id="1" version_string="0.1"><![CDATA[Expire Date]]></phrase>
     <phrase title="bdapi_home" version_id="4" version_string="0.9-dev"><![CDATA[API Access]]></phrase>
-    <phrase title="bdapi_ip_address" version_id="23" version_string="0.9.8a"><![CDATA[Ip Address]]></phrase>
     <phrase title="bdapi_issue_date" version_id="4" version_string="0.9-dev"><![CDATA[Issue Date]]></phrase>
     <phrase title="bdapi_login_to_authorize_x" version_id="13" version_string="0.9-dev"><![CDATA[Please login to authorize access to {client}.]]></phrase>
     <phrase title="bdapi_login_to_authorize_x_google" version_id="50" version_string="1.2.1b"><![CDATA[Click "{login_with_google}" to continue with {client}.]]></phrase>
@@ -567,25 +561,16 @@ step=3600</edit_format_params>
     <phrase title="bdapi_redirect_uri" version_id="1" version_string="0.1"><![CDATA[Redirect Uri]]></phrase>
     <phrase title="bdapi_redirect_uri_must_be_valid" version_id="4" version_string="0.9-dev"><![CDATA[Redirect URI must be valid.]]></phrase>
     <phrase title="bdapi_refresh_token" version_id="1" version_string="0.1"><![CDATA[Refresh Token]]></phrase>
-    <phrase title="bdapi_refresh_token_add" version_id="1" version_string="0.1"><![CDATA[Add New Refresh Token]]></phrase>
     <phrase title="bdapi_refresh_token_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Refresh Token]]></phrase>
     <phrase title="bdapi_refresh_token_delete" version_id="1" version_string="0.1"><![CDATA[Delete Refresh Token]]></phrase>
-    <phrase title="bdapi_refresh_token_edit" version_id="1" version_string="0.1"><![CDATA[Edit Refresh Token]]></phrase>
     <phrase title="bdapi_refresh_token_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Refresh Token could not be found]]></phrase>
     <phrase title="bdapi_refresh_token_no_results" version_id="1" version_string="0.1"><![CDATA[No refresh tokens to display...]]></phrase>
     <phrase title="bdapi_refresh_token_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following refresh token]]></phrase>
-    <phrase title="bdapi_refresh_token_save" version_id="1" version_string="0.1"><![CDATA[Save Refresh Token]]></phrase>
-    <phrase title="bdapi_refresh_token_text" version_id="1" version_string="0.1"><![CDATA[Refresh Token Text]]></phrase>
     <phrase title="bdapi_request" version_id="23" version_string="0.9.8a"><![CDATA[Request]]></phrase>
     <phrase title="bdapi_requested_scopes" version_id="1" version_string="0.1"><![CDATA[Requested Permissions]]></phrase>
-    <phrase title="bdapi_request_date" version_id="23" version_string="0.9.8a"><![CDATA[Request Date]]></phrase>
-    <phrase title="bdapi_request_method" version_id="23" version_string="0.9.8a"><![CDATA[Request Method]]></phrase>
-    <phrase title="bdapi_request_must_authorize_to_decrypt" version_id="25" version_string="1.0"><![CDATA[Request must be authorized to decrypt data.
-]]></phrase>
     <phrase title="bdapi_request_must_authorize_to_encrypt" version_id="25" version_string="1.0"><![CDATA[Request must be authorized to encrypt data.]]></phrase>
     <phrase title="bdapi_requires_upload_x" version_id="20" version_string="0.9.5"><![CDATA[This request requires file upload `{field}`.]]></phrase>
     <phrase title="bdapi_response" version_id="23" version_string="0.9.8a"><![CDATA[Response]]></phrase>
-    <phrase title="bdapi_response_code" version_id="23" version_string="0.9.8a"><![CDATA[Response Code]]></phrase>
     <phrase title="bdapi_revoke" version_id="4" version_string="0.9-dev"><![CDATA[Revoke]]></phrase>
     <phrase title="bdapi_scope" version_id="1" version_string="0.1"><![CDATA[Scope]]></phrase>
     <phrase title="bdapi_scope_manage_account_settings" global_cache="1" version_id="1" version_string="0.1"><![CDATA[Change your account settings]]></phrase>
@@ -623,15 +608,11 @@ step=3600</edit_format_params>
     <phrase title="bdapi_token_add" version_id="1" version_string="0.1"><![CDATA[Add New Token]]></phrase>
     <phrase title="bdapi_token_confirm_deletion" version_id="4" version_string="0.9-dev"><![CDATA[Confirm Revocation of Token]]></phrase>
     <phrase title="bdapi_token_delete" version_id="1" version_string="0.1"><![CDATA[Delete Token]]></phrase>
-    <phrase title="bdapi_token_edit" version_id="1" version_string="0.1"><![CDATA[Edit Token]]></phrase>
     <phrase title="bdapi_token_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Token could not be found]]></phrase>
     <phrase title="bdapi_token_no_results" version_id="1" version_string="0.1"><![CDATA[No tokens to display...]]></phrase>
     <phrase title="bdapi_token_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to revoke the following token]]></phrase>
-    <phrase title="bdapi_token_save" version_id="1" version_string="0.1"><![CDATA[Save Token]]></phrase>
-    <phrase title="bdapi_token_text" version_id="1" version_string="0.1"><![CDATA[Token Text]]></phrase>
     <phrase title="bdapi_topic" version_id="50" version_string="1.2.1b"><![CDATA[Topic]]></phrase>
     <phrase title="bdapi_ttl" version_id="11" version_string="0.9-dev"><![CDATA[Time To Live]]></phrase>
-    <phrase title="bdapi_user_id" version_id="23" version_string="0.9.8a"><![CDATA[User Id]]></phrase>
     <phrase title="bdapi_you_will_be_redirected_x" version_id="24" version_string="0.9.9"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
     <phrase title="cron_entry_bdApi_cleanUpExpired" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Clean Up Expired Data]]></phrase>
     <phrase title="option_bdApi_authCodeTTL" version_id="50" version_string="1.2.1b"><![CDATA[Authentication Code TTL]]></phrase>
