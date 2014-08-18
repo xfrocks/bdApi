@@ -135,7 +135,10 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 				}
 			}
 
-			$data['self_permissions'] = array('create_conversation' => $this->getModelFromCache('XenForo_Model_Conversation')->canStartConversations());
+			$data['self_permissions'] = array(
+				'create_conversation' => $this->getModelFromCache('XenForo_Model_Conversation')->canStartConversations(),
+				'upload_attachment_conversation' => $this->getModelFromCache('XenForo_Model_Conversation')->canUploadAndManageAttachment(),
+			);
 		}
 		else
 		{

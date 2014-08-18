@@ -88,6 +88,7 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 		$data['permissions'] = array(
 			'reply' => $this->canReplyToConversation($conversation),
 			'delete' => true,
+			'upload_attachment' => $this->canUploadAndManageAttachment($conversation),
 		);
 
 		if (isset($conversation['message']))
@@ -185,6 +186,7 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 			'edit' => $this->canEditMessage($message, $conversation),
 			'delete' => false,
 			'reply' => $this->canReplyToConversation($conversation),
+			'upload_attachment' => $this->canUploadAndManageAttachment($conversation) AND $this->canEditMessage($message, $conversation),
 		);
 
 		return $data;
@@ -237,7 +239,10 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 			);
 		}
 
-		$data['permissions'] = array('view' => $attachmentModel->canViewAttachment($attachment, $tempHash));
+		$data['permissions'] = array(
+			'view' => $attachmentModel->canViewAttachment($attachment, $tempHash),
+			'delete' => $attachmentModel->canDeleteAttachment($attachment, $tempHash),
+		);
 
 		return $data;
 	}

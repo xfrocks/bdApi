@@ -873,7 +873,8 @@ Detail information of a user.
                 follow: (boolean)
             },
             self_permissions: { // user_is_visitor==true only
-                create_conversation: (boolean)
+                create_conversation: (boolean),
+                upload_attachment_conversation: (boolean) # since forum-2014081801
             }
         }
     }
@@ -1109,7 +1110,8 @@ Detail information of a conversation.
             },
             permissions: {
                 reply: (boolean),
-                delete: (boolean)
+                delete: (boolean),
+                upload_attachment: (boolean) # since forum-2014081801
             }
         }
     }
@@ -1264,7 +1266,8 @@ Detail information of a message.
                         thumbnail: (uri)
                     },
                     permissions: {
-                        view: (boolean)
+                        view: (boolean),
+                        delete: (boolean) # since forum-2014081801
                     }
                 },
                 ...
@@ -1279,7 +1282,8 @@ Detail information of a message.
                 view: (boolean),
                 edit: (boolean),
                 delete: (boolean),
-                reply: (boolean)
+                reply: (boolean),
+                upload_attachment: (boolean) # since forum-2014081801
             }
         }
     }
