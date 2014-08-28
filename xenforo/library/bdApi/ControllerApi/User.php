@@ -325,7 +325,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
 		if (!XenForo_Application::debugMode())
 		{
-			return $this->respnoseNoPermission();
+			return $this->responseNoPermission();
 		}
 
 		if (empty($input['decrypt']))
