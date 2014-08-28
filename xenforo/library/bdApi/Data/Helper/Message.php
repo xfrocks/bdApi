@@ -2,6 +2,18 @@
 
 class bdApi_Data_Helper_Message
 {
+	public static function getHtml(&$message)
+	{
+		static $bbCodeParser = false;
+
+		if ($bbCodeParser === false)
+		{
+			$bbCodeParser = XenForo_BbCode_Parser::create(XenForo_BbCode_Formatter_Base::create('Base'));
+		}
+
+		return XenForo_ViewPublic_Helper_Message::getBbCodeWrapper($message, $bbCodeParser);
+	}
+
 	public static function getPlainText($bbCode)
 	{
 		$config = XenForo_Application::getConfig();

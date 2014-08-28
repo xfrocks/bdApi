@@ -601,6 +601,9 @@ Detail information of a post.
             post_body: (string),
             post_body_html: (string),
             post_body_plain_text: (string),
+            signature: (string), # since forum-2014082801
+            signature_html: (string), # since forum-2014082801
+            signature_plain_text: (string), # since forum-2014082801
             post_like_count: (int),
             post_attachment_count: (int),
             post_is_published: (boolean),
@@ -1253,6 +1256,9 @@ Detail information of a message.
             message_body: (string),
             message_body_html: (string),
             message_body_plain_text: (string),
+            signature: (string), # since forum-2014082801
+            signature_html: (string), # since forum-2014082801
+            signature_plain_text: (string), # since forum-2014082801
             message_account_count: (int),
             attachments: [  # since forum-2014053003
                 {

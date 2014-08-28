@@ -87,12 +87,16 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
 		if (!isset($post['messageHtml']))
 		{
-			$post['messageHtml'] = $this->_renderApiMessage($post);
+			$post['messageHtml'] = bdApi_Data_Helper_Message::getHtml($post);
 		}
-
 		if (isset($post['message']))
 		{
 			$post['messagePlainText'] = bdApi_Data_Helper_Message::getPlainText($post['message']);
+		}
+		
+		if (isset($post['signature']))
+		{
+			$post['signaturePlainText'] = bdApi_Data_Helper_Message::getPlainText($post['signature']);
 		}
 
 		$publicKeys = array(
@@ -105,6 +109,9 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 			'message' => 'post_body',
 			'messageHtml' => 'post_body_html',
 			'messagePlainText' => 'post_body_plain_text',
+			'signature' => 'signature',
+			'signatureHtml' => 'signature_html',
+			'signaturePlainText' => 'signature_plain_text',
 			'likes' => 'post_like_count',
 			'attach_count' => 'post_attachment_count',
 		);
@@ -228,18 +235,6 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		);
 
 		return $data;
-	}
-
-	protected function _renderApiMessage(array $post)
-	{
-		static $bbCodeParser = false;
-
-		if ($bbCodeParser === false)
-		{
-			$bbCodeParser = new XenForo_BbCode_Parser(XenForo_BbCode_Formatter_Base::create('Base'));
-		}
-
-		return new XenForo_BbCode_TextWrapper($post['message'], $bbCodeParser);
 	}
 
 }
