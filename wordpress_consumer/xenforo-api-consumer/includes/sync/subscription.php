@@ -269,6 +269,12 @@ function _xfac_subscription_handleCallback_userNotification($config, $ping)
 		return false;
 	}
 
+	$postSyncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'thread', array($xfPost['post']['thread_id']));
+	if (!empty($postSyncRecords))
+	{
+		return false;
+	}
+
 	$xfThread = xfac_api_getThread($config, $xfPost['post']['thread_id'], $accessToken);
 	if (empty($xfThread['thread']))
 	{
