@@ -35,7 +35,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		);
 
 		return $this->_getWrapper(
-				'account', 'bdApi',
+				'account', 'api',
 				$this->responseView('bdApi_ViewPublic_Account_Api_Index', 'bdapi_account_api', $viewParams)
 		);
 	}
@@ -79,7 +79,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 			);
 
 			return $this->_getWrapper(
-					'account', 'bdApi',
+					'account', 'api',
 					$this->responseView('bdApi_ViewPublic_Account_Api_Client_Add', 'bdapi_account_api_client_add', $viewParams)
 			);
 		}
@@ -120,7 +120,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 			);
 
 			return $this->_getWrapper(
-					'account', 'bdApi',
+					'account', 'api',
 					$this->responseView('bdApi_ViewPublic_Account_Api_Client_Delete', 'bdapi_account_api_client_delete', $viewParams)
 			);
 		}
@@ -211,7 +211,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 			);
 
 			return $this->_getWrapper(
-					'account', 'bdApi',
+					'account', 'api',
 					$this->responseView('bdApi_ViewPublic_Account_Api_Token_Revoke', 'bdapi_account_api_token_revoke', $viewParams)
 			);
 		}
@@ -381,7 +381,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 			);
 
 			return $this->_getWrapper(
-					'account', 'bdApi',
+					'account', 'api',
 					$this->responseView('bdApi_ViewPublic_Account_Authorize', 'bdapi_account_authorize', $viewParams)
 			);
 		}

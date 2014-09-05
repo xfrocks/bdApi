@@ -17,24 +17,24 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 
 		$data = array(
 			'links' => array(
-				'categories' => bdApi_Link::buildApiLink('categories'),
-				'conversations' => bdApi_Link::buildApiLink('conversations'),
-				'conversation-messages' => bdApi_Link::buildApiLink('conversation-messages'),
-				'notifications' => bdApi_Link::buildApiLink('notifications'),
+				'categories' => XenForo_Link::buildApiLink('categories'),
+				'conversations' => XenForo_Link::buildApiLink('conversations'),
+				'conversation-messages' => XenForo_Link::buildApiLink('conversation-messages'),
+				'notifications' => XenForo_Link::buildApiLink('notifications'),
 
-				'forums' => bdApi_Link::buildApiLink('forums'),
-				'posts' => bdApi_Link::buildApiLink('posts'),
-				'search' => bdApi_Link::buildApiLink('search'),
-				'threads' => bdApi_Link::buildApiLink('threads'),
-				'threads/recent' => bdApi_Link::buildApiLink('threads/recent'),
-				'threads/new' => bdApi_Link::buildApiLink('threads/new'),
-				'users' => bdApi_Link::buildApiLink('users'),
+				'forums' => XenForo_Link::buildApiLink('forums'),
+				'posts' => XenForo_Link::buildApiLink('posts'),
+				'search' => XenForo_Link::buildApiLink('search'),
+				'threads' => XenForo_Link::buildApiLink('threads'),
+				'threads/recent' => XenForo_Link::buildApiLink('threads/recent'),
+				'threads/new' => XenForo_Link::buildApiLink('threads/new'),
+				'users' => XenForo_Link::buildApiLink('users'),
 
-				'batch' => bdApi_Link::buildApiLink('batch'),
-				'subscriptions' => bdApi_Link::buildApiLink('subscriptions'),
+				'batch' => XenForo_Link::buildApiLink('batch'),
+				'subscriptions' => XenForo_Link::buildApiLink('subscriptions'),
 
-				'oauth_authorize' => bdApi_Link::buildApiLink('oauth/authorize', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
-				'oauth_token' => bdApi_Link::buildApiLink('oauth/token', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
+				'oauth_authorize' => XenForo_Link::buildApiLink('oauth/authorize', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
+				'oauth_token' => XenForo_Link::buildApiLink('oauth/token', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
 			),
 			'system_info' => $systemInfo,
 		);

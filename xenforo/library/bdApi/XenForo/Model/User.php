@@ -92,8 +92,8 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 		$data['user_is_followed'] = !empty($user['bdapi_user_is_followed']);
 
 		$data['links'] = array(
-			'permalink' => bdApi_Link::buildPublicLink('members', $user),
-			'detail' => bdApi_Link::buildApiLink('users', $user),
+			'permalink' => XenForo_Link::buildPublicLink('members', $user),
+			'detail' => XenForo_Link::buildApiLink('users', $user),
 			'avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array(
 				$user,
 				'm',
@@ -106,8 +106,8 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 				false,
 				true
 			)),
-			'followers' => bdApi_Link::buildApiLink('users/followers', $user),
-			'followings' => bdApi_Link::buildApiLink('users/followings', $user),
+			'followers' => XenForo_Link::buildApiLink('users/followers', $user),
+			'followings' => XenForo_Link::buildApiLink('users/followings', $user),
 		);
 
 		$data['permissions'] = array('follow' => ($user['user_id'] != $visitor->get('user_id')) AND $visitor->canFollow());

@@ -6,8 +6,8 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 	{
 		$data = array(
 				'links' => array(
-						'posts' 			=> bdApi_Link::buildApiLink('search/posts'),
-						'threads' 			=> bdApi_Link::buildApiLink('search/threads'),
+						'posts' 			=> XenForo_Link::buildApiLink('search/posts'),
+						'threads' 			=> XenForo_Link::buildApiLink('search/threads'),
 				),
 		);
 

@@ -76,13 +76,13 @@ class bdApi_Data_Helper_Core
 		if ($page > 1)
 		{
 			// a previous link should only be added if we are not at page 1
-			$pageNav['prev'] = bdApi_Link::buildApiLink($linkType, $linkData, array_merge($linkParams, array('page' => $page - 1)));
+			$pageNav['prev'] = XenForo_Link::buildApiLink($linkType, $linkData, array_merge($linkParams, array('page' => $page - 1)));
 		}
 
 		if ($page < $pageNav['pages'])
 		{
 			// a next link should only be added if we are not at the last page
-			$pageNav['next'] = bdApi_Link::buildApiLink($linkType, $linkData, array_merge($linkParams, array('page' => $page + 1)));
+			$pageNav['next'] = XenForo_Link::buildApiLink($linkType, $linkData, array_merge($linkParams, array('page' => $page + 1)));
 		}
 
 		// add the page navigation into `links`

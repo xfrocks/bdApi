@@ -10,7 +10,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
 		$authorizeParams = $oauth2Model->getServer()->getAuthorizeParams();
 		$authorizeParams['social'] = $this->_input->filterSingle('social', XenForo_Input::STRING);
 
-		$targetLink = bdApi_Link::buildPublicLink('account/authorize', array(), $authorizeParams);
+		$targetLink = XenForo_Link::buildPublicLink('account/authorize', array(), $authorizeParams);
 
 		header('Location: ' . $targetLink);
 		exit ;

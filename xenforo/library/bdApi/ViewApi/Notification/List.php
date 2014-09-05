@@ -13,12 +13,12 @@ class bdApi_ViewApi_Notification_List extends bdApi_ViewApi_Base
 		}
 
 		// subscription discovery
-		$hubLink = bdApi_Link::buildApiLink('subscriptions', null, array(
+		$hubLink = XenForo_Link::buildApiLink('subscriptions', null, array(
 			'hub.topic' => bdApi_Model_Subscription::getTopic(bdApi_Model_Subscription::TYPE_NOTIFICATION, XenForo_Visitor::getUserId()),
 			OAUTH2_TOKEN_PARAM_NAME => '',
 		));
 		$this->_response->setHeader('Link', sprintf('<%s>; rel=hub', $hubLink));
-		$selfLink = bdApi_Link::buildApiLink('notifications', null, array(OAUTH2_TOKEN_PARAM_NAME => ''));
+		$selfLink = XenForo_Link::buildApiLink('notifications', null, array(OAUTH2_TOKEN_PARAM_NAME => ''));
 		$this->_response->setHeader('Link', sprintf('<%s>; rel=self', $selfLink));
 
 		// subscription info

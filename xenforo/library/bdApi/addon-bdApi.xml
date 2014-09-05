@@ -1136,8 +1136,8 @@ step=3600</edit_format_params>
 
 	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
 </form>]]></template>
-    <template title="bdapi_account_wrapper_sidebar" version_id="6" version_string="0.9-dev"><![CDATA[<li><a
-	class="{xen:if "{$selectedKey} == 'account/bdApi'", 'secondaryContent', 'primaryContent'}"
+    <template title="bdapi_account_wrapper_sidebar" version_id="51" version_string="1.3.0"><![CDATA[<li><a
+	class="{xen:if "{$selectedKey} == 'account/api'", 'secondaryContent', 'primaryContent'}"
 	href="{xen:link account/api}">{xen:phrase bdapi_home}</a></li>]]></template>
     <template title="bdapi_error_authorize_guest" version_id="50" version_string="1.2.1b"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 

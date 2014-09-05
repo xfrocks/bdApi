@@ -20,9 +20,9 @@ class bdApi_Model_Subscription extends XenForo_Model
 				if (!empty($subscriptions))
 				{
 					$link = null;
-					if (XenForo_Application::isRegistered('_bdApi_fc'))
+					if (is_callable(array('XenForo_Link', 'buildApiLink')))
 					{
-						$link = bdApi_Link::buildApiLink('notifications', null, array(OAUTH2_TOKEN_PARAM_NAME => ''));
+						$link = XenForo_Link::buildApiLink('notifications', null, array(OAUTH2_TOKEN_PARAM_NAME => ''));
 					}
 
 					$userOption = array(
@@ -42,9 +42,9 @@ class bdApi_Model_Subscription extends XenForo_Model
 				if (!empty($subscriptions))
 				{
 					$link = null;
-					if (XenForo_Application::isRegistered('_bdApi_fc'))
+					if (is_callable(array('XenForo_Link', 'buildApiLink')))
 					{
-						$link = bdApi_Link::buildApiLink('posts', null, array(
+						$link = XenForo_Link::buildApiLink('posts', null, array(
 							'thread_id' => $id,
 							OAUTH2_TOKEN_PARAM_NAME => '',
 						));

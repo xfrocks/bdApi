@@ -26,10 +26,10 @@ class bdApi_XenForo_Model_Category extends XFCP_bdApi_XenForo_Model_Category
 		$data = bdApi_Data_Helper_Core::filter($category, $publicKeys);
 
 		$data['links'] = array(
-				'permalink' => bdApi_Link::buildPublicLink('categories', $category),
-				'detail' => bdApi_Link::buildApiLink('categories', $category),
-				'sub-categories' => bdApi_Link::buildApiLink('categories', array(), array('parent_category_id' => $category['node_id'])),
-				'sub-forums' => bdApi_Link::buildApiLink('forums', array(), array('parent_category_id' => $category['node_id'])),
+				'permalink' => XenForo_Link::buildPublicLink('categories', $category),
+				'detail' => XenForo_Link::buildApiLink('categories', $category),
+				'sub-categories' => XenForo_Link::buildApiLink('categories', array(), array('parent_category_id' => $category['node_id'])),
+				'sub-forums' => XenForo_Link::buildApiLink('forums', array(), array('parent_category_id' => $category['node_id'])),
 		);
 
 		$data['permissions'] = array(

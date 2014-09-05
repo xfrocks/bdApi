@@ -97,7 +97,7 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
 
 	protected function _doJob(XenForo_FrontController $fc, $method, $uri, array $params)
 	{
-		$request = new bdApi_Zend_Controller_Request_Http(bdApi_Link::convertApiUriToAbsoluteUri($uri, true));
+		$request = new bdApi_Zend_Controller_Request_Http(XenForo_Link::convertApiUriToAbsoluteUri($uri, true));
 		$request->setMethod($method);
 		foreach ($params as $key => $value)
 		{

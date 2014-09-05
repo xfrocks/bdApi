@@ -25,7 +25,7 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 
 		$loginLinkData['user_id'] = bdApi_Crypt::encryptTypeOne(XenForo_Visitor::getUserId(), $loginLinkData['timestamp']);
 
-		$loginLink = bdApi_Link::buildPublicLink('login/api', '', $loginLinkData);
+		$loginLink = XenForo_Link::buildPublicLink('login/api', '', $loginLinkData);
 
 		return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $loginLink);
 	}
@@ -78,7 +78,7 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 
 		$logoutLinkData['md5'] = bdApi_Crypt::encryptTypeOne(md5($logoutLinkData['redirect']), $logoutLinkData['timestamp']);
 
-		$logoutLink = bdApi_Link::buildPublicLink('logout', '', $logoutLinkData);
+		$logoutLink = XenForo_Link::buildPublicLink('logout', '', $logoutLinkData);
 
 		return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $logoutLink);
 	}
@@ -102,11 +102,11 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 		switch ($type)
 		{
 			case 'admin':
-				$link = bdApi_Link::buildAdminLink($route);
+				$link = XenForo_Link::buildAdminLink($route);
 				break;
 			case 'public':
 			default:
-				$link = bdApi_Link::buildPublicLink($route);
+				$link = XenForo_Link::buildPublicLink($route);
 				break;
 		}
 

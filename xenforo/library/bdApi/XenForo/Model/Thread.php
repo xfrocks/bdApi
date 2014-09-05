@@ -91,18 +91,18 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 		}
 
 		$data['links'] = array(
-			'permalink' => bdApi_Link::buildPublicLink('threads', $thread),
-			'detail' => bdApi_Link::buildApiLink('threads', $thread),
-			'followers' => bdApi_Link::buildApiLink('threads/followers', $thread),
-			'forum' => bdApi_Link::buildApiLink('forums', $thread),
-			'posts' => bdApi_Link::buildApiLink('posts', array(), array('thread_id' => $thread['thread_id'])),
-			'first_poster' => bdApi_Link::buildApiLink('users', $thread),
-			'first_post' => bdApi_Link::buildApiLink('posts', array('post_id' => $thread['first_post_id'])),
+			'permalink' => XenForo_Link::buildPublicLink('threads', $thread),
+			'detail' => XenForo_Link::buildApiLink('threads', $thread),
+			'followers' => XenForo_Link::buildApiLink('threads/followers', $thread),
+			'forum' => XenForo_Link::buildApiLink('forums', $thread),
+			'posts' => XenForo_Link::buildApiLink('posts', array(), array('thread_id' => $thread['thread_id'])),
+			'first_poster' => XenForo_Link::buildApiLink('users', $thread),
+			'first_post' => XenForo_Link::buildApiLink('posts', array('post_id' => $thread['first_post_id'])),
 		);
 
 		if ($thread['last_post_user_id'] != $thread['user_id'])
 		{
-			$data['links']['last_poster'] = bdApi_Link::buildApiLink('users', array(
+			$data['links']['last_poster'] = XenForo_Link::buildApiLink('users', array(
 				'user_id' => $thread['last_post_user_id'],
 				'username' => $thread['last_post_username']
 			));
@@ -110,7 +110,7 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 
 		if ($thread['last_post_id'] != $thread['first_post_id'])
 		{
-			$data['links']['last_post'] = bdApi_Link::buildApiLink('posts', array('post_id' => $thread['last_post_id']));
+			$data['links']['last_post'] = XenForo_Link::buildApiLink('posts', array('post_id' => $thread['last_post_id']));
 		}
 
 		$data['permissions'] = array(
