@@ -139,6 +139,12 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 	{
 		$message = $this->prepareMessage($message, $conversation);
 
+		$attachments = array();
+		if (!empty($message['attachments']))
+		{
+			$attachments = $message['attachments'];
+		}
+
 		if (!isset($message['messageHtml']))
 		{
 			$message['messageHtml'] = bdApi_Data_Helper_Message::getHtml($message);
@@ -171,9 +177,9 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 
 		$data = bdApi_Data_Helper_Core::filter($message, $publicKeys);
 
-		if (!empty($message['attachments']))
+		if (!empty($attachments))
 		{
-			$data['attachments'] = $this->prepareApiDataForAttachments($message, $message['attachments']);
+			$data['attachments'] = $this->prepareApiDataForAttachments($message, $attachments);
 		}
 
 		$data['links'] = array(
@@ -250,6 +256,11 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 			'view' => $attachmentModel->canViewAttachment($attachment, $tempHash),
 			'delete' => $attachmentModel->canDeleteAttachment($attachment, $tempHash),
 		);
+
+		if (isset($message['messageHtml']))
+		{
+			$data['attachment_is_inserted'] = empty($message['attachments'][$attachment['attachment_id']]);
+		}
 
 		return $data;
 	}

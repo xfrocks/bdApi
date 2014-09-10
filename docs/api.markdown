@@ -608,7 +608,7 @@ Detail information of a post.
             post_attachment_count: (int),
             post_is_published: (boolean),
             post_is_deleted: (boolean),
-            post_is_first_post: (boolean), # since 2013122402
+            post_is_first_post: (boolean), # since forum-2013122402
             post_is_liked: (boolean),
             attachments: [
                 {
@@ -616,6 +616,7 @@ Detail information of a post.
                     post_id: (int),
                     attachment_download_count: (int),
                     filename: (string), # since 2014052201
+                    attachment_is_inserted: (boolean), # since forum-2014091001
                     links: {
                         permalink: (uri),
                         data: (uri),
@@ -1266,6 +1267,7 @@ Detail information of a message.
                     message_id: (int),
                     attachment_download_count: (int),
                     filename: (string),
+                    attachment_is_inserted: (boolean), # since forum-2014091001
                     links: {
                         permalink: (uri),
                         data: (uri),

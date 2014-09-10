@@ -85,6 +85,12 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 	{
 		$post = $this->preparePost($post, $thread, $forum);
 
+		$attachments = array();
+		if (!empty($post['attachments']))
+		{
+			$attachments = $post['attachments'];
+		}
+
 		if (!isset($post['messageHtml']))
 		{
 			$post['messageHtml'] = bdApi_Data_Helper_Message::getHtml($post);
@@ -93,7 +99,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 		{
 			$post['messagePlainText'] = bdApi_Data_Helper_Message::getPlainText($post['message']);
 		}
-		
+
 		if (isset($post['signature']))
 		{
 			$post['signaturePlainText'] = bdApi_Data_Helper_Message::getPlainText($post['signature']);
@@ -147,9 +153,9 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 			$data['post_is_liked'] = !empty($post['like_date']);
 		}
 
-		if (!empty($post['attachments']))
+		if (!empty($attachments))
 		{
-			$data['attachments'] = $this->prepareApiDataForAttachments($post, $post['attachments']);
+			$data['attachments'] = $this->prepareApiDataForAttachments($post, $attachments);
 		}
 
 		$data['links'] = array(
@@ -233,6 +239,11 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 			'view' => $attachmentModel->canViewAttachment($attachment, $tempHash),
 			'delete' => $attachmentModel->canDeleteAttachment($attachment, $tempHash),
 		);
+
+		if (isset($post['messageHtml']))
+		{
+			$data['attachment_is_inserted'] = empty($post['attachments'][$attachment['attachment_id']]);
+		}
 
 		return $data;
 	}
