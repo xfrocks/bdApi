@@ -3,7 +3,7 @@
  Plugin Name: XenForo API Consumer
  Plugin URI: https://xfrocks.com/api-support/
  Description: Connects to XenForo API system.
- Version: 1.1.0
+ Version: 1.1.0-lightpull1
  Author: XFROCKS
  Author URI: https://xfrocks.com
  Text Domain: xenforo-api-consumer
@@ -71,3 +71,5 @@ require_once (dirname(__FILE__) . '/includes/sync/post.php');
 require_once (dirname(__FILE__) . '/includes/sync/comment.php');
 
 require_once (dirname(__FILE__) . '/includes/widget/threads.php');
+
+require_once (dirname(__FILE__) . '/lightpull.php');

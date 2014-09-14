@@ -10,6 +10,12 @@ function xfac_options_init()
 {
 
 	$config = xfac_option_getConfig();
+	if (empty($config) AND xfac_option_getWorkingMode() == 'blog')
+	{
+		require (xfac_template_locateTemplate('lightpull_wizard.php'));
+		return;
+	}
+
 	$hourlyNext = wp_next_scheduled('xfac_cron_hourly');
 
 	$xfGuestRecords = xfac_user_getRecordsByUserId(0);
