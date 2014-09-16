@@ -444,8 +444,7 @@
   </admin_templates>
   <admin_template_modifications/>
   <code_events>
-    <event event_id="bdapi_setup_routes"><![CDATA[<p>Called after all default API routes have been registered.</p>
-<p>It's recommended to use <code>bdApi_Route_PrefixApi::addRoute</code> to register new route instead of adding it directly to the <code>$routes</code> array.</p>
+    <event event_id="api_setup_routes"><![CDATA[<p>Called after all default API routes have been registered.</p>
 
 Arguments:
 <ol>

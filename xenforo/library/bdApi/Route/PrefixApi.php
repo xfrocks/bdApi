@@ -36,7 +36,7 @@ class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
 		self::addRoute($routes, 'subscriptions', 'bdApi_Route_PrefixApi_Subscriptions');
 		self::addRoute($routes, 'tools', 'bdApi_Route_PrefixApi_Tools');
 
-		XenForo_CodeEvent::fire('bdapi_setup_routes', array(&$routes));
+		XenForo_CodeEvent::fire('api_setup_routes', array(&$routes));
 	}
 
 	/**
