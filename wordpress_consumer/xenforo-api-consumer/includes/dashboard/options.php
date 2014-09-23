@@ -167,7 +167,7 @@ function xfac_dashboardOptions_admin_init()
 				{
 					wp_die('no_token');
 				}
-				$guest = xfac_api_getUsersMe($config, $token['access_token']);
+				$guest = xfac_api_getUsersMe($config, $token['access_token'], false);
 
 				if (empty($guest['user']))
 				{

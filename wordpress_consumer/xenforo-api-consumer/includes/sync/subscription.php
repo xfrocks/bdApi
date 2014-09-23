@@ -313,7 +313,7 @@ function _xfac_subscription_handleCallback_user($config, $ping)
 		return false;
 	}
 
-	$me = xfac_api_getUsersMe($config, $accessToken);
+	$me = xfac_api_getUsersMe($config, $accessToken, false);
 	if (empty($me))
 	{
 		return false;

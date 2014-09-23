@@ -251,7 +251,7 @@ function xfac_api_getForums($config, $accessToken = '', $extraParams = '')
 	}
 }
 
-function xfac_api_getUsersMe($config, $accessToken)
+function xfac_api_getUsersMe($config, $accessToken, $autoSubscribe = true)
 {
 	$curl = _xfac_api_curl(call_user_func_array('sprintf', array(
 		'%s/index.php?users/me/&oauth_token=%s',
@@ -263,6 +263,11 @@ function xfac_api_getUsersMe($config, $accessToken)
 	if (isset($parts['user']))
 	{
 		$parts['_headerLinkHub'] = _xfac_api_getHeaderLinkHub($curl);
+
+		if ($autoSubscribe AND empty($parts['subscription_callback']) AND !empty($parts['_headerLinkHub']))
+		{
+			xfac_api_postSubscription($config, $accessToken, $parts['_headerLinkHub']);
+		}
 
 		return $parts;
 	}
@@ -489,7 +494,7 @@ function xfac_api_postPost($config, $accessToken, $threadId, $postBody, array $e
 	}
 }
 
-function xfac_api_postUser($config, $email, $username, $password, array $extraParams = array())
+function xfac_api_postUser($config, $email, $username, $password, array $extraParams = array(), $autoSubscribe = true)
 {
 	$url = call_user_func_array('sprintf', array(
 		'%s/index.php?users/',
@@ -510,6 +515,13 @@ function xfac_api_postUser($config, $email, $username, $password, array $extraPa
 
 	if (isset($parts['user']))
 	{
+		$parts['_headerLinkHub'] = _xfac_api_getHeaderLinkHub($curl);
+
+		if ($autoSubscribe AND !empty($parts['token']['access_token']) AND !empty($parts['_headerLinkHub']))
+		{
+			xfac_api_postSubscription($config, $parts['token']['access_token'], $parts['_headerLinkHub']);
+		}
+
 		return $parts;
 	}
 	else
