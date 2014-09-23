@@ -67,6 +67,8 @@ function xfac_option_getConfig()
 
 function xfac_option_getMeta($config)
 {
+	static $rebuiltCount = 0;
+
 	if (empty($config))
 	{
 		return array();
@@ -88,6 +90,21 @@ function xfac_option_getMeta($config)
 				$rebuild = true;
 				break;
 			}
+		}
+	}
+
+	if ($rebuild AND !empty($_REQUEST['oauth_token']))
+	{
+		// looks like admin enter WordPress url as the root, abort rebuilding
+		$rebuild = false;
+	}
+
+	if ($rebuild AND $rebuiltCount > 0)
+	{
+		// we rebuild once, only retry if $meta is empty
+		if (!empty($meta))
+		{
+			$rebuld = false;
 		}
 	}
 
@@ -115,6 +132,7 @@ function xfac_option_getMeta($config)
 			}
 		}
 
+		$rebuiltCount++;
 		update_option('xfac_meta', $meta);
 	}
 
