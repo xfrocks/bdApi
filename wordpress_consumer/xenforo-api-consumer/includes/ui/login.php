@@ -110,7 +110,13 @@ function xfac_login_init()
 			break;
 		case 'authorize':
 		default:
-			$authorizeUrl = xfac_api_getAuthorizeUrl($config, $callbackUrl);
+			$scope = '';
+			if (!empty($_REQUEST['admin']))
+			{
+				$scope = XFAC_API_SCOPE . ' admincp';
+			}
+
+			$authorizeUrl = xfac_api_getAuthorizeUrl($config, $callbackUrl, $scope);
 
 			// wp_redirect($authorizeUrl);
 			// cannot use wp_redirect because wp_sanitize_redirect changes our url

@@ -80,14 +80,14 @@ function xfac_api_getVersionSuggestionText($config, $meta)
 	}
 }
 
-function xfac_api_getAuthorizeUrl($config, $redirectUri)
+function xfac_api_getAuthorizeUrl($config, $redirectUri, $scope = '')
 {
 	return call_user_func_array('sprintf', array(
 		'%s/index.php?oauth/authorize/&client_id=%s&redirect_uri=%s&response_type=code&scope=%s',
 		rtrim($config['root'], '/'),
 		rawurlencode($config['clientId']),
 		rawurlencode($redirectUri),
-		rawurlencode(XFAC_API_SCOPE),
+		rawurlencode($scope ? $scope : XFAC_API_SCOPE),
 	));
 }
 
@@ -159,7 +159,6 @@ function xfac_api_getAccessTokenFromCode($config, $code, $redirectUri)
 		'client_secret' => $config['clientSecret'],
 		'code' => $code,
 		'redirect_uri' => $redirectUri,
-		'scope' => XFAC_API_SCOPE,
 	)));
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -407,6 +406,31 @@ function xfac_api_getThread($config, $threadId, $accessToken = '')
 	extract($curl);
 
 	if (isset($parts['thread']))
+	{
+		return $parts;
+	}
+	else
+	{
+		return _xfac_api_getFailedResponse($curl);
+	}
+}
+
+function xfac_api_getUserGroups($config, $userId = 0, $accessToken = '')
+{
+	if ($accessToken === '')
+	{
+		$accessToken = xfac_user_getSystemAccessToken($config, true);
+	}
+
+	$curl = _xfac_api_curl(call_user_func_array('sprintf', array(
+		'%s/index.php?users/%sgroups/&oauth_token=%s',
+		rtrim($config['root'], '/'),
+		$userId > 0 ? ($userId . '/') : '',
+		rawurlencode($accessToken),
+	)));
+	extract($curl);
+
+	if (isset($parts['user_groups']))
 	{
 		return $parts;
 	}

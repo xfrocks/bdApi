@@ -25,23 +25,24 @@ function xfac_options_init()
 
 	$currentWpUser = wp_get_current_user();
 	$xfAdminRecords = xfac_user_getRecordsByUserId($currentWpUser->ID);
+	$configuredAdminRecord = null;
 
 	$xfAdminAccountOption = intval(get_option('xfac_xf_admin_account'));
 	if ($xfAdminAccountOption > 0)
 	{
-		$record = xfac_user_getRecordById($xfAdminAccountOption);
+		$configuredAdminRecord = xfac_user_getRecordById($xfAdminAccountOption);
 		if (!empty($record))
 		{
 			foreach ($xfAdminRecords as $xfAdminRecord)
 			{
-				if ($xfAdminRecord->id == $record->id)
+				if ($xfAdminRecord->id == $configuredAdminRecord->id)
 				{
 					$found = true;
 				}
 			}
 			if (!$found)
 			{
-				$xfAdminRecords[] = $record;
+				$xfAdminRecords[] = $configuredAdminRecord;
 			}
 		}
 	}

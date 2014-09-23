@@ -93,6 +93,12 @@ function xfac_option_getMeta($config)
 		}
 	}
 
+	$xfAdminAccountOption = intval(get_option('xfac_xf_admin_account'));
+	if (empty($meta['xfac_xf_admin_account']) OR $meta['xfac_xf_admin_account'] != $xfAdminAccountOption)
+	{
+		$rebuild = true;
+	}
+
 	if ($rebuild AND !empty($_REQUEST['oauth_token']))
 	{
 		// looks like admin enter WordPress url as the root, abort rebuilding
@@ -129,6 +135,13 @@ function xfac_option_getMeta($config)
 			if (!empty($forums['forums']))
 			{
 				$meta['forums'] = $forums['forums'];
+			}
+
+			$meta['xfac_xf_admin_account'] = $xfAdminAccountOption;
+			$userGroups = xfac_api_getUserGroups($config, 0, xfac_user_getAdminAccessToken($config));
+			if (!empty($userGroups['user_groups']))
+			{
+				$meta['userGroups'] = $userGroups['user_groups'];
 			}
 		}
 
