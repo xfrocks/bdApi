@@ -66,10 +66,9 @@ function xfac_options_init()
 	{
 		$meta = xfac_option_getMeta($config);
 
-		$apiForums = xfac_api_getForums($config);
-		if (!empty($apiForums['forums']))
+		if (!empty($meta['forums']))
 		{
-			$forums = $apiForums['forums'];
+			$forums = $meta['forums'];
 		}
 	}
 
