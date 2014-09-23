@@ -551,6 +551,32 @@ function xfac_api_postForumFollower($config, $accessToken, $forumId)
 	}
 }
 
+function xfac_api_postUserGroups($config, $accessToken, $userId, $primaryGroupId, array $secondaryGroupIds = array())
+{
+	$url = call_user_func_array('sprintf', array(
+		'%s/index.php?users/%d/groups',
+		rtrim($config['root'], '/'),
+		$userId,
+	));
+	$postFields = array(
+		'oauth_token' => $accessToken,
+		'primary_group_id' => $primaryGroupId,
+		'secondary_group_ids' => $secondaryGroupIds,
+	);
+
+	$curl = _xfac_api_curl($url, 'POST', $postFields);
+	extract($curl);
+
+	if (isset($parts['status']) AND $parts['status'] == 'ok')
+	{
+		return true;
+	}
+	else
+	{
+		return _xfac_api_getFailedResponse($curl);
+	}
+}
+
 function xfac_api_putPost($config, $accessToken, $postId, $postBody, array $extraParams = array())
 {
 	$url = call_user_func_array('sprintf', array(

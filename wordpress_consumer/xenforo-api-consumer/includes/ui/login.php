@@ -219,6 +219,7 @@ function xfac_login_init()
 
 	if (!empty($wpUser))
 	{
+		xfac_syncLogin_syncRole($config, $wpUser, $xfUser);
 		xfac_user_updateRecord($wpUser->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
 
 		if (empty($me['subscription_callback']) AND !empty($me['_headerLinkHub']))

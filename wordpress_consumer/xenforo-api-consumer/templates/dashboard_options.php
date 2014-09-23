@@ -236,6 +236,51 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 							</p>
 						</div>
 					</fieldset>
+
+					<?php if (!empty($meta['userGroups'])): ?>
+						<fieldset>
+							<p><strong><?php _e('Roles Synchronization', 'xenforo-api-consumer'); ?></strong></p>
+							
+							<div style="margin-left: 20px;">
+								<table cellspacing="0" cellpadding="0" style-"border-spacing: 0">
+									<tbody>
+										<?php foreach(get_editable_roles() as $roleName => $roleInfo): ?>
+											<?php $syncRoleOptionThisRole = (!empty($syncRoleOption[$roleName]) ? $syncRoleOption[$roleName] : 0); ?>
+											<tr>
+												<td style="margin: 0; padding: 0 10px">
+													<label for="xfac_sync_role_<?php echo $roleName; ?>">
+														<?php echo $roleInfo['name']; ?>
+													</label>
+												</td>
+												<td style="margin: 0; padding: 10px 0">
+													<select id="xfac_sync_role_<?php echo $roleName; ?>" name="xfac_sync_role[<?php echo $roleName; ?>]">
+														<option value="0" <?php selected(0, $syncRoleOptionThisRole); ?>></option>
+														<?php foreach($meta['userGroups'] as $userGroup): ?>
+															<option value="<?php echo $userGroup['user_group_id']; ?>" <?php selected($userGroup['user_group_id'], $syncRoleOptionThisRole); ?>>
+																<?php echo $userGroup['user_group_title']; ?>
+															</option>
+														<?php endforeach; ?>
+													</select>
+												</td>
+											</tr>
+										<?php endforeach; ?>
+									</tbody>
+								</table>
+								<p class="description"><?php _e('Users who come from XenForo will have their WordPress roles setup as configured in this table.', 'xenforo-api-consumer'); ?></p>
+								
+								<label for="xfac_sync_role_wp_xf">
+									<input name="xfac_sync_role_wp_xf" type="checkbox" id="xfac_sync_role_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_role_wp_xf')); ?> />
+									<?php _e('Role from WordPress to XenForo', 'xenforo-api-consumer'); ?>
+								</label>
+								<p class="description"><?php _e('Update XenForo user groups when WordPress roles are changed.', 'xenforo-api-consumer'); ?></p>
+							</div>
+						</fieldset>
+					<?php else: ?>
+						<?php foreach($syncRoleOption as $roleName => $userGroupId): ?>
+							<input type="hidden" name="xfac_sync_role[<?php echo $roleName; ?>]" value="<?php echo $userGroupId; ?>" />
+						<?php endforeach; ?>
+						<input type="hidden" name="xfac_sync_role_wp_xf" value="<?php echo get_option('xfac_sync_role_wp_xf'); ?>" />
+					<?php endif; ?>
 				</td>
 			</tr>
 

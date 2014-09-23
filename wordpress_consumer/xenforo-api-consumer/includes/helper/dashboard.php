@@ -35,6 +35,8 @@ function xfac_admin_init()
 		register_setting('xfac-settings', 'xfac_sync_password');
 		register_setting('xfac-settings', 'xfac_sync_login');
 		register_setting('xfac-settings', 'xfac_sync_user_wp_xf');
+		register_setting('xfac-settings', 'xfac_sync_role');
+		register_setting('xfac-settings', 'xfac_sync_role_wp_xf');
 
 		register_setting('xfac-settings', 'xfac_top_bar_forums');
 		register_setting('xfac-settings', 'xfac_top_bar_notifications');
@@ -99,6 +101,8 @@ function xfac_whitelist_options($whitelist_options)
 		$whitelist_options['xfac'][] = 'xfac_sync_password';
 		$whitelist_options['xfac'][] = 'xfac_sync_login';
 		$whitelist_options['xfac'][] = 'xfac_sync_user_wp_xf';
+		$whitelist_options['xfac'][] = 'xfac_sync_role';
+		$whitelist_options['xfac'][] = 'xfac_sync_role_wp_xf';
 
 		$whitelist_options['xfac'][] = 'xfac_top_bar_forums';
 		$whitelist_options['xfac'][] = 'xfac_top_bar_notifications';

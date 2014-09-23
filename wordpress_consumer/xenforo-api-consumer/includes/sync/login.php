@@ -182,6 +182,7 @@ function xfac_authenticate($user, $username, $password)
 	if (!empty($wpUser))
 	{
 		// yay, found an associated user!
+		xfac_syncLogin_syncRole($config, $wpUser, $xfUser);
 		xfac_user_updateRecord($newUserId, $config['root'], $xfUser['user_id'], $xfUser, $token);
 
 		return $wpUser;
@@ -201,9 +202,12 @@ function xfac_authenticate($user, $username, $password)
 		$newUserId = wp_create_user($xfUser['username'], wp_generate_password(), $xfUser['user_email']);
 		if (!is_wp_error($newUserId))
 		{
+			$newUser = new WP_User($newUserId);
+
+			xfac_syncLogin_syncRole($config, $newUser, $xfUser);
 			xfac_user_updateRecord($newUserId, $config['root'], $xfUser['user_id'], $xfUser, $token);
 
-			return new WP_User($newUserId);
+			return $newUser;
 		}
 	}
 
@@ -253,6 +257,7 @@ function xfac_authenticate_syncUserWpXf($user, $username, $password)
 			}
 		}
 
+		xfac_syncLogin_syncRole($config, $user, $xfUser, false);
 		xfac_user_updateRecord($user->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
 	}
 	else
@@ -269,6 +274,7 @@ function xfac_authenticate_syncUserWpXf($user, $username, $password)
 				if (!empty($me['user']))
 				{
 					$xfUser = $me['user'];
+					xfac_syncLogin_syncRole($config, $user, $xfUser);
 					xfac_user_updateRecord($user->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
 				}
 			}
@@ -281,4 +287,194 @@ function xfac_authenticate_syncUserWpXf($user, $username, $password)
 if (!!get_option('xfac_sync_user_wp_xf'))
 {
 	add_filter('authenticate', 'xfac_authenticate_syncUserWpXf', PHP_INT_MAX - 1, 3);
+}
+
+function xfac_set_user_role($wpUserId, $newRole, $oldRoles)
+{
+	if (!empty($GLOBALS['XFAC_SKIP_xfac_set_user_role']))
+	{
+		return;
+	}
+
+	$config = xfac_option_getConfig();
+	$accessToken = xfac_user_getAccessToken($wpUserId);
+	if (empty($accessToken))
+	{
+		return;
+	}
+
+	$me = xfac_api_getUsersMe($config, $accessToken);
+	if (empty($me['user']))
+	{
+		return;
+	}
+	$xfUser = $me['user'];
+
+	$wpUser = new WP_User($wpUserId);
+
+	xfac_syncLogin_syncRole($config, $wpUser, $xfUser, false);
+}
+
+if (!!get_option('xfac_sync_role_wp_xf'))
+{
+	add_action('set_user_role', 'xfac_set_user_role', 10, 3);
+}
+
+function xfac_syncLogin_syncRole($config, WP_User $wpUser, array $xfUser, $xfToWp = true)
+{
+	$meta = xfac_option_getMeta($config);
+	if (empty($meta['userGroups']))
+	{
+		return false;
+	}
+
+	$syncRoleOption = get_option('xfac_sync_role');
+	if (empty($syncRoleOption))
+	{
+		return false;
+	}
+
+	if ($xfToWp)
+	{
+		// good
+	}
+	elseif (!get_option('xfac_sync_role_wp_xf'))
+	{
+		// requested for WordPress to XenForo sync
+		// but it is not enabled
+		return false;
+	}
+
+	if ($xfToWp)
+	{
+		$currentRoles = $wpUser->roles;
+
+		$targetRoles = array();
+		if (!empty($xfUser['user_groups']))
+		{
+			foreach ($xfUser['user_groups'] as $xfUserGroup)
+			{
+				foreach ($syncRoleOption as $optionRoleName => $optionUserGroupId)
+				{
+					if ($xfUserGroup['user_group_id'] == $optionUserGroupId)
+					{
+						$targetRoles[] = $optionRoleName;
+					}
+				}
+			}
+		}
+
+		if (!empty($currentRoles) AND !empty($targetRoles))
+		{
+			// TODO: improve this
+			// we put a safe guard against unexpected error here
+			// and do not sync if one of the arrays is empty
+			// they should not be right? Right!?
+			$newRole = _xfac_syncLogin_syncRole_getHighestLevelRole($targetRoles);
+
+			$XFAC_SKIP_xfac_set_user_role_before = !empty($GLOBALS['XFAC_SKIP_xfac_set_user_role']);
+			$GLOBALS['XFAC_SKIP_xfac_set_user_role'] = true;
+			$wpUser->set_role($newRole);
+			$GLOBALS['XFAC_SKIP_xfac_set_user_role'] = $XFAC_SKIP_xfac_set_user_role_before;
+		}
+	}
+	else
+	{
+		$currentPrimaryGroupId = 0;
+		$currentGroupIds = array();
+		if (!empty($xfUser['user_groups']))
+		{
+			foreach ($xfUser['user_groups'] as $xfUserGroup)
+			{
+				$currentGroupIds[] = intval($xfUserGroup['user_group_id']);
+
+				if (!empty($xfUserGroup['is_primary_group']))
+				{
+					$currentPrimaryGroupId = intval($xfUserGroup['user_group_id']);
+				}
+			}
+		}
+		asort($currentGroupIds);
+
+		$targetGroupIds = array();
+		$optionGroupIds = array();
+		_xfac_syncLogin_syncRole_getHighestLevelRole($wpUser->roles, $wpUserLevel);
+		foreach ($syncRoleOption as $optionRoleName => $optionGroupId)
+		{
+			$optionGroupId = intval($optionGroupId);
+
+			if ($optionGroupId > 0)
+			{
+				$optionGroupIds[] = $optionGroupId;
+
+				$optionLevel = false;
+				_xfac_syncLogin_syncRole_getHighestLevelRole(array($optionRoleName), $optionLevel);
+
+				if ($optionLevel <= $wpUserLevel)
+				{
+					$targetGroupIds[] = $optionGroupId;
+				}
+			}
+		}
+		foreach ($currentGroupIds as $currentGroupId)
+		{
+			if (!in_array($currentGroupId, $optionGroupIds, true))
+			{
+				// some group is not configured at all, keep them untouched
+				$targetGroupIds[] = $currentGroupId;
+			}
+		}
+		asort($targetGroupIds);
+
+		if (!empty($targetGroupIds) AND serialize($currentGroupIds) !== serialize($targetGroupIds))
+		{
+			if (in_array($currentPrimaryGroupId, $targetGroupIds, true))
+			{
+				$newPrimaryGroupId = $currentPrimaryGroupId;
+			}
+			else
+			{
+				$newPrimaryGroupId = array_shift($targetGroupIds);
+			}
+
+			$newSecondaryGroupIds = array();
+			foreach ($targetGroupIds as $groupId)
+			{
+				if ($groupId !== $newPrimaryGroupId)
+				{
+					$newSecondaryGroupIds[] = $groupId;
+				}
+			}
+
+			$accessToken = xfac_user_getAdminAccessToken($config);
+			xfac_api_postUserGroups($config, $accessToken, $xfUser['user_id'], $newPrimaryGroupId, $newSecondaryGroupIds);
+		}
+	}
+}
+
+function _xfac_syncLogin_syncRole_getHighestLevelRole(array $roles, &$levelMax = false)
+{
+	global $wp_roles;
+	$highestLevelRole = '';
+
+	foreach ($wp_roles->roles as $roleName => $roleInfo)
+	{
+		if (in_array($roleName, $roles))
+		{
+			foreach ($roleInfo['capabilities'] as $cap => $boolean)
+			{
+				if (preg_match('/^level_(\d+)$/i', $cap, $matches))
+				{
+					$level = intval($matches[1]);
+					if ($levelMax === false OR $level > $levelMax)
+					{
+						$levelMax = $level;
+						$highestLevelRole = $roleName;
+					}
+				}
+			}
+		}
+	}
+
+	return $highestLevelRole;
 }

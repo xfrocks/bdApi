@@ -320,6 +320,7 @@ function _xfac_subscription_handleCallback_user($config, $ping)
 	}
 	$xfUser = $me['user'];
 
+	xfac_syncLogin_syncRole($config, new WP_User($wpUserData), $xfUser);
 	if (xfac_user_updateRecord($wpUserData->ID, $config['root'], $xfUser['user_id'], $xfUser))
 	{
 		return 'updated user record';

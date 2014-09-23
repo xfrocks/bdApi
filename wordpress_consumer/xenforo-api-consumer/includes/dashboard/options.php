@@ -20,6 +20,12 @@ function xfac_options_init()
 
 	$config = xfac_option_getConfig();
 	$hourlyNext = wp_next_scheduled('xfac_cron_hourly');
+	
+	$syncRoleOption = get_option('xfac_sync_role');
+	if (!is_array($syncRoleOption))
+	{
+		$syncRoleOption = array();
+	}
 
 	$xfGuestRecords = xfac_user_getRecordsByUserId(0);
 
