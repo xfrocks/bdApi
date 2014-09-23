@@ -23,6 +23,29 @@ function xfac_options_init()
 
 	$xfGuestRecords = xfac_user_getRecordsByUserId(0);
 
+	$currentWpUser = wp_get_current_user();
+	$xfAdminRecords = xfac_user_getRecordsByUserId($currentWpUser->ID);
+
+	$xfAdminAccountOption = intval(get_option('xfac_xf_admin_account'));
+	if ($xfAdminAccountOption > 0)
+	{
+		$record = xfac_user_getRecordById($xfAdminAccountOption);
+		if (!empty($record))
+		{
+			foreach ($xfAdminRecords as $xfAdminRecord)
+			{
+				if ($xfAdminRecord->id == $record->id)
+				{
+					$found = true;
+				}
+			}
+			if (!$found)
+			{
+				$xfAdminRecords[] = $record;
+			}
+		}
+	}
+
 	$tagForumMappings = get_option('xfac_tag_forum_mappings');
 	if (!is_array($tagForumMappings))
 	{

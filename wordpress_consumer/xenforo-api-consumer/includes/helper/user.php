@@ -160,6 +160,23 @@ function xfac_user_getSystemAccessToken($config, $generateOneTimeToken = false, 
 	return $accessToken;
 }
 
+function xfac_user_getAdminAccessToken($config)
+{
+	$accessToken = null;
+
+	$xfAdminAccountOption = intval(get_option('xfac_xf_admin_account'));
+	if ($xfAdminAccountOption > 0)
+	{
+		$record = xfac_user_getRecordById($xfAdminAccountOption);
+		if (!empty($record))
+		{
+			$accessToken = xfac_user_getAccessTokenForRecord($record);
+		}
+	}
+
+	return $accessToken;
+}
+
 function xfac_user_getAccessToken($wpUserId)
 {
 	$records = xfac_user_getRecordsByUserId($wpUserId);

@@ -322,8 +322,30 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 					<p class="description"><?php _e('The guest account will be used when contents need to be sync\'d to XenForo but no connected account can be found.', 'xenforo-api-consumer'); ?></p>
 				</td>
 			</tr>
+			<tr valign="top">
+				<th scope="row">
+					<?php _e('XenForo Admin Account', 'xenforo-api-consumer'); ?>
+				</th>
+				<td>
+					<?php if (!empty($xfAdminRecords)): ?>
+						<?php foreach($xfAdminRecords as $xfAdminRecord): ?>
+							<fieldset>
+								<label for="xfac_xf_admin_account_<?php echo $xfAdminRecord->id; ?>">
+									<input name="xfac_xf_admin_account" type="radio" id="xfac_xf_admin_account_<?php echo $xfAdminRecord->id; ?>" value="<?php echo $xfAdminRecord->id; ?>" <?php checked($xfAdminRecord->id, get_option('xfac_xf_admin_account')); ?> />
+									<?php echo $xfAdminRecord->profile['username']; ?>
+								</label>
+							</fieldset>
 						<?php endforeach; ?>
 					<?php endif; ?>
+					
+					<fieldset>
+						<label for="xfac_xf_admin_account_0">
+							<input name="xfac_xf_admin_account" type="radio" id="xfac_xf_admin_account_0" value="0" <?php checked(0, intval(get_option('xfac_xf_admin_account'))); ?> />
+							<?php _e('Disabled', 'xenforo-api-consumer'); ?>
+						</label>
+					</fieldset>
+
+					<p class="description"><?php _e('The admin account is used for administration task such as user group sync. An Administrator WordPress account must associate with an Administrative XenForo account to setup this.', 'xenforo-api-consumer'); ?></p>
 				</td>
 			</tr>
 

@@ -43,6 +43,7 @@ function xfac_admin_init()
 		register_setting('xfac-settings', 'xfac_top_bar_always');
 
 		register_setting('xfac-settings', 'xfac_xf_guest_account');
+		register_setting('xfac-settings', 'xfac_xf_admin_account');
 	}
 }
 
@@ -106,6 +107,7 @@ function xfac_whitelist_options($whitelist_options)
 		$whitelist_options['xfac'][] = 'xfac_top_bar_always';
 
 		$whitelist_options['xfac'][] = 'xfac_xf_guest_account';
+		$whitelist_options['xfac'][] = 'xfac_xf_admin_account';
 	}
 
 	return $whitelist_options;
