@@ -669,7 +669,7 @@ function _xfac_api_curl($url, $method = 'GET', $postFields = null, $curlOptions 
 	}
 	else
 	{
-		$resuts['parts'] = null;
+		$result['parts'] = array();
 		$result['body'] = $body;
 	}
 

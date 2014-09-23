@@ -28,6 +28,7 @@ function xfac_options_init()
 
 	$tags = get_terms('post_tag', array('hide_empty' => false));
 	$forums = array();
+	$meta = array();
 
 	if (!empty($config))
 	{
