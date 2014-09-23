@@ -35,6 +35,27 @@ function xfac_user_getRecordsByUserId($wpUserId)
 	return $records;
 }
 
+function xfac_user_getRecordById($recordId)
+{
+	global $wpdb;
+
+	$tblAuth = xfac_getTableAuth();
+
+	$record = $wpdb->get_row($wpdb->prepare("
+		SELECT *
+		FROM {$tblAuth}
+		WHERE id = %d
+	", $recordId));
+
+	if (!empty($record))
+	{
+		$record->profile = unserialize($record->profile);
+		$record->token = unserialize($record->token);
+	}
+
+	return $record;
+}
+
 function xfac_user_getUserDataByApiData($root, $xfUserId)
 {
 	global $wpdb;
@@ -118,12 +139,18 @@ function xfac_user_getSystemAccessToken($config, $generateOneTimeToken = false, 
 {
 	$accessToken = null;
 
-	if (intval(get_option('xfac_xf_guest_account')) > 0)
+	$xfGuestAccountOption = intval(get_option('xfac_xf_guest_account'));
+	if ($xfGuestAccountOption > 0)
 	{
 		// use pre-configured system account
-		$accessToken = xfac_user_getAccessToken(0);
+		$record = xfac_user_getRecordById($xfGuestAccountOption);
+		if (!empty($record))
+		{
+			$accessToken = xfac_user_getAccessTokenForRecord($record);
+		}
 	}
-	elseif ($generateOneTimeToken)
+
+	if (empty($accessToken) AND $generateOneTimeToken)
 	{
 		// use one time token for guest
 		$accessToken = xfac_api_generateOneTimeToken($config);

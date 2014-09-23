@@ -302,26 +302,27 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 				<td>
 					<?php if (!empty($xfGuestRecords)): ?>
 						<?php foreach($xfGuestRecords as $xfGuestRecord): ?>
-							<label for="xfac_xf_guest_account_<?php echo $xfGuestRecord->id; ?>">
-								<input name="xfac_xf_guest_account" type="checkbox" id="xfac_xf_guest_account_<?php echo $xfGuestRecord->id; ?>" value="<?php echo $xfGuestRecord->id; ?>" <?php checked($xfGuestRecord->id, get_option('xfac_xf_guest_account')); ?> />
-								<?php echo $xfGuestRecord->profile['username']; ?>
-								<?php if (!empty($authorizeUrl)): ?>
-								(<a href="<?php echo $authorizeUrl; ?>"><?php _e('change', 'xenforo-api-consumer'); ?></a>)
-								<?php endif; ?>
-							</label>
-							<p class="description"><?php _e('The guest account will be used when contents need to be sync\'d to XenForo but no connected account can be found.', 'xenforo-api-consumer'); ?></p>
+							<fieldset>
+								<label for="xfac_xf_guest_account_<?php echo $xfGuestRecord->id; ?>">
+									<input name="xfac_xf_guest_account" type="radio" id="xfac_xf_guest_account_<?php echo $xfGuestRecord->id; ?>" value="<?php echo $xfGuestRecord->id; ?>" <?php checked($xfGuestRecord->id, get_option('xfac_xf_guest_account')); ?> />
+									<?php echo $xfGuestRecord->profile['username']; ?>
+								</label>
+							</fieldset>
 						<?php endforeach; ?>
-					<?php else: ?>
-					<label for="xfac_xf_guest_account">
-						<input name="xfac_xf_guest_account" type="hidden" value="0" />
-						<input name="xfac_xf_guest_account" type="checkbox" id="xfac_xf_guest_account" value="1" disabled="disabled" />
+					<?php endif; ?>
 
-						<?php if (!empty($authorizeUrl)): ?>
-						<a href="<?php echo $authorizeUrl; ?>"><?php _e('Connect a XenForo account as Guest account', 'xenforo-api-consumer'); ?></a>
-						<?php else: ?>
-						<?php _e('Configure API Client first', 'xenforo-api-consumer'); ?>
-						<?php endif; ?>
-					</label>
+					<fieldset>
+						<label for="xfac_xf_guest_account_0">
+							<input name="xfac_xf_guest_account" type="radio" id="xfac_xf_guest_account_0" value="0" <?php checked(0, intval(get_option('xfac_xf_guest_account'))); ?> />
+							<?php _e('Disabled', 'xenforo-api-consumer'); ?>
+							(<a href="<?php echo admin_url('options-general.php?page=xfac&do=xfac_xf_guest_account'); ?>"><?php _e('change account', 'xenforo-api-consumer'); ?></a>)
+						</label>
+					</fieldset>
+
+					<p class="description"><?php _e('The guest account will be used when contents need to be sync\'d to XenForo but no connected account can be found.', 'xenforo-api-consumer'); ?></p>
+				</td>
+			</tr>
+						<?php endforeach; ?>
 					<?php endif; ?>
 				</td>
 			</tr>

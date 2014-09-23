@@ -8,6 +8,15 @@ if (!defined('ABSPATH'))
 
 function xfac_options_init()
 {
+	if (!empty($_REQUEST['do']))
+	{
+		switch($_REQUEST['do'])
+		{
+			case 'xfac_xf_guest_account':
+				require (xfac_template_locateTemplate('dashboard_xfac_xf_guest_account.php'));
+				return;
+		}
+	}
 
 	$config = xfac_option_getConfig();
 	$hourlyNext = wp_next_scheduled('xfac_cron_hourly');
@@ -39,9 +48,6 @@ function xfac_options_init()
 		{
 			$forums = $apiForums['forums'];
 		}
-
-		$callbackUrl = admin_url('options-general.php?page=xfac&do=xfac_xf_guest_account');
-		$authorizeUrl = xfac_api_getAuthorizeUrl($config, $callbackUrl);
 	}
 
 	require (xfac_template_locateTemplate('dashboard_options.php'));
@@ -108,16 +114,26 @@ function xfac_dashboardOptions_admin_init()
 				update_option('xfac_meta', array());
 				wp_redirect(admin_url('options-general.php?page=xfac&done=xfac_meta'));
 				break;
-			case 'xfac_xf_guest_account':
+			case 'xfac_xf_guest_account_submit':
 				$config = xfac_option_getConfig();
-				$callbackUrl = admin_url('options-general.php?page=xfac&do=xfac_xf_guest_account');
-
-				if (empty($_REQUEST['code']))
+				if (empty($config))
 				{
-					wp_die('no_code');
+					wp_die('no_config');
 				}
-				$token = xfac_api_getAccessTokenFromCode($config, $_REQUEST['code'], $callbackUrl);
 
+				$username = $_REQUEST['xfac_guest_username'];
+				if (empty($username))
+				{
+					wp_die('no_username');
+				}
+
+				$password = $_REQUEST['xfac_guest_password'];
+				if (empty($password))
+				{
+					wp_die('no_password');
+				}
+
+				$token = xfac_api_getAccessTokenFromUsernamePassword($config, $username, $password);
 				if (empty($token))
 				{
 					wp_die('no_token');
