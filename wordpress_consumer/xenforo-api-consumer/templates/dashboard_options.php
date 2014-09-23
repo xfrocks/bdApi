@@ -309,13 +309,15 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 								</label>
 							</fieldset>
 						<?php endforeach; ?>
+						<fieldset><a href="<?php echo admin_url('options-general.php?page=xfac&do=xfac_xf_guest_account'); ?>"><?php _e('Change account', 'xenforo-api-consumer'); ?></a></fieldset>
+					<?php else: ?>
+						<fieldset><a href="<?php echo admin_url('options-general.php?page=xfac&do=xfac_xf_guest_account'); ?>"><?php _e('Add account', 'xenforo-api-consumer'); ?></a></fieldset>
 					<?php endif; ?>
 
 					<fieldset>
 						<label for="xfac_xf_guest_account_0">
 							<input name="xfac_xf_guest_account" type="radio" id="xfac_xf_guest_account_0" value="0" <?php checked(0, intval(get_option('xfac_xf_guest_account'))); ?> />
 							<?php _e('Disabled', 'xenforo-api-consumer'); ?>
-							(<a href="<?php echo admin_url('options-general.php?page=xfac&do=xfac_xf_guest_account'); ?>"><?php _e('change account', 'xenforo-api-consumer'); ?></a>)
 						</label>
 					</fieldset>
 
