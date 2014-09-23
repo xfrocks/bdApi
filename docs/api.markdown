@@ -888,7 +888,8 @@ Detail information of a user.
                 create_conversation: (boolean),
                 upload_attachment_conversation: (boolean) # since forum-2014081801
             }
-        }
+        },
+        subscription_callback: (uri) # since subscription-2014092301
     }
 
 Fields with asterisk (*) are protected data. They are only included when the authenticated user is the requested user or the authenticated user is an admin with `user` admin permission and has `admincp` scope.

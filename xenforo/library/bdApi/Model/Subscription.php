@@ -4,6 +4,7 @@ class bdApi_Model_Subscription extends XenForo_Model
 {
 	const TYPE_NOTIFICATION = 'user_notification';
 	const TYPE_THREAD_POST = 'thread_post';
+	const TYPE_USER = 'user';
 
 	public function updateCallbacksForTopic($topic)
 	{
@@ -20,7 +21,10 @@ class bdApi_Model_Subscription extends XenForo_Model
 				if (!empty($subscriptions))
 				{
 					$link = null;
-					if (is_callable(array('XenForo_Link', 'buildApiLink')))
+					if (is_callable(array(
+						'XenForo_Link',
+						'buildApiLink'
+					)))
 					{
 						$link = XenForo_Link::buildApiLink('notifications', null, array(OAUTH2_TOKEN_PARAM_NAME => ''));
 					}
@@ -42,7 +46,10 @@ class bdApi_Model_Subscription extends XenForo_Model
 				if (!empty($subscriptions))
 				{
 					$link = null;
-					if (is_callable(array('XenForo_Link', 'buildApiLink')))
+					if (is_callable(array(
+						'XenForo_Link',
+						'buildApiLink'
+					)))
 					{
 						$link = XenForo_Link::buildApiLink('posts', null, array(
 							'thread_id' => $id,
@@ -62,6 +69,31 @@ class bdApi_Model_Subscription extends XenForo_Model
 				}
 
 				$this->_getDb()->update('xf_thread', array('bdapi_thread_post' => serialize($threadOption)), array('thread_id = ?' => $id));
+				break;
+			case self::TYPE_USER:
+				if (!empty($subscriptions))
+				{
+					$link = null;
+					if (is_callable(array(
+						'XenForo_Link',
+						'buildApiLink'
+					)))
+					{
+						$link = XenForo_Link::buildApiLink('users', array('user_id' => $id), array(OAUTH2_TOKEN_PARAM_NAME => ''));
+					}
+
+					$userOption = array(
+						'topic' => $topic,
+						'link' => $link,
+						'subscriptions' => $subscriptions,
+					);
+				}
+				else
+				{
+					$userOption = array();
+				}
+
+				$this->_getDb()->update('xf_user_option', array('bdapi_user' => serialize($userOption)), array('user_id = ?' => $id));
 				break;
 		}
 	}
@@ -114,6 +146,8 @@ class bdApi_Model_Subscription extends XenForo_Model
 				return $this->_preparePingDataManyNotification($pingDataMany);
 			case  self::TYPE_THREAD_POST:
 				return $this->_preparePingDataManyPost($pingDataMany);
+			case  self::TYPE_USER:
+				return $this->_preparePingDataManyUser($pingDataMany);
 		}
 
 		return $data;
@@ -195,6 +229,12 @@ class bdApi_Model_Subscription extends XenForo_Model
 		// TODO: do anything here?
 		return $pingDataMany;
 	}
+	
+	protected function _preparePingDataManyUser($pingDataMany)
+	{
+		// TODO: do anything here?
+		return $pingDataMany;
+	}
 
 	protected function _preparePingData_getViewingUsers($userIds)
 	{
@@ -250,6 +290,8 @@ class bdApi_Model_Subscription extends XenForo_Model
 				$thread = $this->getModelFromCache('XenForo_Model_Thread')->getThreadById($id);
 
 				return $thread['user_id'] == $viewingUser['user_id'];
+			case self::TYPE_USER:
+				return (($id > 0) AND ($id == $viewingUser['user_id']));
 		}
 
 		return false;

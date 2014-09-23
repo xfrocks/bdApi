@@ -180,6 +180,7 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base
 		),
 		'xf_user_option' => array(
 			'bdapi_user_notification' => array('name' => 'bdapi_user_notification', 'type' => 'serialized'),
+			'bdapi_user' => array('name' => 'bdapi_user', 'type' => 'serialized'),
 		),
 		'xf_thread' => array(
 			'bdapi_thread_post' => array('name' => 'bdapi_thread_post', 'type' => 'serialized'),

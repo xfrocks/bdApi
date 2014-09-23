@@ -51,7 +51,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 	{
 		$user = $this->_getUserOrError();
 
-		$data = array('user' => $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user)));
+		$data = array(
+			'user' => $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user)),
+			'_user' => $user,
+		);
 
 		return $this->responseData('bdApi_ViewApi_User_Single', $data);
 	}

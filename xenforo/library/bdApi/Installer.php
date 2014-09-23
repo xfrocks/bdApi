@@ -132,6 +132,14 @@ class bdApi_Installer
 			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_user_option` DROP COLUMN `bdapi_user_notification`',
 		),
 		array(
+			'table' => 'xf_user_option',
+			'field' => 'bdapi_user',
+			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_user_option\'',
+			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_user_option` LIKE \'bdapi_user\'',
+			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_user_option` ADD COLUMN `bdapi_user` MEDIUMBLOB',
+			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_user_option` DROP COLUMN `bdapi_user`',
+		),
+		array(
 			'table' => 'xf_thread',
 			'field' => 'bdapi_thread_post',
 			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_thread\'',
