@@ -336,9 +336,10 @@ function xfac_syncPost_pullPost($config, $thread, $tags, $direction = 'pull')
 		'tags_input' => implode(', ', $tags),
 	);
 
+	$XFAC_SKIP_xfac_save_post_before = !empty($GLOBALS['XFAC_SKIP_xfac_save_post']);
 	$GLOBALS['XFAC_SKIP_xfac_save_post'] = true;
 	$wpPostId = wp_insert_post($wpPost);
-	$GLOBALS['XFAC_SKIP_xfac_save_post'] = false;
+	$GLOBALS['XFAC_SKIP_xfac_save_post'] = $XFAC_SKIP_xfac_save_post_before;
 
 	if ($wpPostId > 0)
 	{

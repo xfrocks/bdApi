@@ -182,12 +182,13 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
 				$wfPostLink = get_permalink($postSyncRecord->sync_id);
 				$postContent = preg_replace('#<a href="' . preg_quote($wfPostLink, '#') . '"[^>]*>[^<]+</a>$#', '', $postContent);
 
+				$XFAC_SKIP_xfac_save_post_before = !empty($GLOBALS['XFAC_SKIP_xfac_save_post']); 
 				$GLOBALS['XFAC_SKIP_xfac_save_post'] = true;
 				$postUpdated = wp_update_post(array(
 					'ID' => $postSyncRecord->sync_id,
 					'post_content' => $postContent,
 				));
-				$GLOBALS['XFAC_SKIP_xfac_save_post'] = false;
+				$GLOBALS['XFAC_SKIP_xfac_save_post'] = $XFAC_SKIP_xfac_save_post_before;
 
 				if (is_int($postUpdated) AND $postUpdated > 0)
 				{
@@ -203,13 +204,14 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
 			// update comment content and approve it automatically
 			$commentContent = xfac_api_filterHtmlFromXenForo($xfPost['post']['post_body_html']);
 
+			$XFAC_SKIP_xfac_save_comment_before = !empty($GLOBALS['XFAC_SKIP_xfac_save_comment']);
 			$GLOBALS['XFAC_SKIP_xfac_save_comment'] = true;
 			$commentUpdated = wp_update_comment(array(
 				'comment_ID' => $commentSyncRecord->sync_id,
 				'comment_content' => $commentContent,
 				'comment_approved' => 1,
 			));
-			$GLOBALS['XFAC_SKIP_xfac_save_comment'] = false;
+			$GLOBALS['XFAC_SKIP_xfac_save_comment'] = $XFAC_SKIP_xfac_save_comment_before;
 
 			if ($commentUpdated == 1)
 			{
@@ -223,12 +225,13 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
 
 			if (!empty($wpComment->comment_approved))
 			{
+				$XFAC_SKIP_xfac_save_comment_before = !empty($GLOBALS['XFAC_SKIP_xfac_save_comment']);
 				$GLOBALS['XFAC_SKIP_xfac_save_comment'] = true;
 				$commentUpdated = wp_update_comment(array(
 					'comment_ID' => $commentSyncRecord->sync_id,
 					'comment_approved' => 0,
 				));
-				$GLOBALS['XFAC_SKIP_xfac_save_comment'] = false;
+				$GLOBALS['XFAC_SKIP_xfac_save_comment'] = $XFAC_SKIP_xfac_save_comment_before;
 
 				return 'unapproved comment';
 			}

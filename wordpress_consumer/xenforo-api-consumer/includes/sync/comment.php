@@ -286,9 +286,10 @@ function xfac_syncComment_pullComment($config, $xfPost, $wpPostId, $direction = 
 		'comment_approved' => 1,
 	);
 
+	$XFAC_SKIP_xfac_save_comment_before = !empty($GLOBALS['XFAC_SKIP_xfac_save_comment']);
 	$GLOBALS['XFAC_SKIP_xfac_save_comment'] = true;
 	$commentId = wp_insert_comment($comment);
-	$GLOBALS['XFAC_SKIP_xfac_save_comment'] = false;
+	$GLOBALS['XFAC_SKIP_xfac_save_comment'] = $XFAC_SKIP_xfac_save_comment_before;
 
 	if ($commentId > 0)
 	{
