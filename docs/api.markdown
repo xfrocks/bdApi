@@ -866,7 +866,7 @@ Detail information of a user.
                 field_id: (field_value),
                 ...
             }
-            *user_groups: [ // since forum-2014092301, requires admincp scope
+            *user_groups: [ // since forum-2014092301
                 {
                     user_group_id: (int),
                     user_group_title: (string),
@@ -1070,7 +1070,7 @@ Parameters:
 Required scopes:
 
  * `read`
- * `admincp`
+ * `admincp` (not required if viewing groups of current authenticated user)
 
 ### POST `/users/:userId/groups`
 Change user groups of a user. Since forum-2014092301.

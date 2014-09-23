@@ -347,18 +347,26 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
 	public function actionGetGroups()
 	{
-		$this->_assertRequiredScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM);
-		$this->_assertAdminPermission('user');
-
 		$userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
 		if (!empty($userId))
 		{
 			$user = $this->_getUserOrError();
+
+			if ($user['user_id'] != XenForo_Visitor::getUserId())
+			{
+				// viewing groups of other user requires admin permission
+				$this->_assertRequiredScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM);
+				$this->_assertAdminPermission('user');
+			}
+
 			$user = $this->_getUserModel()->prepareApiDataForUser($user);
 			$userGroups = $user['user_groups'];
 		}
 		else
 		{
+			$this->_assertRequiredScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM);
+			$this->_assertAdminPermission('user');
+
 			$userGroupModel = $this->_getUserGroupModel();
 			$userGroups = $userGroupModel->getAllUserGroups();
 			$userGroups = $userGroupModel->prepareApiDataForUserGroups($userGroups);

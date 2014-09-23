@@ -138,30 +138,27 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 				}
 			}
 
-			if ($isAdminRequest)
+			$userGroupModel = $this->getModelFromCache('XenForo_Model_UserGroup');
+			$thisUserGroups = array();
+			$userGroups = $userGroupModel->bdApi_getAllUserGroupsCached();
+			foreach ($userGroups as $userGroup)
 			{
-				$userGroupModel = $this->getModelFromCache('XenForo_Model_UserGroup');
-				$thisUserGroups = array();
-				$userGroups = $userGroupModel->bdApi_getAllUserGroupsCached();
-				foreach ($userGroups as $userGroup)
+				if ($this->isMemberOfUserGroup($user, $userGroup['user_group_id']))
 				{
-					if ($this->isMemberOfUserGroup($user, $userGroup['user_group_id']))
-					{
-						$thisUserGroups[] = $userGroup;
-					}
+					$thisUserGroups[] = $userGroup;
 				}
-				$data['user_groups'] = $userGroupModel->prepareApiDataForUserGroups($thisUserGroups);
-				
-				foreach ($data['user_groups'] as &$userGroupRef)
+			}
+			$data['user_groups'] = $userGroupModel->prepareApiDataForUserGroups($thisUserGroups);
+
+			foreach ($data['user_groups'] as &$userGroupRef)
+			{
+				if ($userGroupRef['user_group_id'] == $user['user_group_id'])
 				{
-					if ($userGroupRef['user_group_id'] == $user['user_group_id'])
-					{
-						$userGroupRef['is_primary_group'] = true;
-					}
-					else
-					{
-						$userGroupRef['is_primary_group'] = false;
-					}
+					$userGroupRef['is_primary_group'] = true;
+				}
+				else
+				{
+					$userGroupRef['is_primary_group'] = false;
 				}
 			}
 
