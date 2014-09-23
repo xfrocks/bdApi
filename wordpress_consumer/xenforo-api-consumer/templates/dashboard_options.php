@@ -22,11 +22,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 	<select name="xfac_tag_forum_mappings[<?php echo $i; ?>][term_id]">
 		<option value="0">&nbsp;</option>
 		<?php foreach ($tags as $tag): ?>
-			<option value="<?php echo esc_attr($tag->term_id); ?>"
-				<?php
-				if (!empty($tagForumMapping['term_id']) AND $tagForumMapping['term_id'] == $tag->term_id)
-					echo ' selected="selected"';
-			?>>
+			<option value="<?php echo esc_attr($tag->term_id); ?>" <?php selected($tag->term_id, !empty($tagForumMapping['term_id']) ? $tagForumMapping['term_id'] : ''); ?>>
 				<?php echo esc_html($tag->name); ?>
 			</option>
 		<?php endforeach; ?>
@@ -34,11 +30,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 	<select name="xfac_tag_forum_mappings[<?php echo $i; ?>][forum_id]">
 		<option value="0">&nbsp;</option>
 		<?php foreach ($forums as $forum): ?>
-			<option value="<?php echo esc_attr($forum['forum_id']); ?>"
-				<?php
-				if (!empty($tagForumMapping['term_id']) AND $tagForumMapping['forum_id'] == $forum['forum_id'])
-					echo ' selected="selected"';
-			?>>
+			<option value="<?php echo esc_attr($forum['forum_id']); ?>" <?php selected($forum['forum_id'], !empty($tagForumMapping['forum_id']) ? $tagForumMapping['forum_id'] : ''); ?>>
 				<?php echo esc_html($forum['forum_title']); ?>
 			</option>
 		<?php endforeach; ?>
@@ -397,9 +389,11 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 
 					<p class="description">
 						<?php _e('The admin account is used for administration task such as user group sync. An Administrator WordPress account must associate with an Administrative XenForo account to setup this.', 'xenforo-api-consumer'); ?>
-						<?php if (wp_get_current_user()->ID == $configuredAdminRecord->user_id AND empty($meta['userGroups'])): ?>
-							<?php _e('Looks like your associated account doesn\'t have <span style="font-family: Courier New">admincp</span> API scope.', 'xenforo-api-consumer'); ?>
-							<a href="<?php echo site_url('wp-login.php?xfac=authorize&admin=1&redirect_to=' . rawurlencode(admin_url('profile.php')), 'login_post'); ?>"><?php _e('Click here to attempt to fix it.', 'xenforo-api-consumer'); ?></a>
+						<?php if (!empty($configuredAdminRecord) AND empty($meta['userGroups']) AND wp_get_current_user()->ID == $configuredAdminRecord->user_id): ?>
+							<?php if (strpos($configuredAdminRecord->token['scope'], 'admincp') === false): ?>
+								<?php _e('Looks like your associated account doesn\'t have <span style="font-family: Courier New">admincp</span> API scope.', 'xenforo-api-consumer'); ?>
+								<a href="<?php echo site_url('wp-login.php?xfac=authorize&admin=1&redirect_to=' . rawurlencode(admin_url('profile.php')), 'login_post'); ?>"><?php _e('Click here to attempt to fix it.', 'xenforo-api-consumer'); ?></a>
+							<?php endif; ?>
 						<?php endif; ?>
 					</p>
 				</td>
