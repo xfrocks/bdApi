@@ -342,6 +342,70 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_User_PasswordTest', $data);
 	}
 
+	public function actionGetGroups()
+	{
+		$this->_assertRequiredScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM);
+		$this->_assertAdminPermission('user');
+
+		$userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+		if (!empty($userId))
+		{
+			$user = $this->_getUserOrError();
+			$user = $this->_getUserModel()->prepareApiDataForUser($user);
+			$userGroups = $user['user_groups'];
+		}
+		else
+		{
+			$userGroupModel = $this->_getUserGroupModel();
+			$userGroups = $userGroupModel->getAllUserGroups();
+			$userGroups = $userGroupModel->prepareApiDataForUserGroups($userGroups);
+		}
+
+		$data = array('user_groups' => $this->_filterDataMany($userGroups));
+
+		if (!empty($user))
+		{
+			$data['user_id'] = $user['user_id'];
+		}
+
+		return $this->responseData('bdApi_ViewApi_User_Groups', $data);
+	}
+
+	public function actionPostGroups()
+	{
+		$this->_assertRequiredScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM);
+		$this->_assertAdminPermission('user');
+
+		$user = $this->_getUserOrError();
+
+		$primaryGroupId = $this->_input->filterSingle('primary_group_id', XenForo_Input::UINT);
+		$secondaryGroupIds = $this->_input->filterSingle('secondary_group_ids', XenForo_Input::UINT, array('array' => true));
+
+		$userGroups = $this->_getUserGroupModel()->getAllUserGroups();
+		if (!isset($userGroups[$primaryGroupId]))
+		{
+			return $this->responseError(new XenForo_Phrase('requested_user_group_not_found'));
+		}
+		if (!empty($secondaryGroupIds))
+		{
+			foreach ($secondaryGroupIds as $secondaryGroupId)
+			{
+				if (!isset($userGroups[$secondaryGroupId]))
+				{
+					return $this->responseError(new XenForo_Phrase('requested_user_group_not_found'));
+				}
+			}
+		}
+
+		$writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
+		$writer->setExistingData($user, true);
+		$writer->set('user_group_id', $primaryGroupId);
+		$writer->setSecondaryGroups($secondaryGroupIds);
+		$writer->save();
+
+		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+	}
+
 	public function actionGetMe()
 	{
 		if (XenForo_Visitor::getUserId() == 0)
@@ -408,12 +472,42 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		return $this->responseReroute(__CLASS__, 'post-password');
 	}
 
+	public function actionGetMeGroups()
+	{
+		if (XenForo_Visitor::getUserId() == 0)
+		{
+			return $this->responseNoPermission();
+		}
+
+		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
+		return $this->responseReroute(__CLASS__, 'get-groups');
+	}
+
+	public function actionPostMeGroups()
+	{
+		if (XenForo_Visitor::getUserId() == 0)
+		{
+			return $this->responseNoPermission();
+		}
+
+		$this->_request->setParam('user_id', XenForo_Visitor::getUserId());
+		return $this->responseReroute(__CLASS__, 'post-groups');
+	}
+
 	/**
 	 * @return XenForo_Model_User
 	 */
 	protected function _getUserModel()
 	{
 		return $this->getModelFromCache('XenForo_Model_User');
+	}
+
+	/**
+	 * @return XenForo_Model_UserGroup
+	 */
+	protected function _getUserGroupModel()
+	{
+		return $this->getModelFromCache('XenForo_Model_UserGroup');
 	}
 
 	protected function _getUserOrError(array $fetchOptions = array())

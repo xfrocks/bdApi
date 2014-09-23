@@ -851,21 +851,29 @@ Detail information of a user.
             user_message_count: (int),
             user_register_date: (unix timestamp in seconds),
             user_like_count: (int),
-            user_is_visitor: (boolean), // since 2013110601
-            user_email: (email), // user_is_visitor==true only
-            user_dob_day: (int), // user_is_visitor==true only
-            user_dob_month: (int), // user_is_visitor==true only
-            user_dob_year: (int), // user_is_visitor==true only
-            user_timezone_offset: (int), // user_is_visitor==true only
-            user_has_password: (boolean), // user_is_visitor==true only
-            user_unread_conversation_count: (int), // since 2014022601, user_is_visitor==true only, requires conversate scope
+            user_is_visitor: (boolean), // since forum-2013110601
+            *user_email: (email),
+            *user_dob_day: (int),
+            *user_dob_month: (int),
+            *user_dob_year: (int),
+            *user_timezone_offset: (int),
+            *user_has_password: (boolean),
+            *user_unread_conversation_count: (int), // since forum-2014022601, requires conversate scope
             user_is_valid: (boolean),
             user_is_verified: (boolean),
             user_is_followed: (boolean), // since forum-2014052902
-            user_custom_fields: { // user_is_visitor==true only, since 2013110601
+            *user_custom_fields: { // since forum-2013110601
                 field_id: (field_value),
                 ...
             }
+            *user_groups: [ // since forum-2014092301, requires admincp scope
+                {
+                    user_group_id: (int),
+                    user_group_title: (string),
+                    is_primary_group: (boolean)
+                },
+                ...
+            ]
             links: {
                 permalink: (uri),
                 detail: (uri),
@@ -876,12 +884,14 @@ Detail information of a user.
             permissions: {
                 follow: (boolean)
             },
-            self_permissions: { // user_is_visitor==true only
+            *self_permissions: {
                 create_conversation: (boolean),
                 upload_attachment_conversation: (boolean) # since forum-2014081801
             }
         }
     }
+
+Fields with asterisk (*) are protected data. They are only included when the authenticated user is the requested user or the authenticated user is an admin with `user` admin permission and has `admincp` scope.
 
 Parameters:
 
@@ -1015,6 +1025,70 @@ Required scopes:
 
  * `post`
 
+### GET `/users/groups`
+List of all user groups. Since forum-2014092301.
+
+    {
+        user_groups: [
+            {
+                user_group_id: (int),
+                user_group_title: (string)
+            },
+            ...
+        ]
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+ * `admincp`
+
+### GET `/users/:userId/groups`
+List of a user's groups. Since forum-2014092301.
+
+    {
+        user_groups: [
+            {
+                user_group_id: (int),
+                user_group_title: (string),
+                is_primary_group: (boolean)
+            },
+            ...
+        ],
+        user_id: (int)
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+ * `admincp`
+
+### POST `/users/:userId/groups`
+Change user groups of a user. Since forum-2014092301.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * `primary_group_id` (__required__): id of new primary group.
+ * `secondary_group_ids` (__required__): array of ids of new secondary groups.
+
+Required scopes:
+
+ * `post`
+ * `admincp`
+
 ### GET `/users/me`
 Alias for GET `/users/:userId` for authorized user.
 
@@ -1032,6 +1106,12 @@ Alias for GET `/users/:userId/followings` for authorized user.
 
 ### POST `/users/me/password`
 Alias for POST `/users/:userId/password` for authorized user.
+
+### GET `/users/me/groups`
+Alias for GET `/users/:userId/groups` for authorized user. Since forum-2014092301.
+
+### POST `/users/me/groups`
+Alias for POST `/users/:userId/groups` for authorized user. Since forum-2014092301.
 
 ## Conversation
 

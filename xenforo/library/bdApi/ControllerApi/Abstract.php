@@ -245,6 +245,14 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		}
 	}
 
+	protected function _assertAdminPermission($permissionId)
+	{
+		if (!XenForo_Visitor::getInstance()->hasAdminPermission($permissionId))
+		{
+			throw $this->responseException($this->responseNoPermission());
+		}
+	}
+
 	public function responseNoPermission()
 	{
 		return $this->responseReroute('bdApi_ControllerApi_Error', 'noPermission');

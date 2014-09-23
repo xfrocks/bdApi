@@ -29,6 +29,9 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 	public function prepareApiDataForUser(array $user)
 	{
 		$visitor = XenForo_Visitor::getInstance();
+		$hasAdminScope = XenForo_Application::getSession()->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM);
+		$isAdminRequest = ($hasAdminScope AND $visitor->hasAdminPermission('user'));
+		$prepareProtectedData = (($user['user_id'] == $visitor->get('user_id')) OR $isAdminRequest);
 
 		$publicKeys = array(
 			// xf_user
@@ -40,7 +43,7 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 			'like_count' => 'user_like_count',
 		);
 
-		if ($user['user_id'] == $visitor->get('user_id'))
+		if ($prepareProtectedData)
 		{
 			$publicKeys = array_merge($publicKeys, array(
 				// xf_user
@@ -112,10 +115,10 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 
 		$data['permissions'] = array('follow' => ($user['user_id'] != $visitor->get('user_id')) AND $visitor->canFollow());
 
-		if ($user['user_id'] == $visitor->get('user_id'))
-		{
-			$data['user_is_visitor'] = true;
+		$data['user_is_visitor'] = ($user['user_id'] == $visitor->get('user_id'));
 
+		if ($prepareProtectedData)
+		{
 			if (isset($user['timezone']))
 			{
 				$dtz = new DateTimeZone($user['timezone']);
@@ -135,14 +138,37 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 				}
 			}
 
+			if ($isAdminRequest)
+			{
+				$userGroupModel = $this->getModelFromCache('XenForo_Model_UserGroup');
+				$thisUserGroups = array();
+				$userGroups = $userGroupModel->bdApi_getAllUserGroupsCached();
+				foreach ($userGroups as $userGroup)
+				{
+					if ($this->isMemberOfUserGroup($user, $userGroup['user_group_id']))
+					{
+						$thisUserGroups[] = $userGroup;
+					}
+				}
+				$data['user_groups'] = $userGroupModel->prepareApiDataForUserGroups($thisUserGroups);
+				
+				foreach ($data['user_groups'] as &$userGroupRef)
+				{
+					if ($userGroupRef['user_group_id'] == $user['user_group_id'])
+					{
+						$userGroupRef['is_primary_group'] = true;
+					}
+					else
+					{
+						$userGroupRef['is_primary_group'] = false;
+					}
+				}
+			}
+
 			$data['self_permissions'] = array(
 				'create_conversation' => $this->getModelFromCache('XenForo_Model_Conversation')->canStartConversations(),
 				'upload_attachment_conversation' => $this->getModelFromCache('XenForo_Model_Conversation')->canUploadAndManageAttachment(),
 			);
-		}
-		else
-		{
-			$data['user_is_visitor'] = false;
 		}
 
 		return $data;
