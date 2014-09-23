@@ -135,6 +135,9 @@ function xfac_subscription_handleCallback(array $json)
 					$pingRef['result'] = _xfac_subscription_handleCallback_userNotification($config, $pingRef);
 				}
 				break;
+			case 'user':
+				$pingRef['result'] = _xfac_subscription_handleCallback_user($config, $pingRef);
+				break;
 		}
 	}
 
@@ -294,6 +297,37 @@ function _xfac_subscription_handleCallback_userNotification($config, $ping)
 	}
 
 	return false;
+}
+
+function _xfac_subscription_handleCallback_user($config, $ping)
+{
+	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $ping['object_data']);
+	if (empty($wpUserData))
+	{
+		return false;
+	}
+
+	$accessToken = xfac_user_getAccessToken($wpUserData->ID);
+	if (empty($accessToken))
+	{
+		return false;
+	}
+
+	$me = xfac_api_getUsersMe($config, $accessToken);
+	if (empty($me))
+	{
+		return false;
+	}
+	$xfUser = $me['user'];
+
+	if (xfac_user_updateRecord($wpUserData->ID, $config['root'], $xfUser['user_id'], $xfUser))
+	{
+		return 'updated user record';
+	}
+	else
+	{
+		return false;
+	}
 }
 
 function xfac_do_parse_request($bool, $wp, $extra_query_vars)

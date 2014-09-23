@@ -38,8 +38,9 @@ function xfac_api_getModules($config)
 function xfac_api_getVersionSuggestionText($config, $meta)
 {
 	$requiredModules = array(
-		'forum' => 2014022602,
+		'forum' => 2014092301,
 		'oauth2' => 2014030701,
+		'subscription' => 2014092301,
 	);
 
 	if (empty($meta['modules']))
@@ -262,6 +263,8 @@ function xfac_api_getUsersMe($config, $accessToken)
 
 	if (isset($parts['user']))
 	{
+		$parts['_headerLinkHub'] = _xfac_api_getHeaderLinkHub($curl);
+
 		return $parts;
 	}
 	else

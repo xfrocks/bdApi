@@ -215,6 +215,11 @@ function xfac_login_init()
 	{
 		xfac_user_updateRecord($wpUser->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
 
+		if (empty($me['subscription_callback']) AND !empty($me['_headerLinkHub']))
+		{
+			xfac_api_postSubscription($config, $token['access_token'], $me['_headerLinkHub']);
+		}
+
 		wp_set_auth_cookie($wpUser->ID, true);
 
 		$redirectToFiltered = apply_filters('login_redirect', $redirectTo, $redirectToRequested, $wpUser);

@@ -73,7 +73,7 @@ function xfac_user_getUserByApiData($root, $xfUserId)
 	return $user;
 }
 
-function xfac_user_updateRecord($wpUserId, $root, $xfUserId, array $xfUser, array $token)
+function xfac_user_updateRecord($wpUserId, $root, $xfUserId, array $xfUser, array $token = null)
 {
 	global $wpdb;
 
@@ -82,11 +82,25 @@ function xfac_user_updateRecord($wpUserId, $root, $xfUserId, array $xfUser, arra
 
 	wp_cache_delete($wpUserId, XFAC_CACHE_RECORDS_BY_USER_ID);
 
-	return $wpdb->query($wpdb->prepare("
-		REPLACE INTO {$tblAuth}
-		(user_id, provider, identifier, profile, token)
-		VALUES (%d, %s, %s, %s, %s)
-	", $wpUserId, $provider, $xfUserId, serialize($xfUser), serialize($token)));
+	return $wpdb->query(call_user_func_array(array(
+		$wpdb,
+		'prepare'
+	), array(
+'INSERT INTO wp_xfac_auth
+			(user_id, provider, identifier, profile'		. ($token ? ', token' : '') . ')
+		VALUES
+			(%s, %s, %s, %s' . ($token ? ', %s' : '') . ')
+		ON DUPLICATE KEY UPDATE
+			user_id = VALUES(user_id),
+			provider = VALUES(provider),
+			identifier = VALUES(identifier),
+			profile = VALUES(profile)' . ($token ? ', token = VALUES(token)' : ''),
+		$wpUserId,
+		$provider,
+		$xfUserId,
+		serialize($xfUser),
+		serialize($token),
+	)));
 }
 
 function xfac_user_deleteRecord($record)
