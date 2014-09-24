@@ -247,6 +247,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 												<td style="margin: 0; padding: 10px 0">
 													<select id="xfac_sync_role_<?php echo $roleName; ?>" name="xfac_sync_role[<?php echo $roleName; ?>]">
 														<option value="0" <?php selected(0, $syncRoleOptionThisRole); ?>></option>
+														<option value="-1" <?php selected(-1, $syncRoleOptionThisRole); ?>><?php _e('Do not sync', 'xenforo-api-consumer'); ?></option>
 														<?php foreach($meta['userGroups'] as $userGroup): ?>
 															<option value="<?php echo $userGroup['user_group_id']; ?>" <?php selected($userGroup['user_group_id'], $syncRoleOptionThisRole); ?>>
 																<?php echo $userGroup['user_group_title']; ?>
@@ -258,7 +259,9 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 										<?php endforeach; ?>
 									</tbody>
 								</table>
-								<p class="description"><?php _e('Users who come from XenForo will have their WordPress roles setup as configured in this table.', 'xenforo-api-consumer'); ?></p>
+								<p class="description"><?php _e('Users who come from XenForo will have their WordPress roles setup as configured in this table. ' .
+									'The roles are checked from the highest level down to the lowest so user will have one role that fits best to their user groups. ' .
+									'Choose "Do not sync" for roles that need to be ignored by the sync logic (WordPress accounts with these roles will be protected from changing).', 'xenforo-api-consumer'); ?></p>
 								
 								<label for="xfac_sync_role_wp_xf">
 									<input name="xfac_sync_role_wp_xf" type="checkbox" id="xfac_sync_role_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_role_wp_xf')); ?> />

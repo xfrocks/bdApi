@@ -10,7 +10,7 @@ function xfac_install()
 {
 	global $wpdb;
 
-	$currentVersion = 12;
+	$currentVersion = 13;
 	$installedVersion = intval(get_option('xfac_version'));
 
 	$tblAuth = xfac_getTableAuth();
@@ -77,9 +77,10 @@ function xfac_install()
 		update_option('xfac_sync_post_wp_xf_link', 1);
 	}
 
-	if ($installedVersion < 12)
+	if ($installedVersion < 13)
 	{
 		update_option('xfac_sync_role', array(
+			'administrator' => -1,
 			'editor' => 4,
 			'subscriber' => 2,
 		));

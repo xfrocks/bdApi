@@ -364,6 +364,17 @@ function xfac_syncLogin_syncRole($config, WP_User $wpUser, array $xfUser, $xfToW
 			}
 		}
 
+		foreach ($currentRoles as $currentRole)
+		{
+			if (isset($syncRoleOption[$currentRole]) AND $syncRoleOption[$currentRole] == -1)
+			{
+				// put do not sync roles into target roles directly
+				// if the current role is high level, it will be kept
+				// otherwise user level will just go up
+				$targetRoles[] = $currentRole;
+			}
+		}
+
 		if (!empty($currentRoles) AND !empty($targetRoles))
 		{
 			// TODO: improve this
