@@ -144,9 +144,9 @@ class bdApi_Model_Subscription extends XenForo_Model
 		{
 			case self::TYPE_NOTIFICATION:
 				return $this->_preparePingDataManyNotification($pingDataMany);
-			case  self::TYPE_THREAD_POST:
+			case self::TYPE_THREAD_POST:
 				return $this->_preparePingDataManyPost($pingDataMany);
-			case  self::TYPE_USER:
+			case self::TYPE_USER:
 				return $this->_preparePingDataManyUser($pingDataMany);
 		}
 
@@ -229,7 +229,7 @@ class bdApi_Model_Subscription extends XenForo_Model
 		// TODO: do anything here?
 		return $pingDataMany;
 	}
-	
+
 	protected function _preparePingDataManyUser($pingDataMany)
 	{
 		// TODO: do anything here?

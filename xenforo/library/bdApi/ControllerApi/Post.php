@@ -37,6 +37,19 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			$pageNavParams['limit'] = $inputLimit;
 		}
 
+		if (empty($page))
+		{
+			$pageOfPostId = $this->_input->filterSingle('page_of_post_id', XenForo_Input::UINT);
+			if (!empty($pageOfPostId))
+			{
+				$pageOfPost = $this->_getPostModel()->getPostById($pageOfPostId);
+				if (!empty($pageOfPost) AND $pageOfPost['thread_id'] == $thread['thread_id'])
+				{
+					$page = floor($pageOfPost['position'] / $limit) + 1;
+				}
+			}
+		}
+
 		$fetchOptions = array(
 			'deleted' => false,
 			'moderated' => false,

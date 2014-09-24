@@ -547,6 +547,7 @@ Parameters:
  * `page` (_optional_): page number of posts.
  * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.
  * `order` (_optional_, since forum-2013122401): ordering of posts. Support `natural`, `natural_reverse`.
+ * `page_of_post_id` (_optional_, since forum-2014092401): id of a post, the page number that contains the specified post will be used.
 
 Required scopes:
 
@@ -865,7 +866,7 @@ Detail information of a user.
             *user_custom_fields: { // since forum-2013110601
                 field_id: (field_value),
                 ...
-            }
+            },
             *user_groups: [ // since forum-2014092301
                 {
                     user_group_id: (int),
@@ -873,7 +874,7 @@ Detail information of a user.
                     is_primary_group: (boolean)
                 },
                 ...
-            ]
+            ],
             links: {
                 permalink: (uri),
                 detail: (uri),

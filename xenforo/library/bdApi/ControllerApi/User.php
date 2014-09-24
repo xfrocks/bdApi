@@ -161,6 +161,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 		$user = $userModel->getUserById($user['user_id'], $userModel->getFetchOptionsToPrepareApiData());
 		$data = array(
 			'user' => $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user)),
+			'_user' => $user,
 			'token' => $token,
 		);
 
