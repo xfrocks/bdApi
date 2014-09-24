@@ -115,6 +115,11 @@ class bdApi_OAuth2 extends OAuth2
 			'refresh_token_lifetime' => bdApi_Option::get('refreshTokenTTLDays') * 86400,
 		));
 
+		if (XenForo_Application::debugMode())
+		{
+			$this->setVariable('display_error', true);
+		}
+
 		$this->_model = $model;
 	}
 
