@@ -18,65 +18,111 @@ function xfac_options_init()
 		}
 	}
 
+	// prepare common data
 	$config = xfac_option_getConfig();
-	$hourlyNext = wp_next_scheduled('xfac_cron_hourly');
-	
-	$syncRoleOption = get_option('xfac_sync_role');
-	if (!is_array($syncRoleOption))
-	{
-		$syncRoleOption = array();
-	}
-
-	$xfGuestRecords = xfac_user_getRecordsByUserId(0);
-
-	$currentWpUser = wp_get_current_user();
-	$xfAdminRecords = xfac_user_getRecordsByUserId($currentWpUser->ID);
-	$configuredAdminRecord = null;
-
-	$xfAdminAccountOption = intval(get_option('xfac_xf_admin_account'));
-	if ($xfAdminAccountOption > 0)
-	{
-		$configuredAdminRecord = xfac_user_getRecordById($xfAdminAccountOption);
-		if (!empty($record))
-		{
-			foreach ($xfAdminRecords as $xfAdminRecord)
-			{
-				if ($xfAdminRecord->id == $configuredAdminRecord->id)
-				{
-					$found = true;
-				}
-			}
-			if (!$found)
-			{
-				$xfAdminRecords[] = $configuredAdminRecord;
-			}
-		}
-	}
-
-	$tagForumMappings = get_option('xfac_tag_forum_mappings');
-	if (!is_array($tagForumMappings))
-	{
-		$tagForumMappings = array();
-	}
-
-	$optionTopBarForums = get_option('xfac_top_bar_forums');
-	if (!is_array($optionTopBarForums))
-	{
-		$optionTopBarForums = array();
-	}
-
-	$tags = get_terms('post_tag', array('hide_empty' => false));
-	$forums = array();
 	$meta = array();
-
 	if (!empty($config))
 	{
 		$meta = xfac_option_getMeta($config);
+	}
 
-		if (!empty($meta['forums']))
+	// setup sections
+	$sections = array( array(
+			'id' => 'xfac_api',
+			'title' => __('API Configuration', 'xenforo-api-consumer'),
+		));
+	if (!empty($meta['linkIndex']))
+	{
+		$sections = array_merge($sections, array(
+			array(
+				'id' => 'xfac_post_comment',
+				'title' => __('Post & Comment', 'xenforo-api-consumer'),
+			),
+			array(
+				'id' => 'xfac_user_role',
+				'title' => __('User & Role', 'xenforo-api-consumer'),
+			),
+			array(
+				'id' => 'xfac_ui',
+				'title' => __('Appearances', 'xenforo-api-consumer'),
+			),
+		));
+	}
+	
+	// setup tabs
+	if (!empty($_REQUEST['tab']))
+	{
+		$tab = 'xfac_' . $_GET['tab'];
+	}
+	$sectionFound = false;
+	foreach ($sections as $section)
+	{
+		if ($section['id'] === $tab)
 		{
-			$forums = $meta['forums'];
+			$sectionFound = true;
 		}
+	}
+	if (!$sectionFound)
+	{
+		$firstSection = reset($sections);
+		$tab = $firstSection['id'];
+	}
+
+	// prepare section's data
+	switch ($tab)
+	{
+		case 'xfac_api':
+			$xfGuestRecords = xfac_user_getRecordsByUserId(0);
+
+			$currentWpUser = wp_get_current_user();
+			$xfAdminRecords = xfac_user_getRecordsByUserId($currentWpUser->ID);
+			$configuredAdminRecord = null;
+
+			$xfAdminAccountOption = intval(get_option('xfac_xf_admin_account'));
+			if ($xfAdminAccountOption > 0)
+			{
+				$configuredAdminRecord = xfac_user_getRecordById($xfAdminAccountOption);
+				if (!empty($record))
+				{
+					foreach ($xfAdminRecords as $xfAdminRecord)
+					{
+						if ($xfAdminRecord->id == $configuredAdminRecord->id)
+						{
+							$found = true;
+						}
+					}
+					if (!$found)
+					{
+						$xfAdminRecords[] = $configuredAdminRecord;
+					}
+				}
+			}
+			break;
+		case 'xfac_post_comment':
+			$hourlyNext = wp_next_scheduled('xfac_cron_hourly');
+
+			$tagForumMappings = get_option('xfac_tag_forum_mappings');
+			if (!is_array($tagForumMappings))
+			{
+				$tagForumMappings = array();
+			}
+
+			$tags = get_terms('post_tag', array('hide_empty' => false));
+			break;
+		case 'xfac_user_role':
+			$syncRoleOption = get_option('xfac_sync_role');
+			if (!is_array($syncRoleOption))
+			{
+				$syncRoleOption = array();
+			}
+			break;
+		case 'xfac_ui':
+			$optionTopBarForums = get_option('xfac_top_bar_forums');
+			if (!is_array($optionTopBarForums))
+			{
+				$optionTopBarForums = array();
+			}
+			break;
 	}
 
 	require (xfac_template_locateTemplate('dashboard_options.php'));

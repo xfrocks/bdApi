@@ -43,6 +43,11 @@ function xfac_api_getVersionSuggestionText($config, $meta)
 		'subscription' => 2014092301,
 	);
 
+	if (empty($config))
+	{
+		return __('Enter API credentials to start using the plugin.', 'xenforo-api-consumer');
+	}
+
 	if (empty($meta['modules']))
 	{
 		return __('Unable to determine API version.', 'xenforo-api-consumer');

@@ -10,42 +10,42 @@ function xfac_admin_init()
 {
 	if (xfac_option_getWorkingMode() === 'blog')
 	{
-		register_setting('xfac-settings', 'xfac_root');
-		register_setting('xfac-settings', 'xfac_client_id');
-		register_setting('xfac-settings', 'xfac_client_secret');
+		register_setting('xfac_api', 'xfac_root');
+		register_setting('xfac_api', 'xfac_client_id');
+		register_setting('xfac_api', 'xfac_client_secret');
 	}
 
 	$config = xfac_option_getConfig();
 	$meta = xfac_option_getMeta($config);
 	if (!empty($meta['linkIndex']))
 	{
-		register_setting('xfac-settings', 'xfac_tag_forum_mappings');
-		register_setting('xfac-settings', 'xfac_sync_post_wp_xf');
-		register_setting('xfac-settings', 'xfac_sync_post_wp_xf_excerpt');
-		register_setting('xfac-settings', 'xfac_sync_post_wp_xf_link');
-		register_setting('xfac-settings', 'xfac_sync_post_xf_wp');
-		register_setting('xfac-settings', 'xfac_sync_post_xf_wp_publish');
-		register_setting('xfac-settings', 'xfac_sync_comment_wp_xf');
-		register_setting('xfac-settings', 'xfac_sync_comment_wp_xf_as_guest');
-		register_setting('xfac-settings', 'xfac_sync_comment_xf_wp');
-		register_setting('xfac-settings', 'xfac_sync_comment_xf_wp_as_guest');
-		register_setting('xfac-settings', 'xfac_sync_avatar_xf_wp');
+		register_setting('xfac_post_comment', 'xfac_tag_forum_mappings');
+		register_setting('xfac_post_comment', 'xfac_sync_post_wp_xf');
+		register_setting('xfac_post_comment', 'xfac_sync_post_wp_xf_excerpt');
+		register_setting('xfac_post_comment', 'xfac_sync_post_wp_xf_link');
+		register_setting('xfac_post_comment', 'xfac_sync_post_xf_wp');
+		register_setting('xfac_post_comment', 'xfac_sync_post_xf_wp_publish');
+		register_setting('xfac_post_comment', 'xfac_sync_comment_wp_xf');
+		register_setting('xfac_post_comment', 'xfac_sync_comment_wp_xf_as_guest');
+		register_setting('xfac_post_comment', 'xfac_sync_comment_xf_wp');
+		register_setting('xfac_post_comment', 'xfac_sync_comment_xf_wp_as_guest');
+		register_setting('xfac_post_comment', 'xfac_sync_avatar_xf_wp');
 
-		register_setting('xfac-settings', 'xfac_bypass_users_can_register');
-		register_setting('xfac-settings', 'xfac_sync_password');
-		register_setting('xfac-settings', 'xfac_sync_login');
-		register_setting('xfac-settings', 'xfac_sync_user_wp_xf');
-		register_setting('xfac-settings', 'xfac_sync_role');
-		register_setting('xfac-settings', 'xfac_sync_role_wp_xf');
+		register_setting('xfac_user_role', 'xfac_bypass_users_can_register');
+		register_setting('xfac_user_role', 'xfac_sync_password');
+		register_setting('xfac_user_role', 'xfac_sync_login');
+		register_setting('xfac_user_role', 'xfac_sync_user_wp_xf');
+		register_setting('xfac_user_role', 'xfac_sync_role');
+		register_setting('xfac_user_role', 'xfac_sync_role_wp_xf');
 
-		register_setting('xfac-settings', 'xfac_top_bar_forums');
-		register_setting('xfac-settings', 'xfac_top_bar_notifications');
-		register_setting('xfac-settings', 'xfac_top_bar_conversations');
-		register_setting('xfac-settings', 'xfac_top_bar_replace');
-		register_setting('xfac-settings', 'xfac_top_bar_always');
+		register_setting('xfac_ui', 'xfac_top_bar_forums');
+		register_setting('xfac_ui', 'xfac_top_bar_notifications');
+		register_setting('xfac_ui', 'xfac_top_bar_conversations');
+		register_setting('xfac_ui', 'xfac_top_bar_replace');
+		register_setting('xfac_ui', 'xfac_top_bar_always');
 
-		register_setting('xfac-settings', 'xfac_xf_guest_account');
-		register_setting('xfac-settings', 'xfac_xf_admin_account');
+		register_setting('xfac_api', 'xfac_xf_guest_account');
+		register_setting('xfac_api', 'xfac_xf_admin_account');
 	}
 }
 

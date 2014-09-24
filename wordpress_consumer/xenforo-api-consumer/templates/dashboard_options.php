@@ -6,15 +6,34 @@ if (!defined('ABSPATH'))
 	exit();
 }
 
-function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagForumMapping)
+function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForumMapping)
 {
-	// generate fake forum in case we lost connection
-	if (empty($forums) AND !empty($tagForumMapping['forum_id']))
+	$forums = array();
+	if (!empty($meta['forums']))
 	{
-		$forums = array(array(
-			'forum_id' => $tagForumMapping['forum_id'],
-			'forum_title' => '#' . $tagForumMapping['forum_id'],
-		));
+		$forums = $meta['forums'];
+	}
+	
+	// generate fake forum in case we lost connection
+	if (!empty($tagForumMapping['forum_id']))
+	{
+		$found = false;
+
+		foreach ($forums as $forum)
+		{
+			if ($forum['forum_id'] == $tagForumMapping['forum_id'])
+			{
+				$found = true;
+			}
+		}
+
+		if (!$found)
+		{
+			$forums[] = array(
+				'forum_id' => $tagForumMapping['forum_id'],
+				'forum_title' => '#' . $tagForumMapping['forum_id'],
+			);
+		}
 	}
 ?>
 
@@ -40,18 +59,21 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 }
 ?>
 
-<style>
-	#xfacDashboardOptions fieldset label { margin-top: 1em !important; margin-bottom: 0 !important; }
-</style>
 <div class="wrap">
-	<div id="icon-options-general" class="icon32">
-		<br />
-	</div><h2><?php _e('XenForo API Consumer', 'xenforo-api-consumer'); ?></h2>
+	<h2 class="nav-tab-wrapper">
+		<?php foreach ($sections as $section): ?>
+			<a href="<?php echo admin_url('options-general.php?page=xfac&tab=' . substr($section['id'], 5)); ?>" class="nav-tab<?php if ($tab == $section['id']) echo ' nav-tab-active'; ?>">
+				<?php echo $section['title']; ?>
+			</a>
+		<?php endforeach; ?>
+	</h2>
 
-	<form method="post" action="options.php" id="xfacDashboardOptions">
-		<?php settings_fields('xfac'); ?>
+	<form method="post" action="options.php">
+		<?php settings_fields($tab); ?>
 
 		<table class="form-table">
+			
+			<?php if ($tab == 'xfac_api'): ?>
 			<?php if (xfac_option_getWorkingMode() === 'network'): ?>
 			<tr valign="top">
 				<th scope="row"><label for="xfac_root"><?php _e('API Root', 'xenforo-api-consumer'); ?></label></th>
@@ -81,15 +103,13 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 				</td>
 			</tr>
 			<?php endif; ?>
+			<?php endif; ?>
 
 			<?php if (!empty($meta['linkIndex'])): ?>
+			<?php if ($tab == 'xfac_post_comment'): ?>
 			<tr valign="top">
 				<th scope="row">
-					<?php _e('Synchronization', 'xenforo-api-consumer'); ?><br />
-					
-					<?php _e('Next Run', 'xenforo-api-consumer'); ?>:
-					<?php echo date_i18n('H:i', $hourlyNext + get_option('gmt_offset') * HOUR_IN_SECONDS); ?>
-					(<a href="options-general.php?page=xfac&cron=hourly"><?php _e('Sync Now', 'xenforo-api-consumer'); ?></a>)
+					<?php _e('Post Sync', 'xenforo-api-consumer'); ?>
 				</th>
 				<td>
 					<fieldset>
@@ -139,7 +159,14 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 							<p class="description"><?php _e('Publish sync\'d WordPress post immediately.', 'xenforo-api-consumer'); ?></p>
 						</div>
 					</fieldset>
+				</td>
+			</tr>
 
+			<tr valign="top">
+				<th scope="row">
+					<?php _e('Comment Sync', 'xenforo-api-consumer'); ?>
+				</th>
+				<td>
 					<fieldset>
 						<label for="xfac_sync_comment_wp_xf">
 							<input name="xfac_sync_comment_wp_xf" type="checkbox" id="xfac_sync_comment_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_comment_wp_xf')); ?> />
@@ -177,7 +204,27 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 								. 'create the comment as a guest comment.', 'xenforo-api-consumer'); ?></p>
 						</div>
 					</fieldset>
+				</td>
+			</tr>
 
+			<tr valign="top">
+				<th scope="row">
+					<?php _e('Synchronization', 'xenforo-api-consumer'); ?><br />
+				</th>
+				<td>
+					<?php _e('Next Run', 'xenforo-api-consumer'); ?>:
+					<?php echo date_i18n('H:i', $hourlyNext + get_option('gmt_offset') * HOUR_IN_SECONDS); ?>
+					(<a href="options-general.php?page=xfac&cron=hourly"><?php _e('Sync Now', 'xenforo-api-consumer'); ?></a>)
+				</td>
+			</tr>
+			<?php endif; ?>
+
+			<?php if ($tab == 'xfac_user_role'): ?>
+			<tr valign="top">
+				<th scope="row">
+					<?php _e('User Sync', 'xenforo-api-consumer'); ?>
+				</th>
+				<td>
 					<fieldset>
 						<label for="xfac_sync_avatar_xf_wp">
 							<input name="xfac_sync_avatar_xf_wp" type="checkbox" id="xfac_sync_avatar_xf_wp" value="1" <?php checked('1', get_option('xfac_sync_avatar_xf_wp')); ?> />
@@ -185,31 +232,40 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 						</label>
 						<p class="description"><?php _e('Use avatar URL provided by XenForo as WordPress user avatar.', 'xenforo-api-consumer'); ?></p>
 					</fieldset>
+				</td>
+			</tr>
 
+			<tr valign="top">
+				<th scope="row">
+					<?php _e('Cookie Sync', 'xenforo-api-consumer'); ?><br />
+				</th>
+				<td>
 					<fieldset>
-						<br />
-						<p><strong><?php _e('User Authentication', 'xenforo-api-consumer'); ?></strong></p>
-
-						<div style="margin-left: 20px;">
 							<label for="xfac_bypass_users_can_register">
 								<input name="xfac_bypass_users_can_register" type="checkbox" id="xfac_bypass_users_can_register" value="1" <?php checked('1', get_option('xfac_bypass_users_can_register')); ?> />
 								<?php _e('Always create new WordPress account', 'xenforo-api-consumer'); ?>
 							</label>
 							<p class="description"><?php _e('Bypass WordPress option "Anyone can register" when creating WordPress account for XenForo user.', 'xenforo-api-consumer'); ?></p>
+					</fieldset>
 
+					<fieldset>
 							<label for="xfac_sync_password">
 								<input name="xfac_sync_password" type="checkbox" id="xfac_sync_password" value="1" <?php checked('1', get_option('xfac_sync_password')); ?> />
 								<?php _e('Accept XenForo login credentials', 'xenforo-api-consumer'); ?>
 							</label>
 							<p class="description"><?php _e('Allow user to enter XenForo username and password into WordPress login form.', 'xenforo-api-consumer'); ?></p>
+					</fieldset>
 
+					<fieldset>
 							<label for="xfac_sync_login">
 								<input name="xfac_sync_login" type="checkbox" id="xfac_sync_login" value="1" <?php checked('1', get_option('xfac_sync_login')); ?> />
 								<?php _e('Sync logged-in cookie', 'xenforo-api-consumer'); ?>
 							</label>
 							<p class="description"><?php _e('Use JavaScript to detect XenForo logged-in status and let user login to WordPress automatically. '
 								. 'If user logs into WordPress first, try to regsiter XenForo logged-in status.', 'xenforo-api-consumer'); ?></p>
+					</fieldset>
 
+					<fieldset>
 							<label for="xfac_sync_user_wp_xf">
 								<input name="xfac_sync_user_wp_xf" type="checkbox" id="xfac_sync_user_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_user_wp_xf')); ?> />
 								<?php _e('Create XenForo account for WordPress user', 'xenforo-api-consumer'); ?>
@@ -217,7 +273,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 							<p class="description">
 								<?php _e('Try to create XenForo account for WordPress user if he/she has\'t have a XenForo account yet. '
 									. 'This is done everytime user logs into WordPress using a WordPress credential.', 'xenforo-api-consumer'); ?>
-
+		
 								<?php if (isset($meta['modules']['oauth2']) AND $meta['modules']['oauth2'] < 2014030701): ?>
 									<span style="color: red"><?php echo sprintf(
 										__('This feature requires %s-%s, it will not work until API server is updated.', 'xenforo-api-consumer'),
@@ -226,14 +282,16 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 									); ?></span>
 								<?php endif; ?> 
 							</p>
-						</div>
 					</fieldset>
+				</td>
+			</tr>
 
-					<?php if (!empty($meta['userGroups'])): ?>
-						<fieldset>
-							<p><strong><?php _e('Roles Synchronization', 'xenforo-api-consumer'); ?></strong></p>
-							
-							<div style="margin-left: 20px;">
+			<?php if (!empty($meta['userGroups'])): ?>
+			<tr valign="top">
+				<th scope="row">
+					<?php _e('Role / Group Mapping', 'xenforo-api-consumer'); ?><br />
+				</th>
+				<td>
 								<table cellspacing="0" cellpadding="0" style-"border-spacing: 0">
 									<tbody>
 										<?php foreach(get_editable_roles() as $roleName => $roleInfo): ?>
@@ -262,23 +320,28 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 								<p class="description"><?php _e('Users who come from XenForo will have their WordPress roles setup as configured in this table. ' .
 									'The roles are checked from the highest level down to the lowest so user will have one role that fits best to their user groups. ' .
 									'Choose "Do not sync" for roles that need to be ignored by the sync logic (WordPress accounts with these roles will be protected from changing).', 'xenforo-api-consumer'); ?></p>
-								
+				</td>
+			</tr>
+
+			<tr valign="top">
+				<th scope="row">&nbsp;</th>
+				<td>
 								<label for="xfac_sync_role_wp_xf">
 									<input name="xfac_sync_role_wp_xf" type="checkbox" id="xfac_sync_role_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_role_wp_xf')); ?> />
 									<?php _e('Role from WordPress to XenForo', 'xenforo-api-consumer'); ?>
 								</label>
 								<p class="description"><?php _e('Update XenForo user groups when WordPress roles are changed.', 'xenforo-api-consumer'); ?></p>
-							</div>
-						</fieldset>
-					<?php else: ?>
+				</td>
+			</tr>
+			<?php else: ?>
 						<?php foreach($syncRoleOption as $roleName => $userGroupId): ?>
 							<input type="hidden" name="xfac_sync_role[<?php echo $roleName; ?>]" value="<?php echo $userGroupId; ?>" />
 						<?php endforeach; ?>
 						<input type="hidden" name="xfac_sync_role_wp_xf" value="<?php echo get_option('xfac_sync_role_wp_xf'); ?>" />
-					<?php endif; ?>
-				</td>
-			</tr>
+			<?php endif; ?>
+			<?php endif; ?>
 
+			<?php if ($tab == 'xfac_ui'): ?>
 			<tr valign="top">
 				<th scope="row">
 					<?php _e('Top Bar', 'xenforo-api-consumer'); ?>
@@ -291,9 +354,9 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 						</label>
 						<p class="description"><?php _e('Show XenForo index link in Top Bar. XenForo forums can be chosen to show as submenu items below.', 'xenforo-api-consumer'); ?></p>
 
-						<?php if (!empty($forums)): ?>
+						<?php if (!empty($meta['forums'])): ?>
 							<div style="margin-left: 20px;">
-								<?php foreach ($forums as $forum): ?>
+								<?php foreach ($meta['forums'] as $forum): ?>
 									<label for="xfac_top_bar_forums_<?php echo $forum['forum_id']; ?>">
 										<input name="xfac_top_bar_forums[]" type="checkbox" id="xfac_top_bar_forums_<?php echo $forum['forum_id']; ?>" value="<?php echo $forum['forum_id']; ?>" <?php checked(true, in_array($forum['forum_id'], $optionTopBarForums)); ?> />
 										<?php echo $forum['forum_title']; ?>
@@ -334,7 +397,9 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 					</fieldset>
 				</td>
 			</tr>
+			<?php endif; ?>
 
+			<?php if ($tab == 'xfac_api'): ?>
 			<tr valign="top">
 				<th scope="row">
 					<?php _e('XenForo Guest Account', 'xenforo-api-consumer'); ?>
@@ -401,7 +466,9 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 					</p>
 				</td>
 			</tr>
+			<?php endif; ?>
 
+			<?php if ($tab == 'xfac_post_comment'): ?>
 			<tr valign="top">
 				<th scope="row"><label for="xfac_tag_forum_mappings"><?php _e('Tag / Forum Mappings', 'xenforo-api-consumer'); ?></label></th>
 				<td>
@@ -415,33 +482,30 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 							continue;
 						}
 
-						_xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagForumMapping);
+						_xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForumMapping);
 					}
 
 					if (empty($tags))
 					{
 						_e('No WordPress tags found', 'xenforo-api-consumer');
 					}
-					elseif (empty($forums))
+					elseif (empty($meta['forums']))
 					{
 						_e('No XenForo forums found', 'xenforo-api-consumer');
 					}
 					else
 					{
-						_xfac_dashboardOptions_renderTagForumMapping($tags, $forums, ++$i, null);
+						_xfac_dashboardOptions_renderTagForumMapping($tags, $meta, ++$i, null);
 					}
 					?>
 				</td>
 			</tr>
 			<?php endif; ?>
+			<?php endif; ?>
 
 		</table>
 
-		<p class="submit">
-			<input type="submit" name="submit" id="submit" class="button button-primary" value="<?php _e('Save Changes'); ?>"  />
-
-			<a href="<?php echo admin_url('options-general.php?page=xfac&do=xfac_meta'); ?>"><?php _e('Reload System Info', 'xenforo-api-consumer'); ?></a>
-		</p>
+		<?php submit_button(); ?>
 	</form>
 
 </div>
