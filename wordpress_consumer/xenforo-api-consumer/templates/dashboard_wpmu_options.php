@@ -14,7 +14,7 @@ if (!defined('ABSPATH'))
 		<th scope="row"><label for="xfac_client_id"><?php _e('API Key', 'xenforo-api-consumer'); ?></label></th>
 		<td>
 			<input name="xfac_root" type="hidden" id="xfac_root" value="<?php echo esc_attr(XFAC_LIGHTPULL_ROOT); ?>" />
-		<input name="xfac_client_id" type="text" id="xfac_client_id" value="<?php echo esc_attr($config['clientId']); ?>" class="regular-text" />
+			<input name="xfac_client_id" type="text" id="xfac_client_id" value="<?php echo esc_attr($config['clientId']); ?>" class="regular-text" />
 		</td>
 	</tr>
 	<tr valign="top">
@@ -23,15 +23,4 @@ if (!defined('ABSPATH'))
 		<input name="xfac_client_secret" type="text" id="xfac_client_secret" value="<?php echo esc_attr($config['clientSecret']); ?>" class="regular-text" />
 		</td>
 	</tr>
-	
-	<?php if (!empty($meta['linkIndex'])): ?>
-	<tr valign="top">
-		<th scope="row">&nbsp;</th>
-		<td>
-			<?php _e('Successfully connected to Lightpull', 'xenforo-api-consumer'); ?>
-
-			<p><?php echo xfac_api_getVersionSuggestionText($config, $meta); ?></p>
-		</td>
-	</tr>
-	<?php endif; ?>
 </table>

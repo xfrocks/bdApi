@@ -44,7 +44,7 @@ function xfac_lightpull_admin_init()
 	}
 
 	$clients = xfac_lightpull_api_getClients($config, $token['access_token']);
-	$updatedOptions = false;
+	$foundClient = null;
 
 	if (!empty($clients['clients']))
 	{
@@ -52,23 +52,33 @@ function xfac_lightpull_admin_init()
 		{
 			if ($existingClient['redirect_uri'] == home_url())
 			{
-				update_option('xfac_root', $config['root']);
-				update_option('xfac_client_id', $existingClient['client_id']);
-				update_option('xfac_client_secret', $existingClient['client_secret']);
-				$updatedOptions = true;
+				$foundClient = $existingClient;
 			}
 		}
 	}
 
-	if (!$updatedOptions AND !empty($clients['can_create_client']))
+	if (empty($foundClient) AND !empty($clients['can_create_client']))
 	{
 		$newClient = xfac_lightpull_api_postClients($config, $token['access_token'], get_option('blogname'), get_option('blogdescription'), home_url());
 		if (!empty($newClient['client']))
 		{
+			$foundClient = $newClient['client'];
+		}
+	}
+
+	if (!empty($foundClient))
+	{
+		if (xfac_option_getWorkingMode() == 'network')
+		{
+			update_site_option('xfac_root', $config['root']);
+			update_site_option('xfac_client_id', $foundClient['client_id']);
+			update_site_option('xfac_client_secret', $foundClient['client_secret']);
+		}
+		else
+		{
 			update_option('xfac_root', $config['root']);
-			update_option('xfac_client_id', $newClient['client']['client_id']);
-			update_option('xfac_client_secret', $newClient['client']['client_secret']);
-			$updatedOptions = true;
+			update_option('xfac_client_id', $foundClient['client_id']);
+			update_option('xfac_client_secret', $foundClient['client_secret']);
 		}
 	}
 
