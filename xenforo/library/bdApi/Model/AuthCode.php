@@ -20,11 +20,11 @@ class bdApi_Model_AuthCode extends XenForo_Model
 				AND expire_date < ?
 		', array(XenForo_Application::$time));
 	}
-	
+
 	public function getAuthCodeByText($authCodeText, array $fetchOptions = array())
 	{
 		$authCodes = $this->getAuthCodes(array('auth_code_text' => $authCodeText), $fetchOptions);
-		
+
 		return reset($authCodes);
 	}
 
@@ -32,22 +32,22 @@ class bdApi_Model_AuthCode extends XenForo_Model
 	{
 		$authCodes = $this->getAuthCodes($conditions, $fetchOptions);
 		$list = array();
-		
+
 		foreach ($authCodes as $authCodeId => $authCode)
 		{
 			$list[$authCodeId] = $authCode['auth_code_text'];
 		}
-		
+
 		return $list;
 	}
 
 	public function getAuthCodeById($authCodeId, array $fetchOptions = array())
 	{
-		$data = $this->getAuthCodes(array ('auth_code_id' => $authCodeId), $fetchOptions);
-		
+		$data = $this->getAuthCodes(array('auth_code_id' => $authCodeId), $fetchOptions);
+
 		return reset($data);
 	}
-	
+
 	public function getAuthCodes(array $conditions = array(), array $fetchOptions = array())
 	{
 		$whereConditions = $this->prepareAuthCodeConditions($conditions, $fetchOptions);
@@ -63,12 +63,11 @@ class bdApi_Model_AuthCode extends XenForo_Model
 					$joinOptions[joinTables]
 				WHERE $whereConditions
 					$orderClause
-			", $limitOptions['limit'], $limitOptions['offset']
-		), 'auth_code_id');
+			", $limitOptions['limit'], $limitOptions['offset']), 'auth_code_id');
 
 		return $all;
 	}
-		
+
 	public function countAuthCodes(array $conditions = array(), array $fetchOptions = array())
 	{
 		$whereConditions = $this->prepareAuthCodeConditions($conditions, $fetchOptions);
@@ -84,16 +83,17 @@ class bdApi_Model_AuthCode extends XenForo_Model
 			WHERE $whereConditions
 		");
 	}
-	
+
 	public function prepareAuthCodeConditions(array $conditions, array &$fetchOptions)
 	{
 		$sqlConditions = array();
 		$db = $this->_getDb();
-		
+
 		foreach (array('auth_code_id', 'client_id', 'expire_date', 'user_id') as $columnName)
 		{
-			if (!isset($conditions[$columnName])) continue;
-			
+			if (!isset($conditions[$columnName]))
+				continue;
+
 			if (is_array($conditions[$columnName]))
 			{
 				if (!empty($conditions[$columnName]))
@@ -107,20 +107,20 @@ class bdApi_Model_AuthCode extends XenForo_Model
 				$sqlConditions[] = "auth_code.$columnName = " . $db->quote($conditions[$columnName]);
 			}
 		}
-		
+
 		if (isset($conditions['auth_code_text']))
 		{
 			$sqlConditions[] = 'auth_code.auth_code_text = ' . $this->_getDb()->quote($conditions['auth_code_text']);
 		}
-		
+
 		return $this->getConditionsForClause($sqlConditions);
 	}
-	
+
 	public function prepareAuthCodeFetchOptions(array $fetchOptions)
 	{
 		$selectFields = '';
 		$joinTables = '';
-		
+
 		if (!empty($fetchOptions['join']))
 		{
 			if ($fetchOptions['join'] & self::FETCH_CLIENT)
@@ -133,7 +133,7 @@ class bdApi_Model_AuthCode extends XenForo_Model
 					LEFT JOIN `xf_bdapi_client` AS client
 					ON (client.client_id = auth_code.client_id)';
 			}
-			
+
 			if ($fetchOptions['join'] & self::FETCH_USER)
 			{
 				$selectFields .= '
@@ -143,19 +143,18 @@ class bdApi_Model_AuthCode extends XenForo_Model
 					ON (user.user_id = auth_code.user_id)';
 			}
 		}
-		
+
 		return array(
 			'selectFields' => $selectFields,
-			'joinTables'   => $joinTables
+			'joinTables' => $joinTables
 		);
 	}
-	
+
 	public function prepareAuthCodeOrderOptions(array &$fetchOptions, $defaultOrderSql = '')
 	{
-		$choices = array(
-			'issue_date' => 'auth_code.issue_date',
-		);
-		
+		$choices = array('issue_date' => 'auth_code.issue_date');
+
 		return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
 	}
+
 }

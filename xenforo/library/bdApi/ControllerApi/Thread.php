@@ -179,7 +179,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		}
 
 		// the routine is very similar to XenForo_ControllerPublic_Forum::actionAddThread
-		$input = $this->_input->filter(array('thread_title' => XenForo_Input::STRING, ));
+		$input = $this->_input->filter(array('thread_title' => XenForo_Input::STRING));
 		$input['post_body'] = $this->getHelper('Editor')->getMessageText('post_body', $this->_input);
 		$input['post_body'] = XenForo_Helper_String::autoLinkBbCode($input['post_body']);
 
@@ -234,7 +234,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
 
 		$deleteType = 'soft';
-		$options = array('reason' => '[bd] API', );
+		$options = array('reason' => '[bd] API');
 
 		if (!$this->_getThreadModel()->canDeleteThread($thread, $forum, $deleteType, $errorPhraseKey))
 		{
@@ -403,7 +403,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 		$forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
 		if (empty($forumId))
 		{
-			$threadIds = $threadModel->getUnreadThreadIds($visitor->get('user_id'), array('limit' => $maxResults, ));
+			$threadIds = $threadModel->getUnreadThreadIds($visitor->get('user_id'), array('limit' => $maxResults));
 		}
 		else
 		{
@@ -411,7 +411,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 			$forum = $this->getHelper('ForumThreadPost')->assertForumValidAndViewable($forumId);
 			$childNodeIds = array_keys($this->getModelFromCache('XenForo_Model_Node')->getChildNodesForNodeIds(array($forum['node_id'])));
 
-			$threadIds = $threadModel->bdApi_getUnreadThreadIdsInForum($visitor->get('user_id'), array_merge(array($forum['node_id']), $childNodeIds), array('limit' => $maxResults, ));
+			$threadIds = $threadModel->bdApi_getUnreadThreadIdsInForum($visitor->get('user_id'), array_merge(array($forum['node_id']), $childNodeIds), array('limit' => $maxResults));
 		}
 
 		return $this->_getNewOrRecentResponse($threadIds);
@@ -548,11 +548,11 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
 			if ($threadModel->canViewThreadAndContainer($threadRef, $threadRef, $null, $threadRef['permissions']))
 			{
-				$results[] = array('thread_id' => $threadId, );
+				$results[] = array('thread_id' => $threadId);
 			}
 		}
 
-		$data = array('threads' => $results, );
+		$data = array('threads' => $results);
 
 		return $this->responseData('bdApi_ViewApi_Thread_NewOrRecent', $data);
 	}

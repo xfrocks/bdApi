@@ -77,7 +77,7 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
 			$jobsOutput[$id] = $this->_doJob($fcTemp, $method, $batchJob['uri'], $params);
 		}
 
-		$data = array('jobs' => $jobsOutput, );
+		$data = array('jobs' => $jobsOutput);
 
 		return $this->responseData('bdApi_ViewApi_Batch_Index', $data);
 	}

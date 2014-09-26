@@ -102,7 +102,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			$post = reset($posts);
 		}
 
-		$data = array('post' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum)), );
+		$data = array('post' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum)));
 
 		return $this->responseData('bdApi_ViewApi_Post_Single', $data);
 	}
@@ -281,7 +281,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			}
 		}
 
-		$data = array('users' => $users, );
+		$data = array('users' => $users);
 
 		return $this->responseData('bdApi_ViewApi_Post_Likes', $data);
 	}

@@ -36,10 +36,10 @@ class bdApi_Model_Token extends XenForo_Model
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	public function pruneExpired()
 	{
 		$this->_getDb()->query('
@@ -48,34 +48,34 @@ class bdApi_Model_Token extends XenForo_Model
 				AND expire_date < ?
 		', array(XenForo_Application::$time));
 	}
-	
+
 	public function getTokenByText($tokenText, array $fetchOptions = array())
 	{
 		$tokens = $this->getTokens(array('token_text' => $tokenText), $fetchOptions);
-		
+
 		return reset($tokens);
 	}
-	
+
 	public function getList(array $conditions = array(), array $fetchOptions = array())
 	{
 		$tokens = $this->getTokens($conditions, $fetchOptions);
 		$list = array();
-		
+
 		foreach ($data as $tokenId => $token)
 		{
 			$tokens[$tokenId] = $token['token_text'];
 		}
-		
+
 		return $list;
 	}
 
 	public function getTokenById($tokenId, array $fetchOptions = array())
 	{
-		$data = $this->getTokens(array ('token_id' => $tokenId), $fetchOptions);
-		
+		$data = $this->getTokens(array('token_id' => $tokenId), $fetchOptions);
+
 		return reset($data);
 	}
-	
+
 	public function getTokens(array $conditions = array(), array $fetchOptions = array())
 	{
 		$whereConditions = $this->prepareTokenConditions($conditions, $fetchOptions);
@@ -91,12 +91,11 @@ class bdApi_Model_Token extends XenForo_Model
 					$joinOptions[joinTables]
 				WHERE $whereConditions
 					$orderClause
-			", $limitOptions['limit'], $limitOptions['offset']
-		), 'token_id');
+			", $limitOptions['limit'], $limitOptions['offset']), 'token_id');
 
 		return $all;
 	}
-		
+
 	public function countTokens(array $conditions = array(), array $fetchOptions = array())
 	{
 		$whereConditions = $this->prepareTokenConditions($conditions, $fetchOptions);
@@ -112,15 +111,17 @@ class bdApi_Model_Token extends XenForo_Model
 			WHERE $whereConditions
 		");
 	}
-	
+
 	public function prepareTokenConditions(array $conditions, array &$fetchOptions)
 	{
 		$sqlConditions = array();
 		$db = $this->_getDb();
-		
-		foreach (array('token_id', 'client_id', 'expire_date', 'user_id') as $columnName) {
-			if (!isset($conditions[$columnName])) continue;
-			
+
+		foreach (array('token_id', 'client_id', 'expire_date', 'user_id') as $columnName)
+		{
+			if (!isset($conditions[$columnName]))
+				continue;
+
 			if (is_array($conditions[$columnName]))
 			{
 				if (!empty($conditions[$columnName]))
@@ -134,20 +135,20 @@ class bdApi_Model_Token extends XenForo_Model
 				$sqlConditions[] = "token.$columnName = " . $db->quote($conditions[$columnName]);
 			}
 		}
-		
+
 		if (isset($conditions['token_text']))
 		{
 			$sqlConditions[] = 'token.token_text = ' . $this->_getDb()->quote($conditions['token_text']);
 		}
-		
+
 		return $this->getConditionsForClause($sqlConditions);
 	}
-	
+
 	public function prepareTokenFetchOptions(array $fetchOptions)
 	{
 		$selectFields = '';
 		$joinTables = '';
-		
+
 		if (!empty($fetchOptions['join']))
 		{
 			if ($fetchOptions['join'] & self::FETCH_CLIENT)
@@ -160,7 +161,7 @@ class bdApi_Model_Token extends XenForo_Model
 					LEFT JOIN `xf_bdapi_client` AS client
 					ON (client.client_id = token.client_id)';
 			}
-			
+
 			if ($fetchOptions['join'] & self::FETCH_USER)
 			{
 				$selectFields .= '
@@ -170,19 +171,18 @@ class bdApi_Model_Token extends XenForo_Model
 					ON (user.user_id = token.user_id)';
 			}
 		}
-		
+
 		return array(
 			'selectFields' => $selectFields,
-			'joinTables'   => $joinTables
+			'joinTables' => $joinTables
 		);
 	}
-	
+
 	public function prepareTokenOrderOptions(array &$fetchOptions, $defaultOrderSql = '')
 	{
-		$choices = array(
-			'issue_date' => 'token.issue_date',
-		);
-		
+		$choices = array('issue_date' => 'token.issue_date');
+
 		return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
 	}
+
 }

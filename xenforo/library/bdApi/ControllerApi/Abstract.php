@@ -361,7 +361,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		}
 		elseif ($controllerResponse instanceof XenForo_ControllerResponse_Error)
 		{
-			$responseOutput = array('error' => $controllerResponse->errorText, );
+			$responseOutput = array('error' => $controllerResponse->errorText);
 		}
 		elseif ($controllerResponse instanceof XenForo_ControllerResponse_Exception)
 		{
@@ -369,7 +369,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		}
 		elseif ($controllerResponse instanceof XenForo_ControllerResponse_Message)
 		{
-			$responseOutput = array('message' => $controllerResponse->message, );
+			$responseOutput = array('message' => $controllerResponse->message);
 		}
 		elseif ($controllerResponse instanceof XenForo_ControllerResponse_Reroute)
 		{
