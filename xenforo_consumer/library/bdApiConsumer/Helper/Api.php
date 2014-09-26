@@ -61,18 +61,16 @@ class bdApiConsumer_Helper_Api
 			'client_secret' => $provider['client_secret'],
 			'code' => $code,
 			'redirect_uri' => $redirectUri,
-			'scope' => 'read',
 		));
 	}
 
-	public static function getAccessTokenFromRefreshToken(array $provider, $refreshToken, $scope)
+	public static function getAccessTokenFromRefreshToken(array $provider, $refreshToken)
 	{
 		return self::_post($provider, 'oauth/token/', '', 'access_token', array(
 			'grant_type' => 'refresh_token',
 			'client_id' => $provider['client_id'],
 			'client_secret' => $provider['client_secret'],
 			'refresh_token' => $refreshToken,
-			'scope' => $scope,
 		));
 	}
 
@@ -95,12 +93,19 @@ class bdApiConsumer_Helper_Api
 		return sprintf('%d,%d,%s,%s', $userId, $timestamp, $once, $provider['client_id']);
 	}
 
-	public static function getVisitor(array $provider, $accessToken)
+	public static function getVisitor(array $provider, $accessToken, $autoSubscribe = true)
 	{
 		$json = self::_get($provider, 'users/me/', $accessToken, 'user');
 
 		if (!empty($json['user']))
 		{
+			$json['_headerLinkHub'] = self::_getHeaderLinkHub($json['_headers']);
+
+			if ($autoSubscribe AND empty($parts['subscription_callback']) AND !empty($json['_headerLinkHub']))
+			{
+				self::postSubscription($provider, $accessToken, $json['_headerLinkHub']);
+			}
+
 			return $json['user'];
 		}
 
@@ -115,6 +120,16 @@ class bdApiConsumer_Helper_Api
 	public static function postPasswordResetRequest(array $provider, $accessToken)
 	{
 		return self::_post($provider, 'tools/password-reset-request/', $accessToken, 'status');
+	}
+
+	public static function postSubscription(array $provider, $accessToken, $url)
+	{
+		$json = self::_post($provider, $url, $accessToken, false, array(
+			'hub.callback' => XenForo_Link::buildPublicLink('canonical:misc/api-consumer/callback'),
+			'hub.mode' => 'subscribe',
+		));
+
+		return (!empty($json['_responseStatus']) AND $json['_responseStatus'] == 202);
 	}
 
 	public static function verifyJsSdkSignature(array $provider, array $data, $prefix = '_api_data_')
@@ -150,22 +165,47 @@ class bdApiConsumer_Helper_Api
 
 	protected static function _get(array $provider, $path, $accessToken = false, $expectedKey = false, array $params = array())
 	{
+		return self::_request('GET', $provider, $path, $accessToken, $expectedKey, $params);
+	}
+
+	protected static function _post(array $provider, $path, $accessToken = false, $expectedKey = false, array $params = array())
+	{
+		return self::_request('POST', $provider, $path, $accessToken, $expectedKey, $params);
+	}
+
+	protected static function _request($method, array $provider, $path, $accessToken = false, $expectedKey = false, array $params = array())
+	{
 		try
 		{
-			$uri = call_user_func_array('sprintf', array(
-				'%s/index.php?%s',
-				rtrim($provider['root'], '/'),
-				$path,
-			));
+			if (Zend_Uri::check($path))
+			{
+				$uri = $path;
+			}
+			else
+			{
+				$uri = call_user_func_array('sprintf', array(
+					'%s/index.php?%s',
+					rtrim($provider['root'], '/'),
+					$path,
+				));
+			}
 			$client = XenForo_Helper_Http::getClient($uri);
 
 			if ($accessToken !== false AND !isset($params['oauth_token']))
 			{
 				$params['oauth_token'] = $accessToken;
 			}
-			$client->setParameterGet($params);
 
-			$response = $client->request('GET');
+			if ($method === 'GET')
+			{
+				$client->setParameterGet($params);
+			}
+			else
+			{
+				$client->setParameterPost($params);
+			}
+
+			$response = $client->request($method);
 
 			$body = $response->getBody();
 			$json = @json_decode($body, true);
@@ -179,10 +219,13 @@ class bdApiConsumer_Helper_Api
 			{
 				if (!isset($json[$expectedKey]))
 				{
-					XenForo_Error::logException(sprintf('Key "%s" not found in GET `%s`: %s', $expectedKey, $path, $body), false);
+					XenForo_Error::logException(new XenForo_Exception(sprintf('Key "%s" not found in %s `%s`: %s', $method, $expectedKey, $path, $body)), false);
 					return false;
 				}
 			}
+
+			$json['_headers'] = $response->getHeaders();
+			$json['_responseStatus'] = $response->getStatus();
 
 			return $json;
 		}
@@ -193,49 +236,22 @@ class bdApiConsumer_Helper_Api
 		}
 	}
 
-	protected static function _post(array $provider, $path, $accessToken = false, $expectedKey = false, array $params = array())
+	protected static function _getHeaderLinkHub(array $headers)
 	{
-		try
+		if (empty($headers['Link']))
 		{
-			$uri = call_user_func_array('sprintf', array(
-				'%s/index.php?%s',
-				rtrim($provider['root'], '/'),
-				$path,
-			));
-			$client = XenForo_Helper_Http::getClient($uri);
-
-			if ($accessToken !== false AND !isset($params['oauth_token']))
-			{
-				$params['oauth_token'] = $accessToken;
-			}
-			$client->setParameterPost($params);
-
-			$response = $client->request('POST');
-
-			$body = $response->getBody();
-			$json = @json_decode($body, true);
-
-			if (!is_array($json))
-			{
-				return false;
-			}
-
-			if ($expectedKey !== false)
-			{
-				if (!isset($json[$expectedKey]))
-				{
-					XenForo_Error::logException(new XenForo_Exception(sprintf('Key "%s" not found in GET `%s`: %s', $expectedKey, $path, $body)), false);
-					return false;
-				}
-			}
-
-			return $json;
+			return null;
 		}
-		catch (Zend_Http_Client_Exception $e)
+
+		foreach ($headers['Link'] as $headerLink)
 		{
-			XenForo_Error::logException($e, false);
-			return false;
+			if (preg_match('/<(?<url>[^>]+)>; rel=hub/', $headerLink, $matches))
+			{
+				return $matches['url'];
+			}
 		}
+
+		return null;
 	}
 
 }

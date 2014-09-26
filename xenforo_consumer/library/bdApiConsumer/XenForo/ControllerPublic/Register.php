@@ -195,8 +195,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 		}
 
 		$refreshToken = $this->_input->filterSingle('refresh_token', XenForo_Input::STRING);
-		$scope = $this->_input->filterSingle('scope', XenForo_Input::STRING);
-		$externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromRefreshToken($provider, $refreshToken, $scope);
+		$externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromRefreshToken($provider, $refreshToken);
 		if (empty($externalToken))
 		{
 			return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x', array('provider' => $provider['name'])));

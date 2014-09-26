@@ -40,7 +40,7 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
 		{
 			// expired
 			// note: we are checking against time() here, not XenForo_Application::$time
-			$externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromRefreshToken($provider, $auth['extra_data']['token']['refresh_token'], $auth['extra_data']['token']['scope']);
+			$externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromRefreshToken($provider, $auth['extra_data']['token']['refresh_token']);
 			if (empty($externalToken))
 			{
 				return false;
@@ -103,6 +103,26 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
 			WHERE `user_id` = ?
 				AND `provider` LIKE \'bdapi_%\'
 		', 'provider', array($userId));
+
+		foreach ($externalAuths as &$externalAuth)
+		{
+			$externalAuth['extra_data'] = @unserialize($externalAuth['extra_data']);
+		}
+
+		return $externalAuths;
+	}
+
+	public function bdApiConsumer_getExternalAuthAssociationsForProviderUser($provider, $providerKeys)
+	{
+		$providerCode = $this->bdApiConsumer_getProviderCode($provider);
+
+		$externalAuths = $this->fetchAllKeyed("
+			SELECT *
+			FROM xf_user_external_auth
+			WHERE provider = ?
+				AND provider_key IN (" . $this->_getDb()->quote($providerKeys) . ")
+			ORDER BY provider
+		", 'provider_key', $providerCode);
 
 		foreach ($externalAuths as &$externalAuth)
 		{

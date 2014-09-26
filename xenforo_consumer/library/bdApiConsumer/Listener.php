@@ -11,6 +11,7 @@ class bdApiConsumer_Listener
 			'XenForo_ControllerPublic_Login',
 			'XenForo_ControllerPublic_Logout',
 			'XenForo_ControllerPublic_Member',
+			'XenForo_ControllerPublic_Misc',
 			'XenForo_ControllerPublic_Register',
 			'XenForo_Model_Avatar',
 			'XenForo_Model_User',
