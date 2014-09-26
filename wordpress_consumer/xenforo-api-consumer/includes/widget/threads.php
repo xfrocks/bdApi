@@ -10,7 +10,7 @@ class XFAC_Widget_Threads extends WP_Widget
 {
 	function XFAC_Widget_Threads()
 	{
-		parent::WP_Widget(false, $name = __('XenForo Threads', 'xenforo-api-consumer'));
+		parent::WP_Widget(false, $name = __('Lightpull Threads', 'xenforo-api-consumer'));
 	}
 
 	function form($instance)

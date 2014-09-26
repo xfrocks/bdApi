@@ -27,7 +27,7 @@ function xfac_login_form()
 	$authenticateUrl .= '&redirect_to=' . urlencode($redirectTo);
 
 	$href = esc_url($authenticateUrl);
-	$text = __('Login with XenForo', 'xenforo-api-consumer');
+	$text = __('Login with Lightpull', 'xenforo-api-consumer');
 
 	echo "<div>\n\t<a href=\"$href\">{$text}</a>\n</div>\n";
 }

@@ -1,8 +1,8 @@
 <?php
 /*
- Plugin Name: XenForo API Consumer
+ Plugin Name: Lightpull
  Plugin URI: https://xfrocks.com/api-support/
- Description: Connects to XenForo API system.
+ Description: Connects to Lightpull system.
  Version: 1.1.0-lightpull1
  Author: XFROCKS
  Author URI: https://xfrocks.com
@@ -29,7 +29,7 @@ function xfac_activate()
 	{
 		// requires WordPress v3.0+
 		deactivate_plugins(basename(dirname(__FILE__)) . '/' . basename(__FILE__));
-		wp_die(__("XenForo API Consumer plugin requires WordPress 3.0 or newer.", 'xenforo-api-consumer'));
+		wp_die(__("Lightpull plugin requires WordPress 3.0 or newer.", 'xenforo-api-consumer'));
 	}
 
 	xfac_install();

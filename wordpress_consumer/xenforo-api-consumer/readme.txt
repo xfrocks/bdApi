@@ -1,4 +1,4 @@
-=== XenForo API Consumer ===
+=== Lightpull ===
 Contributors: xfrocks
 Tags: xenforo, api, login, synchronization, sync, post, comment, user
 Requires at least: 3.5
@@ -7,7 +7,7 @@ License: GPLv3
 
 == Description ==
 
-Connects to XenForo API system.
+Connects to Lightpull system.
 
 = Docs & Support =
 

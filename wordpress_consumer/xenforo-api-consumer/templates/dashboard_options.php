@@ -54,31 +54,19 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 <div class="wrap">
 	<div id="icon-options-general" class="icon32">
 		<br />
-	</div><h2><?php _e('XenForo API Consumer', 'xenforo-api-consumer'); ?></h2>
+	</div><h2><?php _e('Lightpull', 'xenforo-api-consumer'); ?></h2>
 
 	<form method="post" action="options.php" id="xfacDashboardOptions">
 		<?php settings_fields('xfac'); ?>
 
+		
 		<table class="form-table">
 			<?php if (xfac_option_getWorkingMode() === 'network'): ?>
-			<tr valign="top">
-				<th scope="row"><label for="xfac_root"><?php _e('API Root', 'xenforo-api-consumer'); ?></label></th>
-				<td>
-					<input name="xfac_root" type="text" id="xfac_root" value="<?php echo esc_attr($config['root']); ?>" class="regular-text" disabled="disabled" />
-				</td>
-			</tr>
 			<?php else: ?>
-			<tr valign="top">
-				<th scope="row"><label for="xfac_root"><?php _e('API Root', 'xenforo-api-consumer'); ?></label></th>
-				<td>
-					<input name="xfac_root" type="text" id="xfac_root" value="<?php echo esc_attr($config['root']); ?>" class="regular-text" />
-
-					<p class="description"><?php echo xfac_api_getVersionSuggestionText($config, $meta); ?></p>
-				</td>
-			</tr>
 			<tr valign="top">
 				<th scope="row"><label for="xfac_client_id"><?php _e('API Key', 'xenforo-api-consumer'); ?></label></th>
 				<td>
+					<input name="xfac_root" type="hidden" id="xfac_root" value="<?php echo esc_attr(XFAC_LIGHTPULL_ROOT); ?>" />
 					<input name="xfac_client_id" type="text" id="xfac_client_id" value="<?php echo esc_attr($config['clientId']); ?>" class="regular-text" />
 				</td>
 			</tr>
@@ -93,154 +81,6 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 			<?php if (!empty($meta['linkIndex'])): ?>
 			<tr valign="top">
 				<th scope="row">
-					<?php _e('Synchronization', 'xenforo-api-consumer'); ?><br />
-					
-					<?php _e('Next Run', 'xenforo-api-consumer'); ?>:
-					<?php echo date_i18n('H:i', $hourlyNext + get_option('gmt_offset') * HOUR_IN_SECONDS); ?>
-					(<a href="options-general.php?page=xfac&cron=hourly"><?php _e('Sync Now', 'xenforo-api-consumer'); ?></a>)
-				</th>
-				<td>
-					<fieldset>
-						<label for="xfac_sync_post_wp_xf">
-							<input name="xfac_sync_post_wp_xf" type="checkbox" id="xfac_sync_post_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_post_wp_xf')); ?> />
-							<?php _e('Post from WordPress to XenForo', 'xenforo-api-consumer'); ?>
-						</label>
-						<p class="description"><?php echo sprintf(
-							__('Sync WordPress post to XenForo as thread. '
-								. 'Only posts with pre-configured tags will be sync\'d, see %s option below.',
-								'xenforo-api-consumer'),
-							__('Tag / Forum Mappings', 'xenforo-api-consumer')
-						); ?></p>
-
-						<div style="margin-left: 20px;">
-							<label for="xfac_sync_post_wp_xf_excerpt">
-								<input name="xfac_sync_post_wp_xf_excerpt" type="checkbox" id="xfac_sync_post_wp_xf_excerpt" value="1" <?php checked('1', get_option('xfac_sync_post_wp_xf_excerpt')); ?> />
-								<?php _e('Sync excerpt only', 'xenforo-api-consumer'); ?>
-							</label>
-							<p class="description"><?php _e('Only use excerpt (instead of the whole post) to create XenForo thread.', 'xenforo-api-consumer'); ?></p>
-
-							<label for="xfac_sync_post_wp_xf_link">
-								<input name="xfac_sync_post_wp_xf_link" type="checkbox" id="xfac_sync_post_wp_xf_link" value="1" <?php checked('1', get_option('xfac_sync_post_wp_xf_link')); ?> />
-								<?php _e('Include post link', 'xenforo-api-consumer'); ?>
-							</label>
-							<p class="description"><?php _e('Insert a backlink to WordPress post at the end of XenForo thread.', 'xenforo-api-consumer'); ?></p>
-						</div>
-					</fieldset>
-
-					<fieldset>
-						<label for="xfac_sync_post_xf_wp">
-							<input name="xfac_sync_post_xf_wp" type="checkbox" id="xfac_sync_post_xf_wp" value="1" <?php checked('1', get_option('xfac_sync_post_xf_wp')); ?> />
-							<?php _e('Thread from XenForo to WordPress', 'xenforo-api-consumer'); ?>
-						</label>
-						<p class="description"><?php echo sprintf(
-							__('Sync XenForo thread to WordPress as draft. '
-								. 'Only threads in pre-configured forums will be sync\'d, see %s option below.',
-								'xenforo-api-consumer'),
-							__('Tag / Forum Mappings', 'xenforo-api-consumer')
-						); ?></p>
-
-						<div style="margin-left: 20px;">
-							<label for="xfac_sync_post_xf_wp_publish">
-								<input name="xfac_sync_post_xf_wp_publish" type="checkbox" id="xfac_sync_post_xf_wp_publish" value="1" <?php checked('1', get_option('xfac_sync_post_xf_wp_publish')); ?> />
-								<?php _e('Auto-publish synchronized post', 'xenforo-api-consumer'); ?>
-							</label>
-							<p class="description"><?php _e('Publish sync\'d WordPress post immediately.', 'xenforo-api-consumer'); ?></p>
-						</div>
-					</fieldset>
-
-					<fieldset>
-						<label for="xfac_sync_comment_wp_xf">
-							<input name="xfac_sync_comment_wp_xf" type="checkbox" id="xfac_sync_comment_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_comment_wp_xf')); ?> />
-							<?php _e('Comment from WordPress to XenForo', 'xenforo-api-consumer'); ?>
-						</label>
-						<p class="description"><?php _e('Sync comment in WordPress post to connected XenForo thread as reply.', 'xenforo-api-consumer'); ?></p>
-
-						<div style="margin-left: 20px;">
-							<label for="xfac_sync_comment_wp_xf_as_guest">
-								<input name="xfac_sync_comment_wp_xf_as_guest" type="checkbox" id="xfac_sync_comment_wp_xf_as_guest" value="1" <?php checked('1', get_option('xfac_sync_comment_wp_xf_as_guest')); ?> />
-								<?php _e('Sync as guest if account is not connected', 'xenforo-api-consumer'); ?>
-							</label>
-							<p class="description"><?php echo sprintf(
-								__('If no XenForo account can be found for post creator, '
-									. 'create the reply using account configured in %s option below.',
-									'xenforo-api-consumer'),
-								__('XenForo Guest Account', 'xenforo-api-consumer')
-							); ?></p>
-						</div>
-					</fieldset>
-
-					<fieldset>
-						<label for="xfac_sync_comment_xf_wp">
-							<input name="xfac_sync_comment_xf_wp" type="checkbox" id="xfac_sync_comment_xf_wp" value="1" <?php checked('1', get_option('xfac_sync_comment_xf_wp')); ?> />
-							<?php _e('Reply from XenForo to WordPress', 'xenforo-api-consumer'); ?>
-						</label>
-						<p class="description"><?php _e('Sync reply in XenForo thread to connected WordPress post as comment.', 'xenforo-api-consumer'); ?></p>
-
-						<div style="margin-left: 20px;">
-							<label for="xfac_sync_comment_xf_wp_as_guest">
-								<input name="xfac_sync_comment_xf_wp_as_guest" type="checkbox" id="xfac_sync_comment_xf_wp_as_guest" value="1" <?php checked('1', get_option('xfac_sync_comment_xf_wp_as_guest')); ?> />
-								<?php _e('Sync as guest if account is not connected', 'xenforo-api-consumer'); ?>
-							</label>
-							<p class="description"><?php _e('If no WordPress account can be found for reply poster, '
-								. 'create the comment as a guest comment.', 'xenforo-api-consumer'); ?></p>
-						</div>
-					</fieldset>
-
-					<fieldset>
-						<label for="xfac_sync_avatar_xf_wp">
-							<input name="xfac_sync_avatar_xf_wp" type="checkbox" id="xfac_sync_avatar_xf_wp" value="1" <?php checked('1', get_option('xfac_sync_avatar_xf_wp')); ?> />
-							<?php _e('Avatar from XenForo to WordPress', 'xenforo-api-consumer'); ?>
-						</label>
-						<p class="description"><?php _e('Use avatar URL provided by XenForo as WordPress user avatar.', 'xenforo-api-consumer'); ?></p>
-					</fieldset>
-
-					<fieldset>
-						<br />
-						<p><strong><?php _e('User Authentication', 'xenforo-api-consumer'); ?></strong></p>
-
-						<div style="margin-left: 20px;">
-							<label for="xfac_bypass_users_can_register">
-								<input name="xfac_bypass_users_can_register" type="checkbox" id="xfac_bypass_users_can_register" value="1" <?php checked('1', get_option('xfac_bypass_users_can_register')); ?> />
-								<?php _e('Always create new WordPress account', 'xenforo-api-consumer'); ?>
-							</label>
-							<p class="description"><?php _e('Bypass WordPress option "Anyone can register" when creating WordPress account for XenForo user.', 'xenforo-api-consumer'); ?></p>
-
-							<label for="xfac_sync_password">
-								<input name="xfac_sync_password" type="checkbox" id="xfac_sync_password" value="1" <?php checked('1', get_option('xfac_sync_password')); ?> />
-								<?php _e('Accept XenForo login credentials', 'xenforo-api-consumer'); ?>
-							</label>
-							<p class="description"><?php _e('Allow user to enter XenForo username and password into WordPress login form.', 'xenforo-api-consumer'); ?></p>
-
-							<label for="xfac_sync_login">
-								<input name="xfac_sync_login" type="checkbox" id="xfac_sync_login" value="1" <?php checked('1', get_option('xfac_sync_login')); ?> />
-								<?php _e('Sync logged-in cookie', 'xenforo-api-consumer'); ?>
-							</label>
-							<p class="description"><?php _e('Use JavaScript to detect XenForo logged-in status and let user login to WordPress automatically. '
-								. 'If user logs into WordPress first, try to regsiter XenForo logged-in status.', 'xenforo-api-consumer'); ?></p>
-
-							<label for="xfac_sync_user_wp_xf">
-								<input name="xfac_sync_user_wp_xf" type="checkbox" id="xfac_sync_user_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_user_wp_xf')); ?> />
-								<?php _e('Create XenForo account for WordPress user', 'xenforo-api-consumer'); ?>
-							</label>
-							<p class="description">
-								<?php _e('Try to create XenForo account for WordPress user if he/she has\'t have a XenForo account yet. '
-									. 'This is done everytime user logs into WordPress using a WordPress credential.', 'xenforo-api-consumer'); ?>
-
-								<?php if (isset($meta['modules']['oauth2']) AND $meta['modules']['oauth2'] < 2014030701): ?>
-									<span style="color: red"><?php echo sprintf(
-										__('This feature requires %s-%s, it will not work until API server is updated.', 'xenforo-api-consumer'),
-										'oauth2',
-										2014030701
-									); ?></span>
-								<?php endif; ?> 
-							</p>
-						</div>
-					</fieldset>
-				</td>
-			</tr>
-
-			<tr valign="top">
-				<th scope="row">
 					<?php _e('Top Bar', 'xenforo-api-consumer'); ?>
 				</th>
 				<td>
@@ -249,7 +89,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 							<input name="xfac_top_bar_forums[]" type="checkbox" id="xfac_top_bar_forums_0" value="0" <?php checked(true, in_array(0, $optionTopBarForums)); ?> />
 							<?php _e('Forums link', 'xenforo-api-consumer'); ?>
 						</label>
-						<p class="description"><?php _e('Show XenForo index link in Top Bar. XenForo forums can be chosen to show as submenu items below.', 'xenforo-api-consumer'); ?></p>
+						<p class="description"><?php _e('Show Lightpull link in Top Bar. Forums can be chosen to show as submenu items below.', 'xenforo-api-consumer'); ?></p>
 
 						<?php if (!empty($forums)): ?>
 							<div style="margin-left: 20px;">
@@ -268,14 +108,14 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 							<input name="xfac_top_bar_notifications" type="checkbox" id="xfac_top_bar_notifications" value="1" <?php checked('1', get_option('xfac_top_bar_notifications')); ?> />
 							<?php _e('Show Alerts link', 'xenforo-api-consumer'); ?>
 						</label>
-						<p class="description"><?php _e('Show XenForo alerts link in Top Bar. The number of unread alerts will be updated via AJAX.', 'xenforo-api-consumer'); ?></p>
+						<p class="description"><?php _e('Show Alerts link in Top Bar. The number of unread alerts will be updated via AJAX.', 'xenforo-api-consumer'); ?></p>
 					</fieldset>
 					<fieldset>
 						<label for="xfac_top_bar_conversations">
 							<input name="xfac_top_bar_conversations" type="checkbox" id="xfac_top_bar_conversations" value="1" <?php checked('1', get_option('xfac_top_bar_conversations')); ?> />
 							<?php _e('Show Conversations link', 'xenforo-api-consumer'); ?>
 						</label>
-						<p class="description"><?php _e('Show XenForo conversations link in Top Bar. The number of new conversations will be updated via AJAX.', 'xenforo-api-consumer'); ?></p>
+						<p class="description"><?php _e('Show Conversations link in Top Bar. The number of new conversations will be updated via AJAX.', 'xenforo-api-consumer'); ?></p>
 					</fieldset>
 
 					<fieldset>
@@ -297,7 +137,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 
 			<tr valign="top">
 				<th scope="row">
-					<?php _e('XenForo Guest Account', 'xenforo-api-consumer'); ?>
+					<?php _e('Guest Account', 'xenforo-api-consumer'); ?>
 				</th>
 				<td>
 					<?php if (!empty($xfGuestRecords)): ?>
@@ -309,7 +149,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 								(<a href="<?php echo $authorizeUrl; ?>"><?php _e('change', 'xenforo-api-consumer'); ?></a>)
 								<?php endif; ?>
 							</label>
-							<p class="description"><?php _e('The guest account will be used when contents need to be sync\'d to XenForo but no connected account can be found.', 'xenforo-api-consumer'); ?></p>
+							<p class="description"><?php _e('The guest account will be used when contents need to be sync\'d to Lightpull but no connected account can be found.', 'xenforo-api-consumer'); ?></p>
 						<?php endforeach; ?>
 					<?php else: ?>
 					<label for="xfac_xf_guest_account">
@@ -317,7 +157,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 						<input name="xfac_xf_guest_account" type="checkbox" id="xfac_xf_guest_account" value="1" disabled="disabled" />
 
 						<?php if (!empty($authorizeUrl)): ?>
-						<a href="<?php echo $authorizeUrl; ?>"><?php _e('Connect a XenForo account as Guest account', 'xenforo-api-consumer'); ?></a>
+						<a href="<?php echo $authorizeUrl; ?>"><?php _e('Connect a Lightpull account as Guest account', 'xenforo-api-consumer'); ?></a>
 						<?php else: ?>
 						<?php _e('Configure API Client first', 'xenforo-api-consumer'); ?>
 						<?php endif; ?>
@@ -348,13 +188,39 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 					}
 					elseif (empty($forums))
 					{
-						_e('No XenForo forums found', 'xenforo-api-consumer');
+						_e('No Lightpull forums found', 'xenforo-api-consumer');
 					}
 					else
 					{
 						_xfac_dashboardOptions_renderTagForumMapping($tags, $forums, ++$i, null);
 					}
 					?>
+				</td>
+			</tr>
+
+			<tr valign="top">
+				<th scope="row">
+					<?php _e('Synchronization', 'xenforo-api-consumer'); ?><br />
+				</th>
+				<td>
+					<?php _e('Next Run', 'xenforo-api-consumer'); ?>:
+					<?php echo date_i18n('H:i', $hourlyNext + get_option('gmt_offset') * HOUR_IN_SECONDS); ?>
+					(<a href="options-general.php?page=xfac&cron=hourly"><?php _e('Sync Now', 'xenforo-api-consumer'); ?></a>)
+
+					<input name="xfac_sync_post_wp_xf" type="hidden" id="xfac_sync_post_wp_xf" value="1" />
+					<input name="xfac_sync_post_wp_xf_excerpt" type="hidden" id="xfac_sync_post_wp_xf_excerpt" value="0" />
+					<input name="xfac_sync_post_wp_xf_link" type="hidden" id="xfac_sync_post_wp_xf_link" value="1" />
+					<input name="xfac_sync_post_xf_wp" type="hidden" id="xfac_sync_post_xf_wp" value="0" />
+					<input name="xfac_sync_post_xf_wp_publish" type="hidden" id="xfac_sync_post_xf_wp_publish" value="0" />
+					<input name="xfac_sync_comment_wp_xf" type="hidden" id="xfac_sync_comment_wp_xf" value="1" />
+					<input name="xfac_sync_comment_wp_xf_as_guest" type="hidden" id="xfac_sync_comment_wp_xf_as_guest" value="1" />
+					<input name="xfac_sync_comment_xf_wp" type="hidden" id="xfac_sync_comment_xf_wp" value="1" />
+					<input name="xfac_sync_comment_xf_wp_as_guest" type="hidden" id="xfac_sync_comment_xf_wp_as_guest" value="1" />
+					<input name="xfac_sync_avatar_xf_wp" type="hidden" id="xfac_sync_avatar_xf_wp" value="1" />
+					<input name="xfac_bypass_users_can_register" type="hidden" id="xfac_bypass_users_can_register" value="1" />
+					<input name="xfac_sync_password" type="hidden" id="xfac_sync_password" value="1" />
+					<input name="xfac_sync_login" type="hidden" id="xfac_sync_login" value="1" />
+					<input name="xfac_sync_user_wp_xf" type="hidden" id="xfac_sync_user_wp_xf" value="1" />
 				</td>
 			</tr>
 			<?php endif; ?>

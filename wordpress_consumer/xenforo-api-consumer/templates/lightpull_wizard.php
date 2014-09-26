@@ -23,13 +23,8 @@ if (!defined('ABSPATH'))
 	<form method="post" action="options.php" id="xfacDashboardOptions">
 		<?php settings_fields('xfac'); ?>
 
+		<input name="xfac_root" type="hidden" id="xfac_root" value="<?php echo esc_attr(XFAC_LIGHTPULL_ROOT); ?>" />
 		<table class="form-table">
-			<tr valign="top">
-				<th scope="row"><label for="xfac_root"><?php _e('API Root', 'xenforo-api-consumer'); ?></label></th>
-				<td>
-					<input name="xfac_root" type="text" id="xfac_root" value="<?php echo esc_attr($config['root']); ?>" class="regular-text" />
-				</td>
-			</tr>
 			<tr valign="top">
 				<th scope="row"><label for="xfac_client_id"><?php _e('API Key', 'xenforo-api-consumer'); ?></label></th>
 				<td>

@@ -50,7 +50,7 @@ add_action('admin_init', 'xfac_admin_init');
 
 function xfac_admin_menu()
 {
-	add_options_page('XenForo API Consumer', 'XenForo API Consumer', 'manage_options', 'xfac', 'xfac_options_init');
+	add_options_page('Lightpull', 'Lightpull', 'manage_options', 'xfac', 'xfac_options_init');
 }
 
 add_action('admin_menu', 'xfac_admin_menu');
