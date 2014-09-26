@@ -18,4 +18,10 @@ class bdApi_ControllerApi_Asset extends bdApi_ControllerApi_Abstract
 		header(sprintf('Last-Modified: %s', gmstrftime("%a, %d %b %Y %T %Z", filemtime($sdkPath))));
 		die($sdk);
 	}
+
+	protected function _getScopeForAction($action)
+	{
+		return false;
+	}
+
 }

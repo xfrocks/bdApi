@@ -225,7 +225,13 @@ class bdApi_Session extends XenForo_Session
 		}
 		else
 		{
-			$guestScopes = array(bdApi_Model_OAuth2::SCOPE_READ);
+			$guestScopes = array();
+			
+			if (!bdApi_Option::get('restrictAccess'))
+			{
+				$guestScopes[] = bdApi_Model_OAuth2::SCOPE_READ;
+			}
+			
 			$this->set('scopes', $guestScopes);
 		}
 	}

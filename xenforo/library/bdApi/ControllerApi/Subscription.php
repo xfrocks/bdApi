@@ -92,6 +92,11 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
 	{
 		return $this->getModelFromCache('bdApi_Model_Subscription');
 	}
+	
+	protected function _getScopeForAction($action)
+	{
+		return false;
+	}
 
 	protected function _preDispatch($action)
 	{

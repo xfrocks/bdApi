@@ -488,6 +488,12 @@ step=14</edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdApi" display_order="120"/>
     </option>
+    <option option_id="bdApi_restrictAccess" edit_format="onoff" data_type="unsigned_integer" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApi" display_order="10"/>
+    </option>
     <option option_id="bdApi_tokenTTL" edit_format="spinbox" data_type="positive_integer" can_backup="1">
       <default_value>3600</default_value>
       <edit_format_params>min=600
@@ -620,6 +626,8 @@ step=3600</edit_format_params>
     <phrase title="option_bdApi_logRetentionDays_explain" version_id="50" version_string="1.2.1b"><![CDATA[Enter the number of days to keep API log entries. If you don't want to log anything, enter 0 (zero).]]></phrase>
     <phrase title="option_bdApi_refreshTokenTTLDays" version_id="50" version_string="1.2.1b"><![CDATA[Refresh Token TTL]]></phrase>
     <phrase title="option_bdApi_refreshTokenTTLDays_explain" version_id="50" version_string="1.2.1b"><![CDATA[Enter the number of days before refresh token expires itself.]]></phrase>
+    <phrase title="option_bdApi_restrictAccess" version_id="53" version_string="1.3.1"><![CDATA[Restrict Access]]></phrase>
+    <phrase title="option_bdApi_restrictAccess_explain" version_id="53" version_string="1.3.1"><![CDATA[Enable this option to deny access to the API if no authentication is provided. Guest access it still possible with One Time Token.]]></phrase>
     <phrase title="option_bdApi_tokenTTL" version_id="50" version_string="1.2.1b"><![CDATA[Token TTL]]></phrase>
     <phrase title="option_bdApi_tokenTTL_explain" version_id="50" version_string="1.2.1b"><![CDATA[Enter the number of seconds before authentication code expires itself.]]></phrase>
     <phrase title="option_group_bdApi" version_id="50" version_string="1.2.1b"><![CDATA[[bd] API]]></phrase>
