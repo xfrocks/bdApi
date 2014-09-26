@@ -3,7 +3,7 @@
  Plugin Name: Lightpull
  Plugin URI: https://xfrocks.com/api-support/
  Description: Connects to Lightpull system.
- Version: 1.1.0-lightpull1
+ Version: 1.1.0-lightpull2
  Author: XFROCKS
  Author URI: https://xfrocks.com
  Text Domain: xenforo-api-consumer
