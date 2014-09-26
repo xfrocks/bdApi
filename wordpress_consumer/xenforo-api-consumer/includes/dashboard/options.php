@@ -50,6 +50,7 @@ function xfac_options_init()
 	}
 	
 	// setup tabs
+	$tab = 'xfac_api';
 	if (!empty($_REQUEST['tab']))
 	{
 		$tab = 'xfac_' . $_GET['tab'];
