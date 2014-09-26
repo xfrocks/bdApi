@@ -61,7 +61,10 @@ class bdApi_Session extends XenForo_Session
 
 		if (!empty($this->_oauthClient['redirect_uri']))
 		{
-			if (strpos($uri, $this->_oauthClient['redirect_uri']) !== 0)
+			$uri = rtrim($uri, '/');
+			$clientUri = rtrim($this->_oauthClient['redirect_uri'], '/');
+
+			if (strpos($uri, $clientUri) !== 0)
 			{
 				return false;
 			}
