@@ -164,6 +164,27 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base
 				'controller_admin' => array('className' => 'bdApi_ControllerAdmin_Subscription', 'hash' => '27d424a7d03a8ca84f5b2ec1b84a0bf0'),
 			),
 		),
+		'user_scope' => array(
+			'name' => 'user_scope',
+			'camelCase' => 'UserScope',
+			'camelCasePlural' => 'UserScopes',
+			'camelCaseWSpace' => 'User Scope',
+			'camelCasePluralWSpace' => 'User Scopes',
+			'fields' => array(
+				'client_id' => array('name' => 'client_id', 'type' => 'string', 'length' => 255, 'required' => true),
+				'user_id' => array('name' => 'user_id', 'type' => 'uint', 'required' => true),
+				'scope' => array('name' => 'scope', 'type' => 'string', 'length' => 255, 'required' => true),
+				'accept_date' => array('name' => 'accept_date', 'type' => 'uint', 'required' => true),
+			),
+			'phrases' => array(),
+			'id_field' => 'user_id',
+			'title_field' => 'client_id',
+			'primaryKey' => false,
+			'indeces' => array(
+				'user_id' => array('name' => 'user_id', 'fields' => array('user_id'), 'type' => 'NORMAL'),
+			),
+			'files' => array('data_writer' => false, 'model' => false, 'route_prefix_admin' => false, 'controller_admin' => false),
+		),
 	);
 	protected $_dataPatches = array(
 		'xf_bdapi_token' => array(

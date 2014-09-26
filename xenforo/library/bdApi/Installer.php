@@ -89,6 +89,17 @@ class bdApi_Installer
 			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
 			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_subscription`',
 		),
+		'user_scope' => array(
+			'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_user_scope` (
+				`client_id` VARCHAR(255) NOT NULL
+				,`user_id` INT(10) UNSIGNED NOT NULL
+				,`scope` VARCHAR(255) NOT NULL
+				,`accept_date` INT(10) UNSIGNED NOT NULL
+				
+				, INDEX `user_id` (`user_id`)
+			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
+			'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_user_scope`',
+		),
 	);
 	protected static $_patches = array(
 		array(

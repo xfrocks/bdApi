@@ -216,19 +216,26 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 
 					if ($data[$cmd] === 0)
 					{
-						// start looking for valid access token
-						$tokens = $tokenModel->getTokens(array(
-							'client_id' => $client['client_id'],
-							'user_id' => $visitor['user_id'],
-						));
-
-						foreach ($tokens as $token)
+						// start looking for accepted scopes
+						$requestedScopes = bdApi_Template_Helper_Core::getInstance()->scopeSplit($scope);
+						if (!empty($requestedScopes))
 						{
-							if (!$tokenModel->hasExpired($client, $token) AND $tokenModel->hasScope($client, $token, $scope))
+							$userScopes = $this->getModelFromCache('bdApi_Model_UserScope')->getUserScopes($client['client_id'], $visitor['user_id']);
+							$requestedScopesAccepted = array();
+							foreach ($requestedScopes as $scope)
+							{
+								foreach ($userScopes as $userScope)
+								{
+									if ($userScope['scope'] === $scope)
+									{
+										$requestedScopesAccepted[] = $scope;
+									}
+								}
+							}
+
+							if (count($requestedScopes) === count($requestedScopesAccepted))
 							{
 								$data[$cmd] = 1;
-								break;
-								// foreach ($tokens as $token)
 							}
 						}
 					}
@@ -237,8 +244,9 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 					{
 						$data['user_id'] = $visitor['user_id'];
 					}
+
+					// switch ($cmd)
 					break;
-				// switch ($cmd)
 			}
 
 			$clientModel->signApiData($client, $data);
@@ -295,28 +303,28 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 			$bypassConfirmation = true;
 		}
 
-		// sondh@2013-05-04
-		// this is a non-standard implementation: bypass confirmation dialog if user has
-		// an active token
-		$activeTokens = $tokenModel->getTokens(array(
-			'client_id' => $client['client_id'],
-			'user_id' => XenForo_Visitor::getUserId(),
-		));
-		foreach ($activeTokens as $activeToken)
+		// sondh@2014-09-26
+		// bypass confirmation if all requested scopes have been granted at some point
+		// in old version of this add-on, it checked for scope from active tokens
+		// from now on, we look for all scopes (no expiration) for better user experience
+		// if a token expires, it should not invalidate all user's choices
+		$userScopes = $this->getModelFromCache('bdApi_Model_UserScope')->getUserScopes($client['client_id'], XenForo_Visitor::getUserId());
+		$paramScopes = bdApi_Template_Helper_Core::getInstance()->scopeSplit($authorizeParams['scope']);
+		$paramScopesNew = array();
+		foreach ($paramScopes as $paramScope)
 		{
-			if ($tokenModel->hasExpired($client, $activeToken))
+			if (!isset($userScopes[$paramScope]))
 			{
-				// expired
-				continue;
+				$paramScopesNew[] = $paramScope;
 			}
-
-			if (!$tokenModel->hasScope($client, $activeToken, $authorizeParams['scope']))
-			{
-				// not enough scope
-				continue;
-			}
-
+		}
+		if (empty($paramScopesNew))
+		{
 			$bypassConfirmation = true;
+		}
+		else
+		{
+			$authorizeParams['scope'] = bdApi_Template_Helper_Core::getInstance()->scopeJoin($paramScopesNew);
 		}
 
 		// use the server get authorize params method to perform some extra validation
@@ -333,6 +341,27 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 				// sondh@2013-03-19
 				// of course if the dialog was bypassed, $accepted should be true
 				$accepted = true;
+			}
+
+			if ($accepted)
+			{
+				// sondh@2014-09-26
+				// get all up to date user scopes and include in the new token
+				// that means client only need to ask for a scope once and they will always have
+				// that scope in future authorizations, even if they ask for less scope!
+				// making it easy for client dev, they don't need to track whether they requested
+				// a scope before. Just check the most recent token for that information.
+				$paramScopes = bdApi_Template_Helper_Core::getInstance()->scopeSplit($authorizeParams['scope']);
+				foreach ($userScopes as $userScope => $userScopeInfo)
+				{
+					if (!in_array($userScope, $paramScopes, true))
+					{
+						$paramScopes[] = $userScope;
+					}
+				}
+				$paramScopes = array_unique($paramScopes);
+				asort($paramScopes);
+				$authorizeParams['scope'] = bdApi_Template_Helper_Core::getInstance()->scopeJoin($paramScopes);
 			}
 
 			$oauth2Model->getServer()->finishClientAuthorization($accepted, $authorizeParams);
