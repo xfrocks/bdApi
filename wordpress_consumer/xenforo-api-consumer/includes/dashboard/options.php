@@ -8,7 +8,6 @@ if (!defined('ABSPATH'))
 
 function xfac_options_init()
 {
-
 	$config = xfac_option_getConfig();
 	if (empty($config) AND xfac_option_getWorkingMode() == 'blog')
 	{
@@ -47,6 +46,8 @@ function xfac_options_init()
 
 		$callbackUrl = admin_url('options-general.php?page=xfac&do=xfac_xf_guest_account');
 		$authorizeUrl = xfac_api_getAuthorizeUrl($config, $callbackUrl);
+		
+		$currentUserAccessToken = xfac_user_getAccessToken(get_current_user_id());
 	}
 
 	require (xfac_template_locateTemplate('dashboard_options.php'));

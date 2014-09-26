@@ -58,9 +58,20 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $forums, $i, $tagFo
 
 	<form method="post" action="options.php" id="xfacDashboardOptions">
 		<?php settings_fields('xfac'); ?>
-
 		
 		<table class="form-table">
+			<?php if (empty($currentUserAccessToken)): ?>
+			<tr valign="top">
+				<td colspan="2">
+					<?php _e('You have configured Lightpull but you haven\'t connect your WordPress account yet. Do it now to start synchronizing posts and comments!', 'xenforo-api-consumer'); ?><br />
+					<?php _e('Other editors also need to connect their own account for their posts to show up in Lightpull.', 'xenforo-api-consumer'); ?>
+					
+					<?php $connectUrl = site_url('wp-login.php?xfac=authorize&redirect_to=' . rawurlencode(admin_url('profile.php')), 'login_post'); ?>
+					<a href="<?php echo $connectUrl; ?>"><?php _e('Connect to an account', 'xenforo-api-consumer'); ?></a>
+				</td>
+			</tr>
+			<?php endif; ?>
+			
 			<?php if (xfac_option_getWorkingMode() === 'network'): ?>
 			<?php else: ?>
 			<tr valign="top">
