@@ -11,33 +11,17 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		/* @var $clientModel bdApi_Model_Token */
 		$tokenModel = $this->getModelFromCache('bdApi_Model_Token');
 
-		$clients = $clientModel->getClients(
-				array(
-						'user_id' => XenForo_Visitor::getUserId(),
-				),
-				array(
-				)
-		);
-		$tokens = $tokenModel->getTokens(
-				array(
-						'user_id' => XenForo_Visitor::getUserId(),
-				),
-				array(
-						'join' => bdApi_Model_Token::FETCH_CLIENT,
-				)
-		);
+		$clients = $clientModel->getClients(array('user_id' => XenForo_Visitor::getUserId()), array());
+		$tokens = $tokenModel->getTokens(array('user_id' => XenForo_Visitor::getUserId()), array('join' => bdApi_Model_Token::FETCH_CLIENT));
 
 		$viewParams = array(
-				'clients' => $clients,
-				'tokens' => $tokens,
+			'clients' => $clients,
+			'tokens' => $tokens,
 
-				'permClientNew' => $visitor->hasPermission('general', 'bdApi_clientNew'),
+			'permClientNew' => $visitor->hasPermission('general', 'bdApi_clientNew'),
 		);
 
-		return $this->_getWrapper(
-				'account', 'api',
-				$this->responseView('bdApi_ViewPublic_Account_Api_Index', 'bdapi_account_api', $viewParams)
-		);
+		return $this->_getWrapper('account', 'api', $this->responseView('bdApi_ViewPublic_Account_Api_Index', 'bdapi_account_api', $viewParams));
 	}
 
 	public function actionApiClientAdd()
@@ -54,9 +38,9 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		if ($this->_request->isPost())
 		{
 			$dwInput = $this->_input->filter(array(
-					'name' => XenForo_Input::STRING,
-					'description' => XenForo_Input::STRING,
-					'redirect_uri' => XenForo_Input::STRING,
+				'name' => XenForo_Input::STRING,
+				'description' => XenForo_Input::STRING,
+				'redirect_uri' => XenForo_Input::STRING,
 			));
 
 			$dw = XenForo_DataWriter::create('bdApi_DataWriter_Client');
@@ -68,20 +52,13 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 
 			$dw->save();
 
-			return $this->responseRedirect(
-					XenForo_ControllerResponse_Redirect::RESOURCE_CREATED,
-					XenForo_Link::buildPublicLink('account/api')
-			);
+			return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CREATED, XenForo_Link::buildPublicLink('account/api'));
 		}
 		else
 		{
-			$viewParams = array(
-			);
+			$viewParams = array();
 
-			return $this->_getWrapper(
-					'account', 'api',
-					$this->responseView('bdApi_ViewPublic_Account_Api_Client_Add', 'bdapi_account_api_client_add', $viewParams)
-			);
+			return $this->_getWrapper('account', 'api', $this->responseView('bdApi_ViewPublic_Account_Api_Client_Add', 'bdapi_account_api_client_add', $viewParams));
 		}
 	}
 
@@ -108,21 +85,13 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 			$dw->setExistingData($client, true);
 			$dw->delete();
 
-			return $this->responseRedirect(
-					XenForo_ControllerResponse_Redirect::RESOURCE_UPDATED,
-					XenForo_Link::buildPublicLink('account/api')
-			);
+			return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_UPDATED, XenForo_Link::buildPublicLink('account/api'));
 		}
 		else
 		{
-			$viewParams = array(
-					'client' => $client,
-			);
+			$viewParams = array('client' => $client);
 
-			return $this->_getWrapper(
-					'account', 'api',
-					$this->responseView('bdApi_ViewPublic_Account_Api_Client_Delete', 'bdapi_account_api_client_delete', $viewParams)
-			);
+			return $this->_getWrapper('account', 'api', $this->responseView('bdApi_ViewPublic_Account_Api_Client_Delete', 'bdapi_account_api_client_delete', $viewParams));
 		}
 	}
 
@@ -139,9 +108,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		$tokenModel = $this->getModelFromCache('bdApi_Model_Token');
 
 		$tokenId = $this->_input->filterSingle('token_id', XenForo_Input::STRING);
-		$token = $tokenModel->getTokenByid($tokenId, array(
-				'join' => bdApi_Model_Token::FETCH_CLIENT,
-		));
+		$token = $tokenModel->getTokenByid($tokenId, array('join' => bdApi_Model_Token::FETCH_CLIENT));
 		if (empty($token))
 		{
 			return $this->responseNoPermission();
@@ -153,14 +120,15 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 
 		if ($this->_request->isPost())
 		{
-			// besides deleting all the tokens, we will delete all associated auth code/refresh token too
+			// besides deleting all the tokens, we will delete all associated auth
+			// code/refresh token too
 			XenForo_Db::beginTransaction();
 
 			try
 			{
 				$authCodes = $authCodeModel->getAuthCodes(array(
-						'client_id' => $token['client_id'],
-						'user_id' => $visitor->get('user_id'),
+					'client_id' => $token['client_id'],
+					'user_id' => $visitor->get('user_id'),
 				));
 				foreach ($authCodes as $authCode)
 				{
@@ -170,8 +138,8 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 				}
 
 				$tokens = $tokenModel->getTokens(array(
-						'client_id' => $token['client_id'],
-						'user_id' => $visitor->get('user_id'),
+					'client_id' => $token['client_id'],
+					'user_id' => $visitor->get('user_id'),
 				));
 				foreach ($tokens as $_token)
 				{
@@ -181,8 +149,8 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 				}
 
 				$refreshTokens = $refreshTokenModel->getRefreshTokens(array(
-						'client_id' => $token['client_id'],
-						'user_id' => $visitor->get('user_id'),
+					'client_id' => $token['client_id'],
+					'user_id' => $visitor->get('user_id'),
 				));
 				foreach ($refreshTokens as $refreshToken)
 				{
@@ -199,21 +167,13 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 				throw $e;
 			}
 
-			return $this->responseRedirect(
-					XenForo_ControllerResponse_Redirect::RESOURCE_UPDATED,
-					XenForo_Link::buildPublicLink('account/api')
-			);
+			return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_UPDATED, XenForo_Link::buildPublicLink('account/api'));
 		}
 		else
 		{
-			$viewParams = array(
-					'token' => $token,
-			);
+			$viewParams = array('token' => $token);
 
-			return $this->_getWrapper(
-					'account', 'api',
-					$this->responseView('bdApi_ViewPublic_Account_Api_Token_Revoke', 'bdapi_account_api_token_revoke', $viewParams)
-			);
+			return $this->_getWrapper('account', 'api', $this->responseView('bdApi_ViewPublic_Account_Api_Token_Revoke', 'bdapi_account_api_token_revoke', $viewParams));
 		}
 	}
 
@@ -222,8 +182,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		$callback = $this->_input->filterSingle('callback', XenForo_Input::STRING);
 		$cmd = $this->_input->filterSingle('cmd', XenForo_Input::STRING);
 		$clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
-		$data = array(
-		);
+		$data = array();
 
 		/* @var $oauth2Model bdApi_Model_OAuth2 */
 		$oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
@@ -244,7 +203,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 				case 'authorized':
 					$scope = $this->_input->filterSingle('scope', XenForo_Input::STRING);
 					$data[$cmd] = 0;
-						
+
 					if ($data[$cmd] === 0 AND $clientModel->canAutoAuthorize($client, $scope))
 					{
 						// this client has auto authorize setting for the requested scope
@@ -254,42 +213,42 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 						// will be granted automatically anyway
 						$data[$cmd] = 1;
 					}
-						
+
 					if ($data[$cmd] === 0)
 					{
 						// start looking for valid access token
 						$tokens = $tokenModel->getTokens(array(
-								'client_id' => $client['client_id'],
-								'user_id' => $visitor['user_id'],
+							'client_id' => $client['client_id'],
+							'user_id' => $visitor['user_id'],
 						));
 
 						foreach ($tokens as $token)
 						{
-							if (!$tokenModel->hasExpired($client, $token)
-							AND $tokenModel->hasScope($client, $token, $scope)
-							)
+							if (!$tokenModel->hasExpired($client, $token) AND $tokenModel->hasScope($client, $token, $scope))
 							{
 								$data[$cmd] = 1;
-								break; // foreach ($tokens as $token)
+								break;
+								// foreach ($tokens as $token)
 							}
 						}
 					}
-						
+
 					if ($data[$cmd] === 1)
 					{
 						$data['user_id'] = $visitor['user_id'];
 					}
-					break; // switch ($cmd)
+					break;
+				// switch ($cmd)
 			}
 
 			$clientModel->signApiData($client, $data);
 		}
 
 		$viewParams = array(
-				'callback' => $callback,
-				'cmd' => $cmd,
-				'client_id' => $clientId,
-				'data' => $data,
+			'callback' => $callback,
+			'cmd' => $cmd,
+			'client_id' => $clientId,
+			'data' => $data,
 		);
 
 		return $this->responseView('bdApi_ViewPublic_Account_Api_Data', '', $viewParams);
@@ -311,7 +270,8 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		if ($this->_request->isPost())
 		{
 			// allow user to deny some certain scopes
-			// only when this is a POST request, this should keep us safe from some vectors of attack
+			// only when this is a POST request, this should keep us safe from some vectors
+			// of attack
 			$scopesIncluded = $this->_input->filterSingle('scopes_included', XenForo_Input::UINT);
 			$scopes = $this->_input->filterSingle('scopes', XenForo_Input::ARRAY_SIMPLE);
 			if (!empty($scopesIncluded))
@@ -327,29 +287,36 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		}
 
 		// sondh@2013-03-19
-		// this is a non-standard implementation: bypass confirmation dialog if the client
-		// has appropriate option set
+		// this is a non-standard implementation: bypass confirmation dialog if the
+		// client has appropriate option set
 		$bypassConfirmation = false;
 		if ($clientModel->canAutoAuthorize($client, $authorizeParams['scope']))
 		{
 			$bypassConfirmation = true;
-			$accepted = true;
 		}
-		
+
 		// sondh@2013-05-04
-		// this is a non-standard implementation: bypass confirmation dialog if user has an active token
-		// this removed the change set sondh@2013-02-17 (try to get a working access token if the response_type == OAUTH2_AUTH_RESPONSE_TYPE_AUTH_CODE) 
+		// this is a non-standard implementation: bypass confirmation dialog if user has
+		// an active token
 		$activeTokens = $tokenModel->getTokens(array(
-				'client_id' => $client['client_id'],
-				'user_id' => XenForo_Visitor::getUserId(),
+			'client_id' => $client['client_id'],
+			'user_id' => XenForo_Visitor::getUserId(),
 		));
 		foreach ($activeTokens as $activeToken)
 		{
-			if ($tokenModel->hasExpired($client, $activeToken)) continue; // expired
-			if (!$tokenModel->hasScope($client, $activeToken, $authorizeParams['scope'])) continue; // not enough scope
+			if ($tokenModel->hasExpired($client, $activeToken))
+			{
+				// expired
+				continue;
+			}
+
+			if (!$tokenModel->hasScope($client, $activeToken, $authorizeParams['scope']))
+			{
+				// not enough scope
+				continue;
+			}
 
 			$bypassConfirmation = true;
-			$accepted = true;
 		}
 
 		// use the server get authorize params method to perform some extra validation
@@ -371,19 +338,16 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 			$oauth2Model->getServer()->finishClientAuthorization($accepted, $authorizeParams);
 
 			// finishClientAuthorization will redirect the page for us...
-			exit;
+			exit ;
 		}
 		else
 		{
 			$viewParams = array(
-					'client' => $client,
-					'authorizeParams' => $authorizeParams,
+				'client' => $client,
+				'authorizeParams' => $authorizeParams,
 			);
 
-			return $this->_getWrapper(
-					'account', 'api',
-					$this->responseView('bdApi_ViewPublic_Account_Authorize', 'bdapi_account_authorize', $viewParams)
-			);
+			return $this->_getWrapper('account', 'api', $this->responseView('bdApi_ViewPublic_Account_Authorize', 'bdapi_account_authorize', $viewParams));
 		}
 	}
 
@@ -400,9 +364,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 				// this is our action and an exception is thrown
 				// check to see if it is a registrationRequired error
 				$controllerResponse = $e->getControllerResponse();
-				if ($controllerResponse instanceof XenForo_ControllerResponse_Reroute
-				AND $controllerResponse->controllerName == 'XenForo_ControllerPublic_Error'
-						AND $controllerResponse->action == 'registrationRequired')
+				if ($controllerResponse instanceof XenForo_ControllerResponse_Reroute AND $controllerResponse->controllerName == 'XenForo_ControllerPublic_Error' AND $controllerResponse->action == 'registrationRequired')
 				{
 					// so it is...
 					$requestPaths = XenForo_Application::get('requestPaths');
@@ -426,4 +388,5 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 
 		return parent::_checkCsrf($action);
 	}
+
 }
