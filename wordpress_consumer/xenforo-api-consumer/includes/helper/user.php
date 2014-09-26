@@ -210,7 +210,7 @@ function xfac_user_getAccessTokenForRecord($record)
 		return null;
 	}
 
-	$newToken = xfac_api_getAccessTokenFromRefreshToken($config, $token['refresh_token'], $token['scope']);
+	$newToken = xfac_api_getAccessTokenFromRefreshToken($config, $token['refresh_token']);
 
 	if (empty($newToken))
 	{

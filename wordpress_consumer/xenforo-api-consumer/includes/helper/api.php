@@ -173,7 +173,7 @@ function xfac_api_getAccessTokenFromCode($config, $code, $redirectUri)
 	return _xfac_api_prepareAccessTokenBody($body);
 }
 
-function xfac_api_getAccessTokenFromRefreshToken($config, $refreshToken, $scope)
+function xfac_api_getAccessTokenFromRefreshToken($config, $refreshToken)
 {
 	$ch = curl_init();
 
@@ -188,7 +188,6 @@ function xfac_api_getAccessTokenFromRefreshToken($config, $refreshToken, $scope)
 		'client_id' => $config['clientId'],
 		'client_secret' => $config['clientSecret'],
 		'refresh_token' => $refreshToken,
-		'scope' => $scope,
 	)));
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 

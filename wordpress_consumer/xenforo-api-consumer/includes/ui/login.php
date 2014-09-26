@@ -105,7 +105,7 @@ function xfac_login_init()
 				exit();
 			}
 
-			$token = xfac_api_getAccessTokenFromRefreshToken($config, $_REQUEST['refresh_token'], $_REQUEST['scope']);
+			$token = xfac_api_getAccessTokenFromRefreshToken($config, $_REQUEST['refresh_token']);
 			$associateConfirmed = $wpUserForAssociate->ID;
 			break;
 		case 'authorize':
