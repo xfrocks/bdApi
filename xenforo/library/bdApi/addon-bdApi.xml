@@ -551,7 +551,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_description" version_id="1" version_string="0.1"><![CDATA[Description]]></phrase>
     <phrase title="bdapi_expire_date" version_id="1" version_string="0.1"><![CDATA[Expire Date]]></phrase>
     <phrase title="bdapi_home" version_id="4" version_string="0.9-dev"><![CDATA[API Access]]></phrase>
-    <phrase title="bdapi_issue_date" version_id="4" version_string="0.9-dev"><![CDATA[Issue Date]]></phrase>
+    <phrase title="bdapi_last_issue_date" version_id="53" version_string="1.3.1"><![CDATA[Last Used]]></phrase>
     <phrase title="bdapi_login_to_authorize_x" version_id="13" version_string="0.9-dev"><![CDATA[Please login to authorize access to {client}.]]></phrase>
     <phrase title="bdapi_login_to_authorize_x_google" version_id="50" version_string="1.2.1b"><![CDATA[Click "{login_with_google}" to continue with {client}.]]></phrase>
     <phrase title="bdapi_logs" version_id="23" version_string="0.9.8a"><![CDATA[Logs]]></phrase>
@@ -576,7 +576,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_request_must_authorize_to_encrypt" version_id="25" version_string="1.0"><![CDATA[Request must be authorized to encrypt data.]]></phrase>
     <phrase title="bdapi_requires_upload_x" version_id="20" version_string="0.9.5"><![CDATA[This request requires file upload `{field}`.]]></phrase>
     <phrase title="bdapi_response" version_id="23" version_string="0.9.8a"><![CDATA[Response]]></phrase>
-    <phrase title="bdapi_revoke" version_id="4" version_string="0.9-dev"><![CDATA[Revoke]]></phrase>
+    <phrase title="bdapi_revoke" version_id="53" version_string="1.3.1"><![CDATA[Revoke Access]]></phrase>
     <phrase title="bdapi_scope" version_id="1" version_string="0.1"><![CDATA[Scope]]></phrase>
     <phrase title="bdapi_scope_manage_account_settings" global_cache="1" version_id="1" version_string="0.1"><![CDATA[Change your account settings]]></phrase>
     <phrase title="bdapi_scope_manage_system" global_cache="1" version_id="4" version_string="0.9-dev"><![CDATA[Manage system-wide settings]]></phrase>
@@ -618,6 +618,8 @@ step=3600</edit_format_params>
     <phrase title="bdapi_token_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to revoke the following token]]></phrase>
     <phrase title="bdapi_topic" version_id="50" version_string="1.2.1b"><![CDATA[Topic]]></phrase>
     <phrase title="bdapi_ttl" version_id="11" version_string="0.9-dev"><![CDATA[Time To Live]]></phrase>
+    <phrase title="bdapi_update_scope" version_id="53" version_string="1.3.1"><![CDATA[Update Permissions]]></phrase>
+    <phrase title="bdapi_update_scope_explain" version_id="53" version_string="1.3.1"><![CDATA[You can review and/or change {name}'s permissions below. Click {revoke} to completely remove {name} access to your account.]]></phrase>
     <phrase title="bdapi_you_will_be_redirected_x" version_id="24" version_string="0.9.9"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
     <phrase title="cron_entry_bdApi_cleanUpExpired" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Clean Up Expired Data]]></phrase>
     <phrase title="option_bdApi_authCodeTTL" version_id="50" version_string="1.2.1b"><![CDATA[Authentication Code TTL]]></phrase>
@@ -646,7 +648,7 @@ step=3600</edit_format_params>
   </route_prefixes>
   <style_properties/>
   <templates>
-    <template title="bdapi.css" version_id="4" version_string="0.9-dev"><![CDATA[/* clients */
+    <template title="bdapi.css" version_id="53" version_string="1.3.1"><![CDATA[/* clients */
 .bdApi_Client_List
 {
 	position: relative;
@@ -773,7 +775,7 @@ step=3600</edit_format_params>
 		}
 
 /* tokens */
-.bdApi_Token_List
+.bdApi_UserScope_List
 {
 	position: relative;
 	zoom: 1;
@@ -781,8 +783,8 @@ step=3600</edit_format_params>
 
 /** column style and width **/
 
-.bdApi_Token_List .sectionHeaders,
-.bdApi_Token_Item
+.bdApi_UserScope_List .sectionHeaders,
+.bdApi_UserScope_Item
 {
 	display: table;
 	table-layout: fixed;
@@ -790,16 +792,16 @@ step=3600</edit_format_params>
 	word-wrap: normal;
 }
 
-	.bdApi_Token_List .sectionHeaders dt,
-	.bdApi_Token_List .sectionHeaders dd,
-	.bdApi_Token_Item .listBlock
+	.bdApi_UserScope_List .sectionHeaders dt,
+	.bdApi_UserScope_List .sectionHeaders dd,
+	.bdApi_UserScope_Item .listBlock
 	{
 		display: table-cell;
 		vertical-align: middle;
 	}
 
-	.bdApi_Token_Item .cellContents,
-	.bdApi_Token_NoItem
+	.bdApi_UserScope_Item .cellContents,
+	.bdApi_UserScope_NoItem
 	{
 		padding: 5px;
 		overflow: hidden;
@@ -807,79 +809,73 @@ step=3600</edit_format_params>
 		position: relative;
 	}
 	
-		.bdApi_Token_List .bdApi_Token_Client
+		.bdApi_UserScope_List .bdApi_UserScope_Client
 		{
 			width: auto;
 		}
 		
-		.bdApi_Token_List .bdApi_Token_IssueDate
+		.bdApi_UserScope_List .bdApi_UserScope_LastIssueDate
 		{
 			width: 150px;
 		}
 
-		.bdApi_Token_List .bdApi_Token_Scope
-		{
-			width: 150px;
-		}
-
-		.bdApi_Token_List .bdApi_Token_Control
+		.bdApi_UserScope_List .bdApi_UserScope_Control
 		{
 			width: 150px;
 		}
 
 /* column headers */
 
-.bdApi_Token_List .sectionHeaders
+.bdApi_UserScope_List .sectionHeaders
 {	
 	{xen:property subHeading}
 	
 	padding: 0;
 }
 		
-	.bdApi_Token_List .sectionHeaders a
+	.bdApi_UserScope_List .sectionHeaders a
 	{
 		display: block;
 		color: {xen:property subHeading.color};
 		outline: none;
 	}
 	
-	.bdApi_Token_List .sectionHeaders a:hover
+	.bdApi_UserScope_List .sectionHeaders a:hover
 	{
 		text-decoration: none;
 	}
 			
-	.bdApi_Token_List .sectionHeaders dd a[href]:hover
+	.bdApi_UserScope_List .sectionHeaders dd a[href]:hover
 	{
 		{xen:property subHeadingHover}
 	}
 	
-		.bdApi_Token_List .sectionHeaders a span
+		.bdApi_UserScope_List .sectionHeaders a span
 		{
 			{xen:property subHeading.padding}
 			display: block;
 		}
 		
 /** IE <8 **/
-.bdApi_Token_List .sectionHeaders,
-.bdApi_Token_Item                    { *display: block; _vertical-align: bottom; }
-.bdApi_Token_List .sectionHeaders dt,
-.bdApi_Token_List .sectionHeaders dd,
-.bdApi_Token_Item .listBlock         { *display: block; *float: left; }
-.bdApi_Token_Item .listBlock         { _height: 52px; *min-height: 52px; } /* todo: should be calculation */
-.bdApi_Token_List .bdApi_Token_Client{ *width: 39.98%; }
-.bdApi_Token_List .bdApi_Token_IssueDate { *width: 19.98%; }
-.bdApi_Token_List .bdApi_Token_Scope { *width: 19.98%; }
-.bdApi_Token_List .bdApi_Token_Control { *width: 19.98%; }
-.bdApi_Token_List .sectionHeaders dt,
-.bdApi_Token_List .sectionHeaders dd { *padding: 5px 0; }
-.bdApi_Token_List .sectionHeaders a,
-.bdApi_Token_List .sectionHeaders a span { *display: inline !important; *float: none !important; }
+.bdApi_UserScope_List .sectionHeaders,
+.bdApi_UserScope_Item                    { *display: block; _vertical-align: bottom; }
+.bdApi_UserScope_List .sectionHeaders dt,
+.bdApi_UserScope_List .sectionHeaders dd,
+.bdApi_UserScope_Item .listBlock         { *display: block; *float: left; }
+.bdApi_UserScope_Item .listBlock         { _height: 52px; *min-height: 52px; } /* todo: should be calculation */
+.bdApi_UserScope_List .bdApi_UserScope_Client{ *width: 59.98%; }
+.bdApi_UserScope_List .bdApi_UserScope_LastIssueDate { *width: 19.98%; }
+.bdApi_UserScope_List .bdApi_UserScope_Control { *width: 19.98%; }
+.bdApi_UserScope_List .sectionHeaders dt,
+.bdApi_UserScope_List .sectionHeaders dd { *padding: 5px 0; }
+.bdApi_UserScope_List .sectionHeaders a,
+.bdApi_UserScope_List .sectionHeaders a span { *display: inline !important; *float: none !important; }
 
-.bdApi_Token_Items
+.bdApi_UserScope_Items
 {
 }
 
-.bdApi_Token_Item
+.bdApi_UserScope_Item
 {
 	{xen:property primaryContent.background}
 	
@@ -888,22 +884,21 @@ step=3600</edit_format_params>
 
 		/* sections, section widths */
 	
-		.bdApi_Token_Item .bdApi_Token_Client,		
-		.bdApi_Token_Item .bdApi_Token_Scope
+		.bdApi_UserScope_List .bdApi_UserScope_Client,
+		.bdApi_UserScope_List .bdApi_UserScope_Control
 		{
 		}
 		
-		.bdApi_Token_Item .bdApi_Token_IssueDate,
-		.bdApi_Token_Item .bdApi_Token_Control
+		.bdApi_UserScope_Item .bdApi_UserScope_LastIssueDate
 		{
 			{xen:property secondaryContent.background}
 		}
 ]]></template>
-    <template title="bdapi_account_api" version_id="4" version_string="0.9-dev"><![CDATA[<xen:require css="bdapi.css" />
+    <template title="bdapi_account_api" version_id="53" version_string="1.3.1"><![CDATA[<xen:require css="bdapi.css" />
 
 <xen:include template="bdapi_account_api_clients" />
 
-<xen:include template="bdapi_account_api_tokens" />
+<xen:include template="bdapi_account_api_user_scopes" />
 
 <xen:title>{xen:phrase bdapi_home}</xen:title>]]></template>
     <template title="bdapi_account_api_clients" version_id="4" version_string="0.9-dev"><![CDATA[<xen:require css="bdapi.css" />
@@ -1016,78 +1011,103 @@ step=3600</edit_format_params>
 	
 	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
 </form>]]></template>
-    <template title="bdapi_account_api_tokens" version_id="4" version_string="0.9-dev"><![CDATA[<xen:require css="bdapi.css" />
+    <template title="bdapi_account_api_update_scope" version_id="53" version_string="1.3.1"><![CDATA[<xen:title>{xen:phrase bdapi_update_scope}: {$client.name}</xen:title>
+<xen:h1>{xen:phrase bdapi_update_scope}</xen:h1>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:link 'account/api'}">{xen:phrase bdapi_home}</xen:breadcrumb>
+	<xen:breadcrumb href="{xen:link 'account/api'}#client-{$client.client_id}">{$client.name}</xen:breadcrumb>
+</xen:navigation>
+
+<form method="post" class="xenForm formOverlay"
+	action="{xen:link 'account/api/update-scope'}">
+
+	<p>{xen:phrase bdapi_update_scope_explain,
+		'name={xen:if '{$client.redirect_uri}', '<a href="{$client.redirect_uri}" target="_blank">{$client.name}</a>', $client.name}',
+		'revoke={xen:phrase bdapi_revoke}'}</p>
+
+	<dl class="ctrlUnit">
+		<dt>&nbsp;</dt>
+		<dd>
+			<ul>
+				<xen:foreach loop="$userScopes" key="$scope" value="$userScope">
+					<xen:set var="$scopeText">{xen:helper bdApi_scopeGetText, $scope}</xen:set>
+					
+					<xen:if is="{$scopeText}">
+						<li><label>
+							<input type="checkbox" name="scopes[]" value="{$scope}" checked="checked" />
+							{xen:raw $scopeText}
+						</label></li>
+					</xen:if>
+				</xen:foreach>
+			</ul>
+		</dd>
+	</dl>
+
+	<dl class="ctrlUnit submitUnit">
+		<dt></dt>
+		<dd>
+			<input type="submit" name="save" value="{xen:phrase save}" accesskey="s" class="button primary" />
+			<input type="submit" name="revoke" value="{xen:phrase bdapi_revoke}" class="button" />
+		</dd>
+	</dl>
+	
+	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+	<input type="hidden" name="_xfConfirm" value="1" />
+	<input type="hidden" name="client_id" value="{$client.client_id}" />
+</form>
+
+]]></template>
+    <template title="bdapi_account_api_user_scopes" version_id="53" version_string="1.3.1"><![CDATA[<xen:require css="bdapi.css" />
 
 <xen:title>{xen:phrase bdapi_tokens}</xen:title>
 
 <h3>{xen:phrase bdapi_tokens}</h3>
 
-<div class="bdApi_Token_List section">
+<div class="bdApi_UserScope_List section">
 	<dl class="sectionHeaders">
-		<dt class="bdApi_Token_Client"><a><span>{xen:phrase bdapi_name}</span></a></dt>
-		<dd class="bdApi_Token_IssueDate"><a><span>{xen:phrase bdapi_issue_date}</span></a></dd>
-		<dd class="bdApi_Token_Scope"><a><span>{xen:phrase bdapi_scope}</span></a></dd>
-		<dd class="bdApi_Token_Control"><a><span>{xen:phrase controls}</span></a></dd>
+		<dt class="bdApi_UserScope_Client"><a><span>{xen:phrase bdapi_name}</span></a></dt>
+		<dd class="bdApi_UserScope_LastIssueDate"><a><span>{xen:phrase bdapi_last_issue_date}</span></a></dd>
+		<dd class="bdApi_UserScope_Control"><a><span>{xen:phrase controls}</span></a></dd>
 	</dl>
-	<ol class="bdApi_Token_Items">
-		<xen:if is="{$tokens}">
-			<xen:foreach loop="$tokens" value="$token">
-				<li class="bdApi_Token_Item">
-					<div class="bdApi_Client_Name listBlock">
+	<ol class="bdApi_UserScope_Items">
+		<xen:if is="{$userScopesByClientIds}">
+			<xen:foreach loop="$userScopesByClientIds" value="$clientScopes">
+				<li class="bdApi_UserScope_Item">
+					<div class="bdApi_UserScope_Client listBlock">
 						<div class="cellContents">
-							<a name="token-{$token.token_id}">{$token.client_name}</a>
-							<p class="muted">{$token.client_description} (<a href="{$token.client_redirect_uri}" rel="nofollow" target="_blank">{$token.client_redirect_uri}</a>)</p>
+							{$clientScopes.client.name}
+							<p class="muted">
+								{$clientScopes.client.description}
+								<xen:if is="{$clientScopes.client.redirect_uri}">(<a href="{$clientScopes.client.redirect_uri}" rel="nofollow" target="_blank">{$clientScopes.client.redirect_uri}</a>)</xen:if>
+							</p>
+							
+							<div class="baseHtml">
+								<ul>
+									<xen:foreach loop="$clientScopes.user_scopes" key="$scope" value="$userScope">
+										<li class="scope-{$scope}">{xen:helper bdApi_scopeGetText, $scope}</li>
+									</xen:foreach>
+								</ul>
+							</div>
 						</div>
 					</div>
-					<div class="bdApi_Token_IssueDate listBlock">
+					<div class="bdApi_UserScope_LastIssueDate listBlock">
 						<div class="cellContents">
-							{xen:datetime $token.issue_date}
+							{xen:datetime $clientScopes.last_issue_date}
 						</div>
 					</div>
-					<div class="bdApi_Token_Scope listBlock">
+					<div class="bdApi_UserScope_Control listBlock">
 						<div class="cellContents">
-							<ul>
-								<xen:foreach loop="{$token._scopes}" value="$scope">
-									<li title="{xen:jsescape {xen:helper bdApi_scopeGetText, $scope}}" class="Tooltip">{$scope}</li>
-								</xen:foreach>
-							</ul>
-						</div>
-					</div>
-					<div class="bdApi_Token_Control listBlock">
-						<div class="cellContents">
-							<a href="{xen:link 'account/api/token-revoke', '', 'token_id={$token.token_id}'}" class="OverlayTrigger">{xen:phrase bdapi_revoke}</a>
+							<a href="{xen:link 'account/api/update-scope', '', 'client_id={$clientScopes.client.client_id}'}" class="OverlayTrigger">{xen:phrase bdapi_update_scope}</a>
 						</div>
 					</div>
 				</li>
 			</xen:foreach>
 		<xen:else />
-			<li class="bdApi_Token_NoItem">{xen:phrase bdapi_token_no_results}</li>
+			<li class="bdApi_UserScope_NoItem">{xen:phrase bdapi_token_no_results}</li>
 		</xen:if>
 	</ol>
 </div>]]></template>
-    <template title="bdapi_account_api_token_revoke" version_id="4" version_string="0.9-dev"><![CDATA[<xen:title>{xen:phrase bdapi_token_confirm_deletion}: {$token.client_name}</xen:title>
-<xen:h1>{xen:phrase bdapi_token_confirm_deletion}</xen:h1>
-
-<xen:navigation>
-	<xen:breadcrumb href="{xen:link 'account/api'}">{xen:phrase bdapi_home}</xen:breadcrumb>
-</xen:navigation>
-
-<form method="post" class="xenForm formOverlay"
-	action="{xen:link 'account/api/token-revoke', '', 'token_id={$token.token_id}'}">
-
-	<p>
-		{xen:phrase bdapi_token_please_confirm}:
-		{$token.client_name}
-		(<a href="{$token.client_redirect_uri}" rel="nofollow" target="_blank">{$token.client_redirect_uri}</a>)
-	</p>
-
-	<dl class="ctrlUnit submitUnit">
-		<dt></dt>
-		<dd><input type="submit" name="save" value="{xen:phrase bdapi_revoke}" accesskey="s" class="button primary" /></dd>
-	</dl>
-	
-	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
-</form>]]></template>
     <template title="bdapi_account_authorize" version_id="24" version_string="0.9.9"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
 <form method="post" class="xenForm"

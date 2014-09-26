@@ -10,13 +10,42 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		$clientModel = $this->getModelFromCache('bdApi_Model_Client');
 		/* @var $clientModel bdApi_Model_Token */
 		$tokenModel = $this->getModelFromCache('bdApi_Model_Token');
+		/* @var $clientModel bdApi_Model_UserScope */
+		$userScopeModel = $this->getModelFromCache('bdApi_Model_UserScope');
 
 		$clients = $clientModel->getClients(array('user_id' => XenForo_Visitor::getUserId()), array());
-		$tokens = $tokenModel->getTokens(array('user_id' => XenForo_Visitor::getUserId()), array('join' => bdApi_Model_Token::FETCH_CLIENT));
+		$tokens = $tokenModel->getTokens(array('user_id' => XenForo_Visitor::getUserId()));
+		$userScopes = $userScopeModel->getUserScopesForAllClients(XenForo_Visitor::getUserId());
+
+		$userScopesByClientIds = array();
+		foreach ($userScopes as $userScope)
+		{
+			if (!isset($userScopesByClientIds[$userScope['client_id']]))
+			{
+				$userScopesByClientIds[$userScope['client_id']] = array(
+					'last_issue_date' => 0,
+					'user_scopes' => array(),
+					'client' => $userScope,
+				);
+			}
+
+			$userScopesByClientIds[$userScope['client_id']]['last_issue_date'] = max($userScopesByClientIds[$userScope['client_id']]['last_issue_date'], $userScope['accept_date']);
+			$userScopesByClientIds[$userScope['client_id']]['user_scopes'][$userScope['scope']] = $userScope;
+		}
+
+		foreach ($tokens as $token)
+		{
+			if (empty($userScopesByClientIds[$token['client_id']]))
+			{
+				continue;
+			}
+
+			$userScopesByClientIds[$token['client_id']]['last_issue_date'] = max($userScopesByClientIds[$token['client_id']]['last_issue_date'], $token['issue_date']);
+		}
 
 		$viewParams = array(
 			'clients' => $clients,
-			'tokens' => $tokens,
+			'userScopesByClientIds' => $userScopesByClientIds,
 
 			'permClientNew' => $visitor->hasPermission('general', 'bdApi_clientNew'),
 		);
@@ -95,68 +124,68 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		}
 	}
 
-	public function actionApiTokenRevoke()
+	public function actionApiUpdateScope()
 	{
 		$visitor = XenForo_Visitor::getInstance();
-		/* @var $clientModel bdApi_Model_AuthCode */
-		$authCodeModel = $this->getModelFromCache('bdApi_Model_AuthCode');
+
 		/* @var $clientModel bdApi_Model_Client */
 		$clientModel = $this->getModelFromCache('bdApi_Model_Client');
-		/* @var $clientModel bdApi_Model_RefreshToken */
-		$refreshTokenModel = $this->getModelFromCache('bdApi_Model_RefreshToken');
-		/* @var $clientModel bdApi_Model_Token */
-		$tokenModel = $this->getModelFromCache('bdApi_Model_Token');
+		/* @var $clientModel bdApi_Model_UserScope */
+		$userScopeModel = $this->getModelFromCache('bdApi_Model_UserScope');
 
-		$tokenId = $this->_input->filterSingle('token_id', XenForo_Input::STRING);
-		$token = $tokenModel->getTokenByid($tokenId, array('join' => bdApi_Model_Token::FETCH_CLIENT));
-		if (empty($token))
-		{
-			return $this->responseNoPermission();
-		}
-		if ($token['user_id'] != $visitor->get('user_id'))
+		$clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
+		$client = $clientModel->getClientById($clientId);
+		if (empty($client))
 		{
 			return $this->responseNoPermission();
 		}
 
-		if ($this->_request->isPost())
+		$userScopes = $userScopeModel->getUserScopes($client['client_id'], $visitor['user_id']);
+		if (empty($userScopes))
 		{
-			// besides deleting all the tokens, we will delete all associated auth
-			// code/refresh token too
+			return $this->responseNoPermission();
+		}
+
+		if ($this->isConfirmedPost())
+		{
+			$isRevoke = $this->_input->filterSingle('revoke', XenForo_Input::STRING);
+			$isRevoke = !empty($isRevoke);
+
 			XenForo_Db::beginTransaction();
 
 			try
 			{
-				$authCodes = $authCodeModel->getAuthCodes(array(
-					'client_id' => $token['client_id'],
-					'user_id' => $visitor->get('user_id'),
-				));
-				foreach ($authCodes as $authCode)
+				$scopes = $this->_input->filterSingle('scopes', XenForo_Input::STRING, array('array' => true));
+				if (empty($scopes))
 				{
-					$authCodeDw = XenForo_DataWriter::create('bdApi_DataWriter_AuthCode');
-					$authCodeDw->setExistingData($authCode, true);
-					$authCodeDw->delete();
+					// no scopes are selected, that equals revoking
+					$isRevoke = true;
+				}
+				$userScopesChanged = false;
+
+				foreach ($userScopes as $userScope)
+				{
+					if ($isRevoke OR !in_array($userScope['scope'], $scopes, true))
+					{
+						// remove the accepted user scope
+						$userScopeModel->deleteUserScope($client['client_id'], $visitor['user_id'], $userScope['scope']);
+						$userScopesChanged = true;
+					}
 				}
 
-				$tokens = $tokenModel->getTokens(array(
-					'client_id' => $token['client_id'],
-					'user_id' => $visitor->get('user_id'),
-				));
-				foreach ($tokens as $_token)
+				if ($userScopesChanged)
 				{
-					$tokenDw = XenForo_DataWriter::create('bdApi_DataWriter_Token');
-					$tokenDw->setExistingData($_token, true);
-					$tokenDw->delete();
+					// invalidate all existing tokens
+					$this->getModelFromCache('bdApi_Model_AuthCode')->deleteAuthCodes($client['client_id'], $visitor['user_id']);
+					$this->getModelFromCache('bdApi_Model_RefreshToken')->deleteRefreshTokens($client['client_id'], $visitor['user_id']);
+					$this->getModelFromCache('bdApi_Model_Token')->deleteTokens($client['client_id'], $visitor['user_id']);
 				}
 
-				$refreshTokens = $refreshTokenModel->getRefreshTokens(array(
-					'client_id' => $token['client_id'],
-					'user_id' => $visitor->get('user_id'),
-				));
-				foreach ($refreshTokens as $refreshToken)
+				if ($isRevoke)
 				{
-					$refreshTokenDw = XenForo_DataWriter::create('bdApi_DataWriter_RefreshToken');
-					$refreshTokenDw->setExistingData($refreshToken, true);
-					$refreshTokenDw->delete();
+					// unsubscribe for user and notification
+					$this->getModelFromCache('bdApi_Model_Subscription')->deleteSubscriptions($client['client_id'], bdApi_Model_Subscription::TYPE_USER, $visitor['user_id']);
+					$this->getModelFromCache('bdApi_Model_Subscription')->deleteSubscriptions($client['client_id'], bdApi_Model_Subscription::TYPE_NOTIFICATION, $visitor['user_id']);
 				}
 
 				XenForo_Db::commit();
@@ -171,9 +200,12 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		}
 		else
 		{
-			$viewParams = array('token' => $token);
+			$viewParams = array(
+				'client' => $client,
+				'userScopes' => $userScopes,
+			);
 
-			return $this->_getWrapper('account', 'api', $this->responseView('bdApi_ViewPublic_Account_Api_Token_Revoke', 'bdapi_account_api_token_revoke', $viewParams));
+			return $this->_getWrapper('account', 'api', $this->responseView('bdApi_ViewPublic_Account_Api_UpdateScope', 'bdapi_account_api_update_scope', $viewParams));
 		}
 	}
 

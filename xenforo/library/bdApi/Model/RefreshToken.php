@@ -3,7 +3,15 @@ class bdApi_Model_RefreshToken extends XenForo_Model
 {
 	const FETCH_CLIENT = 0x01;
 	const FETCH_USER = 0x02;
-	
+
+	public function deleteRefreshTokens($clientId, $userId)
+	{
+		return $this->_getDb()->delete('xf_bdapi_refresh_token', array(
+			'client_id = ?' => $clientId,
+			'user_id = ?' => $userId,
+		));
+	}
+
 	public function pruneExpired()
 	{
 		$this->_getDb()->query('

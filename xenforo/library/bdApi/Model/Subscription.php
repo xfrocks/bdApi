@@ -328,15 +328,25 @@ class bdApi_Model_Subscription extends XenForo_Model
 	public function deleteSubscriptionsForTopic($type, $id)
 	{
 		$topic = sprintf('%s_%s', $type, $id);
-		$subscriptions = $this->getSubscriptions(array('topic' => $topic));
 
-		foreach ($subscriptions as $subscription)
+		$deleted = $this->_getDb()->delete('xf_bdapi_subscription', array('topic = ?' => $topic));
+	}
+
+	public function deleteSubscriptions($clientId, $type, $id)
+	{
+		$topic = sprintf('%s_%s', $type, $id);
+
+		$deleted = $this->_getDb()->delete('xf_bdapi_subscription', array(
+			'client_id = ?' => $clientId,
+			'topic = ?' => $topic,
+		));
+
+		if ($deleted)
 		{
-			$subscriptionDw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription');
-			$subscriptionDw->setOption(bdApi_DataWriter_Subscription::OPTION_UPDATE_CALLBACKS, false);
-			$subscriptionDw->setExistingData($subscription, true);
-			$subscriptionDw->delete();
+			$this->updateCallbacksForTopic($topic);
 		}
+
+		return $deleted;
 	}
 
 	public function getList(array $conditions = array(), array $fetchOptions = array())
