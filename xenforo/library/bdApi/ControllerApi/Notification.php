@@ -36,6 +36,13 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_Notification_List', $data);
 	}
 
+	public function actionPostRead()
+	{
+		$this->_getAlertModel()->markAllAlertsReadForUser(XenForo_Visitor::getUserId());
+
+		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+	}
+
 	/**
 	 *
 	 * @return XenForo_Model_Alert

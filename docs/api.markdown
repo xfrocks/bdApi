@@ -1460,7 +1460,7 @@ Required scopes:
 ## Notifications
 
 ### GET `/notifications`
-List of conversations (with pagination). Since forum-2014022602.
+List of notifications. Since forum-2014022602.
 
     {
         notifications: [
@@ -1481,6 +1481,17 @@ Required scopes:
 
  * `read`
 
+### POST `/notifications/read`
+Mark notifications as read. Since forum-2014092701.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Required scopes:
+
+ * `post`
 
 ## Searching
 
