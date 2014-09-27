@@ -194,7 +194,7 @@ class bdApi_Model_Subscription extends XenForo_Model
 			$userAlerts = $alertModel->bdApi_prepareContentForAlerts($userAlerts, $viewingUsers[$userId]);
 
 			bdApi_Template_Simulation_Template::$bdApi_visitor = $viewingUsers[$userId];
-			$userAlerts = XenForo_ViewPublic_Helper_Alert::getTemplates(bdApi_Template_Simulation_View::create(), $userAlerts, $alertModel->bdApi_getAlertHandlers());
+			$userAlerts = bdApi_ViewApi_Helper_Alert::getTemplates(bdApi_Template_Simulation_View::create(), $userAlerts, $alertModel->bdApi_getAlertHandlers());
 
 			foreach (array_keys($userAlerts) as $userAlertId)
 			{
