@@ -25,6 +25,9 @@ class bdApiConsumer_Helper_Provider
 
 			if (!empty($provider['login/social']))
 			{
+				unset($provider['login/social']['_headers']);
+				unset($provider['login/social']['_responseStatus']);
+
 				self::_updateProvider($provider);
 			}
 		}

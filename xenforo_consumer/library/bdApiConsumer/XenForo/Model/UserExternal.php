@@ -64,6 +64,15 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
 			$extra['token']['expire_date'] = time() + $extra['token']['expires_in'];
 		}
 
+		if (!empty($extra['token']['_headers']))
+		{
+			unset($extra['token']['_headers']);
+		}
+		if (!empty($extra['token']['_responseStatus']))
+		{
+			unset($extra['token']['_responseStatus']);
+		}
+
 		if (bdApiConsumer_Option::get('takeOver', 'avatar'))
 		{
 			$avatarUrl = bdApiConsumer_Helper_Avatar::getAvatarUrlFromAuthExtra($extra);
