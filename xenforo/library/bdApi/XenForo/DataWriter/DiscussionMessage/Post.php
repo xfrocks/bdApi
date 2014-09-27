@@ -55,6 +55,12 @@ class bdApi_XenForo_DataWriter_DiscussionMessage_Post extends XFCP_bdApi_XenForo
 
 	protected function _bdApi_pingThreadPost($action)
 	{
+		if (!bdApi_Option::getSubscription(bdApi_Model_Subscription::TYPE_THREAD_POST))
+		{
+			// subscription for thread post has been disabled
+			return false;
+		}
+
 		$thread = $this->getDiscussionData();
 		if (!empty($thread['bdapi_thread_post']))
 		{

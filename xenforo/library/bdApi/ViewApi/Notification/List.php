@@ -12,32 +12,17 @@ class bdApi_ViewApi_Notification_List extends bdApi_ViewApi_Base
 			$notification['notification_html'] = $templates[$notification['notification_id']]['template'];
 		}
 
-		// subscription discovery
-		$hubLink = XenForo_Link::buildApiLink('subscriptions', null, array(
-			'hub.topic' => bdApi_Model_Subscription::getTopic(bdApi_Model_Subscription::TYPE_NOTIFICATION, XenForo_Visitor::getUserId()),
-			OAUTH2_TOKEN_PARAM_NAME => '',
+		call_user_func_array(array(
+			'bdApi_ViewApi_Helper_Subscription',
+			'prepareDiscoveryParams'
+		), array(
+			&$this->_params,
+			$this->_response,
+			bdApi_Model_Subscription::TYPE_NOTIFICATION,
+			XenForo_Visitor::getUserId(),
+			XenForo_Link::buildApiLink('notifications', null, array(OAUTH2_TOKEN_PARAM_NAME => '')),
+			XenForo_Visitor::getInstance()->get('bdapi_user_notification'),
 		));
-		$this->_response->setHeader('Link', sprintf('<%s>; rel=hub', $hubLink));
-		$selfLink = XenForo_Link::buildApiLink('notifications', null, array(OAUTH2_TOKEN_PARAM_NAME => ''));
-		$this->_response->setHeader('Link', sprintf('<%s>; rel=self', $selfLink));
-
-		// subscription info
-		$visitor = XenForo_Visitor::getInstance()->toArray();
-		if (!empty($visitor['bdapi_user_notification']))
-		{
-			$userOption = @unserialize($visitor['bdapi_user_notification']);
-			if (!empty($userOption['subscriptions']))
-			{
-				$clientId = XenForo_Application::getSession()->getOAuthClientId();
-				foreach ($userOption['subscriptions'] as $subscription)
-				{
-					if ($subscription['client_id'] == $clientId)
-					{
-						$this->_params['subscription_callback'] = $subscription['callback'];
-					}
-				}
-			}
-		}
 
 		return parent::prepareParams();
 	}

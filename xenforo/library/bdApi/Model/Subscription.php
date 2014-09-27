@@ -140,6 +140,12 @@ class bdApi_Model_Subscription extends XenForo_Model
 
 	public function preparePingDataMany($objectType, array $pingDataMany)
 	{
+		if (!bdApi_Option::getSubscription($objectType))
+		{
+			// subscription for this topic type has been disabled
+			return array();
+		}
+
 		switch ($objectType)
 		{
 			case self::TYPE_NOTIFICATION:
@@ -287,6 +293,12 @@ class bdApi_Model_Subscription extends XenForo_Model
 		$this->standardizeViewingUserReference($viewingUser);
 
 		list($type, $id) = self::parseTopic($topic);
+
+		if (!bdApi_Option::getSubscription($type))
+		{
+			// subscription for this topic type has been disabled
+			return false;
+		}
 
 		switch ($type)
 		{

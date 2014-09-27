@@ -4,10 +4,14 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
 {
 	public function resetUnreadAlertsCounter($userId)
 	{
-		$userOption = $this->bdApi_getUserNotificationOption($userId);
-		if (!empty($userOption))
+		if (bdApi_Option::getSubscription(bdApi_Model_Subscription::TYPE_NOTIFICATION))
 		{
-			$this->getModelFromCache('bdApi_Model_Subscription')->ping($userOption, 'read', bdApi_Model_Subscription::TYPE_NOTIFICATION, 0);
+			// subscription for alert is enabled
+			$userOption = $this->bdApi_getUserNotificationOption($userId);
+			if (!empty($userOption))
+			{
+				$this->getModelFromCache('bdApi_Model_Subscription')->ping($userOption, 'read', bdApi_Model_Subscription::TYPE_NOTIFICATION, 0);
+			}
 		}
 
 		return parent::resetUnreadAlertsCounter($userId);

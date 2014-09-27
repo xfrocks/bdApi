@@ -62,6 +62,12 @@ class bdApi_XenForo_DataWriter_User extends XFCP_bdApi_XenForo_DataWriter_User
 
 	protected function _bdApi_pingUser($action)
 	{
+		if (!bdApi_Option::getSubscription(bdApi_Model_Subscription::TYPE_USER))
+		{
+			// subscription for user has been disabled
+			return false;
+		}
+
 		$userOption = $this->get('bdapi_user');
 		if (!empty($userOption))
 		{

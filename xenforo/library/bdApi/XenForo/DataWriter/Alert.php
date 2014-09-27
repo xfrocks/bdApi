@@ -4,7 +4,7 @@ class bdApi_XenForo_DataWriter_Alert extends XFCP_bdApi_XenForo_DataWriter_Alert
 {
 	protected function _postSave()
 	{
-		if ($this->isInsert())
+		if ($this->isInsert() AND bdApi_Option::getSubscription(bdApi_Model_Subscription::TYPE_NOTIFICATION))
 		{
 			$alertModel = $this->getModelFromCache('XenForo_Model_Alert');
 			$userOption = $alertModel->bdApi_getUserNotificationOption($this->get('alerted_user_id'));
