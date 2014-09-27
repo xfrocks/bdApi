@@ -6,14 +6,16 @@ class bdApiConsumer_Installer
 	/* Start auto-generated lines of code. Change made will be overwriten... */
 
 	protected static $_tables = array();
-	protected static $_patches = array( array(
+	protected static $_patches = array(
+		array(
 			'table' => 'xf_user_profile',
 			'field' => 'bdapiconsumer_unused',
 			'showTablesQuery' => 'SHOW TABLES LIKE \'xf_user_profile\'',
 			'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_user_profile` LIKE \'bdapiconsumer_unused\'',
 			'alterTableAddColumnQuery' => 'ALTER TABLE `xf_user_profile` ADD COLUMN `bdapiconsumer_unused` VARCHAR(255)',
 			'alterTableDropColumnQuery' => 'ALTER TABLE `xf_user_profile` DROP COLUMN `bdapiconsumer_unused`',
-		), );
+		),
+	);
 
 	public static function install($existingAddOn, $addOnData)
 	{
@@ -38,7 +40,7 @@ class bdApiConsumer_Installer
 				$db->query($patch['alterTableAddColumnQuery']);
 			}
 		}
-
+		
 		self::installCustomized($existingAddOn, $addOnData);
 	}
 
@@ -73,12 +75,22 @@ class bdApiConsumer_Installer
 
 	private static function installCustomized($existingAddOn, $addOnData)
 	{
-		// customized install script goes here
+		$db = XenForo_Application::getDb();
+
+		$db->query("REPLACE INTO `xf_content_type` (content_type, addon_id, fields) VALUES ('bdapi_consumer', 'bdApiConsumer', '')");
+		$db->query("REPLACE INTO `xf_content_type_field` (content_type, field_name, field_value) VALUES ('bdapi_consumer', 'alert_handler_class', 'bdApiConsumer_AlertHandler_Provider')");
+		XenForo_Model::create('XenForo_Model_ContentType')->rebuildContentTypeCache();
 	}
 
 	private static function uninstallCustomized()
 	{
-		// customized uninstall script goes here
+		$db = XenForo_Application::getDb();
+
+		$db->query("DELETE FROM `xf_content_type` WHERE addon_id = ?", array('bdApiConsumer'));
+		$db->query("DELETE FROM `xf_content_type_field` WHERE content_type = ?", array('bdapi_consumer'));
+		$db->query("DELETE FROM `xf_user_alert` WHERE content_type = ?", array('bdapi_consumer'));
+		$db->query("DELETE FROM `xf_user_alert_optout` WHERE alert LIKE 'bdapiconsumer_%s'");
+		XenForo_Model::create('XenForo_Model_ContentType')->rebuildContentTypeCache();
 	}
 
 }

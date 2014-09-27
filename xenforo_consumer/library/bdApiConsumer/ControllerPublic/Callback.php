@@ -112,6 +112,8 @@ class bdApiConsumer_ControllerPublic_Callback extends XenForo_ControllerPublic_A
 				{
 					case 'user':
 						$this->_handleUserPings($providers[$providerKey], $topicPings);
+					case 'user_notification':
+						$this->_handleUserNotificationPings($providers[$providerKey], $topicPings);
 				}
 
 				foreach ($topicPings as $ping)
@@ -162,6 +164,72 @@ class bdApiConsumer_ControllerPublic_Callback extends XenForo_ControllerPublic_A
 				{
 					$ping['result'] = 'updated user data';
 				}
+			}
+		}
+	}
+
+	protected function _handleUserNotificationPings(array $provider, array &$pings)
+	{
+		$providerKeys = array();
+		foreach ($pings as &$pingRef)
+		{
+			$providerKeys[] = $pingRef['topic_id'];
+		}
+		$auths = $this->getModelFromCache('XenForo_Model_UserExternal')->bdApiConsumer_getExternalAuthAssociationsForProviderUser($provider, $providerKeys);
+
+		$userIds = array();
+		foreach ($auths as &$authRef)
+		{
+			$provider = bdApiConsumer_Option::getProviderByCode($authRef['provider']);
+			if (empty($provider))
+			{
+				continue;
+			}
+
+			$authRef['_provider'] = $provider;
+
+			$userIds[] = $authRef['user_id'];
+		}
+		$users = $this->getModelFromCache('XenForo_Model_User')->getUsersByIds($userIds, array('join' => XenForo_Model_User::FETCH_USER_OPTION));
+
+		foreach ($pings as &$pingRef)
+		{
+			$auth = null;
+			foreach ($auths as $_auth)
+			{
+				if ($_auth['provider_key'] == $pingRef['topic_id'])
+				{
+					$auth = $_auth;
+				}
+			}
+			if (empty($auth))
+			{
+				continue;
+			}
+
+			$user = null;
+			if (!isset($users[$auth['user_id']]))
+			{
+				continue;
+			}
+			$user = $users[$auth['user_id']];
+
+			if ($pingRef['action'] == 'insert' AND !empty($pingRef['object_data']['notification_id']))
+			{
+				if (XenForo_Model_Alert::userReceivesAlert($user, 'bdapi_consumer', $auth['provider']))
+				{
+					$this->getModelFromCache('XenForo_Model_Alert')->bdApiConsumer_alertUser($auth['_provider'], $user, $pingRef['object_data']);
+					$pingRef['result'] = 'inserted alert';
+				}
+				else
+				{
+					$pingRef['result'] = 'user opted out';
+				}
+			}
+			elseif ($pingRef['action'] = 'read')
+			{
+				$this->getModelFromCache('XenForo_Model_Alert')->bdApiConsumer_markAlertsRead($auth['_provider'], $user);
+				$pingRef['result'] = 'marked as read';
 			}
 		}
 	}

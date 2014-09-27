@@ -7,12 +7,15 @@ class bdApiConsumer_Listener
 	public static function load_class($class, array &$extend)
 	{
 		static $classes = array(
+			'bdApi_Model_Subscription',
+
 			'XenForo_ControllerPublic_Account',
 			'XenForo_ControllerPublic_Login',
 			'XenForo_ControllerPublic_Logout',
 			'XenForo_ControllerPublic_Member',
 			'XenForo_ControllerPublic_Misc',
 			'XenForo_ControllerPublic_Register',
+			'XenForo_Model_Alert',
 			'XenForo_Model_Avatar',
 			'XenForo_Model_User',
 			'XenForo_Model_UserConfirmation',

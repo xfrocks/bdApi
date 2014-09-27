@@ -79,6 +79,13 @@ id_sync = {xen:phrase bdapi_consumer_auto_register_id_sync}</edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdApiConsumer" display_order="100"/>
     </option>
+    <option option_id="bdapi_consumer_displayExternalNotifications" edit_format="radio" data_type="unsigned_integer" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params>1 = {xen:phrase yes}
+0 = {xen:phrase no}</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApiConsumer" display_order="120"/>
+    </option>
     <option option_id="bdapi_consumer_loginFacebook" edit_format="callback" data_type="string" can_backup="1">
       <default_value></default_value>
       <edit_format_params>bdApiConsumer_Option::renderOptionLoginSocial</edit_format_params>
@@ -156,6 +163,8 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 &nbsp;- Enabled with ID sync: similar to `Enabled` but external user ID will be included in conflict check.]]></phrase>
     <phrase title="option_bdapi_consumer_bypassRegistrationActive" version_id="2" version_string="0.9-dev"><![CDATA[Bypass Registration Active Check]]></phrase>
     <phrase title="option_bdapi_consumer_bypassRegistrationActive_explain" version_id="2" version_string="0.9-dev"><![CDATA[Enabling this option will allow users who came from external sites to register regardless of the <a href="admin.php?options/list/usersAndRegistration" target="_blank" tabindex="-1">"Enable Registration" option</a>.]]></phrase>
+    <phrase title="option_bdapi_consumer_displayExternalNotifications" version_id="22" version_string="0.9.8-dev"><![CDATA[Display External Alerts]]></phrase>
+    <phrase title="option_bdapi_consumer_displayExternalNotifications_explain" version_id="22" version_string="0.9.8-dev"><![CDATA[]]></phrase>
     <phrase title="option_bdapi_consumer_loginFacebook" version_id="20" version_string="0.9.8-dev"><![CDATA[Facebook Login]]></phrase>
     <phrase title="option_bdapi_consumer_loginFacebook_explain" version_id="20" version_string="0.9.8-dev"><![CDATA[Choose a provider to let users who login via Facebook go through.]]></phrase>
     <phrase title="option_bdapi_consumer_loginGoogle" version_id="20" version_string="0.9.8-dev"><![CDATA[Google Login]]></phrase>

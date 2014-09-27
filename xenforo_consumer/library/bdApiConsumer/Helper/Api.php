@@ -1,13 +1,17 @@
 <?php
+
 class bdApiConsumer_Helper_Api
 {
+	const SCOPE = 'read post';
+
 	public static function getRequestUrl(array $provider, $redirectUri, array $extraParams = array())
 	{
 		$url = call_user_func_array('sprintf', array(
-			'%s/index.php?oauth/authorize/&client_id=%s&redirect_uri=%s&response_type=code&scope=read',
+			'%s/index.php?oauth/authorize/&client_id=%s&redirect_uri=%s&response_type=code&scope=%s',
 			rtrim($provider['root'], '/'),
 			rawurlencode($provider['client_id']),
-			rawurlencode($redirectUri)
+			rawurlencode($redirectUri),
+			rawurlencode(self::SCOPE),
 		));
 
 		foreach ($extraParams as $key => $value)
@@ -112,6 +116,20 @@ class bdApiConsumer_Helper_Api
 		return false;
 	}
 
+	public static function getNotifications(array $provider, $accessToken)
+	{
+		$json = self::_get($provider, 'notifications/', $accessToken, 'notifications');
+
+		if (isset($json['notifications']))
+		{
+			$json['_headerLinkHub'] = self::_getHeaderLinkHub($json['_headers']);
+
+			return $json;
+		}
+
+		return false;
+	}
+
 	public static function postLoginSocial(array $provider)
 	{
 		return self::_post($provider, 'tools/login-social/', self::generateOneTimeToken($provider), 'social');
@@ -130,6 +148,13 @@ class bdApiConsumer_Helper_Api
 		));
 
 		return (!empty($json['_responseStatus']) AND $json['_responseStatus'] == 202);
+	}
+
+	public static function postNotificationsRead(array $provider, $accessToken)
+	{
+		$json = self::_post($provider, 'notifications/read/', $accessToken);
+
+		return (!empty($json['_responseStatus']) AND $json['_responseStatus'] == 200);
 	}
 
 	public static function verifyJsSdkSignature(array $provider, array $data, $prefix = '_api_data_')
@@ -212,7 +237,7 @@ class bdApiConsumer_Helper_Api
 
 			if (!is_array($json))
 			{
-				return false;
+				$json = array('_body' => $body);
 			}
 
 			if ($expectedKey !== false)

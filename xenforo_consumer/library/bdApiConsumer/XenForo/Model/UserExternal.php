@@ -17,7 +17,7 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
 		// TODO
 	}
 
-	public function bdApiConsumer_getAccessTokenFromAuth(array $provider, array $auth)
+	public function bdApiConsumer_getAccessTokenFromAuth(array $provider, array &$auth)
 	{
 		if (!is_array($auth['extra_data']))
 		{
@@ -43,11 +43,14 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
 			$externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromRefreshToken($provider, $auth['extra_data']['token']['refresh_token']);
 			if (empty($externalToken))
 			{
-				return false;
+				$auth['extra_data']['token'] = false;
+			}
+			else
+			{
+				$auth['extra_data']['token'] = $externalToken;
 			}
 
-			$this->bdApiConsumer_updateExternalAuthAssociation($provider, $auth['provider_key'], $auth['user_id'], array_merge($auth['extra_data'], array('token' => $externalToken)));
-			$auth['extra_data']['token'] = $externalToken;
+			$this->bdApiConsumer_updateExternalAuthAssociation($provider, $auth['provider_key'], $auth['user_id'], $auth['extra_data']);
 		}
 
 		return $auth['extra_data']['token']['access_token'];
