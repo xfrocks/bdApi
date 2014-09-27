@@ -2,6 +2,17 @@
 
 class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
 {
+	public function resetUnreadAlertsCounter($userId)
+	{
+		$userOption = $this->bdApi_getUserNotificationOption($userId);
+		if (!empty($userOption))
+		{
+			$this->getModelFromCache('bdApi_Model_Subscription')->ping($userOption, 'read', bdApi_Model_Subscription::TYPE_NOTIFICATION, 0);
+		}
+
+		return parent::resetUnreadAlertsCounter($userId);
+	}
+
 	public function bdApi_getAlertsByIds($alertIds)
 	{
 		return $this->fetchAllKeyed('
@@ -25,7 +36,7 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
 
 		return $alerts;
 	}
-	
+
 	public function bdApi_getAlertHandlers()
 	{
 		return $this->_handlerCache;
@@ -44,11 +55,18 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
 
 		if (empty($userOptions) OR !isset($userOptions[$userId]))
 		{
-			$userOptions[$userId] = $this->_getDb()->fetchOne('
-				SELECT `bdapi_user_notification`
-				FROM `xf_user_option`
-				WHERE user_id = ?
-			', $userId);
+			if ($userId == XenForo_Visitor::getUserId())
+			{
+				$userOptions[$userId] = XenForo_Visitor::getInstance()->get('bdapi_user_notification');
+			}
+			else
+			{
+				$userOptions[$userId] = $this->_getDb()->fetchOne('
+					SELECT `bdapi_user_notification`
+					FROM `xf_user_option`
+					WHERE user_id = ?
+				', $userId);
+			}
 
 			XenForo_Application::set('bdapi_user_notification', $userOptions);
 		}

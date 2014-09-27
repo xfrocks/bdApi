@@ -206,6 +206,12 @@ class bdApi_Model_Subscription extends XenForo_Model
 		{
 			$pingDataRef = &$pingDataMany[$pingDataKey];
 
+			if (empty($pingDataRef['object_data']))
+			{
+				// no alert is attached to object data
+				continue;
+			}
+
 			if (!isset($alerts[$pingDataRef['object_data']]))
 			{
 				// alert not found
