@@ -188,7 +188,10 @@ function xfac_syncComment_processPostSyncRecord($config, $postSyncRecord)
 	{
 		if (xfac_api_postSubscription($config, $accessToken, $xfPosts['_headerLinkHub']))
 		{
-			$postSyncRecord->syncData['subscribed'] = time();
+			$postSyncRecord->syncData['subscribed'] = array(
+				'hub' => $xfPosts['_headerLinkHub'],
+				'time' => time(),
+			);
 			xfac_sync_updateRecord('', $postSyncRecord->provider_content_type, $postSyncRecord->provider_content_id, $postSyncRecord->sync_id, 0, $postSyncRecord->syncData);
 		}
 	}

@@ -534,12 +534,12 @@ function xfac_api_postUser($config, $email, $username, $password, array $extraPa
 	}
 }
 
-function xfac_api_postSubscription($config, $accessToken, $url)
+function xfac_api_postSubscription($config, $accessToken, $url, $mode = 'subscribe')
 {
 	$postFields = array(
 		'oauth_token' => $accessToken,
 		'hub.callback' => site_url('wp-trackback.php?xfac_callback=1'),
-		'hub.mode' => 'subscribe',
+		'hub.mode' => $mode,
 	);
 	$curl = _xfac_api_curl($url, 'POST', $postFields);
 
