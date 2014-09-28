@@ -94,7 +94,8 @@ function xfac_option_getMeta($config)
 	}
 
 	$xfAdminAccountOption = intval(get_option('xfac_xf_admin_account'));
-	if (empty($meta['xfac_xf_admin_account']) OR $meta['xfac_xf_admin_account'] != $xfAdminAccountOption)
+	$xfAdminAccountMeta = (empty($meta['xfac_xf_admin_account']) ? 0 : intval($meta['xfac_xf_admin_account']));
+	if ($xfAdminAccountMeta !== $xfAdminAccountOption)
 	{
 		$rebuild = true;
 	}

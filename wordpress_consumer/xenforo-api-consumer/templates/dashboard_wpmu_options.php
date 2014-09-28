@@ -36,7 +36,10 @@ if (!defined('ABSPATH'))
 			<?php _e('Successfully connected to XenForo at:', 'xenforo-api-consumer'); ?>
 			<a href="<?php echo esc_attr($meta['linkIndex']); ?>" target="_blank"><?php echo $meta['linkIndex']; ?></a>
 
-			<p><?php echo xfac_api_getVersionSuggestionText($config, $meta); ?></p>
+			<p>
+				<?php echo xfac_api_getVersionSuggestionText($config, $meta); ?>
+				<a href="<?php echo admin_url('options-general.php?page=xfac&do=xfac_meta'); ?>"><?php _e('Reload API Info.', 'xenforo-api-consumer'); ?></a>
+			</p>
 		</td>
 	</tr>
 	<?php endif; ?>

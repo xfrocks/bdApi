@@ -87,7 +87,10 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
 				<td>
 					<input name="xfac_root" type="text" id="xfac_root" value="<?php echo esc_attr($config['root']); ?>" class="regular-text" />
 
-					<p class="description"><?php echo xfac_api_getVersionSuggestionText($config, $meta); ?></p>
+					<p class="description">
+						<?php echo xfac_api_getVersionSuggestionText($config, $meta); ?>
+						<a href="<?php echo admin_url('options-general.php?page=xfac&do=xfac_meta'); ?>"><?php _e('Reload API Info.', 'xenforo-api-consumer'); ?></a>
+					</p>
 				</td>
 			</tr>
 			<tr valign="top">
@@ -334,6 +337,32 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
 				</td>
 			</tr>
 			<?php else: ?>
+			<tr valign="top">
+				<th scope="row">
+					<?php _e('Role / Group Mapping', 'xenforo-api-consumer'); ?><br />
+				</th>
+				<td>
+					<p class="description">
+						<?php $optionsUrl = admin_url('options-general.php?page=xfac'); ?>
+						<?php $loginUrl = site_url('wp-login.php?xfac=authorize&admin=1&redirect_to=' . rawurlencode($optionsUrl), 'login_post'); ?>
+						<?php if (xfac_user_getAdminAccessToken($config)): ?>
+							<?php _e('Could not get user groups information from API server.'); ?>
+							<?php if (xfac_user_getRecordsByUserId(get_current_user_id())): ?>
+								<a href="<?php echo $loginUrl; ?>"><?php _e('Click here to refresh your association.', 'xenforo-api-consumer'); ?></a>
+							<?php else: ?>
+								<a href="<?php echo $loginUrl; ?>"><?php _e('Click here to associate your account.', 'xenforo-api-consumer'); ?></a>
+							<?php endif; ?>
+						<?php else: ?>
+							<?php _e('You need to associate an Administrative XenForo account and select it as Admin Account.', 'xenforo-api-consumer'); ?>
+							<?php if (xfac_user_getRecordsByUserId(get_current_user_id())): ?>
+								<a href="<?php echo $optionsUrl; ?>"><?php _e('Click here to configure Admin Account.', 'xenforo-api-consumer'); ?></a>
+							<?php else: ?>
+								<a href="<?php echo $loginUrl; ?>"><?php _e('Click here to associate your XenForo account.', 'xenforo-api-consumer'); ?></a>
+							<?php endif; ?>
+						<?php endif; ?>
+					</p>
+				</td>
+			</tr>
 						<?php foreach($syncRoleOption as $roleName => $userGroupId): ?>
 							<input type="hidden" name="xfac_sync_role[<?php echo $roleName; ?>]" value="<?php echo $userGroupId; ?>" />
 						<?php endforeach; ?>
