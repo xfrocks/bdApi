@@ -92,7 +92,9 @@ class bdApi_Model_AuthCode extends XenForo_Model
 		foreach (array('auth_code_id', 'client_id', 'expire_date', 'user_id') as $columnName)
 		{
 			if (!isset($conditions[$columnName]))
+			{
 				continue;
+			}
 
 			if (is_array($conditions[$columnName]))
 			{
@@ -111,6 +113,33 @@ class bdApi_Model_AuthCode extends XenForo_Model
 		if (isset($conditions['auth_code_text']))
 		{
 			$sqlConditions[] = 'auth_code.auth_code_text = ' . $this->_getDb()->quote($conditions['auth_code_text']);
+		}
+
+		if (isset($conditions['expired']))
+		{
+			if ($conditions['expired'])
+			{
+				$sqlConditions[] = 'auth_code.expire_date > 0';
+				$sqlConditions[] = 'auth_code.expire_date < ' . XenForo_Application::$time;
+			}
+			else
+			{
+				$sqlConditions[] = 'auth_code.expire_date = 0 OR auth_code.expire_date > ' . XenForo_Application::$time;
+			}
+		}
+
+		if (!empty($conditions['filter']))
+		{
+			if (is_array($conditions['filter']))
+			{
+				$filterQuoted = XenForo_Db::quoteLike($conditions['filter'][0], $conditions['filter'][1], $db);
+			}
+			else
+			{
+				$filterQuoted = XenForo_Db::quoteLike($conditions['filter'], 'lr', $db);
+			}
+
+			$sqlConditions[] = sprintf('auth_code.auth_code_text LIKE %1$s', $filterQuoted);
 		}
 
 		return $this->getConditionsForClause($sqlConditions);

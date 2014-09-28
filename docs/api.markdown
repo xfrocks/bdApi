@@ -36,6 +36,8 @@ With `user_id` is the ID of authenticated user; `timestamp` is the unix timestam
  * Authorization URI: `/oauth/authorize`
  * Access token exchange URI: `/oauth/token`
 
+Please note that the TTL can be reconfigured to make it expire sooner or much later.
+
 ### Discoverability
 System information and availability can be determined by sending a GET request to `/` (index route). A list of resources will be returned. If the request is authenticated, the revisions of API system and installed modules will also made available for further inspection.
 
@@ -1584,9 +1586,23 @@ Required scopes:
  * N/A
 
 ## Subscriptions
-Clients can subscribe to certain events to receive real time ping when data is changed within the system. The subscription system uses the [PubSubHubbub protocol](https://code.google.com/p/pubsubhubbub/) to communicate with hubs and/or subscribers. Since subscription-2014081001.
+Clients can subscribe to certain events to receive real time ping when data is changed within the system. The subscription system uses the [PubSubHubbub protocol](https://code.google.com/p/pubsubhubbub/) to communicate with hubs and subscribers. Since subscription-2014081001.
 
 List of supported topics:
 
+ * `user_x` (x is the user_id of the interested user): receives ping when user data is inserted, updated or deleted. The registered callback will be included in GET `/users/:userId` as parameter `subscription_callback`.
  * `user_notification_x` (x is the user_id of the interested user): receives ping when user gets a new notification. Notification data will be included in the ping. The registered callback will be included in GET `/notifications` as parameter `subscription_callback`.
  * `thread_post_x` (x is the thread_id of the interested thread): receives ping when a post in the thread is inserted, updated or deleted. The registered callback will be included in GET `/posts?thread_id=x` as parameter `subscription_callback`.
+
+For supported resources, two `Link` HTTP headers will be included. It is recommended to check for these headers before issuing subscribe request because webmaster can disable some or all types of subscriptions.
+
+    Link: <topic url>; rel="self"
+    Link: <hub url>; rel="hub"
+
+### Example subscribe request
+
+    curl -XPOST http://domain.com/api/subscriptions \
+        -d 'oauth_token=$token' \
+        -d 'hub.callback=$callback_url' \
+        -d 'hub.mode=subscribe' \
+        -d 'hub.topic=$topic'

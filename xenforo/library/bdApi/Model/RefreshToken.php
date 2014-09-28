@@ -92,7 +92,9 @@ class bdApi_Model_RefreshToken extends XenForo_Model
 		foreach (array('refresh_token_id', 'client_id', 'expire_date', 'user_id') as $columnName)
 		{
 			if (!isset($conditions[$columnName]))
+			{
 				continue;
+			}
 
 			if (is_array($conditions[$columnName]))
 			{
@@ -111,6 +113,33 @@ class bdApi_Model_RefreshToken extends XenForo_Model
 		if (isset($conditions['refresh_token_text']))
 		{
 			$sqlConditions[] = 'refresh_token.refresh_token_text = ' . $this->_getDb()->quote($conditions['refresh_token_text']);
+		}
+
+		if (isset($conditions['expired']))
+		{
+			if ($conditions['expired'])
+			{
+				$sqlConditions[] = 'refresh_token.expire_date > 0';
+				$sqlConditions[] = 'refresh_token.expire_date < ' . XenForo_Application::$time;
+			}
+			else
+			{
+				$sqlConditions[] = 'refresh_token.expire_date = 0 OR refresh_token.expire_date > ' . XenForo_Application::$time;
+			}
+		}
+
+		if (!empty($conditions['filter']))
+		{
+			if (is_array($conditions['filter']))
+			{
+				$filterQuoted = XenForo_Db::quoteLike($conditions['filter'][0], $conditions['filter'][1], $db);
+			}
+			else
+			{
+				$filterQuoted = XenForo_Db::quoteLike($conditions['filter'], 'lr', $db);
+			}
+
+			$sqlConditions[] = sprintf('refresh_token.refresh_token_text LIKE %1$s', $filterQuoted);
 		}
 
 		return $this->getConditionsForClause($sqlConditions);

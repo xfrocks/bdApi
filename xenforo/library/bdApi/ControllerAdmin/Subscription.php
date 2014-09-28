@@ -4,13 +4,20 @@ class bdApi_ControllerAdmin_Subscription extends XenForo_ControllerAdmin_Abstrac
 {
 	public function actionIndex()
 	{
-		$conditions = array();
-		$fetchOptions = array();
-
 		$subscriptionModel = $this->_getSubscriptionModel();
-		$subscriptions = $subscriptionModel->getSubscriptions($conditions, $fetchOptions);
 
-		$viewParams = array('subscriptions' => $subscriptions);
+		$conditions = array();
+		$fetchOptions = array('join' => bdApi_Model_Subscription::FETCH_CLIENT);
+
+		$viewParams = $this->getHelper('bdApi_ControllerHelper_Admin')->prepareConditionsAndFetchOptions($conditions, $fetchOptions);
+
+		$subscriptions = $subscriptionModel->getSubscriptions($conditions, $fetchOptions);
+		$total = $subscriptionModel->countSubscriptions($conditions, $fetchOptions);
+
+		$viewParams = array_merge($viewParams, array(
+			'subscriptions' => $subscriptions,
+			'total' => $total,
+		));
 
 		return $this->responseView('bdApi_ViewAdmin_Subscription_List', 'bdapi_subscription_list', $viewParams);
 	}

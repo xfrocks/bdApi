@@ -6,6 +6,8 @@ class bdApi_Model_Subscription extends XenForo_Model
 	const TYPE_THREAD_POST = 'thread_post';
 	const TYPE_USER = 'user';
 
+	const FETCH_CLIENT = 0x01;
+
 	public function updateCallbacksForTopic($topic)
 	{
 		list($type, $id) = self::parseTopic($topic);
@@ -521,6 +523,21 @@ class bdApi_Model_Subscription extends XenForo_Model
 			}
 		}
 
+		if (!empty($conditions['filter']))
+		{
+
+			if (is_array($conditions['filter']))
+			{
+				$filterQuoted = XenForo_Db::quoteLike($conditions['filter'][0], $conditions['filter'][1], $db);
+			}
+			else
+			{
+				$filterQuoted = XenForo_Db::quoteLike($conditions['filter'], 'lr', $db);
+			}
+
+			$sqlConditions[] = sprintf('(subscription.callback LIKE %1$s OR subscription.topic LIKE %1$s)', $filterQuoted);
+		}
+
 		return $this->getConditionsForClause($sqlConditions);
 	}
 
@@ -528,6 +545,20 @@ class bdApi_Model_Subscription extends XenForo_Model
 	{
 		$selectFields = '';
 		$joinTables = '';
+
+		if (!empty($fetchOptions['join']))
+		{
+			if ($fetchOptions['join'] & self::FETCH_CLIENT)
+			{
+				$selectFields .= '
+					, client.name AS client_name
+					, client.description AS client_description
+					, client.redirect_uri AS client_redirect_uri';
+				$joinTables .= '
+					LEFT JOIN `xf_bdapi_client` AS client
+					ON (client.client_id = subscription.client_id)';
+			}
+		}
 
 		return array(
 			'selectFields' => $selectFields,

@@ -5,19 +5,23 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
 	public function actionIndex()
 	{
 		$tokenModel = $this->_getTokenModel();
-		$tokens = $tokenModel->getTokens(
-				array(
-				),
-				array(
-						'join' => bdApi_Model_Token::FETCH_CLIENT + bdApi_Model_Token::FETCH_USER,
-						'order' => 'issue_date',
-						'direction' => 'desc',
-				)
+
+		$conditions = array();
+		$fetchOptions = array(
+			'join' => bdApi_Model_Token::FETCH_CLIENT + bdApi_Model_Token::FETCH_USER,
+			'order' => 'issue_date',
+			'direction' => 'desc',
 		);
 
-		$viewParams = array(
-				'tokens' => $tokens
-		);
+		$viewParams = $this->getHelper('bdApi_ControllerHelper_Admin')->prepareConditionsAndFetchOptions($conditions, $fetchOptions);
+
+		$tokens = $tokenModel->getTokens($conditions, $fetchOptions);
+		$total = $tokenModel->countTokens($conditions, $fetchOptions);
+
+		$viewParams = array_merge($viewParams, array(
+			'tokens' => $tokens,
+			'total' => $total,
+		));
 
 		return $this->responseView('bdApi_ViewAdmin_Token_List', 'bdapi_token_list', $viewParams);
 	}
@@ -33,16 +37,11 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
 			$dw->setExistingData($id);
 			$dw->delete();
 
-			return $this->responseRedirect(
-					XenForo_ControllerResponse_Redirect::SUCCESS,
-					XenForo_Link::buildAdminLink('api-tokens')
-			);
+			return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildAdminLink('api-tokens'));
 		}
 		else
 		{
-			$viewParams = array(
-					'token' => $token
-			);
+			$viewParams = array('token' => $token);
 
 			return $this->responseView('bdApi_ViewAdmin_Token_Delete', 'bdapi_token_delete', $viewParams);
 		}
@@ -77,16 +76,13 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
 			$dw->set('scope', $scopes);
 			$dw->save();
 
-			return $this->responseRedirect(
-					XenForo_ControllerResponse_Redirect::SUCCESS,
-					XenForo_Link::buildAdminLink('api-tokens')
-			);
+			return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildAdminLink('api-tokens'));
 		}
 		else
 		{
 			$viewParams = array(
-					'clients' => $this->_getClientModel()->getList(),
-					'scopes' => $this->_getOAuth2Model()->getSystemSupportedScopes(),
+				'clients' => $this->_getClientModel()->getList(),
+				'scopes' => $this->_getOAuth2Model()->getSystemSupportedScopes(),
 			);
 
 			return $this->responseView('bdApi_ViewAdmin_Token_Add', 'bdapi_token_add', $viewParams);
@@ -148,4 +144,5 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
 	{
 		return XenForo_DataWriter::create('bdApi_DataWriter_Token');
 	}
+
 }

@@ -53,33 +53,50 @@
 	
 	<input type="hidden" name="_xfConfirm" value="1" />
 </xen:form>]]></template>
-    <template title="bdapi_auth_code_list"><![CDATA[<xen:title>{xen:phrase bdapi_auth_code}</xen:title>
+    <template title="bdapi_auth_code_list"><![CDATA[<xen:title>{xen:phrase bdapi_auth_codes}</xen:title>
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
+<xen:require js="js/bdApi/filter_list.js" />
+
+<xen:if is="{$client}">
+	<xen:navigation>
+		<xen:breadcrumb href="{xen:adminlink api-clients/edit, $client}">{$client.name}</xen:breadcrumb>
+	</xen:navigation>
+</xen:if>
 
 <xen:form action="{xen:adminlink 'api-auth-codes'}" class="section">
 	<xen:if is="{$authCodes}">
 		<h2 class="subHeading">
-			<link rel="xenforo_template" type="text/html" href="filter_list_controls.html" />
+			<xen:include template="filter_list_controls" />
 			{xen:phrase bdapi_auth_code}
 		</h2>
-	
-		<ol class="FilterList Scrollable">
-			<xen:foreach loop="$authCodes" value="$authCode">
-				<xen:listitem
-					id="{$authCode.auth_code_id}"
-					label="{$authCode.auth_code_text}"
-					snippet="{$authCode.client_name}->{$authCode.username} ({xen:datetime $authCode.issue_date})"
-					delete="{xen:adminlink 'api-auth-codes/delete', $authCode}" />
-			</xen:foreach>
+
+		<ol class="FilterList Scrollable" data-ajaxFilter="true">
+			<xen:include template="bdapi_auth_code_list_items" />
 		</ol>
-	
+
 		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $allAuthCode}</span>', 'total={xen:count $allAuthCode}'}</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase bdapi_auth_code_no_results}</div>
 	</xen:if>
-</xen:form>]]></template>
+</xen:form>
+
+{xen:adminpagenav $perPage, $total, $page, api-auth-codes, '', '_params={$pageNavParams}'}]]></template>
+    <template title="bdapi_auth_code_list_items"><![CDATA[<xen:foreach loop="$authCodes" value="$authCode">
+	<xen:listitem
+		id="{$authCode.auth_code_id}"
+		delete="{xen:adminlink 'api-auth-codes/delete', $authCode}">
+		<xen:label>{$authCode.auth_code_text}</xen:label>
+		<xen:snippet>
+			{xen:if '!{$client}', '{$authCode.client_name}->'}{$authCode.username}
+			({$authCode.scope}, {xen:datetime $authCode.issue_date})
+		</xen:snippet>
+	</xen:listitem>
+</xen:foreach>
+<xen:if is="{$filterView} AND {$total} > {$perPage}">
+	<li class="listNote">{xen:phrase more_records_matching_filter_more_specific}</li>
+</xen:if>]]></template>
     <template title="bdapi_client_delete"><![CDATA[<xen:title>{xen:phrase bdapi_client_confirm_deletion}: {$client.name}</xen:title>
 <xen:h1>{xen:phrase bdapi_client_confirm_deletion}</xen:h1>
 
@@ -146,7 +163,7 @@
 	
 	<input type="hidden" name="existing_client_id" value="{$client.client_id}" />
 </xen:form>]]></template>
-    <template title="bdapi_client_list"><![CDATA[<xen:title>{xen:phrase bdapi_client}</xen:title>
+    <template title="bdapi_client_list"><![CDATA[<xen:title>{xen:phrase bdapi_clients}</xen:title>
 
 <xen:topctrl>
 	<a href="{xen:adminlink 'api-clients/add'}" class="button" accesskey="a">+ {xen:phrase bdapi_client_add}</a>
@@ -154,30 +171,44 @@
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
+<xen:require js="js/bdApi/filter_list.js" />
 
 <xen:form action="{xen:adminlink 'api-clients'}" class="section">
 	<xen:if is="{$clients}">
 		<h2 class="subHeading">
-			<link rel="xenforo_template" type="text/html" href="filter_list_controls.html" />
+			<xen:include template="filter_list_controls" />
 			{xen:phrase bdapi_client}
 		</h2>
 	
-		<ol class="FilterList Scrollable">
-			<xen:foreach loop="$clients" value="$client">
-				<xen:listitem
-					id="{$client.client_id}"
-					href="{xen:adminlink 'api-clients/edit', $client}"
-					label="{$client.name}"
-					snippet="{$client.redirect_uri}"
-					delete="{xen:adminlink 'api-clients/delete', $client}" />
-			</xen:foreach>
+		<ol class="FilterList Scrollable" data-ajaxFilter="true">
+			<xen:include template="bdapi_client_list_items" />
 		</ol>
 	
 		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $allClient}</span>', 'total={xen:count $allClient}'}</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase bdapi_client_no_results}</div>
 	</xen:if>
-</xen:form>]]></template>
+</xen:form>
+
+{xen:adminpagenav $perPage, $total, $page, api-clients}]]></template>
+    <template title="bdapi_client_list_items"><![CDATA[<xen:foreach loop="$clients" value="$client">
+	<xen:listitem
+		id="{$client.client_id}"
+		href="{xen:adminlink 'api-clients/edit', $client}"
+		label="{$client.name}"
+		snippet="{$client.redirect_uri}"
+		delete="{xen:adminlink 'api-clients/delete', $client}">
+		<xen:popup title="{xen:phrase view}" ctrlclass="toolsCtrl">
+			<xen:link href="{xen:adminlink 'api-tokens', '', 'client_id={$client.client_id}'}">{xen:phrase bdapi_tokens}</xen:link>
+			<xen:link href="{xen:adminlink 'api-auth-codes', '', 'client_id={$client.client_id}'}">{xen:phrase bdapi_auth_codes}</xen:link>
+			<xen:link href="{xen:adminlink 'api-refresh-tokens', '', 'client_id={$client.client_id}'}">{xen:phrase bdapi_refresh_tokens}</xen:link>
+			<xen:link href="{xen:adminlink 'api-subscriptions', '', 'client_id={$client.client_id}'}">{xen:phrase bdapi_subscriptions}</xen:link>
+		</xen:popup>
+	</xen:listitem>
+</xen:foreach>
+<xen:if is="{$filterMore}">
+	<li class="listNote">{xen:phrase more_records_matching_filter_more_specific}</li>
+</xen:if>]]></template>
     <template title="bdapi_log_detail"><![CDATA[<xen:title>{$log.request_method} {$log.request_uri}</xen:title>
 
 <div class="section">
@@ -280,33 +311,50 @@
 	
 	<input type="hidden" name="_xfConfirm" value="1" />
 </xen:form>]]></template>
-    <template title="bdapi_refresh_token_list"><![CDATA[<xen:title>{xen:phrase bdapi_refresh_token}</xen:title>
+    <template title="bdapi_refresh_token_list"><![CDATA[<xen:title>{xen:phrase bdapi_refresh_tokens}</xen:title>
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
+<xen:require js="js/bdApi/filter_list.js" />
+
+<xen:if is="{$client}">
+	<xen:navigation>
+		<xen:breadcrumb href="{xen:adminlink api-clients/edit, $client}">{$client.name}</xen:breadcrumb>
+	</xen:navigation>
+</xen:if>
 
 <xen:form action="{xen:adminlink 'api-refresh-tokens'}" class="section">
 	<xen:if is="{$refreshTokens}">
 		<h2 class="subHeading">
-			<link rel="xenforo_template" type="text/html" href="filter_list_controls.html" />
+			<xen:include template="filter_list_controls" />
 			{xen:phrase bdapi_refresh_token}
 		</h2>
 	
-		<ol class="FilterList Scrollable">
-			<xen:foreach loop="$refreshTokens" value="$refreshToken">
-				<xen:listitem
-					id="{$refreshToken.refresh_token_id}"
-					label="{$refreshToken.refresh_token_text}"
-					snippet="{$refreshToken.client_name}->{$refreshToken.username} ({xen:datetime $refreshToken.issue_date})"
-					delete="{xen:adminlink 'api-refresh-tokens/delete', $refreshToken}" />
-			</xen:foreach>
+		<ol class="FilterList Scrollable" data-ajaxFilter="true">
+			<xen:include template="bdapi_refresh_token_list_items" />
 		</ol>
 	
 		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $allRefreshToken}</span>', 'total={xen:count $allRefreshToken}'}</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase bdapi_refresh_token_no_results}</div>
 	</xen:if>
-</xen:form>]]></template>
+</xen:form>
+
+{xen:adminpagenav $perPage, $total, $page, api-refresh-tokens, '', '_params={$pageNavParams}'}]]></template>
+    <template title="bdapi_refresh_token_list_items"><![CDATA[<xen:foreach loop="$refreshTokens" value="$refreshToken">
+	<xen:listitem
+		id="{$refreshToken.refresh_token_id}"
+		delete="{xen:adminlink 'api-refresh-tokens/delete', $refreshToken}">
+		<xen:label>{$refreshToken.refresh_token_text}</xen:label>
+		<xen:snippet>
+			{xen:if '!{$client}', '{$refreshToken.client_name}->'}{$refreshToken.username}
+			({$refreshToken.scope}, {xen:datetime $refreshToken.issue_date})
+		</xen:snippet>
+	</xen:listitem>
+</xen:foreach>
+<xen:if is="{$filterView} AND {$total} > {$perPage}">
+	<li class="listNote">{xen:phrase more_records_matching_filter_more_specific}</li>
+</xen:if>]]></template>
     <template title="bdapi_subscription_delete"><![CDATA[<xen:title>{xen:phrase bdapi_subscription_confirm_deletion}: {$subscription.client_id}</xen:title>
 <xen:h1>{xen:phrase bdapi_subscription_confirm_deletion}</xen:h1>
 
@@ -346,6 +394,13 @@
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
+<xen:require js="js/bdApi/filter_list.js" />
+
+<xen:if is="{$client}">
+	<xen:navigation>
+		<xen:breadcrumb href="{xen:adminlink api-clients/edit, $client}">{$client.name}</xen:breadcrumb>
+	</xen:navigation>
+</xen:if>
 
 <xen:form action="{xen:adminlink 'api-subscriptions'}" class="section">
 	<xen:if is="{$subscriptions}">
@@ -354,7 +409,7 @@
 			{xen:phrase bdapi_subscriptions}
 		</h2>
 
-		<ol class="FilterList Scrollable">
+		<ol class="FilterList Scrollable" data-ajaxFilter="true">
 			<xen:include template="bdapi_subscription_list_items" />
 		</ol>
 
@@ -362,14 +417,16 @@
 	<xen:else />
 		<div class="noResults">{xen:phrase bdapi_subscription_no_results}</div>
 	</xen:if>
-</xen:form>]]></template>
+</xen:form>
+
+{xen:adminpagenav $perPage, $total, $page, api-subscriptions, '', '_params={$pageNavParams}'}]]></template>
     <template title="bdapi_subscription_list_items"><![CDATA[<xen:foreach loop="$subscriptions" value="$subscription">
 	<xen:listitem
 		id="{$subscription.subscription_id}"
 		href="{xen:adminlink 'api-subscriptions/details', $subscription}"
 		delete="{xen:adminlink 'api-subscriptions/delete', $subscription}">
 		<xen:label>{$subscription.topic}</xen:label>
-		<xen:snippet>{$subscription.client_id}</xen:snippet>
+		<xen:snippet>{xen:if '!{$client}', '{$subscription.client_name}->'}{$subscription.callback}</xen:snippet>
 	</xen:listitem>
 </xen:foreach>]]></template>
     <template title="bdapi_token_add"><![CDATA[<xen:title>{xen:phrase bdapi_token_add}</xen:title>
@@ -410,10 +467,17 @@
 	
 	<input type="hidden" name="_xfConfirm" value="1" />
 </xen:form>]]></template>
-    <template title="bdapi_token_list"><![CDATA[<xen:title>{xen:phrase bdapi_token}</xen:title>
+    <template title="bdapi_token_list"><![CDATA[<xen:title>{xen:phrase bdapi_tokens}</xen:title>
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
+<xen:require js="js/bdApi/filter_list.js" />
+
+<xen:if is="{$client}">
+	<xen:navigation>
+		<xen:breadcrumb href="{xen:adminlink api-clients/edit, $client}">{$client.name}</xen:breadcrumb>
+	</xen:navigation>
+</xen:if>
 
 <xen:topctrl>
 	<a href="{xen:adminlink 'api-tokens/add'}" class="button" accesskey="a">+ {xen:phrase bdapi_token_add}</a>
@@ -422,25 +486,35 @@
 <xen:form action="{xen:adminlink 'api-tokens'}" class="section">
 	<xen:if is="{$tokens}">
 		<h2 class="subHeading">
-			<link rel="xenforo_template" type="text/html" href="filter_list_controls.html" />
+			<xen:include template="filter_list_controls" />
 			{xen:phrase bdapi_token}
 		</h2>
 	
-		<ol class="FilterList Scrollable">
-			<xen:foreach loop="$tokens" value="$token">
-				<xen:listitem
-					id="{$token.token_id}"
-					label="{$token.token_text}"
-					snippet="{$token.client_name}->{$token.username} ({xen:datetime $token.issue_date})"
-					delete="{xen:adminlink 'api-tokens/delete', $token}" />
-			</xen:foreach>
+		<ol class="FilterList Scrollable" data-ajaxFilter="true">
+			<xen:include template="bdapi_token_list_items" />
 		</ol>
 	
 		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $allToken}</span>', 'total={xen:count $allToken}'}</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase bdapi_token_no_results}</div>
 	</xen:if>
-</xen:form>]]></template>
+</xen:form>
+
+{xen:adminpagenav $perPage, $total, $page, api-tokens, '', '_params={$pageNavParams}'}]]></template>
+    <template title="bdapi_token_list_items"><![CDATA[<xen:foreach loop="$tokens" value="$token">
+	<xen:listitem
+		id="{$token.token_id}"
+		delete="{xen:adminlink 'api-tokens/delete', $token}">
+		<xen:label>{$token.token_text}</xen:label>
+		<xen:snippet>
+			{xen:if '!{$client}', '{$token.client_name}->'}{$token.username}
+			({$token.scope}, {xen:datetime $token.issue_date})
+		</xen:snippet>
+	</xen:listitem>
+</xen:foreach>
+<xen:if is="{$filterView} AND {$total} > {$perPage}">
+	<li class="listNote">{xen:phrase more_records_matching_filter_more_specific}</li>
+</xen:if>]]></template>
   </admin_templates>
   <admin_template_modifications/>
   <code_events>
@@ -541,6 +615,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_authorize_error_invalid_or_expired_access_token" version_id="1" version_string="0.1"><![CDATA[Invalid or expired access token.]]></phrase>
     <phrase title="bdapi_authorize_error_scope_x_not_granted" version_id="1" version_string="0.1"><![CDATA[Scope {scope} has not been granted.]]></phrase>
     <phrase title="bdapi_auth_code" version_id="1" version_string="0.1"><![CDATA[Authentication Code]]></phrase>
+    <phrase title="bdapi_auth_codes" version_id="54" version_string="1.3.1b"><![CDATA[Authentication Codes]]></phrase>
     <phrase title="bdapi_auth_code_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Authentication Code]]></phrase>
     <phrase title="bdapi_auth_code_delete" version_id="1" version_string="0.1"><![CDATA[Delete Authentication Code]]></phrase>
     <phrase title="bdapi_auth_code_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Authentication Code could not be found]]></phrase>
@@ -584,6 +659,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_redirect_uri" version_id="1" version_string="0.1"><![CDATA[Redirect Uri]]></phrase>
     <phrase title="bdapi_redirect_uri_must_be_valid" version_id="4" version_string="0.9-dev"><![CDATA[Redirect URI must be valid.]]></phrase>
     <phrase title="bdapi_refresh_token" version_id="1" version_string="0.1"><![CDATA[Refresh Token]]></phrase>
+    <phrase title="bdapi_refresh_tokens" version_id="54" version_string="1.3.1b"><![CDATA[Refresh Tokens]]></phrase>
     <phrase title="bdapi_refresh_token_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Refresh Token]]></phrase>
     <phrase title="bdapi_refresh_token_delete" version_id="1" version_string="0.1"><![CDATA[Delete Refresh Token]]></phrase>
     <phrase title="bdapi_refresh_token_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Refresh Token could not be found]]></phrase>
