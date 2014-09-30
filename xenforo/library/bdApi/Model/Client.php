@@ -1,4 +1,5 @@
 <?php
+
 class bdApi_Model_Client extends XenForo_Model
 {
 	private $_clients = array();
@@ -129,7 +130,9 @@ class bdApi_Model_Client extends XenForo_Model
 		{
 			$client['options'] = @unserialize($client['options']);
 			if (empty($client['options']))
+			{
 				$client['options'] = array();
+			}
 		}
 
 		return $all;

@@ -7,9 +7,10 @@ class bdApi_Route_PrefixApi_Users extends bdApi_Route_PrefixApi_Abstract
 		$action = $router->resolveActionWithIntegerParam($routePath, $request, 'user_id');
 		return $router->getRouteMatch('bdApi_ControllerApi_User', $action);
 	}
-	
+
 	public function buildLink($originalPrefix, $outputPrefix, $action, $extension, $data, array &$extraParams)
 	{
 		return XenForo_Link::buildBasicLinkWithIntegerParam($outputPrefix, $action, $extension, $data, 'user_id');
 	}
+
 }

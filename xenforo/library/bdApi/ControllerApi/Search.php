@@ -4,12 +4,10 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 {
 	public function actionGetIndex()
 	{
-		$data = array(
-				'links' => array(
-						'posts' 			=> XenForo_Link::buildApiLink('search/posts'),
-						'threads' 			=> XenForo_Link::buildApiLink('search/threads'),
-				),
-		);
+		$data = array('links' => array(
+				'posts' => XenForo_Link::buildApiLink('search/posts'),
+				'threads' => XenForo_Link::buildApiLink('search/threads'),
+			), );
 
 		return $this->responseData('bdApi_ViewApi_Index', $data);
 	}
@@ -28,14 +26,10 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 		$results = array();
 		foreach ($rawResults as $rawResult)
 		{
-			$results[] = array(
-					'thread_id' => $rawResult[1],
-			);
+			$results[] = array('thread_id' => $rawResult[1], );
 		}
 
-		$data = array(
-				'threads' => $results,
-		);
+		$data = array('threads' => $results, );
 
 		return $this->responseData('bdApi_ViewApi_Search_Threads', $data);
 	}
@@ -44,7 +38,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 	{
 		return $this->responseError(new XenForo_Phrase('bdapi_slash_search_only_accepts_post_requests'), 400);
 	}
-
 
 	public function actionPostPosts()
 	{
@@ -65,14 +58,10 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 		$results = array();
 		foreach ($posts as $post)
 		{
-			$results[] = array(
-					'post_id' => $post['post_id'],
-			);
+			$results[] = array('post_id' => $post['post_id'], );
 		}
 
-		$data = array(
-				'posts' => $results,
-		);
+		$data = array('posts' => $results, );
 
 		return $this->responseData('bdApi_ViewApi_Search_Posts', $data);
 	}
@@ -87,7 +76,8 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 		$input = array();
 
 		$input['keywords'] = $this->_input->filterSingle('q', XenForo_Input::STRING);
-		$input['keywords'] = XenForo_Helper_String::censorString($input['keywords'], null, ''); // don't allow searching of censored stuff
+		$input['keywords'] = XenForo_Helper_String::censorString($input['keywords'], null, '');
+		// don't allow searching of censored stuff
 		if (empty($input['keywords']))
 		{
 			throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_slash_search_requires_q'), 400));
@@ -108,7 +98,8 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 			$constraints['node'] = implode(' ', $nodeIds);
 			if (!$constraints['node'])
 			{
-				unset($constraints['node']); // just 0
+				unset($constraints['node']);
+				// just 0
 			}
 		}
 
@@ -153,4 +144,5 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 	{
 		return $this->getModelFromCache('XenForo_Model_Forum');
 	}
+
 }

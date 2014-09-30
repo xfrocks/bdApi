@@ -7,9 +7,10 @@ class bdApi_Route_PrefixApi_Categories extends bdApi_Route_PrefixApi_Abstract
 		$action = $router->resolveActionWithIntegerParam($routePath, $request, 'node_id');
 		return $router->getRouteMatch('bdApi_ControllerApi_Category', $action);
 	}
-	
+
 	public function buildLink($originalPrefix, $outputPrefix, $action, $extension, $data, array &$extraParams)
 	{
 		return XenForo_Link::buildBasicLinkWithIntegerParam($outputPrefix, $action, $extension, $data, 'node_id');
 	}
+
 }

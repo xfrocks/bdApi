@@ -8,7 +8,8 @@ class bdApi_ViewAdmin_Token_List extends XenForo_ViewAdmin_Base
 		{
 			$this->_templateName = 'bdapi_token_list_items';
 		}
-	
+
 		return null;
 	}
+
 }

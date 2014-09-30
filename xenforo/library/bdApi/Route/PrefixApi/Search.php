@@ -6,4 +6,5 @@ class bdApi_Route_PrefixApi_Search extends bdApi_Route_PrefixApi_Abstract
 	{
 		return $router->getRouteMatch('bdApi_ControllerApi_Search', $routePath);
 	}
+
 }

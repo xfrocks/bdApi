@@ -7,13 +7,13 @@ class bdApi_Model_OAuth2 extends XenForo_Model
 	const SCOPE_MANAGE_ACCOUNT_SETTINGS = 'usercp';
 	const SCOPE_PARTICIPATE_IN_CONVERSATIONS = 'conversate';
 	const SCOPE_MANAGE_SYSTEM = 'admincp';
-	
+
 	protected static $_serverInstance = false;
-	
+
 	/**
 	 * Gets the server object. Only one instance will be created for
 	 * each page request.
-	 * 
+	 *
 	 * @return bdApi_OAuth2
 	 */
 	public function getServer()
@@ -22,25 +22,25 @@ class bdApi_Model_OAuth2 extends XenForo_Model
 		{
 			self::$_serverInstance = new bdApi_OAuth2($this);
 		}
-		
+
 		return self::$_serverInstance;
 	}
-	
+
 	public function getAuthorizeParamsInputFilter()
 	{
 		return array(
-			'client_id' 			=> XenForo_Input::STRING,
-			'response_type' 		=> XenForo_Input::STRING,
-			'redirect_uri' 			=> XenForo_Input::STRING,
-			'state' 				=> XenForo_Input::STRING,
-			'scope' 				=> XenForo_Input::STRING,
+			'client_id' => XenForo_Input::STRING,
+			'response_type' => XenForo_Input::STRING,
+			'redirect_uri' => XenForo_Input::STRING,
+			'state' => XenForo_Input::STRING,
+			'scope' => XenForo_Input::STRING,
 		);
 	}
-	
+
 	/**
-	 * Gets supported scopes for server. Other add-ons can override 
+	 * Gets supported scopes for server. Other add-ons can override
 	 * this method to support more scopes.
-	 * 
+	 *
 	 * @return array an array of supported scopes
 	 */
 	public function getSystemSupportedScopes()
@@ -53,30 +53,31 @@ class bdApi_Model_OAuth2 extends XenForo_Model
 			self::SCOPE_MANAGE_SYSTEM,
 		);
 	}
-	
+
 	/**
 	 * Gets the authentication realm for server. This will be display
 	 * in the authentication dialog (in browsers and such). By default,
 	 * the XenForo's board title will be used but if it's not available
 	 * or is empty, a generic name will be used ("XenForo")
-	 * 
+	 *
 	 * @return string the realm
 	 */
 	public function getSystemAuthenticationRealm()
 	{
 		$options = XenForo_Application::get('options');
 		$boardTitle = $options->get('boardTitle');
-		
+
 		if (empty($boardTitle))
 		{
 			// no board title, just use a generic name
 			$boardTitle = 'XenForo';
 		}
-		
+
 		$realm = new XenForo_Phrase('bdapi_realm', array('boardTitle' => $boardTitle));
-		$realm .= ''; // convert to string
+		$realm .= '';
+		// convert to string
 	}
-	
+
 	/**
 	 * @return XenForo_Model_User
 	 */
@@ -84,7 +85,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
 	{
 		return $this->getModelFromCache('XenForo_Model_User');
 	}
-	
+
 	/**
 	 * @return bdApi_Model_AuthCode
 	 */
@@ -92,7 +93,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
 	{
 		return $this->getModelFromCache('bdApi_Model_AuthCode');
 	}
-	
+
 	/**
 	 * @return bdApi_Model_Client
 	 */
@@ -100,7 +101,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
 	{
 		return $this->getModelFromCache('bdApi_Model_Client');
 	}
-	
+
 	/**
 	 * @return bdApi_Model_RefreshToken
 	 */
@@ -108,7 +109,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
 	{
 		return $this->getModelFromCache('bdApi_Model_RefreshToken');
 	}
-	
+
 	/**
 	 * @return bdApi_Model_Token
 	 */
@@ -116,4 +117,5 @@ class bdApi_Model_OAuth2 extends XenForo_Model
 	{
 		return $this->getModelFromCache('bdApi_Model_Token');
 	}
+
 }

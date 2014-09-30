@@ -41,13 +41,13 @@ class bdApi_ControllerApi_Category extends bdApi_ControllerApi_Node
 	protected function _getSingle($nodeId)
 	{
 		$node = $this->_getNodeModel()->getNodeById($nodeId);
-		
+
 		if (!empty($node) AND $node['node_type_id'] !== 'Category')
 		{
 			// node exists but not a category
 			return false;
 		}
-		
+
 		return $node;
 	}
 
@@ -78,4 +78,5 @@ class bdApi_ControllerApi_Category extends bdApi_ControllerApi_Node
 	{
 		return $this->getModelFromCache('XenForo_Model_Category');
 	}
+
 }

@@ -26,9 +26,7 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
 
 		$nodes = $this->_getAll($parentId);
 
-		$order = $this->_input->filterSingle('order', XenForo_Input::STRING, array(
-				'default' => 'natural',
-		));
+		$order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural', ));
 		switch ($order)
 		{
 			case 'list':
@@ -37,8 +35,8 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
 		}
 
 		$data = array(
-				$this->_getNamePlural() => $this->_filterDataMany($this->_prepareApiDataForNodes($nodes)),
-				$this->_getNamePlural() . '_total' => count($nodes),
+			$this->_getNamePlural() => $this->_filterDataMany($this->_prepareApiDataForNodes($nodes)),
+			$this->_getNamePlural() . '_total' => count($nodes),
 		);
 
 		return $this->responseData('bdApi_ViewApi_Node_List', $data);
@@ -55,9 +53,7 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
 			return $this->_responseErrorNotFound();
 		}
 
-		$data = array(
-				$this->_getNameSingular() => $this->_filterDataSingle($this->_prepareApiDataForNode($node)),
-		);
+		$data = array($this->_getNameSingular() => $this->_filterDataSingle($this->_prepareApiDataForNode($node)), );
 
 		return $this->responseData('bdApi_ViewApi_Node_Single', $data);
 	}

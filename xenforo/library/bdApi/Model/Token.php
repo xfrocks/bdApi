@@ -1,4 +1,5 @@
 <?php
+
 class bdApi_Model_Token extends XenForo_Model
 {
 	const FETCH_CLIENT = 0x01;

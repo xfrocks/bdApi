@@ -11,35 +11,29 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
 		{
 			$error = array($error);
 		}
-		
+
 		$errors = array();
-		
+
 		foreach ($error as $errorMessage)
 		{
 			$errors[] = array(
 				'_key' => 'error',
-				'_children' => array(
-					array(
+				'_children' => array( array(
 						'_type' => 'cdata',
 						'_value' => $errorMessage,
-					)
-				)
+					))
 			);
 		}
-		
-		return self::xmlEncodeForOutput(array(
-			'errors' => $errors,
-		));
+
+		return self::xmlEncodeForOutput(array('errors' => $errors, ));
 	}
 
 	public function renderMessage($message)
 	{
-		return self::xmlEncodeForOutput(array(
-			'response' => array(
+		return self::xmlEncodeForOutput(array('response' => array(
 				'status' => 'ok',
 				'message' => $message,
-			),
-		));
+			), ));
 	}
 
 	public function renderView($viewName, array $params = array(), $templateName = '', XenForo_ControllerResponse_View $subView = null)
@@ -50,18 +44,17 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
 		{
 			return self::xmlEncodeForOutput($viewOutput);
 		}
-		else if ($viewOutput === null)
+		else
+		if ($viewOutput === null)
 		{
-			return self::xmlEncodeForOutput(
-				$this->getDefaultOutputArray($viewName, $params, $templateName)
-			);
+			return self::xmlEncodeForOutput($this->getDefaultOutputArray($viewName, $params, $templateName));
 		}
 		else
 		{
 			return $viewOutput;
 		}
 	}
-	
+
 	public function getDefaultOutputArray($viewName, $params, $templateName)
 	{
 		return $params;
@@ -72,7 +65,7 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
 		foreach ($input as $key => $value)
 		{
 			$children = false;
-			
+
 			$nodeKey = $key;
 			if (is_numeric($nodeKey))
 			{
@@ -90,36 +83,36 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
 					$nodeKey = 'key_' . $key;
 				}
 			}
-			
+
 			$nodeValue = $value;
-			
+
 			if (is_object($value))
 			{
 				// force the object to string
 				// and use it as a value with a type of CData
-				$value = array(
-					$key => array(
+				$value = array($key => array(
 						'_type' => 'cdata',
 						'_value' => '' . $value,
-					)
-				);
+					));
 			}
-			
+
 			if (is_array($value))
 			{
 				// this value contains many other values
 				// so it should be a parent
 				$children = $value;
-				
+
 				// a custom key can be specified with numeric-based array
-				if (!empty($value['_key'])) $nodeKey = $value['_key'];
-				
+				if (!empty($value['_key']))
+					$nodeKey = $value['_key'];
+
 				// normally, children will be detected as all the elements
 				// of a array. However, a specific set of children can be
 				// specified using _children like this. Refer renderError()
 				// to understand how to use this
-				if (!empty($value['_children'])) $children = $value['_children'];
-				
+				if (!empty($value['_children']))
+					$children = $value['_children'];
+
 				// an array can still be recognized as a single value
 				// if it has _value like below.
 				if (!empty($value['_value']))
@@ -128,27 +121,28 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
 					$nodeValue = $value['_value'];
 				}
 			}
-			
+
 			if (is_array($children))
 			{
 				$nodeType = 'parent';
-				
+
 				$nodeObj = $document->createElement($nodeKey);
-				
+
 				// recursively process children elements
 				self::_xmlEncodeNode($document, $nodeObj, $children);
-				
+
 				$parentNode->appendChild($nodeObj);
 			}
 			else
 			{
 				$nodeType = 'value';
-				
+
 				// there are several type of value, it can be specified
 				// using _type. Supported types:
 				// cdata
-				if (is_array($value) AND !empty($value['_type'])) $nodeType = strtolower($value['_type']);
-				
+				if (is_array($value) AND !empty($value['_type']))
+					$nodeType = strtolower($value['_type']);
+
 				switch ($nodeType)
 				{
 					case 'cdata':
@@ -161,7 +155,7 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
 			}
 		}
 	}
-	
+
 	public static function xmlEncodeForOutput($input, $addDefaultParams = true)
 	{
 		if ($addDefaultParams)
@@ -173,16 +167,17 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
 		$document->formatOutput = true;
 
 		$rootNode = $document->createElement('xenforo');
-		
+
 		self::_xmlEncodeNode($document, $rootNode, $input);
-		
+
 		$document->appendChild($rootNode);
 
 		return $document->saveXML();
 	}
-	
+
 	protected static function _addDefaultParams(array &$params = array())
 	{
 		bdApi_Data_Helper_Core::addDefaultResponse($params);
 	}
+
 }

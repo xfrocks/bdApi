@@ -8,7 +8,8 @@ class bdApi_ViewAdmin_Log_List extends XenForo_ViewAdmin_Base
 		{
 			$this->_templateName = 'bdapi_log_list_items';
 		}
-	
+
 		return null;
 	}
+
 }

@@ -50,8 +50,9 @@ class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
 	public static function addRoute(array &$routes, $originalPrefix, $routeClass, $buildLink = 'none')
 	{
 		$routes[$originalPrefix] = array(
-				'route_class' => $routeClass,
-				'build_link' => $buildLink,
+			'route_class' => $routeClass,
+			'build_link' => $buildLink,
 		);
 	}
+
 }

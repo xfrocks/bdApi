@@ -1,4 +1,5 @@
 <?php
+
 class bdApi_Installer
 {
 	/* Start auto-generated lines of code. Change made will be overwriten... */
@@ -183,7 +184,7 @@ class bdApi_Installer
 				$db->query($patch['alterTableAddColumnQuery']);
 			}
 		}
-		
+
 		self::installCustomized($existingAddOn, $addOnData);
 	}
 

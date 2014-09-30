@@ -1,6 +1,7 @@
 <?php
 
-class bdApi_DataWriter_Log extends XenForo_DataWriter {
+class bdApi_DataWriter_Log extends XenForo_DataWriter
+{
 
 	protected function _beginDbTransaction()
 	{
@@ -17,47 +18,75 @@ class bdApi_DataWriter_Log extends XenForo_DataWriter {
 		return false;
 	}
 
-/* Start auto-generated lines of code. Change made will be overwriten... */
+	/* Start auto-generated lines of code. Change made will be overwriten... */
 
-	protected function _getFields() {
-		return array(
-			'xf_bdapi_log' => array(
-				'log_id' => array('type' => 'uint', 'autoIncrement' => true),
-				'client_id' => array('type' => 'string', 'maxLength' => 255, 'default' => ''),
-				'user_id' => array('type' => 'uint', 'required' => true),
-				'ip_address' => array('type' => 'string', 'maxLength' => 50, 'default' => ''),
-				'request_date' => array('type' => 'uint', 'required' => true),
-				'request_method' => array('type' => 'string', 'maxLength' => 10, 'default' => 'get'),
-				'request_uri' => array('type' => 'string'),
-				'request_data' => array('type' => 'serialized'),
-				'response_code' => array('type' => 'uint', 'required' => true),
-				'response_output' => array('type' => 'serialized')
-			)
-		);
+	protected function _getFields()
+	{
+		return array('xf_bdapi_log' => array(
+				'log_id' => array(
+					'type' => XenForo_DataWriter::TYPE_UINT,
+					'autoIncrement' => true
+				),
+				'client_id' => array(
+					'type' => XenForo_DataWriter::TYPE_STRING,
+					'maxLength' => 255,
+					'default' => ''
+				),
+				'user_id' => array(
+					'type' => XenForo_DataWriter::TYPE_UINT,
+					'required' => true
+				),
+				'ip_address' => array(
+					'type' => XenForo_DataWriter::TYPE_STRING,
+					'maxLength' => 50,
+					'default' => ''
+				),
+				'request_date' => array(
+					'type' => XenForo_DataWriter::TYPE_UINT,
+					'required' => true
+				),
+				'request_method' => array(
+					'type' => XenForo_DataWriter::TYPE_STRING,
+					'maxLength' => 10,
+					'default' => 'get'
+				),
+				'request_uri' => array('type' => XenForo_DataWriter::TYPE_STRING),
+				'request_data' => array('type' => XenForo_DataWriter::TYPE_SERIALIZED),
+				'response_code' => array(
+					'type' => XenForo_DataWriter::TYPE_UINT,
+					'required' => true
+				),
+				'response_output' => array('type' => XenForo_DataWriter::TYPE_SERIALIZED)
+			));
 	}
 
-	protected function _getExistingData($data) {
-		if (!$id = $this->_getExistingPrimaryKey($data, 'log_id')) {
+	protected function _getExistingData($data)
+	{
+		if (!$id = $this->_getExistingPrimaryKey($data, 'log_id'))
+		{
 			return false;
 		}
 
 		return array('xf_bdapi_log' => $this->_getLogModel()->getLogById($id));
 	}
 
-	protected function _getUpdateCondition($tableName) {
+	protected function _getUpdateCondition($tableName)
+	{
 		$conditions = array();
 
-		foreach (array('log_id') as $field) {
+		foreach (array('log_id') as $field)
+		{
 			$conditions[] = $field . ' = ' . $this->_db->quote($this->getExisting($field));
 		}
 
 		return implode(' AND ', $conditions);
 	}
 
-	protected function _getLogModel() {
+	protected function _getLogModel()
+	{
 		return $this->getModelFromCache('bdApi_Model_Log');
 	}
 
-/* End auto-generated lines of code. Feel free to make changes below */
+	/* End auto-generated lines of code. Feel free to make changes below */
 
 }

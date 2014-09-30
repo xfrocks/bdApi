@@ -29,4 +29,5 @@ class bdApi_Route_PrefixApi_Posts extends bdApi_Route_PrefixApi_Abstract
 
 		return XenForo_Link::buildBasicLinkWithIntegerParam($outputPrefix, $action, $extension, $data, 'post_id');
 	}
+
 }

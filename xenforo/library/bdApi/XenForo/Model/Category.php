@@ -17,27 +17,28 @@ class bdApi_XenForo_Model_Category extends XFCP_bdApi_XenForo_Model_Category
 	public function prepareApiDataForCategory(array $category)
 	{
 		$publicKeys = array(
-				// xf_node
-				'node_id' 			=> 'category_id',
-				'title' 			=> 'category_title',
-				'description' 		=> 'category_description',
+			// xf_node
+			'node_id' => 'category_id',
+			'title' => 'category_title',
+			'description' => 'category_description',
 		);
 
 		$data = bdApi_Data_Helper_Core::filter($category, $publicKeys);
 
 		$data['links'] = array(
-				'permalink' => XenForo_Link::buildPublicLink('categories', $category),
-				'detail' => XenForo_Link::buildApiLink('categories', $category),
-				'sub-categories' => XenForo_Link::buildApiLink('categories', array(), array('parent_category_id' => $category['node_id'])),
-				'sub-forums' => XenForo_Link::buildApiLink('forums', array(), array('parent_category_id' => $category['node_id'])),
+			'permalink' => XenForo_Link::buildPublicLink('categories', $category),
+			'detail' => XenForo_Link::buildApiLink('categories', $category),
+			'sub-categories' => XenForo_Link::buildApiLink('categories', array(), array('parent_category_id' => $category['node_id'])),
+			'sub-forums' => XenForo_Link::buildApiLink('forums', array(), array('parent_category_id' => $category['node_id'])),
 		);
 
 		$data['permissions'] = array(
-				'view' => $this->canViewCategory($category),
-				'edit' => XenForo_Visitor::getInstance()->hasAdminPermission('node'),
-				'delete' => XenForo_Visitor::getInstance()->hasAdminPermission('node'),
+			'view' => $this->canViewCategory($category),
+			'edit' => XenForo_Visitor::getInstance()->hasAdminPermission('node'),
+			'delete' => XenForo_Visitor::getInstance()->hasAdminPermission('node'),
 		);
-			
+
 		return $data;
 	}
+
 }
