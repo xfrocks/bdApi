@@ -1,7 +1,5 @@
 <?php
 
-require ('bootstrap.php');
-
 // method overriding support
 if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']) AND isset($_SERVER['REQUEST_METHOD']) AND $_SERVER['REQUEST_METHOD'] === 'POST')
 {
@@ -50,6 +48,8 @@ elseif (isset($_SERVER['REQUEST_METHOD']) AND in_array($_SERVER['REQUEST_METHOD'
 		$_REQUEST[$key] = $value;
 	}
 }
+
+require ('bootstrap.php');
 
 $fc = new XenForo_FrontController(new bdApi_Dependencies());
 
