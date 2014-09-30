@@ -1108,7 +1108,7 @@ step=3600</edit_format_params>
 	
 	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
 </form>]]></template>
-    <template title="bdapi_account_api_update_scope" version_id="53" version_string="1.3.1"><![CDATA[<xen:title>{xen:phrase bdapi_update_scope}: {$client.name}</xen:title>
+    <template title="bdapi_account_api_update_scope" version_id="56" version_string="1.3.3"><![CDATA[<xen:title>{xen:phrase bdapi_update_scope}: {$client.name}</xen:title>
 <xen:h1>{xen:phrase bdapi_update_scope}</xen:h1>
 
 <xen:navigation>
@@ -1128,7 +1128,7 @@ step=3600</edit_format_params>
 		<dd>
 			<ul>
 				<xen:foreach loop="$userScopes" key="$scope" value="$userScope">
-					<xen:set var="$scopeText">{xen:helper bdApi_scopeGetText, $scope}</xen:set>
+					<xen:set var="$scopeText">{xen:helper api_scopeGetText, $scope}</xen:set>
 					
 					<xen:if is="{$scopeText}">
 						<li><label>
@@ -1155,7 +1155,7 @@ step=3600</edit_format_params>
 </form>
 
 ]]></template>
-    <template title="bdapi_account_api_user_scopes" version_id="53" version_string="1.3.1"><![CDATA[<xen:require css="bdapi.css" />
+    <template title="bdapi_account_api_user_scopes" version_id="56" version_string="1.3.3"><![CDATA[<xen:require css="bdapi.css" />
 
 <xen:title>{xen:phrase bdapi_tokens}</xen:title>
 
@@ -1182,7 +1182,7 @@ step=3600</edit_format_params>
 							<div class="baseHtml">
 								<ul>
 									<xen:foreach loop="$clientScopes.user_scopes" key="$scope" value="$userScope">
-										<li class="scope-{$scope}">{xen:helper bdApi_scopeGetText, $scope}</li>
+										<li class="scope-{$scope}">{xen:helper api_scopeGetText, $scope}</li>
 									</xen:foreach>
 								</ul>
 							</div>
@@ -1205,7 +1205,7 @@ step=3600</edit_format_params>
 		</xen:if>
 	</ol>
 </div>]]></template>
-    <template title="bdapi_account_authorize" version_id="24" version_string="0.9.9"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
+    <template title="bdapi_account_authorize" version_id="56" version_string="1.3.3"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
 <form method="post" class="xenForm"
 	action="{xen:link
@@ -1233,7 +1233,7 @@ step=3600</edit_format_params>
 		<dd>
 			<ul>
 				<xen:foreach loop="$authorizeScopes" value="$scope">
-					<xen:set var="$scopeText">{xen:helper bdApi_scopeGetText, $scope}</xen:set>
+					<xen:set var="$scopeText">{xen:helper api_scopeGetText, $scope}</xen:set>
 					
 					<xen:if is="{$scopeText}">
 						<li><label>

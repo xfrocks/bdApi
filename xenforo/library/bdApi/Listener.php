@@ -56,7 +56,7 @@ class bdApi_Listener
 			}
 
 			$methodName = $method->getName();
-			$helperCallbackName = utf8_strtolower('bdApi_' . $methodName);
+			$helperCallbackName = utf8_strtolower('api_' . $methodName);
 			XenForo_Template_Helper_Core::$helperCallbacks[$helperCallbackName] = array(
 				$templateHelper,
 				$methodName
