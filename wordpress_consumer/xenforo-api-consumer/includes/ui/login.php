@@ -21,7 +21,7 @@ function xfac_login_form()
 	}
 
 	$loginUrl = site_url('wp-login.php', 'login_post');
-	$redirectTo = _xfac_login_getRedirectTo();
+	$redirectTo = xfac_api_getRedirectTo();
 
 	$authenticateUrl = $loginUrl . (strpos($loginUrl, '?') !== false ? '&' : '?') . 'xfac=authorize';
 	$authenticateUrl .= '&redirect_to=' . urlencode($redirectTo);
@@ -48,7 +48,7 @@ function xfac_login_init()
 	}
 
 	$loginUrl = site_url('wp-login.php', 'login_post');
-	$redirectTo = _xfac_login_getRedirectTo();
+	$redirectTo = xfac_api_getRedirectTo();
 	$redirectToRequested = isset($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : '';
 
 	$redirectBaseUrl = $loginUrl . (strpos($loginUrl, '?') !== false ? '&' : '?') . 'redirect_to=' . urlencode($redirectTo);
@@ -231,36 +231,6 @@ function xfac_login_init()
 }
 
 add_action('login_init', 'xfac_login_init');
-
-function _xfac_login_getRedirectTo()
-{
-	if (!empty($_REQUEST['redirect_to']))
-	{
-		return $_REQUEST['redirect_to'];
-	}
-
-	$redirectTo = 'http';
-	if (isset($_SERVER['HTTPS']) AND ($_SERVER['HTTPS'] == 'on'))
-	{
-		$redirectTo .= 's';
-	}
-	$redirectTo .= '://';
-	if ($_SERVER['SERVER_PORT'] != '80')
-	{
-		$redirectTo .= $_SERVER['HTTP_HOST'] . ':' . $_SERVER['SERVER_PORT'] . $_SERVER['REQUEST_URI'];
-	}
-	else
-	{
-		$redirectTo .= $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-	}
-
-	if (strpos($redirectTo, 'wp-login.php') !== false)
-	{
-		$redirectTo = home_url();
-	}
-
-	return $redirectTo;
-}
 
 function _xfac_login_renderAssociateForm(WP_User $wpUser, array $xfUser, $refreshToken, $scope, $redirectTo)
 {

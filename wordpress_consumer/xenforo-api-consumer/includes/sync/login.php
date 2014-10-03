@@ -62,15 +62,15 @@ function xfac_wp_logout()
 	$records = xfac_user_getRecordsByUserId($wpUser->ID);
 	if (!empty($records))
 	{
-		$record = reset($records);
+		foreach ($records as $record)
+		{
+			$accessToken = xfac_user_getAccessTokenForRecord($record);
+			$ott = xfac_api_generateOneTimeToken($config, $record->identifier, $accessToken);
+			$redirectTo = xfac_api_getRedirectTo();
+			$newRedirectTo = xfac_api_getLogoutLink($config, $ott, $redirectTo);
 
-		$accessToken = xfac_user_getAccessTokenForRecord($record);
-		$ott = xfac_api_generateOneTimeToken($config, $record->identifier, $accessToken);
-
-		$redirectTo = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : home_url();
-		$newRedirectTo = xfac_api_getLogoutLink($config, $ott, $redirectTo);
-
-		$_REQUEST['redirect_to'] = $newRedirectTo;
+			$_REQUEST['redirect_to'] = $newRedirectTo;
+		}
 	}
 }
 

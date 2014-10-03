@@ -835,3 +835,42 @@ function _xfac_api_encrypt($config, $array, $arrayKey, $data)
 	$array[sprintf('%s_algo', $arrayKey)] = 'aes128';
 	return $array;
 }
+
+function xfac_api_getRedirectTo()
+{
+	if (!empty($_REQUEST['redirect_to']))
+	{
+		$redirectTo = $_REQUEST['redirect_to'];
+
+		$parsed = parse_url($redirectTo);
+		if (empty($parsed['host']))
+		{
+			// not a fully qualified url, we have to append home url
+			$redirectTo = path_join(home_url(), ltrim($redirectTo, '/'));
+		}
+
+		return $redirectTo;
+	}
+
+	$redirectTo = 'http';
+	if (isset($_SERVER['HTTPS']) AND ($_SERVER['HTTPS'] == 'on'))
+	{
+		$redirectTo .= 's';
+	}
+	$redirectTo .= '://';
+	if ($_SERVER['SERVER_PORT'] != '80')
+	{
+		$redirectTo .= $_SERVER['HTTP_HOST'] . ':' . $_SERVER['SERVER_PORT'] . $_SERVER['REQUEST_URI'];
+	}
+	else
+	{
+		$redirectTo .= $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+	}
+
+	if (strpos($redirectTo, 'wp-login.php') !== false)
+	{
+		$redirectTo = home_url();
+	}
+
+	return $redirectTo;
+}
