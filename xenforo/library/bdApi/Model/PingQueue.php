@@ -139,6 +139,7 @@ class bdApi_Model_PingQueue extends XenForo_Model
 			}
 
 			$client = XenForo_Helper_Http::getClient($records[0]['callback']);
+			$client->setHeaders('Content-Type', 'application/json');
 			$client->setRawData(json_encode($payloads));
 			$response = $client->request('POST');
 			$responseCode = $response->getStatus();

@@ -22,7 +22,8 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
 		}
 		if (!XenForo_Application::getSession()->isValidRedirectUri($input['hub_callback']))
 		{
-			return $this->_responseError(new XenForo_Phrase('bdapi_subscription_callback_must_match'));
+			// TODO: enforce this?
+			// return $this->_responseError(new XenForo_Phrase('bdapi_subscription_callback_must_match'));
 		}
 
 		if (!in_array($input['hub_mode'], array(
