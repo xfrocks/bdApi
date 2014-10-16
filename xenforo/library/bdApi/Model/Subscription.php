@@ -305,12 +305,24 @@ class bdApi_Model_Subscription extends XenForo_Model
 		switch ($type)
 		{
 			case self::TYPE_NOTIFICATION:
+				if ($id === 'me')
+				{
+					// now supports user_notification_me
+					$id = $viewingUser['user_id'];
+				}
+
 				return (($id > 0) AND ($id == $viewingUser['user_id']));
 			case self::TYPE_THREAD_POST:
 				$thread = $this->getModelFromCache('XenForo_Model_Thread')->getThreadById($id);
 
 				return $thread['user_id'] == $viewingUser['user_id'];
 			case self::TYPE_USER:
+				if ($id === 'me')
+				{
+					// now supports user_me
+					$id = $viewingUser['user_id'];
+				}
+
 				return (($id > 0) AND ($id == $viewingUser['user_id']));
 		}
 
