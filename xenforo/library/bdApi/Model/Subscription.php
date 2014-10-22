@@ -290,7 +290,7 @@ class bdApi_Model_Subscription extends XenForo_Model
 		return $users;
 	}
 
-	public function isValidTopic($topic, array $viewingUser = null)
+	public function isValidTopic(&$topic, array $viewingUser = null)
 	{
 		$this->standardizeViewingUserReference($viewingUser);
 
@@ -309,6 +309,7 @@ class bdApi_Model_Subscription extends XenForo_Model
 				{
 					// now supports user_notification_me
 					$id = $viewingUser['user_id'];
+					$topic = self::getTopic($type, $id);
 				}
 
 				return (($id > 0) AND ($id == $viewingUser['user_id']));
@@ -321,6 +322,7 @@ class bdApi_Model_Subscription extends XenForo_Model
 				{
 					// now supports user_me
 					$id = $viewingUser['user_id'];
+					$topic = self::getTopic($type, $id);
 				}
 
 				return (($id > 0) AND ($id == $viewingUser['user_id']));
