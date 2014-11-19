@@ -246,7 +246,16 @@ function xfac_authenticate_syncUserWpXf($user, $username, $password)
 		return $user;
 	}
 
-	$result = xfac_api_postUser($config, $user->user_email, $user->user_login, $password);
+	$username = $user->user_login;
+	$atPos = strpos($username, '@');
+	if ($atPos !== false)
+	{
+		// XenForo does not accept username in the email format
+		// TODO: extra verification to make sure it is an address
+		$username = substr($username, $atPos);
+	}
+
+	$result = xfac_api_postUser($config, $user->user_email, $username, $password);
 	if (!empty($result))
 	{
 		// yay! new account has been created in XenForo
