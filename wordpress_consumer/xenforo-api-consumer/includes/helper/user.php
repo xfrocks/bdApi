@@ -106,9 +106,9 @@ function xfac_user_updateRecord($wpUserId, $root, $xfUserId, array $xfUser, arra
 	return $wpdb->query(call_user_func_array(array(
 		$wpdb,
 		'prepare'
-	), array(
-'INSERT INTO wp_xfac_auth
-			(user_id, provider, identifier, profile'		. ($token ? ', token' : '') . ')
+	), array('
+		INSERT INTO ' . $tblAuth . '
+			(user_id, provider, identifier, profile' . ($token ? ', token' : '') . ')
 		VALUES
 			(%s, %s, %s, %s' . ($token ? ', %s' : '') . ')
 		ON DUPLICATE KEY UPDATE
