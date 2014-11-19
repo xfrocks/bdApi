@@ -136,7 +136,15 @@ function xfac_edit_profile_url($url, $user, $scheme)
 
 if (!!get_option('xfac_sync_login'))
 {
-	add_filter('login_redirect', 'xfac_login_redirect', 10, 3);
+	function xfac_login_redirect_add_filter()
+	{
+		// put this in a function to trigger it later (s2member)
+		add_filter('login_redirect', 'xfac_login_redirect', 10, 3);
+	}
+	xfac_login_redirect_add_filter();
+
+	// s2member removes all filters so we have to add back ours afterwards
+	add_action('ws_plugin__s2member_after_remove_login_redirect_filters', 'xfac_login_redirect_add_filter');
 
 	add_filter('allowed_redirect_hosts', 'xfac_allowed_redirect_hosts');
 	add_action('wp_logout', 'xfac_wp_logout');
