@@ -255,21 +255,6 @@ class bdApi_OAuth2 extends OAuth2
 
 	protected function checkUserCredentials($clientId, $username, $password)
 	{
-		$input = $input = filter_input_array(INPUT_POST, array(
-			"client_id" => array("flags" => FILTER_REQUIRE_SCALAR),
-			"password" => array("flags" => FILTER_REQUIRE_SCALAR),
-			"password_algo" => array("flags" => FILTER_REQUIRE_SCALAR),
-		));
-		if (!empty($input['client_id']) AND !empty($input['password']) AND !empty($input['password_algo']) AND $input['password'] === $password)
-		{
-			$client = XenForo_Model::create('bdApi_Model_Client')->getClientById($input['client_id']);
-			if (!empty($client))
-			{
-				$password = bdApi_Crypt::decrypt($input['password'], $input['password_algo'], $client['client_secret']);
-			}
-		}
-
-		$client = $this->_model->getClientModel()->getClientById($clientId);
 		$userId = $this->_model->getUserModel()->validateAuthentication($username, $password);
 
 		if (!empty($userId) AND $userId > 0)
@@ -340,7 +325,7 @@ class bdApi_OAuth2 extends OAuth2
 		return $this->_model->getSystemAuthenticationRealm();
 	}
 
-	public function grantAccessToken($sondhEdited = 20131106)
+	public function grantAccessToken($sondhEdited = 20141113)
 	{
 		// extend to guard against future update of OAuth2 lib
 		return parent::grantAccessToken($sondhEdited);

@@ -983,7 +983,7 @@ abstract class OAuth2 {
    *
    * @ingroup oauth2_section_4
    */
-  public function grantAccessToken($sondhEdited = 20131106) {
+  public function grantAccessToken($sondhEdited = 20141113) {
     $filters = array(
       "grant_type" => array("filter" => FILTER_VALIDATE_REGEXP, "options" => array("regexp" => OAUTH2_GRANT_TYPE_REGEXP), "flags" => FILTER_REQUIRE_SCALAR),
       "scope" => array("flags" => FILTER_REQUIRE_SCALAR),
@@ -997,6 +997,13 @@ abstract class OAuth2 {
     );
 
     $input = filter_input_array(INPUT_POST, $filters);
+
+    // sondh@2014-11-13
+    // use value of password from $_POST instead of filter value
+    // because it may be altered by our code (via decryption etc.)
+    if (!empty($input['password'])) {
+        $input['password'] = $_POST['password'];
+    }
 
     // Grant Type must be specified.
     if (!$input["grant_type"])
