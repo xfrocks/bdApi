@@ -2,90 +2,86 @@
 
 class bdApi_Model_Token extends XenForo_Model
 {
-	const FETCH_CLIENT = 0x01;
-	const FETCH_USER = 0x02;
+    const FETCH_CLIENT = 0x01;
+    const FETCH_USER = 0x02;
 
-	public function deleteTokens($clientId, $userId)
-	{
-		return $this->_getDb()->delete('xf_bdapi_token', array(
-			'client_id = ?' => $clientId,
-			'user_id = ?' => $userId,
-		));
-	}
+    public function deleteTokens($clientId, $userId)
+    {
+        return $this->_getDb()->delete('xf_bdapi_token', array(
+            'client_id = ?' => $clientId,
+            'user_id = ?' => $userId,
+        ));
+    }
 
-	public function hasExpired($client, $token)
-	{
-		if ($token['expire_date'] > 0 AND $token['expire_date'] < XenForo_Application::$time)
-		{
-			return true;
-		}
+    public function hasExpired($client, $token)
+    {
+        if ($token['expire_date'] > 0 AND $token['expire_date'] < XenForo_Application::$time) {
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	public function hasScope($client, $token, $scope)
-	{
-		$helper = bdApi_Template_Helper_Core::getInstance();
-		$scopeArray = $helper->scopeSplit($scope);
-		$tokenScopeArray = $helper->scopeSplit($token['scope']);
+    public function hasScope($client, $token, $scope)
+    {
+        $helper = bdApi_Template_Helper_Core::getInstance();
+        $scopeArray = $helper->scopeSplit($scope);
+        $tokenScopeArray = $helper->scopeSplit($token['scope']);
 
-		foreach ($scopeArray as $scopeSingle)
-		{
-			// use simple in_array check here without any normalization
-			if (!in_array($scopeSingle, $tokenScopeArray))
-			{
-				return false;
-			}
-		}
+        foreach ($scopeArray as $scopeSingle) {
+            // use simple in_array check here without any normalization
+            if (!in_array($scopeSingle, $tokenScopeArray)) {
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	public function pruneExpired()
-	{
-		$this->_getDb()->query('
+    public function pruneExpired()
+    {
+        $this->_getDb()->query('
 			DELETE FROM `xf_bdapi_token`
 			WHERE expire_date > 0
 				AND expire_date < ?
 		', array(XenForo_Application::$time));
-	}
+    }
 
-	public function getTokenByText($tokenText, array $fetchOptions = array())
-	{
-		$tokens = $this->getTokens(array('token_text' => $tokenText), $fetchOptions);
+    public function getTokenByText($tokenText, array $fetchOptions = array())
+    {
+        $tokens = $this->getTokens(array('token_text' => $tokenText), $fetchOptions);
 
-		return reset($tokens);
-	}
+        return reset($tokens);
+    }
 
-	public function getList(array $conditions = array(), array $fetchOptions = array())
-	{
-		$tokens = $this->getTokens($conditions, $fetchOptions);
-		$list = array();
+    public function getList(array $conditions = array(), array $fetchOptions = array())
+    {
+        $tokens = $this->getTokens($conditions, $fetchOptions);
+        $list = array();
 
-		foreach ($data as $tokenId => $token)
-		{
-			$tokens[$tokenId] = $token['token_text'];
-		}
+        foreach ($tokens as $tokenId => $token) {
+            $tokens[$tokenId] = $token['token_text'];
+        }
 
-		return $list;
-	}
+        return $list;
+    }
 
-	public function getTokenById($tokenId, array $fetchOptions = array())
-	{
-		$data = $this->getTokens(array('token_id' => $tokenId), $fetchOptions);
+    public function getTokenById($tokenId, array $fetchOptions = array())
+    {
+        $data = $this->getTokens(array('token_id' => $tokenId), $fetchOptions);
 
-		return reset($data);
-	}
+        return reset($data);
+    }
 
-	public function getTokens(array $conditions = array(), array $fetchOptions = array())
-	{
-		$whereConditions = $this->prepareTokenConditions($conditions, $fetchOptions);
+    public function getTokens(array $conditions = array(), array $fetchOptions = array())
+    {
+        $whereConditions = $this->prepareTokenConditions($conditions, $fetchOptions);
 
-		$orderClause = $this->prepareTokenOrderOptions($fetchOptions);
-		$joinOptions = $this->prepareTokenFetchOptions($fetchOptions);
-		$limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
+        $orderClause = $this->prepareTokenOrderOptions($fetchOptions);
+        $joinOptions = $this->prepareTokenFetchOptions($fetchOptions);
+        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
-		$all = $this->fetchAllKeyed($this->limitQueryResults("
+        $all = $this->fetchAllKeyed($this->limitQueryResults("
 				SELECT token.*
 					$joinOptions[selectFields]
 				FROM `xf_bdapi_token` AS token
@@ -94,125 +90,107 @@ class bdApi_Model_Token extends XenForo_Model
 					$orderClause
 			", $limitOptions['limit'], $limitOptions['offset']), 'token_id');
 
-		return $all;
-	}
+        return $all;
+    }
 
-	public function countTokens(array $conditions = array(), array $fetchOptions = array())
-	{
-		$whereConditions = $this->prepareTokenConditions($conditions, $fetchOptions);
+    public function countTokens(array $conditions = array(), array $fetchOptions = array())
+    {
+        $whereConditions = $this->prepareTokenConditions($conditions, $fetchOptions);
 
-		$orderClause = $this->prepareTokenOrderOptions($fetchOptions);
-		$joinOptions = $this->prepareTokenFetchOptions($fetchOptions);
-		$limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
+        $orderClause = $this->prepareTokenOrderOptions($fetchOptions);
+        $joinOptions = $this->prepareTokenFetchOptions($fetchOptions);
+        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
-		return $this->_getDb()->fetchOne("
+        return $this->_getDb()->fetchOne("
 			SELECT COUNT(*)
 			FROM `xf_bdapi_token` AS token
 				$joinOptions[joinTables]
 			WHERE $whereConditions
 		");
-	}
+    }
 
-	public function prepareTokenConditions(array $conditions, array &$fetchOptions)
-	{
-		$sqlConditions = array();
-		$db = $this->_getDb();
+    public function prepareTokenConditions(array $conditions, array &$fetchOptions)
+    {
+        $sqlConditions = array();
+        $db = $this->_getDb();
 
-		foreach (array('token_id', 'client_id', 'expire_date', 'user_id') as $columnName)
-		{
-			if (!isset($conditions[$columnName]))
-			{
-				continue;
-			}
+        foreach (array('token_id', 'client_id', 'expire_date', 'user_id') as $columnName) {
+            if (!isset($conditions[$columnName])) {
+                continue;
+            }
 
-			if (is_array($conditions[$columnName]))
-			{
-				if (!empty($conditions[$columnName]))
-				{
-					// only use IN condition if the array is not empty (nasty!)
-					$sqlConditions[] = "token.$columnName IN (" . $db->quote($conditions[$columnName]) . ")";
-				}
-			}
-			else
-			{
-				$sqlConditions[] = "token.$columnName = " . $db->quote($conditions[$columnName]);
-			}
-		}
+            if (is_array($conditions[$columnName])) {
+                if (!empty($conditions[$columnName])) {
+                    // only use IN condition if the array is not empty (nasty!)
+                    $sqlConditions[] = "token.$columnName IN (" . $db->quote($conditions[$columnName]) . ")";
+                }
+            } else {
+                $sqlConditions[] = "token.$columnName = " . $db->quote($conditions[$columnName]);
+            }
+        }
 
-		if (isset($conditions['token_text']))
-		{
-			$sqlConditions[] = 'token.token_text = ' . $this->_getDb()->quote($conditions['token_text']);
-		}
+        if (isset($conditions['token_text'])) {
+            $sqlConditions[] = 'token.token_text = ' . $this->_getDb()->quote($conditions['token_text']);
+        }
 
-		if (isset($conditions['expired']))
-		{
-			if ($conditions['expired'])
-			{
-				$sqlConditions[] = 'token.expire_date > 0';
-				$sqlConditions[] = 'token.expire_date < ' . XenForo_Application::$time;
-			}
-			else
-			{
-				$sqlConditions[] = 'token.expire_date = 0 OR token.expire_date > ' . XenForo_Application::$time;
-			}
-		}
+        if (isset($conditions['expired'])) {
+            if ($conditions['expired']) {
+                $sqlConditions[] = 'token.expire_date > 0';
+                $sqlConditions[] = 'token.expire_date < ' . XenForo_Application::$time;
+            } else {
+                $sqlConditions[] = 'token.expire_date = 0 OR token.expire_date > ' . XenForo_Application::$time;
+            }
+        }
 
-		if (!empty($conditions['filter']))
-		{
-			if (is_array($conditions['filter']))
-			{
-				$filterQuoted = XenForo_Db::quoteLike($conditions['filter'][0], $conditions['filter'][1], $db);
-			}
-			else
-			{
-				$filterQuoted = XenForo_Db::quoteLike($conditions['filter'], 'lr', $db);
-			}
+        if (!empty($conditions['filter'])) {
+            if (is_array($conditions['filter'])) {
+                $filterQuoted = XenForo_Db::quoteLike($conditions['filter'][0], $conditions['filter'][1], $db);
+            } else {
+                $filterQuoted = XenForo_Db::quoteLike($conditions['filter'], 'lr', $db);
+            }
 
-			$sqlConditions[] = sprintf('token.token_text LIKE %1$s', $filterQuoted);
-		}
+            $sqlConditions[] = sprintf('token.token_text LIKE %1$s', $filterQuoted);
+        }
 
-		return $this->getConditionsForClause($sqlConditions);
-	}
+        return $this->getConditionsForClause($sqlConditions);
+    }
 
-	public function prepareTokenFetchOptions(array $fetchOptions)
-	{
-		$selectFields = '';
-		$joinTables = '';
+    public function prepareTokenFetchOptions(array $fetchOptions)
+    {
+        $selectFields = '';
+        $joinTables = '';
 
-		if (!empty($fetchOptions['join']))
-		{
-			if ($fetchOptions['join'] & self::FETCH_CLIENT)
-			{
-				$selectFields .= '
+        if (!empty($fetchOptions['join'])) {
+            if ($fetchOptions['join'] & self::FETCH_CLIENT) {
+                $selectFields .= '
 					, client.name AS client_name
 					, client.description AS client_description
 					, client.redirect_uri AS client_redirect_uri';
-				$joinTables .= '
+                $joinTables .= '
 					LEFT JOIN `xf_bdapi_client` AS client
 					ON (client.client_id = token.client_id)';
-			}
+            }
 
-			if ($fetchOptions['join'] & self::FETCH_USER)
-			{
-				$selectFields .= '
+            if ($fetchOptions['join'] & self::FETCH_USER) {
+                $selectFields .= '
 					, user.username';
-				$joinTables .= '
+                $joinTables .= '
 					LEFT JOIN `xf_user` AS user
 					ON (user.user_id = token.user_id)';
-			}
-		}
+            }
+        }
 
-		return array(
-			'selectFields' => $selectFields,
-			'joinTables' => $joinTables
-		);
-	}
+        return array(
+            'selectFields' => $selectFields,
+            'joinTables' => $joinTables
+        );
+    }
 
-	public function prepareTokenOrderOptions(array &$fetchOptions, $defaultOrderSql = '')
-	{
-		$choices = array('issue_date' => 'token.issue_date');
+    public function prepareTokenOrderOptions(array &$fetchOptions, $defaultOrderSql = '')
+    {
+        $choices = array('issue_date' => 'token.issue_date');
 
-		return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
-	}
+        return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
+    }
 
 }

@@ -2,158 +2,155 @@
 
 class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 {
-	public function actionGetLogin()
-	{
-		$input = $this->_input->filter(array(
-			'oauth_token' => XenForo_Input::STRING,
-			'redirect_uri' => XenForo_Input::STRING,
-		));
+    public function actionGetLogin()
+    {
+        /* @var $session bdApi_Session */
+        $session = XenForo_Application::getSession();
 
-		if (empty($input['redirect_uri']))
-		{
-			return $this->responseError(new XenForo_Phrase('bdapi_slash_tools_login_requires_redirect_uri'), 400);
-		}
-		if (!XenForo_Application::getSession()->isValidRedirectUri($input['redirect_uri']))
-		{
-			return $this->responseNoPermission();
-		}
+        $input = $this->_input->filter(array(
+            'oauth_token' => XenForo_Input::STRING,
+            'redirect_uri' => XenForo_Input::STRING,
+        ));
 
-		$loginLinkData = array(
-			'redirect' => $input['redirect_uri'],
-			'timestamp' => XenForo_Application::$time + 10,
-		);
+        if (empty($input['redirect_uri'])) {
+            return $this->responseError(new XenForo_Phrase('bdapi_slash_tools_login_requires_redirect_uri'), 400);
+        }
+        if (!$session->isValidRedirectUri($input['redirect_uri'])) {
+            return $this->responseNoPermission();
+        }
 
-		$loginLinkData['user_id'] = bdApi_Crypt::encryptTypeOne(XenForo_Visitor::getUserId(), $loginLinkData['timestamp']);
+        $loginLinkData = array(
+            'redirect' => $input['redirect_uri'],
+            'timestamp' => XenForo_Application::$time + 10,
+        );
 
-		$loginLink = XenForo_Link::buildPublicLink('login/api', '', $loginLinkData);
+        $loginLinkData['user_id'] = bdApi_Crypt::encryptTypeOne(XenForo_Visitor::getUserId(), $loginLinkData['timestamp']);
 
-		return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $loginLink);
-	}
+        $loginLink = XenForo_Link::buildPublicLink('login/api', '', $loginLinkData);
 
-	public function actionPostLoginSocial()
-	{
-		$social = array();
+        return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $loginLink);
+    }
 
-		$options = XenForo_Application::getOptions();
+    public function actionPostLoginSocial()
+    {
+        $social = array();
 
-		if ($options->get('facebookAppId'))
-		{
-			$social[] = 'facebook';
-		}
+        $options = XenForo_Application::getOptions();
 
-		if ($options->get('twitterAppKey'))
-		{
-			$social[] = 'twitter';
-		}
+        if ($options->get('facebookAppId')) {
+            $social[] = 'facebook';
+        }
 
-		if ($options->get('googleClientId'))
-		{
-			$social[] = 'google';
-		}
+        if ($options->get('twitterAppKey')) {
+            $social[] = 'twitter';
+        }
 
-		return $this->responseData('bdApi_ViewApi_Tool_LoginSocial', array('social' => $social));
-	}
+        if ($options->get('googleClientId')) {
+            $social[] = 'google';
+        }
 
-	public function actionGetLogout()
-	{
-		$input = $this->_input->filter(array(
-			'oauth_token' => XenForo_Input::STRING,
-			'redirect_uri' => XenForo_Input::STRING,
-		));
+        return $this->responseData('bdApi_ViewApi_Tool_LoginSocial', array('social' => $social));
+    }
 
-		if (empty($input['redirect_uri']))
-		{
-			return $this->responseError(new XenForo_Phrase('bdapi_slash_tools_login_requires_redirect_uri'), 400);
-		}
-		if (!XenForo_Application::getSession()->isValidRedirectUri($input['redirect_uri']))
-		{
-			return $this->responseNoPermission();
-		}
+    public function actionGetLogout()
+    {
+        /* @var $session bdApi_Session */
+        $session = XenForo_Application::getSession();
 
-		$logoutLinkData = array(
-			'redirect' => $input['redirect_uri'],
-			'_xfToken' => XenForo_Visitor::getInstance()->get('csrf_token_page'),
-			'timestamp' => XenForo_Application::$time + 10,
-		);
+        $input = $this->_input->filter(array(
+            'oauth_token' => XenForo_Input::STRING,
+            'redirect_uri' => XenForo_Input::STRING,
+        ));
 
-		$logoutLinkData['md5'] = bdApi_Crypt::encryptTypeOne(md5($logoutLinkData['redirect']), $logoutLinkData['timestamp']);
+        if (empty($input['redirect_uri'])) {
+            return $this->responseError(new XenForo_Phrase('bdapi_slash_tools_login_requires_redirect_uri'), 400);
+        }
+        if (!$session->isValidRedirectUri($input['redirect_uri'])) {
+            return $this->responseNoPermission();
+        }
 
-		$logoutLink = XenForo_Link::buildPublicLink('logout', '', $logoutLinkData);
+        $logoutLinkData = array(
+            'redirect' => $input['redirect_uri'],
+            '_xfToken' => XenForo_Visitor::getInstance()->get('csrf_token_page'),
+            'timestamp' => XenForo_Application::$time + 10,
+        );
 
-		return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $logoutLink);
-	}
+        $logoutLinkData['md5'] = bdApi_Crypt::encryptTypeOne(md5($logoutLinkData['redirect']), $logoutLinkData['timestamp']);
 
-	public function actionPostPasswordResetRequest()
-	{
-		$this->_assertRegistrationRequired();
+        $logoutLink = XenForo_Link::buildPublicLink('logout', '', $logoutLinkData);
 
-		$user = XenForo_Visitor::getInstance()->toArray();
+        return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $logoutLink);
+    }
 
-		$this->getModelFromCache('XenForo_Model_UserConfirmation')->sendPasswordResetRequest($user);
+    public function actionPostPasswordResetRequest()
+    {
+        $this->_assertRegistrationRequired();
 
-		return $this->responseMessage(new XenForo_Phrase('password_reset_request_has_been_emailed_to_you'));
-	}
+        $user = XenForo_Visitor::getInstance()->toArray();
 
-	public function actionPostLink()
-	{
-		$type = $this->_input->filterSingle('type', XenForo_Input::STRING, array('default' => 'public'));
-		$route = $this->_input->filterSingle('route', XenForo_Input::STRING, array('default' => 'index'));
+        /* @var $userConfirmationModel XenForo_Model_UserConfirmation */
+        $userConfirmationModel = $this->getModelFromCache('XenForo_Model_UserConfirmation');
+        $userConfirmationModel->sendPasswordResetRequest($user);
 
-		switch ($type)
-		{
-			case 'admin':
-				$link = XenForo_Link::buildAdminLink($route);
-				break;
-			case 'public':
-			default:
-				$link = XenForo_Link::buildPublicLink($route);
-				break;
-		}
+        return $this->responseMessage(new XenForo_Phrase('password_reset_request_has_been_emailed_to_you'));
+    }
 
-		$data = array(
-			'type' => $type,
-			'route' => $route,
-			'link' => $link,
-		);
+    public function actionPostLink()
+    {
+        $type = $this->_input->filterSingle('type', XenForo_Input::STRING, array('default' => 'public'));
+        $route = $this->_input->filterSingle('route', XenForo_Input::STRING, array('default' => 'index'));
 
-		return $this->responseData('bdApi_ViewApi_Tool_Link', $data);
-	}
+        switch ($type) {
+            case 'admin':
+                $link = XenForo_Link::buildAdminLink($route);
+                break;
+            case 'public':
+            default:
+                $link = XenForo_Link::buildPublicLink($route);
+                break;
+        }
+
+        $data = array(
+            'type' => $type,
+            'route' => $route,
+            'link' => $link,
+        );
+
+        return $this->responseData('bdApi_ViewApi_Tool_Link', $data);
+    }
 
     public function actionGetParseLink()
     {
         $link = $this->_input->filterSingle('link', XenForo_Input::STRING);
         $link = XenForo_Link::convertUriToAbsoluteUri($link, true);
         $fc = XenForo_Application::get('_bdApi_fc');
+        /* @var $dependencies bdApi_Dependencies */
         $dependencies = $fc->getDependencies();
 
         $request = new bdApi_Zend_Controller_Request_Http($link);
         $routeMatch = $dependencies->routePublic($request);
-        if (!$routeMatch OR !$routeMatch->getControllerName())
-        {
+        if (!$routeMatch OR !$routeMatch->getControllerName()) {
             // link cannot be route
             return $this->responseNoPermission();
         }
 
-        switch ($routeMatch->getControllerName())
-        {
+        switch ($routeMatch->getControllerName()) {
             case 'XenForo_ControllerPublic_Forum':
                 $nodeId = $request->getParam('node_id');
 
-                if (empty($nodeId))
-                {
+                if (empty($nodeId)) {
                     $nodeName = $request->getParam('node_name');
-                    if (!empty($nodeName))
-                    {
-                        $node = $this->getModelFromCache('XenForo_Model_Node')->getNodeByName($nodeName, 'Forum');
-                        if (!empty($node))
-                        {
+                    if (!empty($nodeName)) {
+                        /* @var $nodeModel XenForo_Model_Node */
+                        $nodeModel = $this->getModelFromCache('XenForo_Model_Node');
+                        $node = $nodeModel->getNodeByName($nodeName, 'Forum');
+                        if (!empty($node)) {
                             $nodeId = $node['node_id'];
                         }
                     }
                 }
 
-                if (!empty($nodeId))
-                {
+                if (!empty($nodeId)) {
                     $this->_request->setParam('forum_id', $nodeId);
                 }
 
@@ -161,13 +158,11 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
             case 'XenForo_ControllerPublic_Thread':
                 $threadId = $request->getParam('thread_id');
 
-                if (!empty($threadId))
-                {
+                if (!empty($threadId)) {
                     $this->_request->setParam('thread_id', $threadId);
 
                     $linkParts = parse_url($link);
-                    if (!empty($linkParts['fragment']) AND preg_match('#^post-(?<post_id>\d+)$#', $linkParts['fragment'], $fragment))
-                    {
+                    if (!empty($linkParts['fragment']) AND preg_match('#^post-(?<post_id>\d+)$#', $linkParts['fragment'], $fragment)) {
                         $this->_request->setParam('page_of_post_id', $fragment['post_id']);
                     }
 
@@ -177,8 +172,7 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
             case 'XenForo_ControllerPublic_Post':
                 $postId = $request->getParam('post_id');
 
-                if (!empty($postId))
-                {
+                if (!empty($postId)) {
                     $this->_request->setParam('page_of_post_id', $postId);
                     return $this->responseReroute('bdApi_ControllerApi_Post', 'get-index');
                 }
@@ -189,18 +183,18 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         return $this->responseNoPermission();
     }
 
-	protected function _getScopeForAction($action)
-	{
-		return false;
-	}
+    protected function _getScopeForAction($action)
+    {
+        return false;
+    }
 
-	/**
-	 *
-	 * @return XenForo_Model_Alert
-	 */
-	protected function _getAlertModel()
-	{
-		return $this->getModelFromCache('XenForo_Model_Alert');
-	}
+    /**
+     *
+     * @return XenForo_Model_Alert
+     */
+    protected function _getAlertModel()
+    {
+        return $this->getModelFromCache('XenForo_Model_Alert');
+    }
 
 }

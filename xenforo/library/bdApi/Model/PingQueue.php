@@ -2,195 +2,175 @@
 
 class bdApi_Model_PingQueue extends XenForo_Model
 {
-	public function insertQueue($callback, $objectType, array $data, $expireDate = 0, $queueDate = 0)
-	{
-		$this->_getDb()->insert('xf_bdapi_ping_queue', array(
-			'callback_md5' => md5($callback),
-			'callback' => $callback,
-			'object_type' => $objectType,
-			'data' => serialize($data),
-			'queue_date' => $queueDate,
-			'expire_date' => $expireDate,
-		));
+    public function insertQueue($callback, $objectType, array $data, $expireDate = 0, $queueDate = 0)
+    {
+        $this->_getDb()->insert('xf_bdapi_ping_queue', array(
+            'callback_md5' => md5($callback),
+            'callback' => $callback,
+            'object_type' => $objectType,
+            'data' => serialize($data),
+            'queue_date' => $queueDate,
+            'expire_date' => $expireDate,
+        ));
 
-		if (is_callable(array(
-			'XenForo_Application',
-			'defer'
-		)))
-		{
-			$triggerDate = null;
-			if ($queueDate > 0)
-			{
-				$triggerDate = $queueDate;
-			}
+        if (is_callable(array(
+            'XenForo_Application',
+            'defer'
+        ))) {
+            $triggerDate = null;
+            if ($queueDate > 0) {
+                $triggerDate = $queueDate;
+            }
 
-			XenForo_Application::defer('bdApi_Deferred_PingQueue', array(), __CLASS__, false, $triggerDate);
-		}
-	}
+            XenForo_Application::defer('bdApi_Deferred_PingQueue', array(), __CLASS__, false, $triggerDate);
+        }
+    }
 
-	public function reInsertQueue($records)
-	{
-		foreach ($records as $record)
-		{
-			$data = $record['data'];
+    public function reInsertQueue($records)
+    {
+        foreach ($records as $record) {
+            $data = $record['data'];
 
-			if (!isset($data['_retries']))
-			{
-				$data['_retries'] = 0;
-			}
-			else
-			{
-				$data['_retries']++;
-			}
-			if ($data['_retries'] > 5)
-			{
-				// too many tries
-				continue;
-			}
+            if (!isset($data['_retries'])) {
+                $data['_retries'] = 0;
+            } else {
+                $data['_retries']++;
+            }
+            if ($data['_retries'] > 5) {
+                // too many tries
+                continue;
+            }
 
-			$queueDate = time() + 60 * pow(2, $data['_retries'] - 1);
+            $queueDate = time() + 60 * pow(2, $data['_retries'] - 1);
 
-			$this->insertQueue($record['callback'], $record['object_type'], $data, $record['expire_date'], $queueDate);
-		}
-	}
+            $this->insertQueue($record['callback'], $record['object_type'], $data, $record['expire_date'], $queueDate);
+        }
+    }
 
-	public function hasQueue()
-	{
-		$minId = $this->_getDb()->fetchOne('
+    public function hasQueue()
+    {
+        $minId = $this->_getDb()->fetchOne('
 			SELECT MIN(ping_queue_id)
 			FROM xf_bdapi_ping_queue
 			WHERE queue_date < ?
 		', array(XenForo_Application::$time));
 
-		return (bool)$minId;
-	}
+        return (bool)$minId;
+    }
 
-	public function getQueue($limit = 20)
-	{
-		$queueRecords = $this->fetchAllKeyed($this->limitQueryResults('
+    public function getQueue($limit = 20)
+    {
+        $queueRecords = $this->fetchAllKeyed($this->limitQueryResults('
 			SELECT *
 			FROM xf_bdapi_ping_queue
 			WHERE queue_date < ?
 			ORDER BY callback_md5
 		', $limit), 'ping_queue_id', array(XenForo_Application::$time));
 
-		foreach ($queueRecords as &$record)
-		{
-			$record['data'] = unserialize($record['data']);
-		}
+        foreach ($queueRecords as &$record) {
+            $record['data'] = unserialize($record['data']);
+        }
 
-		return $queueRecords;
-	}
+        return $queueRecords;
+    }
 
-	public function runQueue($targetRunTime = 0)
-	{
-		$s = microtime(true);
+    public function runQueue($targetRunTime = 0)
+    {
+        $s = microtime(true);
 
-		do
-		{
-			$queueRecords = $this->getQueue($targetRunTime ? 20 : 0);
+        do {
+            $queueRecords = $this->getQueue($targetRunTime ? 20 : 0);
 
-			$this->ping($queueRecords);
+            $this->ping($queueRecords);
 
-			if ($targetRunTime && microtime(true) - $s > $targetRunTime)
-			{
-				$queue = false;
-				break;
-			}
-		}
-		while ($queueRecords);
+            if ($targetRunTime && microtime(true) - $s > $targetRunTime) {
+                break;
+            }
+        } while ($queueRecords);
 
-		return $this->hasQueue();
-	}
+        return $this->hasQueue();
+    }
 
-	public function ping(array $queueRecords)
-	{
-		while (count($queueRecords) > 0)
-		{
-			$records = array();
+    public function ping(array $queueRecords)
+    {
+        /* @var $logModel bdApi_Model_Log */
+        $logModel = $this->getModelFromCache('bdApi_Model_Log');
 
-			foreach (array_keys($queueRecords) as $key)
-			{
-				if (count($records) == 0 OR $queueRecords[$key]['callback'] === $records[0]['callback'])
-				{
-					$record = $queueRecords[$key];
-					unset($queueRecords[$key]);
+        while (count($queueRecords) > 0) {
+            $records = array();
 
-					if (!$this->_getDb()->delete('xf_bdapi_ping_queue', 'ping_queue_id = ' . intval($record['ping_queue_id'])))
-					{
-						// already been deleted - run elsewhere
-						continue;
-					}
+            foreach (array_keys($queueRecords) as $key) {
+                if (count($records) == 0 OR $queueRecords[$key]['callback'] === $records[0]['callback']) {
+                    $record = $queueRecords[$key];
+                    unset($queueRecords[$key]);
 
-					if ($record['expire_date'] > 0 AND $record['expire_date'] < XenForo_Application::$time)
-					{
-						// expired
-						continue;
-					}
+                    if (!$this->_getDb()->delete('xf_bdapi_ping_queue', 'ping_queue_id = ' . intval($record['ping_queue_id']))) {
+                        // already been deleted - run elsewhere
+                        continue;
+                    }
 
-					$records[] = $record;
-				}
-			}
+                    if ($record['expire_date'] > 0 AND $record['expire_date'] < XenForo_Application::$time) {
+                        // expired
+                        continue;
+                    }
 
-			$payloads = $this->_preparePayloadsFromRecords($records);
-			if (empty($payloads))
-			{
-				continue;
-			}
+                    $records[] = $record;
+                }
+            }
 
-			$client = XenForo_Helper_Http::getClient($records[0]['callback']);
-			$client->setHeaders('Content-Type', 'application/json');
-			$client->setRawData(json_encode($payloads));
-			$response = $client->request('POST');
-			$responseCode = $response->getStatus();
-			$reInserted = false;
+            $payloads = $this->_preparePayloadsFromRecords($records);
+            if (empty($payloads)) {
+                continue;
+            }
 
-			if ($responseCode < 200 OR $responseCode > 299)
-			{
-				$this->reInsertQueue($records);
-				$reInserted = true;
-			}
+            $client = XenForo_Helper_Http::getClient($records[0]['callback']);
+            $client->setHeaders('Content-Type', 'application/json');
+            $client->setRawData(json_encode($payloads));
+            $response = $client->request('POST');
+            $responseCode = $response->getStatus();
+            $reInserted = false;
 
-			if (XenForo_Application::debugMode() OR $reInserted)
-			{
-				$this->getModelFromCache('bdApi_Model_Log')->logRequest('POST', $records[0]['callback'], $payloads, $responseCode, array('message' => $response->getBody()), array(
-					'client_id' => '',
-					'user_id' => 0,
-					'ip_address' => '127.0.0.1',
-				));
-			}
-		}
-	}
+            if ($responseCode < 200 OR $responseCode > 299) {
+                $this->reInsertQueue($records);
+                $reInserted = true;
+            }
 
-	protected function _preparePayloadsFromRecords(array $records)
-	{
-		$dataByTypes = array();
-		$payloads = array();
+            if (XenForo_Application::debugMode() OR $reInserted) {
+                $logModel->logRequest('POST', $records[0]['callback'], $payloads, $responseCode, array('message' => $response->getBody()), array(
+                    'client_id' => '',
+                    'user_id' => 0,
+                    'ip_address' => '127.0.0.1',
+                ));
+            }
+        }
+    }
 
-		foreach ($records as $key => $record)
-		{
-			if (!isset($dataByTypes[$record['object_type']]))
-			{
-				$dataByTypes[$record['object_type']] = array();
+    protected function _preparePayloadsFromRecords(array $records)
+    {
+        $dataByTypes = array();
+        $payloads = array();
 
-			}
-			$dataByTypes[$record['object_type']][$key] = $record['data'];
-		}
+        foreach ($records as $key => $record) {
+            if (!isset($dataByTypes[$record['object_type']])) {
+                $dataByTypes[$record['object_type']] = array();
 
-		foreach ($dataByTypes as $objectType => &$dataMany)
-		{
-			$dataMany = $this->getModelFromCache('bdApi_Model_Subscription')->preparePingDataMany($objectType, $dataMany);
-		}
+            }
+            $dataByTypes[$record['object_type']][$key] = $record['data'];
+        }
 
-		foreach ($records as $key => $record)
-		{
-			if (!empty($dataByTypes[$record['object_type']][$key]))
-			{
-				$payloads[$key] = $dataByTypes[$record['object_type']][$key];
-			}
-		}
+        /* @var $subscriptionModel bdApi_Model_Subscription */
+        $subscriptionModel = $this->getModelFromCache('bdApi_Model_Subscription');
+        foreach ($dataByTypes as $objectType => &$dataMany) {
+            $dataMany = $subscriptionModel->preparePingDataMany($objectType, $dataMany);
+        }
 
-		return $payloads;
-	}
+        foreach ($records as $key => $record) {
+            if (!empty($dataByTypes[$record['object_type']][$key])) {
+                $payloads[$key] = $dataByTypes[$record['object_type']][$key];
+            }
+        }
+
+        return $payloads;
+    }
 
 }

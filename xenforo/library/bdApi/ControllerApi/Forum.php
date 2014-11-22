@@ -2,186 +2,181 @@
 
 class bdApi_ControllerApi_Forum extends bdApi_ControllerApi_Node
 {
-	public function actionGetFollowed()
-	{
-		$forums = array();
+    public function actionGetFollowed()
+    {
+        $forums = array();
 
-		if (XenForo_Application::$versionId >= 1020000)
-		{
-			$forumWatchModel = $this->getModelFromCache('XenForo_Model_ForumWatch');
+        if (XenForo_Application::$versionId >= 1020000) {
+            $forumWatches = $this->_getForumWatchModel()->getUserForumWatchByUser(XenForo_Visitor::getUserId());
 
-			$forumWatches = $forumWatchModel->getUserForumWatchByUser(XenForo_Visitor::getUserId());
+            $nodeIds = array();
+            foreach ($forumWatches as $forumWatch) {
+                $nodeIds[] = $forumWatch['node_id'];
+            }
 
-			$nodeIds = array();
-			foreach ($forumWatches as $forumWatch)
-			{
-				$nodeIds[] = $forumWatch['node_id'];
-			}
+            $forums = $this->_getForumModel()->getForumsByIds($nodeIds, $this->_getForumModel()->getFetchOptionsToPrepareApiData());
+            $forums = $this->_getForumModel()->prepareApiDataForForums($forums);
 
-			$forums = $this->_getForumModel()->getForumsByIds($nodeIds, $this->_getForumModel()->getFetchOptionsToPrepareApiData());
-			$forums = $this->_getForumModel()->prepareApiDataForForums($forums);
+            foreach ($forumWatches as $forumWatch) {
+                foreach ($forums as &$forum) {
+                    if ($forumWatch['node_id'] == $forum['forum_id']) {
+                        $forum = $this->_getForumWatchModel()->prepareApiDataForForumWatches($forum, $forumWatch);
+                    }
+                }
+            }
+        }
 
-			foreach ($forumWatches as $forumWatch)
-			{
-				foreach ($forums as &$forum)
-				{
-					if ($forumWatch['node_id'] == $forum['forum_id'])
-					{
-						$forum = $forumWatchModel->prepareApiDataForForumWatches($forum, $forumWatch);
-					}
-				}
-			}
-		}
+        $data = array('forums' => $this->_filterDataMany($forums));
 
-		$data = array('forums' => $this->_filterDataMany($forums));
+        return $this->responseData('bdApi_ViewApi_Forum_Followed', $data);
+    }
 
-		return $this->responseData('bdApi_ViewApi_Forum_Followed', $data);
-	}
+    public function actionGetFollowers()
+    {
+        $users = array();
 
-	public function actionGetFollowers()
-	{
-		$users = array();
+        if (XenForo_Application::$versionId >= 1020000) {
+            $nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
+            $forum = $this->_getForumThreadPostHelper()->assertForumValidAndViewable($nodeId);
 
-		if (XenForo_Application::$versionId >= 1020000)
-		{
-			$nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
+            if ($this->_getForumModel()->canWatchForum($forum)) {
+                $visitor = XenForo_Visitor::getInstance();
+                $forumWatch = $this->_getForumWatchModel()->getUserForumWatchByForumId($visitor['user_id'], $forum['node_id']);
 
-			$ftpHelper = $this->getHelper('ForumThreadPost');
-			$forum = $ftpHelper->assertForumValidAndViewable($nodeId);
+                if (!empty($forumWatch)) {
+                    $user = array(
+                        'user_id' => $visitor['user_id'],
+                        'username' => $visitor['username'],
+                    );
 
-			if ($this->_getForumModel()->canWatchForum($forum))
-			{
-				$visitor = XenForo_Visitor::getInstance();
-				$forumWatchModel = $this->getModelFromCache('XenForo_Model_ForumWatch');
+                    $user = $this->_getForumWatchModel()->prepareApiDataForForumWatches($user, $forumWatch);
 
-				$forumWatch = $forumWatchModel->getUserForumWatchByForumId($visitor['user_id'], $forum['node_id']);
+                    $users[] = $user;
+                }
+            }
+        }
 
-				if (!empty($forumWatch))
-				{
-					$user = array(
-						'user_id' => $visitor['user_id'],
-						'username' => $visitor['username'],
-					);
+        $data = array('users' => $this->_filterDataMany($users));
 
-					$user = $forumWatchModel->prepareApiDataForForumWatches($user, $forumWatch);
+        return $this->responseData('bdApi_ViewApi_Forum_Followers', $data);
+    }
 
-					$users[] = $user;
-				}
-			}
-		}
+    public function actionPostFollowers()
+    {
+        if (XenForo_Application::$versionId < 1020000) {
+            return $this->responseNoPermission();
+        }
 
-		$data = array('users' => $this->_filterDataMany($users));
+        $nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
+        $forum = $this->_getForumThreadPostHelper()->assertForumValidAndViewable($nodeId);
 
-		return $this->responseData('bdApi_ViewApi_Forum_Followers', $data);
-	}
+        $post = $this->_input->filterSingle('post', XenForo_Input::UINT);
+        $sendAlert = $this->_input->filterSingle('alert', XenForo_Input::UINT, array('default' => 1));
+        $sendEmail = $this->_input->filterSingle('email', XenForo_Input::UINT);
 
-	public function actionPostFollowers()
-	{
-		if (XenForo_Application::$versionId < 1020000)
-		{
-			return $this->responseNoPermission();
-		}
+        if (!$this->_getForumModel()->canWatchForum($forum)) {
+            return $this->responseNoPermission();
+        }
 
-		$nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
-		$post = $this->_input->filterSingle('post', XenForo_Input::UINT);
-		$sendAlert = $this->_input->filterSingle('alert', XenForo_Input::UINT, array('default' => 1));
-		$sendEmail = $this->_input->filterSingle('email', XenForo_Input::UINT);
+        $notifyOn = ($post > 0 ? 'message' : 'thread');
+        $this->_getForumWatchModel()->setForumWatchState(XenForo_Visitor::getUserId(), $forum['node_id'], $notifyOn, $sendAlert, $sendEmail);
 
-		$ftpHelper = $this->getHelper('ForumThreadPost');
-		$forum = $ftpHelper->assertForumValidAndViewable($nodeId);
+        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
 
-		if (!$this->_getForumModel()->canWatchForum($forum))
-		{
-			return $this->responseNoPermission();
-		}
+    public function actionDeleteFollowers()
+    {
+        if (XenForo_Application::$versionId < 1020000) {
+            return $this->responseNoPermission();
+        }
 
-		$notifyOn = ($post > 0 ? 'message' : 'thread');
-		$this->getModelFromCache('XenForo_Model_ForumWatch')->setForumWatchState(XenForo_Visitor::getUserId(), $forum['node_id'], $notifyOn, $sendAlert, $sendEmail);
+        $nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
 
-		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
-	}
+        $this->_getForumWatchModel()->setForumWatchState(XenForo_Visitor::getUserId(), $nodeId, 'delete');
 
-	public function actionDeleteFollowers()
-	{
-		if (XenForo_Application::$versionId < 1020000)
-		{
-			return $this->responseNoPermission();
-		}
+        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
 
-		$nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
+    protected function _getControllerName()
+    {
+        return 'bdApi_ControllerApi_Forum';
+    }
 
-		$this->getModelFromCache('XenForo_Model_ForumWatch')->setForumWatchState(XenForo_Visitor::getUserId(), $nodeId, 'delete');
+    protected function _getNameSingular()
+    {
+        return 'forum';
+    }
 
-		return $this->responseMessage(new XenForo_Phrase('changes_saved'));
-	}
+    protected function _getNamePlural()
+    {
+        return 'forums';
+    }
 
-	protected function _getControllerName()
-	{
-		return 'bdApi_ControllerApi_Forum';
-	}
+    protected function _getAll($parentNodeId = false)
+    {
+        $nodes = $this->_getNodeModel()->getViewableNodeList();
 
-	protected function _getNameSingular()
-	{
-		return 'forum';
-	}
+        $forumIds = array();
+        foreach ($nodes as $node) {
+            if ($parentNodeId !== false AND $node['parent_node_id'] != $parentNodeId) {
+                continue;
+            }
 
-	protected function _getNamePlural()
-	{
-		return 'forums';
-	}
+            if ($node['node_type_id'] === 'Forum') {
+                $forumIds[] = $node['node_id'];
+            }
+        }
 
-	protected function _getAll($parentNodeId = false)
-	{
-		$nodes = $this->_getNodeModel()->getViewableNodeList();
+        return $this->_getForumModel()->getForumsByIds($forumIds, $this->_getForumModel()->getFetchOptionsToPrepareApiData());
+    }
 
-		$forumIds = array();
-		foreach ($nodes as $node)
-		{
-			if ($parentNodeId !== false AND $node['parent_node_id'] != $parentNodeId)
-			{
-				continue;
-			}
+    protected function _getSingle($nodeId)
+    {
+        return $this->_getForumModel()->getForumById($nodeId, $this->_getForumModel()->getFetchOptionsToPrepareApiData());
+    }
 
-			if ($node['node_type_id'] === 'Forum')
-			{
-				$forumIds[] = $node['node_id'];
-			}
-		}
+    protected function _isViewable(array $forum)
+    {
+        return $this->_getForumModel()->canViewForum($forum);
+    }
 
-		return $this->_getForumModel()->getForumsByIds($forumIds, $this->_getForumModel()->getFetchOptionsToPrepareApiData());
-	}
+    protected function _prepareApiDataForNodes(array $forums)
+    {
+        return $this->_getForumModel()->prepareApiDataForForums($forums);
+    }
 
-	protected function _getSingle($nodeId)
-	{
-		return $this->_getForumModel()->getForumById($nodeId, $this->_getForumModel()->getFetchOptionsToPrepareApiData());
-	}
+    protected function _prepareApiDataForNode(array $forum)
+    {
+        return $this->_getForumModel()->prepareApiDataForForum($forum);
+    }
 
-	protected function _isViewable(array $forum)
-	{
-		return $this->_getForumModel()->canViewForum($forum);
-	}
+    protected function _responseErrorNotFound()
+    {
+        return $this->responseError(new XenForo_Phrase('requested_forum_not_found'), 404);
+    }
 
-	protected function _prepareApiDataForNodes(array $forums)
-	{
-		return $this->_getForumModel()->prepareApiDataForForums($forums);
-	}
+    /**
+     * @return bdApi_XenForo_Model_Forum
+     */
+    protected function _getForumModel()
+    {
+        return $this->getModelFromCache('XenForo_Model_Forum');
+    }
 
-	protected function _prepareApiDataForNode(array $forum)
-	{
-		return $this->_getForumModel()->prepareApiDataForForum($forum);
-	}
+    /**
+     * @return bdApi_XenForo_Model_ForumWatch
+     */
+    protected function _getForumWatchModel()
+    {
+        return $this->getModelFromCache('XenForo_Model_ForumWatch');
+    }
 
-	protected function _responseErrorNotFound()
-	{
-		return $this->responseError(new XenForo_Phrase('requested_forum_not_found'), 404);
-	}
-
-	/**
-	 * @return XenForo_Model_Forum
-	 */
-	protected function _getForumModel()
-	{
-		return $this->getModelFromCache('XenForo_Model_Forum');
-	}
+    /**
+     * @return XenForo_ControllerHelper_ForumThreadPost
+     */
+    protected function _getForumThreadPostHelper()
+    {
+        return $this->getHelper('ForumThreadPost');
+    }
 
 }
