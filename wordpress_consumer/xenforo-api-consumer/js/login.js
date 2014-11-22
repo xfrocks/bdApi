@@ -18,7 +18,7 @@
 				return false;
 			}
 
-			sdk.isAuthorized('read', function(isAuthorized, apiData)
+			sdk.isAuthorized('', function(isAuthorized, apiData)
 			{
 				if (isAuthorized)
 				{

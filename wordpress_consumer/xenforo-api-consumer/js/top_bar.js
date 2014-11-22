@@ -27,41 +27,33 @@
 	{
 		var sdk = window.xfacSDK;
 
-		var token = false;
-		if (window.xfacOneTimeToken != _undefined)
+		if (window.xfacClientId != _undefined && window.xfacXenForoUserId != _undefined && window.xfacDoNotifications != _undefined && window.xfacDoConversations != _undefined)
 		{
-			token = window.xfacOneTimeToken;
-		}
-
-		if (token !== false)
-		{
-			sdk.request('users/me', function(apiData)
+			sdk.init(
 			{
-				if (apiData == _undefined)
-				{
-					return;
-				}
+				client_id: window.xfacClientId
+			});
 
-				if (apiData.user == _undefined)
+			sdk.isAuthorized('read' + (window.xfacDoConversations ? ' conversate' : ''), function(isAuthorized, apiData)
+			{
+				if (isAuthorized && apiData.user_id == window.xfacXenForoUserId)
 				{
-					return;
-				}
+					var conversationCount = 0;
+					var notificationCount = 0;
+					if (apiData.user_unread_conversation_count != _undefined)
+					{
+						conversationCount = apiData.user_unread_conversation_count;
+						document.cookie = 'conversationCount=' + conversationCount;
+					}
+					if (apiData.user_unread_notification_count != _undefined)
+					{
+						notificationCount = apiData.user_unread_notification_count;
+						document.cookie = 'notificationCount=' + notificationCount;
+					}
 
-				var conversationCount = 0;
-				var notificationCount = 0;
-				if (apiData.user.user_unread_conversation_count != _undefined)
-				{
-					conversationCount = apiData.user.user_unread_conversation_count;
-					document.cookie = 'conversationCount=' + conversationCount;
+					updateJsCount(conversationCount, notificationCount);
 				}
-				if (apiData.user.user_unread_notification_count != _undefined)
-				{
-					notificationCount = apiData.user.user_unread_notification_count;
-					document.cookie = 'notificationCount=' + notificationCount;
-				}
-
-				updateJsCount(conversationCount, notificationCount);
-			}, token);
+			});
 		}
 	};
 }(jQuery, this, document);

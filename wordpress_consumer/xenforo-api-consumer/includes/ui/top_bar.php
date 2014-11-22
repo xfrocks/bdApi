@@ -99,12 +99,16 @@ function xfac_admin_bar_jscount_menu($wpAdminBar)
 	$record = reset($records);
 
 	$meta = xfac_option_getMeta($config);
+	$doNotifications = (!!get_option('xfac_top_bar_notifications') AND !empty($meta['linkAlerts']));
+	$doConversations = (!!get_option('xfac_top_bar_conversations') AND !empty($meta['linkConversations']));
 
-	$accessToken = xfac_user_getAccessTokenForRecord($record);
-	$ott = xfac_api_generateOneTimeToken($config, $record->profile['user_id'], $accessToken);
-	$html = '<script>window.xfacOneTimeToken = "' . $ott . '";</script>';
+	$script = 'window.xfacClientId = "' . $config['clientId'] . '";';
+	$script .= 'window.xfacXenForoUserId = ' . intval($record->identifier) . ';';
+	$script .= 'window.xfacDoNotifications = ' . ($doNotifications ? 1 : 0) . ';';
+	$script .= 'window.xfacDoConversations = ' . ($doConversations ? 1 : 0) . ';';
+	$html = sprintf('<script>%s</script>', $script);
 
-	if (!!get_option('xfac_top_bar_notifications') AND !empty($meta['linkAlerts']))
+	if ($doNotifications)
 	{
 		$notificationsTitle = __('Alerts', 'xenforo-api-consumer');
 
@@ -128,9 +132,12 @@ function xfac_admin_bar_jscount_menu($wpAdminBar)
 			'href' => $meta['linkAlerts'],
 			'meta' => array('html' => $html),
 		));
+
+		// reset html
+		$html = '';
 	}
 
-	if (!!get_option('xfac_top_bar_conversations') AND !empty($meta['linkConversations']))
+	if ($doConversations)
 	{
 		$conversationTitle = __('Conversations', 'xenforo-api-consumer');
 
@@ -154,6 +161,9 @@ function xfac_admin_bar_jscount_menu($wpAdminBar)
 			'href' => $meta['linkConversations'],
 			'meta' => array('html' => $html),
 		));
+
+		// reset html
+		$html = '';
 	}
 }
 
@@ -260,11 +270,6 @@ function xfac_add_admin_bar_menus()
 
 	if (!!get_option('xfac_top_bar_notifications') OR !!get_option('xfac_top_bar_conversations'))
 	{
-		wp_enqueue_script('jquery');
-		wp_enqueue_script('xfac-sdk', xfac_api_getSdkJsUrl($config));
-		wp_enqueue_script('xfac-top_bar.js', XFAC_PLUGIN_URL . '/js/top_bar.js');
-		wp_enqueue_style('xfac-top_bar.css', XFAC_PLUGIN_URL . '/css/top_bar.css');
-
 		add_action('admin_bar_menu', 'xfac_admin_bar_jscount_menu', !!get_option('xfac_top_bar_replace') ? 0 : 30);
 	}
 
@@ -290,3 +295,27 @@ function xfac_show_admin_bar($showAdminBar)
 }
 
 add_filter('show_admin_bar', 'xfac_show_admin_bar');
+
+if (!!get_option('xfac_top_bar_notifications') OR !!get_option('xfac_top_bar_conversations'))
+{
+	function xfac_topBar_wp_enqueue_scripts()
+	{
+		$config = xfac_option_getConfig();
+		if (empty($config))
+		{
+			// do nothing
+			return;
+		}
+
+		$wpUser = wp_get_current_user();
+		if ($wpUser->ID > 0)
+		{
+			wp_enqueue_script('jquery');
+			wp_enqueue_script('xfac-sdk', xfac_api_getSdkJsUrl($config));
+			wp_enqueue_script('xfac-top_bar.js', XFAC_PLUGIN_URL . '/js/top_bar.js');
+			wp_enqueue_style('xfac-top_bar.css', XFAC_PLUGIN_URL . '/css/top_bar.css');
+		}
+	}
+
+	add_action('wp_enqueue_scripts', 'xfac_topBar_wp_enqueue_scripts');
+}
