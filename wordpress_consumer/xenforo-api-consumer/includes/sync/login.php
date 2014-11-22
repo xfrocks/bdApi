@@ -83,16 +83,9 @@ function xfac_syncLogin_wp_enqueue_scripts()
 		return;
 	}
 
-	$wpUser = wp_get_current_user();
-	if ($wpUser->ID > 0)
-	{
-		// don't add ajax login for users
-		return;
-	}
-
 	wp_enqueue_script('jquery');
 	wp_enqueue_script('xfac-sdk', xfac_api_getSdkJsUrl($config));
-	wp_enqueue_script('xfac-login.js', XFAC_PLUGIN_URL . '/js/login.js');
+	wp_enqueue_script('xfac-script.js', XFAC_PLUGIN_URL . '/js/script.js');
 }
 
 function xfac_syncLogin_wp_head()
@@ -104,15 +97,19 @@ function xfac_syncLogin_wp_head()
 		return;
 	}
 
+	$script = 'window.xfacClientId = ' . json_encode($config['clientId']) . ';';
+
 	$wpUser = wp_get_current_user();
 	if ($wpUser->ID > 0)
 	{
-		// don't add ajax login for users
-		return;
+		$script .= 'window.xfacWpLogout = ' . json_encode(html_entity_decode(wp_logout_url())) . ';';
+	}
+	else
+	{
+		$script .= 'window.xfacWpLogin = ' . json_encode(site_url('wp-login.php?xfac=1')) . ';';
 	}
 
-	echo '<script>window.xfacClientId = "' . $config['clientId'] . '"</script>';
-	echo '<script>window.xfacWpLogin = "' . site_url('wp-login.php?xfac=1') . '"</script>';
+	echo sprintf('<script>%s</script>', $script);
 }
 
 function xfac_edit_profile_url($url, $user, $scheme)

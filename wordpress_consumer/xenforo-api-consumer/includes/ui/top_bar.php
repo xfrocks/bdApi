@@ -102,10 +102,10 @@ function xfac_admin_bar_jscount_menu($wpAdminBar)
 	$doNotifications = (!!get_option('xfac_top_bar_notifications') AND !empty($meta['linkAlerts']));
 	$doConversations = (!!get_option('xfac_top_bar_conversations') AND !empty($meta['linkConversations']));
 
-	$script = 'window.xfacClientId = "' . $config['clientId'] . '";';
-	$script .= 'window.xfacXenForoUserId = ' . intval($record->identifier) . ';';
-	$script .= 'window.xfacDoNotifications = ' . ($doNotifications ? 1 : 0) . ';';
-	$script .= 'window.xfacDoConversations = ' . ($doConversations ? 1 : 0) . ';';
+	$script = 'window.xfacClientId = ' . json_encode($config['clientId']) . ';';
+	$script .= 'window.xfacXenForoUserId = ' . json_encode(intval($record->identifier)) . ';';
+	$script .= 'window.xfacDoNotifications = ' . json_encode($doNotifications ? 1 : 0) . ';';
+	$script .= 'window.xfacDoConversations = ' . json_encode($doConversations ? 1 : 0) . ';';
 	$html = sprintf('<script>%s</script>', $script);
 
 	if ($doNotifications)
@@ -312,7 +312,7 @@ if (!!get_option('xfac_top_bar_notifications') OR !!get_option('xfac_top_bar_con
 		{
 			wp_enqueue_script('jquery');
 			wp_enqueue_script('xfac-sdk', xfac_api_getSdkJsUrl($config));
-			wp_enqueue_script('xfac-top_bar.js', XFAC_PLUGIN_URL . '/js/top_bar.js');
+			wp_enqueue_script('xfac-script.js', XFAC_PLUGIN_URL . '/js/script.js');
 			wp_enqueue_style('xfac-top_bar.css', XFAC_PLUGIN_URL . '/css/top_bar.css');
 		}
 	}
