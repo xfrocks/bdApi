@@ -168,7 +168,16 @@ class bdApi_OAuth2 extends OAuth2
 			return false;
 		}
 
-		return $client['redirect_uri'];
+        if (isset($_REQUEST['redirect_uri'])) {
+            // check white-listed domains only if a redirect_uri is in the request
+            $redirectUri = $this->_model->getClientModel()->getRedirectUri($client, $_REQUEST['redirect_uri']);
+
+            if (!empty($redirectUri)) {
+                return $redirectUri;
+            }
+        }
+
+        return $client['redirect_uri'];
 	}
 
 	protected function getAccessToken($oauthToken)

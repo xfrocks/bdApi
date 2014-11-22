@@ -65,8 +65,11 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
 		$this->_assertPostOnly();
 
 		$id = $this->_input->filterSingle('existing_client_id', XenForo_Input::STRING);
+        if (!empty($id)) {
+            $client = $this->_getClientOrError($id);
+        }
 
-		$dwInput = $this->_input->filter(array(
+        $dwInput = $this->_input->filter(array(
 			'name' => XenForo_Input::STRING,
 			'description' => XenForo_Input::STRING,
 			'client_id' => XenForo_Input::STRING,
@@ -75,11 +78,18 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
 			'options' => XenForo_Input::ARRAY_SIMPLE
 		));
 
-		$dw = $this->_getClientDataWriter();
-		if (!empty($id))
+        $dwInput['options'] = array_merge(array(
+            'whitelisted_domains' => '',
+            'auto_authorize' => array(),
+        ), $dwInput['options']);
+
+        $dw = $this->_getClientDataWriter();
+		if (!empty($client))
 		{
-			$dw->setExistingData($id);
-		}
+			$dw->setExistingData($client, true);
+            $dwInput['options'] = array_merge($client['options'], $dwInput['options']);
+        }
+
 		$dw->bulkSet($dwInput);
 		if (!$dw->get('user_id'))
 		{

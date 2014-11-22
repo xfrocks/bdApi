@@ -122,11 +122,12 @@
 	<xen:textboxunit label="{xen:phrase bdapi_name}:" name="name" value="{$client.name}" data-liveTitleTemplate="{xen:if {$client.client_id},
 		'{xen:phrase bdapi_client_edit}: <em>%s</em>',
 		'{xen:phrase bdapi_client_add}: <em>%s</em>'}" />
-	<xen:textboxunit label="{xen:phrase bdapi_description}:" name="description" value="{$client.description}" rows="5"/>
+	<xen:textboxunit label="{xen:phrase bdapi_description}:" name="description" value="{$client.description}" rows="3"/>
 	
 	<xen:textboxunit label="{xen:phrase bdapi_client_key}:" name="client_id" value="{$client.client_id}" />
 	<xen:textboxunit label="{xen:phrase bdapi_client_secret}:" name="client_secret" value="{$client.client_secret}" />
 	<xen:textboxunit label="{xen:phrase bdapi_redirect_uri}:" name="redirect_uri" value="{$client.redirect_uri}" />
+	<xen:textboxunit label="{xen:phrase bdapi_whitelisted_domains}:" name="options[whitelisted_domains]" value="{$client.options.whitelisted_domains}" rows="3"/>
 	
 	<xen:checkboxunit label="{xen:phrase options}" explain="{xen:phrase bdapi_client_options_explain}">
 		<xen:option label="{xen:phrase bdapi_client_option_auto_authorize_read}"
@@ -711,6 +712,8 @@ step=3600</edit_format_params>
     <phrase title="bdapi_ttl" version_id="11" version_string="0.9-dev"><![CDATA[Time To Live]]></phrase>
     <phrase title="bdapi_update_scope" version_id="53" version_string="1.3.1"><![CDATA[Update Permissions]]></phrase>
     <phrase title="bdapi_update_scope_explain" version_id="53" version_string="1.3.1"><![CDATA[You can review and/or change {name}'s permissions below. Click {revoke} to completely remove {name} access to your account.]]></phrase>
+    <phrase title="bdapi_whitelisted_domains" version_id="59" version_string="1.3.3d"><![CDATA[White-listed Domains]]></phrase>
+    <phrase title="bdapi_whitelisted_domains_explain" version_id="59" version_string="1.3.3d"><![CDATA[In addition to Redirect Uri, the system will also allow redirection to these domains. Each domain must be in a new line and may have wildcard, for example: "*.domain.com". To enable redirection to all domains, use "*" although it is not recommended for security reason.]]></phrase>
     <phrase title="bdapi_you_will_be_redirected_x" version_id="24" version_string="0.9.9"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
     <phrase title="cron_entry_bdApi_cleanUpExpired" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Clean Up Expired Data]]></phrase>
     <phrase title="option_bdApi_authCodeTTL" version_id="50" version_string="1.2.1b"><![CDATA[Authentication Code TTL]]></phrase>
@@ -998,7 +1001,7 @@ step=3600</edit_format_params>
 <xen:include template="bdapi_account_api_user_scopes" />
 
 <xen:title>{xen:phrase bdapi_home}</xen:title>]]></template>
-    <template title="bdapi_account_api_clients" version_id="4" version_string="0.9-dev"><![CDATA[<xen:require css="bdapi.css" />
+    <template title="bdapi_account_api_clients" version_id="59" version_string="1.3.3d"><![CDATA[<xen:require css="bdapi.css" />
 
 <xen:title>{xen:phrase bdapi_clients}</xen:title>
 
@@ -1040,6 +1043,7 @@ step=3600</edit_format_params>
 						</div>
 						<div class="bdApi_Client_Control listBlock">
 							<div class="cellContents">
+								<a href="{xen:link 'account/api/client-edit', '', 'client_id={$client.client_id}'}" class="OverlayTrigger">{xen:phrase edit}</a>
 								<a href="{xen:link 'account/api/client-delete', '', 'client_id={$client.client_id}'}" class="OverlayTrigger">{xen:phrase delete}</a>
 							</div>
 						</div>
@@ -1049,42 +1053,6 @@ step=3600</edit_format_params>
 		</ol>
 	</div>
 </xen:if>]]></template>
-    <template title="bdapi_account_api_client_add" version_id="4" version_string="0.9-dev"><![CDATA[<xen:require css="bdapi.css" />
-
-<xen:title>{xen:phrase bdapi_client_add}</xen:title>
-
-<form method="post" class="xenForm AutoValidator"
-	action="{xen:link account/api/client-add}"
-	data-redirect="yes">
-
-	<dl class="ctrlUnit">
-		<dt><label for="ctrl_name">{xen:phrase bdapi_name}:</label></dt>
-		<dd>
-			<input id="name" type="text" name="name" class="textCtrl" />
-		</dd>
-	</dl>
-
-	<dl class="ctrlUnit">
-		<dt><label for="ctrl_description">{xen:phrase bdapi_description}:</label></dt>
-		<dd>
-			<textarea id="description" name="description" class="textCtrl Elastic" rows="5"></textarea>
-		</dd>
-	</dl>
-
-	<dl class="ctrlUnit">
-		<dt><label for="ctrl_redirect_uri">{xen:phrase bdapi_redirect_uri}:</label></dt>
-		<dd>
-			<input id="redirect_uri" type="text" name="redirect_uri" class="textCtrl" />
-		</dd>
-	</dl>
-
-	<dl class="ctrlUnit submitUnit">
-		<dt></dt>
-		<dd><input type="submit" name="save" value="{xen:phrase save}" accesskey="s" class="button primary" /></dd>
-	</dl>
-
-	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
-</form>]]></template>
     <template title="bdapi_account_api_client_delete" version_id="4" version_string="0.9-dev"><![CDATA[<xen:title>{xen:phrase bdapi_client_confirm_deletion}: {$client.name}</xen:title>
 <xen:h1>{xen:phrase bdapi_client_confirm_deletion}</xen:h1>
 
@@ -1107,6 +1075,60 @@ step=3600</edit_format_params>
 	</dl>
 	
 	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+</form>]]></template>
+    <template title="bdapi_account_api_client_edit" version_id="59" version_string="1.3.3d"><![CDATA[<xen:require css="bdapi.css" />
+
+<xen:if is="{$client.client_id}">
+	<xen:title>{xen:phrase bdapi_client_edit}: {$client.name}</xen:title>
+	<xen:h1>{$client.name}</xen:h1>
+<xen:else />
+	<xen:title>{xen:phrase bdapi_client_add}</xen:title>
+</xen:if>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:link 'account/api'}">{xen:phrase bdapi_home}</xen:breadcrumb>
+</xen:navigation>
+
+<form method="post" class="xenForm formOverlay AutoValidator"
+	action="{xen:link account/api/client-save}"
+	data-redirect="yes">
+
+	<dl class="ctrlUnit">
+		<dt><label for="ctrl_name">{xen:phrase bdapi_name}:</label></dt>
+		<dd>
+			<input id="ctrl_name" type="text" name="name" class="textCtrl" value="{$client.name}" />
+		</dd>
+	</dl>
+
+	<dl class="ctrlUnit">
+		<dt><label for="ctrl_description">{xen:phrase bdapi_description}:</label></dt>
+		<dd>
+			<textarea id="ctrl_description" name="description" class="textCtrl Elastic" rows="3">{$client.description}</textarea>
+		</dd>
+	</dl>
+
+	<dl class="ctrlUnit">
+		<dt><label for="ctrl_redirect_uri">{xen:phrase bdapi_redirect_uri}:</label></dt>
+		<dd>
+			<input id="ctrl_redirect_uri" type="text" name="redirect_uri" class="textCtrl" value="{$client.redirect_uri}" />
+		</dd>
+	</dl>
+
+	<dl class="ctrlUnit">
+		<dt><label for="ctrl_whitelisted_domains">{xen:phrase bdapi_whitelisted_domains}:</label></dt>
+		<dd>
+			<textarea id="ctrl_whitelisted_domains" name="options[whitelisted_domains]" class="textCtrl Elastic" rows="3">{$client.options.whitelisted_domains}</textarea>
+			<p class="explain">{xen:phrase bdapi_whitelisted_domains_explain}</p>
+		</dd>
+	</dl>
+
+	<dl class="ctrlUnit submitUnit">
+		<dt></dt>
+		<dd><input type="submit" name="save" value="{xen:phrase save}" accesskey="s" class="button primary" /></dd>
+	</dl>
+
+	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+	<input type="hidden" name="client_id" value="{$client.client_id}" />
 </form>]]></template>
     <template title="bdapi_account_api_update_scope" version_id="56" version_string="1.3.3"><![CDATA[<xen:title>{xen:phrase bdapi_update_scope}: {$client.name}</xen:title>
 <xen:h1>{xen:phrase bdapi_update_scope}</xen:h1>

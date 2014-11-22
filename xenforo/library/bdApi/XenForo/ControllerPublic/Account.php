@@ -53,60 +53,84 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		return $this->_getWrapper('account', 'api', $this->responseView('bdApi_ViewPublic_Account_Api_Index', 'bdapi_account_api', $viewParams));
 	}
 
-	public function actionApiClientAdd()
-	{
-		$visitor = XenForo_Visitor::getInstance();
-		if (!$visitor->hasPermission('general', 'bdApi_clientNew'))
-		{
-			return $this->responseNoPermission();
-		}
+    public function actionApiClientAdd()
+    {
+        $visitor = XenForo_Visitor::getInstance();
+        if (!$visitor->hasPermission('general', 'bdApi_clientNew'))
+        {
+            return $this->responseNoPermission();
+        }
 
-		/* @var $clientModel bdApi_Model_Client */
-		$clientModel = $this->getModelFromCache('bdApi_Model_Client');
+        $viewParams = array(
+            'client' => array(),
+        );
 
-		if ($this->_request->isPost())
-		{
-			$dwInput = $this->_input->filter(array(
-				'name' => XenForo_Input::STRING,
-				'description' => XenForo_Input::STRING,
-				'redirect_uri' => XenForo_Input::STRING,
-			));
+        return $this->_getWrapper(
+            'account', 'api',
+            $this->responseView('bdApi_ViewPublic_Account_Api_Client_Edit', 'bdapi_account_api_client_edit', $viewParams));
+    }
 
-			$dw = XenForo_DataWriter::create('bdApi_DataWriter_Client');
-			$dw->bulkSet($dwInput);
+    public function actionApiClientEdit()
+    {
+        $client = $this->_bdApi_getClientOrError();
 
-			$dw->set('client_id', $clientModel->generateClientId());
-			$dw->set('client_secret', $clientModel->generateClientSecret());
-			$dw->set('user_id', $visitor->get('user_id'));
+        $viewParams = array(
+            'client' => $client,
+        );
 
-			$dw->save();
+        return $this->_getWrapper(
+            'account', 'api',
+            $this->responseView('bdApi_ViewPublic_Account_Api_Client_Edit', 'bdapi_account_api_client_edit', $viewParams)
+        );
+    }
 
-			return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CREATED, XenForo_Link::buildPublicLink('account/api'));
-		}
-		else
-		{
-			$viewParams = array();
+    public function actionApiClientSave()
+    {
+        $this->_assertPostOnly();
 
-			return $this->_getWrapper('account', 'api', $this->responseView('bdApi_ViewPublic_Account_Api_Client_Add', 'bdapi_account_api_client_add', $viewParams));
-		}
-	}
+        $client = null;
+        $options = array();
+        try {
+            $client = $this->_bdApi_getClientOrError();
+            $options = $client['options'];
+        } catch (Exception $e) {
+            // ignore
+        }
+
+        /* @var $clientModel bdApi_Model_Client */
+        $clientModel = $this->getModelFromCache('bdApi_Model_Client');
+
+        $dwInput = $this->_input->filter(array(
+            'name' => XenForo_Input::STRING,
+            'description' => XenForo_Input::STRING,
+            'redirect_uri' => XenForo_Input::STRING,
+        ));
+
+        $optionsInput = $this->_input->filterSingle('options', XenForo_Input::ARRAY_SIMPLE);
+        $optionsInput = array_merge(array(
+            'whitelisted_domains' => '',
+        ), $options, $optionsInput);
+
+        $dw = XenForo_DataWriter::create('bdApi_DataWriter_Client');
+        if (!empty($client)) {
+            $dw->setExistingData($client, true);
+        } else {
+            $dw->set('client_id', $clientModel->generateClientId());
+            $dw->set('client_secret', $clientModel->generateClientSecret());
+            $dw->set('user_id', XenForo_Visitor::getUserId());
+        }
+
+        $dw->bulkSet($dwInput);
+        $dw->set('options', $optionsInput);
+
+        $dw->save();
+
+        return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CREATED, XenForo_Link::buildPublicLink('account/api'));
+    }
 
 	public function actionApiClientDelete()
 	{
-		$visitor = XenForo_Visitor::getInstance();
-		/* @var $clientModel bdApi_Model_Client */
-		$clientModel = $this->getModelFromCache('bdApi_Model_Client');
-
-		$clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
-		$client = $clientModel->getClientByid($clientId);
-		if (empty($client))
-		{
-			return $this->responseNoPermission();
-		}
-		if ($client['user_id'] != $visitor->get('user_id'))
-		{
-			return $this->responseNoPermission();
-		}
+		$client = $this->_bdApi_getClientOrError();
 
 		if ($this->_request->isPost())
 		{
@@ -133,12 +157,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		/* @var $clientModel bdApi_Model_UserScope */
 		$userScopeModel = $this->getModelFromCache('bdApi_Model_UserScope');
 
-		$clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
-		$client = $clientModel->getClientById($clientId);
-		if (empty($client))
-		{
-			return $this->responseNoPermission();
-		}
+		$client = $this->_bdApi_getClientOrError(false);
 
 		$userScopes = $userScopeModel->getUserScopes($client['client_id'], $visitor['user_id']);
 		if (empty($userScopes))
@@ -450,4 +469,22 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 		return parent::_checkCsrf($action);
 	}
 
+    protected function _bdApi_getClientOrError($verifyCanEdit = true)
+    {
+        $clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
+        if (empty($clientId)) {
+            throw $this->getNoPermissionResponseException();
+        }
+
+        $client = $this->getModelFromCache('bdApi_Model_Client')->getClientByid($clientId);
+        if (empty($client)) {
+            throw $this->getNoPermissionResponseException();
+        }
+
+        if ($verifyCanEdit AND $client['user_id'] != XenForo_Visitor::getUserId()) {
+            throw $this->getNoPermissionResponseException();
+        }
+
+        return $client;
+    }
 }

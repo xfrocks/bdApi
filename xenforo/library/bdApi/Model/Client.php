@@ -75,7 +75,46 @@ class bdApi_Model_Client extends XenForo_Model
 		return $client['client_secret'] == $secret;
 	}
 
-	public function getList(array $conditions = array(), array $fetchOptions = array())
+    public function getRedirectUri(array $client, $requestedRedirectUri)
+    {
+        if (empty($client['options']['whitelisted_domains'])) {
+            return false;
+        }
+
+        if (empty($requestedRedirectUri) OR !is_string($requestedRedirectUri)) {
+            return false;
+        }
+        $parsed = @parse_url($requestedRedirectUri);
+        if (empty($parsed['scheme']) OR empty($parsed['host'])) {
+            return false;
+        }
+
+        $domains = explode("\n", $client['options']['whitelisted_domains']);
+        foreach ($domains as $domain) {
+            if (empty($domain)) {
+                continue;
+            }
+
+            $pattern = '#^';
+            for ($i = 0, $l = utf8_strlen($domain); $i < $l; $i++) {
+                $char = utf8_substr($domain, $i, 1);
+                if ($char === '*') {
+                    $pattern .= '.+?';
+                } else {
+                    $pattern .= preg_quote($char, '#');
+                }
+            }
+            $pattern .= '$#';
+            if (preg_match($pattern, $parsed['host'])) {
+                // we have found a match
+                return $requestedRedirectUri;
+            }
+        }
+
+        return false;
+    }
+
+    public function getList(array $conditions = array(), array $fetchOptions = array())
 	{
 		$clients = $this->getClients($conditions, $fetchOptions);
 		$list = array();
