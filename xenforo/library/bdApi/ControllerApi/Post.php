@@ -436,6 +436,32 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 		return $attachmentHelper->doDelete($hash, $attachmentId);
 	}
 
+    public function actionPostReport()
+    {
+        $postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
+
+        $ftpHelper = $this->getHelper('ForumThreadPost');
+        list($post, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($postId);
+
+        if (!$this->_getPostModel()->canReportPost($post, $thread, $forum, $errorPhraseKey))
+        {
+            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+        }
+
+        $message = $this->_input->filterSingle('message', XenForo_Input::STRING);
+        if (!$message)
+        {
+            return $this->responseError(new XenForo_Phrase('please_enter_reason_for_reporting_this_message'), 400);
+        }
+
+        $this->assertNotFlooding('report');
+
+        $reportModel = $this->getModelFromCache('XenForo_Model_Report');
+        $reportModel->reportContent('post', $post, $message);
+
+        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
+
 	/**
 	 * @return XenForo_Model_Post
 	 */

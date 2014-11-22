@@ -164,7 +164,9 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 			'thread' => XenForo_Link::buildApiLink('threads', $post),
 			'poster' => XenForo_Link::buildApiLink('users', $post),
 			'likes' => XenForo_Link::buildApiLink('posts/likes', $post),
-			'poster_avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array(
+            'report' => XenForo_Link::buildApiLink('posts/report', $post),
+            'attachments' => XenForo_Link::buildApiLink('posts/attachments', $post),
+            'poster_avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array(
 				$post,
 				'm',
 				false,
@@ -183,7 +185,8 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 			'delete' => $this->canDeletePost($post, $thread, $forum),
 			'reply' => $this->getModelFromCache('XenForo_Model_Thread')->canReplyToThread($thread, $forum),
 			'like' => $this->canLikePost($post, $thread, $forum),
-			'upload_attachment' => $this->canEditPost($post, $thread, $forum) AND $this->getModelFromCache('XenForo_Model_Forum')->canUploadAndManageAttachment($forum),
+            'report' => $this->canReportPost($post, $thread, $forum),
+            'upload_attachment' => $this->canEditPost($post, $thread, $forum) AND $this->getModelFromCache('XenForo_Model_Forum')->canUploadAndManageAttachment($forum),
 		);
 
 		return $data;

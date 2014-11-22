@@ -638,6 +638,8 @@ Detail information of a post.
                 thread: (uri),
                 poster: (uri),
                 likes: (uri),
+                report: (uri), # since forum-2014103003
+                attachments: (uri),
                 poster_avatar: (uri)
             },
             permissions: {
@@ -646,6 +648,7 @@ Detail information of a post.
                 delete: (boolean),
                 reply: (boolean), #since forum-2014052901
                 like: (boolean),
+                report: (boolean), # since forum-2014103003
                 upload_attachment: (boolean) # since forum-2014081204
             }
         }
@@ -787,6 +790,22 @@ Unlike a post.
 Parameters:
 
  * N/A
+
+Required scopes:
+
+ * `post`
+
+### POST `/posts/:postId/report`
+Report a post.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * `message` (__required__): reason of the report.
 
 Required scopes:
 
