@@ -61,13 +61,29 @@ class bdApi_OAuth2 extends OAuth2
 	 *
 	 * @param string $clientId
 	 * @param string $scope
+     *
+     * @return array token
 	 */
 	public function createAccessTokenPublic($clientId, $scope = NULL)
 	{
 		return $this->createAccessToken($clientId, $scope);
 	}
 
-	/**
+    /**
+     * Includes user id into returned token
+     *
+     * @param $client_id
+     * @param string $scope
+     *
+     * @return array token
+     */
+    protected function createAccessToken($client_id, $scope = NULL) {
+        $token = parent::createAccessToken($client_id, $scope);
+        $token['user_id'] = $this->getUserId();
+        return $token;
+    }
+
+    /**
 	 * Exposes genAccessToken with visibility public.
 	 */
 	public function genAccessTokenPublic()
