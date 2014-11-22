@@ -209,6 +209,23 @@ class bdApi_Session extends XenForo_Session
         }
     }
 
+    public function fakeStart(array $client, XenForo_Visitor $visitor, array $scopes)
+    {
+        $this->_oauthToken = array(
+            'token_id' => 0,
+            'client_id' => $client['client_id'],
+            'token_text' => '',
+            'expire_date' => XenForo_Application::$time,
+            'issue_date' => XenForo_Application::$time,
+            'user_id' => $visitor['user_id'],
+            'scope' => bdApi_Template_Helper_Core::getInstance()->scopeJoin($scopes),
+        );
+        $this->changeUserId($visitor['user_id']);
+        $this->set('scopes', $scopes);
+
+        XenForo_Application::set('_bdApi_session', $this);
+    }
+
     public function getSessionFromSource($sessionId)
     {
         // api sessions are not saved

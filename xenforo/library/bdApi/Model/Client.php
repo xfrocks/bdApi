@@ -11,9 +11,11 @@ class bdApi_Model_Client extends XenForo_Model
         $keys = array_keys($data);
         asort($keys);
         foreach ($keys as $key) {
-            if ($key == 'signature')
+            if ($key == 'signature') {
+                // do not include existing signature when signing
+                // it's safe to run this method more than once with the same $data
                 continue;
-            // ?!
+            }
 
             $str .= sprintf('%s=%s&', $key, $data[$key]);
         }

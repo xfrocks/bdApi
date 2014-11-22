@@ -4,7 +4,7 @@ class bdApi_Template_Helper_Core
 {
     public function scopeSplit($scopesStr)
     {
-        return array_map('trim', explode(' ', $scopesStr));
+        return array_map('trim', preg_split('#\s#', $scopesStr, -1, PREG_SPLIT_NO_EMPTY));
     }
 
     public function scopeJoin(array $scopes)

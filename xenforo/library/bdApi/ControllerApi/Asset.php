@@ -10,7 +10,7 @@ class bdApi_ControllerApi_Asset extends bdApi_ControllerApi_Abstract
         $sdkPath = XenForo_Autoloader::getInstance()->getRootDir() . '/../js/bdApi/full/sdk.js';
         $sdk = file_get_contents($sdkPath);
         $sdk = str_replace('{prefix}', $prefix, $sdk);
-        $sdk = str_replace('{data_uri}', XenForo_Link::buildPublicLink('canonical:account/api-data'), $sdk);
+        $sdk = str_replace('{data_uri}', XenForo_Link::buildPublicLink('canonical:misc/api-data'), $sdk);
         $sdk = str_replace('{request_uri}', XenForo_Link::buildApiLink('index'), $sdk);
 
         header('Content-Type: application/x-javascript; charset=utf-8');

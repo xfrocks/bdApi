@@ -9,6 +9,7 @@ class bdApi_Listener
             'XenForo_ControllerPublic_Error',
             'XenForo_ControllerPublic_Login',
             'XenForo_ControllerPublic_Logout',
+            'XenForo_ControllerPublic_Misc',
             'XenForo_ControllerPublic_Register',
 
             'XenForo_DataWriter_Alert',

@@ -201,75 +201,6 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
         }
     }
 
-    public function actionApiData()
-    {
-        $callback = $this->_input->filterSingle('callback', XenForo_Input::STRING);
-        $cmd = $this->_input->filterSingle('cmd', XenForo_Input::STRING);
-        $clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
-        $data = array();
-
-        $client = $this->_bdApi_getClientModel()->getClientById($clientId);
-        $visitor = XenForo_Visitor::getInstance();
-
-        if (!empty($client) AND $visitor['user_id'] > 0) {
-            switch ($cmd) {
-                case 'authorized':
-                    $scope = $this->_input->filterSingle('scope', XenForo_Input::STRING);
-                    $data[$cmd] = 0;
-
-                    if ($data[$cmd] === 0 AND $this->_bdApi_getClientModel()->canAutoAuthorize($client, $scope)) {
-                        // this client has auto authorize setting for the requested scope
-                        // response with authorized = 1
-                        // note: we don't have (and don't need) an access token for now
-                        // but in case the client application request authorization, it
-                        // will be granted automatically anyway
-                        $data[$cmd] = 1;
-                    }
-
-                    if ($data[$cmd] === 0) {
-                        // start looking for accepted scopes
-                        $requestedScopes = bdApi_Template_Helper_Core::getInstance()->scopeSplit($scope);
-                        if (!empty($requestedScopes)) {
-                            /* @var $userScopeModel bdApi_Model_UserScope */
-                            $userScopeModel = $this->getModelFromCache('bdApi_Model_UserScope');
-                            $userScopes = $userScopeModel->getUserScopes($client['client_id'], $visitor['user_id']);
-
-                            $requestedScopesAccepted = array();
-                            foreach ($requestedScopes as $scope) {
-                                foreach ($userScopes as $userScope) {
-                                    if ($userScope['scope'] === $scope) {
-                                        $requestedScopesAccepted[] = $scope;
-                                    }
-                                }
-                            }
-
-                            if (count($requestedScopes) === count($requestedScopesAccepted)) {
-                                $data[$cmd] = 1;
-                            }
-                        }
-                    }
-
-                    if ($data[$cmd] === 1) {
-                        $data['user_id'] = $visitor['user_id'];
-                    }
-
-                    // switch ($cmd)
-                    break;
-            }
-
-            $this->_bdApi_getClientModel()->signApiData($client, $data);
-        }
-
-        $viewParams = array(
-            'callback' => $callback,
-            'cmd' => $cmd,
-            'client_id' => $clientId,
-            'data' => $data,
-        );
-
-        return $this->responseView('bdApi_ViewPublic_Account_Api_Data', '', $viewParams);
-    }
-
     public function actionAuthorize()
     {
         /* @var $oauth2Model bdApi_Model_OAuth2 */
@@ -366,6 +297,11 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
         }
     }
 
+    public function actionApiData()
+    {
+        return $this->responseReroute('XenForo_ControllerPublic_Misc', 'api-data');
+    }
+
     protected function _preDispatch($action)
     {
         try {
@@ -387,15 +323,6 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 
             throw $e;
         }
-    }
-
-    protected function _checkCsrf($action)
-    {
-        if ($action === 'ApiData') {
-            return;
-        }
-
-        parent::_checkCsrf($action);
     }
 
     protected function _bdApi_getClientOrError($verifyCanEdit = true)

@@ -28,14 +28,13 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
     public function prepareApiDataForUser(array $user)
     {
         $visitor = XenForo_Visitor::getInstance();
-        /* @var $session bdApi_Session */
-        $session = XenForo_Application::getSession();
+        $session = bdApi_Data_Helper_Core::safeGetSession();
         /* @var $userGroupModel bdApi_XenForo_Model_UserGroup */
         $userGroupModel = $this->getModelFromCache('XenForo_Model_UserGroup');
         /* @var $conversationModel XenForo_Model_Conversation */
         $conversationModel = $this->getModelFromCache('XenForo_Model_Conversation');
 
-        $hasAdminScope = $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM);
+        $hasAdminScope = (!empty($session) AND $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM));
         $isAdminRequest = ($hasAdminScope AND $visitor->hasAdminPermission('user'));
         $prepareProtectedData = (($user['user_id'] == $visitor->get('user_id')) OR $isAdminRequest);
 
@@ -60,7 +59,7 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
                 'dob_year' => 'user_dob_year',
             ));
 
-            if ($session->checkScope(bdApi_Model_OAuth2::SCOPE_PARTICIPATE_IN_CONVERSATIONS)) {
+            if (!empty($session) AND $session->checkScope(bdApi_Model_OAuth2::SCOPE_PARTICIPATE_IN_CONVERSATIONS)) {
                 // xf_user
                 $publicKeys['conversations_unread'] = 'user_unread_conversation_count';
             }
@@ -95,7 +94,7 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('members', $user),
-            'detail' => XenForo_Link::buildApiLink('users', $user),
+            'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $user),
             'avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array(
                 $user,
                 'm',
@@ -108,8 +107,8 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
                 false,
                 true
             )),
-            'followers' => XenForo_Link::buildApiLink('users/followers', $user),
-            'followings' => XenForo_Link::buildApiLink('users/followings', $user),
+            'followers' => bdApi_Data_Helper_Core::safeBuildApiLink('users/followers', $user),
+            'followings' => bdApi_Data_Helper_Core::safeBuildApiLink('users/followings', $user),
         );
 
         $data['permissions'] = array('follow' => ($user['user_id'] != $visitor->get('user_id')) AND $visitor->canFollow());

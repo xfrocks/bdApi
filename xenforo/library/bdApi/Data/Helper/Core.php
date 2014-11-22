@@ -113,4 +113,35 @@ class bdApi_Data_Helper_Core
         return $filteredData;
     }
 
+    /**
+     * @return bdApi_Session|null
+     */
+    public static function safeGetSession()
+    {
+        if (XenForo_Application::isRegistered('_bdApi_session')) {
+            return XenForo_Application::get('_bdApi_session');
+        }
+
+        $session = XenForo_Application::getSession();
+        if ($session instanceof bdApi_Session) {
+            return $session;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return string
+     */
+    public static function safeBuildApiLink()
+    {
+        $args = func_get_args();
+        $func = array('XenForo_Link', 'buildApiLink');
+
+        if (is_callable($func)) {
+            return call_user_func_array($func, $args);
+        } else {
+            return '';
+        }
+    }
 }
