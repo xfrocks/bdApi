@@ -10,14 +10,23 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			return $this->responseReroute(__CLASS__, 'get-single');
 		}
 
-		$threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
-		if (empty($threadId))
-		{
-			return $this->responseError(new XenForo_Phrase('bdapi_slash_posts_requires_thread_id'), 400);
-		}
+        $ftpHelper = $this->getHelper('ForumThreadPost');
+        $pageOfPostId = $this->_input->filterSingle('page_of_post_id', XenForo_Input::UINT);
+        $pageOfPost = null;
+        if (!empty($pageOfPostId))
+        {
+            list($pageOfPost, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($pageOfPostId, array(), $this->_getThreadModel()->getFetchOptionsToPrepareApiData(), $this->_getForumModel()->getFetchOptionsToPrepareApiData());
+            $threadId = $thread['thread_id'];
+        }
+        else
+        {
+            $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
+            if (empty($threadId)) {
+                return $this->responseError(new XenForo_Phrase('bdapi_slash_posts_requires_thread_id'), 400);
+            }
 
-		$ftpHelper = $this->getHelper('ForumThreadPost');
-		list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId, $this->_getThreadModel()->getFetchOptionsToPrepareApiData(), $this->_getForumModel()->getFetchOptionsToPrepareApiData());
+            list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId, $this->_getThreadModel()->getFetchOptionsToPrepareApiData(), $this->_getForumModel()->getFetchOptionsToPrepareApiData());
+        }
 
 		$visitor = XenForo_Visitor::getInstance();
 
@@ -37,18 +46,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 			$pageNavParams['limit'] = $inputLimit;
 		}
 
-		if (empty($page))
-		{
-			$pageOfPostId = $this->_input->filterSingle('page_of_post_id', XenForo_Input::UINT);
-			if (!empty($pageOfPostId))
-			{
-				$pageOfPost = $this->_getPostModel()->getPostById($pageOfPostId);
-				if (!empty($pageOfPost) AND $pageOfPost['thread_id'] == $thread['thread_id'])
-				{
-					$page = floor($pageOfPost['position'] / $limit) + 1;
-				}
-			}
-		}
+        if (!empty($pageOfPost))
+        {
+            $page = floor($pageOfPost['position'] / $limit) + 1;
+        }
 
 		$fetchOptions = array(
 			'deleted' => false,
@@ -82,6 +83,11 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
 			'_thread' => $thread,
 		);
+
+        if (!$this->_isFieldExcluded('thread'))
+        {
+            $data['thread'] = $this->_filterDataSingle($this->_getThreadModel()->prepareApiDataForThread($thread, $forum, array()), array('thread'));
+        }
 
 		bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'posts', array(), $pageNavParams);
 

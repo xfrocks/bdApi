@@ -73,6 +73,8 @@ class bdApi_Data_Helper_Core
 			return;
 		}
 
+        $pageNav['page'] = $page;
+
 		if ($page > 1)
 		{
 			// a previous link should only be added if we are not at page 1
@@ -92,15 +94,16 @@ class bdApi_Data_Helper_Core
 		{
 			$data['links'] = array();
 		}
-		$data['links'] += $pageNav;
+		$data['links'] = array_merge($data['links'], $pageNav);
 	}
 
-	/**
-	 * Filters data into another array with value from specified keys only
-	 *
-	 * @param array $data
-	 * @param array $publicKeys
-	 */
+    /**
+     * Filters data into another array with value from specified keys only
+     *
+     * @param array $data
+     * @param array $publicKeys
+     * @return array
+     */
 	public static function filter(array $data, array $publicKeys)
 	{
 		$filteredData = array();

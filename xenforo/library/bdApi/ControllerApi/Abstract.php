@@ -17,6 +17,8 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 	 *
 	 * @param string $viewName
 	 * @param array $data
+     *
+     * @return XenForo_ControllerResponse_View
 	 */
 	public function responseData($viewName, array $data = array())
 	{
@@ -41,12 +43,13 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		return $filtered;
 	}
 
-	/**
-	 * Filters data for one resource
-	 *
-	 * @param array $resourceData
-	 * @return array
-	 */
+    /**
+     * Filters data for one resource
+     *
+     * @param array $resourceData
+     * @param array $prefixes
+     * @return array
+     */
 	protected function _filterDataSingle(array $resourceData, array $prefixes = array())
 	{
 		$this->_prepareFieldsFilter();
@@ -218,10 +221,13 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 		}
 	}
 
-	/**
-	 * Helper to check for the required scope and throw an exception
-	 * if it could not be found.
-	 */
+    /**
+     * Helper to check for the required scope and throw an exception
+     * if it could not be found.
+     * @param $scope
+     * @throws XenForo_ControllerResponse_Exception
+     * @throws Zend_Exception
+     */
 	protected function _assertRequiredScope($scope)
 	{
 		if (empty($scope))
@@ -329,7 +335,6 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 	}
 
 	protected function _logRequest($controllerResponse, $controllerName, $action)
-
 	{
 		$requestMethod = $this->_request->getMethod();
 		$requestUri = $this->_request->getRequestUri();
