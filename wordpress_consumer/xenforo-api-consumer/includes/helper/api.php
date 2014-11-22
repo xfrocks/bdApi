@@ -60,7 +60,7 @@ function xfac_api_getVersionSuggestionText($config, $meta)
 		if (empty($meta['modules'][$module]))
 		{
 			$problems[] = call_user_func_array('sprintf', array(
-				__('Required module %$1s not found.', 'xenforo-api-consumer'),
+				__('Required module %1$s not found.', 'xenforo-api-consumer'),
 				$module
 			));
 		}
