@@ -113,6 +113,11 @@ if (XenForo_Application::$versionId > 1020000)
 			return $router;
 		}
 
+        public function routePublic(Zend_Controller_Request_Http $request, $routePath = null)
+        {
+            return parent::getRouter()->match($request, $routePath);
+        }
+
 	}
 
 }
@@ -133,6 +138,11 @@ else
 
 			return $routeMatch;
 		}
+
+        public function routePublic(Zend_Controller_Request_Http $request)
+        {
+            return parent::route($request);
+        }
 
 	}
 

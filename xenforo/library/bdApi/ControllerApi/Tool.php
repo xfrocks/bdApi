@@ -119,6 +119,76 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 		return $this->responseData('bdApi_ViewApi_Tool_Link', $data);
 	}
 
+    public function actionGetParseLink()
+    {
+        $link = $this->_input->filterSingle('link', XenForo_Input::STRING);
+        $link = XenForo_Link::convertUriToAbsoluteUri($link, true);
+        $fc = XenForo_Application::get('_bdApi_fc');
+        $dependencies = $fc->getDependencies();
+
+        $request = new bdApi_Zend_Controller_Request_Http($link);
+        $routeMatch = $dependencies->routePublic($request);
+        if (!$routeMatch OR !$routeMatch->getControllerName())
+        {
+            // link cannot be route
+            return $this->responseNoPermission();
+        }
+
+        switch ($routeMatch->getControllerName())
+        {
+            case 'XenForo_ControllerPublic_Forum':
+                $nodeId = $request->getParam('node_id');
+
+                if (empty($nodeId))
+                {
+                    $nodeName = $request->getParam('node_name');
+                    if (!empty($nodeName))
+                    {
+                        $node = $this->getModelFromCache('XenForo_Model_Node')->getNodeByName($nodeName, 'Forum');
+                        if (!empty($node))
+                        {
+                            $nodeId = $node['node_id'];
+                        }
+                    }
+                }
+
+                if (!empty($nodeId))
+                {
+                    $this->_request->setParam('forum_id', $nodeId);
+                }
+
+                return $this->responseReroute('bdApi_ControllerApi_Thread', 'get-index');
+            case 'XenForo_ControllerPublic_Thread':
+                $threadId = $request->getParam('thread_id');
+
+                if (!empty($threadId))
+                {
+                    $this->_request->setParam('thread_id', $threadId);
+
+                    $linkParts = parse_url($link);
+                    if (!empty($linkParts['fragment']) AND preg_match('#^post-(?<post_id>\d+)$#', $linkParts['fragment'], $fragment))
+                    {
+                        $this->_request->setParam('page_of_post_id', $fragment['post_id']);
+                    }
+
+                    return $this->responseReroute('bdApi_ControllerApi_Post', 'get-index');
+                }
+                break;
+            case 'XenForo_ControllerPublic_Post':
+                $postId = $request->getParam('post_id');
+
+                if (!empty($postId))
+                {
+                    $this->_request->setParam('page_of_post_id', $postId);
+                    return $this->responseReroute('bdApi_ControllerApi_Post', 'get-index');
+                }
+                break;
+        }
+
+        // controller / action not recognized...
+        return $this->responseNoPermission();
+    }
+
 	protected function _getScopeForAction($action)
 	{
 		return false;

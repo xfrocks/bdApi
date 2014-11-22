@@ -134,7 +134,14 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 			'threads_total' => $total,
 		);
 
-		bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'threads', array(), $pageNavParams);
+        if (!$this->_isFieldExcluded('forum') AND count($forumIdArray) == 1)
+        {
+            $forumModel = $this->_getForumModel();
+            $forum = $forumModel->getForumById(reset($forumIdArray), $forumModel->getFetchOptionsToPrepareApiData());
+            $data['forum'] = $this->_filterDataSingle($forumModel->prepareApiDataForForum($forum), array('forum'));
+        }
+
+        bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'threads', array(), $pageNavParams);
 
 		return $this->responseData('bdApi_ViewApi_Thread_List', $data);
 	}
