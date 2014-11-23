@@ -29,6 +29,8 @@ function xfac_options_init()
 	$currentWpUser = wp_get_current_user();
 	$currentWpUserRecords = xfac_user_getRecordsByUserId($currentWpUser->ID);
 
+	$adminAccessToken = xfac_user_getAdminAccessToken($config);
+
 	// setup sections
 	$sections = array( array(
 			'id' => 'xfac_api',

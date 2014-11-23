@@ -285,6 +285,17 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
 									); ?></span>
 								<?php endif; ?> 
 							</p>
+
+							<?php if (!empty($adminAccessToken)): ?>
+								<div style="margin-left: 20px;">
+									<label for="xfac_sync_user_wp_xf_as_admin">
+										<input name="xfac_sync_user_wp_xf_as_admin" type="checkbox" id="xfac_sync_user_wp_xf_as_admin" value="1" <?php checked('1', get_option('xfac_sync_user_wp_xf_as_admin')); ?> />
+										<?php _e('Create new account with XenForo Admin Account', 'xenforo-api-consumer'); ?>
+									</label>
+									<p class="description"><?php _e('Use access token of the configured Admin Account to create new accounts, '
+										. 'the new accounts\' state will be "valid", bypassing email confirmation even if XenForo was setup to require that.', 'xenforo-api-consumer'); ?></p>
+								</div>
+							<?php endif; ?>
 					</fieldset>
 				</td>
 			</tr>
@@ -345,7 +356,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
 					<p class="description">
 						<?php $optionsUrl = admin_url('options-general.php?page=xfac'); ?>
 						<?php $loginUrl = site_url('wp-login.php?xfac=authorize&admin=1&redirect_to=' . rawurlencode($optionsUrl), 'login_post'); ?>
-						<?php if (xfac_user_getAdminAccessToken($config)): ?>
+						<?php if (!empty($adminAccessToken)): ?>
 							<?php _e('Could not get user groups information from API server.'); ?>
 							<?php if (!empty($currentWpUserRecords)): ?>
 								<?php if (xfac_user_recordsHaveAdmincpScope($currentWpUserRecords)): ?>

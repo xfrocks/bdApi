@@ -262,7 +262,13 @@ function xfac_authenticate_syncUserWpXf($user, $username, $password)
 		$username = substr($username, $atPos);
 	}
 
-	$result = xfac_api_postUser($config, $user->user_email, $username, $password);
+	$postUserExtraParams = array();
+	if (!!get_option('xfac_sync_user_wp_xf_as_admin'))
+	{
+		$postUserExtraParams['oauth_token'] = xfac_user_getAdminAccessToken($config);
+	}
+
+	$result = xfac_api_postUser($config, $user->user_email, $username, $password, $postUserExtraParams);
 	if (!empty($result))
 	{
 		// yay! new account has been created in XenForo
