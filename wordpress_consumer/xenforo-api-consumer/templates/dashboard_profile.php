@@ -34,11 +34,14 @@ if (!defined('ABSPATH'))
 			<?php endif; ?>
 
 				<a href="<?php echo $apiRecord->profile['links']['permalink']; ?>" target="_blank"><?php echo $apiRecord->profile['username']; ?></a><br />
+				<?php if (!empty($apiRecord->token['scope']) AND strpos($apiRecord->token['scope'], 'admincp') !== false): ?>
+					<em><?php _e('Connected as admin', 'xenforo-api-consumer'); ?></em><br />
+				<?php endif; ?>
 				<?php echo $apiRecord->profile['user_email']; ?>
 			</div>
 		</th>
 		<td valign="top">
-			<p><a href="profile.php?xfac=disconnect&id=<?php echo $apiRecord->id; ?>"><?php _e('Disconnect this account', 'xenforo-api-consumer'); ?></a></p>
+			<p><a href="profile.php?xfac=disconnect&amp;id=<?php echo $apiRecord->id; ?>"><?php _e('Disconnect this account', 'xenforo-api-consumer'); ?></a></p>
 		</td>
 	</tr>
 <?php endforeach; ?>
