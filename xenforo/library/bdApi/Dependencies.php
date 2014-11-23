@@ -75,9 +75,14 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
                         $action = 'index';
                     }
 
-                    $method = $request->getMethod();
+                    $method = strtolower($request->getMethod());
 
-                    $routeMatch->setAction($method . '-' . $action);
+                    if ($method === 'options' AND bdApi_Option::get('cors')) {
+                        $routeMatch->setControllerName('bdApi_ControllerApi_Index');
+                        $routeMatch->setAction('options-cors');
+                    } else {
+                        $routeMatch->setAction($method . '-' . $action);
+                    }
             }
         }
 

@@ -43,6 +43,11 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_Index', $data);
     }
 
+    public function actionOptionsCors()
+    {
+        return $this->responseData('bdApi_ViewApi_Index_OptionsCors');
+    }
+
     protected function _getModules()
     {
         return array(

@@ -4,6 +4,8 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
 {
     public function renderError($error)
     {
+        bdApi_Data_Helper_Cors::addHeaders($this, $this->_response);
+
         if (!is_array($error)) {
             $error = array($error);
         }
@@ -13,6 +15,8 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
 
     public function renderMessage($message)
     {
+        bdApi_Data_Helper_Cors::addHeaders($this, $this->_response);
+
         return self::jsonEncodeForOutput(array(
             'status' => 'ok',
             'message' => $message
@@ -21,6 +25,8 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
 
     public function renderRedirect($redirectType, $redirectTarget, $redirectMessage = null, array $redirectParams = array())
     {
+        bdApi_Data_Helper_Cors::addHeaders($this, $this->_response);
+
         switch ($redirectType) {
             case XenForo_ControllerResponse_Redirect::RESOURCE_CREATED:
             case XenForo_ControllerResponse_Redirect::RESOURCE_UPDATED:
@@ -47,6 +53,7 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
 
     public function renderView($viewName, array $params = array(), $templateName = '', XenForo_ControllerResponse_View $subView = null)
     {
+        bdApi_Data_Helper_Cors::addHeaders($this, $this->_response);
         $viewOutput = $this->renderViewObject($viewName, 'Json', $params, $templateName);
 
         if (is_array($viewOutput)) {

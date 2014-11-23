@@ -4,7 +4,7 @@ class bdApi_ViewPublic_Misc_Api_Data extends XenForo_ViewPublic_Base
 {
     public function renderRaw()
     {
-        bdApi_Data_Helper_Cors::addHeaders($this->_response);
+        bdApi_Data_Helper_Cors::addHeaders($this->_renderer, $this->_response);
 
         if (!empty($this->_params['callback'])) {
             $this->_response->setHeader('Content-Type', 'application/x-javascript; charset=UTF-8', true);
