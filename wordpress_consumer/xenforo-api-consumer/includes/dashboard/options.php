@@ -83,8 +83,9 @@ function xfac_options_init()
 			if ($xfAdminAccountOption > 0)
 			{
 				$configuredAdminRecord = xfac_user_getRecordById($xfAdminAccountOption);
-				if (!empty($record))
+				if (!empty($configuredAdminRecord))
 				{
+					$found = false;
 					foreach ($xfAdminRecords as $xfAdminRecord)
 					{
 						if ($xfAdminRecord->id == $configuredAdminRecord->id)
