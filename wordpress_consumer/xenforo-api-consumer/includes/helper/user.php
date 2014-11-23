@@ -221,3 +221,21 @@ function xfac_user_getAccessTokenForRecord($record)
 
 	return $newToken['access_token'];
 }
+
+function xfac_user_recordHasAdmincpScope($record)
+{
+	return (!empty($record->token['scope']) AND strpos($record->token['scope'], 'admincp') !== false);
+}
+
+function xfac_user_recordsHaveAdmincpScope(array $records)
+{
+	foreach ($records as $record)
+	{
+		if (xfac_user_recordHasAdmincpScope($record)) 
+		{
+			return true;
+		}
+	}
+
+	return false;
+}

@@ -26,6 +26,9 @@ function xfac_options_init()
 		$meta = xfac_option_getMeta($config);
 	}
 
+	$currentWpUser = wp_get_current_user();
+	$currentWpUserRecords = xfac_user_getRecordsByUserId($currentWpUser->ID);
+
 	// setup sections
 	$sections = array( array(
 			'id' => 'xfac_api',
@@ -74,9 +77,7 @@ function xfac_options_init()
 	{
 		case 'xfac_api':
 			$xfGuestRecords = xfac_user_getRecordsByUserId(0);
-
-			$currentWpUser = wp_get_current_user();
-			$xfAdminRecords = xfac_user_getRecordsByUserId($currentWpUser->ID);
+			$xfAdminRecords = $currentWpUserRecords;
 			$configuredAdminRecord = null;
 
 			$xfAdminAccountOption = intval(get_option('xfac_xf_admin_account'));
