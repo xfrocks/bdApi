@@ -202,7 +202,7 @@ function xfac_authenticate($user, $username, $password)
 	{
 		// yay, found an associated user!
 		xfac_syncLogin_syncRole($config, $wpUser, $xfUser);
-		xfac_user_updateRecord($newUserId, $config['root'], $xfUser['user_id'], $xfUser, $token);
+		xfac_user_updateRecord($wpUser->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
 
 		return $wpUser;
 	}
