@@ -344,6 +344,10 @@ function xfac_syncPost_processThreads($config, array $threads, array $mappedTags
 
 function xfac_syncPost_pullPost($config, $thread, $tags, $direction = 'pull')
 {
+    if (empty($thread['creator_user_id'])) {
+        return 0;
+    }
+
 	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $thread['creator_user_id']);
 	if (empty($wpUserData))
 	{

@@ -58,7 +58,7 @@ function xfac_log($args)
     $args = func_get_args();
     foreach ($args as &$arg) {
         if (is_array($arg)) {
-            $arg = var_export($arg);
+            $arg = var_export($arg, true);
         } elseif (is_object($arg)) {
             $arg = strval($arg);
         }
