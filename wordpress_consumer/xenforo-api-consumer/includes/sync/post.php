@@ -170,14 +170,14 @@ function xfac_syncPost_cron()
 	$stickyThreads = xfac_api_getThreadsInForums($config, $forumIds, '', 'sticky=1');
 	if (!empty($stickyThreads['threads']))
 	{
-		xfac_syncPost_processThreads($config, $stickyThreads['threads']);
+		xfac_syncPost_processThreads($config, $stickyThreads['threads'], $mappedTags);
 	}
 
 	// now start syncing normal threads
 	$threads = xfac_api_getThreadsInForums($config, $forumIds);
 	if (!empty($threads['threads']))
 	{
-		xfac_syncPost_processThreads($config, $threads['threads']);
+		xfac_syncPost_processThreads($config, $threads['threads'], $mappedTags);
 	}
 }
 
@@ -307,7 +307,7 @@ function xfac_syncPost_getMappedTags($forumId = 0)
 	}
 }
 
-function xfac_syncPost_processThreads($config, array $threads)
+function xfac_syncPost_processThreads($config, array $threads, array $mappedTags)
 {
 	$threadIds = array();
 	foreach ($threads as $thread)
@@ -330,14 +330,20 @@ function xfac_syncPost_processThreads($config, array $threads)
 
 		if (!$synced)
 		{
-			$wpPostId = xfac_syncPost_pullPost($config, $thread, $tagNames);
+            $tagNames = array();
+            if (!empty($thread['forum_id']) && isset($mappedTags[$thread['forum_id']])) {
+                $tagNames = $mappedTags[$thread['forum_id']];
+            }
+
+            if (!empty($tagNames)) {
+                xfac_syncPost_pullPost($config, $thread, $tagNames);
+            }
 		}
 	}
 }
 
 function xfac_syncPost_pullPost($config, $thread, $tags, $direction = 'pull')
 {
-	$postAuthor = 0;
 	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $thread['creator_user_id']);
 	if (empty($wpUserData))
 	{
