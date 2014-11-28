@@ -122,6 +122,10 @@ function xfac_syncLogin_wp_head()
 
 function xfac_edit_profile_url($url, $user, $scheme)
 {
+    if (!empty($_SERVER['REQUEST_METHOD']) AND $_SERVER['REQUEST_METHOD'] != 'GET') {
+        return $url;
+    }
+
 	$wpUser = wp_get_current_user();
 	if ($user == $wpUser->ID AND $wpUser->has_cap('subscriber'))
 	{
