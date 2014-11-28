@@ -46,6 +46,28 @@ function xfac_init()
 
 add_action('init', 'xfac_init');
 
+/**
+ * @param mixed $args,...
+ */
+function xfac_log($args)
+{
+    if (!defined('WP_DEBUG_LOG')) {
+        return;
+    }
+
+    $args = func_get_args();
+    foreach ($args as &$arg) {
+        if (is_array($arg)) {
+            $arg = var_export($arg);
+        } elseif (is_object($arg)) {
+            $arg = strval($arg);
+        }
+    }
+    $message = call_user_func_array('sprintf', $args);
+
+    error_log($message);
+}
+
 require_once (dirname(__FILE__) . '/includes/helper/api.php');
 require_once (dirname(__FILE__) . '/includes/helper/dashboard.php');
 require_once (dirname(__FILE__) . '/includes/helper/installer.php');
