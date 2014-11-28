@@ -235,12 +235,64 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
 						</label>
 						<p class="description"><?php _e('Use avatar URL provided by XenForo as WordPress user avatar.', 'xenforo-api-consumer'); ?></p>
 					</fieldset>
+
+                    <?php if (!empty($adminAccessToken)): ?>
+                        <fieldset>
+                            <label for="xfac_sync_user_wp_xf_password">
+                                <input name="xfac_sync_user_wp_xf_password" type="checkbox" id="xfac_sync_user_wp_xf_password" value="1" <?php checked('1', get_option('xfac_sync_user_wp_xf_password')); ?> />
+                                <?php _e('Password from WordPress to XenForo', 'xenforo-api-consumer'); ?>
+                            </label>
+                            <p class="description">
+                                <?php echo sprintf(__('Use access token of the configured Admin Account to to update XenForo password when user WordPress password is changed. '
+                                    . 'Please note that due to technical limitation, XenForo password change cannot be detected from WordPress. A workaround for this is to enable "%s".',
+                                    'xenforo-api-consumer'), __('Accept XenForo login credentials', 'xenforo-api-consumer')); ?>
+
+                                <?php if (isset($meta['modules']['forum']) AND $meta['modules']['forum'] < 2014112801): ?>
+                                    <span style="color: red"><?php echo sprintf(
+                                            __('This feature requires %s-%s, it will not work until API server is updated.', 'xenforo-api-consumer'),
+                                            'forum',
+                                            2014112801
+                                        ); ?></span>
+                                <?php endif; ?>
+                            </p>
+                        </fieldset>
+                    <?php endif; ?>
+
+					<fieldset>
+						<label for="xfac_sync_user_wp_xf">
+							<input name="xfac_sync_user_wp_xf" type="checkbox" id="xfac_sync_user_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_user_wp_xf')); ?> />
+							<?php _e('Create XenForo account for WordPress user', 'xenforo-api-consumer'); ?>
+						</label>
+						<p class="description">
+							<?php _e('Try to create XenForo account for WordPress user if he/she has\'t have a XenForo account yet. '
+								. 'This is done everytime user logs into WordPress using a WordPress credential.', 'xenforo-api-consumer'); ?>
+	
+							<?php if (isset($meta['modules']['oauth2']) AND $meta['modules']['oauth2'] < 2014030701): ?>
+								<span style="color: red"><?php echo sprintf(
+									__('This feature requires %s-%s, it will not work until API server is updated.', 'xenforo-api-consumer'),
+									'oauth2',
+									2014030701
+								); ?></span>
+							<?php endif; ?> 
+						</p>
+
+						<?php if (!empty($adminAccessToken)): ?>
+							<div style="margin-left: 20px;">
+								<label for="xfac_sync_user_wp_xf_as_admin">
+										<input name="xfac_sync_user_wp_xf_as_admin" type="checkbox" id="xfac_sync_user_wp_xf_as_admin" value="1" <?php checked('1', get_option('xfac_sync_user_wp_xf_as_admin')); ?> />
+										<?php _e('Create new account with XenForo Admin Account', 'xenforo-api-consumer'); ?>
+									</label>
+									<p class="description"><?php _e('Use access token of the configured Admin Account to create new accounts, '
+										. 'the new accounts\' state will be "valid", bypassing email confirmation even if XenForo was setup to require that.', 'xenforo-api-consumer'); ?></p>
+							</div>
+						<?php endif; ?>
+					</fieldset>
 				</td>
 			</tr>
 
 			<tr valign="top">
 				<th scope="row">
-					<?php _e('Cookie Sync', 'xenforo-api-consumer'); ?><br />
+					<?php _e('Login Sync', 'xenforo-api-consumer'); ?><br />
 				</th>
 				<td>
 					<fieldset>
@@ -266,36 +318,6 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
 							</label>
 							<p class="description"><?php _e('Use JavaScript to detect XenForo logged-in status and let user login to WordPress automatically. '
 								. 'If user logs into WordPress first, try to regsiter XenForo logged-in status.', 'xenforo-api-consumer'); ?></p>
-					</fieldset>
-
-					<fieldset>
-							<label for="xfac_sync_user_wp_xf">
-								<input name="xfac_sync_user_wp_xf" type="checkbox" id="xfac_sync_user_wp_xf" value="1" <?php checked('1', get_option('xfac_sync_user_wp_xf')); ?> />
-								<?php _e('Create XenForo account for WordPress user', 'xenforo-api-consumer'); ?>
-							</label>
-							<p class="description">
-								<?php _e('Try to create XenForo account for WordPress user if he/she has\'t have a XenForo account yet. '
-									. 'This is done everytime user logs into WordPress using a WordPress credential.', 'xenforo-api-consumer'); ?>
-		
-								<?php if (isset($meta['modules']['oauth2']) AND $meta['modules']['oauth2'] < 2014030701): ?>
-									<span style="color: red"><?php echo sprintf(
-										__('This feature requires %s-%s, it will not work until API server is updated.', 'xenforo-api-consumer'),
-										'oauth2',
-										2014030701
-									); ?></span>
-								<?php endif; ?> 
-							</p>
-
-							<?php if (!empty($adminAccessToken)): ?>
-								<div style="margin-left: 20px;">
-									<label for="xfac_sync_user_wp_xf_as_admin">
-										<input name="xfac_sync_user_wp_xf_as_admin" type="checkbox" id="xfac_sync_user_wp_xf_as_admin" value="1" <?php checked('1', get_option('xfac_sync_user_wp_xf_as_admin')); ?> />
-										<?php _e('Create new account with XenForo Admin Account', 'xenforo-api-consumer'); ?>
-									</label>
-									<p class="description"><?php _e('Use access token of the configured Admin Account to create new accounts, '
-										. 'the new accounts\' state will be "valid", bypassing email confirmation even if XenForo was setup to require that.', 'xenforo-api-consumer'); ?></p>
-								</div>
-							<?php endif; ?>
 					</fieldset>
 				</td>
 			</tr>

@@ -519,3 +519,58 @@ function _xfac_syncLogin_syncRole_getHighestLevelRole(array $roles, &$levelMax =
 
 	return $highestLevelRole;
 }
+
+function xfac_user_profile_update_errors_password(&$errors, $update, &$user)
+{
+    if ($update && !empty($user->user_pass)) {
+        $GLOBALS['_xfac_syncLogin_pending_user_pass'] = array($user->ID, $user->user_pass);
+    }
+
+    return $errors;
+}
+
+function xfac_profile_update_user_pass($wpUserId)
+{
+    if (empty($GLOBALS['_xfac_syncLogin_pending_user_pass'])) {
+        // no data
+        return;
+    }
+
+    $pending = $GLOBALS['_xfac_syncLogin_pending_user_pass'];
+    if (!is_array($pending) || count($pending) != 2) {
+        // data unrecognized
+        return;
+    }
+
+    if ($pending[0] != $wpUserId) {
+        // user_id not matched
+        return;
+    }
+
+    $config = xfac_option_getConfig();
+    if (empty($config)) {
+        // no config
+        return;
+    }
+
+    $adminAccessToken = xfac_user_getAdminAccessToken($config);
+    if (empty($adminAccessToken)) {
+        // no admin access token
+        return;
+    }
+
+    $records = xfac_user_getRecordsByUserId($wpUserId);
+    if (empty($records))  {
+        // no user record
+        return null;
+    }
+    $record = reset($records);
+
+    xfac_api_postUserPassword($config, $adminAccessToken, $record->identifier, $pending[1]);
+}
+
+if (!!get_option('xfac_sync_user_wp_xf_password'))
+{
+    add_action('user_profile_update_errors', 'xfac_user_profile_update_errors_password', 10, 3);
+    add_action('profile_update', 'xfac_profile_update_user_pass');
+}

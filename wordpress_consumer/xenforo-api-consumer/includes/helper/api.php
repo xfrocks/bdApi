@@ -593,6 +593,34 @@ function xfac_api_postUserGroups($config, $accessToken, $userId, $primaryGroupId
 	}
 }
 
+function xfac_api_postUserPassword($config, $accessToken, $userId, $password)
+{
+    $url = call_user_func_array('sprintf', array(
+        '%s/index.php?users/%d/password',
+        rtrim($config['root'], '/'),
+        $userId,
+    ));
+    $postFields = array(
+        'oauth_token' => $accessToken,
+        'password' => $password,
+    );
+
+    // TODO: add password_old to change password
+    // TODO: use password_algo for security
+
+    $curl = _xfac_api_curl($url, 'POST', $postFields);
+    extract($curl);
+
+    if (isset($parts['status']) AND $parts['status'] == 'ok')
+    {
+        return true;
+    }
+    else
+    {
+        return _xfac_api_getFailedResponse($curl);
+    }
+}
+
 function xfac_api_putPost($config, $accessToken, $postId, $postBody, array $extraParams = array())
 {
 	$url = call_user_func_array('sprintf', array(
