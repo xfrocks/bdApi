@@ -1040,8 +1040,8 @@ Change password of a user.
 
 Parameters:
 
- * `password_old` (__required__): data of the existing password.
  * `password` (__required__): data of the new password.
+ * `password_old` (__required__): data of the existing password, it is _optional_ if (1) the current authenticated user has `user` admin permission, (2) the `admincp` scope is granted and (3) the user whose password is being changed is not the current authenticated user.
  * `password_algo` (_optional_): algorithm used to encrypt the `password` parameter. See [Encryption](#encryption) section for more information.
 
 Required scopes:

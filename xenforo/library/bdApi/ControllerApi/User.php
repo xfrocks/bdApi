@@ -282,25 +282,29 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
         $user = $this->_getUserOrError();
         $visitor = XenForo_Visitor::getInstance();
-
-        if ($user['user_id'] != $visitor->get('user_id')) {
-            return $this->responseNoPermission();
-        }
-
         $passwordOld = bdApi_Crypt::decrypt($input['password_old'], $input['password_algo']);
         $password = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
 
-        $auth = $this->_getUserModel()->getUserAuthenticationObjectByUserId($user['user_id']);
-        if (empty($auth)) {
-            return $this->responseNoPermission();
-        }
-        if ($auth->hasPassword() AND !$auth->authenticate($user['user_id'], $passwordOld)) {
-            return $this->responseError(new XenForo_Phrase('your_existing_password_is_not_correct'));
+        $session = bdApi_Data_Helper_Core::safeGetSession();
+        if ($session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM)
+            && $visitor->hasAdminPermission('user')
+            && $visitor['user_id'] != $user['user_id']
+        ) {
+            // current user has admin permission, bypass old password verification
+            // do not bypass if changing self password though
+        } else {
+            $auth = $this->_getUserModel()->getUserAuthenticationObjectByUserId($user['user_id']);
+            if (empty($auth)) {
+                return $this->responseNoPermission();
+            }
+            if ($auth->hasPassword() && !$auth->authenticate($user['user_id'], $passwordOld)) {
+                return $this->responseNoPermission();
+            }
         }
 
         /* @var $writer XenForo_DataWriter_User */
         $writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
-        $writer->setExistingData($user['user_id']);
+        $writer->setExistingData($user, true);
         $writer->setPassword($password, $password);
         $writer->save();
 
