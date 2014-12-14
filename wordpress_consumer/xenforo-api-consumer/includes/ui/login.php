@@ -90,6 +90,11 @@ function xfac_login_init()
 				exit();
 			}
 			$wpUserForAssociate = get_user_by('login', $_REQUEST['user_login']);
+            if (!($wpUserForAssociate instanceof WP_User))
+            {
+                wp_redirect($redirectBaseUrl . '&xfac_error=no_user_login_found');
+                exit();
+            }
 
 			if (empty($_REQUEST['pwd']))
 			{
