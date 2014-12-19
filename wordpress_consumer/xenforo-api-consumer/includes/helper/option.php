@@ -148,6 +148,7 @@ function xfac_option_getMeta($config)
 
 		$rebuiltCount++;
 		update_option('xfac_meta', $meta);
+		xfac_log('xfac_option_getMeta rebuilt $meta=%s', $meta);
 	}
 
 	return $meta;

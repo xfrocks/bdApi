@@ -203,6 +203,7 @@ function xfac_authenticate($user, $username, $password)
 		// yay, found an associated user!
 		xfac_syncLogin_syncRole($config, $wpUser, $xfUser);
 		xfac_user_updateRecord($wpUser->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
+		xfac_log('xfac_authenticate logged in via existing XenForo connection (user #%d)', $wpUser->ID);
 
 		return $wpUser;
 	}
@@ -225,6 +226,7 @@ function xfac_authenticate($user, $username, $password)
 
 			xfac_syncLogin_syncRole($config, $newUser, $xfUser);
 			xfac_user_updateRecord($newUserId, $config['root'], $xfUser['user_id'], $xfUser, $token);
+			xfac_log('xfac_authenticate logged in via new XenForo connection (user #%d)', $newUser->ID);
 
 			return $newUser;
 		}
@@ -293,13 +295,15 @@ function xfac_authenticate_syncUserWpXf($user, $username, $password)
 
 		xfac_syncLogin_syncRole($config, $user, $xfUser, false);
 		xfac_user_updateRecord($user->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
+		xfac_log('xfac_authenticate_syncUserWpXf pushed $wpUser (#%d)', $user->ID);
 	}
 	else
 	{
 		$errors = xfac_api_getLastErrors();
-		if (!empty($errors['username']))
+		if (!empty($errors['username']) && !get_option('xfac_sync_password'))
 		{
 			// special case, a XenForo account with same username has already existed
+			// do not do this if sync password option is turned on to avoid duplicated work
 			// TODO: improve this, there are other kind of username errors actually
 			$token = xfac_api_getAccessTokenFromUsernamePassword($config, $username, $password);
 			if (!empty($token))
@@ -310,6 +314,7 @@ function xfac_authenticate_syncUserWpXf($user, $username, $password)
 					$xfUser = $me['user'];
 					xfac_syncLogin_syncRole($config, $user, $xfUser);
 					xfac_user_updateRecord($user->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
+					xfac_log('xfac_authenticate_syncUserWpXf connected $wpUser (#%d)', $user->ID);
 				}
 			}
 		}
@@ -418,7 +423,12 @@ function xfac_syncLogin_syncRole($config, WP_User $wpUser, array $xfUser, $xfToW
 			$XFAC_SKIP_xfac_set_user_role_before = !empty($GLOBALS['XFAC_SKIP_xfac_set_user_role']);
 			$GLOBALS['XFAC_SKIP_xfac_set_user_role'] = true;
 			$wpUser->set_role($newRole);
+			xfac_log('xfac_syncLogin_syncRole $wpUser->set_role(%s);', $newRole);
 			$GLOBALS['XFAC_SKIP_xfac_set_user_role'] = $XFAC_SKIP_xfac_set_user_role_before;
+		}
+		else
+		{
+			xfac_log('xfac_syncLogin_syncRole skipped setting role for $wpUser (#%d)', $wpUser->ID);
 		}
 	}
 	else
@@ -485,7 +495,14 @@ function xfac_syncLogin_syncRole($config, WP_User $wpUser, array $xfUser, $xfToW
 
 			if (!empty($accessToken)) {
 				xfac_api_postUserGroups($config, $accessToken, $xfUser['user_id'], $newPrimaryGroupId, $newSecondaryGroupIds);
+				xfac_log('xfac_syncLogin_syncRole pushed groups for $xfUser (#%d): %s %s', $xfUser['user_id'], $newPrimaryGroupId, $newSecondaryGroupIds);
+			} else {
+				xfac_log('xfac_syncLogin_syncRole failed setting role for $xfUser (#%d) because of missing $accessToken', $xfUser['user_id']);
 			}
+		}
+		else
+		{
+			xfac_log('xfac_syncLogin_syncRole skipped setting role for $xfUser (#%d)', $xfUser['user_id']);
 		}
 	}
 }
@@ -615,6 +632,7 @@ function xfac_profile_update_user_pass($wpUserId)
     $record = reset($records);
 
     xfac_api_postUserPassword($config, $adminAccessToken, $record->identifier, $pending[1]);
+	xfac_log('xfac_profile_update_user_pass pushed password for $wpUser (#%d)', $wpUserId);
 }
 
 if (!!get_option('xfac_sync_user_wp_xf_password'))

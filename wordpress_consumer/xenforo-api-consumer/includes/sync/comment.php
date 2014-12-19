@@ -94,6 +94,7 @@ function xfac_syncComment_pushComment($wpComment, $postSyncRecord, $commentSyncR
 
 	if (empty($accessToken))
 	{
+		xfac_log('xfac_syncComment_pushComment skipped pushing $wpComment (#%d) because of missing $accessToken (user #%d)', $wpComment->comment_ID, $wpComment->user_id);
 		return false;
 	}
 
@@ -101,14 +102,17 @@ function xfac_syncComment_pushComment($wpComment, $postSyncRecord, $commentSyncR
 	if (empty($commentSyncRecord))
 	{
 		$xfPost = xfac_api_postPost($config, $accessToken, $postSyncRecord->provider_content_id, $commentContent, $extraParams);
+		xfac_log('xfac_syncComment_pushComment pushed $wpComment (#%d)', $wpComment->comment_ID);
 	}
 	elseif ($wpComment->comment_approved)
 	{
 		$xfPost = xfac_api_putPost($config, $accessToken, $commentSyncRecord->provider_content_id, $commentContent, $extraParams);
+		xfac_log('xfac_syncComment_pushComment pushed $wpComment (#%d) as an update', $wpComment->comment_ID);
 	}
 	else
 	{
 		$xfPost = xfac_api_deletePost($config, $accessToken, $commentSyncRecord->provider_content_id);
+		xfac_log('xfac_syncComment_pushComment pushed $wpComment (#%d) as a delete', $wpComment->comment_ID);
 	}
 
 	if (!empty($xfPost['post']['post_id']))
@@ -193,6 +197,11 @@ function xfac_syncComment_processPostSyncRecord($config, $postSyncRecord)
 				'time' => time(),
 			);
 			xfac_sync_updateRecord('', $postSyncRecord->provider_content_type, $postSyncRecord->provider_content_id, $postSyncRecord->sync_id, 0, $postSyncRecord->syncData);
+			xfac_log('xfac_syncComment_processPostSyncRecord subscribed for posts in thread (#%d)', $postSyncRecord->provider_content_id);
+		}
+		else
+		{
+			xfac_log('xfac_syncComment_processPostSyncRecord failed subscribing for posts in thread (#%d)', $postSyncRecord->provider_content_id);
 		}
 	}
 
@@ -247,8 +256,6 @@ function xfac_syncComment_processPostSyncRecord($config, $postSyncRecord)
 
 function xfac_syncComment_pullComment($config, $xfPost, $wpPostId, $direction = 'pull')
 {
-	$wpDisplayName = false;
-	$wpUserEmail = false;
 	$wpUserUrl = '';
 	$wpUserId = 0;
 	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $xfPost['poster_user_id']);
@@ -300,6 +307,11 @@ function xfac_syncComment_pullComment($config, $xfPost, $wpPostId, $direction = 
 			'post' => $xfPost,
 			'direction' => $direction,
 		));
+		xfac_log('xfac_syncComment_pullComment pulled $xfPost (#%d) -> $wpComment (#%d)', $xfPost['post_id'], $commentId);
+	}
+	else
+	{
+		xfac_log('xfac_syncComment_pullComment failed pulling $xfPost (#%d)', $xfPost['post_id']);
 	}
 
 	return $commentId;

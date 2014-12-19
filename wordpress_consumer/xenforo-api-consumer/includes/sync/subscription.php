@@ -148,6 +148,7 @@ function xfac_subscription_handleCallback(array $json)
 		if (!empty($ping['result']))
 		{
 			$results[] = $ping;
+			xfac_log('xfac_subscription_handleCallback %s/%s -> %s', $ping['topic_type'], $ping['topic_id'], $ping['result']);
 		}
 	}
 	echo json_encode($results);

@@ -98,6 +98,12 @@ function xfac_save_post($postId, WP_Post $post, $update)
 								'direction' => 'push',
 								'subscribed' => $subscribed,
 							));
+
+							xfac_log('xfac_save_post pushed to $forum (#%d) as $xfThread (#%d)', $forumId, $thread['thread']['thread_id']);
+						}
+						else
+						{
+							xfac_log('xfac_save_post failed pushing to $forum (#%d)', $forumId);
 						}
 					}
 
@@ -131,6 +137,7 @@ function xfac_save_post($postId, WP_Post $post, $update)
 							$syncData['thread']['first_post'] = $xfPost;
 
 							xfac_sync_updateRecord('', 'thread', $xfPost['thread_id'], $post->ID, 0, $syncData);
+							xfac_log('xfac_save_post pushed an update for $xfPost (#%d)', $xfPost['post_id']);
 						}
 					}
 				}
@@ -365,6 +372,7 @@ function xfac_syncPost_pullPost($config, $thread, $tags, $direction = 'pull')
 	if (!$wpUser->has_cap($postTypeObj->cap->create_posts))
 	{
 		// no permission to create posts
+		xfac_log('xfac_syncPost_pullPost skipped pulling post because of lack of create_posts capability (user #%d)', $wpUser->ID);
 		return 0;
 	}
 
@@ -425,6 +433,11 @@ function xfac_syncPost_pullPost($config, $thread, $tags, $direction = 'pull')
 			'sticky' => !empty($thread['thread_is_sticky']),
 			'subscribed' => $subscribed,
 		));
+		xfac_log('xfac_syncPost_pullPost pulled $xfThread (#%d) as $wpPost (#%d)', $thread['thread_id'], $wpPostId);
+	}
+	else
+	{
+		xfac_log('xfac_syncPost_pullPost failed pulling $xfThread (#%d)');
 	}
 
 	return $wpPostId;
@@ -452,7 +465,7 @@ function _xfac_syncPost_getPostBody($post)
 			$text = wp_trim_words($text, $excerptLength, $excerptMore);
 		}
 
-		$text = apply_filters('wp_trim_excerpt', $text, $raw_excerpt);
+		$text = apply_filters('wp_trim_excerpt', $text, $post->post_excerpt);
 	}
 	else
 	{
