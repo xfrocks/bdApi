@@ -402,10 +402,8 @@ function xfac_syncLogin_syncRole($config, WP_User $wpUser, array $xfUser, $xfToW
 		{
 			if (isset($syncRoleOption[$currentRole]) AND $syncRoleOption[$currentRole] == -1)
 			{
-				// put do not sync roles into target roles directly
-				// if the current role is high level, it will be kept
-				// otherwise user level will just go up
-				$targetRoles[] = $currentRole;
+				// do not sync if role is set to be protected
+				$targetRoles = array();
 			}
 		}
 
@@ -415,7 +413,7 @@ function xfac_syncLogin_syncRole($config, WP_User $wpUser, array $xfUser, $xfToW
 			// we put a safe guard against unexpected error here
 			// and do not sync if one of the arrays is empty
 			// they should not be right? Right!?
-			$newRole = _xfac_syncLogin_syncRole_getHighestLevelRole($targetRoles);
+			$newRole = _xfac_syncLogin_syncRole_getMostPowerfulRoleName($targetRoles);
 
 			$XFAC_SKIP_xfac_set_user_role_before = !empty($GLOBALS['XFAC_SKIP_xfac_set_user_role']);
 			$GLOBALS['XFAC_SKIP_xfac_set_user_role'] = true;
@@ -441,26 +439,18 @@ function xfac_syncLogin_syncRole($config, WP_User $wpUser, array $xfUser, $xfToW
 		}
 		asort($currentGroupIds);
 
-		$targetGroupIds = array();
 		$optionGroupIds = array();
-		_xfac_syncLogin_syncRole_getHighestLevelRole($wpUser->roles, $wpUserLevel);
 		foreach ($syncRoleOption as $optionRoleName => $optionGroupId)
 		{
 			$optionGroupId = intval($optionGroupId);
 
 			if ($optionGroupId > 0)
 			{
-				$optionGroupIds[] = $optionGroupId;
-
-				$optionLevel = false;
-				_xfac_syncLogin_syncRole_getHighestLevelRole(array($optionRoleName), $optionLevel);
-
-				if ($optionLevel <= $wpUserLevel)
-				{
-					$targetGroupIds[] = $optionGroupId;
-				}
+				$optionGroupIds[$optionRoleName] = $optionGroupId;
 			}
 		}
+
+		$targetGroupIds = _xfac_syncLogin_syncRole_getTargetGroupIds($wpUser->roles, $optionGroupIds);
 		foreach ($currentGroupIds as $currentGroupId)
 		{
 			if (!in_array($currentGroupId, $optionGroupIds, true))
@@ -492,36 +482,90 @@ function xfac_syncLogin_syncRole($config, WP_User $wpUser, array $xfUser, $xfToW
 			}
 
 			$accessToken = xfac_user_getAdminAccessToken($config);
-			xfac_api_postUserGroups($config, $accessToken, $xfUser['user_id'], $newPrimaryGroupId, $newSecondaryGroupIds);
+
+			if (!empty($accessToken)) {
+				xfac_api_postUserGroups($config, $accessToken, $xfUser['user_id'], $newPrimaryGroupId, $newSecondaryGroupIds);
+			}
 		}
 	}
 }
 
-function _xfac_syncLogin_syncRole_getHighestLevelRole(array $roles, &$levelMax = false)
+function _xfac_syncLogin_syncRole_getMostPowerfulRoleName(array $roleNames)
 {
 	global $wp_roles;
-	$highestLevelRole = '';
+
+	$highestCapCount = 0;
+	$mostPowerfulRoleName = null;
 
 	foreach ($wp_roles->roles as $roleName => $roleInfo)
 	{
-		if (in_array($roleName, $roles))
+		if (in_array($roleName, $roleNames))
+		{
+			$capCount = 0;
+
+			foreach ($roleInfo['capabilities'] as $cap => $boolean)
+			{
+				if ($boolean) {
+					$capCount++;
+				}
+			}
+
+			if ($mostPowerfulRoleName == null || $capCount > $highestCapCount)
+			{
+				$mostPowerfulRoleName = $roleName;
+				$highestCapCount = $capCount;
+			}
+		}
+	}
+
+	return $mostPowerfulRoleName;
+}
+
+function _xfac_syncLogin_syncRole_getTargetGroupIds(array $roleNames, array $optionGroupIds)
+{
+	global $wp_roles;
+
+	$targetGroupIds = array();
+	$capabilities = array();
+
+	foreach ($wp_roles->roles as $roleName => $roleInfo)
+	{
+		if (in_array($roleName, $roleNames))
 		{
 			foreach ($roleInfo['capabilities'] as $cap => $boolean)
 			{
-				if (preg_match('/^level_(\d+)$/i', $cap, $matches))
+				if ($boolean)
 				{
-					$level = intval($matches[1]);
-					if ($levelMax === false OR $level > $levelMax)
-					{
-						$levelMax = $level;
-						$highestLevelRole = $roleName;
-					}
+					$capabilities[$cap] = true;
 				}
 			}
 		}
 	}
 
-	return $highestLevelRole;
+	foreach ($optionGroupIds as $optionRoleName => $optionGroupId)
+	{
+		foreach ($wp_roles->roles as $roleName => $roleInfo)
+		{
+			if ($roleName == $optionRoleName)
+			{
+				$capsAllFound = true;
+				foreach ($roleInfo['capabilities'] as $cap => $boolean)
+				{
+					if ($boolean && empty($capabilities[$cap]))
+					{
+						$capsAllFound = false;
+					}
+				}
+
+				if ($capsAllFound)
+				{
+					$targetGroupIds[] = $optionGroupId;
+				}
+			}
+		}
+	}
+
+	return $targetGroupIds;
 }
 
 function xfac_user_profile_update_errors_password(&$errors, $update, &$user)

@@ -354,7 +354,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
 									</tbody>
 								</table>
 								<p class="description"><?php _e('Users who come from XenForo will have their WordPress roles setup as configured in this table. ' .
-									'The roles are checked from the highest level down to the lowest so user will have one role that fits best to their user groups. ' .
+									'The roles are checked from the most powerful role down so user will have one role that fits best to their user groups. ' .
 									'Choose "Do not sync" for roles that need to be ignored by the sync logic (WordPress accounts with these roles will be protected from changing).', 'xenforo-api-consumer'); ?></p>
 				</td>
 			</tr>
