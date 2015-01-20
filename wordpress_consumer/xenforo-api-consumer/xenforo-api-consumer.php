@@ -3,7 +3,7 @@
  Plugin Name: XenForo API Consumer
  Plugin URI: https://xfrocks.com/api-support/
  Description: Connects to XenForo API system.
- Version: 1.2.6-BETA
+ Version: 1.2.7-BETA
  Author: XFROCKS
  Author URI: https://xfrocks.com
  Text Domain: xenforo-api-consumer
@@ -79,6 +79,7 @@ if (is_admin())
 {
 	require_once (dirname(__FILE__) . '/includes/dashboard/options.php');
 	require_once (dirname(__FILE__) . '/includes/dashboard/profile.php');
+    require_once (dirname(__FILE__) . '/includes/dashboard/tools.php');
 }
 else
 {
