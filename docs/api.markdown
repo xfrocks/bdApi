@@ -38,7 +38,51 @@ With `user_id` is the ID of authenticated user; `timestamp` is the unix timestam
 
 Please note that the TTL can be reconfigured to make it expire sooner or much later.
 
-### Discoverability
+### Social Logins
+Since oauth2-2015030602, social logins are accepted as a way to authorize access to an user account. List of supported services: Facebook, Twitter and Google. The common flow is:
+
+ 1. Third party client authorize user via social service (e.g. awesomewebsite.com use Facebook Application A to authorize user).
+ 2. Third party client obtains access token to social service (e.g. awesomewebsite.com has Facebook access token T).
+ 3. Third party client submits access token to API endpoint to request access token to XenForo (e.g. awesomewebsite.com sends Facebook access token T to xenforo.com).
+ 4. XenForo verifies that access token is valid and third party client does have access to a XenForo account (e.g. xenforo.com contacts Facebook server to verify access token T then cross-matches to a XenForo user account U).
+ 5. XenForo generates API access token for its account (e.g. xenforo.com generates access token T2 which can be used in future API requests).
+
+It's important to note that third party client and XenForo systems don't need to use the same social service credentials (e.g. awesomewebsite.com use Facebook Application A while xenforo.com can use Facebook Application B).
+
+#### Responses
+If an API access token can be generated, the response is similar to a regular POST `/oauth/token` with token and refresh_token amongst other things. Previously user-granted scopes and auto-authorized scopes will be attached to the token.
+
+Otherwise, the API will try to response with as much information for a new user account as possible. The data is ready to be used with POST `/users`.
+
+#### POST `/oauth/token/facebook`
+Request API access token using Facebook access token. Because Facebook uses app-scoped user_id, it is not possible to recognize user across different Facebook Applications using any unique ID. Therefore email is used to find registered user.
+
+Parameters:
+
+ * `client_id` (__required__)
+ * `client_secret` (__required__)
+ * `facebook_token` (__required__)
+
+#### POST `/oauth/token/twitter`
+Request API access token using Twitter access token.
+
+Parameters:
+
+ * `client_id` (__required__)
+ * `client_secret` (__required__)
+ * `twitter_uri` (__required__): the full `/account/verify_credentials.json` uri that has been used to calculate OAuth signature.
+ * `twitter_auth` (__required__): the complete authentication header that starts with "OAuth". Consult [Twitter document](https://dev.twitter.com/oauth/overview/creating-signatures) for more information.
+ 
+#### POST `/oauth/token/google`
+Request API access token using Google access token.
+
+Parameters:
+
+ * `client_id` (__required__)
+ * `client_secret` (__required__)
+ * `google_token` (__required__)
+
+## Discoverability
 System information and availability can be determined by sending a GET request to `/` (index route). A list of resources will be returned. If the request is authenticated, the revisions of API system and installed modules will also made available for further inspection.
 
 ## Common Parameters

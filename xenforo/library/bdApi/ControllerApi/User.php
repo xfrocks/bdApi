@@ -86,6 +86,12 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             'user_dob_month' => XenForo_Input::UINT,
             'user_dob_year' => XenForo_Input::UINT,
         ));
+
+        if (empty($input['user_email'])) {
+            // backward compatibility
+            $input['user_email'] = $this->_input->filterSingle('email', XenForo_Input::STRING);
+        }
+
         $userModel = $this->_getUserModel();
         $options = XenForo_Application::getOptions();
         $session = XenForo_Application::getSession();
@@ -137,6 +143,33 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
         if ($user['user_state'] == 'email_confirm') {
             $userConfirmationModel->sendEmailConfirmation($user);
+        }
+
+        $extraInput = $this->_input->filter(array(
+            'extra_data' => XenForo_Input::STRING,
+            'extra_timestamp' => XenForo_Input::UINT,
+        ));
+        if (!empty($extraInput['extra_data'])) {
+            try {
+                $extraData = bdApi_Crypt::decryptTypeOne($extraInput['extra_data'], $extraInput['extra_timestamp']);
+                if (!empty($extraData)) {
+                    $extraData = unserialize($extraData);
+                }
+
+                /* @var $userExternalModel XenForo_Model_UserExternal */
+                $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
+                if (!empty($extraData['google_key'])) {
+                    $userExternalModel->updateExternalAuthAssociation('google', $extraData['google_key'], $user['user_id']);
+                }
+                if (!empty($extraData['facebook_key'])) {
+                    $userExternalModel->updateExternalAuthAssociation('facebook', $extraData['facebook_key'], $user['user_id']);
+                }
+                if (!empty($extraData['twitter_key'])) {
+                    $userExternalModel->updateExternalAuthAssociation('twitter', $extraData['twitter_key'], $user['user_id']);
+                }
+            } catch (XenForo_Exception $e) {
+                // ignore
+            }
         }
 
         if (XenForo_Visitor::getUserId() == 0) {
