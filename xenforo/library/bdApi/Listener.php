@@ -22,6 +22,7 @@ class bdApi_Listener
             'XenForo_Model_Conversation',
             'XenForo_Model_Forum',
             'XenForo_Model_ForumWatch',
+            'XenForo_Model_LinkForum',
             'XenForo_Model_Post',
             'XenForo_Model_Thread',
             'XenForo_Model_ThreadWatch',

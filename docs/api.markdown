@@ -255,6 +255,53 @@ Required scopes:
 
  * `read`
 
+## Navigation
+
+### GET `/navigation`
+List of navigation elements within the system. Since forum-2015030601.
+
+    {
+        elements: [
+            (category) + {
+                navigation_type: "category",
+                navigation_id: (int),
+                has_sub_elements: (boolean)
+            },
+            (forum) + {
+                navigation_type: "forum",
+                navigation_id: (int),
+                has_sub_elements: (boolean)
+            },
+            {
+                link_id: (int),
+                link_title: (string),
+                link_description: (string),
+                links {
+                    target: (uri),
+                    sub-elements: (uri),
+                },
+                permissions: {
+                    view: (boolean),
+                    edit: (boolean),
+                    delete: (boolean),
+                },
+                navigation_type: "linkforum",
+                navigation_id: (int),
+                has_sub_elements: (boolean)
+            },
+            ...
+        ],
+        elements_count: (int)
+    }
+
+Parameters:
+
+ * `parent` (_optional_): id of parent element. If exists, filter elements that are direct children of that element.
+
+Required scopes:
+
+ * `read`
+
 ## Threads
 
 ### GET `/threads`

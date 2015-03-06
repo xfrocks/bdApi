@@ -18,17 +18,16 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 
         $data = array(
             'links' => array(
-                'categories' => XenForo_Link::buildApiLink('categories'),
                 'conversations' => XenForo_Link::buildApiLink('conversations'),
                 'conversation-messages' => XenForo_Link::buildApiLink('conversation-messages'),
                 'notifications' => XenForo_Link::buildApiLink('notifications'),
 
-                'forums' => XenForo_Link::buildApiLink('forums'),
-                'posts' => XenForo_Link::buildApiLink('posts'),
                 'search' => XenForo_Link::buildApiLink('search'),
+                'navigation' => XenForo_Link::buildApiLink('navigation'),
                 'threads' => XenForo_Link::buildApiLink('threads'),
                 'threads/recent' => XenForo_Link::buildApiLink('threads/recent'),
                 'threads/new' => XenForo_Link::buildApiLink('threads/new'),
+                'posts' => XenForo_Link::buildApiLink('posts'),
                 'users' => XenForo_Link::buildApiLink('users'),
 
                 'batch' => XenForo_Link::buildApiLink('batch'),
@@ -51,7 +50,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
     protected function _getModules()
     {
         return array(
-            'forum' => 2014112801,
+            'forum' => 2015030601,
             'oauth2' => 2014030701,
             'subscription' => 2014092301,
         );
