@@ -16,7 +16,7 @@ class bdApi_ControllerApi_Error extends bdApi_ControllerApi_Abstract
             $controllerName = $this->_request->getParam('_controllerName');
 
             if (empty($controllerName)) {
-                return $this->responseError(new XenForo_Phrase('controller_for_route_not_found', array('routePath' => $this->_request->getParam('_origRoutePath'),)), 404);
+                return $this->responseError(new XenForo_Phrase('controller_for_route_not_found', array('routePath' => $this->_request->getParam('_origRoutePath'))), 404);
             } else {
                 return $this->responseError(new XenForo_Phrase('controller_x_does_not_define_action_y', array(
                     'controller' => $controllerName,

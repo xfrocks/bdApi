@@ -50,9 +50,9 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
 					AND style_id = ?
 					AND language_id = ?
 			', array(
-                    XenForo_Application::getOptions()->get('defaultStyleId'),
-                    $languageId,
-                ));
+                XenForo_Application::getOptions()->get('defaultStyleId'),
+                $languageId,
+            ));
 
             foreach ($templates as $title => $compiled) {
                 $results[sprintf('__%s_%d', $title, $languageId)] = $compiled;

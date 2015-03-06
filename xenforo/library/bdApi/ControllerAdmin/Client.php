@@ -42,7 +42,7 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
 
     public function actionAdd()
     {
-        $viewParams = array('client' => array(),);
+        $viewParams = array('client' => array());
 
         return $this->responseView('bdApi_ViewAdmin_Client_Edit', 'bdapi_client_edit', $viewParams);
     }
@@ -52,7 +52,7 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
         $id = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
         $client = $this->_getClientOrError($id);
 
-        $viewParams = array('client' => $client,);
+        $viewParams = array('client' => $client);
 
         return $this->responseView('bdApi_ViewAdmin_Client_Edit', 'bdapi_client_edit', $viewParams);
     }

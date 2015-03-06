@@ -23,7 +23,7 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
             );
         }
 
-        return self::xmlEncodeForOutput(array('errors' => $errors,));
+        return self::xmlEncodeForOutput(array('errors' => $errors));
     }
 
     public function renderMessage($message)
@@ -31,7 +31,7 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
         return self::xmlEncodeForOutput(array('response' => array(
             'status' => 'ok',
             'message' => $message,
-        ),));
+        )));
     }
 
     public function renderView($viewName, array $params = array(), $templateName = '', XenForo_ControllerResponse_View $subView = null)

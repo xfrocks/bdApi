@@ -7,7 +7,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         $data = array('links' => array(
             'posts' => XenForo_Link::buildApiLink('search/posts'),
             'threads' => XenForo_Link::buildApiLink('search/threads'),
-        ),);
+        ));
 
         return $this->responseData('bdApi_ViewApi_Index', $data);
     }
@@ -25,10 +25,10 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
         $results = array();
         foreach ($rawResults as $rawResult) {
-            $results[] = array('thread_id' => $rawResult[1],);
+            $results[] = array('thread_id' => $rawResult[1]);
         }
 
-        $data = array('threads' => $results,);
+        $data = array('threads' => $results);
 
         return $this->responseData('bdApi_ViewApi_Search_Threads', $data);
     }
@@ -55,10 +55,10 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
         $results = array();
         foreach ($posts as $post) {
-            $results[] = array('post_id' => $post['post_id'],);
+            $results[] = array('post_id' => $post['post_id']);
         }
 
-        $data = array('posts' => $results,);
+        $data = array('posts' => $results);
 
         return $this->responseData('bdApi_ViewApi_Search_Posts', $data);
     }
