@@ -41,7 +41,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             $visitor->setNodePermissions($nodeId, $permissions);
         }
 
-        $sticky = $this->_input->filterSingle('sticky', XenForo_Input::UINT);
+        $sticky = $this->_input->filterSingle('sticky', XenForo_Input::STRING);
 
         $pageNavParams = array('forum_id' => implode(',', $forumIdArray));
         $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
@@ -57,18 +57,12 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             'deleted' => false,
             'moderated' => false,
             'node_id' => $forumIdArray,
-            'sticky' => $sticky,
+            'sticky' => (intval($sticky) > 0),
         );
         $fetchOptions = array(
             'limit' => $limit,
             'page' => $page
         );
-
-        if ($sticky) {
-            $limit = 0;
-            $pageNavParams['limit'] = 0;
-            $fetchOptions['limit'] = 0;
-        }
 
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
         switch ($order) {
@@ -115,6 +109,21 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         $threads = $this->_getThreadModel()->getThreads($conditions, $this->_getThreadModel()->getFetchOptionsToPrepareApiData($fetchOptions));
+
+        if (!is_numeric($sticky) && intval($page) <= 1) {
+            // mixed mode, put sticky threads on top of result if this is the first page
+            // mixed mode is the active mode by default (no `sticky` param)
+            // the two other modes related are: sticky mode (`sticky`=1) and non-sticky mode (`sticky`=0)
+            $stickyThreads = $this->_getThreadModel()->getThreads(
+                array_merge($conditions, array('sticky' => 1)),
+                array_merge($fetchOptions, array(
+                    'limit' => 0,
+                    'page' => 0,
+                ))
+            );
+            $threads = array_merge($stickyThreads, $threads);
+        }
+
         $threadsData = $this->_prepareThreads($threads);
 
         $total = $this->_getThreadModel()->countThreads($conditions);

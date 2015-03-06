@@ -276,7 +276,7 @@ List of threads in a forum (with pagination).
 Parameters:
 
  * `forum_id` (__required__): ids of needed forums (separated by comma). Support for multiple ids were added in forum-2014011801.
- * `sticky` (_optional_): filter to get sticky threads only. If `sticky` = 1, `page` and `limit` parameters will be ignored.
+ * `sticky` (_optional_): filter to get only sticky (`sticky`=1) or non-sticky (`sticky`=0) threads. By default, all threads will be included and sticky ones will be at the top of the result on the first page. In mixed mode, sticky threads are not counted towards `threads_total` and does not affect pagination.
  * `page` (_optional_): page number of threads.
  * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.
  * `order` (_optional_): ordering of threads. Support `natural`, `thread_create_date`, `thread_create_date_reverse`, `thread_update_date`, `thread_update_date_reverse`.
