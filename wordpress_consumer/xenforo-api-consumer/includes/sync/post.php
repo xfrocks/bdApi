@@ -104,13 +104,13 @@ function xfac_save_post($postId, WP_Post $post, $update)
 
                         $xfPost = xfac_api_putPost($config, $accessToken, $existingSyncRecord->syncData['thread']['first_post']['post_id'], $postBody, array('thread_title' => $post->post_title));
 
-                        if (!empty($xfPost['post_id'])) {
+                        if (!empty($xfPost['post']['post_id'])) {
                             $syncData = $existingSyncRecord->syncData;
                             $syncData['direction'] = 'push';
-                            $syncData['thread']['first_post'] = $xfPost;
+                            $syncData['thread']['first_post'] = $xfPost['post'];
 
-                            xfac_sync_updateRecord('', 'thread', $xfPost['thread_id'], $post->ID, 0, $syncData);
-                            xfac_log('xfac_save_post pushed an update for $xfPost (#%d)', $xfPost['post_id']);
+                            xfac_sync_updateRecord('', 'thread', $xfPost['post']['thread_id'], $post->ID, 0, $syncData);
+                            xfac_log('xfac_save_post pushed an update for $xfPost (#%d)', $xfPost['post']['post_id']);
                         }
                     }
                 }

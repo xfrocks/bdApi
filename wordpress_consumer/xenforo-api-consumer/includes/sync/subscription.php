@@ -143,6 +143,22 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
                     return 'created new comment';
                 }
             } else {
+                $recordPostUpdateDate = 0;
+                $xfPostUpdateDate = 0;
+                if (isset($postSyncRecord->syncData['thread']['first_post']['post_update_date'])) {
+                    $recordPostUpdateDate = $postSyncRecord->syncData['thread']['first_post']['post_update_date'];
+                }
+                if (isset($xfPost['post']['post_update_date'])) {
+                    $xfPostUpdateDate = $xfPost['post']['post_update_date'];
+                }
+                if ($recordPostUpdateDate > 0 && $xfPostUpdateDate > 0) {
+                    if ($xfPostUpdateDate <= $recordPostUpdateDate) {
+                        // the new post is not newer than the post in record
+                        // we used XenForo server time (which uses GMT) so it should be correct
+                        return false;
+                    }
+                }
+
                 // update the WordPress post
                 $postContent = xfac_api_filterHtmlFromXenForo($xfPost['post']['post_body_html']);
 
