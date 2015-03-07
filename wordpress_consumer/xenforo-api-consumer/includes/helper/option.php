@@ -125,6 +125,35 @@ function xfac_option_getMeta($config)
 
 		if (!empty($meta['linkIndex']))
 		{
+            if ($xfAdminAccountOption) {
+                $adminAccessToken = xfac_user_getAdminAccessToken($config);
+                if (empty($adminAccessToken)) {
+                    // unable to obtain admin access token
+                    // probably a missing record or expired refresh token
+                    // reset the option
+                    update_option('xfac_xf_admin_account', 0);
+                    $xfAdminAccountOption = 0;
+                }
+            }
+
+            $xfGuestAccountOption = intval(get_option('xfac_xf_guest_account'));
+            if ($xfGuestAccountOption) {
+                $guestAccessToken = xfac_user_getSystemAccessToken($config);
+                if (empty($guestAccessToken)) {
+                    // unable to obtain guest access token
+                    // probably an expired refresh token
+                    // reset the option
+                    update_option('xfac_xf_guest_account', 0);
+                } else {
+                    $mappedTags = xfac_syncPost_getMappedTags();
+                    if (!empty($mappedTags)) {
+                        // make sures the guest account follows required forums
+                        // and have the needed notification subscription
+                        xfac_syncPost_followForums($config, $guestAccessToken, array_keys($mappedTags));
+                    }
+                }
+            }
+
 			$meta['modules'] = xfac_api_getModules($config);
 			$meta['linkAlerts'] = xfac_api_getPublicLink($config, 'account/alerts');
 			$meta['linkConversations'] = xfac_api_getPublicLink($config, 'conversations');

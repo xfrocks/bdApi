@@ -207,35 +207,40 @@ function xfac_update_option_tag_forum_mappings($option, $oldValue, $newValue)
 			$accessToken = xfac_user_getSystemAccessToken($config);
 			if (!empty($accessToken))
 			{
-				$forumFollowed = xfac_api_getForumFollowed($config, $accessToken);
-				$followedForumIds = array();
-
-				foreach ($forumFollowed['forums'] as $forumFollowedOne)
-				{
-					$followedForumIds[] = intval($forumFollowedOne['forum_id']);
-				}
-				foreach (array_diff($forumIds, $followedForumIds) as $forumId)
-				{
-					// follow the forum to get thread notification
-					xfac_api_postForumFollower($config, $accessToken, $forumId);
-				}
-				foreach (array_diff($followedForumIds, $forumIds) as $forumId)
-				{
-					// unfollow the forum to save server resources
-					xfac_api_deleteForumFollower($config, $accessToken, $forumId);
-				}
-
-				// make sure we subscribe for notification callback
-				$notifications = xfac_api_getNotifications($config, $accessToken);
-				if (empty($notifications['subscription_callback']) AND !empty($notifications['_headerLinkHub']))
-				{
-					xfac_api_postSubscription($config, $accessToken, $notifications['_headerLinkHub']);
-				}
-
-				xfac_sync_updateRecord('', 'forums/followed', 0, 0);
+                xfac_syncPost_followForums($config, $accessToken, $forumIds);
 			}
 		}
 	}
+}
+
+function xfac_syncPost_followForums($config, $accessToken, $forumIds)
+{
+    $forumFollowed = xfac_api_getForumFollowed($config, $accessToken);
+    $followedForumIds = array();
+
+    foreach ($forumFollowed['forums'] as $forumFollowedOne)
+    {
+        $followedForumIds[] = intval($forumFollowedOne['forum_id']);
+    }
+    foreach (array_diff($forumIds, $followedForumIds) as $forumId)
+    {
+        // follow the forum to get thread notification
+        xfac_api_postForumFollower($config, $accessToken, $forumId);
+    }
+    foreach (array_diff($followedForumIds, $forumIds) as $forumId)
+    {
+        // unfollow the forum to save server resources
+        xfac_api_deleteForumFollower($config, $accessToken, $forumId);
+    }
+
+    // make sure we subscribe for notification callback
+    $notifications = xfac_api_getNotifications($config, $accessToken);
+    if (empty($notifications['subscription_callback']) AND !empty($notifications['_headerLinkHub']))
+    {
+        xfac_api_postSubscription($config, $accessToken, $notifications['_headerLinkHub']);
+    }
+
+    xfac_sync_updateRecord('', 'forums/followed', 0, 0);
 }
 
 if (intval(get_option('xfac_sync_post_xf_wp')) > 0)
