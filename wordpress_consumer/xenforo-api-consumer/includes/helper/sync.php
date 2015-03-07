@@ -1,31 +1,28 @@
 <?php
 
 // Exit if accessed directly
-if (!defined('ABSPATH'))
-{
-	exit();
+if (!defined('ABSPATH')) {
+    exit();
 }
 
 function xfac_sync_mysqlDateToGmtTimestamp($string)
 {
-	if (preg_match('/^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)$/', trim($string), $m))
-	{
-		return gmmktime($m[4], $m[5], $m[6], $m[2], $m[3], $m[1]);
-	}
+    if (preg_match('/^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)$/', trim($string), $m)) {
+        return gmmktime($m[4], $m[5], $m[6], $m[2], $m[3], $m[1]);
+    }
 
-	return 0;
+    return 0;
 }
 
 function xfac_sync_updateRecord($provider, $cType, $cId, $syncId, $syncDate = 0, $syncData = array())
 {
-	global $wpdb;
+    global $wpdb;
 
-	if ($syncDate === 0)
-	{
-		$syncDate = time();
-	}
+    if ($syncDate === 0) {
+        $syncDate = time();
+    }
 
-	return $wpdb->query($wpdb->prepare("
+    return $wpdb->query($wpdb->prepare("
 		REPLACE INTO {$wpdb->prefix}xfac_sync
 		SET provider = %s,
 			provider_content_type = %s,
@@ -38,9 +35,9 @@ function xfac_sync_updateRecord($provider, $cType, $cId, $syncId, $syncDate = 0,
 
 function xfac_sync_deleteRecord($record)
 {
-	global $wpdb;
+    global $wpdb;
 
-	return $wpdb->query($wpdb->prepare("
+    return $wpdb->query($wpdb->prepare("
 		DELETE FROM {$wpdb->prefix}xfac_sync
 		WHERE provider = %s
 			AND provider_content_type = %s
@@ -51,14 +48,13 @@ function xfac_sync_deleteRecord($record)
 
 function xfac_sync_updateRecordDate($record, $syncDate = 0)
 {
-	global $wpdb;
+    global $wpdb;
 
-	if ($syncDate === 0)
-	{
-		$syncDate = time();
-	}
+    if ($syncDate === 0) {
+        $syncDate = time();
+    }
 
-	return $wpdb->query($wpdb->prepare("
+    return $wpdb->query($wpdb->prepare("
 		UPDATE {$wpdb->prefix}xfac_sync
 		SET sync_date = %d
 		WHERE provider = %s
@@ -70,9 +66,9 @@ function xfac_sync_updateRecordDate($record, $syncDate = 0)
 
 function xfac_sync_getRecordsByProviderTypeAndSyncId($provider, $cType, $syncId)
 {
-	global $wpdb;
+    global $wpdb;
 
-	$records = $wpdb->get_results($wpdb->prepare("
+    $records = $wpdb->get_results($wpdb->prepare("
 		SELECT *
 		FROM {$wpdb->prefix}xfac_sync
 		WHERE provider = %s
@@ -80,16 +76,16 @@ function xfac_sync_getRecordsByProviderTypeAndSyncId($provider, $cType, $syncId)
 			AND sync_id = %d
 	", $provider, $cType, $syncId));
 
-	_xfac_sync_prepareRecords($records);
+    _xfac_sync_prepareRecords($records);
 
-	return $records;
+    return $records;
 }
 
 function xfac_sync_getRecordsByProviderTypeAndIds($provider, $cType, array $cIds)
 {
-	global $wpdb;
+    global $wpdb;
 
-	$records = $wpdb->get_results($wpdb->prepare("
+    $records = $wpdb->get_results($wpdb->prepare("
 		SELECT *
 		FROM {$wpdb->prefix}xfac_sync
 		WHERE provider = %s
@@ -97,18 +93,18 @@ function xfac_sync_getRecordsByProviderTypeAndIds($provider, $cType, array $cIds
 			AND provider_content_id IN (" . implode(',', array_map('intval', $cIds)) . ")
 	", $provider, $cType));
 
-	_xfac_sync_prepareRecords($records);
+    _xfac_sync_prepareRecords($records);
 
-	return $records;
+    return $records;
 }
 
 function xfac_sync_getRecordsByProviderTypeAndRecent($provider, $cType, $recentThreshold = 604800)
 {
-	// 604800 equals 7 days, we only sync data that was updated within a week
+    // 604800 equals 7 days, we only sync data that was updated within a week
 
-	global $wpdb;
+    global $wpdb;
 
-	$records = $wpdb->get_results($wpdb->prepare("
+    $records = $wpdb->get_results($wpdb->prepare("
 		SELECT *
 		FROM {$wpdb->prefix}xfac_sync
 		WHERE provider = %s
@@ -116,15 +112,14 @@ function xfac_sync_getRecordsByProviderTypeAndRecent($provider, $cType, $recentT
 			AND sync_date > %d
 	", $provider, $cType, time() - $recentThreshold));
 
-	_xfac_sync_prepareRecords($records);
+    _xfac_sync_prepareRecords($records);
 
-	return $records;
+    return $records;
 }
 
 function _xfac_sync_prepareRecords(&$records)
 {
-	foreach ($records as &$record)
-	{
-		$record->syncData = unserialize($record->sync_data);
-	}
+    foreach ($records as &$record) {
+        $record->syncData = unserialize($record->sync_data);
+    }
 }
