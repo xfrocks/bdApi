@@ -133,6 +133,16 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
             }
         }
 
+        if (isset($post['last_edit_date'])) {
+            // since XenForo 1.2.0
+            if ($post['last_edit_date'] > 0) {
+                $data['post_update_date'] = $post['last_edit_date'];
+            } else {
+                // by default, last_edit_date = 0
+                $data['post_update_date'] = $post['post_date'];
+            }
+        }
+
         if (isset($post['position'])) {
             $data['post_is_first_post'] = (intval($post['position']) === 0);
         }

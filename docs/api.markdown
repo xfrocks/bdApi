@@ -692,6 +692,7 @@ Detail information of a post.
             poster_user_id: (int),
             poster_username: (string),
             post_create_date: (unix timestamp in seconds),
+            post_update_date: (unix timestamp in seconds), #since forum-2015030701
             post_body: (string),
             post_body_html: (string),
             post_body_plain_text: (string),
