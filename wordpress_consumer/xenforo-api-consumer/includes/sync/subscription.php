@@ -63,11 +63,8 @@ function xfac_subscription_handleCallback(array $json)
 		switch ($pingRef['topic_type'])
 		{
 			case 'thread_post':
-				if (intval(get_option('xfac_sync_comment_xf_wp')) > 0)
-				{
-					$xfThreadIds[] = $pingRef['topic_id'];
-					$xfPostIds[] = $pingRef['object_data'];
-				}
+                $xfThreadIds[] = $pingRef['topic_id'];
+                $xfPostIds[] = $pingRef['object_data'];
 				break;
 		}
 	}
@@ -130,10 +127,7 @@ function xfac_subscription_handleCallback(array $json)
 				}
 				break;
 			case 'user_notification':
-				if (intval(get_option('xfac_sync_post_xf_wp')) > 0)
-				{
-					$pingRef['result'] = _xfac_subscription_handleCallback_userNotification($config, $pingRef);
-				}
+                $pingRef['result'] = _xfac_subscription_handleCallback_userNotification($config, $pingRef);
 				break;
 			case 'user':
 				$pingRef['result'] = _xfac_subscription_handleCallback_user($config, $pingRef);
@@ -157,6 +151,8 @@ function xfac_subscription_handleCallback(array $json)
 function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncRecord, $commentSyncRecord)
 {
 	$wpUserData = xfac_user_getUserDataByApiData($config['root'], $postSyncRecord->syncData['thread']['creator_user_id']);
+    $optionSyncPost = intval(get_option('xfac_sync_post_xf_wp')) > 0;
+    $optionSyncComment = intval(get_option('xfac_sync_comment_xf_wp')) > 0;
 	$accessToken = xfac_user_getAccessToken($wpUserData->ID);
 
 	$xfPost = xfac_api_getPost($config, $ping['object_data'], $accessToken);
@@ -169,7 +165,7 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
 			if (empty($xfPost['post']['post_is_first_post']))
 			{
 				// create a new comment
-				if (xfac_syncComment_pullComment($config, $xfPost['post'], $postSyncRecord->sync_id, 'subscription') > 0)
+				if ($optionSyncComment && xfac_syncComment_pullComment($config, $xfPost['post'], $postSyncRecord->sync_id, 'subscription') > 0)
 				{
 					return 'created new comment';
 				}
@@ -185,10 +181,14 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
 
 				$XFAC_SKIP_xfac_save_post_before = !empty($GLOBALS['XFAC_SKIP_xfac_save_post']); 
 				$GLOBALS['XFAC_SKIP_xfac_save_post'] = true;
-				$postUpdated = wp_update_post(array(
-					'ID' => $postSyncRecord->sync_id,
-					'post_content' => $postContent,
-				));
+				$postUpdated = 0;
+                if ($optionSyncPost)
+                {
+                    $postUpdated = wp_update_post(array(
+                        'ID' => $postSyncRecord->sync_id,
+                        'post_content' => $postContent,
+                    ));
+                }
 				$GLOBALS['XFAC_SKIP_xfac_save_post'] = $XFAC_SKIP_xfac_save_post_before;
 
 				if (is_int($postUpdated) AND $postUpdated > 0)
@@ -207,14 +207,18 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
 
 			$XFAC_SKIP_xfac_save_comment_before = !empty($GLOBALS['XFAC_SKIP_xfac_save_comment']);
 			$GLOBALS['XFAC_SKIP_xfac_save_comment'] = true;
-			$commentUpdated = wp_update_comment(array(
-				'comment_ID' => $commentSyncRecord->sync_id,
-				'comment_content' => $commentContent,
-				'comment_approved' => 1,
-			));
+			$commentUpdated = 0;
+            if ($optionSyncComment)
+            {
+                $commentUpdated = wp_update_comment(array(
+                    'comment_ID' => $commentSyncRecord->sync_id,
+                    'comment_content' => $commentContent,
+                    'comment_approved' => 1,
+                ));
+            }
 			$GLOBALS['XFAC_SKIP_xfac_save_comment'] = $XFAC_SKIP_xfac_save_comment_before;
 
-			if ($commentUpdated == 1)
+			if ($commentUpdated > 0)
 			{
 				return 'updated comment';
 			}
@@ -228,13 +232,20 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
 			{
 				$XFAC_SKIP_xfac_save_comment_before = !empty($GLOBALS['XFAC_SKIP_xfac_save_comment']);
 				$GLOBALS['XFAC_SKIP_xfac_save_comment'] = true;
-				$commentUpdated = wp_update_comment(array(
-					'comment_ID' => $commentSyncRecord->sync_id,
-					'comment_approved' => 0,
-				));
+                $commentUpdated = 0;
+                if ($optionSyncComment)
+                {
+                    $commentUpdated = wp_update_comment(array(
+                        'comment_ID' => $commentSyncRecord->sync_id,
+                        'comment_approved' => 0,
+                    ));
+                }
 				$GLOBALS['XFAC_SKIP_xfac_save_comment'] = $XFAC_SKIP_xfac_save_comment_before;
 
-				return 'unapproved comment';
+                if ($commentUpdated > 0)
+                {
+                    return 'unapproved comment';
+                }
 			}
 			else
 			{
@@ -264,10 +275,12 @@ function _xfac_subscription_handleCallback_userNotification($config, $ping)
 	{
 		return false;
 	}
-	if (!preg_match('/^post_(?<postId>\d+)_insert$/', $notification['notification_type'], $matches))
-	{
-		return false;
-	}
+    if (!preg_match('/^post_(?<postId>\d+)_insert$/', $notification['notification_type'], $matches)
+        || intval(get_option('xfac_sync_post_xf_wp')) == 0)
+    {
+        // currently we only handle post pull here
+        return false;
+    }
 	$postId = $matches['postId'];
 
 	$xfPost = xfac_api_getPost($config, $postId, $accessToken);
