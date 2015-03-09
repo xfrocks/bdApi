@@ -33,8 +33,8 @@ function xfac_api_getModules($config)
 function xfac_api_getVersionSuggestionText($config, $meta)
 {
     $requiredModules = array(
-        'forum' => 2014092301,
-        'oauth2' => 2014030701,
+        'forum' => 2015030901,
+        'oauth2' => 2015030902,
         'subscription' => 2014092301,
     );
 
@@ -69,6 +69,24 @@ function xfac_api_getVersionSuggestionText($config, $meta)
     } else {
         return __('All required API modules have been found.', 'xenforo-api-consumer');
     }
+}
+
+function xfac_api_hasModuleVersion($config, $module, $version = 0)
+{
+    $meta = xfac_option_getMeta($config);
+    if (empty($meta['modules'])) {
+        return false;
+    }
+
+    if (!isset($meta['modules'][$module])) {
+        return false;
+    }
+
+    if ($version > 0 && $meta['modules'][$module] < $version) {
+        return false;
+    }
+
+    return true;
 }
 
 function xfac_api_getAuthorizeUrl($config, $redirectUri, $scope = '')
@@ -607,6 +625,39 @@ function xfac_api_deleteForumFollower($config, $accessToken, $forumId)
     }
 }
 
+function xfac_api_getUsersFind($config, $username, $email = '')
+{
+    $curl = _xfac_api_curl(call_user_func_array('sprintf', array(
+        '%s/index.php?users/find/&username=%s&email=%s',
+        rtrim($config['root'], '/'),
+        rawurlencode($username),
+        rawurlencode($email),
+    )));
+    extract($curl);
+
+    if (isset($parts['users'])) {
+        return $parts;
+    } else {
+        return _xfac_api_getFailedResponse($curl);
+    }
+}
+
+function xfac_api_postOauthTokenAdmin($config, $adminAccessToken, $userId)
+{
+    $url = call_user_func_array('sprintf', array(
+        '%s/index.php?oauth/token/admin',
+        rtrim($config['root'], '/'),
+    ));
+    $postFields = array(
+        'oauth_token' => $adminAccessToken,
+        'user_id' => $userId,
+    );
+    $curl = _xfac_api_curl($url, 'POST', $postFields);
+    extract($curl);
+
+    return _xfac_api_prepareAccessTokenBody($body);
+}
+
 function xfac_api_filterHtmlFromXenForo($html)
 {
     $offset = 0;
@@ -668,6 +719,7 @@ function _xfac_api_curl($url, $method = 'GET', $postFields = null, $curlOptions 
     $result = array(
         'http_code' => $httpCode,
         'headers' => $GLOBALS['_xfac_api_curlHeaders'],
+        'body' => $body,
     );
 
     $headerContentType = _xfac_api_getHeader($result, 'Content-Type');
@@ -675,7 +727,6 @@ function _xfac_api_curl($url, $method = 'GET', $postFields = null, $curlOptions 
         $result['parts'] = json_decode($body, true);
     } else {
         $result['parts'] = array();
-        $result['body'] = $body;
     }
 
     if ($httpCode < 200 || $httpCode > 299 || empty($result['parts']) || !empty($result['parts']['error'])) {

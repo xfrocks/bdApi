@@ -16,7 +16,9 @@ if (!defined('ABSPATH')) {
             <th>&nbsp;</th>
             <td>
                 <p>
-                    <a href="<?php echo $connectUrl; ?>"><?php _e('Connect to an account', 'xenforo-api-consumer'); ?></a>
+                    <a href="<?php echo site_url('wp-login.php?xfac=authorize&redirect_to=' . rawurlencode(admin_url('profile.php')), 'login_post'); ?>">
+                        <?php _e('Connect to an account', 'xenforo-api-consumer'); ?>
+                    </a>
                 </p>
             </td>
         </tr>
@@ -34,15 +36,14 @@ if (!defined('ABSPATH')) {
 
                             <a href="<?php echo $apiRecord->profile['links']['permalink']; ?>"
                                target="_blank"><?php echo $apiRecord->profile['username']; ?></a><br/>
-                            <?php if (xfac_user_recordHasAdmincpScope($apiRecord)): ?>
-                                <em><?php _e('Connected as admin', 'xenforo-api-consumer'); ?></em><br/>
-                            <?php endif; ?>
                             <?php echo $apiRecord->profile['user_email']; ?>
                         </div>
                 </th>
                 <td valign="top">
                     <p>
-                        <a href="profile.php?xfac=disconnect&amp;id=<?php echo $apiRecord->id; ?>"><?php _e('Disconnect this account', 'xenforo-api-consumer'); ?></a>
+                        <a href="<?php echo site_url('profile.php?xfac=disconnect&id=' . $apiRecord->id); ?>">
+                            <?php _e('Disconnect this account', 'xenforo-api-consumer'); ?>
+                        </a>
                     </p>
                 </td>
             </tr>
