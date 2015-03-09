@@ -954,6 +954,27 @@ Required scopes:
 
  * `post`
 
+### GET `/users/find`
+Filtered list of users by username or email. Since forum-2015030901.
+
+    {
+        users: [
+            (user),
+            (user),
+            ...
+        ]
+    }
+
+Parameters:
+
+ * `username` (_optional_): username to filter. Usernames start with the query will be returned.
+ * `email` (_optional_): email to filter. Requires `admincp` scope.
+
+Required scopes:
+
+ * `read`
+ * `admincp`
+
 ### GET `/users/:userId`
 Detail information of a user.
 

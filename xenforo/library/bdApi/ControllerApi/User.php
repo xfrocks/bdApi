@@ -57,6 +57,39 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_User_Single', $data);
     }
 
+    public function actionGetFind()
+    {
+        $users = array();
+        $username = $this->_input->filterSingle('username', XenForo_Input::STRING);
+        $email = $this->_input->filterSingle('email', XenForo_Input::STRING);
+
+        if (XenForo_Helper_Email::isEmailValid($email)) {
+            $visitor = XenForo_Visitor::getInstance();
+            $session = bdApi_Data_Helper_Core::safeGetSession();
+            if ($visitor->hasAdminPermission('user') && $session->checkScope('admincp')) {
+                // perform email search only if visitor is an admin and granted admincp scope
+                $user = $this->_getUserModel()->getUserByEmail($email);
+                if (!empty($user)) {
+                    $users[$user['user_id']] = $user;
+                }
+            }
+        }
+
+        if (empty($users) && utf8_strlen($username) >= 2) {
+            // perform username search only if nothing found and username is long enough
+            $users = $this->_getUserModel()->getUsers(
+                array('username' => array($username, 'r')),
+                array('limit' => 10)
+            );
+        }
+
+        $data = array(
+            'users' => $this->_filterDataMany($this->_getUserModel()->prepareApiDataForUsers($users)),
+        );
+
+        return $this->responseData('bdApi_ViewData_User_Find', $data);
+    }
+
     public function actionPostIndex()
     {
         /* @var $oauth2Model bdApi_Model_OAuth2 */
