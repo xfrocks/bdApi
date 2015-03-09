@@ -692,6 +692,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_slash_batch_requires_json" version_id="19" version_string="0.9.4"><![CDATA[/batch requires valid JSON for jobs input.]]></phrase>
     <phrase title="bdapi_slash_conversation_messages_attachments_requires_ids" version_id="50" version_string="1.2.1b"><![CDATA[/conversation-messages/attachments requires `conversation_id` for new message or `message_id` for existing message.]]></phrase>
     <phrase title="bdapi_slash_conversation_messages_requires_conversation_id" version_id="38" version_string="1.0.13"><![CDATA[/conversation-messages requires `conversation_id`.]]></phrase>
+    <phrase title="bdapi_slash_oauth_token_admin_requires_user_id" version_id="63" version_string="1.4.3-BETA"><![CDATA[/oauth/token/admin requires `user_id`.]]></phrase>
     <phrase title="bdapi_slash_oauth_token_only_accepts_post_requests" version_id="2" version_string="0.2"><![CDATA[/oauth/token only accepts POST requests.]]></phrase>
     <phrase title="bdapi_slash_posts_attachments_requires_ids" version_id="20" version_string="0.9.5"><![CDATA[/posts/attachments requires `thread_id` for new post or `post_id` for existing post.]]></phrase>
     <phrase title="bdapi_slash_posts_requires_thread_id" version_id="20" version_string="0.9.5"><![CDATA[/posts requires `thread_id`.]]></phrase>
@@ -1299,7 +1300,7 @@ step=3600</edit_format_params>
     <template title="bdapi_account_wrapper_sidebar" version_id="51" version_string="1.3.0"><![CDATA[<li><a
 	class="{xen:if "{$selectedKey} == 'account/api'", 'secondaryContent', 'primaryContent'}"
 	href="{xen:link account/api}">{xen:phrase bdapi_home}</a></li>]]></template>
-    <template title="bdapi_error_authorize_guest" version_id="50" version_string="1.2.1b"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
+    <template title="bdapi_error_authorize_guest" version_id="63" version_string="1.4.3-BETA"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
 <xen:set var="$text">{xen:phrase bdapi_login_to_authorize_x, 'client={$client.name}'}</xen:set>
 

@@ -63,6 +63,10 @@ Parameters:
  * `client_secret` (__required__)
  * `facebook_token` (__required__)
 
+Required scopes:
+
+ * N/A
+
 #### POST `/oauth/token/twitter`
 Request API access token using Twitter access token.
 
@@ -72,7 +76,11 @@ Parameters:
  * `client_secret` (__required__)
  * `twitter_uri` (__required__): the full `/account/verify_credentials.json` uri that has been used to calculate OAuth signature.
  * `twitter_auth` (__required__): the complete authentication header that starts with "OAuth". Consult [Twitter document](https://dev.twitter.com/oauth/overview/creating-signatures) for more information.
- 
+
+Required scopes:
+
+ * N/A
+
 #### POST `/oauth/token/google`
 Request API access token using Google access token.
 
@@ -81,6 +89,21 @@ Parameters:
  * `client_id` (__required__)
  * `client_secret` (__required__)
  * `google_token` (__required__)
+
+Required scopes:
+
+ * N/A
+
+#### POST `/oauth/token/admin`
+Request API access token for another user. This requires `admincp` scope and the current user must have sufficient system permissions. Since oauth2-2015030902.
+
+Parameters:
+
+ * `user_id` (__required__): id of the user that needs access token.
+
+Required scopes:
+
+ * `admincp`
 
 ## Discoverability
 System information and availability can be determined by sending a GET request to `/` (index route). A list of resources will be returned. If the request is authenticated, the revisions of API system and installed modules will also made available for further inspection.

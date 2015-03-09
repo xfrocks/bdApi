@@ -68,7 +68,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         if ($user['user_state'] == 'valid') {
             $facebookAssoc = $userExternalModel->getExternalAuthAssociationForUser('facebook', $user['user_id']);
             if (!empty($facebookAssoc)) {
-                return $this->_actionPostTokenSocial($client, $facebookAssoc['user_id']);
+                return $this->_actionPostTokenNonStandard($client, $facebookAssoc['user_id']);
             }
         }
 
@@ -147,7 +147,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
             return $this->responseData('bdApi_ViewApi_OAuth_TokenTwitter_NoAssoc', $data);
         }
 
-        return $this->_actionPostTokenSocial($client, $twitterAssoc['user_id']);
+        return $this->_actionPostTokenNonStandard($client, $twitterAssoc['user_id']);
     }
 
     public function actionPostTokenGoogle()
@@ -210,7 +210,22 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
             return $this->responseData('bdApi_ViewApi_OAuth_TokenGoogle_NoAssoc', $data);
         }
 
-        return $this->_actionPostTokenSocial($client, $googleAssoc['user_id']);
+        return $this->_actionPostTokenNonStandard($client, $googleAssoc['user_id']);
+    }
+
+    public function actionPostTokenAdmin()
+    {
+        $this->_assertRequiredScope('admincp');
+        $this->_assertAdminPermission('user');
+
+        $client = $this->_getClientOrError();
+
+        $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+        if (empty($userId)) {
+            return $this->responseError(new XenForo_Phrase('bdapi_slash_oauth_token_admin_requires_user_id'), 400);
+        }
+
+        return $this->_actionPostTokenNonStandard($client, $userId);
     }
 
     protected function _getClientOrError()
@@ -242,7 +257,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         return $client;
     }
 
-    protected function _actionPostTokenSocial(array $client, $userId)
+    protected function _actionPostTokenNonStandard(array $client, $userId)
     {
         /* @var $oauth2Model bdApi_Model_OAuth2 */
         $oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
@@ -273,7 +288,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         $token = $oauth2Model->getServer()->createAccessTokenPublic($client['client_id'], $scopes);
         $oauth2Server->setUserId($oauth2ServerUserId);
 
-        return $this->responseData('bdApi_ViewApi_OAuth_TokenSocial', $token);
+        return $this->responseData('bdApi_ViewApi_OAuth_TokenNonStandard', $token);
     }
 
     protected function _getScopeForAction($action)
