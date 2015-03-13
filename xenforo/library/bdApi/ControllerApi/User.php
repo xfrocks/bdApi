@@ -125,6 +125,20 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             $input['user_email'] = $this->_input->filterSingle('email', XenForo_Input::STRING);
         }
 
+        $extraInput = $this->_input->filter(array(
+            'extra_data' => XenForo_Input::STRING,
+            'extra_timestamp' => XenForo_Input::UINT,
+        ));
+        if (!empty($extraInput['extra_data'])) {
+            $extraData = bdApi_Crypt::decryptTypeOne($extraInput['extra_data'], $extraInput['extra_timestamp']);
+            if (!empty($extraData)) {
+                $extraData = @unserialize($extraData);
+            }
+            if (!empty($extraData)) {
+                $extraData = array();
+            }
+        }
+
         $userModel = $this->_getUserModel();
         $options = XenForo_Application::getOptions();
         $session = XenForo_Application::getSession();
@@ -161,7 +175,13 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $writer->set('user_group_id', XenForo_Model_User::$defaultRegisteredGroupId);
         $writer->set('language_id', XenForo_Visitor::getInstance()->get('language_id'));
 
-        $writer->advanceRegistrationUserState();
+        $allowEmailConfirm = true;
+        if (!empty($extraData['user_email']) && $extraData['user_email'] == $writer->get('email')) {
+            // the email address has been validated by some other mean (external provider?)
+            // do not require email confirmation again to avoid complication
+            $allowEmailConfirm = false;
+        }
+        $writer->advanceRegistrationUserState($allowEmailConfirm);
 
         if ($visitor->hasAdminPermission('user') AND $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM)) {
             $writer->set('user_state', 'valid');
@@ -178,31 +198,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             $userConfirmationModel->sendEmailConfirmation($user);
         }
 
-        $extraInput = $this->_input->filter(array(
-            'extra_data' => XenForo_Input::STRING,
-            'extra_timestamp' => XenForo_Input::UINT,
-        ));
-        if (!empty($extraInput['extra_data'])) {
-            try {
-                $extraData = bdApi_Crypt::decryptTypeOne($extraInput['extra_data'], $extraInput['extra_timestamp']);
-                if (!empty($extraData)) {
-                    $extraData = unserialize($extraData);
-                }
-
-                /* @var $userExternalModel XenForo_Model_UserExternal */
-                $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
-                if (!empty($extraData['google_key'])) {
-                    $userExternalModel->updateExternalAuthAssociation('google', $extraData['google_key'], $user['user_id']);
-                }
-                if (!empty($extraData['facebook_key'])) {
-                    $userExternalModel->updateExternalAuthAssociation('facebook', $extraData['facebook_key'], $user['user_id']);
-                }
-                if (!empty($extraData['twitter_key'])) {
-                    $userExternalModel->updateExternalAuthAssociation('twitter', $extraData['twitter_key'], $user['user_id']);
-                }
-            } catch (XenForo_Exception $e) {
-                // ignore
-            }
+        if (!empty($extraData['external_provider']) && !empty($extraData['external_provider_key'])) {
+            /* @var $userExternalModel XenForo_Model_UserExternal */
+            $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
+            $userExternalModel->updateExternalAuthAssociation($extraData['external_provider'], $extraData['external_provider_key'], $user['user_id']);
         }
 
         if (XenForo_Visitor::getUserId() == 0) {

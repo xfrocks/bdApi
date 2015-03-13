@@ -73,7 +73,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         }
 
         $userData = array(
-            'email' => $facebookUser['email'],
+            'user_email' => $facebookUser['email'],
         );
 
         if (!empty($facebookUser['name'])) {
@@ -85,7 +85,14 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
             }
         }
 
-        $extraData = serialize(array('facebook_key' => $facebookUser['id']));
+        $extraData = array(
+            'external_provider' => 'facebook',
+            'external_provider_key' => $facebookUser['id'],
+        );
+        if (!empty($userData['user_email'])) {
+            $extraData['user_email'] = $userData['user_email'];
+        }
+        $extraData = serialize($extraData);
         $extraTimestamp = time() + bdApi_Option::get('refreshTokenTTLDays') * 86400;
         $userData += array(
             'extra_data' => bdApi_Crypt::encryptTypeOne($extraData, $extraTimestamp),
@@ -131,7 +138,11 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
                 }
             }
 
-            $extraData = serialize(array('twitter_key' => $twitterUser['id']));
+            $extraData = array(
+                'external_provider' => 'twitter',
+                'external_provider_key' => $twitterUser['id'],
+            );
+            $extraData = serialize($extraData);
             $extraTimestamp = time() + bdApi_Option::get('refreshTokenTTLDays') * 86400;
             $userData += array(
                 'extra_data' => bdApi_Crypt::encryptTypeOne($extraData, $extraTimestamp),
@@ -194,7 +205,14 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
                 }
             }
 
-            $extraData = serialize(array('google_key' => $googleUser['id']));
+            $extraData = array(
+                'external_provider' => 'google',
+                'external_provider_key' => $googleUser['id'],
+            );
+            if (!empty($userData['user_email'])) {
+                $extraData['user_email'] = $userData['user_email'];
+            }
+            $extraData = serialize($extraData);
             $extraTimestamp = time() + bdApi_Option::get('refreshTokenTTLDays') * 86400;
             $userData += array(
                 'extra_data' => bdApi_Crypt::encryptTypeOne($extraData, $extraTimestamp),
