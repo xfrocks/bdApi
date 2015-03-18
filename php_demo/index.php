@@ -130,6 +130,10 @@ switch ($action) {
 
         <input type="submit" value="Make API Request"/>
     </form>
+    <hr/>
 <?php endif; ?>
 
-<?php require('html/header.php'); ?>
+    <h3>Test JavaScript</h3>
+    <p>Click <a href="js.php">here</a></p>
+
+<?php require('html/footer.php'); ?>

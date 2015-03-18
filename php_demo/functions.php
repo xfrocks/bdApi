@@ -69,6 +69,16 @@ function getCallbackUrl()
     );
 }
 
+function generateJsSdkUrl($apiRoot)
+{
+    $url = sprintf(
+        '%s/index.php?assets/sdk.js',
+        $apiRoot
+    );
+
+    return $url;
+}
+
 function renderMessageForJson($url, array $json)
 {
     global $accessToken;

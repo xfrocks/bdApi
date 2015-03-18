@@ -14,8 +14,29 @@
             width: 400px;
         }
 
-        span.code {
+        .code {
             font-family: "Courier New", Courier, monospace;
+            white-space: pre;
+        }
+
+        .pl-e {
+            color: #795da3;
+        }
+
+        .pl-ent {
+            color: #63a35c;
+        }
+
+        .pl-k, .pl-s, .pl-st {
+            color: #a71d5d;
+        }
+
+        .pl-s1 {
+            color: #df5000;
+        }
+
+        .pl-s3 {
+            color: #0086b3;
         }
 
         div.request {
