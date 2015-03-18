@@ -95,7 +95,7 @@ function renderMessageForJson($url, array $json)
                 if (strpos($link, $accessToken) !== false) {
                     // found a link
                     $targetUrl = sprintf(
-                        '%s?action=request&url=%s&access_token=%s&api_root=%s&api_key=%s&api_secret=%s&api_scope=%s',
+                        '%s?action=request&url=%s&access_token=%s',
                         getBaseUrl(),
                         rawurlencode($link),
                         rawurlencode($accessToken)
