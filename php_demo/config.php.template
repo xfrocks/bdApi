@@ -1,0 +1,13 @@
+<?php
+
+// API Root
+$config['api_root'] = '';
+
+// API Key
+$config['api_key'] = '';
+
+// API Secret
+$config['api_secret'] = '';
+
+// API Scope (separated by space)
+$config['api_scope'] = 'read';
