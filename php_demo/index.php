@@ -92,9 +92,10 @@ switch ($action) {
     default:
         // step 1
         $authorizeUrl = sprintf(
-            '%s/index.php?oauth/authorize&response_type=code&client_id=%s&redirect_uri=%s',
+            '%s/index.php?oauth/authorize&response_type=code&client_id=%s&scope=%s&redirect_uri=%s',
             $config['api_root'],
             rawurlencode($config['api_key']),
+            rawurlencode($config['api_scope']),
             rawurlencode(getCallbackUrl())
         );
 
