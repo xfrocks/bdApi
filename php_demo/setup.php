@@ -39,11 +39,7 @@ if ((empty($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'GET')
         // a HEAD request, redirect to setup.php with all configuration needed
         // but only after verification (!important)
         // used in the add-on installer when it issues HEAD request to verify itself
-        if (in_array(parse_url($apiRoot, PHP_URL_HOST), array(
-            'localhost',
-            '127.0.0.1',
-            'local.dev',
-        ))) {
+        if (isLocal($apiRoot)) {
             // accepts all local addresses
         } else {
             $ott = generateOneTimeToken($apiKey, $apiSecret);

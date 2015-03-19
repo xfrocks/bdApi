@@ -24,7 +24,8 @@ switch ($action) {
     case 'callback':
         // step 3
         if (empty($_REQUEST['code'])) {
-            die('Callback request must have `code` query parameter!');
+            $message = 'Callback request must have `code` query parameter!';
+            break;
         }
 
         $tokenUrl = sprintf(
@@ -39,6 +40,12 @@ switch ($action) {
             'code' => $_REQUEST['code'],
             'redirect_uri' => getCallbackUrl(),
         );
+
+        if (isLocal($config['api_root'])) {
+            $message = renderMessageForPostRequest($tokenUrl, $postFields);
+            $message .= '<br />Afterwards, you can test JavaScript by clicking the link below.';
+            break;
+        }
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $tokenUrl);
@@ -74,7 +81,7 @@ switch ($action) {
                 die('Unexpected response from server: ' . $body);
             }
 
-            $message = renderMessageForJson($url, $json);
+            $message = renderMessageForJson($_REQUEST['url'], $json);
         }
         break;
     case 'authorize':

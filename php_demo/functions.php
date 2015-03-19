@@ -110,6 +110,27 @@ function makeRequest($url, $apiRoot, $accessToken)
     return array($body, $json);
 }
 
+function renderMessageForPostRequest($url, array $postFields)
+{
+    $message = 'It looks like you are testing a local installation. ';
+    $message .= 'Since this test server cannot reach yours, please run this command in your terminal ';
+    $message .= '(or equivalent) please:<br /><br />';
+    $message .= '<div class="code">curl -XPOST "' . $url . '" \\</div>';
+
+    $postFieldKeys = array_keys($postFields);
+    $lastFieldKey = array_pop($postFieldKeys);
+    foreach ($postFields as $postFieldKey => $postFieldValue) {
+        $message .= sprintf(
+            '<div class="code"> -F %s=%s%s</div>',
+            $postFieldKey,
+            $postFieldValue,
+            $postFieldKey === $lastFieldKey ? '' : ' \\'
+        );
+    }
+
+    return $message;
+}
+
 function renderMessageForJson($url, array $json)
 {
     global $accessToken;
@@ -157,6 +178,17 @@ function renderMessageForJson($url, array $json)
         $url,
         nl2br($html)
     );
+}
+
+function isLocal($apiRoot) {
+    $apiRootHost = parse_url($apiRoot, PHP_URL_HOST);
+    $isLocal = in_array($apiRootHost, array(
+        'localhost',
+        '127.0.0.1',
+        'local.dev',
+    ));
+
+    return $isLocal;
 }
 
 function bitlyShorten($token, $url)
