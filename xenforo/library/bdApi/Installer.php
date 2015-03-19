@@ -209,7 +209,7 @@ class bdApi_Installer
 
     /* End auto-generated lines of code. Feel free to make changes below */
 
-    private static function installCustomized($existingAddOn, $addOnData)
+    public static function installCustomized($existingAddOn, $addOnData)
     {
         $db = XenForo_Application::getDb();
 
@@ -224,13 +224,63 @@ class bdApi_Installer
 			PRIMARY KEY (`ping_queue_id`),
 			INDEX `callback_md5` (`callback_md5`)
 		) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;');
+
+        $existingVersionId = 0;
+        if (!empty($existingAddOn)) {
+            $existingVersionId = $existingAddOn['version_id'];
+        }
+
+        if ($existingVersionId < 1) {
+            self::_installPhpDemoClient();
+        }
     }
 
-    private static function uninstallCustomized()
+    public static function uninstallCustomized()
     {
         $db = XenForo_Application::getDb();
 
         $db->query('DROP TABLE IF EXISTS `xf_bdapi_ping_queue`');
+    }
+
+    protected static function _installPhpDemoClient()
+    {
+        /** @var bdApi_Model_Client $clientModel */
+        $clientModel = XenForo_Model::create('bdApi_Model_Client');
+
+        $siteUrl = 'http://api-php-demo.xfrocks.com/';
+
+        /** @var bdApi_DataWriter_Client $dw */
+        $dw = XenForo_DataWriter::create('bdApi_DataWriter_Client');
+        $dw->bulkSet(array(
+            'name' => 'Demo Site',
+            'description' => 'Demo website for [bd] API setup and maintained by xfrocks.',
+            'redirect_uri' => $siteUrl,
+            'client_id' => $clientModel->generateClientId(),
+            'client_secret' => $clientModel->generateClientSecret(),
+            'user_id' => XenForo_Visitor::getUserId(),
+            'options' => array(),
+        ));
+        $dw->save();
+
+        $client = XenForo_Helper_Http::getClient($siteUrl . 'setup.php', array(
+            'maxredirects' => 0,
+        ));
+        $client->setParameterGet('api_root', rtrim(XenForo_Application::getOptions()->get('boardUrl'), '/') . '/api');
+        $client->setParameterGet('api_key', $dw->get('client_id'));
+        $client->setParameterGet('api_secret', $dw->get('client_secret'));
+        $client->setParameterGet('api_scope', 'read');
+
+        $response = $client->request('HEAD');
+        if ($response->getStatus() === 302) {
+            $location = $response->getHeader('Location');
+            if (!empty($location) && parse_url($location, PHP_URL_HOST) === 'j.mp') {
+                /** @var bdApi_DataWriter_Client $dw2 */
+                $dw2 = XenForo_DataWriter::create('bdApi_DataWriter_Client');
+                $dw2->setExistingData($dw->getMergedData());
+                $dw2->set('name', $location);
+                $dw2->save();
+            }
+        }
     }
 
 }
