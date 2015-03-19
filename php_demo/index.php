@@ -41,7 +41,7 @@ switch ($action) {
             'redirect_uri' => getCallbackUrl(),
         );
 
-        if (isLocal($config['api_root'])) {
+        if (isLocal($config['api_root']) && !isLocal(getBaseUrl())) {
             $message = renderMessageForPostRequest($tokenUrl, $postFields);
             $message .= '<br />Afterwards, you can test JavaScript by clicking the link below.';
             break;
@@ -69,6 +69,11 @@ switch ($action) {
                 $json['scope'],
                 date('c', time() + $json['expires_in'])
             );
+
+            list($body, $json) = makeRequest('index', $config['api_root'], $accessToken);
+            if (!empty($json['links'])) {
+                $message .= '<hr />' . renderMessageForJson('index', $json);
+            }
         } else {
             $message = renderMessageForJson($tokenUrl, $json);
         }
@@ -78,10 +83,10 @@ switch ($action) {
         if (!empty($accessToken) && !empty($_REQUEST['url'])) {
             list($body, $json) = makeRequest($_REQUEST['url'], $config['api_root'], $accessToken);
             if (empty($json)) {
-                die('Unexpected response from server: ' . $body);
+                $message = 'Unexpected response from server: ' . var_export($body, true);
+            } else {
+                $message = renderMessageForJson($_REQUEST['url'], $json);
             }
-
-            $message = renderMessageForJson($_REQUEST['url'], $json);
         }
         break;
     case 'authorize':
@@ -96,7 +101,7 @@ switch ($action) {
         );
 
         $message = sprintf(
-            '<a href="%s">Click here</a> to go to %s and start the authorization.',
+            '<h3>Authorization (step 1)</h3><a href="%s">Click here</a> to go to %s and start the authorizing flow.',
             $authorizeUrl,
             parse_url($authorizeUrl, PHP_URL_HOST)
         );
