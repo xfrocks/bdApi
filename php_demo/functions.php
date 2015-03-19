@@ -85,6 +85,31 @@ function generateJsSdkUrl($apiRoot)
     return $url;
 }
 
+function generateOneTimeToken($apiKey, $apiSecret, $userId = 0, $accessToken = '', $ttl = 86400)
+{
+    $timestamp = time() + $ttl;
+    $once = md5($userId . $timestamp . $accessToken . $apiSecret);
+
+    return sprintf('%d,%d,%s,%s', $userId, $timestamp, $once, $apiKey);
+}
+
+function makeRequest($url, $apiRoot, $accessToken)
+{
+    if (strpos($url, $apiRoot) === false) {
+        $url = sprintf(
+            '%s/index.php?%s&oauth_token=%s',
+            $apiRoot,
+            $url,
+            rawurlencode($accessToken)
+        );
+    }
+
+    $body = @file_get_contents($url);
+    $json = @json_decode($body, true);
+
+    return array($body, $json);
+}
+
 function renderMessageForJson($url, array $json)
 {
     global $accessToken;
@@ -132,4 +157,21 @@ function renderMessageForJson($url, array $json)
         $url,
         nl2br($html)
     );
+}
+
+function bitlyShorten($token, $url)
+{
+    $bitlyUrl = sprintf(
+        '%s?access_token=%s&longUrl=%s&domain=j.mp&format=txt',
+        'https://api-ssl.bitly.com/v3/shorten',
+        rawurlencode($token),
+        rawurlencode($url)
+    );
+
+    $body = @file_get_contents($bitlyUrl);
+    if (!empty($body)) {
+        $url = $body;
+    }
+
+    return $url;
 }

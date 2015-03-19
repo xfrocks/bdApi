@@ -69,18 +69,7 @@ switch ($action) {
     case 'request':
         // step 5
         if (!empty($accessToken) && !empty($_REQUEST['url'])) {
-            $url = $_REQUEST['url'];
-            if (strpos($url, $config['api_root']) === false) {
-                $url = sprintf(
-                    '%s/index.php?%s&oauth_token=%s',
-                    $config['api_root'],
-                    $_REQUEST['url'],
-                    rawurlencode($accessToken)
-                );
-            }
-
-            $body = file_get_contents($url);
-            $json = @json_decode($body, true);
+            list($body, $json) = makeRequest($_REQUEST['url'], $config['api_root'], $accessToken);
             if (empty($json)) {
                 die('Unexpected response from server: ' . $body);
             }

@@ -24,7 +24,7 @@ if (empty($apiScope)) {
 }
 
 // save configuration to session
-if (!empty($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST'
+if ((empty($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'GET')
     && !empty($apiRoot) && !empty($apiKey) && !empty($apiSecret) && !empty($apiScope)
 ) {
     $_SESSION['api_root'] = $apiRoot;
@@ -33,7 +33,43 @@ if (!empty($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST'
     $_SESSION['api_scope'] = $apiScope;
     $_SESSION['ignore_config'] = true;
 
-    header('Location: index.php');
+    $location = 'index.php';
+
+    if (!empty($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'HEAD') {
+        // a HEAD request, redirect to setup.php with all configuration needed
+        // but only after verification (!important)
+        // used in the add-on installer when it issues HEAD request to verify itself
+        if (in_array(parse_url($apiRoot, PHP_URL_HOST), array(
+            'localhost',
+            '127.0.0.1',
+            'local.dev',
+        ))) {
+            // accepts all local addresses
+        } else {
+            $ott = generateOneTimeToken($apiKey, $apiSecret);
+            list(, $json) = makeRequest('', $apiRoot, $ott);
+            if (empty($json['links'])) {
+                header('HTTP/1.0 403 Forbidden');
+                exit;
+            }
+        }
+
+        $location = sprintf(
+            '%s?api_root=%s&api_key=%s&api_secret=%s&api_scope=%s',
+            getBaseUrl(),
+            rawurlencode($apiRoot),
+            rawurlencode($apiKey),
+            rawurlencode($apiSecret),
+            rawurlencode($apiScope)
+        );
+
+        $bitlyToken = getenv('BITLY_TOKEN');
+        if (!empty($bitlyToken)) {
+            $location = bitlyShorten($bitlyToken, $location);
+        }
+    }
+
+    header('Location: ' . $location);
     exit;
 }
 
