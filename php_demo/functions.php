@@ -48,7 +48,19 @@ function displaySetup()
 
 function getBaseUrl()
 {
-    $baseUrl = $_SERVER['SCRIPT_URI'];
+    // idea from http://stackoverflow.com/questions/6768793/get-the-full-url-in-php
+    $ssl = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? true : false;
+    $sp = strtolower($_SERVER['SERVER_PROTOCOL']);
+    $protocol = substr($sp, 0, strpos($sp, '/')) . (($ssl) ? 's' : '');
+
+    $port = $_SERVER['SERVER_PORT'];
+    $port = ((!$ssl && $port == '80') || ($ssl && $port == '443')) ? '' : ':' . $port;
+
+    // using HTTP_POST may have some security implication
+    $host = isset($s['HTTP_X_FORWARDED_HOST']) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null);
+    $host = isset($host) ? $host : $_SERVER['SERVER_NAME'] . $port;
+
+    $baseUrl = $protocol . '://' . $host . $_SERVER['REQUEST_URI'];
     $baseUrl = preg_replace('#\?.*$#', '', $baseUrl);
     $baseUrl = rtrim($baseUrl, '/');
 
@@ -57,15 +69,9 @@ function getBaseUrl()
 
 function getCallbackUrl()
 {
-    global $apiRoot, $apiKey, $apiSecret, $apiScope;
-
     return sprintf(
-        '%s?action=callback&api_root=%s&api_key=%s&api_secret=%s&api_scope=%s',
-        getBaseUrl(),
-        rawurlencode($apiRoot),
-        rawurlencode($apiKey),
-        rawurlencode($apiSecret),
-        rawurlencode($apiScope)
+        '%s?action=callback',
+        getBaseUrl()
     );
 }
 
