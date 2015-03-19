@@ -1,6 +1,7 @@
 .DS_Store
 *.devhelper
 xenforo/library/bdApi/DevHelper/Generated/*
+xenforo/library/bdApi/DevHelper/XFCP/*
 xenforo_consumer/library/bdApiConsumer/DevHelper/Generated/*
 
 xenforo/library/bdApi/FileSums.php
