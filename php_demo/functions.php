@@ -52,11 +52,6 @@ function getBaseUrl()
     $ssl = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? true : false;
     $sp = strtolower($_SERVER['SERVER_PROTOCOL']);
     $protocol = substr($sp, 0, strpos($sp, '/')) . (($ssl) ? 's' : '');
-    if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
-        // this is used by Heroku
-        // more info http://www.yiiframework.com/forum/index.php/topic/28110-ssl-not-properly-detected-on-heroku/
-        $protocol = 'https';
-    }
 
     $port = $_SERVER['SERVER_PORT'];
     $port = ((!$ssl && $port == '80') || ($ssl && $port == '443')) ? '' : ':' . $port;
