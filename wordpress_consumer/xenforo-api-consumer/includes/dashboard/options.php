@@ -46,12 +46,13 @@ function xfac_options_init()
                 'id' => 'xfac_ui',
                 'title' => __('Appearances', 'xenforo-api-consumer'),
             ),
-            array(
-                'id' => 'xfac_advanced',
-                'title' => __('Advanced', 'xenforo-api-consumer'),
-            ),
         ));
     }
+    // always show advanced sections
+    $sections[] = array(
+        'id' => 'xfac_advanced',
+        'title' => __('Advanced', 'xenforo-api-consumer'),
+    );
 
     // setup tabs
     $tab = 'xfac_api';

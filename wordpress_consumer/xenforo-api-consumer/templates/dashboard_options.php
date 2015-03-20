@@ -636,24 +636,25 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
                         </td>
                     </tr>
                 <?php endif; ?>
+            <?php endif; ?>
 
-                <?php if ($tab == 'xfac_advanced'): ?>
-                    <p style="color: red; font-weight: bold;"><?php _e('Below are advanced setting configurations. Proceed with caution. '
-                            . 'Some of them are meant for debugging purpose only and may affect performance.', 'xenforo-api-consumer'); ?></p>
+            <!-- always show advanced sections -->
+            <?php if ($tab == 'xfac_advanced'): ?>
+                <p style="color: red; font-weight: bold;"><?php _e('Below are advanced setting configurations. Proceed with caution. '
+                        . 'Some of them are meant for debugging purpose only and may affect performance.', 'xenforo-api-consumer'); ?></p>
 
-                    <tr valign="top">
-                        <th scope="row"><label for="xfac_server_ip"><?php _e('XenForo Server IP Address', 'xenforo-api-consumer'); ?></label>
-                        </th>
-                        <td>
-                            <input name="xfac_server_ip" type="text" id="xfac_server_ip"
-                                   value="<?php echo esc_attr(get_option('xfac_server_ip')); ?>" class="regular-text"/>
+                <tr valign="top">
+                    <th scope="row"><label for="xfac_server_ip"><?php _e('XenForo Server IP Address', 'xenforo-api-consumer'); ?></label>
+                    </th>
+                    <td>
+                        <input name="xfac_server_ip" type="text" id="xfac_server_ip"
+                               value="<?php echo esc_attr(get_option('xfac_server_ip')); ?>" class="regular-text"/>
 
-                            <p class="description"><?php _e('A firewall prevents your WordPress server from reaching your XenForo using the public IP address? '
-                                    . 'Running the sites on the same server behind a CDN and it needs better performance? '
-                                    . 'Enter the private / internal XenForo server IP address here to connect directly to it.', 'xenforo-api-consumer'); ?></p>
-                        </td>
-                    </tr>
-                <?php endif; ?>
+                        <p class="description"><?php _e('A firewall prevents your WordPress server from reaching your XenForo using the public IP address? '
+                                . 'Running the sites on the same server behind a CDN and it needs better performance? '
+                                . 'Enter the private / internal XenForo server IP address here to connect directly to it.', 'xenforo-api-consumer'); ?></p>
+                    </td>
+                </tr>
             <?php endif; ?>
 
         </table>
