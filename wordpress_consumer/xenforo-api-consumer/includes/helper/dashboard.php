@@ -45,6 +45,8 @@ function xfac_admin_init()
 
         register_setting('xfac_api', 'xfac_xf_guest_account');
         register_setting('xfac_api', 'xfac_xf_admin_account');
+
+        register_setting('xfac_advanced', 'xfac_server_ip');
     }
 }
 
@@ -110,6 +112,8 @@ function xfac_whitelist_options($whitelist_options)
 
         $whitelist_options['xfac'][] = 'xfac_xf_guest_account';
         $whitelist_options['xfac'][] = 'xfac_xf_admin_account';
+
+        $whitelist_options['xfac'][] = 'xfac_server_ip';
     }
 
     return $whitelist_options;

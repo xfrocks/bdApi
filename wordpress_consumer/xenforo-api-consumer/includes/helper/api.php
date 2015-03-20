@@ -684,8 +684,21 @@ function _xfac_api_curlHeaderFunction($ch, $headerLine)
 function _xfac_api_curl($url, $method = 'GET', $postFields = null, $curlOptions = array(), $xfacOptions = array())
 {
     $ch = curl_init();
+    $requestHeaders = array();
     $GLOBALS['_xfac_api_curlHeaders'] = array();
 
+    $serverIp = get_option('xfac_server_ip');
+    if (!empty($serverIp)) {
+        // we need to connect directly to this address
+        $urlHost = parse_url($url, PHP_URL_HOST);
+        if (!empty($urlHost)) {
+            $urlHostPos = strpos($url, $urlHost);
+            if ($urlHostPos !== false) {
+                $url = substr_replace($url, $serverIp, $urlHostPos, strlen($urlHost));
+                $requestHeaders['Host'] = 'Host: ' . $urlHost;
+            }
+        }
+    }
     curl_setopt($ch, CURLOPT_URL, $url);
 
     switch ($method) {
@@ -699,6 +712,8 @@ function _xfac_api_curl($url, $method = 'GET', $postFields = null, $curlOptions 
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
             break;
     }
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array_values($requestHeaders));
 
     if (is_array($postFields)) {
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postFields));
