@@ -23,7 +23,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
                 'notifications' => XenForo_Link::buildApiLink('notifications'),
 
                 'search' => XenForo_Link::buildApiLink('search'),
-                'navigation' => XenForo_Link::buildApiLink('navigation'),
+                'navigation' => XenForo_Link::buildApiLink('navigation', array(), array('parent' => 0)),
                 'threads' => XenForo_Link::buildApiLink('threads'),
                 'threads/recent' => XenForo_Link::buildApiLink('threads/recent'),
                 'threads/new' => XenForo_Link::buildApiLink('threads/new'),

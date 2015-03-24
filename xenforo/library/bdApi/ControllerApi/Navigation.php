@@ -19,11 +19,26 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
     protected function _getElements($parent)
     {
         if (is_numeric($parent)) {
-            $parentNode = $this->_getNodeModel()->getNodeById($parent);
-            $expectedParentNodeId = $parentNode['node_id'];
+            if ($parent > 0) {
+                // return children of specified element
+                $parentNode = $this->_getNodeModel()->getNodeById($parent);
+                if (empty($parentNode)) {
+                    throw $this->responseException($this->responseError(
+                        new XenForo_Phrase('bdapi_navigation_element_not_found'),
+                        404
+                    ));
+                }
+
+                $expectedParentNodeId = intval($parentNode['node_id']);
+            } else {
+                // return root elements
+                $parentNode = false;
+                $expectedParentNodeId = 0;
+            }
         } else {
+            // return all viewable elements
             $parentNode = false;
-            $expectedParentNodeId = 0;
+            $expectedParentNodeId = null;
         }
 
         $nodeList = $this->_getNodeModel()->getNodeDataForListDisplay($parentNode, 0);
@@ -44,48 +59,67 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
                 $forums = $this->_getForumModel()->getForumsByIds($forumIds, $this->_getForumModel()->getFetchOptionsToPrepareApiData());
             }
 
-            foreach ($nodeList['nodesGrouped'] as $parentNodeId => $nodes) {
-                if ($parentNodeId != $expectedParentNodeId) {
-                    continue;
+            $arrangeOptions = array(
+                'expectedParentNodeId' => $expectedParentNodeId,
+                'forums' => $forums,
+            );
+            $this->_arrangeElements(
+                $elements,
+                $nodeList['nodesGrouped'],
+                is_int($expectedParentNodeId) ? $expectedParentNodeId : 0,
+                $arrangeOptions
+            );
+        }
+
+        return $elements;
+    }
+
+    protected function _arrangeElements(array &$elements, array &$nodesGrouped, $parentNodeId, array &$options = array())
+    {
+        foreach ($nodesGrouped as $_parentNodeId => $nodes) {
+            if ($parentNodeId != $_parentNodeId) {
+                continue;
+            }
+
+            foreach ($nodes as $node) {
+                $element = false;
+
+                switch ($node['node_type_id']) {
+                    case 'Category':
+                        $element = $this->_getCategoryModel()->prepareApiDataForCategory($node);
+                        break;
+                    case 'Forum':
+                        if (!empty($options['forums'][$node['node_id']])) {
+                            $element = $this->_getForumModel()->prepareApiDataForForum($options['forums'][$node['node_id']]);
+                        }
+                        break;
+                    case 'LinkForum':
+                        $element = $this->_getLinkForumModel()->prepareApiDataForLinkForum($node);
+                        break;
                 }
 
-                foreach ($nodes as $node) {
-                    $element = false;
+                if (!empty($element)) {
+                    $element['navigation_type'] = strtolower($node['node_type_id']);
+                    $element['navigation_id'] = $node['node_id'];
+                    $element['navigation_parent_id'] = $node['parent_node_id'];
 
-                    switch ($node['node_type_id']) {
-                        case 'Category':
-                            $element = $this->_getCategoryModel()->prepareApiDataForCategory($node);
-                            break;
-                        case 'Forum':
-                            if (!empty($forums[$node['node_id']])) {
-                                $element = $this->_getForumModel()->prepareApiDataForForum($forums[$node['node_id']]);
-                            }
-                            break;
-                        case 'LinkForum':
-                            $element = $this->_getLinkForumModel()->prepareApiDataForLinkForum($node);
-                            break;
-                    }
-
-                    if (!empty($element)) {
-                        $element['navigation_type'] = strtolower($node['node_type_id']);
-                        $element['navigation_id'] = $node['node_id'];
-
-                        $element['has_sub_elements'] = !empty($nodeList['nodesGrouped'][$node['node_id']]);
-                        if ($element['has_sub_elements']) {
-                            if (empty($element['links'])) {
-                                $element['links'] = array();
-                            }
-
-                            $element['links']['sub-elements'] = XenForo_Link::buildApiLink('navigation', '', array('parent' => $element['navigation_id']));
+                    $element['has_sub_elements'] = !empty($nodesGrouped[$node['node_id']]);
+                    if ($element['has_sub_elements']) {
+                        if (empty($element['links'])) {
+                            $element['links'] = array();
                         }
 
-                        $elements[] = $element;
+                        $element['links']['sub-elements'] = XenForo_Link::buildApiLink('navigation', '', array('parent' => $element['navigation_id']));
+                    }
+
+                    $elements[] = $element;
+
+                    if ($element['has_sub_elements'] && !is_int($options['expectedParentNodeId'])) {
+                        $this->_arrangeElements($elements, $nodesGrouped, intval($node['node_id']), $options);
                     }
                 }
             }
         }
-
-        return $elements;
     }
 
     /**
