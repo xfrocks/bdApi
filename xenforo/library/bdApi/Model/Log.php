@@ -217,7 +217,7 @@ class bdApi_Model_Log extends XenForo_Model
         return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
     }
 
-    protected function _filterData(array &$data)
+    protected function _filterData(array &$data, $level = 0)
     {
         static $whitelistedKeys = array(
             // internal
@@ -243,7 +243,11 @@ class bdApi_Model_Log extends XenForo_Model
 
         foreach ($data as $key => &$value) {
             if (is_array($value)) {
-                $filtered[$key] = $this->_filterData($value);
+                if ($level < 2) {
+                    $filtered[$key] = $this->_filterData($value, $level + 1);
+                } else {
+                    $filtered[$key] = '(array)';
+                }
             } else {
                 if (in_array($key, $whitelistedKeys)) {
                     $filtered[$key] = strval($value);
