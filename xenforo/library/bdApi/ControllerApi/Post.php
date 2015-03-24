@@ -359,7 +359,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             return $response;
         }
 
-        $data = array('attachment' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForAttachment($contentData, $response, $hash)));
+        $data = array('attachment' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForAttachment($response, $contentData, $contentData, $contentData, $hash)));
 
         return $this->responseData('bdApi_ViewApi_Post_Attachments', $data);
     }

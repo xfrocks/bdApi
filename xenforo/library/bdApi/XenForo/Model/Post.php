@@ -152,7 +152,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
         }
 
         if (!empty($attachments)) {
-            $data['attachments'] = $this->prepareApiDataForAttachments($post, $attachments);
+            $data['attachments'] = $this->prepareApiDataForAttachments($attachments, $post, $thread, $forum);
         }
 
         $data['links'] = array(
@@ -188,18 +188,18 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
         return $data;
     }
 
-    public function prepareApiDataForAttachments(array $post, array $attachments, $tempHash = '')
+    public function prepareApiDataForAttachments(array $attachments, array $post, array $thread, array $forum, $tempHash = '')
     {
         $data = array();
 
         foreach ($attachments as $key => $attachment) {
-            $data[] = $this->prepareApiDataForAttachment($post, $attachment, $tempHash);
+            $data[] = $this->prepareApiDataForAttachment($attachment, $post, $thread, $forum, $tempHash);
         }
 
         return $data;
     }
 
-    public function prepareApiDataForAttachment(array $post, array $attachment, $tempHash = '')
+    public function prepareApiDataForAttachment(array $attachment, array $post, array $thread, array $forum, $tempHash = '')
     {
         /* @var $attachmentModel XenForo_Model_Attachment */
         $attachmentModel = $this->getModelFromCache('XenForo_Model_Attachment');
@@ -233,8 +233,12 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
         }
 
         $data['permissions'] = array(
-            'view' => $attachmentModel->canViewAttachment($attachment, $tempHash),
-            'delete' => $attachmentModel->canDeleteAttachment($attachment, $tempHash),
+            'view' => !empty($tempHash)
+                ? $attachmentModel->canViewAttachment($attachment, $tempHash)
+                : $this->canViewAttachmentOnPost($post, $thread, $forum),
+            'delete' => !empty($tempHash)
+                ? $attachmentModel->canDeleteAttachment($attachment, $tempHash)
+                : $this->canEditPost($post, $thread, $forum),
         );
 
         if (isset($post['messageHtml'])) {
