@@ -41,7 +41,7 @@ if (!defined('ABSPATH')) {
                 </th>
                 <td valign="top">
                     <p>
-                        <a href="<?php echo site_url('profile.php?xfac=disconnect&id=' . $apiRecord->id); ?>">
+                        <a href="<?php echo admin_url('profile.php?xfac=disconnect&id=' . $apiRecord->id); ?>">
                             <?php _e('Disconnect this account', 'xenforo-api-consumer'); ?>
                         </a>
                     </p>
