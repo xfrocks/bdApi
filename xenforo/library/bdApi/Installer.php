@@ -231,6 +231,14 @@ class bdApi_Installer
         }
 
         if ($existingVersionId < 1) {
+            $db->query("
+				INSERT IGNORE INTO xf_permission_entry
+					(user_group_id, user_id, permission_group_id, permission_id, permission_value, permission_value_int)
+				SELECT user_group_id, user_id, 'general', 'bdApi_clientNew', permission_value, 0
+				FROM xf_permission_entry
+				WHERE permission_group_id = 'general' AND permission_id = 'bypassFloodCheck'
+			");
+
             self::_installPhpDemoClient();
         }
     }
@@ -270,16 +278,20 @@ class bdApi_Installer
         $client->setParameterGet('api_secret', $dw->get('client_secret'));
         $client->setParameterGet('api_scope', 'read');
 
-        $response = $client->request('HEAD');
-        if ($response->getStatus() === 302) {
-            $location = $response->getHeader('Location');
-            if (!empty($location) && parse_url($location, PHP_URL_HOST) === 'j.mp') {
-                /** @var bdApi_DataWriter_Client $dw2 */
-                $dw2 = XenForo_DataWriter::create('bdApi_DataWriter_Client');
-                $dw2->setExistingData($dw->getMergedData());
-                $dw2->set('name', $location);
-                $dw2->save();
+        try {
+            $response = $client->request('HEAD');
+            if ($response->getStatus() === 302) {
+                $location = $response->getHeader('Location');
+                if (!empty($location) && parse_url($location, PHP_URL_HOST) === 'j.mp') {
+                    /** @var bdApi_DataWriter_Client $dw2 */
+                    $dw2 = XenForo_DataWriter::create('bdApi_DataWriter_Client');
+                    $dw2->setExistingData($dw->getMergedData());
+                    $dw2->set('name', $location);
+                    $dw2->save();
+                }
             }
+        } catch (Exception $e) {
+            // ignore
         }
     }
 
