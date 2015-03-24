@@ -36,7 +36,7 @@ class bdApi_Model_Log extends XenForo_Model
         $dw->set('request_date', XenForo_Application::$time);
         $dw->set('request_method', $requestMethod);
         $dw->set('request_uri', $requestUri);
-        $dw->set('request_data', $requestData);
+        $dw->set('request_data', $this->_filterData($requestData));
         $dw->set('response_code', $responseCode);
         $dw->set('response_output', $this->_filterData($responseOutput));
 
@@ -220,6 +220,21 @@ class bdApi_Model_Log extends XenForo_Model
     protected function _filterData(array &$data)
     {
         static $whitelistedKeys = array(
+            // internal
+            '_exception',
+            '_matchedRoutePath',
+            '_origRoutePath',
+
+            // request
+            'fields_exclude',
+            'fields_include',
+            'limit',
+            'oauth_token',
+            'order',
+            'page',
+            'q',
+
+            // response
             'error',
             'message',
         );
