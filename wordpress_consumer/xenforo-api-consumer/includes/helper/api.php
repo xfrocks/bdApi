@@ -151,76 +151,55 @@ function xfac_api_getPublicLink($config, $route)
 
 function xfac_api_getAccessTokenFromCode($config, $code, $redirectUri)
 {
-    $ch = curl_init();
-
-    curl_setopt($ch, CURLOPT_URL, call_user_func_array('sprintf', array(
+    $url = call_user_func_array('sprintf', array(
         '%s/index.php?oauth/token/',
         rtrim($config['root'], '/')
-    )));
-
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+    ));
+    $postFields = array(
         'grant_type' => 'authorization_code',
         'client_id' => $config['clientId'],
         'client_secret' => $config['clientSecret'],
         'code' => $code,
         'redirect_uri' => $redirectUri,
-    )));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    );
+    $curl = _xfac_api_curl($url, 'POST', $postFields);
 
-    $body = curl_exec($ch);
-    curl_close($ch);
-
-    return _xfac_api_prepareAccessTokenBody($body);
+    return _xfac_api_prepareAccessTokenBody($curl['body']);
 }
 
 function xfac_api_getAccessTokenFromRefreshToken($config, $refreshToken)
 {
-    $ch = curl_init();
-
-    curl_setopt($ch, CURLOPT_URL, call_user_func_array('sprintf', array(
+    $url = call_user_func_array('sprintf', array(
         '%s/index.php?oauth/token/',
         rtrim($config['root'], '/')
-    )));
-
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+    ));
+    $postFields = array(
         'grant_type' => 'refresh_token',
         'client_id' => $config['clientId'],
         'client_secret' => $config['clientSecret'],
         'refresh_token' => $refreshToken,
-    )));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    );
+    $curl = _xfac_api_curl($url, 'POST', $postFields);
 
-    $body = curl_exec($ch);
-    curl_close($ch);
-
-    return _xfac_api_prepareAccessTokenBody($body);
+    return _xfac_api_prepareAccessTokenBody($curl['body']);
 }
 
 function xfac_api_getAccessTokenFromUsernamePassword($config, $username, $password)
 {
-    $ch = curl_init();
-
-    curl_setopt($ch, CURLOPT_URL, call_user_func_array('sprintf', array(
+    $url = call_user_func_array('sprintf', array(
         '%s/index.php?oauth/token/',
         rtrim($config['root'], '/')
-    )));
-
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array(
+    ));
+    $postFields = array(
         'grant_type' => 'password',
         'client_id' => $config['clientId'],
         'client_secret' => $config['clientSecret'],
         'username' => $username,
         'password' => $password,
-    )));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    );
+    $curl = _xfac_api_curl($url, 'POST', $postFields);
 
-    $body = curl_exec($ch);
-    curl_close($ch);
-
-    return _xfac_api_prepareAccessTokenBody($body);
+    return _xfac_api_prepareAccessTokenBody($curl['body']);
 }
 
 function xfac_api_generateOneTimeToken($config, $userId = 0, $accessToken = '', $ttl = 10)
