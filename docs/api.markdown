@@ -1662,6 +1662,11 @@ Search for threads.
                 thread_id: (int)
             },
             ...
+        ],
+        data: [
+            (thread),
+            ...
+                
         ]
     }
 
@@ -1670,6 +1675,7 @@ Parameters:
  * `q` (__required__): query to search for.
  * `limit` (_optional_): maximum number of result threads. The limit may get decreased if the value is too large (depending on the system configuration).
  * `forum_id` (_optional_): id of the container forum to search for threads. Child forums of the specified forum will be included in the search.
+ * `data_limit` (_optional_): number of thread to be returned in data. By default, no data is returned. Since forum-2015032402.
 
 Required scopes:
 

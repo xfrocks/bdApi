@@ -19,16 +19,33 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function actionPostThreads()
     {
-        $constraints = array();
+        $dataLimit = $this->_input->filterSingle('data_limit', XenForo_Input::UINT);
+        $threadIds = array();
 
+        $constraints = array();
         $rawResults = $this->_doSearch('thread', $constraints);
 
         $results = array();
         foreach ($rawResults as $rawResult) {
             $results[] = array('thread_id' => $rawResult[1]);
+
+            if ($dataLimit > 0 && count($threadIds) < $dataLimit) {
+                $threadIds[] = $rawResult[1];
+            }
         }
 
         $data = array('threads' => $results);
+
+        if (!empty($threadIds)) {
+            // fetch the first few thread data as a bonus
+            $dataJobParams = $this->_request->getParams();
+            $dataJobParams['thread_ids'] = implode(',', $threadIds);
+            $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'threads', $dataJobParams);
+
+            if (isset($dataJob['threads'])) {
+                $data['data'] = $dataJob['threads'];
+            }
+        }
 
         return $this->responseData('bdApi_ViewApi_Search_Threads', $data);
     }

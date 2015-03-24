@@ -9,12 +9,6 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
 
     public function actionPostIndex()
     {
-        /* @var $fc XenForo_FrontController */
-        $fc = XenForo_Application::get('_bdApi_fc');
-
-        $fcTemp = new XenForo_FrontController($fc->getDependencies());
-        $fcTemp->setup();
-
         $input = file_get_contents('php://input');
         $batchJobs = @json_decode($input, true);
         if (empty($batchJobs)) {
@@ -57,7 +51,7 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
 
             $params = array_merge($this->_extractUriParams($batchJob['uri']), $params);
 
-            $jobsOutput[$id] = $this->_doJob($fcTemp, $method, $batchJob['uri'], $params);
+            $jobsOutput[$id] = bdApi_Data_Helper_Batch::doJob($method, $batchJob['uri'], $params);
         }
 
         $data = array('jobs' => $jobsOutput);
@@ -75,48 +69,6 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
         }
 
         return $params;
-    }
-
-    protected function _doJob(XenForo_FrontController $fc, $method, $uri, array $params)
-    {
-        $request = new bdApi_Zend_Controller_Request_Http(XenForo_Link::convertApiUriToAbsoluteUri($uri, true));
-        $request->setMethod($method);
-        foreach ($params as $key => $value) {
-            $request->setParam($key, $value);
-        }
-        $fc->setRequest($request);
-
-        // routing
-        $routeMatch = $fc->getDependencies()->route($request);
-        if (!$routeMatch OR !$routeMatch->getControllerName()) {
-            list($controllerName, $action) = $fc->getDependencies()->getNotFoundErrorRoute();
-            $routeMatch->setControllerName($controllerName);
-            $routeMatch->setAction($action);
-        }
-
-        $response = $fc->dispatch($routeMatch);
-
-        if ($response instanceof XenForo_ControllerResponse_Error) {
-            return array(
-                '_job_result' => 'error',
-                '_job_error' => $response->errorText,
-            );
-        } elseif ($response instanceof XenForo_ControllerResponse_Exception) {
-            return array(
-                '_job_result' => 'error',
-                '_job_error' => $response->getMessage(),
-            );
-        } elseif ($response instanceof XenForo_ControllerResponse_Message) {
-            return array(
-                '_job_result' => 'message',
-                '_job_message' => $response->message,
-            );
-        } elseif ($response instanceof XenForo_ControllerResponse_View) {
-            return array_merge(array('_job_result' => 'ok'), $response->params);
-        }
-
-        // this should not happen
-        throw new XenForo_Exception('Unexpected $response occurred.');
     }
 
     protected function _getScopeForAction($action)
