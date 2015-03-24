@@ -394,6 +394,7 @@ Parameters:
  * `page` (_optional_): page number of threads.
  * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.
  * `order` (_optional_): ordering of threads. Support `natural`, `thread_create_date`, `thread_create_date_reverse`, `thread_update_date`, `thread_update_date_reverse`.
+ * `thread_ids` (_option_): ids of needed threads (separated by comma). If this paramater is set, all other parameters will be ignored. Since forum-2015032401.
 
 Required scopes:
 

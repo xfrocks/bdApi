@@ -6,7 +6,12 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     {
         $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
         if (!empty($threadId)) {
-            return $this->responseReroute(__CLASS__, 'get-single');
+            return $this->responseReroute(__CLASS__, 'single');
+        }
+
+        $threadIds = $this->_input->filterSingle('thread_ids', XenForo_Input::STRING);
+        if (!empty($threadIds)) {
+            return $this->responseReroute(__CLASS__, 'multiple');
         }
 
         $forumIdInput = $this->_input->filterSingle('forum_id', XenForo_Input::STRING);
@@ -34,12 +39,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
         $forumIdArray = array_unique($forumIdArray);
         asort($forumIdArray);
-
-        $visitor = XenForo_Visitor::getInstance();
-        $nodePermissions = $this->_getNodeModel()->getNodePermissionsForPermissionCombination();
-        foreach ($nodePermissions as $nodeId => $permissions) {
-            $visitor->setNodePermissions($nodeId, $permissions);
-        }
 
         $sticky = $this->_input->filterSingle('sticky', XenForo_Input::STRING);
 
@@ -136,7 +135,9 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         if (!$this->_isFieldExcluded('forum') AND count($forumIdArray) == 1) {
             $forumModel = $this->_getForumModel();
             $forum = $forumModel->getForumById(reset($forumIdArray), $forumModel->getFetchOptionsToPrepareApiData());
-            $data['forum'] = $this->_filterDataSingle($forumModel->prepareApiDataForForum($forum), array('forum'));
+            if (!empty($forum)) {
+                $data['forum'] = $this->_filterDataSingle($forumModel->prepareApiDataForForum($forum), array('forum'));
+            }
         }
 
         bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'threads', array(), $pageNavParams);
@@ -144,7 +145,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_Thread_List', $data);
     }
 
-    public function actionGetSingle()
+    public function actionSingle()
     {
         $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
 
@@ -164,6 +165,35 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $data = array('thread' => $this->_filterDataSingle($this->_getThreadModel()->prepareApiDataForThread($thread, $forum, $firstPost)));
 
         return $this->responseData('bdApi_ViewApi_Thread_Single', $data);
+    }
+
+    public function actionMultiple()
+    {
+        $threadIdsInput = $this->_input->filterSingle('thread_ids', XenForo_Input::STRING);
+        $threadIds = array_map('intval', explode(',', $threadIdsInput));
+        if (empty($threadIds)) {
+            return $this->responseNoPermission();
+        }
+
+        $threads = $this->_getThreadModel()->getThreadsByIds(
+            $threadIds,
+            $this->_getThreadModel()->getFetchOptionsToPrepareApiData()
+        );
+
+        $threadsOrdered = array();
+        foreach ($threadIds as $threadId) {
+            if (isset($threads[$threadId])) {
+                $threadsOrdered[$threadId] = $threads[$threadId];
+            }
+        }
+
+        $threadsData = $this->_prepareThreads($threadsOrdered);
+
+        $data = array(
+            'threads' => $this->_filterDataMany($threadsData),
+        );
+
+        return $this->responseData('bdApi_ViewApi_Thread_List', $data);
     }
 
     public function actionPostIndex()
@@ -454,11 +484,18 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     protected function _prepareThreads(array $threads)
     {
         $forumIds = array();
+        $forums = array();
         foreach ($threads as $thread) {
             $forumIds[$thread['node_id']] = true;
         }
         if (!empty($forumIds)) {
             $forums = $this->_getForumModel()->getForumsByIds(array_keys($forumIds));
+        }
+
+        $visitor = XenForo_Visitor::getInstance();
+        $nodePermissions = $this->_getNodeModel()->getNodePermissionsForPermissionCombination();
+        foreach ($nodePermissions as $nodeId => $permissions) {
+            $visitor->setNodePermissions($nodeId, $permissions);
         }
 
         foreach (array_keys($threads) as $threadId) {

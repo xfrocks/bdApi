@@ -13,6 +13,7 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
         }
 
         $fetchOptions['watchUserId'] = XenForo_Visitor::getUserId();
+        $fetchOptions['replyBanUserId'] = XenForo_Visitor::getUserId();
 
         return $fetchOptions;
     }
