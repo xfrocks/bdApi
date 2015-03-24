@@ -41,8 +41,7 @@ class bdApi_Listener
     public static function init_dependencies(XenForo_Dependencies_Abstract $dependencies, array $data)
     {
         // initializes the core template helper object
-        // in the future, we may have different template helpers for public/admin/api
-        // context
+        // in the future, we may have different template helpers for public/admin/api context
         $templateHelper = bdApi_Template_Helper_Core::getInstance();
 
         // register the helper methods in the format `bdApi_<method_name>`
