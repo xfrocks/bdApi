@@ -394,7 +394,7 @@ Parameters:
  * `page` (_optional_): page number of threads.
  * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.
  * `order` (_optional_): ordering of threads. Support `natural`, `thread_create_date`, `thread_create_date_reverse`, `thread_update_date`, `thread_update_date_reverse`.
- * `thread_ids` (_option_): ids of needed threads (separated by comma). If this paramater is set, all other parameters will be ignored. Since forum-2015032401.
+ * `thread_ids` (_optional_): ids of needed threads (separated by comma). If this paramater is set, all other parameters will be ignored. Since forum-2015032401.
 
 Required scopes:
 
@@ -665,6 +665,8 @@ Parameters:
  * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.
  * `order` (_optional_, since forum-2013122401): ordering of posts. Support `natural`, `natural_reverse`.
  * `page_of_post_id` (_optional_, since forum-2014092401): id of a post, the page number that contains the specified post will be used.
+ * `post_ids` (_optional_): ids of needed posts (separated by comma). If this paramater is set, all other parameters will be ignored. Since forum-2015032403.
+
 
 Required scopes:
 
@@ -1675,7 +1677,7 @@ Parameters:
  * `q` (__required__): query to search for.
  * `limit` (_optional_): maximum number of result threads. The limit may get decreased if the value is too large (depending on the system configuration).
  * `forum_id` (_optional_): id of the container forum to search for threads. Child forums of the specified forum will be included in the search.
- * `data_limit` (_optional_): number of thread to be returned in data. By default, no data is returned. Since forum-2015032402.
+ * `data_limit` (_optional_): number of threads to be returned in data. By default, no data is returned. Since forum-2015032402.
 
 Required scopes:
 
@@ -1690,6 +1692,11 @@ Search for posts.
                 post_id: (int)
             },
             ...
+        ],
+        data: [
+            (post),
+            ...
+                
         ]
     }
 
@@ -1699,6 +1706,7 @@ Parameters:
  * `limit` (_optional_): maximum number of result posts. The limit may get decreased if the value is too large (depending on the system configuration).
  * `forum_id` (_optional_): id of the container forum to search for posts. Child forums of the specified forum will be included in the search.
  * `thread_id` (_optional_): id of the container thread to search for posts.
+ * `data_limit` (_optional_): number of posts to be returned in data. By default, no data is returned. Since forum-2015032403.
 
 Required scopes:
 

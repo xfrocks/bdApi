@@ -57,8 +57,10 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function actionPostPosts()
     {
-        $constraints = array();
+        $dataLimit = $this->_input->filterSingle('data_limit', XenForo_Input::UINT);
+        $postIds = array();
 
+        $constraints = array();
         $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
         if (!empty($threadId)) {
             $constraints['thread'] = $threadId;
@@ -73,9 +75,24 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         $results = array();
         foreach ($posts as $post) {
             $results[] = array('post_id' => $post['post_id']);
+
+            if ($dataLimit > 0 && count($postIds) < $dataLimit) {
+                $postIds[] = $post['post_id'];
+            }
         }
 
         $data = array('posts' => $results);
+
+        if (!empty($postIds)) {
+            // fetch the first few thread data as a bonus
+            $dataJobParams = $this->_request->getParams();
+            $dataJobParams['post_ids'] = implode(',', $postIds);
+            $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'posts', $dataJobParams);
+
+            if (isset($dataJob['posts'])) {
+                $data['data'] = $dataJob['posts'];
+            }
+        }
 
         return $this->responseData('bdApi_ViewApi_Search_Posts', $data);
     }

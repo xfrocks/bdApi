@@ -6,7 +6,12 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     {
         $postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
         if (!empty($postId)) {
-            return $this->responseReroute(__CLASS__, 'get-single');
+            return $this->responseReroute(__CLASS__, 'single');
+        }
+
+        $postIds = $this->_input->filterSingle('post_ids', XenForo_Input::STRING);
+        if (!empty($postIds)) {
+            return $this->responseReroute(__CLASS__, 'multiple');
         }
 
         $pageOfPostId = $this->_input->filterSingle('page_of_post_id', XenForo_Input::UINT);
@@ -59,14 +64,12 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         }
 
         $posts = $this->_getPostModel()->getPostsInThread($threadId, $this->_getPostModel()->getFetchOptionsToPrepareApiData($fetchOptions));
-        if (!$this->_isFieldExcluded('attachments')) {
-            $posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
-        }
+        $postsData = $this->_preparePosts($posts, $thread, $forum);
 
         $total = $thread['reply_count'] + 1;
 
         $data = array(
-            'posts' => $this->_filterDataMany($this->_getPostModel()->prepareApiDataForPosts($posts, $thread, $forum)),
+            'posts' => $this->_filterDataMany($postsData),
             'posts_total' => $total,
 
             '_thread' => $thread,
@@ -81,7 +84,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_Post_List', $data);
     }
 
-    public function actionGetSingle()
+    public function actionSingle()
     {
         $postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
         list($post, $thread, $forum) = $this->_getForumThreadPostHelper()->assertPostValidAndViewable($postId, $this->_getPostModel()->getFetchOptionsToPrepareApiData(), $this->_getThreadModel()->getFetchOptionsToPrepareApiData(), $this->_getForumModel()->getFetchOptionsToPrepareApiData());
@@ -95,6 +98,35 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $data = array('post' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum)));
 
         return $this->responseData('bdApi_ViewApi_Post_Single', $data);
+    }
+
+    public function actionMultiple()
+    {
+        $postIdsInput = $this->_input->filterSingle('post_ids', XenForo_Input::STRING);
+        $postIds = array_map('intval', explode(',', $postIdsInput));
+        if (empty($postIds)) {
+            return $this->responseNoPermission();
+        }
+
+        $posts = $this->_getPostModel()->getPostsByIds(
+            $postIds,
+            $this->_getPostModel()->getFetchOptionsToPrepareApiData()
+        );
+
+        $postsOrdered = array();
+        foreach ($postIds as $postId) {
+            if (isset($posts[$postId])) {
+                $postsOrdered[$postId] = $posts[$postId];
+            }
+        }
+
+        $postsData = $this->_preparePosts($postsOrdered);
+
+        $data = array(
+            'posts' => $this->_filterDataMany($postsData),
+        );
+
+        return $this->responseData('bdApi_ViewApi_Post_List', $data);
     }
 
     public function actionPostIndex()
@@ -405,6 +437,77 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));
     }
 
+    protected function _preparePosts(array $posts, array $thread = null, array $forum = null)
+    {
+        $threads = array();
+        if ($thread !== null) {
+            $threads[$thread['thread_id']] = $thread;
+        }
+
+        $forums = array();
+        if ($forum !== null) {
+            $forums[$forum['node_id']] = $forum;
+        }
+
+        $threadIds = array();
+        $dbThreads = array();
+        foreach ($posts as $post) {
+            if (!isset($threads[$post['thread_id']])) {
+                $threadIds[] = $post['thread_id'];
+            }
+        }
+        if (!empty($threadIds)) {
+            $dbThreads = $this->_getThreadModel()->getThreadsByIds($threadIds);
+        }
+
+        $forumIds = array();
+        foreach ($dbThreads as $dbThread) {
+            $threads[$dbThread['thread_id']] = $dbThread;
+
+            if (!isset($forums[$dbThread['node_id']])) {
+                $forumIds[] = $dbThread['node_id'];
+            }
+        }
+        if (!empty($forumIds)) {
+            $dbForums = $this->_getForumModel()->getForumsByIds($forumIds);
+            foreach ($dbForums as $dbForum) {
+                $forums[$dbForum['node_id']] = $dbForum;
+            }
+        }
+
+        if (!$this->_isFieldExcluded('attachments')) {
+            $posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
+        }
+
+        $visitor = XenForo_Visitor::getInstance();
+        $nodePermissions = $this->_getNodeModel()->getNodePermissionsForPermissionCombination();
+        foreach ($nodePermissions as $nodeId => $permissions) {
+            $visitor->setNodePermissions($nodeId, $permissions);
+        }
+
+
+        $postsData = array();
+        foreach ($posts as $post) {
+            if (!isset($threads[$post['thread_id']])) {
+                continue;
+            }
+            $threadRef = &$threads[$post['thread_id']];
+
+            if (!isset($forums[$threadRef['node_id']])) {
+                continue;
+            }
+            $forumRef = &$forums[$threadRef['node_id']];
+
+            if (!$this->_getPostModel()->canViewPost($post, $threadRef, $forumRef)) {
+                continue;
+            }
+
+            $postsData[] = $this->_getPostModel()->prepareApiDataForPost($post, $threadRef, $forumRef);
+        }
+
+        return $postsData;
+    }
+
     /**
      * @return bdApi_XenForo_Model_Post
      */
@@ -427,6 +530,14 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     protected function _getForumModel()
     {
         return $this->getModelFromCache('XenForo_Model_Forum');
+    }
+
+    /**
+     * @return XenForo_Model_Node
+     */
+    protected function _getNodeModel()
+    {
+        return $this->getModelFromCache('XenForo_Model_Node');
     }
 
     /**
