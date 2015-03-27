@@ -75,6 +75,11 @@ class bdApi_ViewApi_Helper_Attachment_Data extends bdApi_ViewApi_Base
         $this->_response->setHeader('Content-Length', $attachmentFileSize, true);
         $this->_response->setHeader('X-Content-Type-Options', 'nosniff');
 
+        if (!empty($this->_params['skipFileOutput'])) {
+            $this->_response->setHeader('X-SKIP-FILE-OUTPUT', '1');
+            return '';
+        }
+
         return new XenForo_FileOutput($attachmentFile);
     }
 

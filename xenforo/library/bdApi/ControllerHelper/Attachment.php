@@ -86,6 +86,7 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
             'attachmentFile' => $filePath,
 
             'resize' => $resize,
+            'skipFileOutput' => $this->_controller->getRequest()->getMethod() === 'HEAD',
         );
 
         return $this->_controller->responseData('bdApi_ViewApi_Helper_Attachment_Data', $viewParams);
