@@ -661,6 +661,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_log_no_client" version_id="23" version_string="0.9.8a"><![CDATA[Public Request (no client)]]></phrase>
     <phrase title="bdapi_log_no_results" version_id="23" version_string="0.9.8a"><![CDATA[No logs to display...]]></phrase>
     <phrase title="bdapi_name" version_id="4" version_string="0.9-dev"><![CDATA[Client Name]]></phrase>
+    <phrase title="bdapi_navigation_element_not_found" version_id="65" version_string="1.4.3-BETA"><![CDATA[The requested navigation element could not be found.]]></phrase>
     <phrase title="bdapi_no_facebook_association_found" version_id="62" version_string="1.4.2-BETA"><![CDATA[No user has been registered with this Facebook account.]]></phrase>
     <phrase title="bdapi_no_google_association_found" version_id="62" version_string="1.4.2-BETA"><![CDATA[No user has been registered with this Google account.]]></phrase>
     <phrase title="bdapi_no_twitter_association_found" version_id="62" version_string="1.4.2-BETA"><![CDATA[No user has been registered with this Twitter account.]]></phrase>
