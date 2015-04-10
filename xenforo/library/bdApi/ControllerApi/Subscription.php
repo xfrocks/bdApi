@@ -11,6 +11,15 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
     {
         /* @var $session bdApi_Session */
         $session = XenForo_Application::getSession();
+        $clientId = $session->getOAuthClientId();;
+        $isSessionClientId = true;
+        if (empty($clientId)) {
+            $clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
+            $isSessionClientId = false;
+        }
+        if (empty($clientId)) {
+            return $this->responseNoPermission();
+        }
 
         $input = $this->_input->filter(array(
             'hub_callback' => XenForo_Input::STRING,
@@ -22,10 +31,6 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
         if (!Zend_Uri::check($input['hub_callback'])) {
             return $this->_responseError(new XenForo_Phrase('bdapi_subscription_callback_is_required'));
         }
-        if (!$session->isValidRedirectUri($input['hub_callback'])) {
-            // TODO: enforce this?
-            // return $this->_responseError(new XenForo_Phrase('bdapi_subscription_callback_must_match'));
-        }
 
         if (!in_array($input['hub_mode'], array(
             'subscribe',
@@ -35,15 +40,28 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
             return $this->_responseError(new XenForo_Phrase('bdapi_subscription_mode_must_valid'));
         }
 
-        if (!$this->_getSubscriptionModel()->isValidTopic($input['hub_topic'])) {
-            return $this->_responseError(new XenForo_Phrase('bdapi_subscription_topic_not_recognized'));
+        if ($input['hub_mode'] === 'subscribe') {
+            if (!$isSessionClientId) {
+                // subscribe requires authenticated session
+                return $this->responseNoPermission();
+            }
+
+            if (!$this->_getSubscriptionModel()->isValidTopic($input['hub_topic'])) {
+                return $this->_responseError(new XenForo_Phrase('bdapi_subscription_topic_not_recognized'));
+            }
         }
 
-        if ($this->_getSubscriptionModel()->verifyIntentOfSubscriber($input['hub_callback'], $input['hub_mode'], $input['hub_topic'], $input['hub_lease_seconds'], array('client_id' => $this->_getClientId()))) {
+        if ($this->_getSubscriptionModel()->verifyIntentOfSubscriber(
+            $input['hub_callback'],
+            $input['hub_mode'],
+            $input['hub_topic'],
+            $input['hub_lease_seconds'],
+            array('client_id' => $clientId))
+        ) {
             switch ($input['hub_mode']) {
                 case 'unsubscribe':
                     $subscriptions = $this->_getSubscriptionModel()->getSubscriptions(array(
-                        'client_id' => $this->_getClientId(),
+                        'client_id' => $clientId,
                         'topic' => $input['hub_topic'],
                     ));
 
@@ -57,7 +75,7 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
                     break;
                 default:
                     $dw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription');
-                    $dw->set('client_id', $this->_getClientId());
+                    $dw->set('client_id', $clientId);
                     $dw->set('callback', $input['hub_callback']);
                     $dw->set('topic', $input['hub_topic']);
                     $dw->set('subscribe_date', XenForo_Application::$time);
@@ -75,13 +93,6 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
         return $this->_responseError(new XenForo_Phrase('bdapi_subscription_cannot_verify_intent_of_subscriber'));
     }
 
-    protected function _getClientId()
-    {
-        /* @var $session bdApi_Session */
-        $session = XenForo_Application::getSession();
-        return $session->getOAuthClientId();
-    }
-
     /**
      * @return bdApi_Model_Subscription
      */
@@ -93,16 +104,6 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
     protected function _getScopeForAction($action)
     {
         return false;
-    }
-
-    protected function _preDispatch($action)
-    {
-        $clientId = $this->_getClientId();
-        if (empty($clientId)) {
-            throw $this->responseException($this->responseReroute('bdApi_ControllerApi_Error', 'noPermission'));
-        }
-
-        parent::_preDispatch($action);
     }
 
     protected function _responseError($error)

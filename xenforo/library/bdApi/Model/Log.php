@@ -226,6 +226,7 @@ class bdApi_Model_Log extends XenForo_Model
             '_origRoutePath',
 
             // request
+            'client_id',
             'fields_exclude',
             'fields_include',
             'limit',

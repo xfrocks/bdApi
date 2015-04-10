@@ -304,15 +304,29 @@ class bdApi_Model_Subscription extends XenForo_Model
         $challenge = md5($challenge . XenForo_Application::getConfig()->get('globalSalt'));
 
         $client = XenForo_Helper_Http::getClient($callback);
-        $client->setParameterGet(array_merge(array(
+
+        $requestData = array_merge(array(
             'hub.mode' => $mode,
             'hub.topic' => $topic,
             'hub.lease_seconds' => $leaseSeconds,
             'hub.challenge' => $challenge,
-        ), $extraParams));
+        ), $extraParams);
+        $client->setParameterGet($requestData);
 
         $response = $client->request('GET');
         $body = trim($response->getBody());
+
+        if (XenForo_Application::debugMode()) {
+            /* @var $logModel bdApi_Model_Log */
+            $logModel = $this->getModelFromCache('bdApi_Model_Log');
+
+            $logModel->logRequest('GET', $callback, $requestData, $response->getStatus(), array('message' => $response->getBody()), array(
+                'client_id' => '',
+                'user_id' => 0,
+                'ip_address' => '127.0.0.1',
+            ));
+        }
+
         if ($body !== $challenge) {
             return false;
         }
