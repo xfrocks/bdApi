@@ -610,13 +610,14 @@ function xfac_api_deleteForumFollower($config, $accessToken, $forumId)
     }
 }
 
-function xfac_api_getUsersFind($config, $username, $email = '')
+function xfac_api_getUsersFind($config, $username, $email = '', $adminAccessToken = '')
 {
     $curl = _xfac_api_curl(call_user_func_array('sprintf', array(
-        '%s/index.php?users/find/&username=%s&email=%s',
+        '%s/index.php?users/find/&username=%s&email=%s&oauth_token=%s',
         rtrim($config['root'], '/'),
         rawurlencode($username),
         rawurlencode($email),
+        rawurlencode($adminAccessToken),
     )));
     extract($curl);
 

@@ -31,10 +31,13 @@ function xfac_user_edit($wpUser)
                     }
                 }
 
-                $emailUsers = xfac_api_getUsersFind($config, '', $wpUser->user_email);
-                if (!empty($emailUsers['users'])) {
-                    foreach ($emailUsers['users'] as $emailUser) {
-                        $xfUsers[$emailUser['user_id']] = $emailUser;
+                $adminAccessToken = xfac_user_getAdminAccessToken($config);
+                if (!empty($adminAccessToken)) {
+                    $emailUsers = xfac_api_getUsersFind($config, '', $wpUser->user_email, $adminAccessToken);
+                    if (!empty($emailUsers['users'])) {
+                        foreach ($emailUsers['users'] as $emailUser) {
+                            $xfUsers[$emailUser['user_id']] = $emailUser;
+                        }
                     }
                 }
             }
