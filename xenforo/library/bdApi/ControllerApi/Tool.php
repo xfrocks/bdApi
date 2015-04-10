@@ -128,12 +128,33 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         $dependencies = $fc->getDependencies();
 
         $request = new bdApi_Zend_Controller_Request_Http($link);
+        $request->setBaseUrl(parse_url(XenForo_Application::getOptions()->get('boardUrl'), PHP_URL_PATH));
+
         $routeMatch = $dependencies->routePublic($request);
         if (!$routeMatch OR !$routeMatch->getControllerName()) {
             // link cannot be route
-            return $this->responseNoPermission();
+            return $this->_actionGetParseLink_getControllerResponseNop($link, false);
         }
 
+        $controllerResponse = $this->_actionGetParseLink_getControllerResponse($link, $request, $routeMatch);
+        if (!empty($controllerResponse)) {
+            return $controllerResponse;
+        }
+
+        // controller / action not recognized...
+        return $this->_actionGetParseLink_getControllerResponseNop($link, true);
+    }
+
+    protected function _actionGetParseLink_getControllerResponseNop($link, $routed)
+    {
+        return $this->responseData('bdApi_ViewApi_Tool_ParseLink', array(
+            'link' => $link,
+            'routed' => $routed,
+        ));
+    }
+
+    protected function _actionGetParseLink_getControllerResponse($link, Zend_Controller_Request_Http $request, XenForo_RouteMatch $routeMatch)
+    {
         switch ($routeMatch->getControllerName()) {
             case 'XenForo_ControllerPublic_Forum':
                 $nodeId = $request->getParam('node_id');
@@ -161,8 +182,8 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
                 if (!empty($threadId)) {
                     $this->_request->setParam('thread_id', $threadId);
 
-                    $linkParts = parse_url($link);
-                    if (!empty($linkParts['fragment']) AND preg_match('#^post-(?<post_id>\d+)$#', $linkParts['fragment'], $fragment)) {
+                    $linkFragment = parse_url($link, PHP_URL_FRAGMENT);
+                    if (!empty($linkFragment) AND preg_match('#^post-(?<post_id>\d+)$#', $linkFragment, $fragment)) {
                         $this->_request->setParam('page_of_post_id', $fragment['post_id']);
                     }
 
@@ -179,8 +200,7 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
                 break;
         }
 
-        // controller / action not recognized...
-        return $this->responseNoPermission();
+        return null;
     }
 
     protected function _getScopeForAction($action)
