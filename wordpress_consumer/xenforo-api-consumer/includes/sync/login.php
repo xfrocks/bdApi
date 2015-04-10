@@ -32,6 +32,18 @@ function xfac_login_login_redirect_memberpress($redirectTo, $wpUser)
     return $redirectTo;
 }
 
+function xfac_login_pmpro_confirmation_url($redirectTo, $wpUserId, $level)
+{
+    // this method is for Paid Membership Pro
+    global $current_user;
+
+    if (!empty($current_user) && $current_user->ID == $wpUserId) {
+        $redirectTo = xfac_login_redirect($redirectTo, $redirectTo, $current_user);
+    }
+
+    return $redirectTo;
+}
+
 function xfac_allowed_redirect_hosts($hosts)
 {
     $config = xfac_option_getConfig();
@@ -139,6 +151,8 @@ if (!!get_option('xfac_sync_login')) {
     add_action('ws_plugin__s2member_after_remove_login_redirect_filters', 'xfac_login_redirect_add_filter');
 
     add_filter('mepr-process-login-redirect-url', 'xfac_login_login_redirect_memberpress', 10, 2);
+
+    add_filter('pmpro_confirmation_url', 'xfac_login_pmpro_confirmation_url', 10, 3);
 
     add_filter('allowed_redirect_hosts', 'xfac_allowed_redirect_hosts');
     add_action('wp_logout', 'xfac_wp_logout');
