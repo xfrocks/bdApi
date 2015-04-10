@@ -130,9 +130,11 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
             $data['notification_type'] = sprintf('%s_%d_%s', $alert['content_type'], $alert['content_id'], $alert['action']);
         }
 
-        $data['links'] = array(
-            'content' => XenForo_Link::buildApiLink('notifications/content', null, array('notification_id' => $alert['alert_id'])),
-        );
+        if (is_callable(array('XenForo_Link', 'buildApiLink'))) {
+            $data['links'] = array(
+                'content' => XenForo_Link::buildApiLink('notifications/content', null, array('notification_id' => $alert['alert_id'])),
+            );
+        }
 
         return $data;
     }
