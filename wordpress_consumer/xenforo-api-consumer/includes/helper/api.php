@@ -110,6 +110,12 @@ function xfac_api_getSdkJsUrl($config)
 
 function xfac_api_getLoginLink($config, $accessToken, $redirectUri)
 {
+    if (!parse_url($redirectUri, PHP_URL_HOST)) {
+        // host is missing from the redirect uri
+        // assume it is a relative one
+        $redirectUri = site_url($redirectUri);
+    }
+
     return call_user_func_array('sprintf', array(
         '%s/index.php?tools/login&oauth_token=%s&redirect_uri=%s',
         rtrim($config['root'], '/'),
