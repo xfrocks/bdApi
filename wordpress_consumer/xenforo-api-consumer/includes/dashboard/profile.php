@@ -77,10 +77,16 @@ function xfac_edit_user_profile_update($wpUserId)
                 $userAccessToken = xfac_api_postOauthTokenAdmin($config, $adminAccessToken, $xfUserId);
 
                 if (!empty($userAccessToken)) {
-                    $xfUser = xfac_api_getUsersMe($config, $userAccessToken['access_token']);
+                    $result = xfac_api_getUsersMe($config, $userAccessToken['access_token']);
 
-                    if (!empty($xfUser['user']['user_id']) && $xfUser['user']['user_id'] == $xfUserId) {
-                        xfac_user_updateRecord($wpUserId, $config['root'], $xfUserId, $xfUser['user'], $userAccessToken);
+                    if (!empty($result['user']['user_id'])) {
+                        xfac_syncLogin_syncRole($config, get_user_by('id', $wpUserId), $result['user']);
+                        if (isset($_POST['role'])) {
+                            // because we have already sync'd role, ignore role submitted via POST
+                            unset($_POST['role']);
+                        }
+
+                        xfac_user_updateRecord($wpUserId, $config['root'], $xfUserId, $result['user'], $userAccessToken);
                     }
                 }
             }
