@@ -26,6 +26,12 @@ function xfac_tool_box()
     ?>
     <div class="tool-box">
         <h3 class="title"><?php _e('Auto associate with XenForo', 'xenforo-api-consumer') ?></h3>
+        <p><?php _e('Run this tool if you want to go through all WordPress accounts '
+            . 'and make sure each of them is associated to a XenForo account. '
+            . 'Please note that associating accounts without user consent '
+            . 'should not be taken lightly. It\'s recommended to only '
+            . 'do this once (right after installing the bridge).'
+            , 'xenforo-api-consumer'); ?></p>
 
         <form action="<?php echo admin_url('tools.php'); ?>">
             <input type="hidden" name="action" value="xfac_tools_connect"/>
@@ -34,12 +40,12 @@ function xfac_tool_box()
 
             <label>
                 <input type="checkbox" name="associate" value="1"/>
-                <?php _e('Associate XenForo account if found', 'xenforo-api-consumer'); ?>
+                <?php _e('Associate existing account if found', 'xenforo-api-consumer'); ?>
             </label><br/>
 
             <label>
                 <input type="checkbox" name="push" value="1"/>
-                <?php _e('Create XenForo account if needed', 'xenforo-api-consumer'); ?>
+                <?php _e('Create new account if needed', 'xenforo-api-consumer'); ?>
             </label><br/>
 
             <input type="submit" value="<?php _e('Start', 'xenforo-api-consumer'); ?>" class="button"/>
