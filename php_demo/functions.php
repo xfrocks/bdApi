@@ -110,6 +110,53 @@ function makeRequest($url, $apiRoot, $accessToken)
     return array($body, $json);
 }
 
+function makeSubscriptionRequest($config, $topic, $fwd, $accessToken = null)
+{
+    $subscriptionUrl = sprintf(
+        '%s/index.php?subscriptions',
+        $config['api_root']
+    );
+
+    $callbackUrl = sprintf(
+        '%s/subscriptions.php?fwd=%s',
+        rtrim(preg_replace('#index.php$#', '', getBaseUrl()), '/'),
+        rawurlencode($fwd)
+    );
+
+    $postFields = array(
+        'hub.callback' => $callbackUrl,
+        'hub.mode' => !empty($accessToken) ? 'subscribe' : 'unsubscribe',
+        'hub.topic' => $topic,
+        'oauth_token' => $accessToken,
+        'client_id' => $config['api_key'],
+    );
+
+    return array('response' => makeCurlPost($subscriptionUrl, $postFields, false));
+}
+
+function makeCurlPost($url, $postFields, $getJson = true)
+{
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $body = curl_exec($ch);
+    curl_close($ch);
+
+    if (!$getJson) {
+        return $body;
+    }
+
+    $json = @json_decode($body, true);
+    if (empty($json)) {
+        die('Unexpected response from server: ' . $body);
+    }
+
+    return $json;
+}
+
 function renderMessageForPostRequest($url, array $postFields)
 {
     $message = 'It looks like you are testing a local installation. ';

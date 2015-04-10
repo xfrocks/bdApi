@@ -47,20 +47,8 @@ switch ($action) {
             break;
         }
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $tokenUrl);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
         // step 4
-        $body = curl_exec($ch);
-        curl_close($ch);
-
-        $json = @json_decode($body, true);
-        if (empty($json)) {
-            die('Unexpected response from server: ' . $body);
-        }
+        $json = makeCurlPost($tokenUrl, $postFields);
 
         if (!empty($json['access_token'])) {
             $accessToken = $json['access_token'];
@@ -86,8 +74,34 @@ switch ($action) {
                 $message = 'Unexpected response from server: ' . var_export($body, true);
             } else {
                 $message = renderMessageForJson($_REQUEST['url'], $json);
+
+                if ($_REQUEST['url'] === 'users/me') {
+                    $topic = 'user_notification_' . $json['user']['user_id'];
+                }
             }
         }
+        break;
+    case 'subscribe':
+    case 'unsubscribe':
+        if (empty($_REQUEST['topic'])) {
+            $message = 'Subscription request must have `topic` parameter!';
+            break;
+        }
+        $topic = $_REQUEST['topic'];
+
+        if (empty($_REQUEST['fwd'])) {
+            $message = 'Subscription request must have `fwd` parameter!';
+            break;
+        }
+        $fwd = $_REQUEST['fwd'];
+
+        if ($action == 'subscribe') {
+            $json = makeSubscriptionRequest($config, $topic, $fwd, $accessToken);
+        } else {
+            $json = makeSubscriptionRequest($config, $topic, $fwd);
+        }
+
+        $message = renderMessageForJson($action, $json);
         break;
     case 'authorize':
     default:
@@ -131,6 +145,34 @@ switch ($action) {
         <br/>
 
         <input type="submit" value="Make API Request"/>
+    </form>
+    <hr/>
+
+    <h3>Test Subscriptions</h3>
+    <form action="index.php" method="POST">
+        <label>Action:</label>
+        <label>
+            <input type="radio" name="action" value="subscribe" checked="checked"/>
+            Subscribe
+        </label>
+        <label>
+            <input type="radio" name="action" value="unsubscribe"/>
+            Unsubscribe
+        </label>
+        <br/>
+
+        <label for="topic_ctrl">Topic</label><br/>
+        <input id="topic_ctrl" type="text" name="topic" placeholder="user_notification_xxx"
+               value="<?php echo (!empty($topic) ? $topic : ''); ?>"/><br/>
+        <br/>
+
+        <label for="fwd_ctrl">Forward Address</label><br/>
+        <input id="fwd_ctrl" type="text" name="fwd" placeholder="http://requestb.in/123456"
+               value="<?php echo (!empty($fwd) ? $fwd : ''); ?>"/><br/>
+        <br/>
+
+        <input type="submit" value="Subscribe / Unsubscribe"/>
+        <input type="hidden" name="access_token" value="<?php echo $accessToken; ?>"/><br/>
     </form>
     <hr/>
 <?php endif; ?>

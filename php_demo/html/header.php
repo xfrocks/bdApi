@@ -8,7 +8,8 @@
             color: blue;
         }
 
-        input {
+        input[type=text],
+        input[type=button] {
             margin-right: 5px;
             max-width: 90%;
             width: 400px;
