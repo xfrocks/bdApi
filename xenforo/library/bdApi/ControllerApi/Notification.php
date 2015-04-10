@@ -45,6 +45,46 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));
     }
 
+
+    public function actionGetContent()
+    {
+        $id = $this->_input->filterSingle('notification_id', XenForo_Input::UINT);
+        $alert = $this->_getAlertModel()->getAlertById($id);
+        if (empty($alert)) {
+            return $this->_actionGetContent_getControllerResponseNop();
+        }
+
+        $controllerResponse = $this->_actionGetContent_getControllerResponse($alert);
+        if (!empty($controllerResponse)) {
+            return $controllerResponse;
+        }
+
+        // alert content type not recognized...
+        return $this->_actionGetContent_getControllerResponseNop($alert);
+    }
+
+
+    protected function _actionGetContent_getControllerResponseNop(array $alert = null)
+    {
+        return $this->responseData('bdApi_ViewApi_Notification_Content', array(
+            'notification_id' => !empty($alert['alert_id']) ? $alert['alert_id'] : null,
+        ));
+    }
+
+    protected function _actionGetContent_getControllerResponse(array $alert)
+    {
+        switch ($alert['content_type']) {
+            case 'thread':
+                $this->_request->setParam('thread_id', $alert['content_id']);
+                return $this->responseReroute('bdApi_ControllerApi_Post', 'get-index');
+            case 'post':
+                $this->_request->setParam('page_of_post_id', $alert['content_id']);
+                return $this->responseReroute('bdApi_ControllerApi_Post', 'get-index');
+        }
+
+        return null;
+    }
+
     /**
      *
      * @return bdApi_XenForo_Model_Alert

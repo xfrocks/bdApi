@@ -1630,12 +1630,26 @@ List of notifications. Since forum-2014022602.
                 creator_user_id: (int), # since subscription-2014081001
                 creator_username: (string), # since subscription-2014081001
                 notification_type: (string), # since forum-2014080901
-                notification_html: (string)
+                notification_html: (string),
+                links: {
+                    content: (uri), # since forum-2015041001
+                }
             },
             ...
         ],
         subscription_callback: (uri) # since subscription-2014081002
     }
+
+Required scopes:
+
+ * `read`
+
+### GET `/notifications/content`
+Get associated content of notification. The response depends on the content type. Since forum-2015041001.
+
+Parameters:
+
+ * `notification_id` (__required__): id of the notification.
 
 Required scopes:
 
