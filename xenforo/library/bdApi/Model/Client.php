@@ -20,7 +20,10 @@ class bdApi_Model_Client extends XenForo_Model
             if (is_array($data[$key])) {
                 // do not support array in signing for now
                 unset($data[$key]);
-            } elseif (is_bool($data[$key])) {
+                continue;
+            }
+
+            if (is_bool($data[$key])) {
                 // strval(true) = 1 while strval(false) = 0
                 // so we will normalize bool to int before the strval
                 $data[$key] = ($data[$key] ? 1 : 0);
