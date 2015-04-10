@@ -42,17 +42,19 @@ if (!defined('ABSPATH')) {
                     </li>
                 <?php endif; ?>
 
-                <?php foreach ($xfUsers as $xfUser): ?>
-                    <li>
-                        <label for="xfac_connect_<?php echo $xfUser['user_id']; ?>">
-                            <input type="radio" name="xfac_connect" id="xfac_connect_<?php echo $xfUser['user_id']; ?>"
-                                   value="<?php echo $xfUser['user_id']; ?>">
-                            <?php _e('Connect to', 'xenforo-api-consumer'); ?>
-                            <a href="<?php echo $xfUser['links']['permalink']; ?>"
-                               target="_blank"><?php echo $xfUser['username']; ?></a>
-                        </label>
-                    </li>
-                <?php endforeach; ?>
+                <?php if (!empty($xfUsers)): ?>
+                    <?php foreach ($xfUsers as $xfUser): ?>
+                        <li>
+                            <label for="xfac_connect_<?php echo $xfUser['user_id']; ?>">
+                                <input type="radio" name="xfac_connect" id="xfac_connect_<?php echo $xfUser['user_id']; ?>"
+                                       value="<?php echo $xfUser['user_id']; ?>">
+                                <?php _e('Connect to', 'xenforo-api-consumer'); ?>
+                                <a href="<?php echo $xfUser['links']['permalink']; ?>"
+                                   target="_blank"><?php echo $xfUser['username']; ?></a>
+                            </label>
+                        </li>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </ul>
         </td>
     </tr>
