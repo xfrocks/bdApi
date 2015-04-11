@@ -68,12 +68,28 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
                     if (!empty($subscriptions)) {
                         foreach ($subscriptions as $subscription) {
                             $dw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription');
+                            $dw->setOption(bdApi_DataWriter_Subscription::OPTION_UPDATE_CALLBACKS, false);
                             $dw->setExistingData($subscription, true);
                             $dw->delete();
                         }
+
+                        $this->_getSubscriptionModel()->updateCallbacksForTopic($input['hub_topic']);
                     }
                     break;
                 default:
+                    $subscriptions = $this->_getSubscriptionModel()->getSubscriptions(array(
+                        'client_id' => $clientId,
+                        'topic' => $input['hub_topic'],
+                    ));
+                    foreach ($subscriptions as $subscription) {
+                        if ($subscription['callback'] == $input['hub_callback']) {
+                            $duplicateDw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription');
+                            $duplicateDw->setOption(bdApi_DataWriter_Subscription::OPTION_UPDATE_CALLBACKS, false);
+                            $duplicateDw->setExistingData($subscription, true);
+                            $duplicateDw->delete();
+                        }
+                    }
+
                     $dw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription');
                     $dw->set('client_id', $clientId);
                     $dw->set('callback', $input['hub_callback']);
