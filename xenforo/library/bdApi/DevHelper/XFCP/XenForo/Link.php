@@ -4,6 +4,11 @@ abstract class XenForo_Link
 {
     const API_LINK_GROUP = '';
 
+    public function __construct($linkString, $canPrependFull = true)
+    {
+        // do nothing
+    }
+
     public static function buildApiLink(/** @noinspection PhpUnusedParameterInspection */
         $type, $data = null, array $extraParams = array(), $skipPrepend = false)
     {

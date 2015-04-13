@@ -20,6 +20,16 @@ class bdApi_Link extends _XenForo_Link
 {
     const API_LINK_GROUP = 'api';
 
+    public function __construct($linkString, $canPrependFull = true)
+    {
+        if ($canPrependFull) {
+            // we have to verify this because caller may not know that all relative urls are forced to absolute by us
+            $canPrependFull = !Zend_Uri::check($linkString);
+        }
+
+        parent::__construct($linkString, $canPrependFull);
+    }
+
     public static function buildPublicLink($type, $data = null, array $extraParams = array(), $skipPrepend = false)
     {
         // the type MUST BE canonical:$type
