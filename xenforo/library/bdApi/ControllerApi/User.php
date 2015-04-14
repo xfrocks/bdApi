@@ -6,7 +6,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     {
         $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
         if (!empty($userId)) {
-            return $this->responseReroute(__CLASS__, 'get-single');
+            return $this->responseReroute(__CLASS__, 'single');
         }
 
         $userModel = $this->_getUserModel();
@@ -45,7 +45,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_User_List', $data);
     }
 
-    public function actionGetSingle()
+    public function actionSingle()
     {
         $user = $this->_getUserOrError();
 
@@ -470,7 +470,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         }
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
-        return $this->responseReroute(__CLASS__, 'get-single');
+        return $this->responseReroute(__CLASS__, 'single');
     }
 
     public function actionPostMeAvatar()

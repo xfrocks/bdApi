@@ -181,7 +181,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         ));
 
         $this->_request->setParam('post_id', $post['post_id']);
-        return $this->responseReroute(__CLASS__, 'get-single');
+        return $this->responseReroute(__CLASS__, 'single');
     }
 
     public function actionPutIndex()
@@ -241,7 +241,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         XenForo_Db::commit();
 
-        return $this->responseReroute(__CLASS__, 'get-single');
+        return $this->responseReroute(__CLASS__, 'single');
     }
 
     public function actionDeleteIndex()

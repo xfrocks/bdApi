@@ -15,7 +15,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
     {
         $messageId = $this->_input->filterSingle('message_id', XenForo_Input::UINT);
         if (!empty($messageId)) {
-            return $this->responseReroute(__CLASS__, 'get-single');
+            return $this->responseReroute(__CLASS__, 'single');
         }
 
         $conversationId = $this->_input->filterSingle('conversation_id', XenForo_Input::UINT);
@@ -57,7 +57,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         return $this->responseData('bdApi_ViewApi_ConversationMessage_List', $data);
     }
 
-    public function actionGetSingle()
+    public function actionSingle()
     {
         $messageId = $this->_input->filterSingle('message_id', XenForo_Input::UINT);
         $message = $this->_getMessageOrError($messageId);
@@ -114,7 +114,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $this->_getConversationModel()->markConversationAsRead($conversation['conversation_id'], XenForo_Visitor::getUserId(), XenForo_Application::$time, 0, false);
 
         $this->_request->setParam('message_id', $message['message_id']);
-        return $this->responseReroute(__CLASS__, 'get-single');
+        return $this->responseReroute(__CLASS__, 'single');
     }
 
     public function actionPutIndex()
@@ -142,7 +142,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $messageDw->setExtraData(XenForo_DataWriter_ConversationMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($message));
         $messageDw->save();
 
-        return $this->responseReroute(__CLASS__, 'get-single');
+        return $this->responseReroute(__CLASS__, 'single');
     }
 
     public function actionDeleteIndex()

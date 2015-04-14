@@ -6,7 +6,7 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
     {
         $nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
         if (!empty($nodeId)) {
-            return $this->responseReroute($this->_getControllerName(), 'get-single');
+            return $this->responseReroute($this->_getControllerName(), 'single');
         }
 
         $parentId = $this->_input->filterSingle('parent_category_id', XenForo_Input::STRING);
@@ -36,7 +36,7 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_Node_List', $data);
     }
 
-    public function actionGetSingle()
+    public function actionSingle()
     {
         $nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
 

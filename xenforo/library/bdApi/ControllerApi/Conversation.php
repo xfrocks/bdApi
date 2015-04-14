@@ -15,7 +15,7 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
     {
         $conversationId = $this->_input->filterSingle('conversation_id', XenForo_Input::UINT);
         if (!empty($conversationId)) {
-            return $this->responseReroute(__CLASS__, 'get-single');
+            return $this->responseReroute(__CLASS__, 'single');
         }
 
         $visitor = XenForo_Visitor::getInstance();
@@ -59,7 +59,7 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_Conversation_List', $data);
     }
 
-    public function actionGetSingle()
+    public function actionSingle()
     {
         $fetchOptions = array('join' => 0);
 
@@ -121,7 +121,7 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
         $this->_getConversationModel()->markConversationAsRead($conversation['conversation_id'], XenForo_Visitor::getUserId(), XenForo_Application::$time);
 
         $this->_request->setParam('conversation_id', $conversation['conversation_id']);
-        return $this->responseReroute(__CLASS__, 'get-single');
+        return $this->responseReroute(__CLASS__, 'single');
     }
 
     public function actionDeleteIndex()

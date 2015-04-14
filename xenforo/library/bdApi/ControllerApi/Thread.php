@@ -263,7 +263,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $this->_getThreadModel()->markThreadRead($thread, $forum, XenForo_Application::$time);
 
         $this->_request->setParam('thread_id', $thread['thread_id']);
-        return $this->responseReroute(__CLASS__, 'get-single');
+        return $this->responseReroute(__CLASS__, 'single');
     }
 
     public function actionDeleteIndex()
