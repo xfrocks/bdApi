@@ -644,6 +644,25 @@ function xfac_api_postOauthTokenAdmin($config, $adminAccessToken, $userId)
     return _xfac_api_prepareAccessTokenBody($body);
 }
 
+function xfac_api_putUser($config, $accessToken, $userId, array $postFields)
+{
+    $url = call_user_func_array('sprintf', array(
+        '%s/index.php?users/%d&oauth_token=%s',
+        rtrim($config['root'], '/'),
+        $userId,
+        rawurlencode($accessToken),
+    ));
+
+    $curl = _xfac_api_curl($url, 'PUT', $postFields);
+    extract($curl);
+
+    if (isset($parts['status']) AND $parts['status'] == 'ok') {
+        return true;
+    } else {
+        return _xfac_api_getFailedResponse($curl);
+    }
+}
+
 function xfac_api_filterHtmlFromXenForo($html)
 {
     $offset = 0;

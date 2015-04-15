@@ -192,6 +192,7 @@ function xfac_authenticate($user, $username, $password)
     $wpUser = xfac_user_getUserByApiData($config['root'], $xfUser['user_id']);
     if (!empty($wpUser)) {
         // yay, found an associated user!
+        xfac_syncLogin_syncBasic($config, $wpUser, $xfUser);
         xfac_syncLogin_syncRole($config, $wpUser, $xfUser);
         xfac_user_updateRecord($wpUser->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
         xfac_log('xfac_authenticate logged in via existing XenForo connection (user #%d)', $wpUser->ID);
@@ -299,6 +300,106 @@ function xfac_authenticate_syncUserWpXf($user, $username, $password)
 
 if (!!get_option('xfac_sync_user_wp_xf')) {
     add_filter('authenticate', 'xfac_authenticate_syncUserWpXf', PHP_INT_MAX - 1, 3);
+}
+
+function xfac_syncLogin_syncBasic($config, WP_User $wpUser, array $xfUser, $xfToWp = true)
+{
+    $meta = xfac_option_getMeta($config);
+    if (empty($meta['userGroups'])) {
+        return false;
+    }
+
+    $changes = 0;
+    if (!empty($xfUser['username']) && $wpUser->nickname != $xfUser['username']) {
+        $changes++;
+    }
+    if (!empty($xfUser['user_email']) && $wpUser->user_email != $xfUser['user_email']) {
+        $changes++;
+    }
+    if ($changes === 0) {
+        return false;
+    }
+
+    if ($xfToWp) {
+        if (!get_option('xfac_sync_login')) {
+            return false;
+        }
+    } else {
+        if (!get_option('xfac_sync_user_wp_xf')) {
+            return false;
+        }
+    }
+
+    if ($xfToWp) {
+        $XFAC_SKIP_xfac_profile_update = !empty($GLOBALS['XFAC_SKIP_xfac_profile_update']);
+        $GLOBALS['XFAC_SKIP_xfac_profile_update'] = true;
+
+        $wpUserData = array('ID' => $wpUser->ID);
+        if (!empty($xfUser['username']) && $wpUser->nickname != $xfUser['username']) {
+            $wpUserData['nickname'] = $xfUser['username'];
+
+            if ($wpUser->display_name == $wpUser->nickname) {
+                $wpUserData['display_name'] = $wpUserData['nickname'];
+            }
+        }
+        if (!empty($xfUser['user_email']) && $wpUser->user_email != $xfUser['user_email']) {
+            $wpUserData['user_email'] = $xfUser['user_email'];
+        }
+
+        $inserted = wp_update_user($wpUserData);
+        xfac_log(
+            'xfac_syncLogin_syncBasic wp_update_user(%s) -> %s',
+            var_export($wpUserData, true),
+            $inserted
+        );
+        $GLOBALS['XFAC_SKIP_xfac_profile_update'] = $XFAC_SKIP_xfac_profile_update;
+    } else {
+        $accessToken = xfac_user_getAdminAccessToken($config);
+
+        if (!empty($accessToken)) {
+            $xfUserData = array();
+            if (!empty($xfUser['username']) && $wpUser->nickname != $xfUser['username']) {
+                $xfUserData['username'] = $wpUser->nickname;
+            }
+            if (!empty($xfUser['user_email']) && $wpUser->user_email != $xfUser['user_email']) {
+                $xfUserData['user_email'] = $wpUser->user_email;
+            }
+
+            xfac_api_putUser($config, $accessToken, $xfUser['user_id'], $xfUserData);
+            xfac_log('xfac_syncLogin_syncBasic updated $xfUser (#%d): %s', $xfUser['user_id'], var_export($xfUserData, true));
+        } else {
+            xfac_log('xfac_syncLogin_syncBasic updating $xfUser (#%d) because of missing $accessToken', $xfUser['user_id']);
+        }
+    }
+
+    return true;
+}
+
+function xfac_profile_update($wpUserId)
+{
+    if (!empty($GLOBALS['XFAC_SKIP_xfac_profile_update'])) {
+        return;
+    }
+
+    $config = xfac_option_getConfig();
+    $accessToken = xfac_user_getAccessToken($wpUserId);
+    if (empty($accessToken)) {
+        return;
+    }
+
+    $me = xfac_api_getUsersMe($config, $accessToken);
+    if (empty($me['user'])) {
+        return;
+    }
+    $xfUser = $me['user'];
+
+    $wpUser = new WP_User($wpUserId);
+
+    xfac_syncLogin_syncBasic($config, $wpUser, $xfUser, false);
+}
+
+if (!!get_option('xfac_sync_login')) {
+    add_action('profile_update', 'xfac_profile_update', 10, 2);
 }
 
 function xfac_set_user_role($wpUserId, $newRole, $oldRoles)

@@ -187,6 +187,7 @@ function xfac_login_init()
     }
 
     if (!empty($wpUser)) {
+        xfac_syncLogin_syncBasic($config, $wpUser, $xfUser);
         xfac_syncLogin_syncRole($config, $wpUser, $xfUser);
         xfac_user_updateRecord($wpUser->ID, $config['root'], $xfUser['user_id'], $xfUser, $token);
 
