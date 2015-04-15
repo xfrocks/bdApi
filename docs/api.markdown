@@ -967,7 +967,7 @@ Create a new user.
 
 Parameters:
 
- * `email` (__required__): email of the new user.
+ * `user_email` (__required__): email of the new user.
  * `username` (__required__): username of the new user.
  * `password` (__required__): password of the new user.
  * `password_algo` (_optional_): algorithm used to encrypt the `password` parameter. See [Encryption](#encryption) section for more information.
@@ -994,7 +994,7 @@ Filtered list of users by username or email. Since forum-2015030901.
 Parameters:
 
  * `username` (_optional_): username to filter. Usernames start with the query will be returned.
- * `email` (_optional_): email to filter. Requires `admincp` scope.
+ * `user_email` (_optional_): email to filter. Requires `admincp` scope.
 
 Required scopes:
 
@@ -1062,6 +1062,30 @@ Parameters:
 Required scopes:
 
  * `read`
+
+### PUT `/users/:userId`
+Edit a user. Since forum-2015041501. The introduction of this method makes POST `/users/:userId/password` deprecated.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * `user_email` (_optional_): new email of the user.
+ * `username` (_optional_): new username of the user. Changing username requires Administrator permission.
+ * `password` (_optional_): data of the new password.
+ * `user_dob_day` (_optional_): new date of birth (day) of the user. This parameter must come together with `user_dob_month` and `user_dob_year`. User can add his/her own date of birth but changing existing data requires Administrator permission.
+ * `user_dob_month` (_optional_): new date of birth (month) of the user.
+ * `user_dob_year` (_optional_): new date of birth (year) of the user.
+ * `password_old` (_optional_): data of the existing password, it is not required if (1) the current authenticated user has `user` admin permission, (2) the `admincp` scope is granted and (3) the user being edited is not the current authenticated user.
+ * `password_algo` (_optional_): algorithm used to encrypt the `password` and `password_old` parameters. See [Encryption](#encryption) section for more information.
+
+Required scopes:
+
+ * `post`
+ * `admincp`
 
 ### POST `/users/:userId/avatar`
 Upload avatar for a user.
@@ -1169,24 +1193,6 @@ Required scopes:
 
  * `read`
 
-### POST `/users/:userId/password`
-Change password of a user.
-
-    {
-        status: "ok",
-        message: "Changes Saved"
-    }
-
-Parameters:
-
- * `password` (__required__): data of the new password.
- * `password_old` (__required__): data of the existing password, it is _optional_ if (1) the current authenticated user has `user` admin permission, (2) the `admincp` scope is granted and (3) the user whose password is being changed is not the current authenticated user.
- * `password_algo` (_optional_): algorithm used to encrypt the `password` parameter. See [Encryption](#encryption) section for more information.
-
-Required scopes:
-
- * `post`
-
 ### GET `/users/groups`
 List of all user groups. Since forum-2014092301.
 
@@ -1254,6 +1260,9 @@ Required scopes:
 ### GET `/users/me`
 Alias for GET `/users/:userId` for authorized user.
 
+### PUT `/users/me`
+Alias for PUT `/users/:userId` for authorized user.
+
 ### POST `/users/me/avatar`
 Alias for POST `/users/:userId/avatar` for authorized user.
 
@@ -1265,9 +1274,6 @@ Alias for GET `/users/:userId/followers` for authorized user.
 
 ### GET `/users/me/followings`
 Alias for GET `/users/:userId/followings` for authorized user.
-
-### POST `/users/me/password`
-Alias for POST `/users/:userId/password` for authorized user.
 
 ### GET `/users/me/groups`
 Alias for GET `/users/:userId/groups` for authorized user. Since forum-2014092301.

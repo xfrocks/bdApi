@@ -61,7 +61,11 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     {
         $users = array();
         $username = $this->_input->filterSingle('username', XenForo_Input::STRING);
-        $email = $this->_input->filterSingle('email', XenForo_Input::STRING);
+        $email = $this->_input->filterSingle('user_email', XenForo_Input::STRING);
+        if (empty($email)) {
+            // backward compatibility
+            $email = $this->_input->filterSingle('email', XenForo_Input::STRING);
+        }
 
         if (XenForo_Helper_Email::isEmailValid($email)) {
             $visitor = XenForo_Visitor::getInstance();
@@ -111,7 +115,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         }
 
         $input = $this->_input->filter(array(
-            'email' => XenForo_Input::STRING,
+            'user_email' => XenForo_Input::STRING,
             'username' => XenForo_Input::STRING,
             'password' => XenForo_Input::STRING,
             'password_algo' => XenForo_Input::STRING,
@@ -228,6 +232,124 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_User_Single', $data);
     }
 
+    public function actionPutIndex()
+    {
+        $user = $this->_getUserOrError();
+        $visitor = XenForo_Visitor::getInstance();
+
+        $input = $this->_input->filter(array(
+            'password_old' => XenForo_Input::STRING,
+            'password_algo' => XenForo_Input::STRING,
+
+            'user_email' => XenForo_Input::STRING,
+            'username' => XenForo_Input::STRING,
+            'password' => XenForo_Input::STRING,
+            'user_dob_day' => XenForo_Input::UINT,
+            'user_dob_month' => XenForo_Input::UINT,
+            'user_dob_year' => XenForo_Input::UINT,
+        ));
+
+        $session = bdApi_Data_Helper_Core::safeGetSession();
+        $isAdmin = $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM) && $visitor->hasAdminPermission('user');
+
+        $isAuth = false;
+        if ($isAdmin && $visitor['user_id'] != $user['user_id']) {
+            $isAuth = true;
+        } elseif (!empty($input['password_old'])) {
+            $auth = $this->_getUserModel()->getUserAuthenticationObjectByUserId($user['user_id']);
+            if (!empty($auth)) {
+                $passwordOld = bdApi_Crypt::decrypt($input['password_old'], $input['password_algo']);
+                if ($auth->hasPassword() && $auth->authenticate($user['user_id'], $passwordOld)) {
+                    $isAuth = true;
+                }
+            }
+        }
+        if (!$isAuth) {
+            return $this->responseNoPermission();
+        }
+
+        /* @var $writer XenForo_DataWriter_User */
+        $writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
+        $writer->setExistingData($user, true);
+
+        if (!empty($input['user_email'])) {
+            $writer->set('email', $input['user_email']);
+
+            if ($writer->isChanged('email')
+                && XenForo_Application::getOptions()->get('registrationSetup', 'emailConfirmation')
+                && !$isAdmin
+            ) {
+                switch ($writer->get('user_state')) {
+                    case 'moderated':
+                    case 'email_confirm':
+                        $writer->set('user_state', 'email_confirm');
+                        break;
+
+                    default:
+                        $writer->set('user_state', 'email_confirm_edit');
+                }
+            }
+        }
+
+        if (!empty($input['username'])) {
+            if (!$isAdmin) {
+                return $this->responseNoPermission();
+            }
+
+            $writer->set('username', $input['username']);
+        }
+
+        if (!empty($input['password'])) {
+            $password = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
+            $writer->setPassword($password, $password);
+        }
+
+        if (!empty($input['user_dob_day']) && !empty($input['user_dob_month']) && !empty($input['user_dob_year'])) {
+            $hasExistingDob = false;
+            $hasExistingDob = $hasExistingDob || !!$writer->getExisting('dob_day');
+            $hasExistingDob = $hasExistingDob || !!$writer->getExisting('dob_month');
+            $hasExistingDob = $hasExistingDob || !!$writer->getExisting('dob_year');
+
+            if ($hasExistingDob) {
+                if (!$isAdmin) {
+                    // changing dob requires admin permission
+                    return $this->responseNoPermission();
+                }
+            } else {
+                // new dob just needs auth
+            }
+
+            $writer->set('dob_day', $input['user_dob_day']);
+            $writer->set('dob_month', $input['user_dob_month']);
+            $writer->set('dob_year', $input['user_dob_year']);
+        }
+
+        if (!$writer->hasChanges()) {
+            return $this->responseError(new XenForo_Phrase('error_occurred_or_request_stopped'), 400);
+        }
+
+        $writer->save();
+
+        $user = $writer->getMergedData();
+        if ($writer->isChanged('email')
+            && in_array($user['user_state'], array('email_confirm', 'email_confirm_edit'))
+        ) {
+            /* @var $userConfirmationModel XenForo_Model_UserConfirmation */
+            $userConfirmationModel = $this->getModelFromCache('XenForo_Model_UserConfirmation');
+            $userConfirmationModel->sendEmailConfirmation($user);
+        }
+
+        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
+
+    public function actionPostPassword()
+    {
+        $link = XenForo_Link::buildApiLink('users', array('user_id' => $this->_input->filterSingle('user_id', XenForo_Input::UINT)));
+        $this->_setDeprecatedHeaders('PUT', $link);
+
+        return $this->responseReroute(__CLASS__, 'put-index');
+    }
+
     public function actionPostAvatar()
     {
         $user = $this->_getUserOrError();
@@ -337,68 +459,6 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_User_Followings', $data);
     }
 
-    public function actionPostPassword()
-    {
-        $input = $this->_input->filter(array(
-            'password_old' => XenForo_Input::STRING,
-            'password' => XenForo_Input::STRING,
-            'password_algo' => XenForo_Input::STRING,
-        ));
-
-        $user = $this->_getUserOrError();
-        $visitor = XenForo_Visitor::getInstance();
-        $passwordOld = bdApi_Crypt::decrypt($input['password_old'], $input['password_algo']);
-        $password = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
-
-        $session = bdApi_Data_Helper_Core::safeGetSession();
-        if ($session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM)
-            && $visitor->hasAdminPermission('user')
-            && $visitor['user_id'] != $user['user_id']
-        ) {
-            // current user has admin permission, bypass old password verification
-            // do not bypass if changing self password though
-        } else {
-            $auth = $this->_getUserModel()->getUserAuthenticationObjectByUserId($user['user_id']);
-            if (empty($auth)) {
-                return $this->responseNoPermission();
-            }
-            if ($auth->hasPassword() && !$auth->authenticate($user['user_id'], $passwordOld)) {
-                return $this->responseNoPermission();
-            }
-        }
-
-        /* @var $writer XenForo_DataWriter_User */
-        $writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
-        $writer->setExistingData($user, true);
-        $writer->setPassword($password, $password);
-        $writer->save();
-
-        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
-    }
-
-    public function actionPostPasswordTest()
-    {
-        $input = $this->_input->filter(array(
-            'password' => XenForo_Input::STRING,
-            'password_algo' => XenForo_Input::STRING,
-            'decrypt' => XenForo_Input::UINT,
-        ));
-
-        if (!XenForo_Application::debugMode()) {
-            return $this->responseNoPermission();
-        }
-
-        if (empty($input['decrypt'])) {
-            $result = bdApi_Crypt::encrypt($input['password'], $input['password_algo']);
-        } else {
-            $result = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
-        }
-
-        $data = array('result' => $result);
-
-        return $this->responseData('bdApi_ViewApi_User_PasswordTest', $data);
-    }
-
     public function actionGetGroups()
     {
         $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
@@ -471,6 +531,16 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'single');
+    }
+
+    public function actionPutMe()
+    {
+        if (XenForo_Visitor::getUserId() == 0) {
+            return $this->responseNoPermission();
+        }
+
+        $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
+        return $this->responseReroute(__CLASS__, 'put-index');
     }
 
     public function actionPostMeAvatar()

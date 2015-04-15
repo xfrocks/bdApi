@@ -337,4 +337,12 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         return $responseOutput;
     }
 
+    protected function _setDeprecatedHeaders($newMethod, $newLink) {
+        $this->_response->setHeader('X-Api-Deprecated', sprintf(
+            'newMethod=%s, newLink=%s',
+            strtoupper($newMethod),
+            $newLink
+        ), true);
+    }
+
 }

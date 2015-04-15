@@ -82,6 +82,29 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $logoutLink);
     }
 
+    public function actionPostPasswordTest()
+    {
+        $input = $this->_input->filter(array(
+            'password' => XenForo_Input::STRING,
+            'password_algo' => XenForo_Input::STRING,
+            'decrypt' => XenForo_Input::UINT,
+        ));
+
+        if (!XenForo_Application::debugMode()) {
+            return $this->responseNoPermission();
+        }
+
+        if (empty($input['decrypt'])) {
+            $result = bdApi_Crypt::encrypt($input['password'], $input['password_algo']);
+        } else {
+            $result = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
+        }
+
+        $data = array('result' => $result);
+
+        return $this->responseData('bdApi_ViewApi_Tool_PasswordTest', $data);
+    }
+
     public function actionPostPasswordResetRequest()
     {
         $this->_assertRegistrationRequired();
