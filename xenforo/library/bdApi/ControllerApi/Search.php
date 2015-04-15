@@ -125,8 +125,12 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             $constraints['node'] = implode(' ', $nodeIds);
             if (!$constraints['node']) {
                 unset($constraints['node']);
-                // just 0
             }
+        }
+
+        $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+        if (!empty($userId)) {
+            $constraints['user'] = array($userId);
         }
 
         $searchModel = $this->_getSearchModel();
