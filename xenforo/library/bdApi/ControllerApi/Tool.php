@@ -4,27 +4,35 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 {
     public function actionGetLogin()
     {
-        /* @var $session bdApi_Session */
-        $session = XenForo_Application::getSession();
-
-        $input = $this->_input->filter(array(
-            'oauth_token' => XenForo_Input::STRING,
-            'redirect_uri' => XenForo_Input::STRING,
-        ));
-
-        if (empty($input['redirect_uri'])) {
+        $redirectUri = $this->_input->filterSingle('redirect_uri', XenForo_Input::STRING);
+        if (empty($redirectUri)) {
             return $this->responseError(new XenForo_Phrase('bdapi_slash_tools_login_requires_redirect_uri'), 400);
         }
-        if (!$session->isValidRedirectUri($input['redirect_uri'])) {
+
+        /* @var $session bdApi_Session */
+        $session = XenForo_Application::getSession();
+        $clientId = $session->getOAuthClientId();
+        if (empty($clientId)) {
+            $this->_response->setHeader('X-Api-Login-Error', 'client_id');
+            return $this->responseNoPermission();
+        }
+
+        if (!$session->isValidRedirectUri($redirectUri)) {
+            $this->_response->setHeader('X-Api-Login-Error', 'redirect_uri');
+            return $this->responseNoPermission();
+        }
+
+        $userId = XenForo_Visitor::getUserId();
+        if (empty($userId)) {
+            $this->_response->setHeader('X-Api-Login-Error', 'oauth_token');
             return $this->responseNoPermission();
         }
 
         $loginLinkData = array(
-            'redirect' => $input['redirect_uri'],
+            'redirect' => $redirectUri,
             'timestamp' => XenForo_Application::$time + 10,
         );
-
-        $loginLinkData['user_id'] = bdApi_Crypt::encryptTypeOne(XenForo_Visitor::getUserId(), $loginLinkData['timestamp']);
+        $loginLinkData['user_id'] = bdApi_Crypt::encryptTypeOne($userId, $loginLinkData['timestamp']);
 
         $loginLink = XenForo_Link::buildPublicLink('login/api', '', $loginLinkData);
 
@@ -54,27 +62,29 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 
     public function actionGetLogout()
     {
-        /* @var $session bdApi_Session */
-        $session = XenForo_Application::getSession();
-
-        $input = $this->_input->filter(array(
-            'oauth_token' => XenForo_Input::STRING,
-            'redirect_uri' => XenForo_Input::STRING,
-        ));
-
-        if (empty($input['redirect_uri'])) {
+        $redirectUri = $this->_input->filterSingle('redirect_uri', XenForo_Input::STRING);
+        if (empty($redirectUri)) {
             return $this->responseError(new XenForo_Phrase('bdapi_slash_tools_login_requires_redirect_uri'), 400);
         }
-        if (!$session->isValidRedirectUri($input['redirect_uri'])) {
+
+        /* @var $session bdApi_Session */
+        $session = XenForo_Application::getSession();
+        $clientId = $session->getOAuthClientId();
+        if (empty($clientId)) {
+            $this->_response->setHeader('X-Api-Logout-Error', 'client_id');
+            return $this->responseNoPermission();
+        }
+
+        if (!$session->isValidRedirectUri($redirectUri)) {
+            $this->_response->setHeader('X-Api-Logout-Error', 'redirect_uri');
             return $this->responseNoPermission();
         }
 
         $logoutLinkData = array(
-            'redirect' => $input['redirect_uri'],
+            'redirect' => $redirectUri,
             '_xfToken' => XenForo_Visitor::getInstance()->get('csrf_token_page'),
             'timestamp' => XenForo_Application::$time + 10,
         );
-
         $logoutLinkData['md5'] = bdApi_Crypt::encryptTypeOne(md5($logoutLinkData['redirect']), $logoutLinkData['timestamp']);
 
         $logoutLink = XenForo_Link::buildPublicLink('logout', '', $logoutLinkData);
@@ -225,6 +235,38 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 
         return null;
     }
+
+    protected function _preDispatchFirst($action)
+    {
+        switch ($action) {
+            case 'GetLogin':
+            case 'GetLogout':
+                $this->_redirectAsNoPermission = true;
+                break;
+        }
+
+        parent::_preDispatchFirst($action);
+    }
+
+    protected $_redirectAsNoPermission = false;
+
+    public function responseNoPermission()
+    {
+        if ($this->_redirectAsNoPermission) {
+            // this "hack" is required because other pre dispatch jobs may throw no permission response around
+            // and we want to redirect them all, not just from our actions
+            $redirectUri = $this->_input->filterSingle('redirect_uri', XenForo_Input::STRING);
+            if (!empty($redirectUri)) {
+                return $this->responseRedirect(
+                    XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
+                    $redirectUri
+                );
+            }
+        }
+
+        return parent::responseNoPermission();
+    }
+
 
     protected function _getScopeForAction($action)
     {
