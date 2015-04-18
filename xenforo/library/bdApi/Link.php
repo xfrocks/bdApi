@@ -72,10 +72,8 @@ class bdApi_Link extends _XenForo_Link
         $queryString = XenForo_Link::buildQueryString($extraParams);
 
         if ($link instanceof XenForo_Link) {
-            $isRaw = true;
             $canPrependFull = $link->canPrependFull();
         } else {
-            $isRaw = false;
             $canPrependFull = true;
 
             if (strpos($link, '#') !== false) {
@@ -83,23 +81,19 @@ class bdApi_Link extends _XenForo_Link
             }
         }
 
-        if (XenForo_Link::$_useFriendlyUrls || $isRaw) {
-            $outputLink = ($queryString !== '' ? "$link?$queryString" : $link);
+        if ($queryString !== '' && $link !== '') {
+            $append = "?$link&$queryString";
         } else {
-            if ($queryString !== '' && $link !== '') {
-                $append = "?$link&$queryString";
-            } else {
-                // 1 or neither of these has content
-                $append = $link . $queryString;
-                if ($append !== '') {
-                    $append = "?$append";
-                }
+            // 1 or neither of these has content
+            $append = $link . $queryString;
+            if ($append !== '') {
+                $append = "?$append";
             }
-            if ($skipPrepend) {
-                $outputLink = $append;
-            } else {
-                $outputLink = 'index.php' . $append;
-            }
+        }
+        if ($skipPrepend) {
+            $outputLink = $append;
+        } else {
+            $outputLink = 'index.php' . $append;
         }
 
         if ($fullLink && $canPrependFull) {
