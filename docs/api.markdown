@@ -1963,7 +1963,8 @@ Search for threads.
     {
         threads: [
             {
-                thread_id: (int)
+                content_type: 'thread',
+				content_id: (int)
             },
             ...
         ],
@@ -1974,13 +1975,9 @@ Search for threads.
         ]
     }
 
-Parameters:
+Parameters (other than defaults):
 
- * `q` (__required__): query to search for.
- * `limit` (_optional_): maximum number of result threads. The limit may get decreased if the value is too large (depending on the system configuration).
- * `forum_id` (_optional_): id of the container forum to search for threads. Child forums of the specified forum will be included in the search.
- * `user_id` (_optional_): id of the creator to search for threads. Since forum-2015041502.
- * `data_limit` (_optional_): number of threads to be returned in data. By default, no data is returned. Since forum-2015032402.
+ * N/A
 
 Required scopes:
 
@@ -1992,7 +1989,8 @@ Search for posts.
     {
         posts: [
             {
-                post_id: (int)
+                content_type: 'post',
+				content_id: (int)
             },
             ...
         ],
@@ -2003,14 +2001,66 @@ Search for posts.
         ]
     }
 
+Parameters (other than defaults):
+
+ * `thread_id` (_optional_): id of the container thread to search for posts.
+
+Required scopes:
+
+ * `read`
+
+### POST `/search/profile-posts`
+Search for profile posts. Since forum-2015042001.
+
+    {
+        profile_posts: [
+            {
+                content_type: 'profile_post',
+				content_id: (int)
+            },
+            ...
+        ],
+        data: [
+            (profile_post),
+            ...
+                
+        ]
+    }
+
+Parameters (other than defaults):
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### POST `/search`
+Search for all support contents. Since forum-2015042002.
+
+	{
+		results: [
+			{
+				content_type: (string),
+				content_id: (int)
+			},
+			...
+		],
+		data: [
+			(thread),
+			(post),
+			(profile_post),
+			...
+		]
+	}
+
 Parameters:
 
  * `q` (__required__): query to search for.
- * `limit` (_optional_): maximum number of result posts. The limit may get decreased if the value is too large (depending on the system configuration).
- * `forum_id` (_optional_): id of the container forum to search for posts. Child forums of the specified forum will be included in the search.
- * `thread_id` (_optional_): id of the container thread to search for posts.
- * `user_id` (_optional_): id of the creator to search for posts. Since forum-2015041502.
- * `data_limit` (_optional_): number of posts to be returned in data. By default, no data is returned. Since forum-2015032403.
+ * `limit` (_optional_): maximum number of results. The limit may get decreased if the value is too large (depending on the system configuration).
+ * `forum_id` (_optional_): id of the container forum to search for contents. Child forums of the specified forum will be included in the search.
+ * `user_id` (_optional_): id of the creator to search for contents. Since forum-2015041502.
+ * `data_limit` (_optional_): number of content data to be returned. By default, no data is returned. Since forum-2015032403.
 
 Required scopes:
 

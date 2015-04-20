@@ -13,6 +13,28 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_Index', $data);
     }
 
+    public function actionPostIndex()
+    {
+        $rawResults = $this->_doSearch();
+
+        $results = array();
+        foreach ($rawResults as $rawResult) {
+            $results[] = array(
+                'content_type' => $rawResult[0],
+                'content_id' => $rawResult[1],
+            );
+        }
+
+        $data = array('results' => $results);
+
+        $resultsData = $this->_fetchResultsData($results);
+        if (!empty($resultsData)) {
+            $data['data'] = $resultsData;
+        }
+
+        return $this->responseData('bdApi_ViewApi_Search', $data);
+    }
+
     public function actionGetThreads()
     {
         return $this->responseError(new XenForo_Phrase('bdapi_slash_search_only_accepts_post_requests'), 400);
@@ -129,7 +151,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_Search_ProfilePosts', $data);
     }
 
-    public function _doSearch($contentType, array $constraints = array())
+    public function _doSearch($contentType = null, array $constraints = array())
     {
         if (!XenForo_Visitor::getInstance()->canSearch()) {
             throw $this->getNoPermissionResponseException();
@@ -166,10 +188,37 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         }
 
         $searchModel = $this->_getSearchModel();
-        $typeHandler = $searchModel->getSearchDataHandler($contentType);
         $searcher = new XenForo_Search_Searcher($searchModel);
 
-        return $searcher->searchType($typeHandler, $input['keywords'], $constraints, 'relevance', false, $maxResults);
+        if (!empty($contentType)) {
+            // content type searching
+            $typeHandler = $searchModel->getSearchDataHandler($contentType);
+            $results = $searcher->searchType($typeHandler, $input['keywords'], $constraints, 'relevance', false, $maxResults);
+        } else {
+            // general searching
+            $results = $searcher->searchGeneral($input['keywords'], $constraints, 'relevance', $maxResults);
+        }
+
+        $filteredResults = array();
+        foreach ($results as $result) {
+            if ($this->_contentTypeIsSupported($result[0])) {
+                $filteredResults[] = $result;
+            }
+        }
+
+        return $filteredResults;
+    }
+
+    protected function _contentTypeIsSupported($contentType)
+    {
+        switch ($contentType) {
+            case 'thread':
+            case 'post':
+            case 'profile_post':
+                return true;
+        }
+
+        return false;
     }
 
     protected function _fetchResultsData(array $results)
@@ -219,6 +268,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
                     $key = $threadIds[$thread['thread_id']];
 
                     $data[$key] = $thread;
+                    $data[$key]['content_type'] = 'thread';
                 }
             }
         }
@@ -238,6 +288,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
                     $key = $postIds[$post['post_id']];
 
                     $data[$key] = $post;
+                    $data[$key]['content_type'] = 'post';
                 }
             }
         }
@@ -257,6 +308,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
                     $key = $profilePostIds[$profilePost['profile_post_id']];
 
                     $data[$key] = $profilePost;
+                    $data[$key]['content_type'] = 'profile_post';
                 }
             }
         }
