@@ -6,17 +6,6 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
     protected $_bdApi_postsInThread_orderReverse = false;
 
-    protected static $_bdApi_posts = array();
-
-    public function getPostsByIds(array $postIds, array $fetchOptions = array())
-    {
-        $posts = parent::getPostsByIds($postIds, $fetchOptions);
-
-        self::$_bdApi_posts = $posts;
-
-        return $posts;
-    }
-
     public function getPostsInThread($threadId, array $fetchOptions = array())
     {
         if (!empty($fetchOptions[self::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE])) {
@@ -40,11 +29,6 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
         }
 
         return parent::fetchAllKeyed($sql, $key, $bind, $nullPrefix);
-    }
-
-    public static function bdApi_getCachedPosts()
-    {
-        return self::$_bdApi_posts;
     }
 
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())

@@ -67,18 +67,41 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             $constraints['thread'] = $threadId;
         }
 
-        $this->_doSearch('post', $constraints);
-
-        // perform get posts from model because the search result are grouped
-        $this->_getPostModel();
-        $posts = bdApi_XenForo_Model_Post::bdApi_getCachedPosts();
-
+        $rawResults = $this->_doSearch('post', $constraints);
+        $threadIds = array();
         $results = array();
-        foreach ($posts as $post) {
-            $results[] = array('post_id' => $post['post_id']);
+        foreach ($rawResults as $rawResult) {
+            $results[] = array(
+                'content_type' => $rawResult[0],
+                'content_id' => $rawResult[1],
 
-            if ($dataLimit > 0 && count($postIds) < $dataLimit) {
-                $postIds[] = $post['post_id'];
+                // backward compatibility
+                'post_id' => $rawResult[1],
+            );
+
+            if ($rawResult[0] == 'thread') {
+                $threadIds[] = $rawResult[1];
+            }
+
+            if (count($postIds) < $dataLimit) {
+                $postIds[] = $rawResult[1];
+            }
+        }
+
+        $threadIds = array_unique(array_map('intval', $threadIds));
+        if (!empty($threadIds)) {
+            /** @var XenForo_Model_Thread $threadModel */
+            $threadModel = $this->getModelFromCache('XenForo_Model_Thread');
+            $threads = $threadModel->getThreadsByIds($threadIds);
+            foreach ($results as &$resultRef) {
+                if ($resultRef['content_type'] == 'thread'
+                    && isset($threads[$resultRef['content_id']])
+                ) {
+                    $threadRef =& $threads[$resultRef['content_id']];
+                    $resultRef['content_type'] = 'post';
+                    $resultRef['content_id'] = $threadRef['first_post_id'];
+                    $resultRef['post_id'] = $threadRef['first_post_id'];
+                }
             }
         }
 
