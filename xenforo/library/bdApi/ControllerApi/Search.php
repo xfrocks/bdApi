@@ -20,32 +20,25 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function actionPostThreads()
     {
-        $dataLimit = $this->_input->filterSingle('data_limit', XenForo_Input::UINT);
-        $threadIds = array();
-
         $constraints = array();
         $rawResults = $this->_doSearch('thread', $constraints);
 
         $results = array();
         foreach ($rawResults as $rawResult) {
-            $results[] = array('thread_id' => $rawResult[1]);
+            $results[] = array(
+                'content_type' => 'thread',
+                'content_id' => $rawResult[1],
 
-            if ($dataLimit > 0 && count($threadIds) < $dataLimit) {
-                $threadIds[] = $rawResult[1];
-            }
+                // backward compatibility
+                'thread_id' => $rawResult[1],
+            );
         }
 
         $data = array('threads' => $results);
 
-        if (!empty($threadIds)) {
-            // fetch the first few thread data as a bonus
-            $dataJobParams = $this->_request->getParams();
-            $dataJobParams['thread_ids'] = implode(',', $threadIds);
-            $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'threads', $dataJobParams);
-
-            if (isset($dataJob['threads'])) {
-                $data['data'] = $dataJob['threads'];
-            }
+        $resultsData = $this->_fetchResultsData($results);
+        if (!empty($resultsData)) {
+            $data['data'] = $resultsData;
         }
 
         return $this->responseData('bdApi_ViewApi_Search_Threads', $data);
@@ -58,9 +51,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function actionPostPosts()
     {
-        $dataLimit = $this->_input->filterSingle('data_limit', XenForo_Input::UINT);
-        $postIds = array();
-
         $constraints = array();
         $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
         if (!empty($threadId)) {
@@ -81,10 +71,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
             if ($rawResult[0] == 'thread') {
                 $threadIds[] = $rawResult[1];
-            }
-
-            if (count($postIds) < $dataLimit) {
-                $postIds[] = $rawResult[1];
             }
         }
 
@@ -107,15 +93,9 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
         $data = array('posts' => $results);
 
-        if (!empty($postIds)) {
-            // fetch the first few thread data as a bonus
-            $dataJobParams = $this->_request->getParams();
-            $dataJobParams['post_ids'] = implode(',', $postIds);
-            $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'posts', $dataJobParams);
-
-            if (isset($dataJob['posts'])) {
-                $data['data'] = $dataJob['posts'];
-            }
+        $resultsData = $this->_fetchResultsData($results);
+        if (!empty($resultsData)) {
+            $data['data'] = $resultsData;
         }
 
         return $this->responseData('bdApi_ViewApi_Search_Posts', $data);
@@ -128,9 +108,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function actionPostProfilePosts()
     {
-        $dataLimit = $this->_input->filterSingle('data_limit', XenForo_Input::UINT);
-        $profilePostIds = array();
-
         $constraints = array();
         $rawResults = $this->_doSearch('profile_post', $constraints);
 
@@ -140,23 +117,13 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
                 'content_type' => 'profile_post',
                 'content_id' => $rawResult[1],
             );
-
-            if (count($profilePostIds) < $dataLimit) {
-                $profilePostIds[] = $rawResult[1];
-            }
         }
 
         $data = array('profile_posts' => $results);
 
-        if (!empty($profilePostIds)) {
-            // fetch the first few profile post data as a bonus
-            $dataJobParams = $this->_request->getParams();
-            $dataJobParams['profile_post_ids'] = implode(',', $profilePostIds);
-            $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'profile-posts', $dataJobParams);
-
-            if (isset($dataJob['profile_posts'])) {
-                $data['data'] = $dataJob['profile_posts'];
-            }
+        $resultsData = $this->_fetchResultsData($results);
+        if (!empty($resultsData)) {
+            $data['data'] = $resultsData;
         }
 
         return $this->responseData('bdApi_ViewApi_Search_ProfilePosts', $data);
@@ -203,6 +170,100 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         $searcher = new XenForo_Search_Searcher($searchModel);
 
         return $searcher->searchType($typeHandler, $input['keywords'], $constraints, 'relevance', false, $maxResults);
+    }
+
+    protected function _fetchResultsData(array $results)
+    {
+        $dataLimit = $this->_input->filterSingle('data_limit', XenForo_Input::UINT);
+        if (empty($dataLimit) || empty($results)) {
+            return array();
+        }
+
+        $dataResults = array_slice($results, 0, $dataLimit);
+        return $this->_fetchContentData($dataResults);
+    }
+
+    protected function _fetchContentData(array $dataResults)
+    {
+        $threadIds = array();
+        $postIds = array();
+        $profilePostIds = array();
+        $data = array();
+
+        foreach ($dataResults as $key => $dataResult) {
+            switch ($dataResult['content_type']) {
+                case 'thread':
+                    $threadIds[$dataResult['content_id']] = $key;
+                    break;
+                case 'post':
+                    $postIds[$dataResult['content_id']] = $key;
+                    break;
+                case 'profile_post':
+                    $profilePostIds[$dataResult['content_id']] = $key;
+                    break;
+            }
+        }
+
+        if (!empty($threadIds)) {
+            // fetch the first few thread data as a bonus
+            $dataJobParams = $this->_request->getParams();
+            $dataJobParams['thread_ids'] = implode(',', array_keys($threadIds));
+            $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'threads', $dataJobParams);
+
+            if (isset($dataJob['threads'])) {
+                foreach ($dataJob['threads'] as $thread) {
+                    if (!isset($threadIds[$thread['thread_id']])) {
+                        // key not found?!
+                        continue;
+                    }
+                    $key = $threadIds[$thread['thread_id']];
+
+                    $data[$key] = $thread;
+                }
+            }
+        }
+
+        if (!empty($postIds)) {
+            // fetch the first few thread data as a bonus
+            $dataJobParams = $this->_request->getParams();
+            $dataJobParams['post_ids'] = implode(',', array_keys($postIds));
+            $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'posts', $dataJobParams);
+
+            if (isset($dataJob['posts'])) {
+                foreach ($dataJob['posts'] as $post) {
+                    if (!isset($postIds[$post['post_id']])) {
+                        // key not found?!
+                        continue;
+                    }
+                    $key = $postIds[$post['post_id']];
+
+                    $data[$key] = $post;
+                }
+            }
+        }
+
+        if (!empty($profilePostIds)) {
+            // fetch the first few thread data as a bonus
+            $dataJobParams = $this->_request->getParams();
+            $dataJobParams['profile_post_ids'] = implode(',', array_keys($profilePostIds));
+            $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'profile-posts', $dataJobParams);
+
+            if (isset($dataJob['profile_posts'])) {
+                foreach ($dataJob['profile_posts'] as $profilePost) {
+                    if (!isset($profilePostIds[$profilePost['profile_post_id']])) {
+                        // key not found?!
+                        continue;
+                    }
+                    $key = $profilePostIds[$profilePost['profile_post_id']];
+
+                    $data[$key] = $profilePost;
+                }
+            }
+        }
+
+        ksort($data);
+
+        return array_values($data);
     }
 
     /**

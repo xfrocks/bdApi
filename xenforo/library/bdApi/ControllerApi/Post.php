@@ -457,7 +457,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             }
         }
         if (!empty($threadIds)) {
-            $dbThreads = $this->_getThreadModel()->getThreadsByIds($threadIds);
+            $dbThreads = $this->_getThreadModel()->getThreadsByIds(
+                $threadIds,
+                $this->_getThreadModel()->getFetchOptionsToPrepareApiData()
+            );
         }
 
         $forumIds = array();
@@ -484,7 +487,6 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         foreach ($nodePermissions as $nodeId => $permissions) {
             $visitor->setNodePermissions($nodeId, $permissions);
         }
-
 
         $postsData = array();
         foreach ($posts as $post) {
