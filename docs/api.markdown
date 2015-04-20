@@ -1281,7 +1281,289 @@ Alias for GET `/users/:userId/groups` for authorized user. Since forum-201409230
 ### POST `/users/me/groups`
 Alias for POST `/users/:userId/groups` for authorized user. Since forum-2014092301.
 
-## Conversation
+## Profile Posts
+
+### GET `/users/:userId/timeline`
+List of profile posts on a user timeline (with pagination). Since forum-2015042001.
+
+    {
+        profile_posts: [
+            (profile_post),
+            (profile_post),
+            ...
+        ],
+        profile_posts_total: (int),
+        user: (user),
+        links {
+            pages: (int),
+            next: (uri),
+            prev: (uri)
+        }
+    }
+
+Parameters:
+
+ * `page` (_optional_): page number of profile posts.
+ * `limit` (_optional_): number of profile posts in a page. Default value depends on the system configuration.
+
+Required scopes:
+
+ * `read`
+
+### POST `/users/:userId/timeline`
+Create a new profile post on a user timeline. Since forum-2015042001.
+
+    {
+        profile_post: (profile_post)
+    }
+
+Parameters:
+
+ * `post_body` (__required__): content of the new profile post.
+
+Required scopes:
+
+ * `post`
+
+
+### GET `/users/me/timeline`
+Alias for GET `/users/:userId/timeline` for authorized user. Since forum-2015042001.
+
+### POST `/users/me/groups`
+Alias for POST `/users/:userId/timeline` for authorized user. Since forum-2015042001.
+
+### GET `/profile-posts/:profilePostId`
+Detail information of a profile post. Since forum-2015042001.
+
+    {
+        profile_post: {
+            profile_post_id: (int),
+            timeline_user_id: (int),
+            poster_user_id: (int),
+            poster_username: (string),
+            post_create_date: (unix timestamp in seconds),
+            post_body: (string),
+            post_like_count: (int),
+            post_comment_count: (int),
+            post_is_published: (boolean),
+            post_is_deleted: (boolean),
+            post_is_liked: (boolean),
+            links: {
+                permalink: (uri),
+                detail: (uri),
+                timeline: (uri),
+                timeline_user: (uri),
+                poster: (uri),
+                likes: (uri),
+                comments: (uri),
+                report: (uri),
+                poster_avatar: (uri)
+            },
+            permissions: {
+                view: (boolean),
+                edit: (boolean),
+                delete: (boolean),
+                like: (boolean),
+                comment: (boolean),
+                report: (boolean)
+            }
+        }
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### PUT `/profile-posts/:profilePostId`
+Edit a profile post. Since forum-2015042001.
+
+    {
+        profile_post: (profile_post)
+    }
+
+Parameters:
+
+ * `post_body` (__required__): new content of the profile post.
+
+Required scopes:
+
+ * `post`
+
+### DELETE `/profile-posts/:profilePostId`
+Delete a profile post. Since forum-2015042001.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+
+
+### GET `/profile-posts/:profilePostId/likes`
+List of users who liked a profile post. Since forum-2015042001.
+
+    {
+        users: [
+            {
+                user_id: (int),
+                username: (string)
+            },
+            ...
+        ]
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### POST `/profile-posts/:profilePostId/likes`
+Like a profile post. Since forum-2015042001.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+
+### DELETE `/profile-posts/:profilePostId/likes`
+Unlike a profile post. Since forum-2015042001.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+
+### GET `/profile-posts/:profilePostId/comments`
+List of comments of a profile post. Since forum-2015042001.
+
+    {
+        comments: [
+            (profile_post > comment),
+            ...
+        ]
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### POST `/profile-posts/:profilePostId/comments`
+Create a new profile post comment. Since forum-2015042001.
+
+    {
+        comment: (profile_post > comment)
+    }
+
+Parameters:
+
+ * `comment_body` (__required__): content of the new profile post comment.
+
+Required scopes:
+
+ * `post`
+
+### GET `/profile-posts/:profilePostId/comments/:commentId`
+Detail information of a profile post comment. Since forum-2015042001.
+
+	{
+		comment: {
+			comment_id: (int),
+			timeline_user_id: (int),
+			profile_post_id: (int),
+			comment_user_id: (int),
+			comment_username: (string),
+			comment_create_date: (unix timestamp in seconds),
+			comment_body: (string),
+			links: {
+				detail: (uri),
+				profile_post: (uri),
+				timeline: (uri),
+				timeline_user: (uri),
+				poster: (uri),
+				poster_avatar: (uri)
+			},
+			permissions: {
+				view: (boolean),
+				delete: (boolean)
+			}
+		}
+	}
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
+### DELETE `/profile-posts/:profilePostId/comments/:commentId`
+Delete a profile post's comment. Since forum-2015042001.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `post`
+
+### POST `/profile-posts/:profilePostId/report`
+Report a profile post. Since forum-2015042001.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * `message` (__required__): reason of the report.
+
+Required scopes:
+
+ * `post`
+
+## Conversations
 
 ### GET `/conversations`
 List of conversations (with pagination).
