@@ -7,6 +7,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         $data = array('links' => array(
             'posts' => XenForo_Link::buildApiLink('search/posts'),
             'threads' => XenForo_Link::buildApiLink('search/threads'),
+            'profile-posts' => XenForo_Link::buildApiLink('search/profile-posts'),
         ));
 
         return $this->responseData('bdApi_ViewApi_Index', $data);
@@ -95,6 +96,47 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         }
 
         return $this->responseData('bdApi_ViewApi_Search_Posts', $data);
+    }
+
+    public function actionGetProfilePosts()
+    {
+        return $this->responseError(new XenForo_Phrase('bdapi_slash_search_only_accepts_post_requests'), 400);
+    }
+
+    public function actionPostProfilePosts()
+    {
+        $dataLimit = $this->_input->filterSingle('data_limit', XenForo_Input::UINT);
+        $profilePostIds = array();
+
+        $constraints = array();
+        $rawResults = $this->_doSearch('profile_post', $constraints);
+
+        $results = array();
+        foreach ($rawResults as $rawResult) {
+            $results[] = array(
+                'content_type' => 'profile_post',
+                'content_id' => $rawResult[1],
+            );
+
+            if (count($profilePostIds) < $dataLimit) {
+                $profilePostIds[] = $rawResult[1];
+            }
+        }
+
+        $data = array('profile_posts' => $results);
+
+        if (!empty($profilePostIds)) {
+            // fetch the first few profile post data as a bonus
+            $dataJobParams = $this->_request->getParams();
+            $dataJobParams['profile_post_ids'] = implode(',', $profilePostIds);
+            $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'profile-posts', $dataJobParams);
+
+            if (isset($dataJob['profile_posts'])) {
+                $data['data'] = $dataJob['profile_posts'];
+            }
+        }
+
+        return $this->responseData('bdApi_ViewApi_Search_ProfilePosts', $data);
     }
 
     public function _doSearch($contentType, array $constraints = array())

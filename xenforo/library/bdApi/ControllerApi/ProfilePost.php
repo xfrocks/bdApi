@@ -4,6 +4,11 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
 {
     public function actionGetIndex()
     {
+        $profilePostIds = $this->_input->filterSingle('profile_post_ids', XenForo_Input::STRING);
+        if (!empty($profilePostIds)) {
+            return $this->responseReroute(__CLASS__, 'multiple');
+        }
+
         return $this->responseReroute(__CLASS__, 'single');
     }
 
@@ -20,6 +25,54 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         ));
 
         return $this->responseData('bdApi_ViewApi_ProfilePost_Single', $data);
+    }
+
+    public function actionMultiple()
+    {
+        $profilePostIdsInput = $this->_input->filterSingle('profile_post_ids', XenForo_Input::STRING);
+        $profilePostIds = array_map('intval', explode(',', $profilePostIdsInput));
+        if (empty($profilePostIds)) {
+            return $this->responseNoPermission();
+        }
+
+        $profilePosts = $this->_getProfilePostModel()->getProfilePostsByIds(
+            $profilePostIds,
+            $this->_getProfilePostModel()->getFetchOptionsToPrepareApiData()
+        );
+
+        $profilePostsOrdered = array();
+        $profileUserIds = array();
+        foreach ($profilePostIds as $profilePostId) {
+            if (isset($profilePosts[$profilePostId])) {
+                $profilePostsOrdered[$profilePostId] = $profilePosts[$profilePostId];
+                $profileUserIds[] = $profilePosts[$profilePostId]['profile_user_id'];
+            }
+        }
+
+        $profileUserIds = array_unique(array_map('intval', $profileUserIds));
+        if (!empty($profileUserIds)) {
+            /** @var XenForo_Model_User $userModel */
+            $userModel = $this->getModelFromCache('XenForo_Model_User');
+            $profileUsers = $userModel->getUsersByids($profileUserIds, array(
+                'join' => XenForo_Model_User::FETCH_USER_FULL,
+            ));
+        }
+
+        $profilePostsData = array();
+        foreach ($profilePostsOrdered as $profilePost) {
+            if (!isset($profileUsers[$profilePost['profile_user_id']])) {
+                continue;
+            }
+            $profileUserRef = $profileUsers[$profilePost['profile_user_id']];
+
+            $profilePostsData[] = $this->_getProfilePostModel()->prepareApiDataForProfilePost($profilePost, $profileUserRef);
+        }
+
+        $data = array(
+            'profile_posts' => $this->_filterDataMany($profilePostsData),
+        );
+
+        return $this->responseData('bdApi_ViewApi_ProfilePost_Multiple', $data);
     }
 
     public function actionPutIndex()
