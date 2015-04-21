@@ -201,6 +201,12 @@ function xfac_login_init()
 
 add_action('login_init', 'xfac_login_init');
 
+if (!empty($_REQUEST['xfac'])) {
+    // Paid Membership Pro prevents user from reaching the wp-login.php if logged in
+    // we re-use the login form a few times so we have to block pmpro
+    remove_action('login_init', 'pmpro_redirect_to_logged_in', 5);
+}
+
 function _xfac_login_renderAssociateForm(WP_User $wpUser, array $xfUser, $refreshToken, $scope, $redirectTo)
 {
     $title = __('Associate Account', 'xenforo-api-consumer');
