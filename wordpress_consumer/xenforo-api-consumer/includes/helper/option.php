@@ -92,7 +92,7 @@ function xfac_option_getMeta($config)
     if ($rebuild AND $rebuiltCount > 0) {
         // we rebuild once, only retry if $meta is empty
         if (!empty($meta)) {
-            $rebuld = false;
+            $rebuild = false;
         }
     }
 
@@ -146,9 +146,11 @@ function xfac_option_getMeta($config)
             }
 
             $meta['xfac_xf_admin_account'] = $xfAdminAccountOption;
-            $userGroups = xfac_api_getUserGroups($config, 0, xfac_user_getAdminAccessToken($config));
-            if (!empty($userGroups['user_groups'])) {
-                $meta['userGroups'] = $userGroups['user_groups'];
+            if (!empty($meta['xfac_xf_admin_account'])) {
+                $userGroups = xfac_api_getUserGroups($config, 0, xfac_user_getAdminAccessToken($config));
+                if (!empty($userGroups['user_groups'])) {
+                    $meta['userGroups'] = $userGroups['user_groups'];
+                }
             }
         }
 
