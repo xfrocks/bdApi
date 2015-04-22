@@ -49,7 +49,7 @@
                     }
                 }
                 else {
-                    if (window.xfacWpLogout != _undefined) {
+                    if (xenForoUserId > 0 && window.xfacWpLogout != _undefined) {
                         // logout
                         window.location.href = window.xfacWpLogout + '&redirect_to=' + encodeURIComponent(location);
                     }
