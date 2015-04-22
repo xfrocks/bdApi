@@ -15,15 +15,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function actionPostIndex()
     {
-        $rawResults = $this->_doSearch();
-
-        $results = array();
-        foreach ($rawResults as $rawResult) {
-            $results[] = array(
-                'content_type' => $rawResult[0],
-                'content_id' => $rawResult[1],
-            );
-        }
+        $results = $this->_doSearch();
 
         $data = array('results' => $results);
 
@@ -42,18 +34,10 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function actionPostThreads()
     {
-        $constraints = array();
-        $rawResults = $this->_doSearch('thread', $constraints);
-
-        $results = array();
-        foreach ($rawResults as $rawResult) {
-            $results[] = array(
-                'content_type' => 'thread',
-                'content_id' => $rawResult[1],
-
-                // backward compatibility
-                'thread_id' => $rawResult[1],
-            );
+        $results = $this->_doSearch('thread');
+        foreach ($results as &$resultRef) {
+            // backward compatibility
+            $resultRef['thread_id'] = $resultRef['content_id'];
         }
 
         $data = array('threads' => $results);
@@ -79,20 +63,15 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             $constraints['thread'] = $threadId;
         }
 
-        $rawResults = $this->_doSearch('post', $constraints);
+        $results = $this->_doSearch('post', $constraints);
         $threadIds = array();
-        $results = array();
-        foreach ($rawResults as $rawResult) {
-            $results[] = array(
-                'content_type' => $rawResult[0],
-                'content_id' => $rawResult[1],
 
+        foreach ($results as &$resultRef) {
+            if ($resultRef['content_type'] == 'post') {
                 // backward compatibility
-                'post_id' => $rawResult[1],
-            );
-
-            if ($rawResult[0] == 'thread') {
-                $threadIds[] = $rawResult[1];
+                $resultRef['post_id'] = $resultRef['content_id'];
+            } elseif ($resultRef['content_type'] == 'thread') {
+                $threadIds[] = $resultRef['content_id'];
             }
         }
 
@@ -130,16 +109,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function actionPostProfilePosts()
     {
-        $constraints = array();
-        $rawResults = $this->_doSearch('profile_post', $constraints);
-
-        $results = array();
-        foreach ($rawResults as $rawResult) {
-            $results[] = array(
-                'content_type' => 'profile_post',
-                'content_id' => $rawResult[1],
-            );
-        }
+        $results = $this->_doSearch('profile_post');
 
         $data = array('profile_posts' => $results);
 
@@ -199,26 +169,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             $results = $searcher->searchGeneral($input['keywords'], $constraints, 'relevance', $maxResults);
         }
 
-        $filteredResults = array();
-        foreach ($results as $result) {
-            if ($this->_contentTypeIsSupported($result[0])) {
-                $filteredResults[] = $result;
-            }
-        }
-
-        return $filteredResults;
-    }
-
-    protected function _contentTypeIsSupported($contentType)
-    {
-        switch ($contentType) {
-            case 'thread':
-            case 'post':
-            case 'profile_post':
-                return true;
-        }
-
-        return false;
+        return $searchModel->prepareApiDataForSearchResults($results);
     }
 
     protected function _fetchResultsData(array $results)
@@ -229,125 +180,19 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         }
 
         $dataResults = array_slice($results, 0, $dataLimit);
-        return $this->_fetchContentData($dataResults);
-    }
 
-    protected function _fetchContentData(array $dataResults)
-    {
-        $threadIds = array();
-        $postIds = array();
-        $profilePostIds = array();
-        $data = array();
+        $searchModel = $this->_getSearchModel();
+        $contentData = $searchModel->prepareApiContentDataForSearch($this, $dataResults);
 
-        foreach ($dataResults as $key => $dataResult) {
-            switch ($dataResult['content_type']) {
-                case 'thread':
-                    $threadIds[$dataResult['content_id']] = $key;
-                    break;
-                case 'post':
-                    $postIds[$dataResult['content_id']] = $key;
-                    break;
-                case 'profile_post':
-                    $profilePostIds[$dataResult['content_id']] = $key;
-                    break;
-            }
-        }
-
-        if (!empty($threadIds)) {
-            // fetch the first few thread data as a bonus
-            $dataJobParams = $this->_request->getParams();
-            $dataJobParams['thread_ids'] = implode(',', array_keys($threadIds));
-            $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'threads', $dataJobParams);
-
-            if (isset($dataJob['threads'])) {
-                foreach ($dataJob['threads'] as $thread) {
-                    if (!isset($threadIds[$thread['thread_id']])) {
-                        // key not found?!
-                        continue;
-                    }
-                    $key = $threadIds[$thread['thread_id']];
-
-                    $data[$key] = $thread;
-                    $data[$key]['content_type'] = 'thread';
-                }
-            }
-        }
-
-        if (!empty($postIds)) {
-            // fetch the first few thread data as a bonus
-            $dataJobParams = $this->_request->getParams();
-            $dataJobParams['post_ids'] = implode(',', array_keys($postIds));
-            $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'posts', $dataJobParams);
-
-            if (isset($dataJob['posts'])) {
-                foreach ($dataJob['posts'] as $post) {
-                    if (!isset($postIds[$post['post_id']])) {
-                        // key not found?!
-                        continue;
-                    }
-                    $key = $postIds[$post['post_id']];
-
-                    $data[$key] = $post;
-                    $data[$key]['content_type'] = 'post';
-                }
-            }
-        }
-
-        if (!empty($profilePostIds)) {
-            // fetch the first few thread data as a bonus
-            $dataJobParams = $this->_request->getParams();
-            $dataJobParams['profile_post_ids'] = implode(',', array_keys($profilePostIds));
-            $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'profile-posts', $dataJobParams);
-
-            if (isset($dataJob['profile_posts'])) {
-                foreach ($dataJob['profile_posts'] as $profilePost) {
-                    if (!isset($profilePostIds[$profilePost['profile_post_id']])) {
-                        // key not found?!
-                        continue;
-                    }
-                    $key = $profilePostIds[$profilePost['profile_post_id']];
-
-                    $data[$key] = $profilePost;
-                    $data[$key]['content_type'] = 'profile_post';
-                }
-            }
-        }
-
-        ksort($data);
-
-        return array_values($data);
+        return array_values($contentData);
     }
 
     /**
-     * @return XenForo_Model_Search
+     * @return bdApi_XenForo_Model_Search
      */
     protected function _getSearchModel()
     {
         return $this->getModelFromCache('XenForo_Model_Search');
-    }
-
-    /**
-     * @return XenForo_Model_Post
-     */
-    protected function _getPostModel()
-    {
-        return $this->getModelFromCache('XenForo_Model_Post');
-    }
-
-    /**
-     * @return XenForo_Model_Thread
-     */
-    protected function _getThreadModel()
-    {
-        return $this->getModelFromCache('XenForo_Model_Thread');
-    }
-
-    /**
-     * @return XenForo_Model_Forum
-     */
-    protected function _getForumModel()
-    {
-        return $this->getModelFromCache('XenForo_Model_Forum');
     }
 
     /**
