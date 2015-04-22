@@ -30,7 +30,7 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
         return false;
     }
 
-    public function prepareApiContentDataForSearch(XenForo_Controller $controller, array $preparedResults)
+    public function prepareApiContentDataForSearch(array $preparedResults)
     {
         $threadIds = array();
         $postIds = array();
@@ -53,13 +53,15 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
 
         if (!empty($threadIds)) {
             // fetch the first few thread data as a bonus
-            $dataJobParams = $controller->getRequest()->getParams();
+            $dataJobParams = array();
             $dataJobParams['thread_ids'] = implode(',', array_keys($threadIds));
             $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'threads', $dataJobParams);
 
             if (isset($dataJob['threads'])) {
                 foreach ($dataJob['threads'] as $thread) {
-                    if (!isset($threadIds[$thread['thread_id']])) {
+                    if (empty($thread['thread_id'])
+                        || !isset($threadIds[$thread['thread_id']])
+                    ) {
                         // key not found?!
                         continue;
                     }
@@ -72,13 +74,15 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
 
         if (!empty($postIds)) {
             // fetch the first few thread data as a bonus
-            $dataJobParams = $controller->getRequest()->getParams();
+            $dataJobParams = array();
             $dataJobParams['post_ids'] = implode(',', array_keys($postIds));
             $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'posts', $dataJobParams);
 
             if (isset($dataJob['posts'])) {
                 foreach ($dataJob['posts'] as $post) {
-                    if (!isset($postIds[$post['post_id']])) {
+                    if (empty($post['post_id'])
+                        || !isset($postIds[$post['post_id']])
+                    ) {
                         // key not found?!
                         continue;
                     }
@@ -91,13 +95,15 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
 
         if (!empty($profilePostIds)) {
             // fetch the first few thread data as a bonus
-            $dataJobParams = $controller->getRequest()->getParams();
+            $dataJobParams = array();
             $dataJobParams['profile_post_ids'] = implode(',', array_keys($profilePostIds));
             $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'profile-posts', $dataJobParams);
 
             if (isset($dataJob['profile_posts'])) {
                 foreach ($dataJob['profile_posts'] as $profilePost) {
-                    if (!isset($profilePostIds[$profilePost['profile_post_id']])) {
+                    if (empty($profilePost['profile_post_id'])
+                        || !isset($profilePostIds[$profilePost['profile_post_id']])
+                    ) {
                         // key not found?!
                         continue;
                     }

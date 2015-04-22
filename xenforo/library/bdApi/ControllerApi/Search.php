@@ -182,7 +182,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         $dataResults = array_slice($results, 0, $dataLimit);
 
         $searchModel = $this->_getSearchModel();
-        $contentData = $searchModel->prepareApiContentDataForSearch($this, $dataResults);
+        $contentData = $searchModel->prepareApiContentDataForSearch($dataResults);
 
         return array_values($contentData);
     }
