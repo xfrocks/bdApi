@@ -6,9 +6,9 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
     {
         $data = array();
 
-        foreach ($results as $result) {
+        foreach ($results as $key => $result) {
             if ($this->checkApiSupportsContentType($result[XenForo_Model_Search::CONTENT_TYPE])) {
-                $data[] = array(
+                $data[$key] = array(
                     'content_type' => $result[XenForo_Model_Search::CONTENT_TYPE],
                     'content_id' => $result[XenForo_Model_Search::CONTENT_ID],
                 );
