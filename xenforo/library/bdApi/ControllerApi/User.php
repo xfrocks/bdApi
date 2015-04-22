@@ -154,7 +154,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         if (!empty($registrationDefaults)) {
             $writer->bulkSet($registrationDefaults, array('ignoreInvalidFields' => true));
         }
-        $writer->set('email', $input['email']);
+        $writer->set('email', $input['user_email']);
         $writer->set('username', $input['username']);
 
         $password = bdApi_Crypt::decrypt($input['password'], $input['password_algo'], $clientSecret);
@@ -168,8 +168,8 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             $writer->set('data', $auth->generate(''), 'xf_user_authenticate');
         }
 
-        if ($options->get('gravatarEnable') && XenForo_Model_Avatar::gravatarExists($input['email'])) {
-            $writer->set('gravatar', $input['email']);
+        if ($options->get('gravatarEnable') && XenForo_Model_Avatar::gravatarExists($input['user_email'])) {
+            $writer->set('gravatar', $input['user_email']);
         }
 
         $writer->set('dob_day', $input['user_dob_day']);
