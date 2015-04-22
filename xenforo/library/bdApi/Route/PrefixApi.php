@@ -9,7 +9,7 @@ class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
 
     /**
      * Setups all default routes for [bd] Api. Also fires the code event
-     * `bdapi_setup_routes` and let any other add-ons to setup extra
+     * `api_setup_routes` and let any other add-ons to setup extra
      * routes for the system.
      *
      * @param array $routes the target routes array
