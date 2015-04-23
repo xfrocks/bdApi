@@ -32,10 +32,16 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             return $this->responseError(new XenForo_Phrase('requested_search_not_found'), 404);
         }
 
+        $pageNavParams = array();
         $page = max(1, $this->_input->filterSingle('page', XenForo_Input::UINT));
-        $perPage = XenForo_Application::get('options')->searchResultsPerPage;
+        $limit = XenForo_Application::get('options')->searchResultsPerPage;
+        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
+        if ($inputLimit > 0) {
+            $limit = min($limit, $inputLimit);
+            $pageNavParams['limit'] = $limit;
+        }
 
-        $pageResultIds = $this->_getSearchModel()->sliceSearchResultsToPage($search, $page, $perPage);
+        $pageResultIds = $this->_getSearchModel()->sliceSearchResultsToPage($search, $page, $limit);
         $results = $this->_getSearchModel()->prepareApiDataForSearchResults($pageResultIds);
 
         $contentData = $this->_getSearchModel()->prepareApiContentDataForSearch($results);
@@ -45,7 +51,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             'data_total' => $search['result_count'],
         );
 
-        bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $perPage, $search['result_count'], $page, 'search/results', $search);
+        bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $search['result_count'], $page, 'search/results', $search, $pageNavParams);
 
         return $this->responseData('bdApi_ViewApi_Search_Results', $data);
     }
