@@ -198,6 +198,10 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         if (!empty($contentType)) {
             // content type searching
             $typeHandler = $searchModel->getSearchDataHandler($contentType);
+            if (empty($typeHandler)) {
+                throw new XenForo_Exception(sprintf('No search data handler found for content type %s', $contentType));
+            }
+
             $results = $searcher->searchType($typeHandler, $input['keywords'], $constraints, $input['order'], $input['group_discussion'], $maxResults);
         } else {
             // general searching
