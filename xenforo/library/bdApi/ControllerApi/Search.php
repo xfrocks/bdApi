@@ -137,7 +137,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         $search = $this->_doSearch('profile_post');
 
         $this->_request->setParam('search_id', $search['search_id']);
-        $this->responseReroute(__CLASS__, 'get-results');
+        return $this->responseReroute(__CLASS__, 'get-results');
     }
 
     public function _doSearch($contentType = null, array $constraints = array())
