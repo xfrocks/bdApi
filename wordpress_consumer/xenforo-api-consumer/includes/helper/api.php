@@ -750,7 +750,7 @@ function _xfac_api_curl($url, $method = 'GET', $postFields = null, $curlOptions 
     }
 
     if ($httpCode < 200 || $httpCode > 299 || empty($result['parts']) || !empty($result['parts']['error'])) {
-        xfac_log('_xfac_api_curl %s(%s) -> %s', $method, $url, $httpCode);
+        xfac_log('_xfac_api_curl %s (%s, %s) -> %s', $method, $url, var_export($postFields, true), $httpCode);
         foreach ($result['headers'] as $headerLine) {
             xfac_log('               | %s', $headerLine);
         }
