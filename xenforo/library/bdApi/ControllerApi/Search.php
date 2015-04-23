@@ -15,16 +15,39 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function actionPostIndex()
     {
-        $results = $this->_doSearch();
+        $search = $this->_doSearch();
 
-        $data = array('results' => $results);
+        $this->_request->setParam('search_id', $search['search_id']);
+        return $this->responseReroute(__CLASS__, 'get-results');
+    }
 
-        $resultsData = $this->_fetchResultsData($results);
-        if (!empty($resultsData)) {
-            $data['data'] = $resultsData;
+    public function actionGetResults()
+    {
+        $searchId = $this->_input->filterSingle('search_id', XenForo_Input::UINT);
+        $search = $this->_getSearchModel()->getSearchById($searchId);
+
+        if (empty($search)
+            || $search['user_id'] != XenForo_Visitor::getUserId()
+        ) {
+            return $this->responseError(new XenForo_Phrase('requested_search_not_found'), 404);
         }
 
-        return $this->responseData('bdApi_ViewApi_Search', $data);
+        $page = max(1, $this->_input->filterSingle('page', XenForo_Input::UINT));
+        $perPage = XenForo_Application::get('options')->searchResultsPerPage;
+
+        $pageResultIds = $this->_getSearchModel()->sliceSearchResultsToPage($search, $page, $perPage);
+        $results = $this->_getSearchModel()->prepareApiDataForSearchResults($pageResultIds);
+
+        $contentData = $this->_getSearchModel()->prepareApiContentDataForSearch($results);
+
+        $data = array(
+            'data' => $this->_filterDataMany(array_values($contentData)),
+            'data_total' => $search['result_count'],
+        );
+
+        bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $perPage, $search['result_count'], $page, 'search/results', $search);
+
+        return $this->responseData('bdApi_ViewApi_Search_Results', $data);
     }
 
     public function actionGetThreads()
@@ -34,13 +57,16 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function actionPostThreads()
     {
-        $results = $this->_doSearch('thread');
-        foreach ($results as &$resultRef) {
-            // backward compatibility
-            $resultRef['thread_id'] = $resultRef['content_id'];
+        $search = $this->_doSearch('thread');
+        $pageResultIds = $this->_getSearchModel()->sliceSearchResultsToPage($search, 1, null);
+        $results = $this->_getSearchModel()->prepareApiDataForSearchResults($pageResultIds);
+
+        $threads = array();
+        foreach ($results as $result) {
+            $threads[] = array('thread_id' => $result['content_id']);
         }
 
-        $data = array('threads' => $results);
+        $data = array('threads' => $threads);
 
         $resultsData = $this->_fetchResultsData($results);
         if (!empty($resultsData)) {
@@ -63,36 +89,35 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             $constraints['thread'] = $threadId;
         }
 
-        $results = $this->_doSearch('post', $constraints);
+        $search = $this->_doSearch('post', $constraints);
+        $pageResultIds = $this->_getSearchModel()->sliceSearchResultsToPage($search, 1, null);
+        $results = $this->_getSearchModel()->prepareApiDataForSearchResults($pageResultIds);
         $threadIds = array();
 
-        foreach ($results as &$resultRef) {
-            if ($resultRef['content_type'] == 'post') {
-                // backward compatibility
-                $resultRef['post_id'] = $resultRef['content_id'];
-            } elseif ($resultRef['content_type'] == 'thread') {
-                $threadIds[] = $resultRef['content_id'];
+        $posts = array();
+        foreach ($results as $key => $result) {
+            if ($result['content_type'] == 'post') {
+                $posts[$key] = array('post_id' => $result['content_id']);
+            } elseif ($result['content_type'] == 'thread') {
+                $posts[$key] = array('thread_id' => $result['content_id']);
+                $threadIds[intval($result['content_id'])] = $key;
             }
         }
 
-        $threadIds = array_unique(array_map('intval', $threadIds));
         if (!empty($threadIds)) {
             /** @var XenForo_Model_Thread $threadModel */
             $threadModel = $this->getModelFromCache('XenForo_Model_Thread');
-            $threads = $threadModel->getThreadsByIds($threadIds);
-            foreach ($results as &$resultRef) {
-                if ($resultRef['content_type'] == 'thread'
-                    && isset($threads[$resultRef['content_id']])
-                ) {
-                    $threadRef =& $threads[$resultRef['content_id']];
-                    $resultRef['content_type'] = 'post';
-                    $resultRef['content_id'] = $threadRef['first_post_id'];
-                    $resultRef['post_id'] = $threadRef['first_post_id'];
+            $threads = $threadModel->getThreadsByIds(array_keys($threadIds));
+            foreach ($threadIds as $threadId => $key) {
+                if (isset($threads[$threadId])) {
+                    $threadRef =& $threads[$threadId];
+                    $posts[$key]['post_id'] = $threadRef['first_post_id'];
                 }
             }
+            ksort($posts);
         }
 
-        $data = array('posts' => $results);
+        $data = array('posts' => $posts);
 
         $resultsData = $this->_fetchResultsData($results);
         if (!empty($resultsData)) {
@@ -109,16 +134,10 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function actionPostProfilePosts()
     {
-        $results = $this->_doSearch('profile_post');
+        $search = $this->_doSearch('profile_post');
 
-        $data = array('profile_posts' => $results);
-
-        $resultsData = $this->_fetchResultsData($results);
-        if (!empty($resultsData)) {
-            $data['data'] = $resultsData;
-        }
-
-        return $this->responseData('bdApi_ViewApi_Search_ProfilePosts', $data);
+        $this->_request->setParam('search_id', $search['search_id']);
+        $this->responseReroute(__CLASS__, 'get-results');
     }
 
     public function _doSearch($contentType = null, array $constraints = array())
@@ -127,7 +146,10 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             throw $this->getNoPermissionResponseException();
         }
 
-        $input = array();
+        $input = array(
+            'order' => 'relevance',
+            'group_discussion' => false,
+        );
 
         $input['keywords'] = $this->_input->filterSingle('q', XenForo_Input::STRING);
         $input['keywords'] = XenForo_Helper_String::censorString($input['keywords'], null, '');
@@ -136,10 +158,17 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_slash_search_requires_q'), 400));
         }
 
-        $limit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
         $maxResults = XenForo_Application::getOptions()->get('maximumSearchResults');
-        if ($limit > 0) {
-            $maxResults = min($maxResults, $limit);
+
+        switch ($contentType) {
+            case 'thread':
+            case 'post':
+                // only these two legacy content types support `limit` param while searching
+                // others use `limit` to control how many pieces of data are returned
+                $limit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
+                if ($limit > 0) {
+                    $maxResults = min($maxResults, $limit);
+                }
         }
 
         $forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
@@ -163,17 +192,20 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         if (!empty($contentType)) {
             // content type searching
             $typeHandler = $searchModel->getSearchDataHandler($contentType);
-            $results = $searcher->searchType($typeHandler, $input['keywords'], $constraints, 'relevance', false, $maxResults);
+            $results = $searcher->searchType($typeHandler, $input['keywords'], $constraints, $input['order'], $input['group_discussion'], $maxResults);
         } else {
             // general searching
-            $results = $searcher->searchGeneral($input['keywords'], $constraints, 'relevance', $maxResults);
+            $results = $searcher->searchGeneral($input['keywords'], $constraints, $input['order'], $maxResults);
         }
 
-        return $searchModel->prepareApiDataForSearchResults($results);
+        $search = $searchModel->insertSearch($results, $contentType, $input['keywords'], $constraints, $input['order'], $input['group_discussion']);
+
+        return $search;
     }
 
     protected function _fetchResultsData(array $results)
     {
+        // WARNING: only two legacy types (thread & post) use `data_limit` param
         $dataLimit = $this->_input->filterSingle('data_limit', XenForo_Input::UINT);
         if (empty($dataLimit) || empty($results)) {
             return array();
