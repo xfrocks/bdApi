@@ -25,7 +25,8 @@ function xfac_user_edit($wpUser)
                 $userLoginUsers = xfac_api_getUsersFind($config, $wpUser->user_login);
                 if (!empty($userLoginUsers['users'])) {
                     foreach ($userLoginUsers['users'] as $userLoginUser) {
-                        if ($userLoginUser['username'] == $wpUser->user_login) {
+                        // compare strlen instead of strtolower to avoid unicode complication
+                        if (strlen($userLoginUser['username']) == strlen($wpUser->user_login)) {
                             $xfUsers[$userLoginUser['user_id']] = $userLoginUser;
                         }
                     }

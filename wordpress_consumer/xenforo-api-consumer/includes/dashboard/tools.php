@@ -128,7 +128,8 @@ function xfac_tools_connect()
         $userLoginUsers = xfac_api_getUsersFind($config, $user->user_login);
         if (!empty($userLoginUsers['users'])) {
             foreach ($userLoginUsers['users'] as $userLoginUser) {
-                if ($userLoginUser['username'] == $user->user_login) {
+                // similar logic with includes/dashboard/profile.php
+                if (strlen($userLoginUser['username']) == strlen($user->user_login)) {
                     $candidates[$userLoginUser['user_id']] = $userLoginUser;
                 }
             }
