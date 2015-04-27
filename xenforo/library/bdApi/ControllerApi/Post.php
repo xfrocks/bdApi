@@ -89,13 +89,11 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
         list($post, $thread, $forum) = $this->_getForumThreadPostHelper()->assertPostValidAndViewable($postId, $this->_getPostModel()->getFetchOptionsToPrepareApiData(), $this->_getThreadModel()->getFetchOptionsToPrepareApiData(), $this->_getForumModel()->getFetchOptionsToPrepareApiData());
 
-        if (!$this->_isFieldExcluded('attachments')) {
-            $posts = array($post['post_id'] => $post);
-            $posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
-            $post = reset($posts);
-        }
+        $posts = array($post['post_id'] => $post);
+        $postsData = $this->_preparePosts($posts, $thread, $forum);
+        $postData = reset($postsData);
 
-        $data = array('post' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum)));
+        $data = array('post' => $this->_filterDataSingle($postData));
 
         return $this->responseData('bdApi_ViewApi_Post_Single', $data);
     }
@@ -439,6 +437,12 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
     protected function _preparePosts(array $posts, array $thread = null, array $forum = null)
     {
+        $postIds = array_keys($posts);
+
+        // check for $thread being null because we only prepare `post`.`thread` for request
+        // of multiple posts from different threads (likely from actionMultiple)
+        $preparePostThread = (!$this->_isFieldExcluded('thread') && $thread === null);
+
         $threads = array();
         if ($thread !== null) {
             $threads[$thread['thread_id']] = $thread;
@@ -464,17 +468,31 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         }
 
         $forumIds = array();
+        $firstPostIds = array();
         foreach ($dbThreads as $dbThread) {
             $threads[$dbThread['thread_id']] = $dbThread;
 
             if (!isset($forums[$dbThread['node_id']])) {
                 $forumIds[] = $dbThread['node_id'];
             }
+
+            if (!isset($posts[$dbThread['first_post_id']])) {
+                $firstPostIds[] = $dbThread['first_post_id'];
+            }
         }
         if (!empty($forumIds)) {
             $dbForums = $this->_getForumModel()->getForumsByIds($forumIds);
             foreach ($dbForums as $dbForum) {
                 $forums[$dbForum['node_id']] = $dbForum;
+            }
+        }
+        if ($preparePostThread && !empty($firstPostIds)) {
+            $dbPosts = $this->_getPostModel()->getPostsByIds(
+                $firstPostIds,
+                $this->_getPostModel()->getFetchOptionsToPrepareApiData()
+            );
+            foreach ($dbPosts as $dbPost) {
+                $posts[$dbPost['post_id']] = $dbPost;
             }
         }
 
@@ -489,22 +507,44 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         }
 
         $postsData = array();
-        foreach ($posts as $post) {
-            if (!isset($threads[$post['thread_id']])) {
+        $emptyFirstPost = array();
+        $firstPostRef =& $emptyFirstPost;
+        foreach ($postIds as $postId) {
+            $postRef = &$posts[$postId];
+
+            if (!isset($threads[$postRef['thread_id']])) {
                 continue;
             }
-            $threadRef = &$threads[$post['thread_id']];
+            $threadRef = &$threads[$postRef['thread_id']];
 
             if (!isset($forums[$threadRef['node_id']])) {
                 continue;
             }
             $forumRef = &$forums[$threadRef['node_id']];
 
-            if (!$this->_getPostModel()->canViewPost($post, $threadRef, $forumRef)) {
+            if (!$this->_getPostModel()->canViewPost($postRef, $threadRef, $forumRef)) {
                 continue;
             }
 
-            $postsData[] = $this->_getPostModel()->prepareApiDataForPost($post, $threadRef, $forumRef);
+            if ($preparePostThread) {
+                if (!isset($posts[$threadRef['first_post_id']])) {
+                    continue;
+                }
+
+                if ($postId != $threadRef['first_post_id']) {
+                    $firstPostRef = &$posts[$threadRef['first_post_id']];
+                } else {
+                    $firstPostRef =& $emptyFirstPost;
+                }
+            }
+
+            $postData = $this->_getPostModel()->prepareApiDataForPost($postRef, $threadRef, $forumRef);
+
+            if ($preparePostThread) {
+                $postData['thread'] = $this->_getThreadModel()->prepareApiDataForThread($threadRef, $forumRef, $firstPostRef);
+            }
+
+            $postsData[] = $postData;
         }
 
         return $postsData;

@@ -88,7 +88,20 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
                     }
 
                     $key = $postIds[$post['post_id']];
-                    $data[$key] = array_merge($preparedResults[$key], $post);
+                    if (!empty($post['thread']['first_post'])) {
+                        // the found post is a reply
+                        $data[$key] = array_merge($preparedResults[$key], $post);
+                    } else {
+                        // the found post is a first post, return as thread instead
+                        $thread = $post['thread'];
+                        unset($post['thread']);
+                        $thread['first_post'] = $post;
+
+                        $data[$key] = array_merge(array(
+                            'content_type' => 'thread',
+                            'content_id' => $thread['thread_id'],
+                        ), $thread);
+                    }
                 }
             }
         }
