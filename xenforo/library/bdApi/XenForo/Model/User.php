@@ -158,7 +158,7 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
         /** @var XenForo_Model_UserProfile $userProfileModel */
         $userProfileModel = $this->getModelFromCache('XenForo_Model_UserProfile');
         if ($userProfileModel->canViewProfilePosts($user)) {
-            $data['links']['timeline'] = XenForo_Link::buildApiLink('users/timeline', $user);
+            $data['links']['timeline'] = bdApi_Data_Helper_Core::safeBuildApiLink('users/timeline', $user);
 
             if ($user['user_id'] == $visitor->get('user_id')) {
                 $data['permissions']['profile_post'] = $visitor->canUpdateStatus();

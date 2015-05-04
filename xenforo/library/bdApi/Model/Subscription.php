@@ -20,17 +20,13 @@ class bdApi_Model_Subscription extends XenForo_Model
         switch ($type) {
             case self::TYPE_NOTIFICATION:
                 if (!empty($subscriptions)) {
-                    $link = null;
-                    if (is_callable(array(
-                        'XenForo_Link',
-                        'buildApiLink'
-                    ))) {
-                        $link = XenForo_Link::buildApiLink('notifications', null, array(OAUTH2_TOKEN_PARAM_NAME => ''));
-                    }
-
                     $userOption = array(
                         'topic' => $topic,
-                        'link' => $link,
+                        'link' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                            'notifications',
+                            null,
+                            array(OAUTH2_TOKEN_PARAM_NAME => '')
+                        ),
                         'subscriptions' => $subscriptions,
                     );
                 } else {
@@ -41,20 +37,16 @@ class bdApi_Model_Subscription extends XenForo_Model
                 break;
             case self::TYPE_THREAD_POST:
                 if (!empty($subscriptions)) {
-                    $link = null;
-                    if (is_callable(array(
-                        'XenForo_Link',
-                        'buildApiLink'
-                    ))) {
-                        $link = XenForo_Link::buildApiLink('posts', null, array(
-                            'thread_id' => $id,
-                            OAUTH2_TOKEN_PARAM_NAME => '',
-                        ));
-                    }
-
                     $threadOption = array(
                         'topic' => $topic,
-                        'link' => $link,
+                        'link' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                            'posts',
+                            null,
+                            array(
+                                'thread_id' => $id,
+                                OAUTH2_TOKEN_PARAM_NAME => '',
+                            )
+                        ),
                         'subscriptions' => $subscriptions,
                     );
                 } else {
@@ -65,17 +57,13 @@ class bdApi_Model_Subscription extends XenForo_Model
                 break;
             case self::TYPE_USER:
                 if (!empty($subscriptions)) {
-                    $link = null;
-                    if (is_callable(array(
-                        'XenForo_Link',
-                        'buildApiLink'
-                    ))) {
-                        $link = XenForo_Link::buildApiLink('users', array('user_id' => $id), array(OAUTH2_TOKEN_PARAM_NAME => ''));
-                    }
-
                     $userOption = array(
                         'topic' => $topic,
-                        'link' => $link,
+                        'link' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                            'users',
+                            array('user_id' => $id),
+                            array(OAUTH2_TOKEN_PARAM_NAME => '')
+                        ),
                         'subscriptions' => $subscriptions,
                     );
                 } else {

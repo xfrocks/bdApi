@@ -74,8 +74,8 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('conversations', $conversation),
-            'detail' => XenForo_Link::buildApiLink('conversations', $conversation),
-            'messages' => XenForo_Link::buildApiLink('conversation-messages', array(), array('conversation_id' => $conversation['conversation_id']))
+            'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('conversations', $conversation),
+            'messages' => bdApi_Data_Helper_Core::safeBuildApiLink('conversation-messages', array(), array('conversation_id' => $conversation['conversation_id']))
         );
 
         $data['permissions'] = array(
@@ -166,9 +166,9 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
         }
 
         $data['links'] = array(
-            'detail' => XenForo_Link::buildApiLink('conversation-messages', $message),
-            'conversation' => XenForo_Link::buildApiLink('conversations', $conversation),
-            'creator' => XenForo_Link::buildApiLink('users', $message),
+            'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('conversation-messages', $message),
+            'conversation' => bdApi_Data_Helper_Core::safeBuildApiLink('conversations', $conversation),
+            'creator' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $message),
             'creator_avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array(
                 $message,
                 'm',
@@ -228,8 +228,8 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 
         if (!empty($message['message_id'])) {
             $data['links'] += array(
-                'data' => XenForo_Link::buildApiLink('conversation-messages/attachments', $message, array('attachment_id' => $attachment['attachment_id'])),
-                'message' => XenForo_Link::buildApiLink('conversation-messages', $message),
+                'data' => bdApi_Data_Helper_Core::safeBuildApiLink('conversation-messages/attachments', $message, array('attachment_id' => $attachment['attachment_id'])),
+                'message' => bdApi_Data_Helper_Core::safeBuildApiLink('conversation-messages', $message),
             );
         }
 

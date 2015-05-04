@@ -26,9 +26,9 @@ class bdApi_XenForo_Model_Category extends XFCP_bdApi_XenForo_Model_Category
 
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('categories', $category),
-            'detail' => XenForo_Link::buildApiLink('categories', $category),
-            'sub-categories' => XenForo_Link::buildApiLink('categories', array(), array('parent_category_id' => $category['node_id'])),
-            'sub-forums' => XenForo_Link::buildApiLink('forums', array(), array('parent_category_id' => $category['node_id'])),
+            'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('categories', $category),
+            'sub-categories' => bdApi_Data_Helper_Core::safeBuildApiLink('categories', array(), array('parent_category_id' => $category['node_id'])),
+            'sub-forums' => bdApi_Data_Helper_Core::safeBuildApiLink('forums', array(), array('parent_category_id' => $category['node_id'])),
         );
 
         $data['permissions'] = array(

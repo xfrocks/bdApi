@@ -141,12 +141,12 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('posts', $post),
-            'detail' => XenForo_Link::buildApiLink('posts', $post),
-            'thread' => XenForo_Link::buildApiLink('threads', $post),
-            'poster' => XenForo_Link::buildApiLink('users', $post),
-            'likes' => XenForo_Link::buildApiLink('posts/likes', $post),
-            'report' => XenForo_Link::buildApiLink('posts/report', $post),
-            'attachments' => XenForo_Link::buildApiLink('posts/attachments', $post),
+            'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('posts', $post),
+            'thread' => bdApi_Data_Helper_Core::safeBuildApiLink('threads', $post),
+            'poster' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $post),
+            'likes' => bdApi_Data_Helper_Core::safeBuildApiLink('posts/likes', $post),
+            'report' => bdApi_Data_Helper_Core::safeBuildApiLink('posts/report', $post),
+            'attachments' => bdApi_Data_Helper_Core::safeBuildApiLink('posts/attachments', $post),
             'poster_avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array(
                 $post,
                 'm',
@@ -156,7 +156,7 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
         );
 
         if (!empty($post['attach_count'])) {
-            $data['links']['attachments'] = XenForo_Link::buildApiLink('posts/attachments', $post);
+            $data['links']['attachments'] = bdApi_Data_Helper_Core::safeBuildApiLink('posts/attachments', $post);
         }
 
         $data['permissions'] = array(
@@ -211,8 +211,8 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
         if (!empty($post['post_id'])) {
             $data['links'] += array(
-                'data' => XenForo_Link::buildApiLink('posts/attachments', $post, array('attachment_id' => $attachment['attachment_id'])),
-                'post' => XenForo_Link::buildApiLink('posts', $post),
+                'data' => bdApi_Data_Helper_Core::safeBuildApiLink('posts/attachments', $post, array('attachment_id' => $attachment['attachment_id'])),
+                'post' => bdApi_Data_Helper_Core::safeBuildApiLink('posts', $post),
             );
         }
 

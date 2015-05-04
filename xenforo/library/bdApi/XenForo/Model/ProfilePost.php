@@ -67,13 +67,13 @@ class bdApi_XenForo_Model_ProfilePost extends XFCP_bdApi_XenForo_Model_ProfilePo
 
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('profile-posts', $profilePost),
-            'detail' => XenForo_Link::buildApiLink('profile-posts', $profilePost),
-            'timeline' => XenForo_Link::buildApiLink('users/timeline', $user),
-            'timeline_user' => XenForo_Link::buildApiLink('users', $user),
-            'poster' => XenForo_Link::buildApiLink('users', $profilePost),
-            'likes' => XenForo_Link::buildApiLink('profile-posts/likes', $profilePost),
-            'comments' => XenForo_Link::buildApiLink('profile-posts/comments', $profilePost),
-            'report' => XenForo_Link::buildApiLink('profile-posts/report', $profilePost),
+            'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('profile-posts', $profilePost),
+            'timeline' => bdApi_Data_Helper_Core::safeBuildApiLink('users/timeline', $user),
+            'timeline_user' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $user),
+            'poster' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $profilePost),
+            'likes' => bdApi_Data_Helper_Core::safeBuildApiLink('profile-posts/likes', $profilePost),
+            'comments' => bdApi_Data_Helper_Core::safeBuildApiLink('profile-posts/comments', $profilePost),
+            'report' => bdApi_Data_Helper_Core::safeBuildApiLink('profile-posts/report', $profilePost),
             'poster_avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array(
                 $profilePost,
                 'm',
@@ -135,11 +135,11 @@ class bdApi_XenForo_Model_ProfilePost extends XFCP_bdApi_XenForo_Model_ProfilePo
         $data['timeline_user_id'] = $profilePost['profile_user_id'];
 
         $data['links'] = array(
-            'detail' => XenForo_Link::buildApiLink('profile-posts/comments', $profilePost, array('comment_id' => $comment['profile_post_comment_id'])),
-            'profile_post' => XenForo_Link::buildApiLink('profile-posts', $profilePost),
-            'timeline' => XenForo_Link::buildApiLink('users/timeline', $user),
-            'timeline_user' => XenForo_Link::buildApiLink('users', $user),
-            'poster' => XenForo_Link::buildApiLink('users', $comment),
+            'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('profile-posts/comments', $profilePost, array('comment_id' => $comment['profile_post_comment_id'])),
+            'profile_post' => bdApi_Data_Helper_Core::safeBuildApiLink('profile-posts', $profilePost),
+            'timeline' => bdApi_Data_Helper_Core::safeBuildApiLink('users/timeline', $user),
+            'timeline_user' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $user),
+            'poster' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $comment),
             'poster_avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array(
                 $comment,
                 'm',
