@@ -43,6 +43,9 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
             }
         }
 
+        // log early to keep track of api usages
+        $this->_logRequest($this->responseMessage(''), __CLASS__, __METHOD__);
+
         $oauth2Model->getServer()->grantAccessToken();
 
         // grantAccessToken will send output for us...

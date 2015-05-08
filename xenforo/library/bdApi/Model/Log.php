@@ -222,11 +222,16 @@ class bdApi_Model_Log extends XenForo_Model
         static $whitelistedKeys = array(
             // internal
             '_exception',
-            '_matchedRoutePath',
             '_origRoutePath',
+            '_matchedRoutePath',
 
             // request
             'client_id',
+            'client_secret',
+            'grant_type',
+            'username',
+            'code',
+            'refresh_token',
             'fields_exclude',
             'fields_include',
             'limit',
@@ -252,7 +257,7 @@ class bdApi_Model_Log extends XenForo_Model
             } else {
                 if (in_array($key, $whitelistedKeys)) {
                     $filtered[$key] = strval($value);
-                } else {
+                } elseif (!empty($value)) {
                     $filtered[$key] = '*';
                 }
             }
