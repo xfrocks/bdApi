@@ -58,9 +58,71 @@ class bdApi_Data_Helper_Batch
                 '_job_message' => $response->message,
             );
         } elseif ($response instanceof XenForo_ControllerResponse_View) {
-            return array_merge(array('_job_result' => 'ok'), $response->params);
+            return array(
+                '_job_result' => 'ok',
+                '_job_response' => $response,
+            );
         }
 
         throw new XenForo_Exception('Unexpected $response occurred.');
+    }
+
+    public static function prepareViewParams(XenForo_ViewRenderer_Abstract $viewRenderer, XenForo_View $view)
+    {
+        $params = $view->getParams();
+        $jobs = array();
+
+        if (!empty($params['jobs'])) {
+            foreach ($params['jobs'] as $jobId => $job) {
+                $preparedJob = array();
+
+                if (empty($job['_job_result'])) {
+                    continue;
+                }
+                $preparedJob['_job_result'] = $job['_job_result'];
+
+                switch ($job['_job_result']) {
+                    case 'error':
+                        if (empty($job['_job_error'])) {
+                            continue;
+                        }
+
+                        $preparedJob['_job_error'] = $job['_job_error'];
+                        break;
+                    case 'message':
+                        if (empty($job['_job_message'])) {
+                            continue;
+                        }
+
+                        $preparedJob['_job_message'] = $job['_job_message'];
+                        break;
+                    case 'ok':
+                        if (empty($job['_job_response'])) {
+                            continue;
+                        }
+                        /** @var XenForo_ControllerResponse_View $response */
+                        $response = $job['_job_response'];
+
+                        $viewOutput = $viewRenderer->renderViewObject($response->viewName, 'Json', $response->params, $response->templateName);
+                        if (!is_array($viewOutput)) {
+                            $viewOutput = @json_decode($viewOutput, true);
+                        }
+                        if (is_array($viewOutput)) {
+                            $preparedJob = array_merge($preparedJob, $viewOutput);
+                        } elseif (XenForo_Application::debugMode()) {
+                            $preparedJob = array_merge($preparedJob, $response->params);
+                        }
+                        break;
+                    default:
+                        continue;
+                }
+
+                $jobs[$jobId] = $preparedJob;
+            }
+        }
+
+        return array(
+            'jobs' => $jobs,
+        );
     }
 }
