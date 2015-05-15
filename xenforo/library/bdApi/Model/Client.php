@@ -83,7 +83,7 @@ class bdApi_Model_Client extends XenForo_Model
         return $client['client_secret'] == $secret;
     }
 
-    public function getRedirectUri(array $client, $requestedRedirectUri)
+    public function getWhitelistedRedirectUri(array $client, $requestedRedirectUri)
     {
         if (empty($client['options']['whitelisted_domains'])) {
             return false;

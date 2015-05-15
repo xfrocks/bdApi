@@ -55,9 +55,21 @@ class bdApi_Session extends XenForo_Session
     {
         $this->getOAuthClientSecret();
 
-        if (!empty($this->_oauthClient['redirect_uri'])) {
+        $clientRedirectUri = false;
+
+        if (!empty($this->_oauthClient['client_id'])) {
+            /** @var bdApi_Model_Client $clientModel */
+            $clientModel = XenForo_Model::create('bdApi_Model_Client');
+            $clientRedirectUri = $clientModel->getWhitelistedRedirectUri($this->_oauthClient, $uri);
+
+            if ($clientRedirectUri === false && !empty($this->_oauthClient['redirect_uri'])) {
+                $clientRedirectUri = $this->_oauthClient['redirect_uri'];
+            }
+        }
+
+        if ($clientRedirectUri !== false) {
             $uri = rtrim($uri, '/');
-            $clientUri = rtrim($this->_oauthClient['redirect_uri'], '/');
+            $clientUri = rtrim($clientRedirectUri, '/');
 
             if (strpos($uri, $clientUri) !== 0) {
                 return false;
