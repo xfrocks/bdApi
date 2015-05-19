@@ -57,8 +57,10 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
             $dataJobParams['thread_ids'] = implode(',', array_keys($threadIds));
             $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'threads', $dataJobParams);
 
-            if (isset($dataJob['threads'])) {
-                foreach ($dataJob['threads'] as $thread) {
+            if (isset($dataJob['_job_response'])
+                && !empty($dataJob['_job_response']->params['threads'])
+            ) {
+                foreach ($dataJob['_job_response']->params['threads'] as $thread) {
                     if (empty($thread['thread_id'])
                         || !isset($threadIds[$thread['thread_id']])
                     ) {
@@ -78,8 +80,10 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
             $dataJobParams['post_ids'] = implode(',', array_keys($postIds));
             $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'posts', $dataJobParams);
 
-            if (isset($dataJob['posts'])) {
-                foreach ($dataJob['posts'] as $post) {
+            if (isset($dataJob['_job_response'])
+                && !empty($dataJob['_job_response']->params['posts'])
+            ) {
+                foreach ($dataJob['_job_response']->params['posts'] as $post) {
                     if (empty($post['post_id'])
                         || !isset($postIds[$post['post_id']])
                     ) {
@@ -112,8 +116,10 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
             $dataJobParams['profile_post_ids'] = implode(',', array_keys($profilePostIds));
             $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'profile-posts', $dataJobParams);
 
-            if (isset($dataJob['profile_posts'])) {
-                foreach ($dataJob['profile_posts'] as $profilePost) {
+            if (isset($dataJob['_job_response'])
+                && !empty($dataJob['_job_response']->params['profile_posts'])
+            ) {
+                foreach ($dataJob['_job_response']->params['profile_posts'] as $profilePost) {
                     if (empty($profilePost['profile_post_id'])
                         || !isset($profilePostIds[$profilePost['profile_post_id']])
                     ) {
