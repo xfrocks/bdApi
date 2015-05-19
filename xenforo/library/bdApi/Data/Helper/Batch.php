@@ -107,9 +107,10 @@ class bdApi_Data_Helper_Batch
                         if (!is_array($viewOutput)) {
                             $viewOutput = @json_decode($viewOutput, true);
                         }
+
                         if (is_array($viewOutput)) {
                             $preparedJob = array_merge($preparedJob, $viewOutput);
-                        } elseif (XenForo_Application::debugMode()) {
+                        } elseif ($viewOutput === null) {
                             $preparedJob = array_merge($preparedJob, $response->params);
                         }
                         break;
