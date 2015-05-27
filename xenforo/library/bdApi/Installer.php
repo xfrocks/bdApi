@@ -211,6 +211,10 @@ class bdApi_Installer
 
     public static function installCustomized($existingAddOn, $addOnData)
     {
+        if (!function_exists('mcrypt_decrypt')) {
+            throw new XenForo_Exception('PHP Mcrypt extension is required but could not be found.');
+        }
+
         $db = XenForo_Application::getDb();
 
         $db->query('CREATE TABLE IF NOT EXISTS `xf_bdapi_ping_queue` (
