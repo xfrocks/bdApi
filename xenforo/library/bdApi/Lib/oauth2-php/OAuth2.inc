@@ -947,15 +947,11 @@ abstract class OAuth2 {
 
       $auth_header = trim($auth_header);
 
-      // Make sure it's Token authorization
-      if (strcmp(substr($auth_header, 0, 6), "OAuth ") !== 0)
-        $this->errorJsonResponse(OAUTH2_HTTP_BAD_REQUEST, OAUTH2_ERROR_INVALID_REQUEST, 'Auth header found that doesn\'t start with "OAuth"');
-
       // Parse the rest of the header
-      if (preg_match('/\s*oauth_token\s*="([^"]+)"/', $auth_header, $matches) == 0 || count($matches) < 2)
+      if (preg_match('/^(OAuth|Bearer)\s*(?<token>[a-zA-Z0-9]+)/', $auth_header, $matches) == 0 || empty($matches['token']))
         $this->errorJsonResponse(OAUTH2_HTTP_BAD_REQUEST, OAUTH2_ERROR_INVALID_REQUEST, 'Malformed auth header');
 
-      return $matches[1];
+      return $matches['token'];
     }
 
     if (isset($_GET[OAUTH2_TOKEN_PARAM_NAME])) {
