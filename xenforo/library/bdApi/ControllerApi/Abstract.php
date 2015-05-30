@@ -298,8 +298,17 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         $requestUri = $this->_request->getRequestUri();
         $requestData = $this->_request->getParams();
         if ($controllerResponse instanceof XenForo_ControllerResponse_Abstract) {
-            $responseCode = $controllerResponse->responseCode;
-            $responseOutput = $this->_getResponseOutput($controllerResponse);
+            if ($controllerResponse instanceof XenForo_ControllerResponse_Redirect) {
+                $responseCode = 301;
+                $responseOutput = array_merge($controllerResponse->redirectParams, array(
+                    'redirectType' => $controllerResponse->redirectType,
+                    'redirectMessage' => $controllerResponse->redirectMessage,
+                    'redirectUri' => $controllerResponse->redirectTarget,
+                ));
+            } else {
+                $responseCode = $controllerResponse->responseCode;
+                $responseOutput = $this->_getResponseOutput($controllerResponse);
+            }
         } else {
             $responseCode = $this->_response->getHttpResponseCode();
             $responseOutput = array(

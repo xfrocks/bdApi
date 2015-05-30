@@ -243,6 +243,9 @@ class bdApi_Model_Log extends XenForo_Model
             // response
             'error',
             'message',
+            'redirectType',
+            'redirectMessage',
+            'redirectUri',
         );
 
         $filtered = array();
