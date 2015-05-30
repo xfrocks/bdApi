@@ -509,7 +509,7 @@
 		delete="{xen:adminlink 'api-tokens/delete', $token}">
 		<xen:label>{$token.token_text}</xen:label>
 		<xen:snippet>
-			{xen:if '!{$client}', '{$token.client_name}->'}{$token.username}
+			{xen:if '!{$client}', '{$token.client_name}->'}{xen:if '{$token.username}', $token.username, 'user#{$token.user_id}'}
 			({$token.scope}, {xen:datetime $token.issue_date})
 		</xen:snippet>
 	</xen:listitem>
