@@ -191,18 +191,17 @@ class bdApi_OAuth2 extends \OAuth2\Server
             return $controller->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, $response->getHttpHeader('Location'));
         }
 
+        $params = $response->getParameters();
+        $params['_headers'] = $response->getHttpHeaders();
+
         if ($controller instanceof bdApi_ControllerApi_Abstract) {
-            if ($response->isClientError()) {
-                return $controller->responseData('bdApi_ViewApi_OAuth_Error', $response->getParameters());
-            } else {
-                return $controller->responseData('bdApi_ViewApi_OAuth_Success', $response->getParameters());
-            }
+            return $controller->responseData('bdApi_ViewApi_OAuth', $params);
         } else {
             if ($response->isClientError()) {
                 return $controller->responseError($response->getParameter('error_description'), $response->getStatusCode());
             } else {
                 $controller->getRouteMatch()->setResponseType('json');
-                return $controller->responseView('bdApi_ViewApi_OAuth_Success', '', $response->getParameters());
+                return $controller->responseView('bdApi_ViewPublic_OAuth', '', $params);
             }
         }
     }
