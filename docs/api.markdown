@@ -38,8 +38,10 @@ With `user_id` is the ID of authenticated user; `timestamp` is the unix timestam
  * TTL of refresh token: 2 weeks
  * Authorization URI: `/oauth/authorize`
  * Access token exchange URI: `/oauth/token`
+ * Token param name: `oauth_token`
+ * Token bearer header name: `Bearer`
 
-Please note that the TTL can be reconfigured to make it expire sooner or much later.
+Please note that the TTL can be reconfigured in XenForo AdminCP options page.
 
 ### Social Logins
 Since oauth2-2015030602, social logins are accepted as a way to authorize access to an user account. List of supported services: Facebook, Twitter and Google. The common flow is:
