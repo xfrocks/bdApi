@@ -99,6 +99,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
         $optionsInput = $this->_input->filterSingle('options', XenForo_Input::ARRAY_SIMPLE);
         $optionsInput = array_merge(array(
             'whitelisted_domains' => '',
+            'public_key' => '',
         ), $options, $optionsInput);
 
         $dw = XenForo_DataWriter::create('bdApi_DataWriter_Client');
