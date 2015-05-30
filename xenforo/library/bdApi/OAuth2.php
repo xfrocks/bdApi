@@ -121,6 +121,7 @@ class bdApi_OAuth2 extends \OAuth2\Server
             'token_param_name' => 'oauth_token',
             'enforce_state' => false,
             'require_exact_redirect_uri' => false,
+            'allow_implicit' => true,
         ));
 
         $this->addGrantType(new \OAuth2\GrantType\AuthorizationCode($storage));

@@ -14,6 +14,7 @@ The API implements the OAuth 2.0 Authorization Framework ([RFC 6749](http://tool
  * Authorization code
  * User credentials (username / password)
  * Refresh token
+ * Implicit
 
 ### One Time Token
 Any client can generate one time token (OTT) using existing token. The format for OTT is as follow:

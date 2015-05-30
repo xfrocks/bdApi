@@ -9,11 +9,24 @@ if (empty($config['api_root'])) {
 
 $sdkUrl = generateJsSdkUrl($config['api_root']);
 
+$implicitAuthorizeUrl = sprintf(
+    '%s/index.php?oauth/authorize&response_type=token&client_id=%s&scope=%s&redirect_uri=%s',
+    $config['api_root'],
+    rawurlencode($config['api_key']),
+    rawurlencode($config['api_scope']),
+    rawurlencode(getCallbackUrl())
+);
+
+$isCallback = false;
+if (!empty($_REQUEST['action']) && $_REQUEST['action'] == 'callback') {
+    $isCallback = true;
+}
+
 ?>
 
 <?php require('html/header.php'); ?>
 
-    <h3>Test JavaScript</h3>
+    <h3>JavaScript SDK</h3>
     <p>
         The API system supports a simple JavaScript SDK which can be included into any web page and
         perform callback to the API server. In this demo, click the button below to issue a
@@ -82,5 +95,42 @@ $sdkUrl = generateJsSdkUrl($config['api_root']);
 
         <input type="submit" value=".isAuthorized()"/>
     </form>
+
+    <hr />
+
+    <h3>Implicit Grant Type</h3>
+    <p>
+        Other than the traditional grant types, implicit allows more creative usages of the API system.
+        <a href="http://tools.ietf.org/html/rfc6749#section-4.2" target="_blank">Read more about it here</a>.
+    </p>
+
+    <?php if ($isCallback): ?>
+        <div class="implicit">
+            <h4>Token found from window.location.hash!</h4>
+            <?php require('html/form_request.php'); ?>
+        </div>
+
+        <script>
+            if (window.location.hash.length > 0) {
+                // just a quick (and dirty) way to extract the access token
+                var matches = window.location.hash.match(/access_token=([^&]+)&/);
+                if (matches !== null) {
+                    var accessToken = matches[1];
+
+                    $('.implicit').show();
+                    $('#access_token_ctrl').val(accessToken);
+                }
+            }
+        </script>
+    <?php endif; ?>
+
+    <p>
+        <a href="<?php echo $implicitAuthorizeUrl; ?>">Click here</a>
+        <?php if ($isCallback): ?>
+            to refresh the token.
+        <?php else: ?>
+            to start the authorizing flow.
+        <?php endif; ?>
+    </p>
 
 <?php require('html/footer.php'); ?>

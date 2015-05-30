@@ -133,19 +133,7 @@ switch ($action) {
 
 <?php if (!empty($accessToken)): ?>
     <h3>Test Sending Request</h3>
-    <form action="index.php?action=request" method="POST">
-        <label for="access_token_ctrl">Access Token</label><br/>
-        <input id="access_token_ctrl" type="text" name="access_token" value="<?php echo $accessToken; ?>"/><br/>
-        <br/>
-
-        <select name="url">
-            <option value="users/me">Get detailed information of authorized user (GET /users/me)</option>
-            <option value="navigation">Get list of navigation elements (GET /navigation)</option>
-        </select><br/>
-        <br/>
-
-        <input type="submit" value="Make API Request"/>
-    </form>
+    <?php require('html/form_request.php'); ?>
     <hr/>
 
     <h3>Test Subscriptions</h3>

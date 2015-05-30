@@ -56,6 +56,10 @@
             white-space: nowrap;
             width: 100%;
         }
+
+        .implicit {
+            display: none;
+        }
     </style>
 </head>
 <body>
