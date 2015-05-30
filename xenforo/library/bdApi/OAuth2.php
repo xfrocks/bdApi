@@ -136,7 +136,7 @@ class bdApi_OAuth2 extends \OAuth2\Server
      */
     public function getJwtAudience()
     {
-        $aud = XenForo_Link::buildApiLink('full:index', null, array('oauth_token' => ''));
+        $aud = bdApi_Data_Helper_Core::safeBuildApiLink('full:index', null, array('oauth_token' => ''));
 
         $indexDotPhp = 'index.php';
         if (substr($aud, -strlen($indexDotPhp)) === $indexDotPhp) {
@@ -172,7 +172,11 @@ class bdApi_OAuth2 extends \OAuth2\Server
         $this->addGrantType(new \OAuth2\GrantType\UserCredentials($storage));
         $this->addGrantType(new \OAuth2\GrantType\ClientCredentials($storage));
         $this->addGrantType(new \OAuth2\GrantType\RefreshToken($storage));
-        $this->addGrantType(new bdApi_OAuth2_GrantType_JwtBearer($storage, $this->getJwtAudience()));
+
+        $aud = $this->getJwtAudience();
+        if (!empty($aud)) {
+            $this->addGrantType(new bdApi_OAuth2_GrantType_JwtBearer($storage, $aud));
+        }
 
         $this->_model = $model;
     }
