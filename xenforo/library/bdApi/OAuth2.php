@@ -177,6 +177,14 @@ class bdApi_OAuth2 extends \OAuth2\Server
         $this->_model = $model;
     }
 
+    protected function createDefaultAccessTokenResponseType()
+    {
+        $config = array_intersect_key($this->config, array_flip(explode(' ', 'access_lifetime refresh_token_lifetime')));
+        $config['token_type'] = $this->tokenType ? $this->tokenType->getTokenType() : $this->getDefaultTokenType()->getTokenType();
+
+        return new bdApi_OAuth2_ResponseType_AccessToken($this->storages['access_token'], $this->storages['access_token'], $config);
+    }
+
     protected function _generateControllerResponse(XenForo_Controller $controller, OAuth2\Response $response)
     {
         if ($response->isRedirection()) {
@@ -470,6 +478,18 @@ class bdApi_OAuth2_GrantType_JwtBearer extends OAuth2\GrantType\JwtBearer
         }
 
         return '';
+    }
+
+}
+
+class bdApi_OAuth2_ResponseType_AccessToken extends OAuth2\ResponseType\AccessToken
+{
+    public function createAccessToken($clientId, $userId, $scope = null, $includeRefreshToken = true)
+    {
+        $token = parent::createAccessToken($clientId, $userId, $scope, $includeRefreshToken);
+        $token['user_id'] = $userId;
+
+        return $token;
     }
 
 }
