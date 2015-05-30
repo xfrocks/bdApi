@@ -370,6 +370,9 @@ class bdApi_OAuth2_Storage implements
             return false;
         }
 
-        return array('user_id' => $user['user_id']);
+        return array(
+            'user_id' => $user['user_id'],
+            'scope' => bdApi_Template_Helper_Core::getInstance()->scopeJoin($this->_model->getSystemSupportedScopes()),
+        );
     }
 }
