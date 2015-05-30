@@ -77,6 +77,7 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
 
         $dwInput['options'] = array_merge(array(
             'whitelisted_domains' => '',
+            'public_key' => '',
             'auto_authorize' => array(),
         ), $dwInput['options']);
 

@@ -106,6 +106,23 @@ class bdApi_Model_OAuth2 extends XenForo_Model
     }
 
     /**
+     * Generate key pair to use with JWT Bearer grant type.
+     *
+     * @return array of $privKey and $pubKey
+     */
+    public function generateKeyPair()
+    {
+        $key = openssl_pkey_new();
+
+        openssl_pkey_export($key, $privKey);
+
+        $details = openssl_pkey_get_details($key);
+        $pubKey = $details["key"];
+
+        return array($privKey, $pubKey);
+    }
+
+    /**
      * @return XenForo_Model_User
      */
     public function getUserModel()

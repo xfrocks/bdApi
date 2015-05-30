@@ -40,7 +40,14 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
                 'type' => XenForo_DataWriter::TYPE_UINT,
                 'required' => true
             ),
-            'options' => array('type' => XenForo_DataWriter::TYPE_SERIALIZED)
+            'options' => array(
+                'type' => XenForo_DataWriter::TYPE_SERIALIZED,
+                'default' => 'a:0:{}',
+                'verification' => array(
+                    '$this',
+                    '_verifyOptions'
+                ),
+            )
         ));
     }
 
@@ -90,6 +97,21 @@ class bdApi_DataWriter_Client extends XenForo_DataWriter
         if (!Zend_Uri::check($redirectUri)) {
             $this->error(new XenForo_Phrase('bdapi_redirect_uri_must_be_valid'), 'redirect_uri');
             return false;
+        }
+
+        return true;
+    }
+
+    protected function _verifyOptions(&$options)
+    {
+        $array = unserialize($options);
+
+        if (!empty($array['public_key'])) {
+            $keyPublic = openssl_pkey_get_public($array['public_key']);
+            if ($keyPublic === false) {
+                $this->error(new XenForo_Phrase('bdapi_public_key_must_be_valid'), 'options');
+                return false;
+            }
         }
 
         return true;

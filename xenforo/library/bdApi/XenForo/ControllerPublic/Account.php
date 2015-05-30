@@ -136,6 +136,46 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
         }
     }
 
+    public function actionApiClientGenkey()
+    {
+        $client = $this->_bdApi_getClientOrError();
+
+        $viewParams = array('client' => $client);
+
+        if ($this->_request->isPost()) {
+            /** @var bdApi_Model_OAuth2 $oauth2Model */
+            $oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
+            list($privKey, $pubKey) = $oauth2Model->generateKeyPair();
+
+            /** @var bdApi_DataWriter_Client $dw */
+            $dw = XenForo_DataWriter::create('bdApi_DataWriter_Client');
+            $dw->setExistingData($client, true);
+            $dw->set('options', array_merge($client['options'], array('public_key' => $pubKey)));
+            $dw->save();
+
+            $viewParams['privKey'] = $privKey;
+            $viewParams['pubKey'] = $pubKey;
+
+            return $this->_getWrapper(
+                'account', 'api',
+                $this->responseView(
+                    'bdApi_ViewPublic_Account_Api_Client_GenkeyResult',
+                    'bdapi_account_api_client_genkey_result',
+                    $viewParams
+                )
+            );
+        } else {
+            return $this->_getWrapper(
+                'account', 'api',
+                $this->responseView(
+                    'bdApi_ViewPublic_Account_Api_Client_Genkey',
+                    'bdapi_account_api_client_genkey',
+                    $viewParams
+                )
+            );
+        }
+    }
+
     public function actionApiUpdateScope()
     {
         $visitor = XenForo_Visitor::getInstance();
