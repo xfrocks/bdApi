@@ -126,6 +126,7 @@ class bdApi_OAuth2 extends \OAuth2\Server
 
         $this->addGrantType(new \OAuth2\GrantType\AuthorizationCode($storage));
         $this->addGrantType(new \OAuth2\GrantType\UserCredentials($storage));
+        $this->addGrantType(new \OAuth2\GrantType\ClientCredentials($storage));
         $this->addGrantType(new \OAuth2\GrantType\RefreshToken($storage));
 
         $this->_model = $model;
@@ -264,7 +265,10 @@ class bdApi_OAuth2_Storage implements
             }
         }
 
-        return $client;
+        return array_merge($client, array(
+            'user_id' => 0,
+            'scope' => bdApi_Template_Helper_Core::getInstance()->scopeJoin($this->_model->getSystemSupportedScopes()),
+        ));
     }
 
     public function getClientScope($clientId)
