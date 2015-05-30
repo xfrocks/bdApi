@@ -278,9 +278,8 @@ function xfac_authenticate_syncUserWpXf($user, $username, $password)
         xfac_log('xfac_authenticate_syncUserWpXf pushed $wpUser (#%d)', $user->ID);
     } else {
         $errors = xfac_api_getLastErrors();
-        if (!empty($errors['username']) && !get_option('xfac_sync_password')) {
+        if (!empty($errors['username'])) {
             // special case, a XenForo account with same username has already existed
-            // do not do this if sync password option is turned on to avoid duplicated work
             // TODO: improve this, there are other kind of username errors actually
             $token = xfac_api_getAccessTokenFromUsernamePassword($config, $username, $password);
             if (!empty($token)) {
