@@ -10,6 +10,13 @@ class bdApi_OAuth2 extends \OAuth2\Server
      */
     protected $_model;
 
+    /**
+     * Process /oauth/token request.
+     *
+     * @param bdApi_ControllerApi_Abstract $controller
+     *
+     * @return XenForo_ControllerResponse_Abstract
+     */
     public function actionOauthToken(bdApi_ControllerApi_Abstract $controller)
     {
         $response = $this->handleTokenRequest(OAuth2\Request::createFromGlobals());
@@ -17,6 +24,14 @@ class bdApi_OAuth2 extends \OAuth2\Server
         return $this->_generateControllerResponse($controller, $response);
     }
 
+    /**
+     * Process /oauth/authorize request (step 1).
+     *
+     * @param XenForo_Controller $controller
+     * @param array $authorizeParams
+     *
+     * @return bool|XenForo_ControllerResponse_Abstract
+     */
     public function actionOauthAuthorize1(XenForo_Controller $controller, array $authorizeParams)
     {
         if (!empty($authorizeParams['redirect_uri'])) {
@@ -36,6 +51,16 @@ class bdApi_OAuth2 extends \OAuth2\Server
         return true;
     }
 
+    /**
+     * Process /oauth/authorize request (step 2).
+     *
+     * @param XenForo_Controller $controller
+     * @param array $authorizeParams
+     * @param $accepted
+     * @param $userId
+     *
+     * @return XenForo_ControllerResponse_Abstract
+     */
     public function actionOauthAuthorize2(XenForo_Controller $controller, array $authorizeParams, $accepted, $userId)
     {
         if (!empty($authorizeParams['redirect_uri'])) {
@@ -105,6 +130,25 @@ class bdApi_OAuth2 extends \OAuth2\Server
     }
 
     /**
+     * Get the expected audience value for JWT Bearer grant type.
+     *
+     * @return string
+     */
+    public function getJwtAudience()
+    {
+        $aud = XenForo_Link::buildApiLink('full:index', null, array('oauth_token' => ''));
+
+        $indexDotPhp = 'index.php';
+        if (substr($aud, -strlen($indexDotPhp)) === $indexDotPhp) {
+            $aud = substr($aud, 0, -strlen($indexDotPhp));
+        }
+
+        $aud = rtrim($aud, '/');
+
+        return $aud;
+    }
+
+    /**
      * Constructor
      *
      * @param bdApi_Model_OAuth2 $model
@@ -128,6 +172,7 @@ class bdApi_OAuth2 extends \OAuth2\Server
         $this->addGrantType(new \OAuth2\GrantType\UserCredentials($storage));
         $this->addGrantType(new \OAuth2\GrantType\ClientCredentials($storage));
         $this->addGrantType(new \OAuth2\GrantType\RefreshToken($storage));
+        $this->addGrantType(new bdApi_OAuth2_GrantType_JwtBearer($storage, $this->getJwtAudience()));
 
         $this->_model = $model;
     }
@@ -160,6 +205,7 @@ class bdApi_OAuth2_Storage implements
     OAuth2\Storage\AuthorizationCodeInterface,
     OAuth2\Storage\ClientInterface,
     OAuth2\Storage\ClientCredentialsInterface,
+    OAuth2\Storage\JwtBearerInterface,
     OAuth2\Storage\RefreshTokenInterface,
     OAuth2\Storage\ScopeInterface,
     OAuth2\Storage\UserCredentialsInterface
@@ -169,6 +215,11 @@ class bdApi_OAuth2_Storage implements
     protected $_model;
 
     protected $_requestRedirectUri = '';
+
+    public function getModel()
+    {
+        return $this->_model;
+    }
 
     public function setRequestRedirectUri($redirectUri)
     {
@@ -304,6 +355,33 @@ class bdApi_OAuth2_Storage implements
         return false;
     }
 
+    public function getClientKey($clientId, $subject)
+    {
+        $client = $this->_model->getClientModel()->getClientById($clientId);
+
+        if (empty($client)) {
+            // client not found
+            return false;
+        }
+
+        if (empty($client['options']['public_key'])) {
+            // no public key has been configured
+            return false;
+        }
+
+        return $client['options']['public_key'];
+    }
+
+    public function getJti($client_id, $subject, $audience, $expiration, $jti)
+    {
+        return null;
+    }
+
+    public function setJti($client_id, $subject, $audience, $expiration, $jti)
+    {
+        // do nothing
+    }
+
     public function getRefreshToken($refreshToken)
     {
         $token = $this->_model->getRefreshTokenModel()->getRefreshTokenByText($refreshToken);
@@ -380,4 +458,18 @@ class bdApi_OAuth2_Storage implements
             'scope' => bdApi_Template_Helper_Core::getInstance()->scopeJoin($this->_model->getSystemSupportedScopes()),
         );
     }
+}
+
+class bdApi_OAuth2_GrantType_JwtBearer extends OAuth2\GrantType\JwtBearer
+{
+    public function getScope()
+    {
+        $storage = $this->storage;
+        if ($storage instanceof bdApi_OAuth2_Storage) {
+            return $storage->getModel()->getAutoAndUserScopes($this->getClientId(), $this->getUserId());
+        }
+
+        return '';
+    }
+
 }

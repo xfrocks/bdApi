@@ -115,7 +115,9 @@ switch ($action) {
         );
 
         $message = sprintf(
-            '<h3>Authorization (step 1)</h3><a href="%s">Click here</a> to go to %s and start the authorizing flow.',
+            '<h3>Authorization (step 1)</h3>'
+            . '<a href="%s">Click here</a> to go to %s and start the authorizing flow.'
+            . ' Or <a href="jwt.php">click here</a> and try the JWT Bearer grant type.',
             $authorizeUrl,
             parse_url($authorizeUrl, PHP_URL_HOST)
         );

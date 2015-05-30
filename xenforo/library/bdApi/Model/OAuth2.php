@@ -78,6 +78,33 @@ class bdApi_Model_OAuth2 extends XenForo_Model
         return strval($realm);
     }
 
+    public function getAutoAndUserScopes($clientId, $userId)
+    {
+        $client = $this->getClientModel()->getClientById($clientId);
+        if (empty($client)) {
+            return '';
+        }
+
+        $scopes = array();
+        if (!empty($client['options']['auto_authorize'])) {
+            foreach ($client['options']['auto_authorize'] as $scope => $canAutoAuthorize) {
+                if ($canAutoAuthorize) {
+                    $scopes[] = $scope;
+                }
+            }
+        }
+
+        $userScopes = $this->getUserScopeModel()->getUserScopes($client['client_id'], $userId);
+        if (!empty($userScopes)) {
+            foreach ($userScopes as $scope => $userScope) {
+                $scopes[] = $scope;
+            }
+            $scopes = array_unique($scopes);
+        }
+
+        return bdApi_Template_Helper_Core::getInstance()->scopeJoin($scopes);
+    }
+
     /**
      * @return XenForo_Model_User
      */

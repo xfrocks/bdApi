@@ -275,25 +275,8 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
     {
         /* @var $oauth2Model bdApi_Model_OAuth2 */
         $oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
-        /* @var $userScopeModel bdApi_Model_UserScope */
-        $userScopeModel = $this->getModelFromCache('bdApi_Model_UserScope');
+        $scopes = $oauth2Model->getAutoAndUserScopes($client['client_id'], $userId);
 
-        $scopes = array();
-        if (!empty($client['options']['auto_authorize'])) {
-            foreach ($client['options']['auto_authorize'] as $scope => $canAutoAuthorize) {
-                if ($canAutoAuthorize) {
-                    $scopes[] = $scope;
-                }
-            }
-        }
-
-        $userScopes = $userScopeModel->getUserScopes($client['client_id'], XenForo_Visitor::getUserId());
-        foreach ($userScopes as $scope => $userScope) {
-            $scopes[] = $scope;
-        }
-
-        $scopes = array_unique($scopes);
-        $scopes = bdApi_Template_Helper_Core::getInstance()->scopeJoin($scopes);
         $token = $oauth2Model->getServer()->createAccessToken($client['client_id'], $userId, $scopes);
 
         return $this->responseData('bdApi_ViewApi_OAuth_TokenNonStandard', $token);
