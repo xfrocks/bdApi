@@ -290,7 +290,7 @@
 		label="{$log.request_method} {$log.request_uri} ({$log.ip_address})" 
 		snippet="{xen:if '{$log.client_id}', '{$log.client_id}'}"
 		linkclass="OverlayTrigger"
-		class="bdApi_Log{xen:if '{$log.request_method} != "get"', ' serious'}{xen:if '{$log.response_code} != 200', ' error'}" />
+		class="bdApi_Log{xen:if '{$log.request_method} != "get"', ' serious'}{xen:if '{$log.response_code} >= 400', ' error'}" />
 </xen:foreach>
 <xen:if is="{$filterMore}">
 	<li class="listNote">{xen:phrase more_records_matching_filter_more_specific}</li>
