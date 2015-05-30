@@ -55,29 +55,6 @@ class bdApi_Model_OAuth2 extends XenForo_Model
         );
     }
 
-    /**
-     * Gets the authentication realm for server. This will be display
-     * in the authentication dialog (in browsers and such). By default,
-     * the XenForo's board title will be used but if it's not available
-     * or is empty, a generic name will be used ("XenForo")
-     *
-     * @return string the realm
-     */
-    public function getSystemAuthenticationRealm()
-    {
-        $options = XenForo_Application::get('options');
-        $boardTitle = $options->get('boardTitle');
-
-        if (empty($boardTitle)) {
-            // no board title, just use a generic name
-            $boardTitle = 'XenForo';
-        }
-
-        $realm = new XenForo_Phrase('bdapi_realm', array('boardTitle' => $boardTitle));
-
-        return strval($realm);
-    }
-
     public function getAutoAndUserScopes($clientId, $userId)
     {
         $client = $this->getClientModel()->getClientById($clientId);

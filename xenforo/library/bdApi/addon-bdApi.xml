@@ -679,7 +679,6 @@ step=3600</edit_format_params>
     <phrase title="bdapi_public_key_generate_click_here" version_id="67" version_string="1.4.3-BETA"><![CDATA[You can either generate the key pair yourself or <a href="{link}" class="OverlayTrigger">click here</a> to have them prepared for you.]]></phrase>
     <phrase title="bdapi_public_key_must_be_valid" version_id="67" version_string="1.4.3-BETA"><![CDATA[Public Key, if presents, must be valid.]]></phrase>
     <phrase title="bdapi_public_key_updated_client" version_id="67" version_string="1.4.3-BETA"><![CDATA[The client has already been updated to use this Public Key.]]></phrase>
-    <phrase title="bdapi_realm" global_cache="1" version_id="1" version_string="0.1"><![CDATA[{boardTitle} API]]></phrase>
     <phrase title="bdapi_redirect_uri" version_id="1" version_string="0.1"><![CDATA[Redirect Uri]]></phrase>
     <phrase title="bdapi_redirect_uri_must_be_valid" version_id="4" version_string="0.9-dev"><![CDATA[Redirect URI must be valid.]]></phrase>
     <phrase title="bdapi_refresh_tokens" version_id="54" version_string="1.3.1b"><![CDATA[Refresh Tokens]]></phrase>

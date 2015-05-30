@@ -161,7 +161,6 @@ class bdApi_OAuth2 extends \OAuth2\Server
             'auth_code_lifetime' => bdApi_Option::get('authCodeTTL'),
             'access_lifetime' => bdApi_Option::get('tokenTTL'),
             'refresh_token_lifetime' => bdApi_Option::get('refreshTokenTTLDays') * 86400,
-            'www_realm' => $model->getSystemAuthenticationRealm(),
             'token_param_name' => 'oauth_token',
             'enforce_state' => false,
             'require_exact_redirect_uri' => false,
