@@ -251,11 +251,12 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
             $authorizeParams['scope'] = bdApi_Template_Helper_Core::getInstance()->scopeJoin($paramScopesNew);
         }
 
-        // use the server get authorize params method to perform some extra validation
-        $serverAuthorizeParams = $oauth2Model->getServer()->getAuthorizeParams();
-        $authorizeParams = array_merge($serverAuthorizeParams, $authorizeParams);
+        $response = $oauth2Model->getServer()->actionOauthAuthorize1($this, $authorizeParams);
+        if (is_object($response) && $response instanceof XenForo_ControllerResponse_Abstract) {
+            return $response;
+        }
 
-        if ($this->_request->isPost() OR $bypassConfirmation) {
+        if ($this->_request->isPost() || $bypassConfirmation) {
             $accept = $this->_input->filterSingle('accept', XenForo_Input::STRING);
             $accepted = !!$accept;
 
@@ -283,10 +284,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
                 $authorizeParams['scope'] = bdApi_Template_Helper_Core::getInstance()->scopeJoin($paramScopes);
             }
 
-            $oauth2Model->getServer()->finishClientAuthorization($accepted, $authorizeParams);
-
-            // finishClientAuthorization will redirect the page for us...
-            exit;
+            return $oauth2Model->getServer()->actionOauthAuthorize2($this, $authorizeParams, $accepted, XenForo_Visitor::getUserId());
         } else {
             $viewParams = array(
                 'client' => $client,

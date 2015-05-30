@@ -19,7 +19,7 @@ class bdApi_ViewApi_Notification_List extends bdApi_ViewApi_Base
             $this->_response,
             bdApi_Model_Subscription::TYPE_NOTIFICATION,
             XenForo_Visitor::getUserId(),
-            XenForo_Link::buildApiLink('notifications', null, array(OAUTH2_TOKEN_PARAM_NAME => '')),
+            XenForo_Link::buildApiLink('notifications', null, array('oauth_token' => '')),
             XenForo_Visitor::getInstance()->get('bdapi_user_notification'),
         ));
 

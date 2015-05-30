@@ -7,8 +7,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         /* @var $oauth2Model bdApi_Model_OAuth2 */
         $oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
 
-        $authorizeParams = $oauth2Model->getServer()->getAuthorizeParams();
-        $authorizeParams['social'] = $this->_input->filterSingle('social', XenForo_Input::STRING);
+        $authorizeParams = $this->_input->filter($oauth2Model->getAuthorizeParamsInputFilter());
 
         $targetLink = XenForo_Link::buildPublicLink('account/authorize', array(), $authorizeParams);
 
@@ -43,13 +42,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
             }
         }
 
-        // log early to keep track of api usages
-        $this->_logRequest($this->responseMessage(''), __CLASS__, __METHOD__);
-
-        $oauth2Model->getServer()->grantAccessToken();
-
-        // grantAccessToken will send output for us...
-        exit;
+        return $oauth2Model->getServer()->actionOauthToken($this);
     }
 
     public function actionPostTokenFacebook()
@@ -285,9 +278,6 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         /* @var $userScopeModel bdApi_Model_UserScope */
         $userScopeModel = $this->getModelFromCache('bdApi_Model_UserScope');
 
-        $oauth2Server = $oauth2Model->getServer();
-        $oauth2ServerUserId = $oauth2Server->getUserId();
-
         $scopes = array();
         if (!empty($client['options']['auto_authorize'])) {
             foreach ($client['options']['auto_authorize'] as $scope => $canAutoAuthorize) {
@@ -304,10 +294,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
 
         $scopes = array_unique($scopes);
         $scopes = bdApi_Template_Helper_Core::getInstance()->scopeJoin($scopes);
-
-        $oauth2Server->setUserId($userId);
-        $token = $oauth2Model->getServer()->createAccessTokenPublic($client['client_id'], $scopes);
-        $oauth2Server->setUserId($oauth2ServerUserId);
+        $token = $oauth2Model->getServer()->createAccessToken($client['client_id'], $userId, $scopes);
 
         return $this->responseData('bdApi_ViewApi_OAuth_TokenNonStandard', $token);
     }

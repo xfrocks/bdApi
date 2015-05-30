@@ -25,7 +25,7 @@ class bdApi_Model_Subscription extends XenForo_Model
                         'link' => bdApi_Data_Helper_Core::safeBuildApiLink(
                             'notifications',
                             null,
-                            array(OAUTH2_TOKEN_PARAM_NAME => '')
+                            array('oauth_token' => '')
                         ),
                         'subscriptions' => $subscriptions,
                     );
@@ -44,7 +44,7 @@ class bdApi_Model_Subscription extends XenForo_Model
                             null,
                             array(
                                 'thread_id' => $id,
-                                OAUTH2_TOKEN_PARAM_NAME => '',
+                                'oauth_token' => '',
                             )
                         ),
                         'subscriptions' => $subscriptions,
@@ -62,7 +62,7 @@ class bdApi_Model_Subscription extends XenForo_Model
                         'link' => bdApi_Data_Helper_Core::safeBuildApiLink(
                             'users',
                             array('user_id' => $id),
-                            array(OAUTH2_TOKEN_PARAM_NAME => '')
+                            array('oauth_token' => '')
                         ),
                         'subscriptions' => $subscriptions,
                     );

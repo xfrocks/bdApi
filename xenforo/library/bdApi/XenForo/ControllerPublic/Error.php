@@ -27,11 +27,10 @@ class bdApi_XenForo_ControllerPublic_Error extends XFCP_bdApi_XenForo_Controller
         /* @var $clientModel bdApi_Model_Client */
         $clientModel = $oauth2Model->getClientModel();
 
-        $authorizeParams = $oauth2Model->getServer()->getAuthorizeParams();
-
-        $client = $clientModel->getClientById($authorizeParams['client_id']);
+        $clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
+        $client = $clientModel->getClientById($clientId);
         if (empty($client)) {
-            throw new XenForo_Exception(new XenForo_Phrase('bdapi_authorize_error_client_x_not_found', array('client' => $authorizeParams['client_id'])));
+            throw new XenForo_Exception(new XenForo_Phrase('bdapi_authorize_error_client_x_not_found', array('client' => $clientId)));
         }
 
         $viewParams = array(

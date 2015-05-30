@@ -58,11 +58,12 @@ class bdApi_Link extends _XenForo_Link
         }
 
         // auto appends oauth_token param from the session
-        if (!isset($extraParams[OAUTH2_TOKEN_PARAM_NAME])) {
+        if (!isset($extraParams['oauth_token'])) {
+            /** @var bdApi_Session $session */
             $session = XenForo_Application::get('session');
             $oauthToken = $session->getOAuthTokenText();
             if (!empty($oauthToken)) {
-                $extraParams[OAUTH2_TOKEN_PARAM_NAME] = $oauthToken;
+                $extraParams['oauth_token'] = $oauthToken;
             }
         }
 

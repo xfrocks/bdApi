@@ -212,15 +212,9 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             XenForo_Visitor::setup($user['user_id']);
         }
 
-        $oauth2Server = $oauth2Model->getServer();
-        $oauth2ServerUserId = $oauth2Server->getUserId();
-
         $scopes = $oauth2Model->getSystemSupportedScopes();
         $scopes = bdApi_Template_Helper_Core::getInstance()->scopeJoin($scopes);
-
-        $oauth2Server->setUserId($user['user_id']);
-        $token = $oauth2Server->createAccessTokenPublic($clientId, $scopes);
-        $oauth2Server->setUserId($oauth2ServerUserId);
+        $token = $oauth2Model->getServer()->createAccessToken($clientId, $user['user_id'], $scopes);
 
         $user = $userModel->getUserById($user['user_id'], $userModel->getFetchOptionsToPrepareApiData());
         $data = array(

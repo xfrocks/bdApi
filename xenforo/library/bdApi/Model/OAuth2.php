@@ -33,6 +33,8 @@ class bdApi_Model_OAuth2 extends XenForo_Model
             'redirect_uri' => XenForo_Input::STRING,
             'state' => XenForo_Input::STRING,
             'scope' => XenForo_Input::STRING,
+
+            'social' => XenForo_Input::STRING,
         );
     }
 
