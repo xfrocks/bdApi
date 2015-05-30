@@ -477,7 +477,11 @@ class bdApi_OAuth2_GrantType_JwtBearer extends OAuth2\GrantType\JwtBearer
     {
         $storage = $this->storage;
         if ($storage instanceof bdApi_OAuth2_Storage) {
-            return $storage->getModel()->getAutoAndUserScopes($this->getClientId(), $this->getUserId());
+            if ($this->getUserId() > 0) {
+                return $storage->getModel()->getAutoAndUserScopes($this->getClientId(), $this->getUserId());
+            } else {
+                return bdApi_Template_Helper_Core::getInstance()->scopeJoin($storage->getModel()->getSystemSupportedScopes());
+            }
         }
 
         return '';
