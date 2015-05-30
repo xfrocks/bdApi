@@ -33,8 +33,8 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
                 'batch' => XenForo_Link::buildApiLink('batch'),
                 'subscriptions' => XenForo_Link::buildApiLink('subscriptions'),
 
-                'oauth_authorize' => XenForo_Link::buildApiLink('oauth/authorize', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
-                'oauth_token' => XenForo_Link::buildApiLink('oauth/token', array(), array(OAUTH2_TOKEN_PARAM_NAME => '')),
+                'oauth_authorize' => XenForo_Link::buildApiLink('oauth/authorize', array(), array('oauth_token' => '')),
+                'oauth_token' => XenForo_Link::buildApiLink('oauth/token', array(), array('oauth_token' => '')),
             ),
             'system_info' => $systemInfo,
         );
@@ -51,7 +51,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
     {
         return array(
             'forum' => 2015042301,
-            'oauth2' => 2015030902,
+            'oauth2' => 2015053103,
             'subscription' => 2014092301,
         );
     }

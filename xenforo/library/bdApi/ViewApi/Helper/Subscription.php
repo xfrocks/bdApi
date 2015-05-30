@@ -12,7 +12,7 @@ class bdApi_ViewApi_Helper_Subscription
         // subscription discovery
         $hubLink = XenForo_Link::buildApiLink('subscriptions', null, array(
             'hub.topic' => bdApi_Model_Subscription::getTopic($topicType, $topicId),
-            OAUTH2_TOKEN_PARAM_NAME => '',
+            'oauth_token' => '',
         ));
         $response->setHeader('Link', sprintf('<%s>; rel=hub', $hubLink));
         $response->setHeader('Link', sprintf('<%s>; rel=self', $selfLink));

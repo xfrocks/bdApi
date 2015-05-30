@@ -99,6 +99,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
         $optionsInput = $this->_input->filterSingle('options', XenForo_Input::ARRAY_SIMPLE);
         $optionsInput = array_merge(array(
             'whitelisted_domains' => '',
+            'public_key' => '',
         ), $options, $optionsInput);
 
         $dw = XenForo_DataWriter::create('bdApi_DataWriter_Client');
@@ -132,6 +133,46 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
             $viewParams = array('client' => $client);
 
             return $this->_getWrapper('account', 'api', $this->responseView('bdApi_ViewPublic_Account_Api_Client_Delete', 'bdapi_account_api_client_delete', $viewParams));
+        }
+    }
+
+    public function actionApiClientGenkey()
+    {
+        $client = $this->_bdApi_getClientOrError();
+
+        $viewParams = array('client' => $client);
+
+        if ($this->_request->isPost()) {
+            /** @var bdApi_Model_OAuth2 $oauth2Model */
+            $oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
+            list($privKey, $pubKey) = $oauth2Model->generateKeyPair();
+
+            /** @var bdApi_DataWriter_Client $dw */
+            $dw = XenForo_DataWriter::create('bdApi_DataWriter_Client');
+            $dw->setExistingData($client, true);
+            $dw->set('options', array_merge($client['options'], array('public_key' => $pubKey)));
+            $dw->save();
+
+            $viewParams['privKey'] = $privKey;
+            $viewParams['pubKey'] = $pubKey;
+
+            return $this->_getWrapper(
+                'account', 'api',
+                $this->responseView(
+                    'bdApi_ViewPublic_Account_Api_Client_GenkeyResult',
+                    'bdapi_account_api_client_genkey_result',
+                    $viewParams
+                )
+            );
+        } else {
+            return $this->_getWrapper(
+                'account', 'api',
+                $this->responseView(
+                    'bdApi_ViewPublic_Account_Api_Client_Genkey',
+                    'bdapi_account_api_client_genkey',
+                    $viewParams
+                )
+            );
         }
     }
 
@@ -251,11 +292,12 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
             $authorizeParams['scope'] = bdApi_Template_Helper_Core::getInstance()->scopeJoin($paramScopesNew);
         }
 
-        // use the server get authorize params method to perform some extra validation
-        $serverAuthorizeParams = $oauth2Model->getServer()->getAuthorizeParams();
-        $authorizeParams = array_merge($serverAuthorizeParams, $authorizeParams);
+        $response = $oauth2Model->getServer()->actionOauthAuthorize1($this, $authorizeParams);
+        if (is_object($response) && $response instanceof XenForo_ControllerResponse_Abstract) {
+            return $response;
+        }
 
-        if ($this->_request->isPost() OR $bypassConfirmation) {
+        if ($this->_request->isPost() || $bypassConfirmation) {
             $accept = $this->_input->filterSingle('accept', XenForo_Input::STRING);
             $accepted = !!$accept;
 
@@ -283,10 +325,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
                 $authorizeParams['scope'] = bdApi_Template_Helper_Core::getInstance()->scopeJoin($paramScopes);
             }
 
-            $oauth2Model->getServer()->finishClientAuthorization($accepted, $authorizeParams);
-
-            // finishClientAuthorization will redirect the page for us...
-            exit;
+            return $oauth2Model->getServer()->actionOauthAuthorize2($this, $authorizeParams, $accepted, XenForo_Visitor::getUserId());
         } else {
             $viewParams = array(
                 'client' => $client,

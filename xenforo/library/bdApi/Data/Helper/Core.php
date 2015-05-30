@@ -122,9 +122,11 @@ class bdApi_Data_Helper_Core
             return XenForo_Application::get('_bdApi_session');
         }
 
-        $session = XenForo_Application::getSession();
-        if ($session instanceof bdApi_Session) {
-            return $session;
+        if (XenForo_Application::isRegistered('session')) {
+            $session = XenForo_Application::getSession();
+            if ($session instanceof bdApi_Session) {
+                return $session;
+            }
         }
 
         return null;

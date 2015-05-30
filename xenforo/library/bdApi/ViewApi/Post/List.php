@@ -15,7 +15,7 @@ class bdApi_ViewApi_Post_List extends bdApi_ViewApi_Base
                 $this->_params['_thread']['thread_id'],
                 XenForo_Link::buildApiLink('posts', null, array(
                     'thread_id' => $this->_params['_thread']['thread_id'],
-                    OAUTH2_TOKEN_PARAM_NAME => '',
+                    'oauth_token' => '',
                 )),
                 isset($this->_params['_thread']['bdapi_thread_post']) ? $this->_params['_thread']['bdapi_thread_post'] : '',
             ));

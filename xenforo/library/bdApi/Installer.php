@@ -215,6 +215,10 @@ class bdApi_Installer
             throw new XenForo_Exception('PHP Mcrypt extension is required but could not be found.');
         }
 
+        if (!function_exists('openssl_pkey_new')) {
+            throw new XenForo_Exception('PHP OpenSSL support is required but could not be found.');
+        }
+
         $db = XenForo_Application::getDb();
 
         $db->query('CREATE TABLE IF NOT EXISTS `xf_bdapi_ping_queue` (

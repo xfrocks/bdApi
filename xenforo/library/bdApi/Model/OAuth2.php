@@ -33,6 +33,8 @@ class bdApi_Model_OAuth2 extends XenForo_Model
             'redirect_uri' => XenForo_Input::STRING,
             'state' => XenForo_Input::STRING,
             'scope' => XenForo_Input::STRING,
+
+            'social' => XenForo_Input::STRING,
         );
     }
 
@@ -74,6 +76,50 @@ class bdApi_Model_OAuth2 extends XenForo_Model
         $realm = new XenForo_Phrase('bdapi_realm', array('boardTitle' => $boardTitle));
 
         return strval($realm);
+    }
+
+    public function getAutoAndUserScopes($clientId, $userId)
+    {
+        $client = $this->getClientModel()->getClientById($clientId);
+        if (empty($client)) {
+            return '';
+        }
+
+        $scopes = array();
+        if (!empty($client['options']['auto_authorize'])) {
+            foreach ($client['options']['auto_authorize'] as $scope => $canAutoAuthorize) {
+                if ($canAutoAuthorize) {
+                    $scopes[] = $scope;
+                }
+            }
+        }
+
+        $userScopes = $this->getUserScopeModel()->getUserScopes($client['client_id'], $userId);
+        if (!empty($userScopes)) {
+            foreach ($userScopes as $scope => $userScope) {
+                $scopes[] = $scope;
+            }
+            $scopes = array_unique($scopes);
+        }
+
+        return bdApi_Template_Helper_Core::getInstance()->scopeJoin($scopes);
+    }
+
+    /**
+     * Generate key pair to use with JWT Bearer grant type.
+     *
+     * @return array of $privKey and $pubKey
+     */
+    public function generateKeyPair()
+    {
+        $key = openssl_pkey_new();
+
+        openssl_pkey_export($key, $privKey);
+
+        $details = openssl_pkey_get_details($key);
+        $pubKey = $details["key"];
+
+        return array($privKey, $pubKey);
     }
 
     /**

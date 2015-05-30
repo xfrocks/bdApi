@@ -228,6 +228,8 @@ class bdApi_Model_Log extends XenForo_Model
             // request
             'client_id',
             'client_secret',
+            'redirect_uri',
+            'scope',
             'grant_type',
             'username',
             'code',
@@ -241,7 +243,12 @@ class bdApi_Model_Log extends XenForo_Model
             'q',
 
             // response
+            'access_token',
+            'expires_in',
+            'token_type',
             'error',
+            'error_description',
+            'error_uri',
             'message',
             'redirectType',
             'redirectMessage',
