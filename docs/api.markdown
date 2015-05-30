@@ -1,7 +1,7 @@
 # API Documents
 
 ## Authorization
-The system follows OAuth2 specification [IETF draft v10](http://tools.ietf.org/html/draft-ietf-oauth-v2-10).
+The API implements the OAuth 2.0 Authorization Framework ([RFC 6749](http://tools.ietf.org/html/rfc6749)).
 
 ### Supported scopes
  * `read`
