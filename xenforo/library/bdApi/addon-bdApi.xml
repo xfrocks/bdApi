@@ -1398,6 +1398,7 @@ step=3600</edit_format_params>
 </xen:if>
 
 <xen:include template="helper_login_form" />]]></template>
+    <template title="bdapi_navigation_visitor_tab" version_id="67" version_string="1.4.3-BETA"><![CDATA[<xen:if is="{xen:helper api_visitorHasPermission, clientNew}"><li><a href="{xen:link account/api}">{xen:phrase bdapi_clients}</a></li></xen:if>]]></template>
   </templates>
   <public_template_modifications/>
   <bb_code_media_sites/>

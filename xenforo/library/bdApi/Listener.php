@@ -79,6 +79,11 @@ class bdApi_Listener
                 $ourHtml = $ourTemplate->render();
                 $contents .= $ourHtml;
                 break;
+            case 'navigation_visitor_tab_links1':
+                $ourTemplate = $template->create('bdapi_navigation_visitor_tab', $template->getParams());
+                $ourHtml = $ourTemplate->render();
+                $contents .= $ourHtml;
+                break;
         }
     }
 

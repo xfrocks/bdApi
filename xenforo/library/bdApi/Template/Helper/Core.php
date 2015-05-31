@@ -30,6 +30,11 @@ class bdApi_Template_Helper_Core
         return false;
     }
 
+    public function visitorHasPermission($permission, $group = 'general')
+    {
+        return XenForo_Visitor::getInstance()->hasPermission($group, 'bdApi_' . $permission);
+    }
+
     private function __construct()
     {
         // singleton
