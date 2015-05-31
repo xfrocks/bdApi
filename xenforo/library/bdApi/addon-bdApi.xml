@@ -760,6 +760,12 @@ step=3600</edit_format_params>
     <phrase title="option_group_bdApi" version_id="50" version_string="1.2.1b"><![CDATA[[bd] API]]></phrase>
     <phrase title="option_group_bdApi_description" version_id="50" version_string="1.2.1b"><![CDATA[]]></phrase>
     <phrase title="permission_general_bdApi_clientNew" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Create Client]]></phrase>
+    <phrase title="style_property_bdApi_linkAccountWrapper_description_master" version_id="67" version_string="1.4.3-BETA"><![CDATA[]]></phrase>
+    <phrase title="style_property_bdApi_linkAccountWrapper_master" version_id="67" version_string="1.4.3-BETA"><![CDATA[Show link in account sidebar]]></phrase>
+    <phrase title="style_property_bdApi_linkNavVisitor_description_master" version_id="67" version_string="1.4.3-BETA"><![CDATA[]]></phrase>
+    <phrase title="style_property_bdApi_linkNavVisitor_master" version_id="67" version_string="1.4.3-BETA"><![CDATA[Show link in visitor menu (navbar)]]></phrase>
+    <phrase title="style_property_group_bdApi_master" version_id="67" version_string="1.4.3-BETA"><![CDATA[[bd] API]]></phrase>
+    <phrase title="style_property_group_bdApi_master_desc" version_id="67" version_string="1.4.3-BETA"><![CDATA[]]></phrase>
   </phrases>
   <route_prefixes>
     <route_type type="admin">
@@ -771,7 +777,14 @@ step=3600</edit_format_params>
       <prefix original_prefix="api-tokens" class="bdApi_Route_PrefixAdmin_Token" build_link="data_only"/>
     </route_type>
   </route_prefixes>
-  <style_properties/>
+  <style_properties>
+    <property property_name="bdApi_linkNavVisitor" property_type="scalar" definition="1" group_name="bdApi" title="Show link in visitor menu (navbar)" description="" css_components="" scalar_type="boolean" scalar_parameters="" display_order="10" sub_group="links"><![CDATA[1]]></property>
+    <property property_name="bdApi_linkAccountWrapper" property_type="scalar" definition="1" group_name="bdApi" title="Show link in account sidebar" description="" css_components="" scalar_type="boolean" scalar_parameters="" display_order="20" sub_group="links"><![CDATA[1]]></property>
+    <group group_name="bdApi" display_order="9999">
+      <title>[bd] API</title>
+      <description></description>
+    </group>
+  </style_properties>
   <templates>
     <template title="bdapi.css" version_id="53" version_string="1.3.1"><![CDATA[/* clients */
 .bdApi_Client_List
@@ -1384,9 +1397,10 @@ step=3600</edit_format_params>
 
 	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
 </form>]]></template>
-    <template title="bdapi_account_wrapper_sidebar" version_id="51" version_string="1.3.0"><![CDATA[<li><a
-	class="{xen:if "{$selectedKey} == 'account/api'", 'secondaryContent', 'primaryContent'}"
-	href="{xen:link account/api}">{xen:phrase bdapi_home}</a></li>]]></template>
+    <template title="bdapi_account_wrapper_sidebar" version_id="67" version_string="1.4.3-BETA"><![CDATA[<xen:if is="{xen:property bdApi_linkAccountWrapper}">
+	<li><a class="{xen:if "{$selectedKey} == 'account/api'", 'secondaryContent', 
+		'primaryContent'}" href="{xen:link account/api}">{xen:phrase bdapi_home}</a></li>
+</xen:if>]]></template>
     <template title="bdapi_error_authorize_guest" version_id="63" version_string="1.4.3-BETA"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
 <xen:set var="$text">{xen:phrase bdapi_login_to_authorize_x, 'client={$client.name}'}</xen:set>
@@ -1398,7 +1412,9 @@ step=3600</edit_format_params>
 </xen:if>
 
 <xen:include template="helper_login_form" />]]></template>
-    <template title="bdapi_navigation_visitor_tab" version_id="67" version_string="1.4.3-BETA"><![CDATA[<xen:if is="{xen:helper api_visitorHasPermission, clientNew}"><li><a href="{xen:link account/api}">{xen:phrase bdapi_clients}</a></li></xen:if>]]></template>
+    <template title="bdapi_navigation_visitor_tab" version_id="67" version_string="1.4.3-BETA"><![CDATA[<xen:if is="{xen:property bdApi_linkNavVisitor} && {xen:helper api_visitorHasPermission, clientNew}">
+	<li><a href="{xen:link account/api}">{xen:phrase bdapi_clients}</a></li>
+</xen:if>]]></template>
   </templates>
   <public_template_modifications/>
   <bb_code_media_sites/>
