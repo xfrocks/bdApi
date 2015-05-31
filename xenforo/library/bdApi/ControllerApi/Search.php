@@ -146,7 +146,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         return $this->responseReroute(__CLASS__, 'get-results');
     }
 
-    public function _doSearch($contentType = null, array $constraints = array())
+    public function _doSearch($contentType = '', array $constraints = array())
     {
         if (!XenForo_Visitor::getInstance()->canSearch()) {
             throw $this->getNoPermissionResponseException();

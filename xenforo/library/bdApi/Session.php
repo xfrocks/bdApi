@@ -113,7 +113,7 @@ class bdApi_Session extends XenForo_Session
             $request = new Zend_Controller_Request_Http();
         }
 
-        if (XenForo_Application::$versionId > 1020000) {
+        if (XenForo_Application::$versionId >= 1020000) {
             $addOns = XenForo_Application::get('addOns');
             if (empty($addOns['bdApi'])) {
                 die('The API is currently disabled.');

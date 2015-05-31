@@ -27,7 +27,7 @@ class bdApi_XenForo_DataWriter_User extends XFCP_bdApi_XenForo_DataWriter_User
     {
         $optionLogChanges = true;
         $changeLogIgnoreFields = array();
-        if (XenForo_Application::$versionId > 1030000) {
+        if (XenForo_Application::$versionId >= 1030000) {
             // user changes log is available since XenForo 1.3.0+
             // we will use its configuration when possible
             $optionLogChanges = $this->getOption(self::OPTION_LOG_CHANGES);

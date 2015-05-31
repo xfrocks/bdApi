@@ -7,7 +7,13 @@ class bdApi_Data_Helper_Message
         static $bbCodeParser = false;
 
         if ($bbCodeParser === false) {
-            $bbCodeParser = XenForo_BbCode_Parser::create(XenForo_BbCode_Formatter_Base::create('Base'));
+            $formatter = XenForo_BbCode_Formatter_Base::create('Base');
+
+            if (XenForo_Application::$versionId >= 1020000) {
+                $bbCodeParser = XenForo_BbCode_Parser::create($formatter);
+            } else {
+                $bbCodeParser = new XenForo_BbCode_Parser($formatter);
+            }
         }
 
         return XenForo_ViewPublic_Helper_Message::getBbCodeWrapper($message, $bbCodeParser);

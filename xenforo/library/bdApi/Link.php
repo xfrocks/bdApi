@@ -70,7 +70,7 @@ class bdApi_Link extends _XenForo_Link
 
         $type = XenForo_Link::_checkForFullLink($type, $fullLink, $fullLinkPrefix);
 
-        $link = XenForo_Link::_buildLink(self::API_LINK_GROUP, $type, $data, $extraParams, $prefix);
+        $link = XenForo_Link::_buildLink(self::API_LINK_GROUP, $type, $data, $extraParams);
         $queryString = XenForo_Link::buildQueryString($extraParams);
 
         if ($link instanceof XenForo_Link) {

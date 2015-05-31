@@ -50,7 +50,7 @@ class bdApi_XenForo_ControllerPublic_Register_Base extends XFCP_bdApi_Xenforo_Co
 
 }
 
-if (XenForo_Application::$versionId > 1020000) {
+if (XenForo_Application::$versionId >= 1020000) {
     class bdApi_XenForo_ControllerPublic_Register extends bdApi_XenForo_ControllerPublic_Register_Base
     {
         public function responseView($viewName = '', $templateName = '', array $params = array(), array $containerParams = array())

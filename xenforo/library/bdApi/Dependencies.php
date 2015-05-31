@@ -94,7 +94,7 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
 
 }
 
-if (XenForo_Application::$versionId > 1020000) {
+if (XenForo_Application::$versionId >= 1020000) {
     class bdApi_Dependencies extends bdApi_Dependencies_Base
     {
         public function route(Zend_Controller_Request_Http $request, $routePath = null)
