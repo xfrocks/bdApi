@@ -204,11 +204,22 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
         if (!$session->checkScope($scope)) {
             $oauthTokenText = $session->getOAuthTokenText();
+
             if (empty($oauthTokenText)) {
-                throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_authorize_error_invalid_or_expired_access_token'), 403));
+                /** @var bdApi_Model_OAuth2 $oauth2Model */
+                $oauth2Model = XenForo_Model::create('bdApi_Model_OAuth2');
+                $controllerResponse = $oauth2Model->getServer()->getDefaultControllerResponse($this);
+
+                if (empty($controllerResponse)) {
+                    $controllerResponse = $this->responseError(new XenForo_Phrase('bdapi_authorize_error_invalid_or_expired_access_token'), 403);
+                }
             }
 
-            throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_authorize_error_scope_x_not_granted', array('scope' => $scope)), 403));
+            if (empty($controllerResponse)) {
+                $controllerResponse = $this->responseError(new XenForo_Phrase('bdapi_authorize_error_scope_x_not_granted', array('scope' => $scope)), 403);
+            }
+
+            throw $this->responseException($controllerResponse);
         }
     }
 
@@ -346,7 +357,8 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         return $responseOutput;
     }
 
-    protected function _setDeprecatedHeaders($newMethod, $newLink) {
+    protected function _setDeprecatedHeaders($newMethod, $newLink)
+    {
         $this->_response->setHeader('X-Api-Deprecated', sprintf(
             'newMethod=%s, newLink=%s',
             strtoupper($newMethod),

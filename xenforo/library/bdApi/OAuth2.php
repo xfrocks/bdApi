@@ -19,7 +19,8 @@ class bdApi_OAuth2 extends \OAuth2\Server
      */
     public function actionOauthToken(bdApi_ControllerApi_Abstract $controller)
     {
-        $response = $this->handleTokenRequest(OAuth2\Request::createFromGlobals());
+        $request = $this->_generateOAuth2Request();
+        $response = $this->handleTokenRequest($request);
 
         return $this->_generateControllerResponse($controller, $response);
     }
@@ -90,7 +91,8 @@ class bdApi_OAuth2 extends \OAuth2\Server
         if ($effectiveToken === null) {
             $effectiveToken = array();
 
-            if ($this->verifyResourceRequest(OAuth2\Request::createFromGlobals())) {
+            $request = $this->_generateOAuth2Request();
+            if ($this->verifyResourceRequest($request)) {
                 $token = $this->getResourceController()->getToken();
                 $effectiveToken = $token;
             }
@@ -149,6 +151,22 @@ class bdApi_OAuth2 extends \OAuth2\Server
     }
 
     /**
+     * Get XenForo controller response for default OAuth2 response.
+     *
+     * @param XenForo_Controller $controller
+     *
+     * @return XenForo_ControllerResponse_Abstract
+     */
+    public function getDefaultControllerResponse(XenForo_Controller $controller)
+    {
+        if (!empty($this->response)) {
+            return $this->_generateControllerResponse($controller, $this->response);
+        }
+
+        return null;
+    }
+
+    /**
      * Constructor
      *
      * @param bdApi_Model_OAuth2 $model
@@ -188,6 +206,11 @@ class bdApi_OAuth2 extends \OAuth2\Server
         return new bdApi_OAuth2_ResponseType_AccessToken($this->storages['access_token'], $this->storages['access_token'], $config);
     }
 
+    protected function _generateOAuth2Request()
+    {
+        return new OAuth2\Request($_GET, $_POST, array(), $_COOKIE, $_FILES, $_SERVER);
+    }
+
     protected function _generateControllerResponse(XenForo_Controller $controller, OAuth2\Response $response)
     {
         if ($response->isRedirection()) {
@@ -195,6 +218,7 @@ class bdApi_OAuth2 extends \OAuth2\Server
         }
 
         $params = $response->getParameters();
+        $params['_statusCode'] = $response->getStatusCode();
         $params['_headers'] = $response->getHttpHeaders();
 
         if ($controller instanceof bdApi_ControllerApi_Abstract) {
