@@ -577,12 +577,12 @@ function xfac_api_putPost($config, $accessToken, $postId, $postBody, array $extr
 function xfac_api_deletePost($config, $accessToken, $postId)
 {
     $url = call_user_func_array('sprintf', array(
-        '%s/index.php?posts/%d',
+        '%s/index.php?posts/%d&oauth_token=%s',
         rtrim($config['root'], '/'),
         $postId,
+        rawurlencode($accessToken),
     ));
-    $postFields = array('oauth_token' => $accessToken);
-    $curl = _xfac_api_curl($url, 'DELETE', $postFields);
+    $curl = _xfac_api_curl($url, 'DELETE');
     extract($curl);
 
     if (isset($parts['post'])) {
@@ -595,12 +595,12 @@ function xfac_api_deletePost($config, $accessToken, $postId)
 function xfac_api_deleteForumFollower($config, $accessToken, $forumId)
 {
     $url = call_user_func_array('sprintf', array(
-        '%s/index.php?forums/%d/followers',
+        '%s/index.php?forums/%d/followers&oauth_token=%s',
         rtrim($config['root'], '/'),
         $forumId,
+        rawurlencode($accessToken),
     ));
-    $postFields = array('oauth_token' => $accessToken);
-    $curl = _xfac_api_curl($url, 'DELETE', $postFields);
+    $curl = _xfac_api_curl($url, 'DELETE');
     extract($curl);
 
     if (isset($parts['status']) AND $parts['status'] == 'ok') {
@@ -641,6 +641,7 @@ function xfac_api_postOauthTokenAdmin($config, $adminAccessToken, $userId)
     $curl = _xfac_api_curl($url, 'POST', $postFields);
     extract($curl);
 
+    /** @noinspection PhpUndefinedVariableInspection */
     return _xfac_api_prepareAccessTokenBody($body);
 }
 
