@@ -15,6 +15,18 @@ You can find [howto](https://xfrocks.com/api-support/threads/177/), [FAQ](https:
 
 == Changelog ==
 
+= 1.3.0 =
+
+* Added two way post / comment sync
+* Added user group sync
+* Added support for membership plugins: s2member, MemberPress, Paid Membership Pro
+* Added Dashboard feature: connect / disconnect user accounts when edit user
+* Added Dashboard tool: auto associate existing WordPress accounts with XenForo’s
+* Improved user sync
+* Improved cookie sync
+* Improved options page UX
+* Bug fixes
+
 = 1.1.0 =
 
 * Added options to control how posts are pushed to XenForo
