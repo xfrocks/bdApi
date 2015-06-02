@@ -62,7 +62,13 @@ class bdApi_Link extends _XenForo_Link
             $session = bdApi_Data_Helper_Core::safeGetSession();
             if (!empty($session)) {
                 $oauthToken = $session->getOAuthTokenText();
-                if (!empty($oauthToken)) {
+                if (!empty($oauthToken)
+                    && !empty($_REQUEST['oauth_token'])
+                    && $_REQUEST['oauth_token'] === $oauthToken
+                ) {
+                    // only append token to built link if the current request has token in query too
+                    // this will prevent token in links if it's requested with OTT, token in Auth header
+                    // or token in body (PUT/POST requests)
                     $extraParams['oauth_token'] = $oauthToken;
                 }
             }

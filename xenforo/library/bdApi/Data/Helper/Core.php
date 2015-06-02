@@ -11,6 +11,12 @@ class bdApi_Data_Helper_Core
     {
         if (XenForo_Application::debugMode()) {
             $data['debug'] = XenForo_Debug::getDebugTemplateParams();
+
+            $session = self::safeGetSession();
+            if (!empty($session)) {
+                $data['debug']['client_id'] = $session->getOAuthClientId();
+                $data['debug']['oauth_token'] = $session->getOAuthTokenText();
+            }
         }
 
         if (empty($data['system_info'])) {
