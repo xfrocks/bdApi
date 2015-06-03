@@ -227,6 +227,37 @@ function renderMessageForJson($url, array $json)
     );
 }
 
+function renderAccessTokenMessage($tokenUrl, array $json)
+{
+    global $config, $accessToken;
+
+    if (!empty($json['access_token'])) {
+        $accessToken = $json['access_token'];
+        $message = sprintf(
+            'Obtained access token successfully!<br />'
+            . 'Scopes: %s<br />'
+            . 'Expires At: %s<br />',
+            $json['scope'],
+            date('c', time() + $json['expires_in'])
+        );
+
+        if (!empty($json['refresh_token'])) {
+            $message .= sprintf('Refresh Token: <a href="index.php?action=refresh&refresh_token=%1$s">%1$s</a><br />', $json['refresh_token']);
+        } else {
+            $message .= sprintf('Refresh Token: N/A<br />');
+        }
+
+        list($body, $json) = makeRequest('index', $config['api_root'], $accessToken);
+        if (!empty($json['links'])) {
+            $message .= '<hr />' . renderMessageForJson('index', $json);
+        }
+    } else {
+        $message = renderMessageForJson($tokenUrl, $json);
+    }
+
+    return $message;
+}
+
 function isLocal($apiRoot) {
     $apiRootHost = parse_url($apiRoot, PHP_URL_HOST);
     $isLocal = in_array($apiRootHost, array(

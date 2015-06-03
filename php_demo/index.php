@@ -49,22 +49,29 @@ switch ($action) {
 
         // step 4
         $json = makeCurlPost($tokenUrl, $postFields);
-
-        if (!empty($json['access_token'])) {
-            $accessToken = $json['access_token'];
-            $message = sprintf(
-                'Obtained access token successfully!<br />Scopes: %s<br />Expires At: %s',
-                $json['scope'],
-                date('c', time() + $json['expires_in'])
-            );
-
-            list($body, $json) = makeRequest('index', $config['api_root'], $accessToken);
-            if (!empty($json['links'])) {
-                $message .= '<hr />' . renderMessageForJson('index', $json);
-            }
-        } else {
-            $message = renderMessageForJson($tokenUrl, $json);
+        $message = renderAccessTokenMessage($tokenUrl, $json);
+        break;
+    case 'refresh':
+        // this is the refresh token flow
+        if (empty($_REQUEST['refresh_token'])) {
+            $message = 'Refresh request must have `refresh_token` query parameter!';
+            break;
         }
+
+        $tokenUrl = sprintf(
+            '%s/index.php?oauth/token',
+            $config['api_root']
+        );
+
+        $postFields = array(
+            'grant_type' => 'refresh_token',
+            'client_id' => $config['api_key'],
+            'client_secret' => $config['api_secret'],
+            'refresh_token' => $_REQUEST['refresh_token'],
+        );
+
+        $json = makeCurlPost($tokenUrl, $postFields);
+        $message = renderAccessTokenMessage($tokenUrl, $json);
         break;
     case 'request':
         // step 5
