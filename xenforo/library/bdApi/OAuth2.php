@@ -175,7 +175,13 @@ class bdApi_OAuth2 extends \OAuth2\Server
     {
         $storage = new bdApi_OAuth2_Storage($model);
 
-        parent::__construct($storage, array(
+        parent::__construct(array(
+            'access_token' => $storage,
+            'authorization_code' => $storage,
+            'client_credentials' => $storage,
+            'user_credentials' => $storage,
+            'refresh_token' => $storage,
+        ), array(
             'auth_code_lifetime' => bdApi_Option::get('authCodeTTL'),
             'access_lifetime' => bdApi_Option::get('tokenTTL'),
             'refresh_token_lifetime' => bdApi_Option::get('refreshTokenTTLDays') * 86400,
@@ -183,17 +189,8 @@ class bdApi_OAuth2 extends \OAuth2\Server
             'enforce_state' => false,
             'require_exact_redirect_uri' => false,
             'allow_implicit' => true,
+            'always_issue_new_refresh_token' => true,
         ));
-
-        $this->addGrantType(new \OAuth2\GrantType\AuthorizationCode($storage));
-        $this->addGrantType(new \OAuth2\GrantType\UserCredentials($storage));
-        $this->addGrantType(new \OAuth2\GrantType\ClientCredentials($storage));
-        $this->addGrantType(new \OAuth2\GrantType\RefreshToken($storage));
-
-        $aud = $this->getJwtAudience();
-        if (!empty($aud)) {
-            $this->addGrantType(new bdApi_OAuth2_GrantType_JwtBearer($storage, $aud));
-        }
 
         $this->_model = $model;
     }
@@ -204,6 +201,19 @@ class bdApi_OAuth2 extends \OAuth2\Server
         $config['token_type'] = $this->tokenType ? $this->tokenType->getTokenType() : $this->getDefaultTokenType()->getTokenType();
 
         return new bdApi_OAuth2_ResponseType_AccessToken($this->storages['access_token'], $this->storages['access_token'], $config);
+    }
+
+    protected function getDefaultGrantTypes()
+    {
+        $grantTypes = parent::getDefaultGrantTypes();
+
+        $aud = $this->getJwtAudience();
+        if (!empty($aud)) {
+            $jwtBearer = new bdApi_OAuth2_GrantType_JwtBearer(reset($this->storages), $aud);
+            $grantTypes[$jwtBearer->getQuerystringIdentifier()] = $jwtBearer;
+        }
+
+        return $grantTypes;
     }
 
     protected function _generateOAuth2Request()
