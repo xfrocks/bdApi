@@ -809,6 +809,18 @@ function _xfac_api_prepareAccessTokenBody($body)
     if (!empty($parts['access_token'])) {
         if (!empty($parts['expires_in'])) {
             $parts['expire_date'] = time() + $parts['expires_in'];
+            unset($parts['expires_in']);
+        }
+
+        if (!empty($parts['refresh_token_expires_in'])) {
+            $parts['refresh_token_expire_date'] = time() + $parts['refresh_token_expires_in'];
+            unset($parts['refresh_token_expires_in']);
+        }
+
+        foreach (array_keys($parts) as $key) {
+            if (is_array($parts[$key])) {
+                unset($parts[$key]);
+            }
         }
 
         return $parts;
