@@ -140,6 +140,18 @@ function xfac_user_getSystemAccessToken($config, $generateOneTimeToken = false, 
         if (!empty($record)) {
             $accessToken = xfac_user_getAccessTokenForRecord($record);
         }
+
+        if (empty($accessToken)) {
+            xfac_updateNotice(
+                'xf_guest_account',
+                sprintf(
+                    __('XenForo Guest Account connection is interrupted. <a href="%s">Please update bridge options</a>.', 'xenforo-api-consumer'),
+                    admin_url('options-general.php?page=xfac')
+                ),
+                'manage_options',
+                __('XenForo Admin Account connection is interrupted. Please notify the staff.', 'xenforo-api-consumer')
+            );
+        }
     }
 
     if (empty($accessToken) AND $generateOneTimeToken) {
@@ -172,8 +184,6 @@ function xfac_user_getAdminAccessToken($config)
                 'manage_options',
                 __('XenForo Admin Account connection is interrupted. Please notify the staff.', 'xenforo-api-consumer')
             );
-        } else {
-            xfac_updateNotice('xf_admin_account');
         }
     }
 

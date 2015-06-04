@@ -97,6 +97,7 @@ function xfac_option_getMeta($config)
     }
 
     if ($rebuild) {
+        xfac_updateNotice('xf_guest_account');
         xfac_updateNotice('xf_admin_account');
 
         $meta = $config;

@@ -203,6 +203,9 @@ function xfac_dashboardOptions_admin_init()
                 $record = reset($records);
                 update_option('xfac_xf_guest_account', $record->id);
 
+                // force meta rebuild
+                update_option('xfac_meta', array());
+
                 wp_redirect(admin_url('options-general.php?page=xfac&done=xfac_xf_guest_account'));
                 break;
         }
