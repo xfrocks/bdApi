@@ -183,7 +183,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
                         <p class="description">
                             <?php _e('The admin account is used for administration task such as user group sync. An Administrator WordPress account must associate with an Administrative XenForo account to setup this.', 'xenforo-api-consumer'); ?>
                             <?php if (!empty($configuredAdminRecord) AND empty($meta['userGroups']) AND wp_get_current_user()->ID == $configuredAdminRecord->user_id): ?>
-                                <?php if (xfac_user_recordHasAdmincpScope($configuredAdminRecord)): ?>
+                                <?php if (!xfac_user_recordHasAdmincpScope($configuredAdminRecord)): ?>
                                     <?php _e('Looks like your associated account doesn\'t have <span style="font-family: Courier New">admincp</span> API scope.', 'xenforo-api-consumer'); ?>
                                     <a href="<?php echo site_url('wp-login.php?xfac=authorize&admin=1&redirect_to=' . rawurlencode(admin_url('profile.php')), 'login_post'); ?>"><?php _e('Click here to attempt to fix it.', 'xenforo-api-consumer'); ?></a>
                                 <?php endif; ?>

@@ -182,12 +182,10 @@ function xfac_user_getAccessTokenForRecord($record)
 {
     $token = $record->token;
 
-    if (!empty($token['expire_date']) AND $token['expire_date'] > time()) {
+    if (!empty($token['expire_date'])
+        && $token['expire_date'] > time()
+    ) {
         return $token['access_token'];
-    }
-
-    if (empty($token['refresh_token'])) {
-        return null;
     }
 
     $config = xfac_option_getConfig();
@@ -195,7 +193,29 @@ function xfac_user_getAccessTokenForRecord($record)
         return null;
     }
 
-    $newToken = xfac_api_getAccessTokenFromRefreshToken($config, $token['refresh_token']);
+    if (empty($newToken)) {
+        // try to refresh and get new token
+        if (!empty($token['refresh_token'])
+            && (!isset($token['refresh_token_expire_date'])
+                || $token['refresh_token_expire_date'] > time())
+        ) {
+            $newToken = xfac_api_getAccessTokenFromRefreshToken($config, $token['refresh_token']);
+        }
+    }
+
+    if (empty($newToken)) {
+        // try to get new token with admin token
+        // of course do not attempt that if the current record IS the admin record
+        $xfAdminAccountOption = intval(get_option('xfac_xf_admin_account'));
+        if ($xfAdminAccountOption > 0
+            && $record->id != $xfAdminAccountOption
+        ) {
+            $adminAccessToken = xfac_user_getAdminAccessToken($config);
+            if (!empty($adminAccessToken)) {
+                $newToken = xfac_api_postOauthTokenAdmin($config, $adminAccessToken, $record->identifier);
+            }
+        }
+    }
 
     if (empty($newToken)) {
         return null;
