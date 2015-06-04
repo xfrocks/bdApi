@@ -55,6 +55,12 @@ function xfac_login_init()
     switch ($_REQUEST['xfac']) {
         case 'callback':
             define('XFAC_SYNC_LOGIN_SKIP_REDIRECT', 1);
+
+            if (!empty($_REQUEST['authorizeHash'])) {
+                $callbackUrl .= '&authorizeHash=' . urlencode($_REQUEST['authorizeHash']);
+                $associateConfirmed = _xfac_login_verifyAuthorizeHash($_REQUEST['authorizeHash']);
+            }
+
             if (!empty($_REQUEST['code'])) {
                 $token = xfac_api_getAccessTokenFromCode($config, $_REQUEST['code'], $callbackUrl);
             }
@@ -104,6 +110,12 @@ function xfac_login_init()
             $scope = '';
             if (!empty($_REQUEST['admin'])) {
                 $scope = XFAC_API_SCOPE . ' admincp';
+            }
+
+            if ($_REQUEST['xfac'] === 'authorize') {
+                // user is requesting to connect their own account
+                // include a hash to skip the associate submission if possible
+                $callbackUrl .= '&authorizeHash=' . urlencode(_xfac_login_getAuthorizeHash());
             }
 
             $authorizeUrl = xfac_api_getAuthorizeUrl($config, $callbackUrl, $scope);
@@ -213,4 +225,27 @@ function _xfac_login_renderAssociateForm(WP_User $wpUser, array $xfUser, $refres
     $message = sprintf(__('Enter your password to associate the account "%1$s" with your profile.', 'xenforo-api-consumer'), $xfUser['username']);
 
     require(xfac_template_locateTemplate('login_associate.php'));
+}
+
+function _xfac_login_getAuthorizeHash()
+{
+    $wpUser = wp_get_current_user();
+    if (!($wpUser instanceof WP_User)
+        || $wpUser->ID <= 0
+    ) {
+        return '';
+    }
+
+    return sprintf('%d,%s', $wpUser->ID, md5($wpUser->ID . $wpUser->user_pass . LOGGED_IN_SALT));
+}
+
+function _xfac_login_verifyAuthorizeHash($hash)
+{
+    $expectedHash = _xfac_login_getAuthorizeHash();
+    if ($hash === $expectedHash) {
+        $parts = explode(',', $hash);
+        return intval($parts[0]);
+    }
+
+    return 0;
 }
