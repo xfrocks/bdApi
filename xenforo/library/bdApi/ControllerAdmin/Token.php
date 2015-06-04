@@ -64,7 +64,7 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
             $scopes = bdApi_Template_Helper_Core::getInstance()->scopeJoin($scopes);
 
             $ttl = $this->_input->filterSingle('ttl', XenForo_Input::UINT);
-            $this->_getOAuth2Model()->getServer()->createAccessToken($client['client_id'], $user['user_id'], $scopes, $ttl);
+            $this->_getOAuth2Model()->getServer()->createAccessToken($client['client_id'], $user['user_id'], $scopes, $ttl, false);
 
             return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildAdminLink('api-tokens'));
         } else {

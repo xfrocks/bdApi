@@ -108,12 +108,13 @@ class bdApi_OAuth2 extends \OAuth2\Server
      * @param int $userId
      * @param string $scope
      * @param int|null $ttl
+     * @param bool $includeRefreshToken
      *
      * @return array
      */
-    public function createAccessToken($clientId, $userId, $scope = null, $ttl = null)
+    public function createAccessToken($clientId, $userId, $scope = null, $ttl = null, $includeRefreshToken = true)
     {
-        $token = $this->getAccessTokenResponseType()->createAccessToken($clientId, $userId, $scope);
+        $token = $this->getAccessTokenResponseType()->createAccessToken($clientId, $userId, $scope, $includeRefreshToken);
 
         if ($ttl !== null) {
             $dbToken = $this->_model->getTokenModel()->getTokenByText($token['access_token']);
@@ -528,6 +529,12 @@ class bdApi_OAuth2_ResponseType_AccessToken extends OAuth2\ResponseType\AccessTo
     {
         $token = parent::createAccessToken($clientId, $userId, $scope, $includeRefreshToken);
         $token['user_id'] = $userId;
+
+        if (!empty($token['refresh_token'])
+            && !empty($this->config['refresh_token_lifetime'])
+        ) {
+            $token['refresh_token_expires_in'] = $this->config['refresh_token_lifetime'];
+        }
 
         return $token;
     }

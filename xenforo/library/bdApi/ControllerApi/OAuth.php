@@ -239,7 +239,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
             return $this->responseError(new XenForo_Phrase('bdapi_slash_oauth_token_admin_requires_user_id'), 400);
         }
 
-        return $this->_actionPostTokenNonStandard($client, $userId);
+        return $this->_actionPostTokenNonStandard($client, $userId, false);
     }
 
     protected function _getClientOrError()
@@ -271,13 +271,13 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         return $client;
     }
 
-    protected function _actionPostTokenNonStandard(array $client, $userId)
+    protected function _actionPostTokenNonStandard(array $client, $userId, $includeRefreshToken = true)
     {
         /* @var $oauth2Model bdApi_Model_OAuth2 */
         $oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
         $scopes = $oauth2Model->getAutoAndUserScopes($client['client_id'], $userId);
 
-        $token = $oauth2Model->getServer()->createAccessToken($client['client_id'], $userId, $scopes);
+        $token = $oauth2Model->getServer()->createAccessToken($client['client_id'], $userId, $scopes, null, $includeRefreshToken);
 
         return $this->responseData('bdApi_ViewApi_OAuth_TokenNonStandard', $token);
     }
