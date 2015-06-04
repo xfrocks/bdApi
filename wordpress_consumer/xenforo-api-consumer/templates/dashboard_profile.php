@@ -45,6 +45,14 @@ if (!defined('ABSPATH')) {
                             <?php _e('Disconnect this account', 'xenforo-api-consumer'); ?>
                         </a>
                     </p>
+
+                    <?php if (xfac_user_getAccessTokenForRecord($apiRecord) === null): ?>
+                    <p>
+                        <a href="<?php echo site_url('wp-login.php?xfac=1&redirect_to=' . rawurlencode(admin_url('profile.php')), 'login_post'); ?>">
+                            <?php _e('Refresh connection', 'xenforo-api-consumer'); ?>
+                        </a>
+                    </p>
+                    <?php endif; ?>
                 </td>
             </tr>
         <?php endforeach; ?>
