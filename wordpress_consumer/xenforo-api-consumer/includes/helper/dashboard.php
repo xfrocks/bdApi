@@ -122,3 +122,54 @@ function xfac_whitelist_options($whitelist_options)
 }
 
 add_filter('whitelist_options', 'xfac_whitelist_options');
+
+function xfac_updateNotice($type, $notice = null, $cap = null, $noCapNotice = null)
+{
+    $notices = get_option('_xfac_notices', array());
+    $isChanged = false;
+
+    if ($notice !== null) {
+        $notices[$type] = array(
+            'notice' => $notice,
+            'cap' => $cap,
+            'noCapNotice' => $noCapNotice,
+        );
+        $isChanged = true;
+    } elseif (isset($notices[$type])) {
+        unset($notices[$type]);
+        $isChanged = true;
+    }
+
+    if ($isChanged) {
+        update_option('_xfac_notices', $notices);
+    }
+}
+
+function xfac_admin_notices()
+{
+    $notices = get_option('_xfac_notices', array());
+
+    if (!empty($notices)) {
+        foreach ($notices as $notice) {
+            $text = null;
+
+            if (!empty($notice['cap'])) {
+                if (current_user_can($notice['cap'])) {
+                    $text = $notice['notice'];
+                } elseif (!empty($notice['noCapNotice'])) {
+                    $text = $notice['noCapNotice'];
+                }
+            } else {
+                if (!empty($notice['notice'])) {
+                    $text = $notice['notice'];
+                }
+            }
+
+            if (!empty($text)) {
+                echo '<div class="error"><p>', $text, '</p></div>';
+            }
+        }
+    }
+}
+
+add_action('admin_notices', 'xfac_admin_notices', 3);

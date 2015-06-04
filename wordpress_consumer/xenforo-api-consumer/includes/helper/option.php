@@ -97,6 +97,8 @@ function xfac_option_getMeta($config)
     }
 
     if ($rebuild) {
+        xfac_updateNotice('xf_admin_account');
+
         $meta = $config;
 
         $meta['linkIndex'] = xfac_api_getPublicLink($config, 'index');
