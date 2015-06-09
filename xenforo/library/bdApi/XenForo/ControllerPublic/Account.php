@@ -96,11 +96,11 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
             'redirect_uri' => XenForo_Input::STRING,
         ));
 
-        $optionsInput = $this->_input->filterSingle('options', XenForo_Input::ARRAY_SIMPLE);
-        $optionsInput = array_merge(array(
-            'whitelisted_domains' => '',
-            'public_key' => '',
-        ), $options, $optionsInput);
+        $optionsInput = new XenForo_Input($this->_input->filterSingle('options', XenForo_Input::ARRAY_SIMPLE));
+        $newOptions = array_merge($options, $optionsInput->filter(array(
+            'whitelisted_domains' => XenForo_Input::STRING,
+            'public_key' => XenForo_Input::STRING,
+        )));
 
         $dw = XenForo_DataWriter::create('bdApi_DataWriter_Client');
         if (!empty($client)) {
@@ -112,7 +112,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
         }
 
         $dw->bulkSet($dwInput);
-        $dw->set('options', $optionsInput);
+        $dw->set('options', $newOptions);
 
         $dw->save();
 

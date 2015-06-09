@@ -72,14 +72,14 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
             'client_id' => XenForo_Input::STRING,
             'client_secret' => XenForo_Input::STRING,
             'redirect_uri' => XenForo_Input::STRING,
-            'options' => XenForo_Input::ARRAY_SIMPLE
         ));
 
-        $dwInput['options'] = array_merge(array(
-            'whitelisted_domains' => '',
-            'public_key' => '',
-            'auto_authorize' => array(),
-        ), $dwInput['options']);
+        $optionsInput = new XenForo_Input($this->_input->filterSingle('options', XenForo_Input::ARRAY_SIMPLE));
+        $dwInput['options'] = $optionsInput->filter(array(
+            'whitelisted_domains' => XenForo_Input::STRING,
+            'public_key' => XenForo_Input::STRING,
+            'auto_authorize' => XenForo_Input::ARRAY_SIMPLE,
+        ));
 
         $dw = $this->_getClientDataWriter();
         if (!empty($client)) {
