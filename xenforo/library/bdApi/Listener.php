@@ -68,6 +68,8 @@ class bdApi_Listener
     {
         if ($templateName == 'account_wrapper') {
             $template->preloadTemplate('bdapi_account_wrapper_sidebar');
+        } elseif ($templateName == 'PAGE_CONTAINER') {
+            $template->preloadTemplate('bdapi_navigation_visitor_tab');
         }
     }
 
