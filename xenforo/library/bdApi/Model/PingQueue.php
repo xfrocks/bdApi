@@ -126,21 +126,34 @@ class bdApi_Model_PingQueue extends XenForo_Model
             $client = XenForo_Helper_Http::getClient($records[0]['callback']);
             $client->setHeaders('Content-Type', 'application/json');
             $client->setRawData(json_encode($payloads));
-            $response = $client->request('POST');
-            $responseCode = $response->getStatus();
+
             $reInserted = false;
+
+            try {
+                $response = $client->request('POST');
+                $responseBody = $response->getBody();
+                $responseCode = $response->getStatus();
+            } catch (Zend_Http_Client_Exception $e) {
+                $response = null;
+                $responseBody = $e->getMessage();
+                $responseCode = 500;
+            }
 
             if ($responseCode < 200 OR $responseCode > 299) {
                 $this->reInsertQueue($records);
                 $reInserted = true;
             }
 
-            if (XenForo_Application::debugMode() OR $reInserted) {
-                $logModel->logRequest('POST', $records[0]['callback'], $payloads, $responseCode, array('message' => $response->getBody()), array(
-                    'client_id' => '',
-                    'user_id' => 0,
-                    'ip_address' => '127.0.0.1',
-                ));
+            if (XenForo_Application::debugMode() || $reInserted) {
+                $logModel->logRequest(
+                    'POST', $records[0]['callback'], $payloads,
+                    $responseCode, array('message' => $responseBody),
+                    array(
+                        'client_id' => '',
+                        'user_id' => 0,
+                        'ip_address' => '127.0.0.1',
+                    )
+                );
             }
         }
     }
