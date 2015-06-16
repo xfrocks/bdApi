@@ -42,7 +42,9 @@ db.devices = {
 						deviceLeft--;
 						device.extra_data = extraData;
 
-						if (device.hub_topic == hubTopic) {
+						if (!hubTopic 
+							|| device.hub_topic === hubTopic
+						) {
 							found.push(device);
 						}
 

@@ -12,6 +12,17 @@ class bdApi_Model_Subscription extends XenForo_Model
 
     const FETCH_CLIENT = 0x01;
 
+    public function getClientSubscriptionsData()
+    {
+        $data = $this->_getDataRegistryModel()->get(self::TYPE_CLIENT_DATA_REGISTRY);
+
+        if (empty($data)) {
+            $data = array();
+        }
+
+        return $data;
+    }
+
     public function updateCallbacksForTopic($topic)
     {
         list($type, $id) = self::parseTopic($topic);
@@ -80,11 +91,7 @@ class bdApi_Model_Subscription extends XenForo_Model
                 if (!empty($subscriptions)) {
                     $data = array(
                         'topic' => $topic,
-                        'link' => bdApi_Data_Helper_Core::safeBuildApiLink(
-                            'index',
-                            null,
-                            array('oauth_token' => '')
-                        ),
+                        'link' => '',
                         'subscriptions' => $subscriptions,
                     );
                 } else {
@@ -98,7 +105,9 @@ class bdApi_Model_Subscription extends XenForo_Model
 
     public function ping(array $option, $action, $objectType, $objectData)
     {
-        if (!isset($option['topic']) || empty($option['subscriptions'])) {
+        if (!isset($option['topic'])
+            || empty($option['subscriptions'])
+        ) {
             return false;
         }
 
@@ -108,7 +117,9 @@ class bdApi_Model_Subscription extends XenForo_Model
         $pingQueueModel = $this->getModelFromCache('bdApi_Model_PingQueue');
 
         foreach ($option['subscriptions'] as $subscription) {
-            if ($subscription['expire_date'] > 0 AND $subscription['expire_date'] < XenForo_Application::$time) {
+            if ($subscription['expire_date'] > 0
+                && $subscription['expire_date'] < XenForo_Application::$time
+            ) {
                 // expired
                 continue;
             }
@@ -246,6 +257,8 @@ class bdApi_Model_Subscription extends XenForo_Model
         foreach ($userIds as $userId) {
             if ($userId == XenForo_Visitor::getUserId()) {
                 $users[$userId] = XenForo_Visitor::getInstance()->toArray();
+            } elseif ($userId == 0) {
+                $users[$userId] = $userModel->getVisitingGuestUser();
             } elseif (isset($allUsers[$userId])) {
                 $users[$userId] = $allUsers[$userId];
             } else {

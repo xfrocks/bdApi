@@ -259,8 +259,8 @@ app.post('/callback', function (req, res) {
                 continue;
             } 
 
-            if (!ping.client_id || !ping.topic) {
-                debug('ping does not has client or topic information');
+            if (!ping.client_id) {
+                debug('ping does not has client information');
                 continue;
             }
 
