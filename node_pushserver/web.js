@@ -94,7 +94,7 @@ app.post('/subscribe', function (req, res) {
     debug('/subscribe before request.post', data.hub_uri);
     request.post({
         'url': data.hub_uri,
-        'formData': formData
+        'form': formData
     }, function(err, httpResponse, body) {
         if (httpResponse) {
             var success = false;
@@ -128,7 +128,7 @@ app.post('/unsubscribe', function (req, res) {
     debug('/unsubscribe before request.post', data.hub_uri);
     request.post({
         'url': data.hub_uri,
-        'formData': formData
+        'form': formData
     }, function(err, httpResponse, body) {
         if (httpResponse) {
             var success = false;
