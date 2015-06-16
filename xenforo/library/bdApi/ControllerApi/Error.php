@@ -35,7 +35,15 @@ class bdApi_ControllerApi_Error extends bdApi_ControllerApi_Abstract
 
     public function actionNoPermission()
     {
-        return $this->responseError(new XenForo_Phrase('do_not_have_permission'), 403);
+        /** @var bdApi_Model_OAuth2 $oauth2Model */
+        $oauth2Model = XenForo_Model::create('bdApi_Model_OAuth2');
+        $controllerResponse = $oauth2Model->getServer()->getDefaultControllerResponse($this);
+
+        if (empty($controllerResponse)) {
+            $controllerResponse = $this->responseError(new XenForo_Phrase('do_not_have_permission'), 403);
+        }
+
+        return $controllerResponse;
     }
 
     public function actionRegistrationRequired()
