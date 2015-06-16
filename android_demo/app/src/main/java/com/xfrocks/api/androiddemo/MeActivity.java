@@ -115,6 +115,7 @@ public class MeActivity extends ListActivity {
         @Override
         protected void onStart() {
             mData.clear();
+            ((Adapter) getListAdapter()).notifyDataSetInvalidated();
         }
 
         @Override
@@ -144,9 +145,7 @@ public class MeActivity extends ListActivity {
 
         @Override
         protected void onComplete(boolean isSuccess) {
-            if (isSuccess) {
-                ((Adapter) getListAdapter()).notifyDataSetInvalidated();
-            }
+            ((Adapter) getListAdapter()).notifyDataSetChanged();
         }
     }
 

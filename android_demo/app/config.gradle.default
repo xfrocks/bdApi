@@ -7,6 +7,7 @@ android {
             buildConfigField "String", "API_ROOT", "\"http://domain.com/xenforo/api\""
             buildConfigField "String", "CLIENT_ID", "\"client_id\""
             buildConfigField "String", "CLIENT_SECRET", "\"client_secret\""
+            buildConfigField "String", "PUSH_SERVER", "\"http://push.server.com\""
         }
     }
 

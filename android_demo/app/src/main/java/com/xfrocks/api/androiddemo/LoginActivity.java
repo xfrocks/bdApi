@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
+import com.xfrocks.api.androiddemo.gcm.RegistrationService;
 
 import org.json.JSONObject;
 
@@ -199,10 +200,19 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         @Override
         protected void onSuccess(JSONObject response) {
             Api.AccessToken at = Api.makeAccessToken(response);
+            if (at == null) {
+                return;
+            }
 
             Intent intent = new Intent(LoginActivity.this, MeActivity.class);
             intent.putExtra(MeActivity.EXTRA_ACCESS_TOKEN, at);
             startActivity(intent);
+
+            if (RegistrationService.checkPlayServices(LoginActivity.this)) {
+                Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);
+                gcmIntent.putExtra(RegistrationService.EXTRA_ACCESS_TOKEN, at);
+                startService(gcmIntent);
+            }
         }
 
         @Override

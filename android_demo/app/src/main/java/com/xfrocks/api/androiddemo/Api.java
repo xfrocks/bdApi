@@ -14,6 +14,9 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,12 +34,43 @@ public class Api {
         try {
             AccessToken at = new AccessToken();
             at.token = response.getString("access_token");
+            at.userId = response.getLong("user_id");
             return at;
         } catch (JSONException e) {
             // ignore
         }
 
         return null;
+    }
+
+    public static String makeOneTimeToken(long userId, AccessToken at, long ttl) {
+        long timestamp = new Date().getTime() / 1000 + ttl;
+
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            return e.getMessage();
+        }
+
+        md.update(String.format("%d%d%s%s",
+                userId,
+                timestamp,
+                at != null ? at.getToken() : "",
+                BuildConfig.CLIENT_SECRET
+        ).getBytes());
+        byte[] digest = md.digest();
+
+        StringBuilder sb = new StringBuilder();
+        for (byte d : digest) {
+            String h = Integer.toHexString(0xFF & d);
+            while (h.length() < 2) {
+                h = "0" + h;
+            }
+            sb.append(h);
+        }
+
+        return String.format("%d,%d,%s,%s", userId, timestamp, sb, BuildConfig.CLIENT_ID);
     }
 
     private static String makeUrl(int method, String url, Map<String, String> params) {
@@ -61,12 +95,12 @@ public class Api {
         return url;
     }
 
-    public static class Request extends com.android.volley.Request<JSONObject> {
+    private static class Request extends com.android.volley.Request<JSONObject> {
 
         protected Map<String, String> mParams;
 
         public Request(int method, String url, Map<String, String> params) {
-            super(method, makeUrl(method, url, params), null);
+            super(method, url, null);
 
             mParams = params;
 
@@ -149,13 +183,28 @@ public class Api {
 
     public static class GetRequest extends Request {
         public GetRequest(String url, Map<String, String> params) {
-            super(Method.GET, url, params);
+            super(Method.GET, makeUrl(Method.GET, url, params), params);
         }
     }
 
     public static class PostRequest extends Request {
         public PostRequest(String url, Map<String, String> params) {
-            super(Method.POST, url, params);
+            super(Method.POST, makeUrl(Method.POST, url, params), params);
+        }
+    }
+
+    public static class PushServerRequest extends Request {
+        public PushServerRequest(boolean isSubscribe, String deviceId, String topic, AccessToken at) {
+            super(
+                    Method.POST,
+                    BuildConfig.PUSH_SERVER + (isSubscribe ? "/subscribe" : "/unsubscribe"),
+                    new Params("device_type", "android")
+                            .and("device_id", deviceId)
+                            .and("hub_uri", BuildConfig.API_ROOT + "/index.php?subscriptions")
+                            .and("hub_topic", topic)
+                            .and("oauth_client_id", BuildConfig.CLIENT_ID)
+                            .and("oauth_token", Api.makeOneTimeToken(at != null ? at.getUserId() : 0, at, 3600))
+            );
         }
     }
 
@@ -194,9 +243,14 @@ public class Api {
     public static class AccessToken implements Serializable {
 
         private String token;
+        private long userId;
 
         public String getToken() {
             return token;
+        }
+
+        public long getUserId() {
+            return userId;
         }
 
     }
