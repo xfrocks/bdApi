@@ -22,7 +22,13 @@ db.devices = {
 			}
 		};
 
-		var indexKey = db.devices.getIndexKey(oauthClientId, hubTopic);
+		var indexKey = [];
+		if (hubTopic) {
+			indexKey = db.devices.getIndexKey(oauthClientId, hubTopic);
+		} else {
+			indexKey = db.devices.getIndexKey2(oauthClientId);
+		}
+
 		redisClient.smembers(indexKey, function(err, deviceKeys) {
 			var deviceLeft = deviceKeys.length;
 			if (deviceLeft == 0) {
@@ -64,8 +70,14 @@ db.devices = {
 			redisClient.hmset(extraDataKey, extraData);
 		}
 
-		var indexKey = db.devices.getIndexKey(oauthClientId, hubTopic);
-		redisClient.sadd(indexKey, deviceKey);
+		if (hubTopic) {
+			var indexKey = db.devices.getIndexKey(oauthClientId, hubTopic);
+			redisClient.sadd(indexKey, deviceKey);
+		}
+
+		var indexKey2 = db.devices.getIndexKey2(oauthClientId);
+		redisClient.sadd(indexKey2, deviceKey);
+
 		debug('saved', deviceType, deviceId);
 	},
 
@@ -86,6 +98,10 @@ db.devices = {
 
 			var indexKey = db.devices.getIndexKey(device.oauth_client_id, device.hub_topic);
 			redisClient.srem(indexKey, deviceKey);
+
+			var indexKey2 = db.devices.getIndexKey2(device.oauth_client_id);
+			redisClient.srem(indexKey2, deviceKey);
+
 			debug('deleted', deviceType, deviceId);
 		});
 	},
@@ -100,6 +116,10 @@ db.devices = {
 
 	getIndexKey: function(oauthClientId, hubTopic) {
 		return 'db:i:' + oauthClientId + '_' + hubTopic;
+	},
+
+	getIndexKey2: function(oauthClientId) {
+		return 'db:i2:' + oauthClientId;
 	},
 
 	_hdel: function(key) {

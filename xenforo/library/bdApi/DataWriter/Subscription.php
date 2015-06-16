@@ -27,7 +27,7 @@ class bdApi_DataWriter_Subscription extends XenForo_DataWriter
             ),
             'topic' => array(
                 'type' => XenForo_DataWriter::TYPE_STRING,
-                'required' => true,
+                'default' => '',
                 'maxLength' => 255
             ),
             'subscribe_date' => array(

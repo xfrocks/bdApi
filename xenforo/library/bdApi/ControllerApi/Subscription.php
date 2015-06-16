@@ -40,6 +40,7 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
             return $this->_responseError(new XenForo_Phrase('bdapi_subscription_mode_must_valid'));
         }
 
+        $existingSubscriptions = array();
         if ($input['hub_mode'] === 'subscribe') {
             if (!$isSessionClientId) {
                 // subscribe requires authenticated session
@@ -48,6 +49,19 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
 
             if (!$this->_getSubscriptionModel()->isValidTopic($input['hub_topic'])) {
                 return $this->_responseError(new XenForo_Phrase('bdapi_subscription_topic_not_recognized'));
+            }
+        } else {
+            $existingSubscriptions = $this->_getSubscriptionModel()->getSubscriptions(array(
+                'client_id' => $clientId,
+                'topic' => $input['hub_topic'],
+            ));
+
+            if (!empty($existingSubscriptions)) {
+                foreach (array_keys($existingSubscriptions) as $i) {
+                    if ($existingSubscriptions[$i]['callback'] != $input['hub_callback']) {
+                        unset($existingSubscriptions[$i]);
+                    }
+                }
             }
         }
 
@@ -60,21 +74,14 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
         ) {
             switch ($input['hub_mode']) {
                 case 'unsubscribe':
-                    $subscriptions = $this->_getSubscriptionModel()->getSubscriptions(array(
-                        'client_id' => $clientId,
-                        'topic' => $input['hub_topic'],
-                    ));
-
-                    if (!empty($subscriptions)) {
-                        foreach ($subscriptions as $subscription) {
-                            $dw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription');
-                            $dw->setOption(bdApi_DataWriter_Subscription::OPTION_UPDATE_CALLBACKS, false);
-                            $dw->setExistingData($subscription, true);
-                            $dw->delete();
-                        }
-
-                        $this->_getSubscriptionModel()->updateCallbacksForTopic($input['hub_topic']);
+                    foreach ($existingSubscriptions as $subscription) {
+                        $dw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription');
+                        $dw->setOption(bdApi_DataWriter_Subscription::OPTION_UPDATE_CALLBACKS, false);
+                        $dw->setExistingData($subscription, true);
+                        $dw->delete();
                     }
+
+                    $this->_getSubscriptionModel()->updateCallbacksForTopic($input['hub_topic']);
                     break;
                 default:
                     $subscriptions = $this->_getSubscriptionModel()->getSubscriptions(array(

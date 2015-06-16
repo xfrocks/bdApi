@@ -6,6 +6,10 @@ class bdApi_Model_Subscription extends XenForo_Model
     const TYPE_THREAD_POST = 'thread_post';
     const TYPE_USER = 'user';
 
+    // this is a special type, blank topic will be detect as this type
+    const TYPE_CLIENT = '__client__';
+    const TYPE_CLIENT_DATA_REGISTRY = 'apiSubs';
+
     const FETCH_CLIENT = 0x01;
 
     public function updateCallbacksForTopic($topic)
@@ -72,12 +76,29 @@ class bdApi_Model_Subscription extends XenForo_Model
 
                 $this->_getDb()->update('xf_user_option', array('bdapi_user' => serialize($userOption)), array('user_id = ?' => $id));
                 break;
+            case self::TYPE_CLIENT:
+                if (!empty($subscriptions)) {
+                    $data = array(
+                        'topic' => $topic,
+                        'link' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                            'index',
+                            null,
+                            array('oauth_token' => '')
+                        ),
+                        'subscriptions' => $subscriptions,
+                    );
+                } else {
+                    $data = array();
+                }
+
+                $this->_getDataRegistryModel()->set(self::TYPE_CLIENT_DATA_REGISTRY, $data);
+                break;
         }
     }
 
     public function ping(array $option, $action, $objectType, $objectData)
     {
-        if (empty($option['topic']) OR empty($option['subscriptions'])) {
+        if (!isset($option['topic']) || empty($option['subscriptions'])) {
             return false;
         }
 
@@ -253,7 +274,9 @@ class bdApi_Model_Subscription extends XenForo_Model
 
         list($type, $id) = self::parseTopic($topic);
 
-        if (!bdApi_Option::getSubscription($type)) {
+        if ($type != self::TYPE_CLIENT
+            && !bdApi_Option::getSubscription($type)
+        ) {
             // subscription for this topic type has been disabled
             return false;
         }
@@ -281,6 +304,10 @@ class bdApi_Model_Subscription extends XenForo_Model
                 }
 
                 return (($id > 0) AND ($id == $viewingUser['user_id']));
+            case self::TYPE_CLIENT:
+                $session = bdApi_Data_Helper_Core::safeGetSession();
+
+                return $session->getOAuthClientId() !== '';
         }
 
         return false;
@@ -526,6 +553,10 @@ class bdApi_Model_Subscription extends XenForo_Model
 
     public static function parseTopic($topic)
     {
+        if (empty($topic)) {
+            return array(self::TYPE_CLIENT, 0);
+        }
+
         $parts = explode('_', $topic);
         $id = array_pop($parts);
         $type = implode('_', $parts);

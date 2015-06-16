@@ -72,6 +72,11 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 attemptLogin();
             }
         });
+
+        if (RegistrationService.checkPlayServices(LoginActivity.this)) {
+            Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);
+            startService(gcmIntent);
+        }
     }
 
     private void populateAutoComplete() {

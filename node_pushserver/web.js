@@ -16,14 +16,18 @@ app.get('/', function(req, res) {
     res.send('Hi, I am ' + req.headers.host);
 });
 
+var getCallbackUri = function(req) {
+    return req.protocol + '://' + req.get('host') + '/callback';
+}
+
 var prepareSubscribeData = function(req, res) {
     var hubUri = req.body.hub_uri;
-    var hubTopic = req.body.hub_topic;
     if (!hubUri) {
-        debug('`hub_uri` is missing');
-        return res.status(400).send();
+        hubUri = '';
     }
-    if (!hubTopic) {
+
+    var hubTopic = req.body.hub_topic;
+    if (!hubTopic && hubUri) {
         // try to get hub topic from hub uri
         var hubUriParsed = url.parse(hubUri, true);
         if (!!hubUriParsed.query || !!hubUriParsed.query['hub.topic']) {
@@ -32,22 +36,27 @@ var prepareSubscribeData = function(req, res) {
         }
     }
     if (!hubTopic) {
-        debug('`hub_topic` is missing');
-        return res.status(400).send();
+        hubTopic = '';
     }
 
     var oauthClientId = req.body.oauth_client_id;
+    if (!oauthClientId) {
+        oauthClientId = '';
+    }
+
     var oauthToken = req.body.oauth_token;
-    if (!oauthClientId || !oauthToken) {
-        debug('OAuth information is missing');
-        return res.status(401).send();
+    if (!oauthToken) {
+        oauthToken = '';
     }
 
     var deviceType = req.body.device_type;
+    if (!deviceType) {
+        deviceType = '';
+    }
+
     var deviceId = req.body.device_id;
-    if (!deviceType || !deviceId) {
-        debug('Device data is missing');
-        return res.status(403).send();
+    if (!deviceId) {
+        deviceId = '';
     }
 
     var extraData = req.body.extra_data;
@@ -55,11 +64,8 @@ var prepareSubscribeData = function(req, res) {
         extraData = null;
     }
 
-    var callback = req.protocol + '://' + req.get('host') + '/callback';
-    
-
     var data = {
-        'callback': callback,
+        'callback': getCallbackUri(req),
 
         'hub_uri': hubUri,
         'hub_topic': hubTopic,
@@ -74,9 +80,31 @@ var prepareSubscribeData = function(req, res) {
     return data;
 };
 
+var verifySubscribeData = function(data, res) {
+    if (!data.hub_uri) {
+        debug('`hub_uri` is missing');
+        res.status(400).send();
+        return false;
+    }
+
+    if (!data.oauth_client_id || !data.oauth_token) {
+        debug('OAuth information is missing');
+        res.status(401).send();
+        return false;
+    }
+
+    if (!data.device_type || !data.device_id) {
+        debug('Device data is missing');
+        res.status(403).send();
+        return false;
+    }
+
+    return true;
+}
+
 app.post('/subscribe', function (req, res) {
     var data = prepareSubscribeData(req, res);
-    if (typeof data.oauth_token !== 'string') {
+    if (!verifySubscribeData(data)) {
         return false;
     }
 
@@ -86,12 +114,12 @@ app.post('/subscribe', function (req, res) {
         'hub.topic': data.hub_topic,
 
         'oauth_token': data.oauth_token,
+        'client_id': data.oauth_client_id,
     };
 
     // save the device first, so when server verifies intent, we can look it up
     deviceDb.save(data.device_type, data.device_id, data.oauth_client_id, data.hub_topic, data.extra_data);
 
-    debug('/subscribe before request.post', data.hub_uri);
     request.post({
         'url': data.hub_uri,
         'form': formData
@@ -113,62 +141,111 @@ app.post('/subscribe', function (req, res) {
 
 app.post('/unsubscribe', function (req, res) {
     var data = prepareSubscribeData(req, res);
-    if (typeof data.oauth_token !== 'string') {
-        return false;
+
+    if (!data.hub_topic) {
+        return res.status(400).send('`hub_topic` is missing');
     }
 
-    var formData = {
-        'hub.callback': data.callback,
-        'hub.mode': 'unsubscribe',
-        'hub.topic': data.hub_topic,
+    deviceDb.findDevices(data.oauth_client_id, data.hub_topic, function(devices) {
+        var deviceFound = false;
 
-        'oauth_token': data.oauth_token,
-    };
-
-    debug('/unsubscribe before request.post', data.hub_uri);
-    request.post({
-        'url': data.hub_uri,
-        'form': formData
-    }, function(err, httpResponse, body) {
-        if (httpResponse) {
-            var success = false;
-            if (httpResponse.statusCode >= 200 && httpResponse.statusCode < 300) {
-                deviceDb.delete(data.device_type, data.device_id, data.oauth_client_id);
-                success = true;
+        for (var i in devices) {
+            if (data.device_id == devices[i].device_id) {
+                deviceFound = devices[i];
             }
+        }
 
-            debug('/unsubscribe', success, data.hub_uri, formData);
-            return res.status(httpResponse.statusCode).send(body);
+        if (deviceFound) {
+            deviceDb.save(deviceFound.device_type, deviceFound.device_id, deviceFound.oauth_client_id, '', deviceFound.extra_data);
+
+            var formData = {
+                'hub.callback': data.callback,
+                'hub.mode': 'unsubscribe',
+                'hub.topic': data.hub_topic,
+
+                'oauth_token': data.oauth_token,
+                'client_id': data.oauth_client_id,
+            };
+
+            request.post({
+                'url': data.hub_uri,
+                'form': formData
+            }, function(err, httpResponse, body) {
+                if (httpResponse) {
+                    var success = false;
+                    if (httpResponse.statusCode >= 200 && httpResponse.statusCode < 300) {
+                        success = true;
+                    }
+
+                    debug('/unsubscribe', success, data.hub_uri, formData);
+                    return res.status(httpResponse.statusCode).send(body);
+                } else {
+                    debug('/unsubscribe', data.hub_uri, formData, err);
+                    return res.status(500).send();
+                }
+            });
         } else {
-            debug('/unsubscribe', data.hub_uri, formData, err);
-            return res.status(500).send();
+            debug('/unsubscribe could not find registered device');
+            res.status(404).send();
         }
     });
+});
+
+app.post('/unregister', function(req, res) {
+    var data = prepareSubscribeData(req, res);
+    if (!data.device_type
+        || !data.device_id
+        || !data.oauth_client_id
+    ) {
+        return res.status(400).send();
+    }
+
+    // no verification needed because knowing device_id is quite hard already
+    // also no need to confirm with hub server, future callbacks should be dropped automatically
+    deviceDb.delete(data.device_type, data.device_id, data.oauth_client_id);
+
+    return res.status(200).send();
 });
 
 app.get('/callback', function (req, res) {
     var parsed = url.parse(req.url, true);
 
-    if (!parsed.query || !parsed.query['hub.challenge']) {
-        debug('`hub.challenge` is missing');
+    if (!parsed.query) {
+        debug('`hub.*` is missing');
         return res.status(400).send();
     }
 
-    if (!parsed.query['client_id'] || !parsed.query['hub.topic']) {
-        debug('Client or `hub.topic` is missing');
+    if (!parsed.query['client_id']) {
+        debug('`client_id` is missing');
         return res.status(401).send();
     }
 
-    deviceDb.findDevices(parsed.query['client_id'], parsed.query['hub.topic'], function(devices) {
-        if (devices.length == 0) {
-            debug('No devices could be found');
-            return res.status(403).send();
+    if (!parsed.query['hub.challenge']) {
+        debug('`hub.challenge` is missing');
+        return res.status(403).send();
+    }
+
+    if (!parsed.query['hub.mode']) {
+        debug('`hub.mode` is missing');
+        return res.status(404).send();
+    }
+
+    var hubTopic = parsed.query['hub.topic'];
+    if (!hubTopic) {
+        hubTopic = '';
+    }
+
+    deviceDb.findDevices(parsed.query['client_id'], hubTopic, function(devices) {
+        var isSubscribe = (parsed.query['hub.mode'] === 'subscribe');
+        var devicesFound = devices.length > 0;
+
+        if (isSubscribe != devicesFound) {
+            return res.status(405).send();
         }
 
-        var challenge = parsed.query['hub.challenge'];
+        debug('/callback', parsed.query);
 
-        debug('/callback', challenge);
-        return res.send(challenge);
+        return res.send(parsed.query['hub.challenge']);
     });
 });
 
@@ -187,12 +264,6 @@ app.post('/callback', function (req, res) {
                 continue;
             }
 
-            if (ping.topic.indexOf('user_notification_') !== 0) {
-                // TODO: support other pings
-                debug('ping is not user_notification_* topic, ignore for now');
-                continue;
-            }
-
             deviceDb.findDevices(ping.client_id, ping.topic, function(devices) {
                 for (var i in devices) {
                     pushQueue.enqueue(devices[i].device_type, devices[i].device_id, ping.object_data, devices[i].extra_data);
@@ -201,7 +272,7 @@ app.post('/callback', function (req, res) {
         }
     }
 
-    res.send();
+    return res.send();
 });
 
 web.start = function () {

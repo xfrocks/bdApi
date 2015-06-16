@@ -18,6 +18,7 @@ public class RegistrationService extends IntentService {
     public static final String EXTRA_ACCESS_TOKEN = "access_token";
 
     private static final String TAG = "RegistrationService";
+    private static String mTopic = null;
 
     public RegistrationService() {
         super(TAG);
@@ -62,10 +63,12 @@ public class RegistrationService extends IntentService {
         if (at != null && at.getUserId() > 0) {
             topic = String.format("user_notification_%d", at.getUserId());
         } else {
-            topic = "client_notification";
+            topic = "";
         }
 
-        new RegisterRequest(gcmToken, topic, at).start();
+        if (mTopic == null || !mTopic.equals(topic)) {
+            new RegisterRequest(gcmToken, topic, at).start();
+        }
     }
 
     private static class RegisterRequest extends Api.PushServerRequest {
