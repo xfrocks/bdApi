@@ -35,7 +35,10 @@ db.devices = {
 					redisClient.hgetall(extraDataKey, function(err, extraData) {
 						deviceLeft--;
 						device.extra_data = extraData;
-						found.push(device);
+
+						if (device.hub_topic == hubTopic) {
+							found.push(device);
+						}
 
 						if (deviceLeft == 0) {
 							return done();
