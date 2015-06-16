@@ -1,0 +1,13 @@
+apply plugin: 'com.android.application'
+
+android {
+
+    buildTypes {
+        debug {
+            buildConfigField "String", "API_ROOT", "\"http://domain.com/xenforo/api\""
+            buildConfigField "String", "CLIENT_ID", "\"client_id\""
+            buildConfigField "String", "CLIENT_SECRET", "\"client_secret\""
+        }
+    }
+
+}
