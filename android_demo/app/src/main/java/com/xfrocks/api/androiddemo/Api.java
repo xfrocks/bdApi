@@ -28,9 +28,12 @@ public class Api {
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE = "grant_type";
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_PASSWORD = "password";
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
+    public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_AUTHORIZATION_CODE = "authorization_code";
     public static final String URL_OAUTH_TOKEN_PARAM_USERNAME = "username";
     public static final String URL_OAUTH_TOKEN_PARAM_PASSWORD = "password";
     public static final String URL_OAUTH_TOKEN_PARAM_REFRESH_TOKEN = "refresh_token";
+    public static final String URL_OAUTH_TOKEN_PARAM_CODE = "code";
+    public static final String URL_OAUTH_TOKEN_PARAM_REDIRECT_URI = "redirect_uri";
 
     public static AccessToken makeAccessToken(JSONObject response) {
         try {
@@ -78,6 +81,22 @@ public class Api {
         }
 
         return String.format("%d,%d,%s,%s", userId, timestamp, sb, BuildConfig.CLIENT_ID);
+    }
+
+    public static String makeAuthorizeUri() {
+        try {
+            return String.format(
+                    "%s/index.php?oauth/authorize/&client_id=%s&redirect_uri=%s&response_type=code&scope=%s",
+                    BuildConfig.API_ROOT,
+                    URLEncoder.encode(BuildConfig.CLIENT_ID, "UTF-8"),
+                    URLEncoder.encode(BuildConfig.AUTHORIZE_REDIRECT_URI, "UTF-8"),
+                    URLEncoder.encode("read", "UTF-8")
+            );
+        } catch (UnsupportedEncodingException e) {
+            // ignore
+        }
+
+        return null;
     }
 
     private static String makeUrl(int method, String url, Map<String, String> params) {

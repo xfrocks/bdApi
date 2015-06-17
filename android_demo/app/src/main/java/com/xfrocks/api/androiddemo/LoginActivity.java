@@ -47,6 +47,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private EditText mPasswordView;
     private CheckBox mRememberView;
     private Button mSignIn;
+    private Button mAuthorize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,9 +80,25 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             }
         });
 
+        mAuthorize = (Button) findViewById(R.id.authorize);
+        mAuthorize.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                authorize();
+            }
+        });
+        if (TextUtils.isEmpty(BuildConfig.AUTHORIZE_REDIRECT_URI)) {
+            mAuthorize.setVisibility(View.GONE);
+        }
+
         if (RegistrationService.canRun(LoginActivity.this)) {
             Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);
             startService(gcmIntent);
+        }
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            attemptLogin(intent);
         }
     }
 
@@ -117,16 +134,25 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mEmailView.requestFocus();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        if (intent != null) {
+            attemptLogin(intent);
+        }
+    }
+
     private void populateAutoComplete() {
         getLoaderManager().initLoader(0, null, this);
     }
 
+    public void authorize() {
+        String authorizeUri = Api.makeAuthorizeUri();
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(authorizeUri));
+        startActivity(intent);
+    }
 
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
     public void attemptLogin() {
         if (mTokenRequest != null) {
             return;
@@ -165,6 +191,25 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             new PasswordRequest(email, password).start();
+        }
+    }
+
+    public void attemptLogin(Intent intent) {
+        if (TextUtils.isEmpty(BuildConfig.AUTHORIZE_REDIRECT_URI)) {
+            return;
+        }
+
+        Uri data = intent.getData();
+        if (data == null) {
+            return;
+        }
+
+        String code = data.getQueryParameter("code");
+
+        if (TextUtils.isEmpty(code)) {
+            Toast.makeText(this, R.string.error_no_authorization_code, Toast.LENGTH_LONG).show();
+        } else {
+            new AuthorizationCodeRequest(code).start();
         }
     }
 
@@ -237,6 +282,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mPasswordView.setEnabled(enabled);
         mRememberView.setEnabled(enabled);
         mSignIn.setEnabled(enabled);
+        mAuthorize.setEnabled(enabled);
     }
 
     private abstract class TokenRequest extends Api.PostRequest {
@@ -323,6 +369,28 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                             .and(Api.URL_OAUTH_TOKEN_PARAM_PASSWORD, password)
                             .andClientCredentials()
             );
+        }
+    }
+
+    private class AuthorizationCodeRequest extends TokenRequest {
+        AuthorizationCodeRequest(String code) {
+            super(
+                    Api.URL_OAUTH_TOKEN,
+                    new Api.Params(
+                            Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE,
+                            Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_AUTHORIZATION_CODE)
+                            .and(Api.URL_OAUTH_TOKEN_PARAM_CODE, code)
+                            .and(Api.URL_OAUTH_TOKEN_PARAM_REDIRECT_URI, BuildConfig.AUTHORIZE_REDIRECT_URI)
+                            .andClientCredentials()
+            );
+        }
+
+        @Override
+        protected void onStart() {
+            super.onStart();
+
+            // auto remember with authorization code flow
+            mRememberView.setChecked(true);
         }
     }
 

@@ -6,9 +6,12 @@
     <string name="remember_token">Remember token?</string>
     <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
+    <string name="action_authorize">Authorize via Web</string>
 
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+
+    <string name="error_no_authorization_code">No authorization code could be found</string>
 
     <string name="sign_in_with_remember">Sign in with saved token?</string>
     <string name="error_no_refresh_token">No refresh token could be found</string>
