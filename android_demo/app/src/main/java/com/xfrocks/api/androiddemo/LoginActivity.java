@@ -3,9 +3,12 @@ package com.xfrocks.api.androiddemo;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -40,7 +43,8 @@ import java.util.Map;
  */
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
-    private TokenRequest mTokenRequest = null;
+    private TokenRequest mTokenRequest;
+    private BroadcastReceiver mGcmReceiver;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -48,6 +52,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private CheckBox mRememberView;
     private Button mSignIn;
     private Button mAuthorize;
+    private Button mUnregister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +96,30 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             mAuthorize.setVisibility(View.GONE);
         }
 
+        mUnregister = (Button) findViewById(R.id.unregister);
+        mUnregister.setVisibility(View.GONE);
+
         if (RegistrationService.canRun(LoginActivity.this)) {
+            mGcmReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (intent.getBooleanExtra(RegistrationService.ACTION_REGISTRATION_UNREGISTERED, false)) {
+                        mUnregister.setVisibility(View.GONE);
+                    } else {
+                        mUnregister.setVisibility(View.VISIBLE);
+                    }
+                }
+            };
+
+            mUnregister.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);
+                    gcmIntent.putExtra(RegistrationService.EXTRA_UNREGISTER, true);
+                    startService(gcmIntent);
+                }
+            });
+
             Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);
             startService(gcmIntent);
         }
@@ -132,6 +160,11 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
 
         mEmailView.requestFocus();
+
+        if (mGcmReceiver != null) {
+            IntentFilter intentFilter = new IntentFilter(RegistrationService.ACTION_REGISTRATION);
+            registerReceiver(mGcmReceiver, intentFilter);
+        }
     }
 
     @Override
@@ -140,6 +173,15 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         if (intent != null) {
             attemptLogin(intent);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (mGcmReceiver != null) {
+            unregisterReceiver(mGcmReceiver);
         }
     }
 
@@ -283,6 +325,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mRememberView.setEnabled(enabled);
         mSignIn.setEnabled(enabled);
         mAuthorize.setEnabled(enabled);
+        mUnregister.setEnabled(enabled);
     }
 
     private abstract class TokenRequest extends Api.PostRequest {

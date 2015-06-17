@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.Response;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -20,6 +23,9 @@ import org.json.JSONObject;
 public class RegistrationService extends IntentService {
 
     public static final String EXTRA_ACCESS_TOKEN = "access_token";
+    public static final String EXTRA_UNREGISTER = "unregister";
+    public static final String ACTION_REGISTRATION = "com.xfrocks.api.androiddemo.gcm.REGISTRATION";
+    public static final String ACTION_REGISTRATION_UNREGISTERED = "unregistered";
 
     private static final String TAG = "RegistrationService";
     private static long mLastUserId = -1;
@@ -45,8 +51,6 @@ public class RegistrationService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         try {
-            // In the (unlikely) event that multiple refresh operations occur simultaneously,
-            // ensure that they are processed sequentially.
             synchronized (TAG) {
                 InstanceID instanceID = InstanceID.getInstance(this);
                 String token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
@@ -56,13 +60,18 @@ public class RegistrationService extends IntentService {
                     Log.v(TAG, "GCM token=" + token);
                 }
 
-                Api.AccessToken at = null;
-                if (intent.hasExtra(EXTRA_ACCESS_TOKEN)) {
-                    at = (Api.AccessToken) intent.getSerializableExtra(EXTRA_ACCESS_TOKEN);
-                }
+                if (intent.getBooleanExtra(EXTRA_UNREGISTER, false)) {
+                    sendUnregistrationToServer(token);
+                } else {
+                    Api.AccessToken at = null;
+                    if (intent.hasExtra(EXTRA_ACCESS_TOKEN)) {
+                        at = (Api.AccessToken) intent.getSerializableExtra(EXTRA_ACCESS_TOKEN);
+                    }
 
-                sendRegistrationToServer(token, at);
+                    sendRegistrationToServer(token, at);
+                }
             }
+
         } catch (Exception e) {
             if (BuildConfig.DEBUG) {
                 Log.e(TAG, "Unable to get GCM token", e);
@@ -81,6 +90,11 @@ public class RegistrationService extends IntentService {
             new RegisterRequest(gcmToken, userId, at).start();
             mLastUserId = userId;
         }
+    }
+
+    private void sendUnregistrationToServer(String gcmToken) {
+            new UnregisterRequest(gcmToken).start();
+            mLastUserId = -1;
     }
 
     private static class RegisterRequest extends Api.PushServerRequest {
@@ -108,6 +122,36 @@ public class RegistrationService extends IntentService {
             }
 
             t.show();
+
+            Intent broadcastIntent = new Intent(ACTION_REGISTRATION);
+            c.sendBroadcast(broadcastIntent);
+        }
+    }
+
+    private static class UnregisterRequest extends Api.Request {
+        public UnregisterRequest(String gcmToken) {
+            super(
+                    Method.POST,
+                    BuildConfig.PUSH_SERVER + "/unregister",
+                    new Api.Params("device_type", "android")
+                            .and("device_id", gcmToken)
+                            .and("oauth_client_id", BuildConfig.CLIENT_ID)
+            );
+        }
+
+        @Override
+        protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+            return Response.success(null, HttpHeaderParser.parseCacheHeaders(response));
+        }
+
+        @Override
+        protected void onSuccess(JSONObject response) {
+            final Context c = App.getInstance().getApplicationContext();
+            Toast.makeText(c, R.string.gcm_unregister_success, Toast.LENGTH_LONG).show();
+
+            Intent broadcastIntent = new Intent(ACTION_REGISTRATION);
+            broadcastIntent.putExtra(ACTION_REGISTRATION_UNREGISTERED, true);
+            c.sendBroadcast(broadcastIntent);
         }
     }
 

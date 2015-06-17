@@ -55,5 +55,13 @@
         android:text="@string/action_authorize"
         android:textStyle="bold" />
 
+    <Button
+        android:id="@+id/unregister"
+        style="?android:textAppearanceSmall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/action_gcm_unregister"
+        android:textStyle="bold" />
+
 </LinearLayout>
 
