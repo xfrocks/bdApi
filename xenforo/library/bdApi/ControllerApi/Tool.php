@@ -152,6 +152,20 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_Tool_Link', $data);
     }
 
+    public function actionPostPing()
+    {
+        $this->_assertAdminPermission('bdApi');
+
+        $visitor = XenForo_Visitor::getInstance();
+        $message = $this->_input->filterSingle('message', XenForo_Input::STRING);
+
+        XenForo_Model_Alert::alert(0, $visitor['user_id'], $visitor['username'], 'api_ping', 0, 'message', array(
+            'message' => $message,
+        ));
+
+        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
+
     public function actionGetParseLink()
     {
         $link = $this->_input->filterSingle('link', XenForo_Input::STRING);

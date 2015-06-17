@@ -233,6 +233,12 @@ class bdApi_Installer
 			INDEX `callback_md5` (`callback_md5`)
 		) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;');
 
+        $db->query('REPLACE INTO `xf_content_type` (content_type, addon_id, fields) VALUES ("api_ping", "bdApi", "")');
+        $db->query('REPLACE INTO `xf_content_type_field` (content_type, field_name, field_value) VALUES ("api_ping", "alert_handler_class", "bdApi_AlertHandler_Ping")');
+        /** @var XenForo_Model_ContentType $contentTypeModel */
+        $contentTypeModel = XenForo_Model::create('XenForo_Model_ContentType');
+        $contentTypeModel->rebuildContentTypeCache();
+
         $existingVersionId = 0;
         if (!empty($existingAddOn)) {
             $existingVersionId = $existingAddOn['version_id'];

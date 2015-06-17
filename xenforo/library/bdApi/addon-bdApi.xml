@@ -1401,6 +1401,7 @@ step=3600</edit_format_params>
 	<li><a class="{xen:if "{$selectedKey} == 'account/api'", 'secondaryContent', 
 		'primaryContent'}" href="{xen:link account/api}">{xen:phrase bdapi_home}</a></li>
 </xen:if>]]></template>
+    <template title="bdapi_alert_ping_message" version_id="71" version_string="1.4.3c"><![CDATA[{xen:helper username, $user, 'subject'}: {$extra.message}]]></template>
     <template title="bdapi_error_authorize_guest" version_id="63" version_string="1.4.3-BETA"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
 <xen:set var="$text">{xen:phrase bdapi_login_to_authorize_x, 'client={$client.name}'}</xen:set>
