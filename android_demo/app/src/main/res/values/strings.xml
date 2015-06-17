@@ -4,4 +4,7 @@
     <string name="gcm_register_success">Registered for GCM successfully</string>
     <string name="gcm_subscribe_x_success">Subscribed for %1$s\'s notifications</string>
     <string name="gcm_unregister_success">GCM has been unregistered</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

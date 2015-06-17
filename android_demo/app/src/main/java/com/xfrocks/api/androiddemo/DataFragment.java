@@ -1,0 +1,180 @@
+package com.xfrocks.api.androiddemo;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.support.v4.app.ListFragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+public class DataFragment extends ListFragment {
+
+    private static final String ARG_ACCESS_TOKEN = "access_token";
+    private static final String ARG_URL = "url";
+
+    private List<Row> mData = new ArrayList<>();
+    private BaseAdapter mDataAdapter;
+
+    public static DataFragment newInstance(String url, Api.AccessToken at) {
+        DataFragment fragment = new DataFragment();
+
+        Bundle args = new Bundle();
+        args.putString(ARG_URL, url);
+        args.putSerializable(ARG_ACCESS_TOKEN, at);
+        fragment.setArguments(args);
+
+        return fragment;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mDataAdapter == null) {
+            mDataAdapter = new DataAdapter(getActivity());
+            setListAdapter(mDataAdapter);
+        }
+
+        Bundle args = getArguments();
+        if (args.containsKey(ARG_URL) && args.containsKey(ARG_ACCESS_TOKEN)) {
+            String url = args.getString(ARG_URL);
+            Api.AccessToken at = (Api.AccessToken) args.getSerializable(ARG_ACCESS_TOKEN);
+
+            new DataRequest(url, at).start();
+        }
+    }
+
+    private class DataRequest extends Api.GetRequest {
+        public DataRequest(String url, Api.AccessToken at) {
+            super(url, new Api.Params(at));
+        }
+
+        @Override
+        protected void onStart() {
+            mData.clear();
+            mDataAdapter.notifyDataSetInvalidated();
+        }
+
+        @Override
+        protected void onSuccess(JSONObject response) {
+            parseRows(response, mData);
+        }
+
+        @Override
+        protected void onComplete(boolean isSuccess) {
+            mDataAdapter.notifyDataSetChanged();
+        }
+
+        private void parseRows(JSONObject obj, List<Row> rows) {
+            Iterator<String> keys = obj.keys();
+            while (keys.hasNext()) {
+                final Row row = new Row();
+                row.key = keys.next();
+
+                try {
+                    parseRow(obj.get(row.key), row);
+                    rows.add(row);
+                } catch (JSONException e) {
+                    // ignore
+                }
+            }
+        }
+
+        private void parseRows(JSONArray array, List<Row> rows) {
+            for (int i = 0; i < array.length(); i++) {
+                final Row row = new Row();
+                row.key = String.valueOf(i);
+
+                try {
+                    parseRow(array.get(i), row);
+                    rows.add(row);
+                } catch (JSONException e) {
+                    // ignore
+                }
+            }
+        }
+
+        private void parseRow(Object value, Row row) {
+            if (value instanceof JSONObject) {
+                row.value = "(object)";
+                row.subRows = new ArrayList<>();
+                parseRows((JSONObject) value, row.subRows);
+            } else if (value instanceof JSONArray) {
+                row.value = "(array)";
+                row.subRows = new ArrayList<>();
+                parseRows((JSONArray) value, row.subRows);
+            } else {
+                row.value = String.valueOf(value);
+            }
+        }
+    }
+
+    private class DataAdapter extends BaseAdapter {
+
+        private LayoutInflater mInflater;
+
+        public DataAdapter(Context context) {
+            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        @Override
+        public int getCount() {
+            return mData.size();
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return mData.get(i);
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            final ViewHolder viewHolder;
+
+            if (convertView == null) {
+                convertView = mInflater.inflate(android.R.layout.simple_list_item_2, null);
+
+                viewHolder = new ViewHolder();
+                viewHolder.text1 = (TextView) convertView.findViewById(android.R.id.text1);
+                viewHolder.text2 = (TextView) convertView.findViewById(android.R.id.text2);
+
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+
+            Row row = (Row) getItem(position);
+            viewHolder.text1.setText(row.key);
+            viewHolder.text2.setText(row.value);
+
+            return convertView;
+        }
+    }
+
+    private static class ViewHolder {
+        TextView text1;
+        TextView text2;
+    }
+
+    private static class Row {
+        String key;
+        String value;
+
+        List<Row> subRows;
+    }
+}

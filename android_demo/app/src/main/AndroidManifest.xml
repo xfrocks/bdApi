@@ -13,6 +13,7 @@
     <permission
         android:name="com.xfrocks.api.androiddemo.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
+
     <uses-permission android:name="com.xfrocks.api.androiddemo.permission.C2D_MESSAGE" />
 
     <application
@@ -21,12 +22,10 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
-
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustResize|stateVisible">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
@@ -39,18 +38,15 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".MeActivity"
-            android:label="@string/app_name"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
-
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
             android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
                 <category android:name="com.xfrocks.api.androiddemo" />
+
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
             </intent-filter>
         </receiver>
@@ -73,6 +69,9 @@
             </intent-filter>
         </service>
 
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" />
     </application>
 
 </manifest>

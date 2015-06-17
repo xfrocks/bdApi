@@ -351,8 +351,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 AccessTokenHelper.save(LoginActivity.this, at);
             }
 
-            Intent intent = new Intent(LoginActivity.this, MeActivity.class);
-            intent.putExtra(MeActivity.EXTRA_ACCESS_TOKEN, at);
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            intent.putExtra(MainActivity.EXTRA_ACCESS_TOKEN, at);
             startActivity(intent);
 
             if (RegistrationService.canRun(LoginActivity.this)) {

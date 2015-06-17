@@ -23,7 +23,7 @@ import java.util.Map;
 public class Api {
 
     public static final String URL_OAUTH_TOKEN = "oauth/token";
-    public static final String URL_USERS_ME = "users/me";
+    public static final String URL_INDEX = "index";
 
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE = "grant_type";
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_PASSWORD = "password";
@@ -100,7 +100,9 @@ public class Api {
     }
 
     private static String makeUrl(int method, String url, Map<String, String> params) {
-        url = String.format("%s/index.php?%s", BuildConfig.API_ROOT, url);
+        if (!url.contains("://")) {
+            url = String.format("%s/index.php?%s", BuildConfig.API_ROOT, url);
+        }
 
         if (method == com.android.volley.Request.Method.GET) {
             // append params to url automatically, and clear the map
@@ -248,7 +250,10 @@ public class Api {
 
         public Params(AccessToken at) {
             super(1);
-            put("oauth_token", at.getToken());
+
+            if (at != null) {
+                put("oauth_token", at.getToken());
+            }
         }
 
         public Params and(String key, Object value) {
