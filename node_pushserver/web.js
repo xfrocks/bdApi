@@ -115,8 +115,9 @@ app.post('/subscribe', function (req, res) {
                 success = true;
             }
 
-            debug('/subscribe', success ? 'succeeded' : 'failed', data.hub_uri, formData);
-            return res.status(httpResponse.statusCode).send(body);
+            var txt = success ? 'succeeded' : (body ? body : 'failed');
+            debug('/subscribe', txt, data.hub_uri, formData);
+            return res.status(httpResponse.statusCode).send(txt);
         } else {
             debug('/subscribe', err, data.hub_uri, formData);
             return res.status(500).send();
@@ -173,8 +174,9 @@ app.post('/unsubscribe', function (req, res) {
                         success = true;
                     }
 
-                    debug('/unsubscribe', success ? 'succeeded' : 'failed', data.hub_uri, formData);
-                    return res.status(httpResponse.statusCode).send(body);
+                    var txt = success ? 'succeeded' : (body ? body : 'failed');
+                    debug('/unsubscribe', txt, data.hub_uri, formData);
+                    return res.status(httpResponse.statusCode).send(txt);
                 } else {
                     debug('/unsubscribe', err, data.hub_uri, formData);
                     return res.status(500).send();
@@ -204,7 +206,7 @@ app.post('/unregister', function(req, res) {
     // also no need to confirm with hub server, future callbacks should be dropped automatically
     deviceDb.delete(data.device_type, data.device_id, data.oauth_client_id);
 
-    return res.status(200).send();
+    return res.status(200).send('succeeded');
 });
 
 app.get('/callback', function (req, res) {

@@ -4,21 +4,25 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.xfrocks.api.androiddemo.Api;
+import com.xfrocks.api.androiddemo.App;
 import com.xfrocks.api.androiddemo.BuildConfig;
 import com.xfrocks.api.androiddemo.R;
+
+import org.json.JSONObject;
 
 public class RegistrationService extends IntentService {
 
     public static final String EXTRA_ACCESS_TOKEN = "access_token";
 
     private static final String TAG = "RegistrationService";
-    private static String mTopic = null;
+    private static long mLastUserId = -1;
 
     public RegistrationService() {
         super(TAG);
@@ -67,22 +71,43 @@ public class RegistrationService extends IntentService {
     }
 
     private void sendRegistrationToServer(String gcmToken, Api.AccessToken at) {
-        final String topic;
+        long userId = 0;
 
-        if (at != null && at.getUserId() > 0) {
-            topic = String.format("user_notification_%d", at.getUserId());
-        } else {
-            topic = "";
+        if (at != null) {
+            userId = at.getUserId();
         }
 
-        if (mTopic == null || !mTopic.equals(topic)) {
-            new RegisterRequest(gcmToken, topic, at).start();
+        if (mLastUserId == -1 || mLastUserId != userId) {
+            new RegisterRequest(gcmToken, userId, at).start();
+            mLastUserId = userId;
         }
     }
 
     private static class RegisterRequest extends Api.PushServerRequest {
-        RegisterRequest(String gcmToken, String topic, Api.AccessToken at) {
-            super(true, gcmToken, topic, at);
+        private long mUserId;
+
+        RegisterRequest(String gcmToken, long userId, Api.AccessToken at) {
+            super(true, gcmToken, userId > 0 ? String.format("user_notification_%d", userId) : "", at);
+
+            mUserId = userId;
+        }
+
+        @Override
+        protected void onSuccess(JSONObject response) {
+            final Toast t;
+            final Context c = App.getInstance().getApplicationContext();
+
+            if (mUserId == 0) {
+                t = Toast.makeText(c, R.string.gcm_register_success, Toast.LENGTH_LONG);
+            } else {
+                t = Toast.makeText(
+                        c,
+                        String.format(c.getString(R.string.gcm_subscribe_x_success), String.valueOf(mUserId)),
+                        Toast.LENGTH_LONG
+                );
+            }
+
+            t.show();
         }
     }
 

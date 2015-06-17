@@ -206,6 +206,11 @@ public class Api {
                             .and("oauth_token", Api.makeOneTimeToken(at != null ? at.getUserId() : 0, at, 3600))
             );
         }
+
+        @Override
+        protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+            return Response.success(null, HttpHeaderParser.parseCacheHeaders(response));
+        }
     }
 
     public static class Params extends HashMap<String, String> {
