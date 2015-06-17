@@ -12,6 +12,7 @@ var defaultConfig = {
 		auth: null
 	},
 	pushQueue: {
+		queueId: 'push',
 		attempts: 86400,
 		webPort: 18081
 	},
@@ -54,6 +55,13 @@ if (process.env.REDISTOGO_URL) {
 	config.redis.port = redisToGo.port;
 	config.redis.host = redisToGo.hostname;
 	config.redis.auth = redisToGo.auth.split(":")[1];
+}
+
+if (process.env.CONFIG_PUSH_QUEUE_ID) {
+	config.pushQueue.queueId = process.env.CONFIG_PUSH_QUEUE_ID;
+}
+if (process.env.CONFIG_PUSH_QUEUE_PORT) {
+	config.pushQueue.webPort = process.env.CONFIG_PUSH_QUEUE_PORT;
 }
 
 if (process.env.CONFIG_APN_CERT_FILE && process.env.CONFIG_APN_KEY_FILE) {

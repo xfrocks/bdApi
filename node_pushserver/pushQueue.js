@@ -9,7 +9,7 @@ var jobs = kue.createQueue({
 	'redis': config.redis
 });
 
-jobs.process('push', function(job, done) {
+jobs.process(config.pushQueue.queueId, function(job, done) {
 	var data = job.data;
 	var message = string('' + data.payload.notification_html).stripTags().trim().s;
 
@@ -63,7 +63,7 @@ jobs.process('push', function(job, done) {
 });
 
 pushQueue.enqueue = function(deviceType, deviceId, payload, extraData) {
-	var job = jobs.create('push', {
+	var job = jobs.create(config.pushQueue.queueId, {
 		'device_type': deviceType,
 		'device_id': deviceId,
 		'payload': payload,
