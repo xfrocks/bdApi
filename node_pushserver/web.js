@@ -12,10 +12,6 @@ var app = express();
 app.use(express.compress());
 app.use(express.bodyParser());
 
-app.get('/', function(req, res) {
-    res.send('Hi, I am ' + req.headers.host);
-});
-
 var getCallbackUri = function(req) {
     return req.protocol + '://' + req.get('host') + '/callback';
 }
@@ -80,32 +76,21 @@ var prepareSubscribeData = function(req, res) {
     return data;
 };
 
-var verifySubscribeData = function(data, res) {
+app.post('/subscribe', function (req, res) {
+    var data = prepareSubscribeData(req, res);
     if (!data.hub_uri) {
-        debug('`hub_uri` is missing');
-        res.status(400).send();
-        return false;
+        debug('/subscribe', '`hub_uri` is missing');
+        return res.status(400).send();
     }
 
     if (!data.oauth_client_id || !data.oauth_token) {
-        debug('OAuth information is missing');
-        res.status(401).send();
-        return false;
+        debug('/subscribe', 'OAuth information is missing');
+        return res.status(401).send();
     }
 
     if (!data.device_type || !data.device_id) {
-        debug('Device data is missing');
-        res.status(403).send();
-        return false;
-    }
-
-    return true;
-}
-
-app.post('/subscribe', function (req, res) {
-    var data = prepareSubscribeData(req, res);
-    if (!verifySubscribeData(data)) {
-        return false;
+        debug('/subscribe', 'Device data is missing');
+        return res.status(403).send();
     }
 
     var formData = {
@@ -130,10 +115,10 @@ app.post('/subscribe', function (req, res) {
                 success = true;
             }
 
-            debug('/subscribe', success, data.hub_uri, formData);
+            debug('/subscribe', success ? 'succeeded' : 'failed', data.hub_uri, formData);
             return res.status(httpResponse.statusCode).send(body);
         } else {
-            debug('/subscribe', data.hub_uri, formData, err);
+            debug('/subscribe', err, data.hub_uri, formData);
             return res.status(500).send();
         }
     });
@@ -142,8 +127,19 @@ app.post('/subscribe', function (req, res) {
 app.post('/unsubscribe', function (req, res) {
     var data = prepareSubscribeData(req, res);
 
-    if (!data.hub_topic) {
-        return res.status(400).send('`hub_topic` is missing');
+    if (!data.hub_uri || !data.hub_topic) {
+        debug('/unsubscribe', 'Hub information is missing');
+        return res.status(400).send();
+    }
+
+    if (!data.oauth_client_id) {
+        debug('/unsubscribe', '`oauth_client_id` is missing');
+        return res.status(401).send();
+    }
+
+    if (!data.device_type || !data.device_id) {
+        debug('/unsubscribe', 'Device data is missing');
+        return res.status(403).send();
     }
 
     deviceDb.findDevices(data.oauth_client_id, data.hub_topic, function(devices) {
@@ -177,10 +173,10 @@ app.post('/unsubscribe', function (req, res) {
                         success = true;
                     }
 
-                    debug('/unsubscribe', success, data.hub_uri, formData);
+                    debug('/unsubscribe', success ? 'succeeded' : 'failed', data.hub_uri, formData);
                     return res.status(httpResponse.statusCode).send(body);
                 } else {
-                    debug('/unsubscribe', data.hub_uri, formData, err);
+                    debug('/unsubscribe', err, data.hub_uri, formData);
                     return res.status(500).send();
                 }
             });
@@ -193,11 +189,15 @@ app.post('/unsubscribe', function (req, res) {
 
 app.post('/unregister', function(req, res) {
     var data = prepareSubscribeData(req, res);
-    if (!data.device_type
-        || !data.device_id
-        || !data.oauth_client_id
-    ) {
-        return res.status(400).send();
+
+    if (!data.oauth_client_id) {
+        debug('/unregister', '`oauth_client_id` is missing');
+        return res.status(401).send();
+    }
+
+    if (!data.device_type || !data.device_id) {
+        debug('/unregister', 'Device data is missing');
+        return res.status(403).send();
     }
 
     // no verification needed because knowing device_id is quite hard already
@@ -211,22 +211,22 @@ app.get('/callback', function (req, res) {
     var parsed = url.parse(req.url, true);
 
     if (!parsed.query) {
-        debug('`hub.*` is missing');
+        debug('/callback', '`hub.*` is missing');
         return res.status(400).send();
     }
 
     if (!parsed.query['client_id']) {
-        debug('`client_id` is missing');
+        debug('/callback', '`client_id` is missing');
         return res.status(401).send();
     }
 
     if (!parsed.query['hub.challenge']) {
-        debug('`hub.challenge` is missing');
+        debug('/callback', '`hub.challenge` is missing');
         return res.status(403).send();
     }
 
     if (!parsed.query['hub.mode']) {
-        debug('`hub.mode` is missing');
+        debug('/callback', '`hub.mode` is missing');
         return res.status(404).send();
     }
 
@@ -255,12 +255,12 @@ app.post('/callback', function (req, res) {
             var ping = req.body[i];
 
             if (typeof ping != 'object') {
-                debug('ping is not an object');
+                debug('/callback', 'ping is not an object', ping);
                 continue;
             } 
 
             if (!ping.client_id) {
-                debug('ping does not has client information');
+                debug('/callback', 'ping does not has client information', ping);
                 continue;
             }
 
@@ -273,6 +273,10 @@ app.post('/callback', function (req, res) {
     }
 
     return res.send();
+});
+
+app.get('*', function(req, res) {
+    res.send('Hi, I am ' + getCallbackUri(req));
 });
 
 web.start = function () {
