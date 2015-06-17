@@ -73,7 +73,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             }
         });
 
-        if (RegistrationService.checkPlayServices(LoginActivity.this)) {
+        if (RegistrationService.canRun(LoginActivity.this)) {
             Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);
             startService(gcmIntent);
         }
@@ -213,7 +213,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             intent.putExtra(MeActivity.EXTRA_ACCESS_TOKEN, at);
             startActivity(intent);
 
-            if (RegistrationService.checkPlayServices(LoginActivity.this)) {
+            if (RegistrationService.canRun(LoginActivity.this)) {
                 Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);
                 gcmIntent.putExtra(RegistrationService.EXTRA_ACCESS_TOKEN, at);
                 startService(gcmIntent);

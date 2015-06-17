@@ -24,9 +24,18 @@ public class RegistrationService extends IntentService {
         super(TAG);
     }
 
-    public static boolean checkPlayServices(Context context) {
+    public static boolean canRun(Context context) {
+        boolean canRun;
+
+        // check for push server address
+        canRun = !BuildConfig.PUSH_SERVER.isEmpty();
+
+        // check for Google Play Services
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
-        return resultCode == ConnectionResult.SUCCESS;
+        canRun = canRun && (resultCode == ConnectionResult.SUCCESS);
+
+        return canRun;
+
     }
 
     @Override
