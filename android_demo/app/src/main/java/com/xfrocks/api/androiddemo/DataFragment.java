@@ -1,19 +1,25 @@
 package com.xfrocks.api.androiddemo;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import com.xfrocks.api.androiddemo.persist.Row;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,9 +27,10 @@ public class DataFragment extends ListFragment {
 
     private static final String ARG_ACCESS_TOKEN = "access_token";
     private static final String ARG_URL = "url";
+    private static final String STATE_DATA = "data";
 
-    private List<Row> mData = new ArrayList<>();
-    private BaseAdapter mDataAdapter;
+    List<Row> mData = new ArrayList<>();
+    BaseAdapter mDataAdapter;
 
     public static DataFragment newInstance(String url, Api.AccessToken at) {
         DataFragment fragment = new DataFragment();
@@ -37,25 +44,68 @@ public class DataFragment extends ListFragment {
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(STATE_DATA)) {
+            Row[] rows = (Row[]) savedInstanceState.getParcelableArray(STATE_DATA);
+            if (rows != null) {
+                Collections.addAll(mData, rows);
+            }
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
-        if (mDataAdapter == null) {
-            mDataAdapter = new DataAdapter(getActivity());
-            setListAdapter(mDataAdapter);
+        setListAdapterSafe();
+
+        if (mData.size() == 0) {
+            Bundle args = getArguments();
+            if (args.containsKey(ARG_URL) && args.containsKey(ARG_ACCESS_TOKEN)) {
+                String url = args.getString(ARG_URL);
+                Api.AccessToken at = (Api.AccessToken) args.getSerializable(ARG_ACCESS_TOKEN);
+
+                new DataRequest(url, at).start();
+            }
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelableArray(STATE_DATA, mData.toArray(new Row[mData.size()]));
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        Row row = mData.get(position);
+
+        if (row != null
+                && row.subRows != null
+                && row.subRows.size() > 0
+                && getActivity() instanceof MainActivity) {
+            Fragment fragment = DataSubFragment.newInstance(row.subRows);
+            ((MainActivity) getActivity()).addFragmentToBackStack(fragment);
+        }
+    }
+
+    void setListAdapterSafe() {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return;
         }
 
-        Bundle args = getArguments();
-        if (args.containsKey(ARG_URL) && args.containsKey(ARG_ACCESS_TOKEN)) {
-            String url = args.getString(ARG_URL);
-            Api.AccessToken at = (Api.AccessToken) args.getSerializable(ARG_ACCESS_TOKEN);
-
-            new DataRequest(url, at).start();
+        if (mDataAdapter == null) {
+            mDataAdapter = new DataAdapter(activity);
+            setListAdapter(mDataAdapter);
         }
     }
 
     private class DataRequest extends Api.GetRequest {
-        public DataRequest(String url, Api.AccessToken at) {
+        DataRequest(String url, Api.AccessToken at) {
             super(url, new Api.Params(at));
         }
 
@@ -123,7 +173,7 @@ public class DataFragment extends ListFragment {
 
         private LayoutInflater mInflater;
 
-        public DataAdapter(Context context) {
+        DataAdapter(Context context) {
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
@@ -169,12 +219,5 @@ public class DataFragment extends ListFragment {
     private static class ViewHolder {
         TextView text1;
         TextView text2;
-    }
-
-    private static class Row {
-        String key;
-        String value;
-
-        List<Row> subRows;
     }
 }

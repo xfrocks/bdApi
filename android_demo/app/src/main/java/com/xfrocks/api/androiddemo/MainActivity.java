@@ -2,6 +2,7 @@ package com.xfrocks.api.androiddemo;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -9,6 +10,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
+
+import com.xfrocks.api.androiddemo.persist.Row;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,7 +24,7 @@ public class MainActivity extends AppCompatActivity
     public static final String EXTRA_ACCESS_TOKEN = "access_token";
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
-    private ArrayAdapter<DrawerElement> mDrawerAdapter;
+    private ArrayAdapter<Row> mDrawerRows;
 
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
@@ -38,12 +41,12 @@ public class MainActivity extends AppCompatActivity
         mTitle = getTitle();
 
         // Set up the drawer.
-        mDrawerAdapter = new ArrayAdapter<>(this,
+        mDrawerRows = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_activated_1, android.R.id.text1);
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout),
-                mDrawerAdapter);
+                mDrawerRows);
     }
 
     @Override
@@ -61,11 +64,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
-        DrawerElement de = mDrawerAdapter.getItem(position);
-        if (de != null) {
+        Row row = mDrawerRows.getItem(position);
+        if (row != null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
-                    .replace(R.id.container, DataFragment.newInstance(de.url, null))
+                    .replace(R.id.container, DataFragment.newInstance(row.value, null))
                     .commit();
         }
     }
@@ -81,6 +84,15 @@ public class MainActivity extends AppCompatActivity
 
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(mTitle);
+    }
+
+    public void addFragmentToBackStack(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        String tag = String.valueOf(fragmentManager.getBackStackEntryCount());
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, fragment, tag)
+                .addToBackStack(tag)
+                .commit();
     }
 
     @Override
@@ -107,7 +119,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onStart() {
-            mDrawerAdapter.clear();
+            mDrawerRows.clear();
         }
 
         @Override
@@ -117,27 +129,17 @@ public class MainActivity extends AppCompatActivity
                     JSONObject links = response.getJSONObject("links");
                     Iterator<String> keys = links.keys();
                     while (keys.hasNext()) {
-                        final DrawerElement de = new DrawerElement();
-                        de.key = keys.next();
-                        de.url = links.getString(de.key);
+                        final Row row = new Row();
+                        row.key = keys.next();
+                        row.value = links.getString(row.key);
 
-                        mDrawerAdapter.add(de);
+                        mDrawerRows.add(row);
                     }
                 } catch (JSONException e) {
                     // ignore
                 }
             }
 
-        }
-    }
-
-    private static class DrawerElement {
-        String key;
-        String url;
-
-        @Override
-        public String toString() {
-            return key;
         }
     }
 
