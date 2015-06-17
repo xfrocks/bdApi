@@ -360,6 +360,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 gcmIntent.putExtra(RegistrationService.EXTRA_ACCESS_TOKEN, at);
                 startService(gcmIntent);
             }
+
+            finish();
         }
 
         @Override

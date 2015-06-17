@@ -1,11 +1,14 @@
 package com.xfrocks.api.androiddemo;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,7 +69,25 @@ public class MainActivity extends AppCompatActivity
     public void onNavigationDrawerItemSelected(int position) {
         Row row = mDrawerRows.getItem(position);
         if (row != null) {
-            addDataFragment(row.value);
+            addDataFragment(row.value, true);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStack();
+        } else {
+            new AlertDialog.Builder(this)
+                    .setMessage(R.string.are_you_sure_quit)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, null)
+                    .show();
         }
     }
 
@@ -83,11 +104,13 @@ public class MainActivity extends AppCompatActivity
         actionBar.setTitle(mTitle);
     }
 
-    public void addDataFragment(String url) {
+    public void addDataFragment(String url, boolean clearStack) {
         FragmentManager fragmentManager = getSupportFragmentManager();
 
-        // http://stackoverflow.com/questions/6186433/clear-back-stack-using-fragments
-        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        if (clearStack) {
+            // http://stackoverflow.com/questions/6186433/clear-back-stack-using-fragments
+            fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
 
         fragmentManager.beginTransaction()
                 .replace(R.id.container, DataFragment.newInstance(url, null))
