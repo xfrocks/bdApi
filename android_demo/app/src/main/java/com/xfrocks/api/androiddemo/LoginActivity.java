@@ -364,30 +364,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         @Override
         protected void onError(VolleyError error) {
-            String message = null;
-
-            if (error.getCause() != null) {
-                message = error.getCause().getMessage();
-            }
-
-            if (message == null) {
-                message = error.getMessage();
-            }
-
-            if (message == null && error.networkResponse != null) {
-                try {
-                    String jsonString = new String(error.networkResponse.data,
-                            HttpHeaderParser.parseCharset(error.networkResponse.headers));
-
-                    JSONObject jsonObject = new JSONObject(jsonString);
-
-                    if (jsonObject.has("error_description")) {
-                        message = jsonObject.getString("error_description");
-                    }
-                } catch (Exception e) {
-                    // ignore
-                }
-            }
+            String message = getErrorMessage(error);
 
             if (message != null) {
                 Toast.makeText(LoginActivity.this, message, Toast.LENGTH_LONG).show();

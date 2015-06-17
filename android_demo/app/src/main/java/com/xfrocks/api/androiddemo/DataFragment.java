@@ -13,7 +13,10 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.xfrocks.api.androiddemo.persist.Row;
 
 import org.json.JSONArray;
@@ -137,6 +140,15 @@ public class DataFragment extends ListFragment {
         @Override
         protected void onSuccess(JSONObject response) {
             parseRows(response, mData);
+        }
+
+        @Override
+        protected void onError(VolleyError error) {
+            String message = getErrorMessage(error);
+
+            if (message != null) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            }
         }
 
         @Override

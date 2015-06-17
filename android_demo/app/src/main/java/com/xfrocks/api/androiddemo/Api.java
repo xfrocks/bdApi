@@ -8,6 +8,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -206,6 +207,40 @@ public class Api {
 
         protected void onComplete(boolean isSuccess) {
             // do something?
+        }
+
+        protected String getErrorMessage(VolleyError error) {
+            String message = null;
+
+            if (error.getCause() != null) {
+                message = error.getCause().getMessage();
+            }
+
+            if (message == null) {
+                message = error.getMessage();
+            }
+
+            if (message == null && error.networkResponse != null) {
+                try {
+                    String jsonString = new String(error.networkResponse.data,
+                            HttpHeaderParser.parseCharset(error.networkResponse.headers));
+
+                    JSONObject jsonObject = new JSONObject(jsonString);
+
+                    if (jsonObject.has("error_description")) {
+                        message = jsonObject.getString("error_description");
+                    } else if (jsonObject.has("errors")) {
+                        JSONArray errors = jsonObject.getJSONArray("errors");
+                        if (errors.length() > 0) {
+                            message = errors.getString(0);
+                        }
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+
+            return message;
         }
     }
 
