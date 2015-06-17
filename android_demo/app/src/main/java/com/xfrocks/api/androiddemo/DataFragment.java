@@ -2,6 +2,8 @@ package com.xfrocks.api.androiddemo;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
@@ -29,6 +31,7 @@ public class DataFragment extends ListFragment {
     private static final String ARG_URL = "url";
     private static final String STATE_DATA = "data";
 
+    Row mParentRow;
     List<Row> mData = new ArrayList<>();
     BaseAdapter mDataAdapter;
 
@@ -81,14 +84,30 @@ public class DataFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Row row = mData.get(position);
+        Activity activity = getActivity();
+        if (!(activity instanceof MainActivity)) {
+            return;
+        }
+        MainActivity ma = (MainActivity) activity;
 
-        if (row != null
-                && row.subRows != null
-                && row.subRows.size() > 0
-                && getActivity() instanceof MainActivity) {
-            Fragment fragment = DataSubFragment.newInstance(row.subRows);
-            ((MainActivity) getActivity()).addFragmentToBackStack(fragment);
+        Row row = mData.get(position);
+        if (row == null) {
+            return;
+        }
+
+        if (row.subRows != null
+                && row.subRows.size() > 0) {
+            Fragment fragment = DataSubFragment.newInstance(row, row.subRows);
+            ma.addFragmentToBackStack(fragment);
+        } else if (mParentRow != null) {
+            if ("links".equals(mParentRow.key)) {
+                if ("permalink".equals(row.key)) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(row.value));
+                    startActivity(intent);
+                } else {
+                    ma.addDataFragment(row.value);
+                }
+            }
         }
     }
 

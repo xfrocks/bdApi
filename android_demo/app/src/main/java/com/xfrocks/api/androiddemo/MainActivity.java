@@ -66,10 +66,7 @@ public class MainActivity extends AppCompatActivity
     public void onNavigationDrawerItemSelected(int position) {
         Row row = mDrawerRows.getItem(position);
         if (row != null) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, DataFragment.newInstance(row.value, null))
-                    .commit();
+            addDataFragment(row.value);
         }
     }
 
@@ -84,6 +81,17 @@ public class MainActivity extends AppCompatActivity
 
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(mTitle);
+    }
+
+    public void addDataFragment(String url) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        // http://stackoverflow.com/questions/6186433/clear-back-stack-using-fragments
+        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, DataFragment.newInstance(url, null))
+                .commit();
     }
 
     public void addFragmentToBackStack(Fragment fragment) {
