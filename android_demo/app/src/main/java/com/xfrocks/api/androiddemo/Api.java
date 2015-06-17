@@ -27,14 +27,21 @@ public class Api {
 
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE = "grant_type";
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_PASSWORD = "password";
+    public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
     public static final String URL_OAUTH_TOKEN_PARAM_USERNAME = "username";
     public static final String URL_OAUTH_TOKEN_PARAM_PASSWORD = "password";
+    public static final String URL_OAUTH_TOKEN_PARAM_REFRESH_TOKEN = "refresh_token";
 
     public static AccessToken makeAccessToken(JSONObject response) {
         try {
             AccessToken at = new AccessToken();
             at.token = response.getString("access_token");
             at.userId = response.getLong("user_id");
+
+            if (response.has("refresh_token")) {
+                at.refreshToken = response.getString("refresh_token");
+            }
+
             return at;
         } catch (JSONException e) {
             // ignore
@@ -248,10 +255,15 @@ public class Api {
     public static class AccessToken implements Serializable {
 
         private String token;
+        private String refreshToken;
         private long userId;
 
         public String getToken() {
             return token;
+        }
+
+        public String getRefreshToken() {
+            return refreshToken;
         }
 
         public long getUserId() {

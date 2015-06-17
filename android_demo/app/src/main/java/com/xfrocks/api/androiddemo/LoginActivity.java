@@ -1,8 +1,10 @@
 package com.xfrocks.api.androiddemo;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -17,31 +19,33 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.xfrocks.api.androiddemo.gcm.RegistrationService;
+import com.xfrocks.api.androiddemo.persist.AccessTokenHelper;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private PasswordRequest mLoginRequest = null;
+    private TokenRequest mTokenRequest = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
+    private CheckBox mRememberView;
     private Button mSignIn;
 
     @Override
@@ -65,6 +69,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             }
         });
 
+        mRememberView = (CheckBox) findViewById(R.id.remember);
+
         mSignIn = (Button) findViewById(R.id.sign_in);
         mSignIn.setOnClickListener(new OnClickListener() {
             @Override
@@ -79,6 +85,38 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mEmailView.setText("");
+        mPasswordView.setText("");
+
+        final Api.AccessToken at = AccessTokenHelper.load(this);
+        if (at != null) {
+            mRememberView.setChecked(true);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.sign_in_with_remember)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            attemptLogin(at);
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            mRememberView.setChecked(false);
+                            AccessTokenHelper.save(LoginActivity.this, null);
+                        }
+                    })
+                    .show();
+        }
+
+        mEmailView.requestFocus();
+    }
+
     private void populateAutoComplete() {
         getLoaderManager().initLoader(0, null, this);
     }
@@ -90,7 +128,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
      * errors are presented and no actual login attempt is made.
      */
     public void attemptLogin() {
-        if (mLoginRequest != null) {
+        if (mTokenRequest != null) {
             return;
         }
 
@@ -127,6 +165,18 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             new PasswordRequest(email, password).start();
+        }
+    }
+
+    public void attemptLogin(Api.AccessToken at) {
+        if (mTokenRequest != null) {
+            return;
+        }
+
+        if (TextUtils.isEmpty(at.getRefreshToken())) {
+            Toast.makeText(this, R.string.error_no_refresh_token, Toast.LENGTH_LONG).show();
+        } else {
+            new RefreshTokenRequest(at.getRefreshToken()).start();
         }
     }
 
@@ -182,24 +232,23 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mEmailView.setAdapter(adapter);
     }
 
-    private class PasswordRequest extends Api.PostRequest {
+    private void setViewsEnabled(boolean enabled) {
+        mEmailView.setEnabled(enabled);
+        mPasswordView.setEnabled(enabled);
+        mRememberView.setEnabled(enabled);
+        mSignIn.setEnabled(enabled);
+    }
 
-        PasswordRequest(String email, String password) {
-            super(
-                    Api.URL_OAUTH_TOKEN,
-                    new Api.Params(
-                            Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE,
-                            Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_PASSWORD)
-                            .and(Api.URL_OAUTH_TOKEN_PARAM_USERNAME, email)
-                            .and(Api.URL_OAUTH_TOKEN_PARAM_PASSWORD, password)
-                            .andClientCredentials()
-            );
+    private abstract class TokenRequest extends Api.PostRequest {
+        TokenRequest(String url, Map<String, String> params) {
+            super(url, params);
         }
 
         @Override
         protected void onStart() {
-            mLoginRequest = this;
-            mSignIn.setEnabled(false);
+            mTokenRequest = this;
+            setViewsEnabled(false);
+            AccessTokenHelper.save(LoginActivity.this, null);
         }
 
         @Override
@@ -207,6 +256,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             Api.AccessToken at = Api.makeAccessToken(response);
             if (at == null) {
                 return;
+            }
+
+            if (mRememberView.isChecked()) {
+                AccessTokenHelper.save(LoginActivity.this, at);
             }
 
             Intent intent = new Intent(LoginActivity.this, MeActivity.class);
@@ -222,12 +275,29 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         @Override
         protected void onError(VolleyError error) {
-            final String message;
+            String message = null;
 
             if (error.getCause() != null) {
                 message = error.getCause().getMessage();
-            } else {
+            }
+
+            if (message == null) {
                 message = error.getMessage();
+            }
+
+            if (message == null && error.networkResponse != null) {
+                try {
+                    String jsonString = new String(error.networkResponse.data,
+                            HttpHeaderParser.parseCharset(error.networkResponse.headers));
+
+                    JSONObject jsonObject = new JSONObject(jsonString);
+
+                    if (jsonObject.has("error_description")) {
+                        message = jsonObject.getString("error_description");
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
             }
 
             if (message != null) {
@@ -237,8 +307,35 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         @Override
         protected void onComplete(boolean isSuccess) {
-            mLoginRequest = null;
-            mSignIn.setEnabled(true);
+            mTokenRequest = null;
+            setViewsEnabled(true);
+        }
+    }
+
+    private class PasswordRequest extends TokenRequest {
+        PasswordRequest(String email, String password) {
+            super(
+                    Api.URL_OAUTH_TOKEN,
+                    new Api.Params(
+                            Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE,
+                            Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_PASSWORD)
+                            .and(Api.URL_OAUTH_TOKEN_PARAM_USERNAME, email)
+                            .and(Api.URL_OAUTH_TOKEN_PARAM_PASSWORD, password)
+                            .andClientCredentials()
+            );
+        }
+    }
+
+    private class RefreshTokenRequest extends TokenRequest {
+        RefreshTokenRequest(String refreshToken) {
+            super(
+                    Api.URL_OAUTH_TOKEN,
+                    new Api.Params(
+                            Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE,
+                            Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_REFRESH_TOKEN)
+                            .and(Api.URL_OAUTH_TOKEN_PARAM_REFRESH_TOKEN, refreshToken)
+                            .andClientCredentials()
+            );
         }
     }
 }

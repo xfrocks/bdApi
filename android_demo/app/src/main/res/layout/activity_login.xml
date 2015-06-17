@@ -32,6 +32,12 @@
         android:maxLines="1"
         android:singleLine="true" />
 
+    <CheckBox
+        android:id="@+id/remember"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/remember_token" />
+
     <Button
         android:id="@+id/sign_in"
         style="?android:textAppearanceSmall"

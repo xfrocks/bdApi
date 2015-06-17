@@ -3,9 +3,13 @@
     <!-- Strings related to login -->
     <string name="prompt_email">Email or Username</string>
     <string name="prompt_password">Password</string>
+    <string name="remember_token">Remember token?</string>
     <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
 
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+
+    <string name="sign_in_with_remember">Sign in with saved token?</string>
+    <string name="error_no_refresh_token">No refresh token could be found</string>
 </resources>
