@@ -208,7 +208,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
             if (empty($oauthTokenText)) {
                 /** @var bdApi_Model_OAuth2 $oauth2Model */
                 $oauth2Model = XenForo_Model::create('bdApi_Model_OAuth2');
-                $controllerResponse = $oauth2Model->getServer()->getDefaultControllerResponse($this);
+                $controllerResponse = $oauth2Model->getServer()->getErrorControllerResponse($this);
 
                 if (empty($controllerResponse)) {
                     $controllerResponse = $this->responseError(new XenForo_Phrase('bdapi_authorize_error_invalid_or_expired_access_token'), 403);

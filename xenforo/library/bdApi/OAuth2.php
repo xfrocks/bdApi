@@ -158,10 +158,13 @@ class bdApi_OAuth2 extends \OAuth2\Server
      *
      * @return XenForo_ControllerResponse_Abstract
      */
-    public function getDefaultControllerResponse(XenForo_Controller $controller)
+    public function getErrorControllerResponse(XenForo_Controller $controller)
     {
-        if (!empty($this->response)) {
-            return $this->_generateControllerResponse($controller, $this->response);
+        /** @var OAuth2\Response $response */
+        $response = $this->response;
+
+        if (!empty($response) && $response->getParameter('error')) {
+            return $this->_generateControllerResponse($controller, $response);
         }
 
         return null;
