@@ -2,16 +2,10 @@
 
 class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
 {
-
-    protected function _preDispatch($action)
+    public function actionGetIndex()
     {
         $this->_assertRegistrationRequired();
 
-        parent::_preDispatch($action);
-    }
-
-    public function actionGetIndex()
-    {
         $alertModel = $this->_getAlertModel();
         $visitor = XenForo_Visitor::getInstance();
 
@@ -36,6 +30,7 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
 
     public function actionPostRead()
     {
+        $this->_assertRegistrationRequired();
         $visitor = XenForo_Visitor::getInstance();
 
         if ($visitor['alerts_unread'] > 0) {
@@ -51,7 +46,12 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
         $id = $this->_input->filterSingle('notification_id', XenForo_Input::UINT);
         $alert = $this->_getAlertModel()->getAlertById($id);
         if (empty($alert)) {
-            return $this->_actionGetContent_getControllerResponseNop();
+            return $this->responseNoPermission();
+        }
+
+        $visitor = XenForo_Visitor::getInstance();
+        if ($visitor['user_id'] != $alert['alerted_user_id']) {
+            return $this->responseNoPermission();
         }
 
         $controllerResponse = $this->_actionGetContent_getControllerResponse($alert);
