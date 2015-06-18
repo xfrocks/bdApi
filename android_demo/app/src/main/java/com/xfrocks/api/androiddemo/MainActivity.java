@@ -1,55 +1,64 @@
 package com.xfrocks.api.androiddemo;
 
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 import com.xfrocks.api.androiddemo.persist.Row;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String EXTRA_ACCESS_TOKEN = "access_token";
+    private static final String STATE_NAVIGATION_ROWS = "navigation_rows";
+    private static final String STATE_USER = "user";
 
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-    private ArrayAdapter<Row> mDrawerRows;
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
 
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
-    private CharSequence mTitle;
+    private NavigationView mNavigationView;
+    private TextView mHeaderTxt;
+
+    private ArrayList<Row> mNavigationRows = new ArrayList<>();
+    private Api.User mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        // Set up the drawer.
-        mDrawerRows = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_activated_1, android.R.id.text1);
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout),
-                mDrawerRows);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close);
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
+
+        mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
+        mHeaderTxt = (TextView) findViewById(R.id.header_txt);
+        mNavigationView.setNavigationItemSelectedListener(this);
+        mDrawerLayout.openDrawer(mNavigationView);
     }
 
     @Override
@@ -59,18 +68,63 @@ public class MainActivity extends AppCompatActivity
         Intent intent = getIntent();
         if (intent.hasExtra(EXTRA_ACCESS_TOKEN)) {
             Api.AccessToken at = (Api.AccessToken) intent.getSerializableExtra(EXTRA_ACCESS_TOKEN);
-            new IndexRequest(at).start();
-        } else {
-            finish();
+
+            if (mNavigationRows.size() == 0) {
+                new IndexRequest(at).start();
+            }
+
+            if (mUser == null) {
+                new UsersMeRequest(at).start();
+            }
         }
     }
 
     @Override
-    public void onNavigationDrawerItemSelected(int position) {
-        Row row = mDrawerRows.getItem(position);
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Forward the new configuration the drawer toggle component.
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelableArrayList(STATE_NAVIGATION_ROWS, mNavigationRows);
+        outState.putSerializable(STATE_USER, mUser);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        if (savedInstanceState.containsKey(STATE_NAVIGATION_ROWS)) {
+            ArrayList<Row> rows = savedInstanceState.getParcelableArrayList(STATE_NAVIGATION_ROWS);
+            if (rows != null) {
+                setNavigationRows(rows);
+            }
+        }
+
+        if (savedInstanceState.containsKey(STATE_USER)) {
+            setUser((Api.User) savedInstanceState.getSerializable(STATE_USER));
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem menuItem) {
+        Row row = mNavigationRows.get(menuItem.getItemId());
         if (row != null) {
             addDataFragment(row.value, true);
+            mDrawerLayout.closeDrawer(mNavigationView);
+            return true;
         }
+
+        return false;
     }
 
     @Override
@@ -91,17 +145,24 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void restoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar == null) {
-            return;
+    public void setNavigationRows(ArrayList<Row> rows) {
+        mNavigationRows = rows;
+
+        Menu menu = mNavigationView.getMenu();
+        menu.clear();
+        for (Row row : mNavigationRows) {
+            menu.add(Menu.NONE, mNavigationRows.size() - 1, Menu.NONE, row.key);
         }
+    }
 
-        //noinspection deprecation
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+    public void setUser(Api.User u) {
+        mUser = u;
 
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+        if (mUser != null) {
+            mHeaderTxt.setText(mUser.getUsername());
+        } else {
+            mHeaderTxt.setText("");
+        }
     }
 
     public void addDataFragment(String url, boolean clearStack) {
@@ -126,31 +187,9 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            restoreActionBar();
-            return true;
-        }
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return mNavigationDrawerFragment.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-    }
-
     private class IndexRequest extends Api.GetRequest {
         public IndexRequest(Api.AccessToken at) {
             super(Api.URL_INDEX, new Api.Params(at));
-        }
-
-        @Override
-        protected void onStart() {
-            mDrawerRows.clear();
         }
 
         @Override
@@ -159,18 +198,34 @@ public class MainActivity extends AppCompatActivity
                 try {
                     JSONObject links = response.getJSONObject("links");
                     Iterator<String> keys = links.keys();
+                    ArrayList<Row> rows = new ArrayList<>(links.names().length());
+
                     while (keys.hasNext()) {
                         final Row row = new Row();
                         row.key = keys.next();
                         row.value = links.getString(row.key);
-
-                        mDrawerRows.add(row);
+                        rows.add(row);
                     }
+
+                    setNavigationRows(rows);
                 } catch (JSONException e) {
                     // ignore
                 }
             }
+        }
+    }
 
+    private class UsersMeRequest extends Api.GetRequest {
+        public UsersMeRequest(Api.AccessToken at) {
+            super(Api.URL_USERS_ME, new Api.Params(at));
+        }
+
+        @Override
+        protected void onSuccess(JSONObject response) {
+            Api.User u = Api.makeUser(response);
+            if (u != null) {
+                setUser(u);
+            }
         }
     }
 

@@ -17,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpHeaderParser;
 import com.xfrocks.api.androiddemo.persist.Row;
 
 import org.json.JSONArray;
@@ -25,7 +24,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,7 +34,7 @@ public class DataFragment extends ListFragment {
     private static final String STATE_DATA = "data";
 
     Row mParentRow;
-    List<Row> mData = new ArrayList<>();
+    ArrayList<Row> mData = new ArrayList<>();
     BaseAdapter mDataAdapter;
 
     public static DataFragment newInstance(String url, Api.AccessToken at) {
@@ -55,10 +53,7 @@ public class DataFragment extends ListFragment {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(STATE_DATA)) {
-            Row[] rows = (Row[]) savedInstanceState.getParcelableArray(STATE_DATA);
-            if (rows != null) {
-                Collections.addAll(mData, rows);
-            }
+            mData = savedInstanceState.getParcelableArrayList(STATE_DATA);
         }
     }
 
@@ -90,7 +85,7 @@ public class DataFragment extends ListFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putParcelableArray(STATE_DATA, mData.toArray(new Row[mData.size()]));
+        outState.putParcelableArrayList(STATE_DATA, mData);
     }
 
     @Override

@@ -25,6 +25,7 @@ public class Api {
 
     public static final String URL_OAUTH_TOKEN = "oauth/token";
     public static final String URL_INDEX = "index";
+    public static final String URL_USERS_ME = "users/me";
 
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE = "grant_type";
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_PASSWORD = "password";
@@ -47,6 +48,22 @@ public class Api {
             }
 
             return at;
+        } catch (JSONException e) {
+            // ignore
+        }
+
+        return null;
+    }
+
+    public static User makeUser(JSONObject response) {
+        try {
+            JSONObject user = response.getJSONObject("user");
+
+            User u = new User();
+            u.userId = user.getLong("user_id");
+            u.username = user.getString("username");
+
+            return u;
         } catch (JSONException e) {
             // ignore
         }
@@ -313,9 +330,9 @@ public class Api {
 
     public static class AccessToken implements Serializable {
 
-        private String token;
-        private String refreshToken;
-        private long userId;
+        String token;
+        String refreshToken;
+        long userId;
 
         public String getToken() {
             return token;
@@ -327,6 +344,21 @@ public class Api {
 
         public long getUserId() {
             return userId;
+        }
+
+    }
+
+    public static class User implements Serializable {
+
+        long userId;
+        String username;
+
+        public long getUserId() {
+            return userId;
+        }
+
+        public String getUsername() {
+            return username;
         }
 
     }
