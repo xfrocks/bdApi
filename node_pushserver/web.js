@@ -13,6 +13,10 @@ app.use(express.compress());
 app.use(express.bodyParser());
 
 var getCallbackUri = function(req) {
+    if (config.web.callback) {
+        return config.web.callback;
+    }
+
     return req.protocol + '://' + req.get('host') + '/callback';
 }
 

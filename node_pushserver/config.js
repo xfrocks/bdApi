@@ -5,7 +5,8 @@ var debug = require('debug')('config');
 
 var defaultConfig = {
 	web: {
-		port: 18080
+		port: 18080,
+		callback: '',
 	},
 	redis: {
 		port: 6379,
@@ -57,6 +58,10 @@ if (process.env.REDISTOGO_URL) {
 	config.redis.port = redisToGo.port;
 	config.redis.host = redisToGo.hostname;
 	config.redis.auth = redisToGo.auth.split(":")[1];
+}
+
+if (process.env.CONFIG_WEB_CALLBACK) {
+	config.web.callback = process.env.CONFIG_WEB_CALLBACK;
 }
 
 if (process.env.CONFIG_PUSH_QUEUE_ID) {
