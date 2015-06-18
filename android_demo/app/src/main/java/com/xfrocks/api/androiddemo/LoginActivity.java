@@ -193,6 +193,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         String authorizeUri = Api.makeAuthorizeUri();
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(authorizeUri));
         startActivity(intent);
+        finish();
     }
 
     public void attemptLogin() {
