@@ -17,9 +17,10 @@ public class AccessTokenHelper {
 
     private static final String TAG = "AccessTokenHelper";
 
-    public static boolean save(Context context, Api.AccessToken at) {
+    public static void save(Context context, Api.AccessToken at) {
         if (at == null) {
-            return context.deleteFile(TAG);
+            context.deleteFile(TAG);
+            return;
         }
 
         try {
@@ -32,11 +33,8 @@ public class AccessTokenHelper {
             if (BuildConfig.DEBUG) {
                 Log.e(TAG, "save", e);
             }
-
-            return false;
         }
 
-        return true;
     }
 
     public static Api.AccessToken load(Context context) {

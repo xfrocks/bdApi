@@ -1,5 +1,6 @@
 package com.xfrocks.api.androiddemo;
 
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -10,13 +11,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.xfrocks.api.androiddemo.persist.Row;
 
 import org.json.JSONException;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ActionBarDrawerToggle mDrawerToggle;
 
     private NavigationView mNavigationView;
+    private ImageView mHeaderImg;
     private TextView mHeaderTxt;
 
     private ArrayList<Row> mNavigationRows = new ArrayList<>();
@@ -56,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mDrawerToggle.syncState();
 
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
+        mHeaderImg = (ImageView) findViewById(R.id.header_img);
         mHeaderTxt = (TextView) findViewById(R.id.header_txt);
         mNavigationView.setNavigationItemSelectedListener(this);
         mDrawerLayout.openDrawer(mNavigationView);
@@ -129,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
             getSupportFragmentManager().popBackStack();
         } else {
             new AlertDialog.Builder(this)
@@ -145,41 +149,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    public void setNavigationRows(ArrayList<Row> rows) {
+    private void setNavigationRows(ArrayList<Row> rows) {
         mNavigationRows = rows;
 
         Menu menu = mNavigationView.getMenu();
         menu.clear();
-        for (Row row : mNavigationRows) {
-            menu.add(Menu.NONE, mNavigationRows.size() - 1, Menu.NONE, row.key);
+
+        for (int i = 0; i < mNavigationRows.size(); i++) {
+            menu.add(Menu.NONE, i, Menu.NONE, mNavigationRows.get(i).key);
         }
     }
 
-    public void setUser(Api.User u) {
+    private void setUser(Api.User u) {
         mUser = u;
 
         if (mUser != null) {
+            App.getInstance().getNetworkImageLoader().get(
+                    mUser.getAvatar(),
+                    ImageLoader.getImageListener(mHeaderImg, R.drawable.avatar_l, 0)
+            );
             mHeaderTxt.setText(mUser.getUsername());
         } else {
+            mHeaderImg.setImageDrawable(null);
             mHeaderTxt.setText("");
         }
     }
 
     public void addDataFragment(String url, boolean clearStack) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = DataFragment.newInstance(url);
+        addFragmentToBackStack(fragment, clearStack);
+    }
 
+    public void addFragmentToBackStack(Fragment fragment, boolean clearStack) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
         if (clearStack) {
             // http://stackoverflow.com/questions/6186433/clear-back-stack-using-fragments
             fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
 
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, DataFragment.newInstance(url, null))
-                .commit();
-    }
-
-    public void addFragmentToBackStack(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
         String tag = String.valueOf(fragmentManager.getBackStackEntryCount());
         fragmentManager.beginTransaction()
                 .replace(R.id.container, fragment, tag)
@@ -226,6 +233,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (u != null) {
                 setUser(u);
             }
+
+            ArrayList<Row> rows = new ArrayList<>();
+            parseRows(response, rows);
+            Fragment fragment = DataSubFragment.newInstance(null, rows);
+            MainActivity.this.addFragmentToBackStack(fragment, true);
         }
     }
 

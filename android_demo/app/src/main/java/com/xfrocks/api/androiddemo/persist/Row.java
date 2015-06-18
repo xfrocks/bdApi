@@ -3,18 +3,18 @@ package com.xfrocks.api.androiddemo.persist;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class Row implements Parcelable {
     public String key;
     public String value;
-    public List<Row> subRows;
+    public ArrayList<Row> subRows;
 
     public Row() {
         // do nothing
     }
 
-    public Row(Parcel in) {
+    private Row(Parcel in) {
         key = in.readString();
         value = in.readString();
         subRows = in.createTypedArrayList(Row.CREATOR);

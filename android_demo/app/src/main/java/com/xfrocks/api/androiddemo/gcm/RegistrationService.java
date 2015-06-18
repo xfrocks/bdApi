@@ -98,10 +98,10 @@ public class RegistrationService extends IntentService {
     }
 
     private static class RegisterRequest extends Api.PushServerRequest {
-        private long mUserId;
+        private final long mUserId;
 
         RegisterRequest(String gcmToken, long userId, Api.AccessToken at) {
-            super(true, gcmToken, userId > 0 ? String.format("user_notification_%d", userId) : "", at);
+            super(gcmToken, userId > 0 ? String.format("user_notification_%d", userId) : "", at);
 
             mUserId = userId;
         }

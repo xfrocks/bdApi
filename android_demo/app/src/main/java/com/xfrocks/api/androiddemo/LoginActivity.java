@@ -28,7 +28,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpHeaderParser;
 import com.xfrocks.api.androiddemo.gcm.RegistrationService;
 import com.xfrocks.api.androiddemo.persist.AccessTokenHelper;
 
@@ -189,14 +188,14 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         getLoaderManager().initLoader(0, null, this);
     }
 
-    public void authorize() {
+    private void authorize() {
         String authorizeUri = Api.makeAuthorizeUri();
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(authorizeUri));
         startActivity(intent);
         finish();
     }
 
-    public void attemptLogin() {
+    private void attemptLogin() {
         if (mTokenRequest != null) {
             return;
         }
@@ -237,7 +236,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 
-    public void attemptLogin(Intent intent) {
+    private void attemptLogin(Intent intent) {
         if (TextUtils.isEmpty(BuildConfig.AUTHORIZE_REDIRECT_URI)) {
             return;
         }
@@ -256,7 +255,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 
-    public void attemptLogin(Api.AccessToken at) {
+    private void attemptLogin(Api.AccessToken at) {
         if (mTokenRequest != null) {
             return;
         }
@@ -330,8 +329,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     }
 
     private abstract class TokenRequest extends Api.PostRequest {
-        TokenRequest(String url, Map<String, String> params) {
-            super(url, params);
+        TokenRequest(Map<String, String> params) {
+            super(Api.URL_OAUTH_TOKEN, params);
         }
 
         @Override
@@ -375,7 +374,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
 
         @Override
-        protected void onComplete(boolean isSuccess) {
+        protected void onComplete() {
             mTokenRequest = null;
             setViewsEnabled(true);
         }
@@ -384,7 +383,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private class PasswordRequest extends TokenRequest {
         PasswordRequest(String email, String password) {
             super(
-                    Api.URL_OAUTH_TOKEN,
                     new Api.Params(
                             Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE,
                             Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_PASSWORD)
@@ -398,7 +396,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private class AuthorizationCodeRequest extends TokenRequest {
         AuthorizationCodeRequest(String code) {
             super(
-                    Api.URL_OAUTH_TOKEN,
                     new Api.Params(
                             Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE,
                             Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_AUTHORIZATION_CODE)
@@ -420,7 +417,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private class RefreshTokenRequest extends TokenRequest {
         RefreshTokenRequest(String refreshToken) {
             super(
-                    Api.URL_OAUTH_TOKEN,
                     new Api.Params(
                             Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE,
                             Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_REFRESH_TOKEN)

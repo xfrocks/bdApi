@@ -7,6 +7,7 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
+import com.xfrocks.api.androiddemo.persist.Row;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,8 +18,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class Api {
@@ -60,8 +64,8 @@ public class Api {
             JSONObject user = response.getJSONObject("user");
 
             User u = new User();
-            u.userId = user.getLong("user_id");
             u.username = user.getString("username");
+            u.avatar = user.getJSONObject("links").getString("avatar_big");
 
             return u;
         } catch (JSONException e) {
@@ -71,8 +75,8 @@ public class Api {
         return null;
     }
 
-    public static String makeOneTimeToken(long userId, AccessToken at, long ttl) {
-        long timestamp = new Date().getTime() / 1000 + ttl;
+    private static String makeOneTimeToken(long userId, AccessToken at) {
+        long timestamp = new Date().getTime() / 1000 + (long) 3600;
 
         MessageDigest md;
         try {
@@ -143,7 +147,7 @@ public class Api {
 
     public static class Request extends com.android.volley.Request<JSONObject> {
 
-        protected Map<String, String> mParams;
+        final Map<String, String> mParams;
 
         public Request(int method, String url, Map<String, String> params) {
             super(method, url, null);
@@ -155,7 +159,7 @@ public class Api {
             setTag(this.getClass().getSimpleName());
         }
 
-        public Request start() {
+        public void start() {
             if (BuildConfig.DEBUG) {
                 Log.v(getTag().toString(), "Request=" + getUrl() + " (" + getMethod() + ")");
                 for (String key : mParams.keySet()) {
@@ -166,8 +170,6 @@ public class Api {
             onStart();
 
             App.getInstance().getRequestQueue().add(this);
-
-            return this;
         }
 
         @Override
@@ -197,7 +199,7 @@ public class Api {
         @Override
         protected void deliverResponse(JSONObject response) {
             onSuccess(response);
-            onComplete(true);
+            onComplete();
         }
 
         @Override
@@ -207,10 +209,10 @@ public class Api {
             }
 
             onError(error);
-            onComplete(false);
+            onComplete();
         }
 
-        protected void onStart() {
+        void onStart() {
             // do something?
         }
 
@@ -218,15 +220,15 @@ public class Api {
             // do something?
         }
 
-        protected void onError(VolleyError error) {
+        void onError(VolleyError error) {
             // do something?
         }
 
-        protected void onComplete(boolean isSuccess) {
+        void onComplete() {
             // do something?
         }
 
-        protected String getErrorMessage(VolleyError error) {
+        String getErrorMessage(VolleyError error) {
             String message = null;
 
             if (error.getCause() != null) {
@@ -259,6 +261,49 @@ public class Api {
 
             return message;
         }
+
+        void parseRows(JSONObject obj, List<Row> rows) {
+            Iterator<String> keys = obj.keys();
+            while (keys.hasNext()) {
+                final Row row = new Row();
+                row.key = keys.next();
+
+                try {
+                    parseRow(obj.get(row.key), row);
+                    rows.add(row);
+                } catch (JSONException e) {
+                    // ignore
+                }
+            }
+        }
+
+        void parseRows(JSONArray array, List<Row> rows) {
+            for (int i = 0; i < array.length(); i++) {
+                final Row row = new Row();
+                row.key = String.valueOf(i);
+
+                try {
+                    parseRow(array.get(i), row);
+                    rows.add(row);
+                } catch (JSONException e) {
+                    // ignore
+                }
+            }
+        }
+
+        void parseRow(Object value, Row row) {
+            if (value instanceof JSONObject) {
+                row.value = "(object)";
+                row.subRows = new ArrayList<>();
+                parseRows((JSONObject) value, row.subRows);
+            } else if (value instanceof JSONArray) {
+                row.value = "(array)";
+                row.subRows = new ArrayList<>();
+                parseRows((JSONArray) value, row.subRows);
+            } else {
+                row.value = String.valueOf(value);
+            }
+        }
     }
 
     public static class GetRequest extends Request {
@@ -274,16 +319,16 @@ public class Api {
     }
 
     public static class PushServerRequest extends Request {
-        public PushServerRequest(boolean isSubscribe, String deviceId, String topic, AccessToken at) {
+        public PushServerRequest(String deviceId, String topic, AccessToken at) {
             super(
                     Method.POST,
-                    BuildConfig.PUSH_SERVER + (isSubscribe ? "/subscribe" : "/unsubscribe"),
+                    BuildConfig.PUSH_SERVER + ("/subscribe"),
                     new Params("device_type", "android")
                             .and("device_id", deviceId)
                             .and("hub_uri", BuildConfig.API_ROOT + "/index.php?subscriptions")
                             .and("hub_topic", topic)
                             .and("oauth_client_id", BuildConfig.CLIENT_ID)
-                            .and("oauth_token", Api.makeOneTimeToken(at != null ? at.getUserId() : 0, at, 3600))
+                            .and("oauth_token", Api.makeOneTimeToken(at != null ? at.getUserId() : 0, at))
             );
         }
 
@@ -294,6 +339,10 @@ public class Api {
     }
 
     public static class Params extends HashMap<String, String> {
+
+        public Params() {
+            super();
+        }
 
         public Params(String key, Object value) {
             super(1);
@@ -330,9 +379,9 @@ public class Api {
 
     public static class AccessToken implements Serializable {
 
-        String token;
-        String refreshToken;
-        long userId;
+        private String token;
+        private String refreshToken;
+        private long userId;
 
         public String getToken() {
             return token;
@@ -350,15 +399,15 @@ public class Api {
 
     public static class User implements Serializable {
 
-        long userId;
-        String username;
-
-        public long getUserId() {
-            return userId;
-        }
+        private String username;
+        private String avatar;
 
         public String getUsername() {
             return username;
+        }
+
+        public String getAvatar() {
+            return avatar;
         }
 
     }
