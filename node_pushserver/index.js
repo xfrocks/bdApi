@@ -12,8 +12,8 @@ if (config.apn.enabled) {
 }
 
 if (config.gcm.enabled) {
-	if (!config.gcm.key) {
-		debug('No GCM key.');
+	if (!config.gcm.defaultKeyId) {
+		debug('No GCM keys.');
 		return;
 	}
 } else {

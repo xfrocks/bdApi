@@ -1,6 +1,7 @@
 var config = exports;
 var _ = require('lodash');
 var url = require('url');
+var debug = require('debug')('config');
 
 var defaultConfig = {
 	web: {
@@ -33,7 +34,8 @@ var defaultConfig = {
 	},
 	gcm: {
 		enabled: false,
-		key: '',
+		keys: {},
+		defaultKeyId: '',
 		messageOptions: {}
 	},
 	wns: {
@@ -83,7 +85,29 @@ if (process.env.CONFIG_APN_GATEWAY) {
 
 if (process.env.CONFIG_GCM_KEY) {
 	config.gcm.enabled = true;
-	config.gcm.key = process.env.CONFIG_GCM_KEY;
+
+	var keyId = '_default_';
+	config.gcm.keys[keyId] = process.env.CONFIG_GCM_KEY;
+	config.gcm.defaultKeyId = keyId;
+}
+
+if (process.env.CONFIG_GCM_KEYS) {
+	config.gcm.enabled = true;
+
+	var n = parseInt(process.env.CONFIG_GCM_KEYS);
+	for (var i = 0; i < n; i++) {
+		if (process.env['CONFIG_GCM_KEYS_' + i]) {
+			var keyPair = process.env['CONFIG_GCM_KEYS_' + i].split(',');
+			if (keyPair.length == 2) {
+				config.gcm.keys[keyPair[0]] = keyPair[1];
+				if (!config.gcm.defaultKeyId) {
+					config.gcm.defaultKeyId = keyPair[0];
+				}
+			}
+		}
+	}
+
+	debug('CONFIG_GCM_KEYS', config.gcm);
 }
 
 if (process.env.CONFIG_WNS_CLIENT_ID && process.env.CONFIG_WNS_CLIENT_SECRET) {

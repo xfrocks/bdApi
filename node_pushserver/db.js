@@ -16,7 +16,7 @@ db.devices = {
 		var found = [];
 
 		var done = function() {
-			debug('findDevices', oauthClientId, hubTopic, 'found.length =', found.length);
+			debug('findDevices', oauthClientId, hubTopic ? hubTopic : 'N/A', 'found.length =', found.length);
 			if (typeof callback == 'function') {
 				callback(found);
 			}
@@ -80,7 +80,7 @@ db.devices = {
 		var indexKey2 = db.devices.getIndexKey2(oauthClientId);
 		redisClient.sadd(indexKey2, deviceKey);
 
-		debug('saved', deviceType, deviceId);
+		debug('saved', device, extraData);
 	},
 
 	delete: function(deviceType, deviceId, oauthClientId) {

@@ -1,8 +1,10 @@
 package com.xfrocks.api.androiddemo;
 
+import android.os.Build;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -157,6 +159,13 @@ public class Api {
             // a tag must present at construction time so caller should know to cancel
             // the request when its life cycle is interrupted
             setTag(this.getClass().getSimpleName());
+
+            if (BuildConfig.DEBUG) {
+                // set a long time out for debugging
+                setRetryPolicy(new DefaultRetryPolicy(60000,
+                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            }
         }
 
         public void start() {
@@ -329,6 +338,7 @@ public class Api {
                             .and("hub_topic", topic)
                             .and("oauth_client_id", BuildConfig.CLIENT_ID)
                             .and("oauth_token", Api.makeOneTimeToken(at != null ? at.getUserId() : 0, at))
+                            .and("extra_data[package]", App.getInstance().getApplicationContext().getPackageName())
             );
         }
 

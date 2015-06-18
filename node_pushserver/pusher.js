@@ -56,7 +56,7 @@ pusher.apn = function(token, payload, callback) {
     }
 }
 
-pusher.gcm = function(registrationIds, data, callback) {
+pusher.gcm = function(gcmKey, registrationIds, data, callback) {
 	if (!config.gcm.enabled) {
 		if (typeof callback == 'function') {
 			callback('GCM is disabled.');
@@ -64,7 +64,7 @@ pusher.gcm = function(registrationIds, data, callback) {
 		return;
 	}
 
-	var sender = new gcm.Sender(config.gcm.key);
+	var sender = new gcm.Sender(gcmKey);
 
 	var message = new gcm.Message(config.gcm.messageOptions);
 	message.addDataWithObject(data);

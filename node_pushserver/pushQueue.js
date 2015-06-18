@@ -33,7 +33,17 @@ jobs.process(config.pushQueue.queueId, function(job, done) {
 				payload['notification_id'] = data.payload.notification_id;
 				payload['notification'] = message;
 			}
-			pusher.gcm([data.device_id], payload, callback);
+
+			var gcmKeyId;
+			if (data.extra_data
+				&& typeof data.extra_data.package == 'string'
+				&& typeof config.gcm.keys[data.extra_data.package] == 'string') {
+				gcmKeyId = data.extra_data.package;
+			} else {
+				gcmKeyId = config.gcm.defaultKeyId;
+			}
+
+			pusher.gcm(config.gcm.keys[gcmKeyId], [data.device_id], payload, callback);
 			break;
 		case 'ios':
 			var apnMessage = require('./helper').prepareApnMessage(message);
