@@ -42,6 +42,8 @@ import java.util.Map;
  */
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
+    public static final String EXTRA_REDIRECT_TO = "redirect_to";
+
     private TokenRequest mTokenRequest;
     private BroadcastReceiver mGcmReceiver;
 
@@ -189,7 +191,13 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     }
 
     private void authorize() {
-        String authorizeUri = Api.makeAuthorizeUri();
+        Intent loginIntent = getIntent();
+        String redirectTo = null;
+        if (loginIntent.hasExtra(EXTRA_REDIRECT_TO)) {
+            redirectTo = loginIntent.getStringExtra(EXTRA_REDIRECT_TO);
+        }
+
+        String authorizeUri = Api.makeAuthorizeUri(redirectTo);
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(authorizeUri));
         startActivity(intent);
         finish();
@@ -248,11 +256,18 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         String code = data.getQueryParameter("code");
 
+        String redirectTo = data.getQueryParameter("redirect_to");
+        if (!TextUtils.isEmpty(redirectTo)) {
+            intent.putExtra(EXTRA_REDIRECT_TO, redirectTo);
+        }
+
         if (TextUtils.isEmpty(code)) {
             Toast.makeText(this, R.string.error_no_authorization_code, Toast.LENGTH_LONG).show();
         } else {
-            new AuthorizationCodeRequest(code).start();
+            new AuthorizationCodeRequest(code, redirectTo).start();
         }
+
+        setIntent(intent);
     }
 
     private void attemptLogin(Api.AccessToken at) {
@@ -351,9 +366,15 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 AccessTokenHelper.save(LoginActivity.this, at);
             }
 
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            intent.putExtra(MainActivity.EXTRA_ACCESS_TOKEN, at);
-            startActivity(intent);
+            Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
+            mainIntent.putExtra(MainActivity.EXTRA_ACCESS_TOKEN, at);
+
+            Intent loginIntent = getIntent();
+            if (loginIntent != null && loginIntent.hasExtra(EXTRA_REDIRECT_TO)) {
+                mainIntent.putExtra(MainActivity.EXTRA_URL, loginIntent.getStringExtra(EXTRA_REDIRECT_TO));
+            }
+
+            startActivity(mainIntent);
 
             if (RegistrationService.canRun(LoginActivity.this)) {
                 Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);
@@ -394,13 +415,13 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     }
 
     private class AuthorizationCodeRequest extends TokenRequest {
-        AuthorizationCodeRequest(String code) {
+        AuthorizationCodeRequest(String code, String redirectTo) {
             super(
                     new Api.Params(
                             Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE,
                             Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_AUTHORIZATION_CODE)
                             .and(Api.URL_OAUTH_TOKEN_PARAM_CODE, code)
-                            .and(Api.URL_OAUTH_TOKEN_PARAM_REDIRECT_URI, BuildConfig.AUTHORIZE_REDIRECT_URI)
+                            .and(Api.URL_OAUTH_TOKEN_PARAM_REDIRECT_URI, Api.makeAuthorizeRedirectUri(redirectTo))
                             .andClientCredentials()
             );
         }

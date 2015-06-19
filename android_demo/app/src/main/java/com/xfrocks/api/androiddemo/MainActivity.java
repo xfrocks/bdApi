@@ -30,6 +30,7 @@ import java.util.Iterator;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final String EXTRA_ACCESS_TOKEN = "access_token";
+    public static final String EXTRA_URL = "url";
     private static final String STATE_NAVIGATION_ROWS = "navigation_rows";
     private static final String STATE_USER = "user";
 
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ImageView mHeaderImg;
     private TextView mHeaderTxt;
 
+    private Api.AccessToken mAccessToken;
     private ArrayList<Row> mNavigationRows = new ArrayList<>();
     private Api.User mUser;
 
@@ -69,17 +71,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
 
-        Intent intent = getIntent();
-        if (intent.hasExtra(EXTRA_ACCESS_TOKEN)) {
-            Api.AccessToken at = (Api.AccessToken) intent.getSerializableExtra(EXTRA_ACCESS_TOKEN);
+        Intent mainIntent = getIntent();
+        if (mainIntent != null && mainIntent.hasExtra(EXTRA_ACCESS_TOKEN)) {
+            mAccessToken = (Api.AccessToken) mainIntent.getSerializableExtra(EXTRA_ACCESS_TOKEN);
+        }
 
+        if (mAccessToken != null) {
             if (mNavigationRows.size() == 0) {
-                new IndexRequest(at).start();
+                new IndexRequest(mAccessToken).start();
             }
 
             if (mUser == null) {
-                new UsersMeRequest(at).start();
+                new UsersMeRequest(mAccessToken).start();
             }
+
+            if (mainIntent != null && mainIntent.hasExtra(EXTRA_URL)) {
+                addDataFragment(mainIntent.getStringExtra(EXTRA_URL), mAccessToken, true);
+            }
+        } else {
+            Intent loginIntent = new Intent(this, LoginActivity.class);
+
+            if (mainIntent != null && mainIntent.hasExtra(EXTRA_URL)) {
+                loginIntent.putExtra(LoginActivity.EXTRA_REDIRECT_TO, mainIntent.getStringExtra(EXTRA_URL));
+            }
+
+            startActivity(loginIntent);
+            finish();
         }
     }
 
@@ -123,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(MenuItem menuItem) {
         Row row = mNavigationRows.get(menuItem.getItemId());
         if (row != null) {
-            addDataFragment(row.value, true);
+            addDataFragment(row.value, null, true);
             mDrawerLayout.closeDrawer(mNavigationView);
             return true;
         }
@@ -175,8 +192,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    public void addDataFragment(String url, boolean clearStack) {
-        Fragment fragment = DataFragment.newInstance(url);
+    public void addDataFragment(String url, Api.AccessToken at, boolean clearStack) {
+        Fragment fragment = DataFragment.newInstance(url, at);
         addFragmentToBackStack(fragment, clearStack);
     }
 
@@ -234,10 +251,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 setUser(u);
             }
 
-            ArrayList<Row> rows = new ArrayList<>();
-            parseRows(response, rows);
-            Fragment fragment = DataSubFragment.newInstance(null, rows);
-            MainActivity.this.addFragmentToBackStack(fragment, true);
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                ArrayList<Row> rows = new ArrayList<>();
+                parseRows(response, rows);
+                Fragment fragment = DataSubFragment.newInstance(null, rows);
+                MainActivity.this.addFragmentToBackStack(fragment, true);
+            }
         }
     }
 

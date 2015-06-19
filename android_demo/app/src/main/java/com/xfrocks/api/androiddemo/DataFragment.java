@@ -27,6 +27,7 @@ import java.util.ArrayList;
 public class DataFragment extends ListFragment {
 
     private static final String ARG_URL = "url";
+    private static final String ARG_ACCESS_TOKEN = "access_token";
     private static final String STATE_DATA = "data";
     private static final String STATE_LIST_VIEW = "list_view";
 
@@ -36,11 +37,12 @@ public class DataFragment extends ListFragment {
     private BaseAdapter mDataAdapter;
     private Parcelable mListViewState;
 
-    public static DataFragment newInstance(String url) {
+    public static DataFragment newInstance(String url, Api.AccessToken at) {
         DataFragment fragment = new DataFragment();
 
         Bundle args = new Bundle();
         args.putString(ARG_URL, url);
+        args.putSerializable(ARG_ACCESS_TOKEN, at);
         fragment.setArguments(args);
 
         return fragment;
@@ -69,8 +71,9 @@ public class DataFragment extends ListFragment {
             Bundle args = getArguments();
             if (args.containsKey(ARG_URL)) {
                 String url = args.getString(ARG_URL);
+                Api.AccessToken at = (Api.AccessToken) args.getSerializable(ARG_ACCESS_TOKEN);
 
-                new DataRequest(url).start();
+                new DataRequest(url, at).start();
             }
         }
     }
@@ -115,7 +118,7 @@ public class DataFragment extends ListFragment {
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(row.value));
                     startActivity(intent);
                 } else {
-                    ma.addDataFragment(row.value, false);
+                    ma.addDataFragment(row.value, null, false);
                 }
             }
         }
@@ -128,8 +131,8 @@ public class DataFragment extends ListFragment {
     }
 
     private class DataRequest extends Api.GetRequest {
-        DataRequest(String url) {
-            super(url, new Api.Params());
+        DataRequest(String url, Api.AccessToken at) {
+            super(url, new Api.Params(at));
         }
 
         @Override

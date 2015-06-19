@@ -107,13 +107,27 @@ public class Api {
         return String.format("%d,%d,%s,%s", userId, timestamp, sb, BuildConfig.CLIENT_ID);
     }
 
-    public static String makeAuthorizeUri() {
+    public static String makeAuthorizeRedirectUri(String redirectTo) {
+        try {
+            return String.format(
+                    "%s?redirect_to=%s",
+                    BuildConfig.AUTHORIZE_REDIRECT_URI,
+                    URLEncoder.encode(redirectTo, "UTF-8")
+            );
+        } catch (UnsupportedEncodingException e) {
+            // ignore
+        }
+
+        return null;
+    }
+
+    public static String makeAuthorizeUri(String redirectTo) {
         try {
             return String.format(
                     "%s/index.php?oauth/authorize/&client_id=%s&redirect_uri=%s&response_type=code&scope=%s",
                     BuildConfig.API_ROOT,
                     URLEncoder.encode(BuildConfig.CLIENT_ID, "UTF-8"),
-                    URLEncoder.encode(BuildConfig.AUTHORIZE_REDIRECT_URI, "UTF-8"),
+                    URLEncoder.encode(makeAuthorizeRedirectUri(redirectTo), "UTF-8"),
                     URLEncoder.encode("read", "UTF-8")
             );
         } catch (UnsupportedEncodingException e) {
@@ -125,7 +139,7 @@ public class Api {
 
     private static String makeUrl(int method, String url, Map<String, String> params) {
         if (!url.contains("://")) {
-            url = String.format("%s/index.php?%s", BuildConfig.API_ROOT, url);
+            url = String.format("%s/index.php?%s", BuildConfig.API_ROOT, url.replace('?', '&'));
         }
 
         if (method == com.android.volley.Request.Method.GET) {

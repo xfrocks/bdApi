@@ -12,24 +12,25 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
 import com.xfrocks.api.androiddemo.BuildConfig;
-import com.xfrocks.api.androiddemo.LoginActivity;
+import com.xfrocks.api.androiddemo.MainActivity;
 import com.xfrocks.api.androiddemo.R;
 
 public class ReceiverService extends GcmListenerService {
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        String notification = data.getString("notification");
-        sendNotification(notification);
+        String notificationId = data.getString("notification_id");
+        String message = data.getString("notification");
+        sendNotification(notificationId, message);
     }
 
-    private void sendNotification(String message) {
+    private void sendNotification(String notificationId, String message) {
         if (BuildConfig.DEBUG) {
-            Log.i(ReceiverService.class.getSimpleName(), "notification=" + message);
+            Log.i(ReceiverService.class.getSimpleName(), String.format("notification #%s: %s", notificationId, message));
         }
 
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(MainActivity.EXTRA_URL, "notifications/content?notification_id=" + notificationId);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
