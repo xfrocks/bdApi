@@ -120,7 +120,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                     startService(gcmIntent);
                 }
             });
+        }
 
+        if (AccessTokenHelper.load(this) == null) {
+            // only register if no existing token found
             Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);
             startService(gcmIntent);
         }
