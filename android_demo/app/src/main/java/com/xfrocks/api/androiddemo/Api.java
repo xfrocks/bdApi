@@ -1,6 +1,7 @@
 package com.xfrocks.api.androiddemo;
 
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
@@ -108,6 +109,14 @@ public class Api {
     }
 
     public static String makeAuthorizeRedirectUri(String redirectTo) {
+        if (TextUtils.isEmpty(BuildConfig.AUTHORIZE_REDIRECT_URI)) {
+            return "";
+        }
+
+        if (TextUtils.isEmpty(redirectTo)) {
+            return BuildConfig.AUTHORIZE_REDIRECT_URI;
+        }
+
         try {
             return String.format(
                     "%s?redirect_to=%s",
