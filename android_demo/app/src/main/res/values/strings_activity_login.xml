@@ -18,4 +18,6 @@
 
     <string name="error_google_failed">Unable to login via Google+</string>
     <string name="error_google_no_token">No Google ID token could be found</string>
+
+    <string name="error_facebook_failed">Unable to login via Facebook</string>
 </resources>

@@ -63,6 +63,13 @@
         android:text="@string/action_gcm_unregister"
         android:textStyle="bold" />
 
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/facebook_sign_in"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <com.google.android.gms.common.SignInButton
         android:id="@+id/google_sign_in"
         android:layout_width="match_parent"

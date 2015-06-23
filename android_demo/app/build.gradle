@@ -30,4 +30,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:7.5.0'
     compile 'com.android.support:design:22.2.0'
     compile 'com.mcxiaoke.volley:library:1.0.16'
+    compile 'com.facebook.android:facebook-android-sdk:4.1.0'
 }

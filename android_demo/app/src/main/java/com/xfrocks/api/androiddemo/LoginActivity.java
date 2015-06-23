@@ -30,6 +30,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
@@ -67,6 +73,8 @@ public class LoginActivity extends Activity
     private boolean mGoogleApiIsResolving = false;
     private boolean mGoogleApiShouldResolve = false;
 
+    private CallbackManager mFacebookCallbackManager;
+
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
@@ -74,7 +82,7 @@ public class LoginActivity extends Activity
     private Button mSignIn;
     private Button mAuthorize;
     private Button mGcmUnregister;
-    private Button mFacebook;
+    private LoginButton mFacebookSignin;
     private Button mTwitter;
     private SignInButton mGoogleSignIn;
     private Button mRegister;
@@ -82,6 +90,8 @@ public class LoginActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getApplicationContext());
+
         setContentView(R.layout.activity_login);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -130,6 +140,25 @@ public class LoginActivity extends Activity
 
         mGcmUnregister = (Button) findViewById(R.id.gcm_unregister);
         mGcmUnregister.setVisibility(View.GONE);
+
+        mFacebookCallbackManager = CallbackManager.Factory.create();
+        mFacebookSignin = (LoginButton) findViewById(R.id.facebook_sign_in);
+        mFacebookSignin.registerCallback(mFacebookCallbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                attemptLoginFacebook(loginResult);
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException e) {
+                Toast.makeText(LoginActivity.this, R.string.error_facebook_failed, Toast.LENGTH_LONG).show();
+            }
+        });
 
         mGoogleSignIn = (SignInButton) findViewById(R.id.google_sign_in);
         mGoogleSignIn.setOnClickListener(new OnClickListener() {
@@ -185,6 +214,7 @@ public class LoginActivity extends Activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        mFacebookCallbackManager.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
             case RC_GOOGLE_API_RESOLVE:
@@ -289,6 +319,10 @@ public class LoginActivity extends Activity
         Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
         registerIntent.putExtra(RegisterActivity.EXTRA_USER, u);
         startActivityForResult(registerIntent, RC_REGISTER);
+    }
+
+    private void attemptLoginFacebook(LoginResult result) {
+        new TokenFacebookRequest(result.getAccessToken().getToken()).start();
     }
 
     private void attemptLoginGoogle() {
@@ -470,8 +504,8 @@ public class LoginActivity extends Activity
         mAuthorize.setEnabled(enabled);
         mGcmUnregister.setEnabled(enabled);
 
-        if (mFacebook != null) {
-            mFacebook.setEnabled(enabled);
+        if (mFacebookSignin != null) {
+            mFacebookSignin.setEnabled(enabled);
         }
         if (mTwitter != null) {
             mTwitter.setEnabled(enabled);
@@ -631,8 +665,8 @@ public class LoginActivity extends Activity
                         }
                     }
 
-                    if (mFacebook != null) {
-                        mFacebook.setVisibility(facebook ? View.VISIBLE : View.GONE);
+                    if (mFacebookSignin != null) {
+                        mFacebookSignin.setVisibility(facebook ? View.VISIBLE : View.GONE);
                     }
                     if (mTwitter != null) {
                         mTwitter.setVisibility(twitter ? View.VISIBLE : View.GONE);
@@ -644,6 +678,16 @@ public class LoginActivity extends Activity
             } catch (JSONException e) {
                 // ignore
             }
+        }
+    }
+
+    private class TokenFacebookRequest extends TokenRequest {
+        TokenFacebookRequest(String accessToken) {
+            super(
+                    Api.URL_OAUTH_TOKEN_FACEBOOK,
+                    new Api.Params(Api.URL_OAUTH_TOKEN_FACEBOOK_PARAM_TOKEN, accessToken)
+                            .andClientCredentials()
+            );
         }
     }
 

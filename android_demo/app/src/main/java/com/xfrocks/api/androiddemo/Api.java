@@ -30,6 +30,7 @@ import java.util.Map;
 public class Api {
 
     public static final String URL_OAUTH_TOKEN = "oauth/token";
+    public static final String URL_OAUTH_TOKEN_FACEBOOK = "oauth/token/facebook";
     public static final String URL_OAUTH_TOKEN_GOOGLE = "oauth/token/google";
     public static final String URL_INDEX = "index";
     public static final String URL_USERS = "users";
@@ -45,6 +46,7 @@ public class Api {
     public static final String URL_OAUTH_TOKEN_PARAM_REFRESH_TOKEN = "refresh_token";
     public static final String URL_OAUTH_TOKEN_PARAM_CODE = "code";
     public static final String URL_OAUTH_TOKEN_PARAM_REDIRECT_URI = "redirect_uri";
+    public static final String URL_OAUTH_TOKEN_FACEBOOK_PARAM_TOKEN = "facebook_token";
     public static final String URL_OAUTH_TOKEN_GOOGLE_PARAM_TOKEN = "google_token";
 
     public static final String URL_USERS_PARAM_USERNAME = "username";
