@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Strings related to login -->
-    <string name="prompt_email">Email or Username</string>
+    <string name="prompt_email_or_username">Email or Username</string>
     <string name="prompt_password">Password</string>
     <string name="remember_token">Remember token?</string>
     <string name="action_sign_in">Sign in</string>
@@ -15,4 +15,7 @@
 
     <string name="sign_in_with_remember">Sign in with saved token?</string>
     <string name="error_no_refresh_token">No refresh token could be found</string>
+
+    <string name="error_google_failed">Unable to login via Google+</string>
+    <string name="error_google_no_token">No Google ID token could be found</string>
 </resources>

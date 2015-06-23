@@ -1,0 +1,13 @@
+<resources>
+    <string name="title_activity_register">Register</string>
+
+    <string name="prompt_username">Username</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_dob">Date of birth</string>
+
+    <string name="error_invalid_email">Email is invalid</string>
+    <string name="error_invalid_password">Password is invalid</string>
+
+    <string name="action_register">Register</string>
+
+</resources>

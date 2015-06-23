@@ -246,7 +246,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onSuccess(JSONObject response) {
-            Api.User u = Api.makeUser(response);
+            Api.User u = null;
+
+            if (response.has("user")) {
+                try {
+                    u = Api.makeUser(response.getJSONObject("user"));
+                } catch (JSONException e) {
+                    // ignore
+                }
+            }
+
             if (u != null) {
                 setUser(u);
             }

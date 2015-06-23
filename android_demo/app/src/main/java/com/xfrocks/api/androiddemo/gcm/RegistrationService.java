@@ -3,6 +3,7 @@ package com.xfrocks.api.androiddemo.gcm;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -38,7 +39,7 @@ public class RegistrationService extends IntentService {
         boolean canRun;
 
         // check for push server address
-        canRun = !BuildConfig.PUSH_SERVER.isEmpty();
+        canRun = !TextUtils.isEmpty(BuildConfig.PUSH_SERVER);
 
         // check for Google Play Services
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);

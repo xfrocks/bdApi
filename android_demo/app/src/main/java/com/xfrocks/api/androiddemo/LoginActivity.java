@@ -9,9 +9,11 @@ import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
@@ -28,9 +30,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.plus.Plus;
 import com.xfrocks.api.androiddemo.gcm.RegistrationService;
 import com.xfrocks.api.androiddemo.persist.AccessTokenHelper;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -40,12 +51,21 @@ import java.util.Map;
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
+public class LoginActivity extends Activity
+        implements LoaderCallbacks<Cursor>,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     public static final String EXTRA_REDIRECT_TO = "redirect_to";
+    private static final int RC_GOOGLE_API_RESOLVE = 1;
+    private static final int RC_REGISTER = 2;
 
     private TokenRequest mTokenRequest;
     private BroadcastReceiver mGcmReceiver;
+
+    private GoogleApiClient mGoogleApiClient;
+    private boolean mGoogleApiIsResolving = false;
+    private boolean mGoogleApiShouldResolve = false;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -53,12 +73,23 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private CheckBox mRememberView;
     private Button mSignIn;
     private Button mAuthorize;
-    private Button mUnregister;
+    private Button mGcmUnregister;
+    private Button mFacebook;
+    private Button mTwitter;
+    private SignInButton mGoogleSignIn;
+    private Button mRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Plus.API)
+                .addScope(new Scope(Scopes.PROFILE))
+                .build();
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -97,22 +128,39 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             mAuthorize.setVisibility(View.GONE);
         }
 
-        mUnregister = (Button) findViewById(R.id.unregister);
-        mUnregister.setVisibility(View.GONE);
+        mGcmUnregister = (Button) findViewById(R.id.gcm_unregister);
+        mGcmUnregister.setVisibility(View.GONE);
+
+        mGoogleSignIn = (SignInButton) findViewById(R.id.google_sign_in);
+        mGoogleSignIn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                attemptLoginGoogle();
+            }
+        });
+        new ToolsLoginSocialRequest().start();
+
+        mRegister = (Button) findViewById(R.id.register);
+        mRegister.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                register(null);
+            }
+        });
 
         if (RegistrationService.canRun(LoginActivity.this)) {
             mGcmReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     if (intent.getBooleanExtra(RegistrationService.ACTION_REGISTRATION_UNREGISTERED, false)) {
-                        mUnregister.setVisibility(View.GONE);
+                        mGcmUnregister.setVisibility(View.GONE);
                     } else {
-                        mUnregister.setVisibility(View.VISIBLE);
+                        mGcmUnregister.setVisibility(View.VISIBLE);
                     }
                 }
             };
 
-            mUnregister.setOnClickListener(new OnClickListener() {
+            mGcmUnregister.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);
@@ -120,17 +168,42 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                     startService(gcmIntent);
                 }
             });
-        }
 
-        if (AccessTokenHelper.load(this) == null) {
-            // only register if no existing token found
-            Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);
-            startService(gcmIntent);
+            if (AccessTokenHelper.load(this) == null) {
+                // only register if no existing token found
+                Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);
+                startService(gcmIntent);
+            }
         }
 
         Intent intent = getIntent();
         if (intent != null) {
             attemptLogin(intent);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case RC_GOOGLE_API_RESOLVE:
+                if (resultCode == RESULT_OK) {
+                    mGoogleApiShouldResolve = false;
+                }
+
+                mGoogleApiIsResolving = false;
+                mGoogleApiClient.connect();
+                break;
+            case RC_REGISTER:
+                if (resultCode == RESULT_OK
+                        && data.hasExtra(RegisterActivity.RESULT_EXTRA_ACCESS_TOKEN)) {
+                    Api.AccessToken at = (Api.AccessToken) data.getSerializableExtra(RegisterActivity.RESULT_EXTRA_ACCESS_TOKEN);
+                    if (at != null) {
+                        attemptLogin(at);
+                    }
+                }
+                break;
         }
     }
 
@@ -189,6 +262,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mGoogleApiClient.disconnect();
+    }
+
     private void populateAutoComplete() {
         getLoaderManager().initLoader(0, null, this);
     }
@@ -204,6 +283,17 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(authorizeUri));
         startActivity(intent);
         finish();
+    }
+
+    private void register(Api.User u) {
+        Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
+        registerIntent.putExtra(RegisterActivity.EXTRA_USER, u);
+        startActivityForResult(registerIntent, RC_REGISTER);
+    }
+
+    private void attemptLoginGoogle() {
+        mGoogleApiShouldResolve = true;
+        mGoogleApiClient.connect();
     }
 
     private void attemptLogin() {
@@ -319,6 +409,41 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     }
 
+    @Override
+    public void onConnected(Bundle bundle) {
+        mGoogleApiShouldResolve = false;
+
+        new GetIdTokenTask().execute();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        // for Google+, do nothing for now
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        boolean resolved = false;
+
+        if (!mGoogleApiIsResolving && mGoogleApiShouldResolve) {
+            if (connectionResult.hasResolution()) {
+                try {
+                    connectionResult.startResolutionForResult(this, RC_GOOGLE_API_RESOLVE);
+                    mGoogleApiIsResolving = true;
+                } catch (IntentSender.SendIntentException e) {
+                    mGoogleApiIsResolving = false;
+                    mGoogleApiClient.connect();
+                }
+
+                resolved = true;
+            }
+        }
+
+        if (!resolved) {
+            Toast.makeText(this, R.string.error_google_failed, Toast.LENGTH_LONG).show();
+        }
+    }
+
     private interface ProfileQuery {
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
@@ -343,12 +468,28 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mRememberView.setEnabled(enabled);
         mSignIn.setEnabled(enabled);
         mAuthorize.setEnabled(enabled);
-        mUnregister.setEnabled(enabled);
+        mGcmUnregister.setEnabled(enabled);
+
+        if (mFacebook != null) {
+            mFacebook.setEnabled(enabled);
+        }
+        if (mTwitter != null) {
+            mTwitter.setEnabled(enabled);
+        }
+        if (mGoogleSignIn != null) {
+            mGoogleSignIn.setEnabled(enabled);
+        }
+
+        mRegister.setEnabled(enabled);
     }
 
     private abstract class TokenRequest extends Api.PostRequest {
         TokenRequest(Map<String, String> params) {
             super(Api.URL_OAUTH_TOKEN, params);
+        }
+
+        TokenRequest(String url, Map<String, String> params) {
+            super(url, params);
         }
 
         @Override
@@ -362,6 +503,17 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         protected void onSuccess(JSONObject response) {
             Api.AccessToken at = Api.makeAccessToken(response);
             if (at == null) {
+                if (response.has("user_data")) {
+                    try {
+                        Api.User u = Api.makeUser(response.getJSONObject("user_data"));
+                        if (u != null) {
+                            register(u);
+                        }
+                    } catch (JSONException e) {
+                        // ignore
+                    }
+                }
+
                 return;
             }
 
@@ -445,6 +597,93 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                             Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE,
                             Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_REFRESH_TOKEN)
                             .and(Api.URL_OAUTH_TOKEN_PARAM_REFRESH_TOKEN, refreshToken)
+                            .andClientCredentials()
+            );
+        }
+    }
+
+    private class ToolsLoginSocialRequest extends Api.PostRequest {
+        ToolsLoginSocialRequest() {
+            super(Api.URL_TOOLS_LOGIN_SOCIAL, new Api.Params(0, null));
+        }
+
+        @Override
+        protected void onSuccess(JSONObject response) {
+            try {
+                if (response.has("social")) {
+                    JSONArray networks = response.getJSONArray("social");
+                    boolean facebook = false;
+                    boolean twitter = false;
+                    boolean google = false;
+
+                    for (int i = 0; i < networks.length(); i++) {
+                        String network = networks.getString(i);
+                        switch (network) {
+                            case "facebook":
+                                facebook = true;
+                                break;
+                            case "twitter":
+                                twitter = true;
+                                break;
+                            case "google":
+                                google = true;
+                                break;
+                        }
+                    }
+
+                    if (mFacebook != null) {
+                        mFacebook.setVisibility(facebook ? View.VISIBLE : View.GONE);
+                    }
+                    if (mTwitter != null) {
+                        mTwitter.setVisibility(twitter ? View.VISIBLE : View.GONE);
+                    }
+                    if (mGoogleSignIn != null) {
+                        mGoogleSignIn.setVisibility(google ? View.VISIBLE : View.GONE);
+                    }
+                }
+            } catch (JSONException e) {
+                // ignore
+            }
+        }
+    }
+
+    private class GetIdTokenTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            final String accountName = Plus.AccountApi.getAccountName(mGoogleApiClient);
+            final String scopes = "oauth2:" + Plus.SCOPE_PLUS_LOGIN.toString();
+            String idToken = "";
+
+            try {
+                idToken = GoogleAuthUtil.getToken(
+                        getApplicationContext(),
+                        accountName,
+                        scopes);
+            } catch (Exception e) {
+                // ignore
+            }
+
+            return idToken;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if (TextUtils.isEmpty(result)) {
+                Toast.makeText(LoginActivity.this, R.string.error_google_no_token, Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            new TokenGoogleRequest(result).start();
+        }
+
+    }
+
+    private class TokenGoogleRequest extends TokenRequest {
+        TokenGoogleRequest(String idToken) {
+            super(
+                    Api.URL_OAUTH_TOKEN_GOOGLE,
+                    new Api.Params(Api.URL_OAUTH_TOKEN_GOOGLE_PARAM_TOKEN, idToken)
                             .andClientCredentials()
             );
         }

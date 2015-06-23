@@ -1,6 +1,5 @@
 package com.xfrocks.api.androiddemo;
 
-import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -31,8 +30,11 @@ import java.util.Map;
 public class Api {
 
     public static final String URL_OAUTH_TOKEN = "oauth/token";
+    public static final String URL_OAUTH_TOKEN_GOOGLE = "oauth/token/google";
     public static final String URL_INDEX = "index";
+    public static final String URL_USERS = "users";
     public static final String URL_USERS_ME = "users/me";
+    public static final String URL_TOOLS_LOGIN_SOCIAL = "tools/login/social";
 
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE = "grant_type";
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_PASSWORD = "password";
@@ -43,6 +45,16 @@ public class Api {
     public static final String URL_OAUTH_TOKEN_PARAM_REFRESH_TOKEN = "refresh_token";
     public static final String URL_OAUTH_TOKEN_PARAM_CODE = "code";
     public static final String URL_OAUTH_TOKEN_PARAM_REDIRECT_URI = "redirect_uri";
+    public static final String URL_OAUTH_TOKEN_GOOGLE_PARAM_TOKEN = "google_token";
+
+    public static final String URL_USERS_PARAM_USERNAME = "username";
+    public static final String URL_USERS_PARAM_EMAIL = "user_email";
+    public static final String URL_USERS_PARAM_PASSWORD = "password";
+    public static final String URL_USERS_PARAM_DOB_YEAR = "user_dob_year";
+    public static final String URL_USERS_PARAM_DOB_MONTH = "user_dob_month";
+    public static final String URL_USERS_PARAM_DOB_DAY = "user_dob_day";
+    public static final String URL_USERS_PARAM_EXTRA_DATA = "extra_data";
+    public static final String URL_USERS_PARAM_EXTRA_TIMESTAMP = "extra_timestamp";
 
     public static AccessToken makeAccessToken(JSONObject response) {
         try {
@@ -62,13 +74,36 @@ public class Api {
         return null;
     }
 
-    public static User makeUser(JSONObject response) {
+    public static User makeUser(JSONObject obj) {
         try {
-            JSONObject user = response.getJSONObject("user");
-
             User u = new User();
-            u.username = user.getString("username");
-            u.avatar = user.getJSONObject("links").getString("avatar_big");
+
+            if (obj.has("user_id")) {
+                u.username = obj.getString("username");
+                u.avatar = obj.getJSONObject("links").getString("avatar_big");
+            } else {
+                if (obj.has("username")) {
+                    u.username = obj.getString("username");
+                }
+
+                if (obj.has("user_email")) {
+                    u.userEmail = obj.getString("user_email");
+                }
+
+                if (obj.has("user_dob_year")
+                        && obj.has("user_dob_month")
+                        && obj.has("user_dob_day")) {
+                    u.userDobYear = obj.getInt("user_dob_year");
+                    u.userDobMonth = obj.getInt("user_dob_month");
+                    u.userDobDay = obj.getInt("user_dob_day");
+                }
+
+                if (obj.has("extra_data")
+                        && obj.has("extra_timestamp")) {
+                    u.extraData = obj.getString("extra_data");
+                    u.extraTimestamp = obj.getLong("extra_timestamp");
+                }
+            }
 
             return u;
         } catch (JSONException e) {
@@ -373,10 +408,6 @@ public class Api {
 
     public static class Params extends HashMap<String, String> {
 
-        public Params() {
-            super();
-        }
-
         public Params(String key, Object value) {
             super(1);
             put(key, value);
@@ -387,6 +418,15 @@ public class Api {
 
             if (at != null) {
                 put("oauth_token", at.getToken());
+            }
+        }
+
+        public Params(long userId, AccessToken at) {
+            super(1);
+
+            String ott = Api.makeOneTimeToken(userId, at);
+            if (ott != null) {
+                put("oauth_token", ott);
             }
         }
 
@@ -433,10 +473,42 @@ public class Api {
     public static class User implements Serializable {
 
         private String username;
+        private String userEmail;
+        private Integer userDobYear;
+        private Integer userDobMonth;
+        private Integer userDobDay;
+
         private String avatar;
+
+        private String extraData;
+        private long extraTimestamp;
 
         public String getUsername() {
             return username;
+        }
+
+        public String getEmail() {
+            return userEmail;
+        }
+
+        public Integer getDobYear() {
+            return userDobYear;
+        }
+
+        public Integer getDobMonth() {
+            return userDobMonth;
+        }
+
+        public Integer getDobDay() {
+            return userDobDay;
+        }
+
+        public String getExtraData() {
+            return extraData;
+        }
+
+        public long getExtraTimestamp() {
+            return extraTimestamp;
         }
 
         public String getAvatar() {

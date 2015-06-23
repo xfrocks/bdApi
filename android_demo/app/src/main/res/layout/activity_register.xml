@@ -9,13 +9,21 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".LoginActivity">
+    tools:context="com.xfrocks.api.androiddemo.RegisterActivity">
+
+    <EditText
+        android:id="@+id/username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/prompt_username"
+        android:maxLines="1"
+        android:singleLine="true" />
 
     <AutoCompleteTextView
         android:id="@+id/email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/prompt_email_or_username"
+        android:hint="@string/prompt_email"
         android:inputType="textEmailAddress"
         android:maxLines="1"
         android:singleLine="true" />
@@ -25,56 +33,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/prompt_password"
-        android:imeActionId="@+id/login"
-        android:imeActionLabel="@string/action_sign_in_short"
-        android:imeOptions="actionUnspecified"
         android:inputType="textPassword"
         android:maxLines="1"
         android:singleLine="true" />
 
-    <CheckBox
-        android:id="@+id/remember"
+    <EditText
+        android:id="@+id/dob"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/remember_token" />
-
-    <Button
-        android:id="@+id/sign_in"
-        style="?android:textAppearanceSmall"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/action_sign_in"
-        android:textStyle="bold" />
-
-    <Button
-        android:id="@+id/authorize"
-        style="?android:textAppearanceSmall"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/action_authorize"
-        android:textStyle="bold" />
-
-    <Button
-        android:id="@+id/gcm_unregister"
-        style="?android:textAppearanceSmall"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/action_gcm_unregister"
-        android:textStyle="bold" />
-
-    <com.google.android.gms.common.SignInButton
-        android:id="@+id/google_sign_in"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        android:hint="@string/prompt_dob"
+        android:inputType="date"
+        android:maxLines="1"
+        android:singleLine="true" />
 
     <Button
         android:id="@+id/register"
         style="?android:textAppearanceSmall"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="@string/action_register"
         android:textStyle="bold" />
 

@@ -7,3 +7,4 @@ xenforo_consumer/library/bdApiConsumer/DevHelper/Generated/*
 xenforo/library/bdApi/FileSums.php
 xenforo_consumer/library/bdApiConsumer/FileSums.php
 xenforo/js/bdApi/filter_list.js
+google-services.json
