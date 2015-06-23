@@ -14,5 +14,6 @@ allprojects {
     repositories {
         jcenter()
         mavenCentral()
+        maven { url 'https://maven.fabric.io/repo' }
     }
 }

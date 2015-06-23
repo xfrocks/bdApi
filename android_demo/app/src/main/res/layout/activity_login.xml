@@ -67,6 +67,15 @@
         android:id="@+id/facebook_sign_in"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="3dp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <com.twitter.sdk.android.core.identity.TwitterLoginButton
+        android:id="@+id/twitter_sign_in"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
         android:visibility="gone"
         tools:visibility="visible" />
 

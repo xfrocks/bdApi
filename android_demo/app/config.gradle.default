@@ -9,6 +9,8 @@ android {
             buildConfigField "String", "CLIENT_SECRET", "\"client_secret\""
             buildConfigField "String", "AUTHORIZE_REDIRECT_URI", "\"androiddemo://domain.com/callback\""
             buildConfigField "String", "PUSH_SERVER", "\"http://push.server.com\""
+            buildConfigField "String", "TWITTER_CONSUMER_KEY", "\"\""
+            buildConfigField "String", "TWITTER_CONSUMER_SECRET", "\"\""
         }
     }
 

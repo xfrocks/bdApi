@@ -43,6 +43,13 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
+import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.TwitterSession;
+import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 import com.xfrocks.api.androiddemo.gcm.RegistrationService;
 import com.xfrocks.api.androiddemo.persist.AccessTokenHelper;
 
@@ -51,8 +58,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.fabric.sdk.android.Fabric;
 
 /**
  * A login screen that offers login via email/password.
@@ -75,6 +85,8 @@ public class LoginActivity extends Activity
 
     private CallbackManager mFacebookCallbackManager;
 
+    private TwitterAuthConfig mTwitterAuthConfig;
+
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
@@ -83,7 +95,7 @@ public class LoginActivity extends Activity
     private Button mAuthorize;
     private Button mGcmUnregister;
     private LoginButton mFacebookSignin;
-    private Button mTwitter;
+    private TwitterLoginButton mTwitterSignIn;
     private SignInButton mGoogleSignIn;
     private Button mRegister;
 
@@ -91,6 +103,14 @@ public class LoginActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
+        if (!TextUtils.isEmpty(BuildConfig.TWITTER_CONSUMER_KEY)
+                && !TextUtils.isEmpty(BuildConfig.TWITTER_CONSUMER_SECRET)) {
+            mTwitterAuthConfig = new TwitterAuthConfig(
+                    BuildConfig.TWITTER_CONSUMER_KEY,
+                    BuildConfig.TWITTER_CONSUMER_SECRET
+            );
+            Fabric.with(this, new Twitter(mTwitterAuthConfig));
+        }
 
         setContentView(R.layout.activity_login);
 
@@ -160,6 +180,21 @@ public class LoginActivity extends Activity
             }
         });
 
+        if (mTwitterAuthConfig != null) {
+            mTwitterSignIn = (TwitterLoginButton) findViewById(R.id.twitter_sign_in);
+            mTwitterSignIn.setCallback(new Callback<TwitterSession>() {
+                @Override
+                public void success(Result<TwitterSession> result) {
+                    attemptLoginTwitter(result.data);
+                }
+
+                @Override
+                public void failure(TwitterException e) {
+                    Toast.makeText(LoginActivity.this, R.string.error_twitter_failed, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
         mGoogleSignIn = (SignInButton) findViewById(R.id.google_sign_in);
         mGoogleSignIn.setOnClickListener(new OnClickListener() {
             @Override
@@ -215,6 +250,9 @@ public class LoginActivity extends Activity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         mFacebookCallbackManager.onActivityResult(requestCode, resultCode, data);
+        if (mTwitterSignIn != null) {
+            mTwitterSignIn.onActivityResult(requestCode, resultCode, data);
+        }
 
         switch (requestCode) {
             case RC_GOOGLE_API_RESOLVE:
@@ -323,6 +361,16 @@ public class LoginActivity extends Activity
 
     private void attemptLoginFacebook(LoginResult result) {
         new TokenFacebookRequest(result.getAccessToken().getToken()).start();
+    }
+
+    private void attemptLoginTwitter(TwitterSession session) {
+        String method = "GET";
+        String uri = "https://api.twitter.com/1.1/account/verify_credentials.json";
+        Map<String, String> postParams = new HashMap<>();
+        Map<String, String> headers = session.getAuthToken().getAuthHeaders(mTwitterAuthConfig, method, uri, postParams);
+        String auth = headers.get("Authorization");
+
+        new TokenTwitterRequest(uri, auth).start();
     }
 
     private void attemptLoginGoogle() {
@@ -507,8 +555,8 @@ public class LoginActivity extends Activity
         if (mFacebookSignin != null) {
             mFacebookSignin.setEnabled(enabled);
         }
-        if (mTwitter != null) {
-            mTwitter.setEnabled(enabled);
+        if (mTwitterSignIn != null) {
+            mTwitterSignIn.setEnabled(enabled);
         }
         if (mGoogleSignIn != null) {
             mGoogleSignIn.setEnabled(enabled);
@@ -668,8 +716,8 @@ public class LoginActivity extends Activity
                     if (mFacebookSignin != null) {
                         mFacebookSignin.setVisibility(facebook ? View.VISIBLE : View.GONE);
                     }
-                    if (mTwitter != null) {
-                        mTwitter.setVisibility(twitter ? View.VISIBLE : View.GONE);
+                    if (mTwitterSignIn != null) {
+                        mTwitterSignIn.setVisibility(twitter ? View.VISIBLE : View.GONE);
                     }
                     if (mGoogleSignIn != null) {
                         mGoogleSignIn.setVisibility(google ? View.VISIBLE : View.GONE);
@@ -686,6 +734,17 @@ public class LoginActivity extends Activity
             super(
                     Api.URL_OAUTH_TOKEN_FACEBOOK,
                     new Api.Params(Api.URL_OAUTH_TOKEN_FACEBOOK_PARAM_TOKEN, accessToken)
+                            .andClientCredentials()
+            );
+        }
+    }
+
+    private class TokenTwitterRequest extends TokenRequest {
+        TokenTwitterRequest(String uri, String auth) {
+            super(
+                    Api.URL_OAUTH_TOKEN_TWITTER,
+                    new Api.Params(Api.URL_OAUTH_TOKEN_TWITTER_PARAM_URI, uri)
+                            .and(Api.URL_OAUTH_TOKEN_TWITTER_PARAM_AUTH, auth)
                             .andClientCredentials()
             );
         }
