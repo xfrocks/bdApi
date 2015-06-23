@@ -138,7 +138,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             if (!empty($extraData)) {
                 $extraData = @unserialize($extraData);
             }
-            if (!empty($extraData)) {
+            if (empty($extraData)) {
                 $extraData = array();
             }
         }
