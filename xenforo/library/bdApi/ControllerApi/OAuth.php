@@ -64,7 +64,16 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         // create a provider key tied between current API client and Facebook ID
         // this needs to be done because Facebook uses app-scoped user IDs and they are
         // different from app to app (even with the same user)
-        $providerKey = sprintf('%s_%s', $client['client_id'], $facebookUser['id']);
+        $providerKey = sprintf('api:%s:fb:%s', $client['client_id'], $facebookUser['id']);
+        $facebookApp = XenForo_Helper_Facebook::getUserInfo($facebookToken, 'app');
+        if (!empty($facebookApp['id'])
+            && $facebookApp['id'] === XenForo_Application::getOptions()->get('facebookAppId')
+        ) {
+            // looks like the facebook_token is generated using the same app configured for XenForo
+            // we will use the reported Facebook user ID directly to make it easier for user
+            // when he/she login via Facebook on the web
+            $providerKey = $facebookUser['id'];
+        }
 
         // attempt #1: try to find the association using our provider key
         $facebookAssoc = $userExternalModel->getExternalAuthAssociation('facebook', $providerKey);
