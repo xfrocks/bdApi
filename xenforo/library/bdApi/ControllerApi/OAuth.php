@@ -56,21 +56,36 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
 
         $facebookToken = $this->_input->filterSingle('facebook_token', XenForo_Input::STRING);
         $facebookUser = XenForo_Helper_Facebook::getUserInfo($facebookToken);
-        if (empty($facebookUser['email'])) {
+        $userData = array();
+        if (empty($facebookUser['id'])) {
             return $this->responseError(new XenForo_Phrase('bdapi_invalid_facebook_token'));
         }
 
-        $user = $userModel->getUserByEmail($facebookUser['email']);
-        if ($user['user_state'] == 'valid') {
-            $facebookAssoc = $userExternalModel->getExternalAuthAssociationForUser('facebook', $user['user_id']);
-            if (!empty($facebookAssoc)) {
-                return $this->_actionPostTokenNonStandard($client, $facebookAssoc['user_id']);
-            }
+        // create a provider key tied between current API client and Facebook ID
+        // this needs to be done because Facebook uses app-scoped user IDs and they are
+        // different from app to app (even with the same user)
+        $providerKey = sprintf('%s_%s', $client['client_id'], $facebookUser['id']);
+
+        // attempt #1: try to find the association using our provider key
+        $facebookAssoc = $userExternalModel->getExternalAuthAssociation('facebook', $providerKey);
+        if (!empty($facebookAssoc)) {
+            return $this->_actionPostTokenNonStandard($client, $facebookAssoc['user_id']);
         }
 
-        $userData = array(
-            'user_email' => $facebookUser['email'],
-        );
+        if (!empty($facebookUser['email'])) {
+            // attempt #2: try to find user using email
+            // this is a security risk but in most case it's acceptable
+            // user who is knowledgeable can avoid this by do not associate a Facebook account
+            $user = $userModel->getUserByEmail($facebookUser['email']);
+            if ($user['user_state'] == 'valid') {
+                $facebookAssoc = $userExternalModel->getExternalAuthAssociationForUser('facebook', $user['user_id']);
+                if (!empty($facebookAssoc)) {
+                    return $this->_actionPostTokenNonStandard($client, $facebookAssoc['user_id']);
+                }
+            }
+
+            $userData['user_email'] = $facebookUser['email'];
+        }
 
         if (!empty($facebookUser['name'])) {
             $testDw = XenForo_DataWriter::create('XenForo_DataWriter_User');
@@ -83,7 +98,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
 
         $extraData = array(
             'external_provider' => 'facebook',
-            'external_provider_key' => $facebookUser['id'],
+            'external_provider_key' => $providerKey,
         );
         if (!empty($userData['user_email'])) {
             $extraData['user_email'] = $userData['user_email'];
