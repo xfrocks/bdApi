@@ -157,11 +157,17 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         $this->_assertAdminPermission('bdApi');
 
         $visitor = XenForo_Visitor::getInstance();
+        $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
         $message = $this->_input->filterSingle('message', XenForo_Input::STRING);
 
-        XenForo_Model_Alert::alert(0, $visitor['user_id'], $visitor['username'], 'api_ping', 0, 'message', array(
-            'message' => $message,
-        ));
+        XenForo_Model_Alert::alert(
+            $userId,
+            $visitor['user_id'], $visitor['username'],
+            'api_ping', 0, 'message',
+            array(
+                'message' => $message,
+            )
+        );
 
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));
     }
