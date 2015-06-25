@@ -253,7 +253,6 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
 
     public function actionPostTokenAdmin()
     {
-        $this->_assertRequiredScope('admincp');
         $this->_assertAdminPermission('user');
 
         $client = $this->_getClientOrError();

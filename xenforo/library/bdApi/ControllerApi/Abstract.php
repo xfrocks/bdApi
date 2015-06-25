@@ -225,6 +225,8 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
     protected function _assertAdminPermission($permissionId)
     {
+        $this->_assertRequiredScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM);
+
         if (!XenForo_Visitor::getInstance()->hasAdminPermission($permissionId)) {
             throw $this->responseException($this->responseNoPermission());
         }

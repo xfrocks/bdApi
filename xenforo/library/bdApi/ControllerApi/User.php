@@ -70,7 +70,9 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         if (XenForo_Helper_Email::isEmailValid($email)) {
             $visitor = XenForo_Visitor::getInstance();
             $session = bdApi_Data_Helper_Core::safeGetSession();
-            if ($visitor->hasAdminPermission('user') && $session->checkScope('admincp')) {
+            if ($visitor->hasAdminPermission('user')
+                && $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM)
+            ) {
                 // perform email search only if visitor is an admin and granted admincp scope
                 $user = $this->_getUserModel()->getUserByEmail($email);
                 if (!empty($user)) {
@@ -461,14 +463,12 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
             if ($user['user_id'] != XenForo_Visitor::getUserId()) {
                 // viewing groups of other user requires admin permission
-                $this->_assertRequiredScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM);
                 $this->_assertAdminPermission('user');
             }
 
             $user = $this->_getUserModel()->prepareApiDataForUser($user);
             $userGroups = $user['user_groups'];
         } else {
-            $this->_assertRequiredScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM);
             $this->_assertAdminPermission('user');
 
             $userGroupModel = $this->_getUserGroupModel();
@@ -487,7 +487,6 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionPostGroups()
     {
-        $this->_assertRequiredScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM);
         $this->_assertAdminPermission('user');
 
         $user = $this->_getUserOrError();
