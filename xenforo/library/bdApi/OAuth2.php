@@ -481,9 +481,9 @@ class bdApi_OAuth2_Storage implements
         return false;
     }
 
-    public function checkUserCredentials($username, $password)
+    public function checkUserCredentials($nameOrEmail, $password)
     {
-        $userId = $this->_model->getUserModel()->validateAuthentication($username, $password);
+        $userId = $this->_model->getUserModel()->validateAuthentication($nameOrEmail, $password);
 
         if (!empty($userId)) {
             return true;
@@ -492,9 +492,9 @@ class bdApi_OAuth2_Storage implements
         }
     }
 
-    public function getUserDetails($username)
+    public function getUserDetails($nameOrEmail)
     {
-        $user = $this->_model->getUserModel()->getUserByName($username);
+        $user = $this->_model->getUserModel()->getUserByNameOrEmail($nameOrEmail);
 
         if (empty($user)) {
             // user not found
