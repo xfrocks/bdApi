@@ -2,6 +2,7 @@ package com.xfrocks.api.androiddemo;
 
 import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -14,6 +15,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -73,6 +75,9 @@ public class LoginActivity extends AppCompatActivity
         GoogleApiClient.OnConnectionFailedListener {
 
     public static final String EXTRA_REDIRECT_TO = "redirect_to";
+    private static final String STATE_FACEBOOK_SIGN_IN = "facebookSignIn";
+    private static final String STATE_TWITTER_SIGN_IN = "twitterSignIn";
+    private static final String STATE_GOOGLE_SIGN_IN = "googleSignIn";
     private static final int RC_GOOGLE_API_RESOLVE = 1;
     private static final int RC_REGISTER = 2;
 
@@ -92,13 +97,13 @@ public class LoginActivity extends AppCompatActivity
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private CheckBox mRememberView;
-    private Button mSignIn;
-    private Button mAuthorize;
     private Button mGcmUnregister;
     private Button mFacebookSignin;
     private Button mTwitterSignIn;
     private Button mGoogleSignIn;
-    private Button mRegister;
+
+    private boolean mViewsEnabled = true;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,7 +135,7 @@ public class LoginActivity extends AppCompatActivity
 
         mRememberView = (CheckBox) findViewById(R.id.remember);
 
-        mSignIn = (Button) findViewById(R.id.sign_in);
+        Button mSignIn = (Button) findViewById(R.id.sign_in);
         mSignIn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -138,7 +143,7 @@ public class LoginActivity extends AppCompatActivity
             }
         });
 
-        mAuthorize = (Button) findViewById(R.id.authorize);
+        Button mAuthorize = (Button) findViewById(R.id.authorize);
         mAuthorize.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -224,10 +229,21 @@ public class LoginActivity extends AppCompatActivity
         if (mFacebookSignin != null
                 || mTwitterSignIn != null
                 || mGoogleSignIn != null) {
-            new ToolsLoginSocialRequest().start();
+            if (savedInstanceState != null
+                    && (savedInstanceState.containsKey(STATE_FACEBOOK_SIGN_IN)
+                    || savedInstanceState.containsKey(STATE_TWITTER_SIGN_IN)
+                    || savedInstanceState.containsKey(STATE_GOOGLE_SIGN_IN))) {
+                setSocialVisibilities(
+                        savedInstanceState.getBoolean(STATE_FACEBOOK_SIGN_IN, false),
+                        savedInstanceState.getBoolean(STATE_TWITTER_SIGN_IN, false),
+                        savedInstanceState.getBoolean(STATE_GOOGLE_SIGN_IN, false)
+                );
+            } else {
+                new ToolsLoginSocialRequest().start();
+            }
         }
 
-        mRegister = (Button) findViewById(R.id.register);
+        Button mRegister = (Button) findViewById(R.id.register);
         mRegister.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -304,9 +320,6 @@ public class LoginActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
 
-        mEmailView.setText("");
-        mPasswordView.setText("");
-
         final Api.AccessToken at = AccessTokenHelper.load(this);
         if (at != null) {
             mRememberView.setChecked(true);
@@ -329,8 +342,6 @@ public class LoginActivity extends AppCompatActivity
                     .show();
         }
 
-        mEmailView.requestFocus();
-
         if (mGcmReceiver != null) {
             IntentFilter intentFilter = new IntentFilter(RegistrationService.ACTION_REGISTRATION);
             registerReceiver(mGcmReceiver, intentFilter);
@@ -347,11 +358,32 @@ public class LoginActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(STATE_FACEBOOK_SIGN_IN, mFacebookSignin != null
+                && mFacebookSignin.getVisibility() == View.VISIBLE);
+        outState.putBoolean(STATE_TWITTER_SIGN_IN, mTwitterSignIn != null
+                && mTwitterSignIn.getVisibility() == View.VISIBLE);
+        outState.putBoolean(STATE_GOOGLE_SIGN_IN, mGoogleSignIn != null
+                && mGoogleSignIn.getVisibility() == View.VISIBLE);
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
 
         if (mGcmReceiver != null) {
             unregisterReceiver(mGcmReceiver);
+        }
+
+        if (mTokenRequest != null) {
+            mTokenRequest.cancel();
+        }
+
+        if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
         }
     }
 
@@ -567,25 +599,50 @@ public class LoginActivity extends AppCompatActivity
         mEmailView.setAdapter(adapter);
     }
 
-    private void setViewsEnabled(boolean enabled) {
-        mEmailView.setEnabled(enabled);
-        mPasswordView.setEnabled(enabled);
-        mRememberView.setEnabled(enabled);
-        mSignIn.setEnabled(enabled);
-        mAuthorize.setEnabled(enabled);
-        mGcmUnregister.setEnabled(enabled);
+    private void setViewsEnabled(final boolean enabled) {
+        mViewsEnabled = enabled;
 
+        // we have to use handler and postDelayed because in this activity
+        // some requests are chained together and dismissing then showing immediately
+        // the progress dialog seems to be not optimal
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mViewsEnabled != enabled) {
+                    // view-enable state has been changed
+                    return;
+                }
+
+                if (!enabled) {
+                    // disabling views, let's show the progress dialog (if not yet showing)
+                    if (mProgressDialog == null) {
+                        mProgressDialog = new ProgressDialog(LoginActivity.this);
+                        mProgressDialog.setIndeterminate(true);
+                        mProgressDialog.setCancelable(false);
+                        mProgressDialog.show();
+                    }
+                } else {
+                    // enabling views, hide the progress dialog if any
+                    if (mProgressDialog != null) {
+                        mProgressDialog.dismiss();
+                        mProgressDialog = null;
+                    }
+                }
+            }
+        }, enabled ? 0 : 100);
+    }
+
+    private void setSocialVisibilities(boolean facebook, boolean twitter, boolean google) {
         if (mFacebookSignin != null) {
-            mFacebookSignin.setEnabled(enabled);
+            mFacebookSignin.setVisibility(facebook ? View.VISIBLE : View.GONE);
         }
         if (mTwitterSignIn != null) {
-            mTwitterSignIn.setEnabled(enabled);
+            mTwitterSignIn.setVisibility(twitter ? View.VISIBLE : View.GONE);
         }
         if (mGoogleSignIn != null) {
-            mGoogleSignIn.setEnabled(enabled);
+            mGoogleSignIn.setVisibility(google ? View.VISIBLE : View.GONE);
         }
-
-        mRegister.setEnabled(enabled);
     }
 
     private abstract class TokenRequest extends Api.PostRequest {
@@ -736,15 +793,7 @@ public class LoginActivity extends AppCompatActivity
                         }
                     }
 
-                    if (mFacebookSignin != null) {
-                        mFacebookSignin.setVisibility(facebook ? View.VISIBLE : View.GONE);
-                    }
-                    if (mTwitterSignIn != null) {
-                        mTwitterSignIn.setVisibility(twitter ? View.VISIBLE : View.GONE);
-                    }
-                    if (mGoogleSignIn != null) {
-                        mGoogleSignIn.setVisibility(google ? View.VISIBLE : View.GONE);
-                    }
+                    setSocialVisibilities(facebook, twitter, google);
                 }
             } catch (JSONException e) {
                 // ignore
@@ -794,7 +843,14 @@ public class LoginActivity extends AppCompatActivity
         }
 
         @Override
+        protected void onPreExecute() {
+            setViewsEnabled(false);
+        }
+
+        @Override
         protected void onPostExecute(String result) {
+            setViewsEnabled(true);
+
             if (TextUtils.isEmpty(result)) {
                 Toast.makeText(LoginActivity.this, R.string.error_google_no_token, Toast.LENGTH_LONG).show();
                 return;

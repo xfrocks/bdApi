@@ -3,6 +3,7 @@ package com.xfrocks.api.androiddemo;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.app.ProgressDialog;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -38,7 +39,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
     private EditText mUsernameView;
     private EditText mPasswordView;
     private EditText mDobView;
-    private Button mRegister;
+    private ProgressDialog mProgressDialog;
 
     private Integer mDobYear;
     private Integer mDobMonth;
@@ -74,7 +75,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             }
         });
 
-        mRegister = (Button) findViewById(R.id.register);
+        Button mRegister = (Button) findViewById(R.id.register);
         mRegister.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -107,6 +108,20 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
             mExtraData = u.getExtraData();
             mExtraTimestamp = u.getExtraTimestamp();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (mRegisterRequest != null) {
+            mRegisterRequest.cancel();
+        }
+
+        if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
         }
     }
 
@@ -237,11 +252,21 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
     }
 
     private void setViewsEnabled(boolean enabled) {
-        mUsernameView.setEnabled(enabled);
-        mEmailView.setEnabled(enabled);
-        mPasswordView.setEnabled(enabled);
-        mDobView.setEnabled(enabled);
-        mRegister.setEnabled(enabled);
+        if (!enabled) {
+            // disabling views, let's show the progress dialog (if not yet showing)
+            if (mProgressDialog == null) {
+                mProgressDialog = new ProgressDialog(RegisterActivity.this);
+                mProgressDialog.setIndeterminate(true);
+                mProgressDialog.setCancelable(false);
+                mProgressDialog.show();
+            }
+        } else {
+            // enabling views, hide the progress dialog if any
+            if (mProgressDialog != null) {
+                mProgressDialog.dismiss();
+                mProgressDialog = null;
+            }
+        }
     }
 
     private void showDatePicker() {

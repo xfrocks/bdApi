@@ -130,6 +130,13 @@ public class DataFragment extends ListFragment {
         }
     }
 
+    private void setProgressBarVisibility(boolean visible) {
+        Activity activity = getActivity();
+        if (activity instanceof MainActivity) {
+            ((MainActivity) activity).setTheProgressBarVisibility(visible);
+        }
+    }
+
     private class DataRequest extends Api.GetRequest {
         DataRequest(String url, Api.AccessToken at) {
             super(url, new Api.Params(at));
@@ -139,6 +146,7 @@ public class DataFragment extends ListFragment {
         protected void onStart() {
             mData.clear();
             mDataAdapter.notifyDataSetInvalidated();
+            setProgressBarVisibility(true);
         }
 
         @Override
@@ -158,6 +166,7 @@ public class DataFragment extends ListFragment {
         @Override
         protected void onComplete() {
             mDataAdapter.notifyDataSetChanged();
+            setProgressBarVisibility(false);
         }
     }
 

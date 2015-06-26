@@ -15,7 +15,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
+    private ProgressBar mProgressBar;
 
     private NavigationView mNavigationView;
     private ImageView mHeaderImg;
@@ -59,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 R.string.navigation_drawer_close);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
+
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
         mHeaderImg = (ImageView) findViewById(R.id.header_img);
@@ -189,6 +194,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             mHeaderImg.setImageDrawable(null);
             mHeaderTxt.setText("");
+        }
+    }
+
+    public void setTheProgressBarVisibility(boolean visible) {
+        if (mProgressBar != null) {
+            mProgressBar.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
     }
 

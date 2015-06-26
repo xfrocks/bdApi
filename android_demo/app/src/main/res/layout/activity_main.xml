@@ -16,8 +16,21 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/abc_action_bar_default_height_material"
-            android:background="?attr/colorAccent"
-            android:minHeight="?attr/actionBarSize" />
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:indeterminate="true"
+                android:visibility="gone"
+                tools:ignore="RtlHardcoded"
+                tools:visibility="visible" />
+
+        </android.support.v7.widget.Toolbar>
 
         <FrameLayout
             android:id="@+id/container"
