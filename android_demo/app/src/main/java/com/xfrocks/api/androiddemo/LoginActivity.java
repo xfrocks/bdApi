@@ -380,7 +380,10 @@ public class LoginActivity extends AppCompatActivity
 
     private void register(Api.User u) {
         Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
-        registerIntent.putExtra(RegisterActivity.EXTRA_USER, u);
+        if (u != null) {
+            registerIntent.putExtra(RegisterActivity.EXTRA_USER, u);
+        }
+
         startActivityForResult(registerIntent, RC_REGISTER);
     }
 
