@@ -1,6 +1,5 @@
 package com.xfrocks.api.androiddemo;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.BroadcastReceiver;
@@ -16,6 +15,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -34,12 +34,11 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
@@ -49,7 +48,7 @@ import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
-import com.twitter.sdk.android.core.identity.TwitterLoginButton;
+import com.twitter.sdk.android.core.identity.TwitterAuthClient;
 import com.xfrocks.api.androiddemo.gcm.RegistrationService;
 import com.xfrocks.api.androiddemo.persist.AccessTokenHelper;
 
@@ -58,6 +57,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +67,7 @@ import io.fabric.sdk.android.Fabric;
 /**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends Activity
+public class LoginActivity extends AppCompatActivity
         implements LoaderCallbacks<Cursor>,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -86,6 +86,7 @@ public class LoginActivity extends Activity
     private CallbackManager mFacebookCallbackManager;
 
     private TwitterAuthConfig mTwitterAuthConfig;
+    private TwitterAuthClient mTwitterAuthClient;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -94,24 +95,14 @@ public class LoginActivity extends Activity
     private Button mSignIn;
     private Button mAuthorize;
     private Button mGcmUnregister;
-    private LoginButton mFacebookSignin;
-    private TwitterLoginButton mTwitterSignIn;
-    private SignInButton mGoogleSignIn;
+    private Button mFacebookSignin;
+    private Button mTwitterSignIn;
+    private Button mGoogleSignIn;
     private Button mRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        if (!TextUtils.isEmpty(BuildConfig.TWITTER_CONSUMER_KEY)
-                && !TextUtils.isEmpty(BuildConfig.TWITTER_CONSUMER_SECRET)) {
-            mTwitterAuthConfig = new TwitterAuthConfig(
-                    BuildConfig.TWITTER_CONSUMER_KEY,
-                    BuildConfig.TWITTER_CONSUMER_SECRET
-            );
-            Fabric.with(this, new Twitter(mTwitterAuthConfig));
-        }
-
         setContentView(R.layout.activity_login);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -161,48 +152,80 @@ public class LoginActivity extends Activity
         mGcmUnregister = (Button) findViewById(R.id.gcm_unregister);
         mGcmUnregister.setVisibility(View.GONE);
 
-        mFacebookCallbackManager = CallbackManager.Factory.create();
-        mFacebookSignin = (LoginButton) findViewById(R.id.facebook_sign_in);
-        mFacebookSignin.registerCallback(mFacebookCallbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                attemptLoginFacebook(loginResult);
-            }
-
-            @Override
-            public void onCancel() {
-
-            }
-
-            @Override
-            public void onError(FacebookException e) {
-                Toast.makeText(LoginActivity.this, R.string.error_facebook_failed, Toast.LENGTH_LONG).show();
-            }
-        });
-
-        if (mTwitterAuthConfig != null) {
-            mTwitterSignIn = (TwitterLoginButton) findViewById(R.id.twitter_sign_in);
-            mTwitterSignIn.setCallback(new Callback<TwitterSession>() {
+        if (!TextUtils.isEmpty(getString(R.string.facebook_app_id))) {
+            FacebookSdk.sdkInitialize(getApplicationContext());
+            mFacebookCallbackManager = CallbackManager.Factory.create();
+            mFacebookSignin = (Button) findViewById(R.id.facebook_sign_in);
+            mFacebookSignin.setOnClickListener(new OnClickListener() {
                 @Override
-                public void success(Result<TwitterSession> result) {
-                    attemptLoginTwitter(result.data);
+                public void onClick(View view) {
+                    LoginManager.getInstance().logInWithReadPermissions(
+                            LoginActivity.this,
+                            Arrays.asList("public_profile", "user_friends")
+                    );
+                }
+            });
+            LoginManager.getInstance().registerCallback(mFacebookCallbackManager, new FacebookCallback<LoginResult>() {
+                @Override
+                public void onSuccess(LoginResult loginResult) {
+                    attemptLoginFacebook(loginResult);
                 }
 
                 @Override
-                public void failure(TwitterException e) {
-                    Toast.makeText(LoginActivity.this, R.string.error_twitter_failed, Toast.LENGTH_LONG).show();
+                public void onCancel() {
+                    Toast.makeText(LoginActivity.this, R.string.error_facebook_cancelled, Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                public void onError(FacebookException e) {
+                    Toast.makeText(LoginActivity.this, R.string.error_facebook_failed, Toast.LENGTH_LONG).show();
                 }
             });
         }
 
-        mGoogleSignIn = (SignInButton) findViewById(R.id.google_sign_in);
-        mGoogleSignIn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLoginGoogle();
-            }
-        });
-        new ToolsLoginSocialRequest().start();
+        if (!TextUtils.isEmpty(BuildConfig.TWITTER_CONSUMER_KEY)
+                && !TextUtils.isEmpty(BuildConfig.TWITTER_CONSUMER_SECRET)) {
+            mTwitterAuthConfig = new TwitterAuthConfig(
+                    BuildConfig.TWITTER_CONSUMER_KEY,
+                    BuildConfig.TWITTER_CONSUMER_SECRET
+            );
+            Fabric.with(this, new Twitter(mTwitterAuthConfig));
+            mTwitterAuthClient = new TwitterAuthClient();
+            mTwitterSignIn = (Button) findViewById(R.id.twitter_sign_in);
+            mTwitterSignIn.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mTwitterAuthClient.authorize(LoginActivity.this, new Callback<TwitterSession>() {
+                        @Override
+                        public void success(Result<TwitterSession> result) {
+                            attemptLoginTwitter(result.data);
+                        }
+
+                        @Override
+                        public void failure(TwitterException e) {
+                            Toast.makeText(LoginActivity.this, R.string.error_twitter_failed, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            });
+        }
+
+        if (!TextUtils.isEmpty(getString(R.string.gcm_defaultSenderId))) {
+            mGoogleSignIn = (Button) findViewById(R.id.google_sign_in);
+            mGoogleSignIn.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mGoogleApiShouldResolve = true;
+                    mGoogleApiClient.connect();
+                }
+            });
+        }
+
+        if (mFacebookSignin != null
+                || mTwitterSignIn != null
+                || mGoogleSignIn != null) {
+            new ToolsLoginSocialRequest().start();
+        }
 
         mRegister = (Button) findViewById(R.id.register);
         mRegister.setOnClickListener(new OnClickListener() {
@@ -249,9 +272,11 @@ public class LoginActivity extends Activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        mFacebookCallbackManager.onActivityResult(requestCode, resultCode, data);
-        if (mTwitterSignIn != null) {
-            mTwitterSignIn.onActivityResult(requestCode, resultCode, data);
+        if (mFacebookCallbackManager != null) {
+            mFacebookCallbackManager.onActivityResult(requestCode, resultCode, data);
+        }
+        if (mTwitterAuthClient != null) {
+            mTwitterAuthClient.onActivityResult(requestCode, resultCode, data);
         }
 
         switch (requestCode) {
@@ -371,11 +396,6 @@ public class LoginActivity extends Activity
         String auth = headers.get("Authorization");
 
         new TokenTwitterRequest(uri, auth).start();
-    }
-
-    private void attemptLoginGoogle() {
-        mGoogleApiShouldResolve = true;
-        mGoogleApiClient.connect();
     }
 
     private void attemptLogin() {

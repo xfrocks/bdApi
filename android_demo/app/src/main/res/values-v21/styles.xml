@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="FacebookButton" parent="@android:style/Widget.Button">
+        <item name="android:colorButtonNormal">@color/facebook_blue</item>
+    </style>
+
+    <style name="TwitterButton" parent="@android:style/Widget.Button">
+        <item name="android:colorButtonNormal">@color/twitter_blue</item>
+    </style>
+
+    <style name="GoogleButton" parent="@android:style/Widget.Button">
+        <item name="android:colorButtonNormal">@color/google_red</item>
+    </style>
+
+</resources>

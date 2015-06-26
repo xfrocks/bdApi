@@ -3,4 +3,8 @@
     <color name="primary">#2b485c</color>
     <color name="primary_dark">#032A46</color>
     <color name="accent">#176093</color>
+
+    <color name="facebook_blue">#3b5998</color>
+    <color name="twitter_blue">#4099ff</color>
+    <color name="google_red">#d34836</color>
 </resources>

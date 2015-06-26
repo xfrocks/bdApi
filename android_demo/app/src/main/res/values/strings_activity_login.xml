@@ -16,10 +16,16 @@
     <string name="sign_in_with_remember">Sign in with saved token?</string>
     <string name="error_no_refresh_token">No refresh token could be found</string>
 
-    <string name="error_google_failed">Unable to login via Google+</string>
+    <string name="action_sign_in_google">Sign in with Google+</string>
+    <string name="error_google_failed">Unable to sign in with Google+</string>
     <string name="error_google_no_token">No Google ID token could be found</string>
 
-    <string name="error_facebook_failed">Unable to login via Facebook</string>
+    <string name="action_sign_in_facebook">Sign in with Facebook</string>
+    <string name="error_facebook_cancelled">Signing in with Facebook has been cancelled</string>
+    <string name="error_facebook_failed">Unable to sign in with Facebook</string>
 
-    <string name="error_twitter_failed">Unable to login via Twitter</string>
+    <string name="action_sign_in_twitter">Sign in with Twitter</string>
+    <string name="error_twitter_failed">Unable to sign in with Twitter</string>
+
+    <string name="action_or_register">…Or Register?</string>
 </resources>
