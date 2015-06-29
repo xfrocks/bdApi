@@ -236,6 +236,10 @@ class bdApi_Model_Log extends XenForo_Model
             'refresh_token',
             'fields_exclude',
             'fields_include',
+            'facebook_token',
+            'twitter_uri',
+            'twitter_oauth',
+            'google_token',
             'limit',
             'oauth_token',
             'order',
@@ -246,6 +250,12 @@ class bdApi_Model_Log extends XenForo_Model
             'access_token',
             'expires_in',
             'token_type',
+            'refresh_token_expires_in',
+            'user_id',
+            'user_email',
+            'extra_data',
+            'extra_timestamp',
+            'status',
             'error',
             'error_description',
             'error_uri',
@@ -258,6 +268,10 @@ class bdApi_Model_Log extends XenForo_Model
         $filtered = array();
 
         foreach ($data as $key => &$value) {
+            if (strpos($key, 0, 1) === '_') {
+                continue;
+            }
+
             if (is_array($value)) {
                 if ($level < 2) {
                     $filtered[$key] = $this->_filterData($value, $level + 1);
