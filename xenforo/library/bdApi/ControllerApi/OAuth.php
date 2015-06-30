@@ -136,6 +136,18 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
 
         $twitterUri = $this->_input->filterSingle('twitter_uri', XenForo_Input::STRING);
+        if (!Zend_Uri::check($twitterUri)) {
+            return $this->responseNoPermission();
+        }
+        $twitterUriScheme = parse_url($twitterUri, PHP_URL_SCHEME);
+        if ($twitterUriScheme !== 'https') {
+            return $this->responseNoPermission();
+        }
+        $twitterUriHost = parse_url($twitterUri, PHP_URL_HOST);
+        if (!in_array($twitterUriHost, array('twitter.com', 'api.twitter.com'))) {
+            return $this->responseNoPermission();
+        }
+
         $twitterAuth = $this->_input->filterSingle('twitter_auth', XenForo_Input::STRING);
         $twitterClient = XenForo_Helper_Http::getClient($twitterUri);
         $twitterClient->setHeaders('Authorization', $twitterAuth);

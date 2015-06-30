@@ -73,13 +73,13 @@ Required scopes:
  * N/A
 
 #### POST `/oauth/token/twitter`
-Request API access token using Twitter access token.
+Request API access token using Twitter access token. The `twitter_uri` and `twitter_auth` parameters are similar to `X-Auth-Service-Provider` and `X-Verify-Credentials-Authorization` as specified in Twitter's [OAuth Echo](https://dev.twitter.com/oauth/echo) specification.
 
 Parameters:
 
  * `client_id` (__required__)
  * `client_secret` (__required__)
- * `twitter_uri` (__required__): the full `/account/verify_credentials.json` uri that has been used to calculate OAuth signature.
+ * `twitter_uri` (__required__): the full `/account/verify_credentials.json` uri that has been used to calculate OAuth signature. For security reason, the uri must use HTTPS protocol and the hostname must be either "twitter.com" or "api.twitter.com".
  * `twitter_auth` (__required__): the complete authentication header that starts with "OAuth". Consult [Twitter document](https://dev.twitter.com/oauth/overview/creating-signatures) for more information.
 
 Required scopes:
