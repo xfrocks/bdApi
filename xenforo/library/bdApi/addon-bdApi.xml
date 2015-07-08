@@ -635,7 +635,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_client_delete" version_id="1" version_string="0.1"><![CDATA[Delete Client]]></phrase>
     <phrase title="bdapi_client_edit" version_id="1" version_string="0.1"><![CDATA[Edit Client]]></phrase>
     <phrase title="bdapi_client_ids_must_be_unique" version_id="4" version_string="0.9-dev"><![CDATA[API keys must be unique. The specified key is already in use.]]></phrase>
-    <phrase title="bdapi_client_id_must_be_az09" version_id="50" version_string="1.2.1b"><![CDATA[API key must consist of alphanumeric characters (letters or numbers) only.]]></phrase>
+    <phrase title="bdapi_client_id_must_be_az09" version_id="50" version_string="1.2.1b"><![CDATA[API key must consist of lowercase alphanumeric characters (letters or numbers) only.]]></phrase>
     <phrase title="bdapi_client_key" version_id="4" version_string="0.9-dev"><![CDATA[API Key]]></phrase>
     <phrase title="bdapi_client_not_found" version_id="1" version_string="0.1"><![CDATA[The requested Client could not be found]]></phrase>
     <phrase title="bdapi_client_no_results" version_id="1" version_string="0.1"><![CDATA[No clients to display...]]></phrase>
