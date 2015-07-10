@@ -95,18 +95,9 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('members', $user),
             'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $user),
-            'avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array(
-                $user,
-                'm',
-                false,
-                true
-            )),
-            'avatar_big' => XenForo_Template_Helper_Core::callHelper('avatar', array(
-                $user,
-                'l',
-                false,
-                true
-            )),
+            'avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array($user, 'm', false, true)),
+            'avatar_big' => XenForo_Template_Helper_Core::callHelper('avatar', array($user, 'l', false, true)),
+            'avatar_small' => XenForo_Template_Helper_Core::callHelper('avatar', array($user, 's', false, true)),
             'followers' => bdApi_Data_Helper_Core::safeBuildApiLink('users/followers', $user),
             'followings' => bdApi_Data_Helper_Core::safeBuildApiLink('users/followings', $user),
         );
