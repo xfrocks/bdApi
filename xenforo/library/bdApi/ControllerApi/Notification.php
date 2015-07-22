@@ -9,21 +9,37 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
         $alertModel = $this->_getAlertModel();
         $visitor = XenForo_Visitor::getInstance();
 
-        $alertResults = $alertModel->getAlertsForUser($visitor['user_id'], XenForo_Model_Alert::FETCH_MODE_POPUP);
+        $pageNavParams = array();
+        $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
+        $limit = XenForo_Application::get('options')->alertsPerPage;
 
-        $alerts = array();
-        foreach ($alertResults['alerts'] AS $alertId => $alert) {
-            if ($alert['unviewed']) {
-                $alerts[$alertId] = $alert;
-            }
+        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
+        if (!empty($inputLimit)) {
+            $limit = $inputLimit;
+            $pageNavParams['limit'] = $inputLimit;
         }
+
+        $alertResults = $alertModel->getAlertsForUser(
+            $visitor['user_id'],
+            XenForo_Model_Alert::FETCH_MODE_RECENT,
+            array(
+                'page' => $page,
+                'limit' => $limit
+            )
+        );
+        $alerts =& $alertResults['alerts'];
+
+        $total = $alertModel->countAlertsForUser($visitor['user_id']);
 
         $data = array(
             'notifications' => $this->_filterDataMany($this->_getAlertModel()->prepareApiDataForAlerts($alerts)),
+            'notifications_total' => $total,
 
             '_alerts' => $alerts,
             '_alertHandlers' => $alertResults['alertHandlers'],
         );
+
+        bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'notifications', array(), $pageNavParams);
 
         return $this->responseData('bdApi_ViewApi_Notification_List', $data);
     }

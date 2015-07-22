@@ -1913,13 +1913,14 @@ Required scopes:
 ## Notifications
 
 ### GET `/notifications`
-List of notifications. Since forum-2014022602.
+List of notifications (both read and unread). Since forum-2014022602.
 
     {
         notifications: [
             {
                 notification_id: (int),
                 notification_create_date: (unix timestamp in seconds),
+                notification_is_unread: (boolean), # since forum-2015072301
                 creator_user_id: (int), # since subscription-2014081001
                 creator_username: (string), # since subscription-2014081001
                 notification_type: (string), # since forum-2014080901
@@ -1949,7 +1950,7 @@ Required scopes:
  * `read`
 
 ### POST `/notifications/read`
-Mark notifications as read. Since forum-2014092701.
+Mark all existing notifications as read. Since forum-2014092701.
 
     {
         status: "ok",

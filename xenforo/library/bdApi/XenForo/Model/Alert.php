@@ -117,6 +117,9 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
             'event_date' => 'notification_create_date',
             'user_id' => 'creator_user_id',
             'username' => 'creator_username',
+
+            // XenForo_Model_Alert::prepareAlert
+            'unviewed' => 'notification_is_unread',
         );
 
         $data = bdApi_Data_Helper_Core::filter($alert, $publicKeys);
