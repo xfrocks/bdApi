@@ -96,6 +96,9 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
                     case 'LinkForum':
                         $element = $this->_getLinkForumModel()->prepareApiDataForLinkForum($node);
                         break;
+                    case 'Page':
+                        $element = $this->_getPageModel()->prepareApiDataForPage($node);
+                        break;
                 }
 
                 if (!empty($element)) {
@@ -152,6 +155,14 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
     protected function _getNodeModel()
     {
         return $this->getModelFromCache('XenForo_Model_Node');
+    }
+
+    /**
+     * @return bdApi_XenForo_Model_Page
+     */
+    protected function _getPageModel()
+    {
+        return $this->getModelFromCache('XenForo_Model_Page');
     }
 
 }

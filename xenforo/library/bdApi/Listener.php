@@ -23,6 +23,7 @@ class bdApi_Listener
             'XenForo_Model_Forum',
             'XenForo_Model_ForumWatch',
             'XenForo_Model_LinkForum',
+            'XenForo_Model_Page',
             'XenForo_Model_Post',
             'XenForo_Model_ProfilePost',
             'XenForo_Model_Search',

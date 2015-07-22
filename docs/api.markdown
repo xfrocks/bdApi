@@ -116,7 +116,7 @@ System information and availability can be determined by sending a GET request t
 ## Common Parameters
 
 ### Fields filtering
-For API method with resource data like a forum or a thread, the data can be filtered to get interested fields only. When there are no filter 
+For API method with resource data like a forum or a thread, the data can be filtered to get interested fields only. When there are no filter
 
  * `fields_include`: coma-separated list of fields of a resource. If this parameter is used along with `fields_exclude`, the other parameter will be ignored.
  * `fields_exclude`: coma-separated list of fields of a resource to exclude in the response. Cannot be used with `fields_include` or this parameter will be ignored.
@@ -139,7 +139,7 @@ List of all categories in the system.
             (category),
             ...
         ],
-        categories_count: (int)
+        categories_total: (int)
     }
 
 Parameters:
@@ -192,7 +192,7 @@ List of all forums in the system.
             (forum),
             ...
         ],
-        forums_count: (int)
+        forums_total: (int)
     }
 
 Parameters:
@@ -326,6 +326,59 @@ Parameters:
 Required scopes:
 
  * `read`
+
+ ## Pages
+
+ ### GET `/pages`
+ List of all pages in the system. Since forum-2015072302.
+
+     {
+         pages: [
+             (page),
+             ...
+         ],
+         pages_total: (int)
+     }
+
+ Parameters:
+
+  * `parent_page_id` (_optional_): id of parent page. If exists, filter pages that are direct children of that page.
+  * `order` (_optional_): ordering of pages. Support `natural`, `list`.
+
+ Required scopes:
+
+  * `read`
+
+ ### GET `/pages/:pageId`
+ Detail information of a page. Since forum-2015072302.
+
+     {
+         page: {
+             page_id: (int),
+             page_title: (string),
+             page_description: (string),
+             page_view_count: (int),
+             page_html: (string),
+             links: {
+                 permalink: (uri),
+                 detail: (uri),
+                 sub-pages: (uri)
+             },
+             permissions: {
+                 view: (boolean),
+                 edit: (boolean),
+                 delete: (boolean)
+             }
+         }
+     }
+
+ Parameters:
+
+  * N/A
+
+ Required scopes:
+
+  * `read`
 
 ## Navigation
 
@@ -2003,7 +2056,7 @@ Search for posts.
         ],
         data: [
             (post),
-            ... 
+            ...
         ]
     }
 

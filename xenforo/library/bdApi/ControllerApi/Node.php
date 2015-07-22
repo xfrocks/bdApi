@@ -14,6 +14,9 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
             $parentId = $this->_input->filterSingle('parent_forum_id', XenForo_Input::STRING);
         }
         if ($parentId === '') {
+            $parentId = $this->_input->filterSingle('parent_page_id', XenForo_Input::STRING);
+        }
+        if ($parentId === '') {
             $parentId = false;
         } else {
             $parentId = intval($parentId);
@@ -46,7 +49,10 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
             return $this->_responseErrorNotFound();
         }
 
-        $data = array($this->_getNameSingular() => $this->_filterDataSingle($this->_prepareApiDataForNode($node)));
+        $data = array(
+            $this->_getNameSingular() => $this->_filterDataSingle($this->_prepareApiDataForNode($node)),
+            '_node' => $node,
+        );
 
         return $this->responseData('bdApi_ViewApi_Node_Single', $data);
     }
