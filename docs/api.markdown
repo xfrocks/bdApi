@@ -522,6 +522,7 @@ Detail information of a thread.
             thread_post_count: (int),
             creator_user_id: (int),
             creator_username: (string),
+            user_is_ignored: (boolean), # since forum-2015072304
             thread_create_date: (unix timestamp in seconds),
             thread_update_date: (unix timestamp in seconds),
             thread_is_published: (boolean),
@@ -775,6 +776,7 @@ Detail information of a post.
             thread_id: (int),
             poster_user_id: (int),
             poster_username: (string),
+            user_is_ignored: (boolean), # since forum-2015072304
             post_create_date: (unix timestamp in seconds),
             post_update_date: (unix timestamp in seconds), #since forum-2015030701
             post_body: (string),
@@ -1455,6 +1457,7 @@ Detail information of a profile post. Since forum-2015042001.
             timeline_user_id: (int),
             poster_user_id: (int),
             poster_username: (string),
+            user_is_ignored: (boolean), # since forum-2015072304
             post_create_date: (unix timestamp in seconds),
             post_body: (string),
             post_like_count: (int),
@@ -1620,6 +1623,7 @@ Detail information of a profile post comment. Since forum-2015042001.
 			profile_post_id: (int),
 			comment_user_id: (int),
 			comment_username: (string),
+            user_is_ignored: (boolean), # since forum-2015072304
 			comment_create_date: (unix timestamp in seconds),
 			comment_body: (string),
 			links: {
@@ -1733,6 +1737,7 @@ Detail information of a conversation.
             conversation_title: (string),
             creator_user_id: (int),
             creator_username: (string),
+            user_is_ignored: (boolean), # since forum-2015072304
             conversation_create_date: (unix timestamp in seconds),
             conversation_update_date: (unix timestamp in seconds),
             conversation_message_count: (int),
@@ -1897,6 +1902,7 @@ Detail information of a message.
             conversation_id: (int),
             creator_user_id: (int),
             creator_username: (string),
+            user_is_ignored: (boolean), # since forum-2015072304
             message_create_date: (unix timestamp in seconds),
             message_body: (string),
             message_body_html: (string),

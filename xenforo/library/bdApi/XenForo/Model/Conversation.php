@@ -52,6 +52,8 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 
         $data = bdApi_Data_Helper_Core::filter($conversation, $publicKeys);
 
+        $data['user_is_ignored'] = XenForo_Visitor::getInstance()->isIgnoring($conversation['user_id']);
+
         if (isset($conversation['reply_count'])) {
             $data['conversation_message_count'] = $conversation['reply_count'] + 1;
         }
@@ -160,6 +162,8 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
         );
 
         $data = bdApi_Data_Helper_Core::filter($message, $publicKeys);
+
+        $data['user_is_ignored'] = XenForo_Visitor::getInstance()->isIgnoring($message['user_id']);
 
         if (!empty($attachments)) {
             $data['attachments'] = $this->prepareApiDataForAttachments($message, $attachments);

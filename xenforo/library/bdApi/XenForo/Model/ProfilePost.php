@@ -44,6 +44,8 @@ class bdApi_XenForo_Model_ProfilePost extends XFCP_bdApi_XenForo_Model_ProfilePo
 
         $data = bdApi_Data_Helper_Core::filter($profilePost, $publicKeys);
 
+        $data['user_is_ignored'] = XenForo_Visitor::getInstance()->isIgnoring($profilePost['user_id']);
+
         if (isset($profilePost['message_state'])) {
             switch ($profilePost['message_state']) {
                 case 'visible':
@@ -132,6 +134,7 @@ class bdApi_XenForo_Model_ProfilePost extends XFCP_bdApi_XenForo_Model_ProfilePo
 
         $data = bdApi_Data_Helper_Core::filter($comment, $publicKeys);
 
+        $data['user_is_ignored'] = XenForo_Visitor::getInstance()->isIgnoring($comment['user_id']);
         $data['timeline_user_id'] = $profilePost['profile_user_id'];
 
         $data['links'] = array(

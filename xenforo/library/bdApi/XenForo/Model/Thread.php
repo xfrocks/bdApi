@@ -55,6 +55,8 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 
         $data = bdApi_Data_Helper_Core::filter($thread, $publicKeys);
 
+        $data['user_is_ignored'] = XenForo_Visitor::getInstance()->isIgnoring($thread['user_id']);
+
         if (isset($thread['reply_count'])) {
             $data['thread_post_count'] = $thread['reply_count'] + 1;
         }

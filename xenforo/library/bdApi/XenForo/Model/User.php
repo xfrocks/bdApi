@@ -117,7 +117,7 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
         /** @var XenForo_Model_UserIgnore $ignoreModel */
         $ignoreModel = $this->getModelFromCache('XenForo_Model_UserIgnore');
         $data['permissions']['ignore'] = $ignoreModel->canIgnoreUser($visitor->get('user_id'), $user);
-        $data['user_is_ignored'] = !!$this->isUserIgnored($visitor->toArray(), $user['user_id']);
+        $data['user_is_ignored'] = $visitor->isIgnoring($user['user_id']);
 
         $data['user_is_visitor'] = ($user['user_id'] == $visitor->get('user_id'));
 

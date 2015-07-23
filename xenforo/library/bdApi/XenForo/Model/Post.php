@@ -100,6 +100,8 @@ class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
 
         $data = bdApi_Data_Helper_Core::filter($post, $publicKeys);
 
+        $data['user_is_ignored'] = XenForo_Visitor::getInstance()->isIgnoring($post['user_id']);
+
         if (isset($post['message_state'])) {
             switch ($post['message_state']) {
                 case 'visible':
