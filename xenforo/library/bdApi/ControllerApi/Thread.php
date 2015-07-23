@@ -324,6 +324,14 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
     public function actionGetFollowed()
     {
+        $this->_assertRegistrationRequired();
+
+        if ($this->_input->inRequest('total')) {
+            $total = $this->_getThreadWatchModel()->countThreadsWatchedByUser(XenForo_Visitor::getUserId());
+            $data = array('threads_total' => $total);
+            return $this->responseData('bdApi_ViewApi_Thread_Followed_Total', $data);
+        }
+
         $threadWatches = $this->_getThreadWatchModel()->getThreadsWatchedByUser(XenForo_Visitor::getUserId(), false);
         $threadsData = array();
         $threads = array();

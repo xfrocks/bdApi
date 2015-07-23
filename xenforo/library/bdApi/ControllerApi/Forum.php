@@ -4,6 +4,17 @@ class bdApi_ControllerApi_Forum extends bdApi_ControllerApi_Node
 {
     public function actionGetFollowed()
     {
+        $this->_assertRegistrationRequired();
+
+        if ($this->_input->inRequest('total')) {
+            $total = 0;
+            if (XenForo_Application::$versionId >= 1020000) {
+                $total = $this->_getForumWatchModel()->bdApi_countUserForumWatchByUser(XenForo_Visitor::getUserId());
+            }
+            $data = array('forums_total' => $total);
+            return $this->responseData('bdApi_ViewApi_Forum_Followed_Total', $data);
+        }
+
         $forums = array();
 
         if (XenForo_Application::$versionId >= 1020000) {

@@ -5,6 +5,15 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
     const FETCH_IS_FOLLOWED = 'bdApi_followedUserId';
     const ORDER_USER_ID = 'bdApi_user_id';
 
+    public function bdApi_countUsersBeingFollowedByUserId($userId)
+    {
+        return $this->_getDb()->fetchOne('
+			SELECT COUNT(*)
+			FROM xf_user_follow
+			WHERE user_id = ?
+		', $userId);
+    }
+
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
     {
         $fetchOptions['join'] = XenForo_Model_User::FETCH_USER_FULL;

@@ -321,7 +321,7 @@ List of followed forums by current user. Since forum-2014053001.
 
 Parameters:
 
- * N/A
+ * `total` (_optional_): if included in the request, only the forum count is returned as `forums_total`. Since forum-2015072305.
 
 Required scopes:
 
@@ -649,7 +649,7 @@ List of followed threads by current user. Since forum-2014053002.
 
 Parameters:
 
- * N/A
+ * `total` (_optional_): if included in the request, only the thread count is returned as `threads_total`. Since forum-2015072305.
 
 Required scopes:
 
@@ -1197,7 +1197,7 @@ List of a user's followers
 
 Parameters:
 
- * N/A
+ * `total` (_optional_): if included in the request, only the user count is returned as `users_total`. Since forum-2015072305.
 
 Required scopes:
 
@@ -1250,7 +1250,7 @@ List of users whom are followed by a user.
 
 Parameters:
 
- * N/A
+ * `total` (_optional_): if included in the request, only the user count is returned as `users_total`. Since forum-2015072305.
 
 Required scopes:
 
@@ -1271,7 +1271,7 @@ Required scopes:
 
  Parameters:
 
-  * N/A
+  * `total` (_optional_): if included in the request, only the user count is returned as `users_total`. Since forum-2015072305.
 
  Required scopes:
 

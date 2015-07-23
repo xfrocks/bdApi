@@ -395,6 +395,12 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     {
         $user = $this->_getUserOrError();
 
+        if ($this->_input->inRequest('total')) {
+            $total = $this->_getUserModel()->countUsersFollowingUserId($user['user_id']);
+            $data = array('users_total' => $total);
+            return $this->responseData('bdApi_ViewApi_User_Followers_Total', $data);
+        }
+
         $followers = $this->_getUserModel()->getUsersFollowingUserId($user['user_id'], 0, 'user.user_id');
 
         $data = array('users' => array());
@@ -441,6 +447,12 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     {
         $user = $this->_getUserOrError();
 
+        if ($this->_input->inRequest('total')) {
+            $total = $this->_getUserModel()->bdApi_countUsersBeingFollowedByUserId($user['user_id']);
+            $data = array('users_total' => $total);
+            return $this->responseData('bdApi_ViewApi_User_Followings_Total', $data);
+        }
+
         $followings = $this->_getUserModel()->getFollowedUserProfiles($user['user_id'], 0, 'user.user_id');
 
         $data = array('users' => array());
@@ -458,6 +470,12 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     public function actionGetIgnored()
     {
         $this->_assertRegistrationRequired();
+
+        if ($this->_input->inRequest('total')) {
+            $total = $this->_getIgnoreModel()->bdApi_countIgnoredUsers(XenForo_Visitor::getUserId());
+            $data = array('users_total' => $total);
+            return $this->responseData('bdApi_ViewApi_User_Ignored_Total', $data);
+        }
 
         $ignoredUsers = $this->_getIgnoreModel()->getIgnoredUsers(XenForo_Visitor::getUserId());
 
