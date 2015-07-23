@@ -1081,6 +1081,7 @@ Detail information of a user.
             user_is_valid: (boolean),
             user_is_verified: (boolean),
             user_is_followed: (boolean), // since forum-2014052902
+            user_is_ignored: (boolean), // since forum-2015072303
             *user_custom_fields: { // since forum-2013110601
                 field_id: (field_value),
                 ...
@@ -1098,10 +1099,12 @@ Detail information of a user.
                 detail: (uri),
                 avatar: (uri),
                 followers: (uri),
-                followings: (uri)
+                followings: (uri),
+                ignore: (uri) // since forum-2015072303
             },
             permissions: {
-                follow: (boolean)
+                follow: (boolean),
+                ignore: (boolean) // since forum-2015072303
             },
             *self_permissions: {
                 create_conversation: (boolean),
@@ -1250,6 +1253,59 @@ Parameters:
 Required scopes:
 
  * `read`
+
+ ### GET `/users/ignored`
+ List of a ignored users of current user. Since forum-2015072303.
+
+     {
+         users: [
+             {
+                 user_id: (int),
+                 username: (string)
+             },
+             ...
+         ]
+     }
+
+ Parameters:
+
+  * N/A
+
+ Required scopes:
+
+  * `read`
+
+ ### POST `/users/:userId/ignore`
+ Ignore a user. Since forum-2015072303.
+
+     {
+         status: "ok",
+         message: "Changes Saved"
+     }
+
+ Parameters:
+
+  * N/A
+
+ Required scopes:
+
+  * `post`
+
+ ### DELETE `/users/:userId/ignore`
+ Stop ignoring a user. Since forum-2015072303.
+
+     {
+         status: "ok",
+         message: "Changes Saved"
+     }
+
+ Parameters:
+
+  * N/A
+
+ Required scopes:
+
+  * `post`
 
 ### GET `/users/groups`
 List of all user groups. Since forum-2014092301.

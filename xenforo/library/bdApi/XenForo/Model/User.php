@@ -109,9 +109,15 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
             )),
             'followers' => bdApi_Data_Helper_Core::safeBuildApiLink('users/followers', $user),
             'followings' => bdApi_Data_Helper_Core::safeBuildApiLink('users/followings', $user),
+            'ignore' => bdApi_Data_Helper_Core::safeBuildApiLink('users/ignore', $user),
         );
 
         $data['permissions'] = array('follow' => ($user['user_id'] != $visitor->get('user_id')) AND $visitor->canFollow());
+
+        /** @var XenForo_Model_UserIgnore $ignoreModel */
+        $ignoreModel = $this->getModelFromCache('XenForo_Model_UserIgnore');
+        $data['permissions']['ignore'] = $ignoreModel->canIgnoreUser($visitor->get('user_id'), $user);
+        $data['user_is_ignored'] = !!$this->isUserIgnored($visitor->toArray(), $user['user_id']);
 
         $data['user_is_visitor'] = ($user['user_id'] == $visitor->get('user_id'));
 

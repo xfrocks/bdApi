@@ -455,6 +455,52 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_User_Followings', $data);
     }
 
+    public function actionGetIgnored()
+    {
+        $this->_assertRegistrationRequired();
+
+        $ignoredUsers = $this->_getIgnoreModel()->getIgnoredUsers(XenForo_Visitor::getUserId());
+
+        $data = array('users' => array());
+
+        foreach ($ignoredUsers as $ignoredUser) {
+            $data['users'][] = array(
+                'user_id' => $ignoredUser['user_id'],
+                'username' => $ignoredUser['username'],
+            );
+        }
+
+        return $this->responseData('bdApi_ViewApi_User_Ignored', $data);
+    }
+
+    public function actionPostIgnore()
+    {
+        $user = $this->_getUserOrError();
+        $visitor = XenForo_Visitor::getInstance();
+
+        if (!$this->_getIgnoreModel()->canIgnoreUser($visitor['user_id'], $user, $error)) {
+            return $this->responseError($error);
+        }
+
+        $this->_getIgnoreModel()->ignoreUsers($visitor['user_id'], $user['user_id']);
+
+        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
+
+    public function actionDeleteIgnore()
+    {
+        $user = $this->_getUserOrError();
+        $visitor = XenForo_Visitor::getInstance();
+
+        if (!$this->_getIgnoreModel()->canIgnoreUser($visitor['user_id'], $user, $error)) {
+            return $this->responseError($error);
+        }
+
+        $this->_getIgnoreModel()->unignoreUser($visitor['user_id'], $user['user_id']);
+
+        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
+
     public function actionGetGroups()
     {
         $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
@@ -745,6 +791,14 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     protected function _getUserGroupModel()
     {
         return $this->getModelFromCache('XenForo_Model_UserGroup');
+    }
+
+    /**
+     * @return XenForo_Model_UserIgnore
+     */
+    protected function _getIgnoreModel()
+    {
+        return $this->getModelFromCache('XenForo_Model_UserIgnore');
     }
 
     protected function _getUserOrError(array $fetchOptions = array())
