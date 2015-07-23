@@ -1100,6 +1100,8 @@ Detail information of a user.
                 permalink: (uri),
                 detail: (uri),
                 avatar: (uri),
+                avatar_big: (uri), # since forum-2014052901
+                avatar_small: (uri), # since forum-2015071001
                 followers: (uri),
                 followings: (uri),
                 ignore: (uri) // since forum-2015072303
