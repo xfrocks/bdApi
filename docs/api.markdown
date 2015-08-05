@@ -2044,6 +2044,7 @@ List of notifications (both read and unread). Since forum-2014022602.
                 notification_html: (string),
                 links: {
                     content: (uri), # since forum-2015041001
+                    creator_avatar: (uri), # since forum-2015080501
                 }
             },
             ...

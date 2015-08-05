@@ -141,6 +141,11 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
             ),
         );
 
+        if (!empty($alert['user'])) {
+            $data['links']['creator_avatar'] = XenForo_Template_Helper_Core::callHelper('avatar',
+                array($alert['user'], 'm', false, true));
+        }
+
         return $data;
     }
 
