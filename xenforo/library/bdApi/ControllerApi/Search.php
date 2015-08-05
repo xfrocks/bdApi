@@ -2,6 +2,11 @@
 
 class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 {
+    const OPTION_NO_KEYWORDS = 'noKeywords';
+    const OPTION_ORDER = 'order';
+    const OPTION_SEARCH_TYPE = 'searchType';
+    const OPTION_SEARCH_TYPE_USER_TIMELINE = 'userTimeline';
+
     public function actionGetIndex()
     {
         $data = array('links' => array(
@@ -41,6 +46,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             $pageNavParams['limit'] = $limit;
         }
 
+        $search = $this->_getSearchModel()->prepareSearch($search);
         $pageResultIds = $this->_getSearchModel()->sliceSearchResultsToPage($search, $page, $limit);
         $results = $this->_getSearchModel()->prepareApiDataForSearchResults($pageResultIds);
 
@@ -51,6 +57,23 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             'data' => $this->_filterDataMany(array_values($contentData)),
             'data_total' => $search['result_count'],
         );
+
+        switch ($search['search_type']) {
+            case self::OPTION_SEARCH_TYPE_USER_TIMELINE:
+                if (!$this->_isFieldExcluded('user')
+                    && !empty($search['searchConstraints']['user'])
+                    && is_array($search['searchConstraints']['user'])
+                    && count($search['searchConstraints']['user']) === 1
+                ) {
+                    $userId = reset($search['searchConstraints']['user']);
+
+                    /** @var bdApi_XenForo_Model_User $userModel */
+                    $userModel = $this->getModelFromCache('XenForo_Model_User');
+                    $user = $userModel->getUserById($userId, $userModel->getFetchOptionsToPrepareApiData());
+                    $data['user'] = $this->_filterDataSingle($userModel->prepareApiDataForUser($user), array('user'));
+                }
+                break;
+        }
 
         bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $search['result_count'], $page, 'search/results', $search, $pageNavParams);
 
@@ -147,22 +170,41 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         return $this->responseReroute(__CLASS__, 'get-results');
     }
 
-    public function _doSearch($contentType = '', array $constraints = array())
+    public function actionUserTimeline()
+    {
+        $search = $this->_doSearch('', array(), array(
+            self::OPTION_NO_KEYWORDS => true,
+            self::OPTION_ORDER => 'date',
+            self::OPTION_SEARCH_TYPE => self::OPTION_SEARCH_TYPE_USER_TIMELINE,
+        ));
+
+        $this->_request->setParam('search_id', $search['search_id']);
+        return $this->responseReroute(__CLASS__, 'get-results');
+    }
+
+    public function _doSearch($contentType = '', array $constraints = array(), array $options = array())
     {
         if (!XenForo_Visitor::getInstance()->canSearch()) {
             throw $this->getNoPermissionResponseException();
         }
 
         $input = array(
+            'keywords' => '',
             'order' => 'relevance',
             'group_discussion' => false,
         );
 
-        $input['keywords'] = $this->_input->filterSingle('q', XenForo_Input::STRING);
-        $input['keywords'] = XenForo_Helper_String::censorString($input['keywords'], null, '');
-        // don't allow searching of censored stuff
-        if (empty($input['keywords'])) {
-            throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_slash_search_requires_q'), 400));
+        if (empty($options[self::OPTION_NO_KEYWORDS])) {
+            $input['keywords'] = $this->_input->filterSingle('q', XenForo_Input::STRING);
+            $input['keywords'] = XenForo_Helper_String::censorString($input['keywords'], null, '');
+            // don't allow searching of censored stuff
+            if (empty($input['keywords'])) {
+                throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_slash_search_requires_q'), 400));
+            }
+        }
+
+        if (!empty($options[self::OPTION_ORDER])) {
+            $input['order'] = $options[self::OPTION_ORDER];
         }
 
         $maxResults = XenForo_Application::getOptions()->get('maximumSearchResults');
@@ -209,7 +251,12 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             $results = $searcher->searchGeneral($input['keywords'], $constraints, $input['order'], $maxResults);
         }
 
-        $search = $searchModel->insertSearch($results, $contentType, $input['keywords'], $constraints, $input['order'], $input['group_discussion']);
+        $searchType = $contentType;
+        if (!empty($options[self::OPTION_SEARCH_TYPE])) {
+            $searchType = $options[self::OPTION_SEARCH_TYPE];
+        }
+
+        $search = $searchModel->insertSearch($results, $searchType, $input['keywords'], $constraints, $input['order'], $input['group_discussion']);
 
         return $search;
     }

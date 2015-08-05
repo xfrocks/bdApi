@@ -1402,15 +1402,16 @@ Alias for POST `/users/:userId/groups` for authorized user. Since forum-20140923
 ## Profile Posts
 
 ### GET `/users/:userId/timeline`
-List of profile posts on a user timeline (with pagination). Since forum-2015042001.
+List of contents created by user (with pagination). Since forum-2015042001.
 
     {
-        profile_posts: [
-            (profile_post),
-            (profile_post),
+        profile_posts: nil, # removed since forum-2015080503
+        profile_posts_total: nil, # removed since forum-2015080503
+        data: [ # since forum-2015080503
+            (content),
             ...
         ],
-        profile_posts_total: (int),
+        data_total: (int), # since forum-2015080503
         user: (user),
         links {
             pages: (int),
@@ -2146,7 +2147,7 @@ Search for all supported contents. Since forum-2015042002.
 
     {
         data: [
-            (profile_post),
+            (content),
             ...
         ],
         data_total: (int),

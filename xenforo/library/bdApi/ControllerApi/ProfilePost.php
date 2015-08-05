@@ -75,6 +75,63 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_ProfilePost_Multiple', $data);
     }
 
+    public function actionPostIndex()
+    {
+        /** @var XenForo_Model_User $userModel */
+        $userModel = $this->getModelFromCache('XenForo_Model_User');
+        /** @var XenForo_Model_UserProfile $userProfileModel */
+        $userProfileModel = $this->getModelFromCache('XenForo_Model_UserProfile');
+        /** @var bdApi_XenForo_Model_ProfilePost $profilePostModel */
+        $profilePostModel = $this->getModelFromCache('XenForo_Model_ProfilePost');
+
+        $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+        $user = $userModel->getUserById($userId);
+        if (empty($user)) {
+            return $this->responseNoPermission();
+        }
+
+        if (!$userProfileModel->canViewProfilePosts($user)) {
+            return $this->responseNoPermission();
+        }
+
+        $postBody = $this->_input->filterSingle('post_body', XenForo_Input::STRING);
+
+        $visitor = XenForo_Visitor::getInstance();
+        if ($user['user_id'] == $visitor->get('user_id')) {
+            if (!$visitor->canUpdateStatus()) {
+                return $this->responseNoPermission();
+            }
+
+            $profilePostId = $userProfileModel->updateStatus($postBody);
+        } else {
+            if (!$userProfileModel->canPostOnProfile($user)) {
+                return $this->responseNoPermission();
+            }
+
+            $writer = XenForo_DataWriter::create('XenForo_DataWriter_DiscussionMessage_ProfilePost');
+
+            $writer->set('user_id', $visitor['user_id']);
+            $writer->set('username', $visitor['username']);
+            $writer->set('message', $postBody);
+            $writer->set('profile_user_id', $user['user_id']);
+            $writer->set('message_state', $profilePostModel->getProfilePostInsertMessageState($user));
+            $writer->setExtraData(XenForo_DataWriter_DiscussionMessage_ProfilePost::DATA_PROFILE_USER, $user);
+            $writer->setOption(XenForo_DataWriter_DiscussionMessage_ProfilePost::OPTION_MAX_TAGGED_USERS, $visitor->hasPermission('general', 'maxTaggedUsers'));
+
+            $writer->preSave();
+
+            if (!$writer->hasErrors()) {
+                $this->assertNotFlooding('post');
+            }
+
+            $writer->save();
+            $profilePostId = $writer->get('profile_post_id');
+        }
+
+        $this->_request->setParam('profile_post_id', $profilePostId);
+        return $this->responseReroute(__CLASS__, 'single');
+    }
+
     public function actionPutIndex()
     {
         $profilePostId = $this->_input->filterSingle('profile_post_id', XenForo_Input::UINT);
