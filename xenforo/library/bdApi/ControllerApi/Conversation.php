@@ -186,4 +186,8 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
         return $this->getHelper('bdApi_ControllerHelper_Attachment');
     }
 
+    protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
+    {
+        $controllerName = 'XenForo_ControllerPublic_Conversation';
+    }
 }

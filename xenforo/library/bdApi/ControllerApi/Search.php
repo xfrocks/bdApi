@@ -245,4 +245,9 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
     {
         return $this->getModelFromCache('XenForo_Model_Node');
     }
+
+    protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
+    {
+        $controllerName = 'XenForo_ControllerPublic_Search';
+    }
 }

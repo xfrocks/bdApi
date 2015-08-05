@@ -65,6 +65,11 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
         return $this->getModelFromCache('XenForo_Model_Node');
     }
 
+    protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
+    {
+        $controllerName = 'XenForo_ControllerPublic_Forum';
+    }
+
     abstract protected function _getControllerName();
 
     abstract protected function _getNameSingular();

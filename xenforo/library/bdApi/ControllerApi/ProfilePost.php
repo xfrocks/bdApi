@@ -360,4 +360,9 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
     {
         return $this->getModelFromCache('XenForo_Model_Like');
     }
+
+    protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
+    {
+        $controllerName = 'XenForo_ControllerPublic_ProfilePost';
+    }
 }

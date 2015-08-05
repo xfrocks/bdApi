@@ -92,4 +92,23 @@ class bdApi_ControllerApi_Page extends bdApi_ControllerApi_Node
         return $this->getModelFromCache('XenForo_Model_Page');
     }
 
+    protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
+    {
+        switch ($action) {
+            case 'Single':
+                $controllerName = 'XenForo_ControllerPublic_Page';
+
+                $nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
+                if (!empty($nodeId)) {
+                    $page = $this->_getPageModel()->getPageById($nodeId);
+                    if (!empty($page)) {
+                        $params['node_name'] = $page['node_name'];
+                    }
+                }
+
+                break;
+            default:
+                parent::_prepareSessionActivityForApi($controllerName, $action, $params);
+        }
+    }
 }

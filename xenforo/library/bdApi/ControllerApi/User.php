@@ -850,4 +850,9 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         return parent::_getScopeForAction($action);
     }
 
+    protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
+    {
+        $params['user_id'] = $this->_request->getParam('user_id');
+        $controllerName = 'XenForo_ControllerPublic_Member';
+    }
 }

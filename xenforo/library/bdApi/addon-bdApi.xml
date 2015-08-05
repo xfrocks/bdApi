@@ -601,6 +601,12 @@ step=3600</edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdApi" display_order="110"/>
     </option>
+    <option option_id="bdApi_trackSession" edit_format="onoff" data_type="unsigned_integer" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApi" display_order="30"/>
+    </option>
   </optiongroups>
   <permissions>
     <permission_groups/>
@@ -735,6 +741,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_ttl" version_id="11" version_string="0.9-dev"><![CDATA[Time To Live]]></phrase>
     <phrase title="bdapi_update_scope" version_id="53" version_string="1.3.1"><![CDATA[Update Permissions]]></phrase>
     <phrase title="bdapi_update_scope_explain" version_id="53" version_string="1.3.1"><![CDATA[You can review and/or change {name}'s permissions below. Click {revoke} to completely remove {name} access to your account.]]></phrase>
+    <phrase title="bdapi_using_client" version_id="74" version_string="1.4.4b"><![CDATA[Using]]></phrase>
     <phrase title="bdapi_whitelisted_domains" version_id="59" version_string="1.3.3d"><![CDATA[White-listed Domains]]></phrase>
     <phrase title="bdapi_whitelisted_domains_explain" version_id="59" version_string="1.3.3d"><![CDATA[In addition to Redirect Uri, the system will also allow redirection to these domains. Each domain must be in a new line and may have wildcard, for example: "*.domain.com". To enable redirection to all domains, use "*" although it is not recommended for security reason.]]></phrase>
     <phrase title="bdapi_you_will_be_redirected_x" version_id="24" version_string="0.9.9"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
@@ -757,6 +764,8 @@ step=3600</edit_format_params>
     <phrase title="option_bdApi_subscriptionUser_explain" version_id="53" version_string="1.3.1"><![CDATA[Enable this option to allow clients to <a href="https://github.com/xfrocks/bdApi/blob/master/docs/api.markdown#subscriptions" target="_blank" tabindex="-1">subscribe</a> for user changes.]]></phrase>
     <phrase title="option_bdApi_tokenTTL" version_id="50" version_string="1.2.1b"><![CDATA[Token TTL]]></phrase>
     <phrase title="option_bdApi_tokenTTL_explain" version_id="50" version_string="1.2.1b"><![CDATA[Enter the number of seconds before authentication code expires itself.]]></phrase>
+    <phrase title="option_bdApi_trackSession" version_id="74" version_string="1.4.4b"><![CDATA[Update User Activity]]></phrase>
+    <phrase title="option_bdApi_trackSession_explain" version_id="74" version_string="1.4.4b"><![CDATA[Enable this option to keep track of logged in user session if accessed via api entry points. Disabling this feature may result in improved server performance but will cause missing information for user last activities.]]></phrase>
     <phrase title="option_group_bdApi" version_id="50" version_string="1.2.1b"><![CDATA[[bd] API]]></phrase>
     <phrase title="option_group_bdApi_description" version_id="50" version_string="1.2.1b"><![CDATA[]]></phrase>
     <phrase title="permission_general_bdApi_clientNew" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Create Client]]></phrase>

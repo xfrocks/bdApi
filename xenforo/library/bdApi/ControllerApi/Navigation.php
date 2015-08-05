@@ -165,4 +165,8 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
         return $this->getModelFromCache('XenForo_Model_Page');
     }
 
+    protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
+    {
+        $controllerName = 'XenForo_ControllerPublic_Forum';
+    }
 }

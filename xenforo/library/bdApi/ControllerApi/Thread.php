@@ -629,4 +629,28 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         return $this->getHelper('bdApi_ControllerHelper_Attachment');
     }
 
+    protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
+    {
+        switch ($action) {
+            case 'GetIndex':
+                $forumId = $this->_request->getParam('forum_id');
+                if (!empty($forumId)
+                    && is_numeric($forumId)
+                ) {
+
+                    $params['node_id'] = $forumId;
+                }
+                $controllerName = 'XenForo_ControllerPublic_Forum';
+                break;
+            case 'Single':
+                $controllerName = 'XenForo_ControllerPublic_Thread';
+                break;
+            case 'GetNew':
+            case 'GetRecent':
+                $controllerName = 'XenForo_ControllerPublic_FindNew';
+                break;
+            default:
+                parent::_prepareSessionActivityForApi($controllerName, $action, $params);
+        }
+    }
 }

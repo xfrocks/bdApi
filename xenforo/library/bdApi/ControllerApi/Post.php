@@ -614,4 +614,17 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         return $this->getHelper('bdApi_ControllerHelper_Attachment');
     }
 
+    protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
+    {
+        if ($action === 'GetIndex') {
+            $threadId = $this->_request->getParam('thread_id');
+            if (!empty($threadId)) {
+                $controllerName = 'XenForo_ControllerPublic_Thread';
+                $params['thread_id'] = $threadId;
+                return;
+            }
+        }
+
+        $controllerName = 'XenForo_ControllerPublic_Post';
+    }
 }

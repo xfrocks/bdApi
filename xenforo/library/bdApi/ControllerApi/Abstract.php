@@ -237,36 +237,6 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         return $this->responseReroute('bdApi_ControllerApi_Error', 'noPermission');
     }
 
-    protected function _executePromotionUpdate($force = false)
-    {
-        // disable promotion
-        return;
-    }
-
-    protected function _updateDismissedNoticeSessionCache()
-    {
-        // disable dismissed notice cache
-        return;
-    }
-
-    protected function _updateModeratorSessionCaches()
-    {
-        // disable moderator cache
-        return;
-    }
-
-    protected function _updateAdminSessionCaches()
-    {
-        // disable admin cache
-        return;
-    }
-
-    public function updateSessionActivity($controllerResponse, $controllerName, $action)
-    {
-        // disable session activity for api requests
-        return;
-    }
-
     protected function _assertRegistrationRequired()
     {
         if (!XenForo_Visitor::getUserId()) {
@@ -289,6 +259,56 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         }
 
         bdApi_Session::startApiSession($this->_request);
+    }
+
+
+    public function updateSessionActivity($controllerResponse, $controllerName, $action)
+    {
+        if (!bdApi_Option::get('trackSession')) {
+            return;
+        }
+
+        if (!$this->_request->isGet()) {
+            return;
+        }
+
+        $session = bdApi_Data_Helper_Core::safeGetSession();
+        if (empty($session)) {
+            return;
+        }
+
+        $visitorUserId = XenForo_Visitor::getUserId();
+        if ($visitorUserId === 0) {
+            return;
+        }
+
+        if ($controllerResponse instanceof XenForo_ControllerResponse_Reroute) {
+            return;
+        } elseif ($controllerResponse instanceof XenForo_ControllerResponse_Redirect) {
+            return;
+        }
+
+        $params = $this->_request->getUserParams();
+        $this->_prepareSessionActivityForApi($controllerName, $action, $params);
+
+        /** @var XenForo_Model_User $userModel */
+        $userModel = $this->getModelFromCache('XenForo_Model_User');
+        $userModel->updateSessionActivity(
+            $visitorUserId, $this->_request->getClientIp(false),
+            $controllerName, $action, 'valid', $params
+        );
+    }
+
+    protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
+    {
+        $controllerName = 'bdApi_ControllerApi_Index';
+        $action = '';
+        $params = array();
+
+        $session = bdApi_Data_Helper_Core::safeGetSession();
+        if (!empty($session)) {
+            $params['client_id'] = $session->getOAuthClientId();
+        }
     }
 
     protected function _checkCsrf($action)

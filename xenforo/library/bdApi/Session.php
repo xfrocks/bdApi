@@ -123,6 +123,25 @@ class bdApi_Session extends XenForo_Session
         $session = new bdApi_Session();
         $session->start();
 
+        // XenForo_ControllerPublic_Abstract::_executePromotionUpdate
+        // avoid running promotion check
+        $session->set('promotionChecked', true);
+
+        // XenForo_ControllerPublic_Abstract::_updateDismissedNoticeSessionCache
+        // avoid querying dismissed notices
+        $session->set('dismissedNotices', array());
+
+        // XenForo_ControllerPublic_Abstract::_updateModeratorSessionReportCounts
+        // XenForo_ControllerPublic_Abstract::_updateModeratorSessionModerationCounts
+        // avoid recounting moderator counters
+        $session->set('reportCounts', array('activeCount' => 0, 'lastBuildDate' => XenForo_Application::$time));
+        $session->set('moderationCounts', array('total' => 0, 'lastBuildDate' => XenForo_Application::$time));
+
+        // XenForo_ControllerPublic_Abstract::_updateAdminSessionModerationCounts
+        // avoid recounting admin counters
+        $session->set('canAdminUsers', false);
+        $session->set('userModerationCounts', array('total' => 0, 'lastBuildDate' => XenForo_Application::$time));
+
         XenForo_Application::set('session', $session);
 
         $options = $session->getAll();

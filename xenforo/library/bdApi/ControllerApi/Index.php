@@ -50,7 +50,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
     protected function _getModules()
     {
         return array(
-            'forum' => 2015080501,
+            'forum' => 2015080502,
             'oauth2' => 2015060501,
             'subscription' => 2014092301,
         );
@@ -60,6 +60,49 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
     {
         // no scope checking for this controller
         return false;
+    }
+
+    public static function getSessionActivityDetailsForList(array $activities)
+    {
+        $clientIds = array();
+        foreach ($activities AS $activity) {
+            if (!empty($activity['params']['client_id'])) {
+                $clientIds[] = $activity['params']['client_id'];
+            }
+        }
+
+        $clients = array();
+
+        if (!empty($clientIds)) {
+            $clientIds = array_unique($clientIds);
+
+            /** @var bdApi_Model_Client $clientModel */
+            $clientModel = XenForo_Model::create('bdApi_Model_Client');
+            $clients = $clientModel->getClients(array('client_id' => $clientIds));
+        }
+
+        $output = array();
+        foreach ($activities AS $key => $activity) {
+            $client = null;
+            if (!empty($activity['params']['client_id'])
+                && isset($clients[$activity['params']['client_id']])
+            ) {
+                $client = $clients[$activity['params']['client_id']];
+            }
+
+            if (!empty($client)) {
+                $output[$key] = array(
+                    new XenForo_Phrase('bdapi_using_client'),
+                    $client['name'],
+                    $client['redirect_uri'],
+                    false
+                );
+            } else {
+                $output[$key] = new XenForo_Phrase('viewing_forum_list');
+            }
+        }
+
+        return $output;
     }
 
 }
