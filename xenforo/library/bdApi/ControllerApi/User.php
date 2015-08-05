@@ -601,9 +601,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionGetMe()
     {
-        if (XenForo_Visitor::getUserId() == 0) {
-            return $this->responseNoPermission();
-        }
+        $this->_assertRegistrationRequired();
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'single');
@@ -611,9 +609,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionPutMe()
     {
-        if (XenForo_Visitor::getUserId() == 0) {
-            return $this->responseNoPermission();
-        }
+        $this->_assertRegistrationRequired();
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'put-index');
@@ -621,9 +617,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionPostMeAvatar()
     {
-        if (XenForo_Visitor::getUserId() == 0) {
-            return $this->responseNoPermission();
-        }
+        $this->_assertRegistrationRequired();
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'post-avatar');
@@ -631,9 +625,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionDeleteMeAvatar()
     {
-        if (XenForo_Visitor::getUserId() == 0) {
-            return $this->responseNoPermission();
-        }
+        $this->_assertRegistrationRequired();
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'delete-avatar');
@@ -641,9 +633,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionGetMeFollowers()
     {
-        if (XenForo_Visitor::getUserId() == 0) {
-            return $this->responseNoPermission();
-        }
+        $this->_assertRegistrationRequired();
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'get-followers');
@@ -651,9 +641,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionGetMeFollowings()
     {
-        if (XenForo_Visitor::getUserId() == 0) {
-            return $this->responseNoPermission();
-        }
+        $this->_assertRegistrationRequired();
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'get-followings');
@@ -661,9 +649,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionPostMePassword()
     {
-        if (XenForo_Visitor::getUserId() == 0) {
-            return $this->responseNoPermission();
-        }
+        $this->_assertRegistrationRequired();
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'post-password');
@@ -671,9 +657,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionGetMeGroups()
     {
-        if (XenForo_Visitor::getUserId() == 0) {
-            return $this->responseNoPermission();
-        }
+        $this->_assertRegistrationRequired();
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'get-groups');
@@ -681,9 +665,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionPostMeGroups()
     {
-        if (XenForo_Visitor::getUserId() == 0) {
-            return $this->responseNoPermission();
-        }
+        $this->_assertRegistrationRequired();
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'post-groups');
@@ -691,9 +673,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionGetMeTimeline()
     {
-        if (XenForo_Visitor::getUserId() == 0) {
-            return $this->responseNoPermission();
-        }
+        $this->_assertRegistrationRequired();
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'get-timeline');
@@ -701,9 +681,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionPostMeTimeline()
     {
-        if (XenForo_Visitor::getUserId() == 0) {
-            return $this->responseNoPermission();
-        }
+        $this->_assertRegistrationRequired();
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'post-timeline');
