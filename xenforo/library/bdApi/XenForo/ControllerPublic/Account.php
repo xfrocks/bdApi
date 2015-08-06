@@ -262,7 +262,8 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
 
         $client = $oauth2Model->getClientModel()->getClientById($authorizeParams['client_id']);
         if (empty($client)) {
-            throw new XenForo_Exception(new XenForo_Phrase('bdapi_authorize_error_client_x_not_found', array('client' => $authorizeParams['client_id'])));
+            return $this->responseError(new XenForo_Phrase('bdapi_authorize_error_client_x_not_found',
+                array('client' => $authorizeParams['client_id'])), 404);
         }
 
         // sondh@2013-03-19
@@ -350,7 +351,10 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
                 // this is our action and an exception is thrown
                 // check to see if it is a registrationRequired error
                 $controllerResponse = $e->getControllerResponse();
-                if ($controllerResponse instanceof XenForo_ControllerResponse_Reroute AND $controllerResponse->controllerName == 'XenForo_ControllerPublic_Error' AND $controllerResponse->action == 'registrationRequired') {
+                if ($controllerResponse instanceof XenForo_ControllerResponse_Reroute
+                    && $controllerResponse->controllerName == 'XenForo_ControllerPublic_Error'
+                    && $controllerResponse->action == 'registrationRequired'
+                ) {
                     // so it is...
                     $requestPaths = XenForo_Application::get('requestPaths');
                     $session = XenForo_Application::getSession();
