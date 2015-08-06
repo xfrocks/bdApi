@@ -194,10 +194,11 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
             if ($fetchOptions[self::FETCH_IS_FOLLOWED]) {
                 // note: quoting is skipped; intval'd above
                 $selectFields .= ',
-					IF(user_follow.user_id IS NOT NULL, 1, 0) AS bdapi_user_is_followed';
+					IF(bdapi_user_follow.user_id IS NOT NULL, 1, 0) AS bdapi_user_is_followed';
                 $joinTables .= '
-					LEFT JOIN xf_user_follow AS user_follow ON
-						(user_follow.user_id = ' . $fetchOptions[self::FETCH_IS_FOLLOWED] . ' AND user_follow.follow_user_id = user.user_id)';
+					LEFT JOIN xf_user_follow AS bdapi_user_follow ON
+						(bdapi_user_follow.user_id = ' . $fetchOptions[self::FETCH_IS_FOLLOWED] . '
+						AND bdapi_user_follow.follow_user_id = user.user_id)';
             } else {
                 $selectFields .= ',
 					0 AS bdapi_user_is_followed';
