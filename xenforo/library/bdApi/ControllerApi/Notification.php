@@ -100,7 +100,7 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
                 $this->_request->setParam('profile_post_id', $alert['content_id']);
                 return $this->responseReroute('bdApi_ControllerApi_ProfilePost', 'get-index');
             case 'profile_post_comment':
-                // TODO: add support for `page_of_comment_id` similar to bdApi_ControllerApi_Post
+                // TODO: add support for `page_of_comment_id` similar to ControllerApi_Post
                 /** @var XenForo_Model_ProfilePost $profilePostModel */
                 $profilePostModel = $this->getModelFromCache('XenForo_Model_ProfilePost');
                 $comment = $profilePostModel->getProfilePostCommentById($alert['content_id']);
@@ -108,6 +108,7 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
                     $this->_request->setParam('profile_post_id', $comment['profile_post_id']);
                     return $this->responseReroute('bdApi_ControllerApi_ProfilePost', 'get-comments');
                 }
+                break;
         }
 
         return null;
