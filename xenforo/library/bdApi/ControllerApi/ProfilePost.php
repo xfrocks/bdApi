@@ -363,7 +363,17 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             return $this->responseNoPermission();
         }
 
-        if (!$this->_getProfilePostModel()->canDeleteProfilePostComment($comment, $profilePost, $user, 'soft', $errorPhraseKey)) {
+        $errorPhraseKey = '';
+        if (XenForo_Application::$versionId > 1050051) {
+            $canDelete = call_user_func_array(array($this->_getProfilePostModel(), 'canDeleteProfilePostComment'), array(
+                $comment, $profilePost, $user, 'soft', &$errorPhraseKey
+            ));
+        } else {
+            $canDelete = call_user_func_array(array($this->_getProfilePostModel(), 'canDeleteProfilePostComment'), array(
+                $comment, $profilePost, $user, &$errorPhraseKey
+            ));
+        }
+        if (!$canDelete) {
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
         }
 
