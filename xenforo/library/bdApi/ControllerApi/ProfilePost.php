@@ -248,14 +248,19 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
     public function actionGetComments()
     {
         $profilePostId = $this->_input->filterSingle('profile_post_id', XenForo_Input::UINT);
+        list($profilePost, $user) = $this->_getUserProfileHelper()->assertProfilePostValidAndViewable(
+            $profilePostId,
+            $this->_getProfilePostModel()->getFetchOptionsToPrepareApiData(),
+            $this->_getUserModel()->getFetchOptionsToPrepareApiData()
+        );
 
         $commentId = $this->_input->filterSingle('comment_id', XenForo_Input::UINT);
         if (!empty($commentId)) {
-            list($comment, $profilePost, $user) = $this->_getUserProfileHelper()->assertProfilePostCommentValidAndViewable(
+            list($comment, ,) = $this->_getUserProfileHelper()->assertProfilePostCommentValidAndViewable(
                 $commentId,
                 $this->_getProfilePostModel()->getCommentFetchOptionsToPrepareApiData()
             );
-            if ($profilePost['profile_post_id'] != $profilePostId) {
+            if ($comment['profile_post_id'] != $profilePost['profile_post_id']) {
                 return $this->responseNoPermission();
             }
 
@@ -265,8 +270,6 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
 
             return $this->responseData('bdApi_ViewApi_ProfilePost_Comments_Single', $data);
         }
-
-        list($profilePost, $user) = $this->_getUserProfileHelper()->assertProfilePostValidAndViewable($profilePostId);
 
         $pageNavParams = array();
         $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
@@ -294,7 +297,18 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         $data = array(
             'comments' => $this->_filterDataMany($this->_getProfilePostModel()->prepareApiDataForComments($comments, $profilePost, $user)),
             'comments_total' => $total,
+
+            '_profilePost' => $profilePost,
+            '_user' => $user,
         );
+
+        if (!$this->_isFieldExcluded('profile_post')) {
+            $data['profile_post'] = $this->_filterDataSingle($this->_getProfilePostModel()->prepareApiDataForProfilePost($profilePost, $user), array('profile_post'));
+        }
+
+        if (!$this->_isFieldExcluded('timeline_user')) {
+            $data['timeline_user'] = $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user), array('timeline_user'));
+        }
 
         bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'profile-posts/comments', $profilePost, $pageNavParams);
 
@@ -400,6 +414,14 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
     protected function _getUserProfileHelper()
     {
         return $this->getHelper('UserProfile');
+    }
+
+    /**
+     * @return bdApi_XenForo_Model_User
+     */
+    protected function _getUserModel()
+    {
+        return $this->getModelFromCache('XenForo_Model_User');
     }
 
     /**
