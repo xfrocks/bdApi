@@ -349,7 +349,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             return $this->responseNoPermission();
         }
 
-        if (!$this->_getProfilePostModel()->canDeleteProfilePostComment($comment, $profilePost, $user, $errorPhraseKey)) {
+        if (!$this->_getProfilePostModel()->canDeleteProfilePostComment($comment, $profilePost, $user, 'soft', $errorPhraseKey)) {
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
         }
 
