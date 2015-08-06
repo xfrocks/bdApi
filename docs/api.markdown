@@ -215,11 +215,11 @@ Detail information of a category.
             forum_description: (string),
             forum_thread_count: (int),
             forum_post_count: (int),
-            forum_is_follow: (boolean), // since forum-2014053001
+            forum_is_follow: (boolean), # since forum-2014053001
             links: {
                 permalink: (uri),
                 detail: (uri),
-                followers: (uri), // since forum-2014053001
+                followers: (uri), # since forum-2014053001
                 sub-categories: (uri),
                 sub-forums: (uri),
                 threads: (uri)
@@ -228,7 +228,7 @@ Detail information of a category.
                 view: (boolean),
                 edit: (boolean),
                 delete: (boolean),
-                follow: (boolean), // since forum-2014053001
+                follow: (boolean), # since forum-2014053001
                 create_thread: (boolean),
                 upload_attachment: (boolean) # since forum-2014081202
             }
@@ -528,7 +528,7 @@ Detail information of a thread.
             thread_is_published: (boolean),
             thread_is_deleted: (boolean),
             thread_is_sticky: (boolean),
-            thread_is_followed: (boolean), // since forum-2014052903
+            thread_is_followed: (boolean), # since forum-2014052903
             first_post: (post),
             links: {
                 permalink: (uri),
@@ -544,7 +544,7 @@ Detail information of a thread.
                 view: (boolean),
                 edit: (boolean),
                 delete: (boolean),
-                follow: (boolean), // since forum-2014052903
+                follow: (boolean), # since forum-2014052903
                 post: (boolean),
                 upload_attachment: (boolean) # since forum-2014081203
             }
@@ -1071,24 +1071,25 @@ Detail information of a user.
             user_title: (string),
             user_message_count: (int),
             user_register_date: (unix timestamp in seconds),
+            user_last_seen_date: (unit timestamp in seconds), # since forum-2015080601
             user_like_count: (int),
-            user_is_visitor: (boolean), // since forum-2013110601
+            user_is_visitor: (boolean), # since forum-2013110601
             *user_email: (email),
             *user_dob_day: (int),
             *user_dob_month: (int),
             *user_dob_year: (int),
             *user_timezone_offset: (int),
             *user_has_password: (boolean),
-            *user_unread_conversation_count: (int), // since forum-2014022601, requires conversate scope
+            *user_unread_conversation_count: (int), # since forum-2014022601, requires conversate scope
             user_is_valid: (boolean),
             user_is_verified: (boolean),
-            user_is_followed: (boolean), // since forum-2014052902
-            user_is_ignored: (boolean), // since forum-2015072303
-            *user_custom_fields: { // since forum-2013110601
+            user_is_followed: (boolean), # since forum-2014052902
+            user_is_ignored: (boolean), # since forum-2015072303
+            *user_custom_fields: { # since forum-2013110601
                 field_id: (field_value),
                 ...
             },
-            *user_groups: [ // since forum-2014092301
+            *user_groups: [ # since forum-2014092301
                 {
                     user_group_id: (int),
                     user_group_title: (string),
@@ -1104,11 +1105,11 @@ Detail information of a user.
                 avatar_small: (uri), # since forum-2015071001
                 followers: (uri),
                 followings: (uri),
-                ignore: (uri) // since forum-2015072303
+                ignore: (uri) # since forum-2015072303
             },
             permissions: {
                 follow: (boolean),
-                ignore: (boolean) // since forum-2015072303
+                ignore: (boolean) # since forum-2015072303
             },
             *self_permissions: {
                 create_conversation: (boolean),

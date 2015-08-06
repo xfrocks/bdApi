@@ -101,6 +101,14 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
 
         $data['user_is_followed'] = !empty($user['bdapi_user_is_followed']);
 
+        if ($this->canViewUserCurrentActivity($user)) {
+            $data['user_last_seen_date'] = $user['last_activity'];
+        } else {
+            // user hides his/her activity, use the register date value instead
+            // (IMHO using 0 will make it too obvious that activity is hidden)
+            $data['user_last_seen_date'] = $user['register_date'];
+        }
+
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('members', $user),
             'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $user),
