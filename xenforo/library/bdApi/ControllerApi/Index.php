@@ -8,6 +8,12 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
         $session = XenForo_Application::getSession();
 
         $systemInfo = array();
+        if ($session->getOAuthClientId() === '') {
+            $systemInfo += array(
+                'oauth/authorize' => XenForo_Link::buildApiLink('oauth/authorize', array(), array('oauth_token' => '')),
+                'oauth/token' => XenForo_Link::buildApiLink('oauth/token', array(), array('oauth_token' => '')),
+            );
+        }
         if ($session->checkScope(bdApi_Model_OAuth2::SCOPE_POST)) {
             $systemInfo = array(
                 // YYYYMMDD and 2 digits number (01-99), allowing maximum 99 revisions/day
@@ -19,22 +25,13 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
         $data = array(
             'links' => array(
                 'conversations' => XenForo_Link::buildApiLink('conversations'),
-                'conversation-messages' => XenForo_Link::buildApiLink('conversation-messages'),
                 'notifications' => XenForo_Link::buildApiLink('notifications'),
 
                 'search' => XenForo_Link::buildApiLink('search'),
                 'navigation' => XenForo_Link::buildApiLink('navigation', array(), array('parent' => 0)),
-                'threads' => XenForo_Link::buildApiLink('threads'),
                 'threads/recent' => XenForo_Link::buildApiLink('threads/recent'),
                 'threads/new' => XenForo_Link::buildApiLink('threads/new'),
-                'posts' => XenForo_Link::buildApiLink('posts'),
                 'users' => XenForo_Link::buildApiLink('users'),
-
-                'batch' => XenForo_Link::buildApiLink('batch'),
-                'subscriptions' => XenForo_Link::buildApiLink('subscriptions'),
-
-                'oauth_authorize' => XenForo_Link::buildApiLink('oauth/authorize', array(), array('oauth_token' => '')),
-                'oauth_token' => XenForo_Link::buildApiLink('oauth/token', array(), array('oauth_token' => '')),
             ),
             'system_info' => $systemInfo,
         );

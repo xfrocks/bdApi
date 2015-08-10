@@ -11,6 +11,9 @@ class bdApi_Data_Helper_Core
     {
         if (XenForo_Application::debugMode()) {
             $data['debug'] = XenForo_Debug::getDebugTemplateParams();
+            if (!empty($data['debug']['debug_url'])) {
+                $data['debug']['debug_url'] = XenForo_Link::convertApiUriToAbsoluteUri($data['debug']['debug_url'], true);
+            }
 
             $session = self::safeGetSession();
             if (!empty($session)) {
@@ -19,14 +22,10 @@ class bdApi_Data_Helper_Core
             }
         }
 
-        if (empty($data['system_info'])) {
-            $data['system_info'] = array();
+        if (XenForo_Visitor::getUserId() > 0) {
+            $data['system_info']['visitor_id'] = XenForo_Visitor::getUserId();
+            $data['system_info']['time'] = XenForo_Application::$time;
         }
-
-        $data['system_info'] += array(
-            'visitor_id' => XenForo_Visitor::getUserId(),
-            'time' => XenForo_Application::$time,
-        );
     }
 
     /**
