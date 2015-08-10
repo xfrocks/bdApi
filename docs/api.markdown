@@ -442,7 +442,8 @@ List of threads in a forum (with pagination).
             pages: (int),
             next: (uri),
             prev: (uri)
-        }
+        },
+        forum: (forum) # since forum-2014103002
     }
 
 Parameters:
@@ -714,6 +715,7 @@ List of posts in a thread (with pagination).
             next: (uri),
             prev: (uri)
         },
+        thread: (thread), # since forum-2014103001
         subscription_callback: (uri) # since subscription-2014081002
     }
 
@@ -1413,7 +1415,7 @@ List of contents created by user (with pagination). Since forum-2015042001.
             ...
         ],
         data_total: (int), # since forum-2015080503
-        user: (user),
+        user: (user), # since forum-2015080503
         links {
             pages: (int),
             next: (uri),
