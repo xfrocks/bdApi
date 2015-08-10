@@ -52,6 +52,10 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
             'messages_total' => $total
         );
 
+        if (!$this->_isFieldExcluded('conversation')) {
+            $data['conversation'] = $this->_filterDataSingle($this->_getConversationModel()->prepareApiDataForConversation($conversation), array('conversation'));
+        }
+
         bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'conversation-messages', array(), $pageNavParams);
 
         return $this->responseData('bdApi_ViewApi_ConversationMessage_List', $data);

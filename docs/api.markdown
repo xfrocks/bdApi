@@ -1854,7 +1854,8 @@ List of messages in a conversation (with pagination).
             pages: (int),
             next: (uri),
             prev: (uri)
-        }
+        },
+        conversation: (conversation) # since forum-2015081002
     }
 
 Parameters:
