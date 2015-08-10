@@ -90,12 +90,50 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
     protected function _actionGetContent_getControllerResponse(array $alert)
     {
         switch ($alert['content_type']) {
+            case 'conversation':
+                // NOTE: currently XenForo does not send this type of alert
+                switch ($alert['action']) {
+                    case 'insert':
+                    case 'join':
+                    case 'reply':
+                        $this->_request->setParam('conversation_id', $alert['content_id']);
+                        return $this->responseReroute('bdApi_ControllerApi_ConversationMessage', 'get-index');
+                }
+                $this->_request->setParam('conversation_id', $alert['content_id']);
+                return $this->responseReroute('bdApi_ControllerApi_Conversation', 'get-index');
+
             case 'thread':
                 $this->_request->setParam('thread_id', $alert['content_id']);
                 return $this->responseReroute('bdApi_ControllerApi_Post', 'get-index');
             case 'post':
                 $this->_request->setParam('page_of_post_id', $alert['content_id']);
                 return $this->responseReroute('bdApi_ControllerApi_Post', 'get-index');
+
+            case 'user':
+                switch ($alert['action']) {
+                    case 'following':
+                        $this->_request->setParam('user_id', $alert['content_id']);
+                        return $this->responseReroute('bdApi_ControllerApi_User', 'get-followers');
+                    case 'post_copy':
+                    case 'post_move':
+                    case 'thread_merge':
+                        $extra = @unserialize($alert['extra_data']);
+                        if (!empty($extra['targetLink'])) {
+                            $this->_request->setParam('link', $extra['targetLink']);
+                            return $this->responseReroute('bdApi_ControllerApi_Tool', 'get-parse-link');
+                        }
+                        break;
+                    case 'thread_move':
+                        $extra = @unserialize($alert['extra_data']);
+                        if (!empty($extra['link'])) {
+                            $this->_request->setParam('link', $extra['link']);
+                            return $this->responseReroute('bdApi_ControllerApi_Tool', 'get-parse-link');
+                        }
+                        break;
+                }
+                $this->_request->setParam('user_id', $alert['content_id']);
+                return $this->responseReroute('bdApi_ControllerApi_User', 'get-index');
+
             case 'profile_post':
                 $this->_request->setParam('profile_post_id', $alert['content_id']);
                 return $this->responseReroute('bdApi_ControllerApi_ProfilePost', 'get-comments');
