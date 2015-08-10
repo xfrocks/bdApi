@@ -247,50 +247,73 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
 
     public function actionGetComments()
     {
-        $profilePostId = $this->_input->filterSingle('profile_post_id', XenForo_Input::UINT);
-        list($profilePost, $user) = $this->_getUserProfileHelper()->assertProfilePostValidAndViewable(
-            $profilePostId,
-            $this->_getProfilePostModel()->getFetchOptionsToPrepareApiData(),
-            $this->_getUserModel()->getFetchOptionsToPrepareApiData()
-        );
-
-        $commentId = $this->_input->filterSingle('comment_id', XenForo_Input::UINT);
-        if (!empty($commentId)) {
-            list($comment, ,) = $this->_getUserProfileHelper()->assertProfilePostCommentValidAndViewable(
-                $commentId,
-                $this->_getProfilePostModel()->getCommentFetchOptionsToPrepareApiData()
+        $pageOfCommentId = $this->_input->filterSingle('page_of_comment_id', XenForo_Input::UINT);
+        $pageOfComment = null;
+        if (!empty($pageOfCommentId)) {
+            list($pageOfComment, $profilePost, $user) = $this->_getUserProfileHelper()->assertProfilePostCommentValidAndViewable(
+                $pageOfCommentId,
+                $this->_getProfilePostModel()->getCommentFetchOptionsToPrepareApiData(),
+                $this->_getProfilePostModel()->getFetchOptionsToPrepareApiData(),
+                $this->_getUserModel()->getFetchOptionsToPrepareApiData()
             );
-            if ($comment['profile_post_id'] != $profilePost['profile_post_id']) {
+            $profilePostId = $profilePost['profile_post_id'];
+        } else {
+            $profilePostId = $this->_input->filterSingle('profile_post_id', XenForo_Input::UINT);
+            if (empty($profilePostId)) {
                 return $this->responseNoPermission();
             }
 
-            $data = array(
-                'comment' => $this->_filterDataSingle($this->_getProfilePostModel()->prepareApiDataForComment($comment, $profilePost, $user)),
+            list($profilePost, $user) = $this->_getUserProfileHelper()->assertProfilePostValidAndViewable(
+                $profilePostId,
+                $this->_getProfilePostModel()->getFetchOptionsToPrepareApiData(),
+                $this->_getUserModel()->getFetchOptionsToPrepareApiData()
             );
 
-            return $this->responseData('bdApi_ViewApi_ProfilePost_Comments_Single', $data);
+            // special case for single comment
+            $commentId = $this->_input->filterSingle('comment_id', XenForo_Input::UINT);
+            if (!empty($commentId)) {
+                list($comment, ,) = $this->_getUserProfileHelper()->assertProfilePostCommentValidAndViewable(
+                    $commentId,
+                    $this->_getProfilePostModel()->getCommentFetchOptionsToPrepareApiData()
+                );
+                if ($comment['profile_post_id'] != $profilePost['profile_post_id']) {
+                    return $this->responseNoPermission();
+                }
+
+                $data = array(
+                    'comment' => $this->_filterDataSingle($this->_getProfilePostModel()->prepareApiDataForComment($comment, $profilePost, $user)),
+                );
+
+                return $this->responseData('bdApi_ViewApi_ProfilePost_Comments_Single', $data);
+            }
         }
 
         $pageNavParams = array();
-        $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
-        $limit = XenForo_Application::get('options')->messagesPerPage;
 
+        $beforeDate = $this->_input->filterSingle('before', XenForo_Input::UINT);
+
+        $limit = XenForo_Application::get('options')->messagesPerPage;
         $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
         if (!empty($inputLimit)) {
             $limit = $inputLimit;
             $pageNavParams['limit'] = $inputLimit;
         }
 
+        if (!empty($pageOfComment)) {
+            $beforeDate = $pageOfComment['comment_date'] + 1;
+        }
+
         $fetchOptions = array(
-            'perPage' => $limit,
-            'page' => $page
+            'limit' => $limit,
         );
 
         $comments = $this->_getProfilePostModel()->getProfilePostCommentsByProfilePost(
             $profilePostId,
-            0,
+            $beforeDate,
             $this->_getProfilePostModel()->getCommentFetchOptionsToPrepareApiData($fetchOptions)
         );
+        $oldestComment = reset($comments);
+        $latestComment = end($comments);
 
         $total = $profilePost['comment_count'];
 
@@ -310,7 +333,23 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             $data['timeline_user'] = $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user), array('timeline_user'));
         }
 
-        bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'profile-posts/comments', $profilePost, $pageNavParams);
+        $inputData = $this->_input->filter(array(
+            'fields_include' => XenForo_Input::STRING,
+            'fields_exclude' => XenForo_Input::STRING,
+        ));
+        if (!empty($inputData['fields_include'])) {
+            $pageNavParams['fields_include'] = $inputData['fields_include'];
+        } elseif (!empty($inputData['fields_exclude'])) {
+            $pageNavParams['fields_exclude'] = $inputData['fields_exclude'];
+        }
+        if ($oldestComment['comment_date'] != $profilePost['first_comment_date']) {
+            $data['links']['prev'] = XenForo_Link::buildApiLink('profile-posts/comments', $profilePost, array_merge($pageNavParams, array(
+                'before' => $oldestComment['comment_date'],
+            )));
+        }
+        if ($latestComment['comment_date'] != $profilePost['last_comment_date']) {
+            $data['links']['latest'] = XenForo_Link::buildApiLink('profile-posts/comments', $profilePost, $pageNavParams);
+        }
 
         return $this->responseData('bdApi_ViewApi_ProfilePost_Comments', $data);
     }

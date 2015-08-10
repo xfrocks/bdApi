@@ -98,17 +98,11 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
                 return $this->responseReroute('bdApi_ControllerApi_Post', 'get-index');
             case 'profile_post':
                 $this->_request->setParam('profile_post_id', $alert['content_id']);
-                return $this->responseReroute('bdApi_ControllerApi_ProfilePost', 'get-index');
+                return $this->responseReroute('bdApi_ControllerApi_ProfilePost', 'get-comments');
             case 'profile_post_comment':
-                // TODO: add support for `page_of_comment_id` similar to ControllerApi_Post
-                /** @var XenForo_Model_ProfilePost $profilePostModel */
-                $profilePostModel = $this->getModelFromCache('XenForo_Model_ProfilePost');
-                $comment = $profilePostModel->getProfilePostCommentById($alert['content_id']);
-                if (!empty($comment)) {
-                    $this->_request->setParam('profile_post_id', $comment['profile_post_id']);
-                    return $this->responseReroute('bdApi_ControllerApi_ProfilePost', 'get-comments');
-                }
-                break;
+                // NOTE: currently XenForo does not send this type of alert
+                $this->_request->setParam('page_of_comment_id', $alert['content_id']);
+                return $this->responseReroute('bdApi_ControllerApi_ProfilePost', 'get-comments');
         }
 
         return null;

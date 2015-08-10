@@ -1591,12 +1591,18 @@ List of comments of a profile post. Since forum-2015042001.
         comments: [
             (profile_post > comment),
             ...
-        ]
+        ],
+        links: { # since forum-2015081001
+            prev: (uri),
+            latest: (uri)
+        },
+        profile_post: (profile_post), # since forum-2015081001
+        timeline_user: (user) # since forum-2015081001
     }
 
 Parameters:
 
- * N/A
+ * `before` (_optional_): date to get older comments. Since forum-2015081001. Please note that this entry point does not support the `page` parameter but it still does support `limit`.
 
 Required scopes:
 
