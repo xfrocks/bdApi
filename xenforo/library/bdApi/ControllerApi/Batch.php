@@ -2,11 +2,6 @@
 
 class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
 {
-    public function actionGetIndex()
-    {
-        return $this->responseError(new XenForo_Phrase('bdapi_slash_batch_only_accepts_post_requests'), 400);
-    }
-
     public function actionPostIndex()
     {
         $input = file_get_contents('php://input');

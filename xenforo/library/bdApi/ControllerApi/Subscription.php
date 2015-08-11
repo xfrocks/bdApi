@@ -2,11 +2,6 @@
 
 class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
 {
-    public function actionGetIndex()
-    {
-        return $this->responseError(new XenForo_Phrase('bdapi_slash_subscription_only_accepts_post_requests'), 400);
-    }
-
     public function actionPostIndex()
     {
         /* @var $session bdApi_Session */

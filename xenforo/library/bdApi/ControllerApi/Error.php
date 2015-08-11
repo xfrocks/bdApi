@@ -4,6 +4,16 @@ class bdApi_ControllerApi_Error extends bdApi_ControllerApi_Abstract
 {
     public function actionErrorNotFound()
     {
+        $controllerName = $this->_request->getParam('_controllerName');
+        $action = $this->_request->getParam('_action');
+        if (substr($action, 0, 3) === 'Get') {
+            // try to suggest POST entry point if available
+            $newControllerName = XenForo_Application::resolveDynamicClass($controllerName, 'controller');
+            if (method_exists($newControllerName, 'actionPost' . substr($action, 3))) {
+                return $this->responseError(new XenForo_Phrase('bdapi_only_accepts_post_requests'), 400);
+            }
+        }
+
         if (is_callable(array(
             $this,
             'getNotFoundResponse'

@@ -675,6 +675,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_no_facebook_association_found" version_id="62" version_string="1.4.2-BETA"><![CDATA[No user has been registered with this Facebook account.]]></phrase>
     <phrase title="bdapi_no_google_association_found" version_id="62" version_string="1.4.2-BETA"><![CDATA[No user has been registered with this Google account.]]></phrase>
     <phrase title="bdapi_no_twitter_association_found" version_id="62" version_string="1.4.2-BETA"><![CDATA[No user has been registered with this Twitter account.]]></phrase>
+    <phrase title="bdapi_only_accepts_post_requests" version_id="75" version_string="1.4.4c"><![CDATA[This entry point only accepts POST requests.]]></phrase>
     <phrase title="bdapi_please_confirm_to_authorize_access" version_id="1" version_string="0.1"><![CDATA[Please confirm to authorize access to the listed client with below permissions.]]></phrase>
     <phrase title="bdapi_post_slash_users_requires_client_id" version_id="26" version_string="1.0.1"><![CDATA[POST /users requires `client_id`.
 ]]></phrase>
@@ -705,17 +706,13 @@ step=3600</edit_format_params>
     <phrase title="bdapi_scope_participate_in_conversations" global_cache="1" version_id="3" version_string="0.2.1"><![CDATA[Read and start/reply to your conversations]]></phrase>
     <phrase title="bdapi_scope_post" global_cache="1" version_id="1" version_string="0.1"><![CDATA[Post contents (threads, posts) on behalf of you]]></phrase>
     <phrase title="bdapi_scope_read" global_cache="1" version_id="1" version_string="0.1"><![CDATA[Read information (forums, threads, posts) with your account's permissions]]></phrase>
-    <phrase title="bdapi_slash_batch_only_accepts_post_requests" version_id="19" version_string="0.9.4"><![CDATA[/batch only accepts POST requests.]]></phrase>
     <phrase title="bdapi_slash_batch_requires_json" version_id="19" version_string="0.9.4"><![CDATA[/batch requires valid JSON for jobs input.]]></phrase>
     <phrase title="bdapi_slash_conversation_messages_attachments_requires_ids" version_id="50" version_string="1.2.1b"><![CDATA[/conversation-messages/attachments requires `conversation_id` for new message or `message_id` for existing message.]]></phrase>
     <phrase title="bdapi_slash_conversation_messages_requires_conversation_id" version_id="38" version_string="1.0.13"><![CDATA[/conversation-messages requires `conversation_id`.]]></phrase>
     <phrase title="bdapi_slash_oauth_token_admin_requires_user_id" version_id="63" version_string="1.4.3-BETA"><![CDATA[/oauth/token/admin requires `user_id`.]]></phrase>
-    <phrase title="bdapi_slash_oauth_token_only_accepts_post_requests" version_id="2" version_string="0.2"><![CDATA[/oauth/token only accepts POST requests.]]></phrase>
     <phrase title="bdapi_slash_posts_attachments_requires_ids" version_id="20" version_string="0.9.5"><![CDATA[/posts/attachments requires `thread_id` for new post or `post_id` for existing post.]]></phrase>
     <phrase title="bdapi_slash_posts_requires_thread_id" version_id="20" version_string="0.9.5"><![CDATA[/posts requires `thread_id`.]]></phrase>
-    <phrase title="bdapi_slash_search_only_accepts_post_requests" version_id="16" version_string="0.9.3"><![CDATA[/search only accepts POST requests.]]></phrase>
     <phrase title="bdapi_slash_search_requires_q" version_id="20" version_string="0.9.5"><![CDATA[/search requires `q`.]]></phrase>
-    <phrase title="bdapi_slash_subscription_only_accepts_post_requests" version_id="50" version_string="1.2.1b"><![CDATA[/subscription only accepts POST requests.]]></phrase>
     <phrase title="bdapi_slash_threads_attachments_requires_forum_id" version_id="20" version_string="0.9.5"><![CDATA[/threads/attachments requires `forum_id`.]]></phrase>
     <phrase title="bdapi_slash_threads_requires_forum_id" version_id="20" version_string="0.9.5"><![CDATA[/threads requires `forum_id`.]]></phrase>
     <phrase title="bdapi_slash_tools_login_requires_redirect_uri" version_id="45" version_string="1.1.6"><![CDATA[/tools/login requires `redirect_uri`.]]></phrase>

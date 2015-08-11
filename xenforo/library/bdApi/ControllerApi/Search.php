@@ -80,11 +80,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_Search_Results', $data);
     }
 
-    public function actionGetThreads()
-    {
-        return $this->responseError(new XenForo_Phrase('bdapi_slash_search_only_accepts_post_requests'), 400);
-    }
-
     public function actionPostThreads()
     {
         $search = $this->_doSearch('thread');
@@ -104,11 +99,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         }
 
         return $this->responseData('bdApi_ViewApi_Search_Threads', $data);
-    }
-
-    public function actionGetPosts()
-    {
-        return $this->responseError(new XenForo_Phrase('bdapi_slash_search_only_accepts_post_requests'), 400);
     }
 
     public function actionPostPosts()
@@ -155,11 +145,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         }
 
         return $this->responseData('bdApi_ViewApi_Search_Posts', $data);
-    }
-
-    public function actionGetProfilePosts()
-    {
-        return $this->responseError(new XenForo_Phrase('bdapi_slash_search_only_accepts_post_requests'), 400);
     }
 
     public function actionPostProfilePosts()

@@ -15,11 +15,6 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         exit;
     }
 
-    public function actionGetToken()
-    {
-        return $this->responseError(new XenForo_Phrase('bdapi_slash_oauth_token_only_accepts_post_requests'), 404);
-    }
-
     public function actionPostToken()
     {
         /* @var $oauth2Model bdApi_Model_OAuth2 */
