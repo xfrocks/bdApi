@@ -245,7 +245,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 
         $reportMessage = $this->_input->filterSingle('message', XenForo_Input::STRING);
         if (!$reportMessage) {
-            return $this->responseError(new XenForo_Phrase('please_enter_reason_for_reporting_this_message'), 400);
+            return $this->responseError(new XenForo_Phrase('bdapi_slash_x_report_requires_message', array('route' => 'conversation-messages')), 400);
         }
 
         $this->assertNotFlooding('report');

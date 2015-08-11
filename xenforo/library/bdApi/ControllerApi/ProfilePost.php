@@ -445,7 +445,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
 
         $message = $this->_input->filterSingle('message', XenForo_Input::STRING);
         if (!$message) {
-            return $this->responseError(new XenForo_Phrase('please_enter_reason_for_reporting_this_message'), 400);
+            return $this->responseError(new XenForo_Phrase('bdapi_slash_x_report_requires_message', array('route' => 'profile-posts')), 400);
         }
 
         $this->assertNotFlooding('report');
