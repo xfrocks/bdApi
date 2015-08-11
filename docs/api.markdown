@@ -1947,14 +1947,16 @@ Detail information of a message.
                 detail: (uri),
                 conversation: (uri),
                 creator: (uri),
-                creator_avatar: (uri)
+                creator_avatar: (uri),
+                report: (uri) # since forum-2015081101
             },
             permissions: { # since forum-2014053101
                 view: (boolean),
                 edit: (boolean),
                 delete: (boolean),
                 reply: (boolean),
-                upload_attachment: (boolean) # since forum-2014081801
+                upload_attachment: (boolean), # since forum-2014081801
+                report: (uri) # since forum-2015081101
             }
         }
     }
@@ -2033,6 +2035,22 @@ Parameters:
 
  * `conversation_id` (_optional_): id of the container thread of the target post (use only if the attachment hasn't been associated with a message).
  * `attachment_hash` (_optional_): the hash that was used when the attachment was uploaded (use only if the attachment hasn't been associated with a message).
+
+Required scopes:
+
+ * `post`
+
+### POST `/conversation-messages/:messageId/report`
+Report a message. Since forum-2015081101.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * `message` (__required__): reason of the report.
 
 Required scopes:
 

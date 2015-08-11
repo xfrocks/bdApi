@@ -178,7 +178,8 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
                 'm',
                 false,
                 true
-            ))
+            )),
+            'report' => bdApi_Data_Helper_Core::safeBuildApiLink('conversation-messages/report', $message),
         );
 
         $data['permissions'] = array(
@@ -187,6 +188,7 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
             'delete' => false,
             'reply' => $this->canReplyToConversation($conversation),
             'upload_attachment' => $this->canUploadAndManageAttachment($conversation) AND $this->canEditMessage($message, $conversation),
+            'report' => $this->canReportMessage($message, $conversation),
         );
 
         return $data;

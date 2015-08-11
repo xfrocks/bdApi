@@ -232,6 +232,33 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         return $attachmentHelper->doDelete($hash, $attachmentId);
     }
 
+    public function actionPostReport()
+    {
+        $messageId = $this->_input->filterSingle('message_id', XenForo_Input::UINT);
+
+        $message = $this->_getMessageOrError($messageId);
+        $conversation = $this->_getConversationOrError($message['conversation_id']);
+
+        if (!$this->_getConversationModel()->canReportMessage($message, $conversation, $errorPhraseKey)) {
+            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+        }
+
+        $reportMessage = $this->_input->filterSingle('message', XenForo_Input::STRING);
+        if (!$reportMessage) {
+            return $this->responseError(new XenForo_Phrase('please_enter_reason_for_reporting_this_message'), 400);
+        }
+
+        $this->assertNotFlooding('report');
+
+        $message['conversation'] = $conversation;
+
+        /* @var $reportModel XenForo_Model_Report */
+        $reportModel = $this->getModelFromCache('XenForo_Model_Report');
+        $reportModel->reportContent('conversation_message', $message, $reportMessage);
+
+        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
+
     protected function _getConversationOrError($conversationId, array $fetchOptions = array())
     {
         $conversation = $this->_getConversationModel()->getConversationForUser($conversationId, XenForo_Visitor::getUserId(), $this->_getConversationModel()->getFetchOptionsToPrepareApiData($fetchOptions));
