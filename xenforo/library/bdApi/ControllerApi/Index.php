@@ -24,17 +24,24 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 
         $data = array(
             'links' => array(
-                'conversations' => XenForo_Link::buildApiLink('conversations'),
-                'notifications' => XenForo_Link::buildApiLink('notifications'),
-
                 'search' => XenForo_Link::buildApiLink('search'),
                 'navigation' => XenForo_Link::buildApiLink('navigation', array(), array('parent' => 0)),
                 'threads/recent' => XenForo_Link::buildApiLink('threads/recent'),
-                'threads/new' => XenForo_Link::buildApiLink('threads/new'),
                 'users' => XenForo_Link::buildApiLink('users'),
             ),
             'system_info' => $systemInfo,
         );
+
+        if (XenForo_Visitor::getUserId() > 0) {
+            $data['links']['conversations'] = XenForo_Link::buildApiLink('conversations');
+            $data['links']['forums/followed'] = XenForo_Link::buildApiLink('forums/followed');
+            $data['links']['notifications'] = XenForo_Link::buildApiLink('notifications');
+            $data['links']['threads/followed'] = XenForo_Link::buildApiLink('threads/followed');
+            $data['links']['threads/new'] = XenForo_Link::buildApiLink('threads/new');
+            $data['links']['users/ignored'] = XenForo_Link::buildApiLink('users/ignored');
+            $data['links']['users/me'] = XenForo_Link::buildApiLink('users', array(
+                'user_id' => XenForo_Visitor::getInstance()->toArray()), array('oauth_token' => ''));
+        }
 
         return $this->responseData('bdApi_ViewApi_Index', $data);
     }
