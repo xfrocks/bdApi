@@ -326,13 +326,28 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     {
         $this->_assertRegistrationRequired();
 
+        $total = $this->_getThreadWatchModel()->countThreadsWatchedByUser(XenForo_Visitor::getUserId());
         if ($this->_input->inRequest('total')) {
-            $total = $this->_getThreadWatchModel()->countThreadsWatchedByUser(XenForo_Visitor::getUserId());
             $data = array('threads_total' => $total);
             return $this->responseData('bdApi_ViewApi_Thread_Followed_Total', $data);
         }
 
-        $threadWatches = $this->_getThreadWatchModel()->getThreadsWatchedByUser(XenForo_Visitor::getUserId(), false);
+        $pageNavParams = array();
+        $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
+        $limit = XenForo_Application::get('options')->discussionsPerPage;
+
+        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
+        if (!empty($inputLimit)) {
+            $limit = $inputLimit;
+            $pageNavParams['limit'] = $inputLimit;
+        }
+
+        $fetchOptions = array(
+            'limit' => $limit,
+            'page' => $page
+        );
+
+        $threadWatches = $this->_getThreadWatchModel()->getThreadsWatchedByUser(XenForo_Visitor::getUserId(), false, $fetchOptions);
         $threadsData = array();
         $threads = array();
 
@@ -356,7 +371,12 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             }
         }
 
-        $data = array('threads' => $this->_filterDataMany($threadsData));
+        $data = array(
+            'threads' => $this->_filterDataMany($threadsData),
+            'threads_total' => $total,
+        );
+
+        bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'threads/followed', array(), $pageNavParams);
 
         return $this->responseData('bdApi_ViewApi_Thread_Followed', $data);
     }
