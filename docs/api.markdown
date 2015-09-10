@@ -471,6 +471,7 @@ Parameters:
  * `forum_id` (__required__): id of the target forum.
  * `thread_title` (__required__): title of the new thread.
  * `post_body` (__required__): content of the new thread.
+ * `thread_tags` (_optional_): thread tags for the new thread. Since forum-2015091002 and requires XenForo 1.5+.
 
 Required scopes:
 
@@ -990,6 +991,40 @@ Report a post.
 Parameters:
 
  * `message` (__required__): reason of the report.
+
+Required scopes:
+
+ * `post`
+
+## Content Tagging
+
+### GET `/tags`
+List of tags (no pagination). Since forum-2015091002 and requires XenForo 1.5+.
+
+    {
+        tags: {
+            (tag id): (tag text),
+            ...
+        }
+    }
+
+Required scopes:
+
+ * `read`
+
+### GET `/tags/find`
+Filtered list of tags. Since forum-2015091002 and requires XenForo 1.5+.
+
+    {
+        tags: [
+            (tag text),
+            ...
+        ]
+    }
+
+Parameters:
+
+ * `tag` (__required__): tag to filter. Tags start with the query will be returned.
 
 Required scopes:
 

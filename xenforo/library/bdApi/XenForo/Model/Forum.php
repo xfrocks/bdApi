@@ -56,6 +56,12 @@ class bdApi_XenForo_Model_Forum extends XFCP_bdApi_XenForo_Model_Forum
             'upload_attachment' => $this->canUploadAndManageAttachment($forum),
         );
 
+        if (XenForo_Application::$versionId > 1050000) {
+            /** @var XenForo_Model_Thread $threadModel */
+            $threadModel = $this->getModelFromCache('XenForo_Model_Thread');
+            $data['permissions']['tag_thread'] = $threadModel->canEditTags(null, $forum);
+        }
+
         if (XenForo_Application::$versionId >= 1020000) {
             $data['forum_is_followed'] = !empty($forum['forum_is_watched']);
             $data['links']['followers'] = bdApi_Data_Helper_Core::safeBuildApiLink('forums/followers', $forum);

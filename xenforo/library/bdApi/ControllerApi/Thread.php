@@ -208,7 +208,10 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         // the routine is very similar to XenForo_ControllerPublic_Forum::actionAddThread
-        $input = $this->_input->filter(array('thread_title' => XenForo_Input::STRING));
+        $input = $this->_input->filter(array(
+            'thread_title' => XenForo_Input::STRING,
+            'thread_tags' => XenForo_Input::STRING,
+        ));
 
         /* @var $editorHelper XenForo_ControllerHelper_Editor */
         $editorHelper = $this->getHelper('Editor');
@@ -243,6 +246,19 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
         $writer->setExtraData(XenForo_DataWriter_Discussion_Thread::DATA_FORUM, $forum);
 
+        $tagger = null;
+        if (XenForo_Application::$versionId > 1050000
+            && $this->_getThreadModel()->canEditTags(null, $forum)
+        ) {
+            // thread tagging is available since XenForo 1.5.0
+            /** @var XenForo_Model_Tag $tagModel */
+            $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
+            $tagger = $tagModel->getTagger('thread');
+            $tagger->setPermissionsFromContext($forum)
+                ->setTags($tagModel->splitTags($input['thread_tags']));
+            $writer->mergeErrors($tagger->getErrors());
+        }
+
         $writer->preSave();
 
         if (!$writer->hasErrors()) {
@@ -252,6 +268,11 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $writer->save();
 
         $thread = $writer->getMergedData();
+
+        if (!empty($tagger)) {
+            $tagger->setContent($thread['thread_id'], true)
+                ->save();
+        }
 
         $this->_getThreadWatchModel()->setVisitorThreadWatchStateFromInput($thread['thread_id'], array(
             // TODO
