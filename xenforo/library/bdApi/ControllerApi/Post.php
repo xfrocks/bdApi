@@ -81,6 +81,15 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'posts', array(), $pageNavParams);
 
+        $maxPostDate = 0;
+        foreach ($posts as $post) {
+            if ($post['post_date'] > $maxPostDate) {
+                $maxPostDate = $post['post_date'];
+            }
+        }
+        $this->_getThreadModel()->markThreadRead($thread, $forum, $maxPostDate);
+        $this->_getThreadModel()->logThreadView($threadId);
+
         return $this->responseData('bdApi_ViewApi_Post_List', $data);
     }
 
