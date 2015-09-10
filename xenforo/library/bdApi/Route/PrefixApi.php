@@ -40,7 +40,7 @@ class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
         self::addRoute($routes, 'tools', 'bdApi_Route_PrefixApi_Tools');
 
         // backward compatibility
-        self::addRoute($routes, 'all-threads', 'bdApi_Route_PrefixApi_AllThreads');
+        self::addRoute($routes, 'all-threads', 'bdApi_Route_PrefixApi_Threads');
 
         XenForo_CodeEvent::fire('api_setup_routes', array(&$routes));
     }
