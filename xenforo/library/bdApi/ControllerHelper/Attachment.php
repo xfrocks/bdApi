@@ -73,6 +73,8 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
             return $this->_controller->responseError(new XenForo_Phrase('attachment_cannot_be_shown_at_this_time'));
         }
 
+        $this->_getAttachmentModel()->logAttachmentView($attachment['attachment_id']);
+
         $resize = $this->_controller->getInput()->filter(array(
             'max_width' => XenForo_Input::UINT,
             'max_height' => XenForo_Input::UINT,
