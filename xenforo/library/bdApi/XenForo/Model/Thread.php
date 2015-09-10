@@ -87,6 +87,18 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
             $data['first_post'] = $postModel->prepareApiDataForPost($firstPost, $thread, $forum);
         }
 
+        if (XenForo_Application::$versionId > 1050000
+            && isset($thread['tags'])
+        ) {
+            $tags = @unserialize($thread['tags']);
+
+            if (is_array($tags)) {
+                /** @var bdApi_XenForo_Model_Tag $tagModel */
+                $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
+                $data['thread_tags'] = $tagModel->prepareApiDataForTags($tags);
+            }
+        }
+
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('threads', $thread),
             'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('threads', $thread),

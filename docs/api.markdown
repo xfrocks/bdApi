@@ -531,6 +531,10 @@ Detail information of a thread.
             thread_is_sticky: (boolean),
             thread_is_followed: (boolean), # since forum-2014052903
             first_post: (post),
+            thread_tags { # since forum-2015091001
+                (tag id): (tag text),
+                ...
+            },
             links: {
                 permalink: (uri),
                 detail: (uri),
@@ -2189,8 +2193,34 @@ Search for all supported contents. Since forum-2015042002.
 Parameters:
 
  * `q` (__required__): query to search for.
+ * `tag` (_optional_): tag to search for tagged contents. Since forum-2015091001 and requires XenForo 1.5+.
  * `forum_id` (_optional_): id of the container forum to search for contents. Child forums of the specified forum will be included in the search.
  * `user_id` (_optional_): id of the creator to search for contents.
+ * `page` (_optional_): page number of results. Since forum-2015042301.
+ * `limit` (_optional_): number of results in a page. Default value depends on the system configuration. Since forum-2015042301.
+
+Required scopes:
+
+ * `read`
+
+### POST `/search/tagged`
+Search for tagged contents. Since forum-2015091001 and requires XenForo 1.5+.
+
+    {
+        data: [
+            (content),
+            ...
+        ],
+        data_total: (int),
+        links: {
+            pages: (int),
+            next: (uri),
+            prev: (uri)
+        }
+    }
+Parameters:
+
+ * `tag` (__required__): tag to search for tagged contents.
  * `page` (_optional_): page number of results. Since forum-2015042301.
  * `limit` (_optional_): number of results in a page. Default value depends on the system configuration. Since forum-2015042301.
 
