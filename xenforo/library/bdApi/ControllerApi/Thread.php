@@ -261,9 +261,11 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
         $writer->preSave();
 
-        if (!$writer->hasErrors()) {
-            $this->assertNotFlooding('post');
+        if ($writer->hasErrors()) {
+            return $this->responseErrors($writer->getErrors(), 400);
         }
+
+        $this->assertNotFlooding('post');
 
         $writer->save();
 

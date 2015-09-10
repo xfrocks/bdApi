@@ -120,9 +120,11 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
 
             $writer->preSave();
 
-            if (!$writer->hasErrors()) {
-                $this->assertNotFlooding('post');
+            if ($writer->hasErrors()) {
+                return $this->responseErrors($writer->getErrors(), 400);
             }
+
+            $this->assertNotFlooding('post');
 
             $writer->save();
             $profilePostId = $writer->get('profile_post_id');
@@ -378,9 +380,11 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         $dw->setOption(XenForo_DataWriter_ProfilePostComment::OPTION_MAX_TAGGED_USERS, $visitor->hasPermission('general', 'maxTaggedUsers'));
         $dw->preSave();
 
-        if (!$dw->hasErrors()) {
-            $this->assertNotFlooding('post');
+        if ($dw->hasErrors()) {
+            return $this->responseErrors($dw->getErrors(), 400);
         }
+
+        $this->assertNotFlooding('post');
 
         $dw->save();
         $comment = $dw->getMergedData();

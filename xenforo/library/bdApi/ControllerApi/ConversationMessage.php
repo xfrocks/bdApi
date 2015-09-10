@@ -108,9 +108,11 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 
         $messageDw->preSave();
 
-        if (!$messageDw->hasErrors()) {
-            $this->assertNotFlooding('conversation');
+        if ($messageDw->hasErrors()) {
+            return $this->responseErrors($messageDw->getErrors(), 400);
         }
+
+        $this->assertNotFlooding('conversation');
 
         $messageDw->save();
         $message = $messageDw->getMergedData();

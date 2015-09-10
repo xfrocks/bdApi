@@ -26,6 +26,18 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
     }
 
     /**
+     * @param array $errors
+     * @param int $responseCode
+     * @param array $containerParams
+     *
+     * @return XenForo_ControllerResponse_Error
+     */
+    public function responseErrors(array $errors, $responseCode = 200, array $containerParams = array())
+    {
+        return parent::responseError(reset($errors), $responseCode, $containerParams);
+    }
+
+    /**
      * Filters data for many resources
      *
      * @param array $resourcesData
