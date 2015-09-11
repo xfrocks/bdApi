@@ -302,13 +302,13 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
     public function responseNoPermission()
     {
-        return $this->responseReroute('bdApi_ControllerApi_Error', 'noPermission');
+        return $this->responseReroute('bdApi_ControllerApi_Error', 'no-permission');
     }
 
     protected function _assertRegistrationRequired()
     {
         if (!XenForo_Visitor::getUserId()) {
-            throw $this->responseException($this->responseReroute('bdApi_ControllerApi_Error', 'registrationRequired'));
+            throw $this->responseException($this->responseReroute('bdApi_ControllerApi_Error', 'registration-required'));
         }
     }
 
