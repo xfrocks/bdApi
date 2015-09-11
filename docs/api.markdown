@@ -471,7 +471,7 @@ Parameters:
  * `forum_id` (__required__): id of the target forum.
  * `thread_title` (__required__): title of the new thread.
  * `post_body` (__required__): content of the new thread.
- * `thread_tags` (_optional_): thread tags for the new thread. Since forum-2015091002 and requires XenForo 1.5+.
+ * `thread_tags` (_optional_): thread tags for the new thread. Since forum-2015091002.
 
 Required scopes:
 
@@ -552,7 +552,8 @@ Detail information of a thread.
                 delete: (boolean),
                 follow: (boolean), # since forum-2014052903
                 post: (boolean),
-                upload_attachment: (boolean) # since forum-2014081203
+                upload_attachment: (boolean), # since forum-2014081203
+                edit_tags: (boolean), # since forum-2015091102
             }
         }
     }
@@ -564,6 +565,9 @@ Parameters:
 Required scopes:
 
  * `read`
+
+### PUT `/threads/:threadId`
+Alias for PUT `/posts/:postId`. Since forum-2015091102.
 
 ### DELETE `/threads/:threadId`
 Delete a thread.
@@ -858,7 +862,7 @@ Parameters:
 
  * `post_body` (__required__): new content of the post.
  * `thread_title` (_optional_, since forum-2014052203): new title of the thread (only used if the post is the first post in the thread and the user can edit thread).
- * `thread_tags` (_optional_, since forum-2015091101 and requires XenForo 1.5+): new tags of the thread (only used if the post is the first post in the thread and the user can edit thread tags).
+ * `thread_tags` (_optional_, since forum-2015091101): new tags of the thread (only used if the post is the first post in the thread and the user can edit thread tags).
 
 Required scopes:
 
@@ -1000,7 +1004,7 @@ Required scopes:
 ## Content Tagging
 
 ### GET `/tags`
-List of tags (no pagination). Since forum-2015091002 and requires XenForo 1.5+.
+List of tags (no pagination). Since forum-2015091002.
 
     {
         tags: {
@@ -1014,7 +1018,7 @@ Required scopes:
  * `read`
 
 ### GET `/tags/find`
-Filtered list of tags. Since forum-2015091002 and requires XenForo 1.5+.
+Filtered list of tags. Since forum-2015091002.
 
     {
         tags: [
@@ -2229,7 +2233,7 @@ Search for all supported contents. Since forum-2015042002.
 Parameters:
 
  * `q` (__required__): query to search for.
- * `tag` (_optional_): tag to search for tagged contents. Since forum-2015091001 and requires XenForo 1.5+.
+ * `tag` (_optional_): tag to search for tagged contents. Since forum-2015091001.
  * `forum_id` (_optional_): id of the container forum to search for contents. Child forums of the specified forum will be included in the search.
  * `user_id` (_optional_): id of the creator to search for contents.
  * `page` (_optional_): page number of results. Since forum-2015042301.
@@ -2240,7 +2244,7 @@ Required scopes:
  * `read`
 
 ### POST `/search/tagged`
-Search for tagged contents. Since forum-2015091001 and requires XenForo 1.5+.
+Search for tagged contents. Since forum-2015091001.
 
     {
         data: [

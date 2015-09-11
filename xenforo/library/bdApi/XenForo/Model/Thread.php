@@ -129,6 +129,10 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
             'upload_attachment' => $this->_getForumModel()->canUploadAndManageAttachment($forum),
         );
 
+        if (XenForo_Application::$versionId > 1050000) {
+            $data['permissions']['edit_tags'] = $this->canEditTags($thread, $forum);
+        }
+
         return $data;
     }
 

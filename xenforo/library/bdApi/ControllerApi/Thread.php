@@ -303,6 +303,18 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         return $this->responseReroute(__CLASS__, 'single');
     }
 
+    public function actionPutIndex()
+    {
+        $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
+        $thread = $this->_getThreadModel()->getThreadById($threadId);
+        if (empty($thread)) {
+            return $this->responseNoPermission();
+        }
+
+        $this->_request->setParam('post_id', $thread['first_post_id']);
+        return $this->responseReroute('bdApi_ControllerApi_Post', 'put-index');
+    }
+
     public function actionDeleteIndex()
     {
         $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
