@@ -7,6 +7,8 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
         /* @var $session bdApi_Session */
         $session = XenForo_Application::getSession();
 
+        $visitor = XenForo_Visitor::getInstance();
+
         $systemInfo = array();
         if ($session->getOAuthClientId() === '') {
             $systemInfo += array(
@@ -22,17 +24,15 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
             );
         }
 
-        $data = array(
-            'links' => array(
-                'search' => XenForo_Link::buildApiLink('search'),
-                'navigation' => XenForo_Link::buildApiLink('navigation', array(), array('parent' => 0)),
-                'threads/recent' => XenForo_Link::buildApiLink('threads/recent'),
-                'users' => XenForo_Link::buildApiLink('users'),
-            ),
-            'system_info' => $systemInfo,
+        $data = array();
+        $data['links'] = array(
+            'search' => XenForo_Link::buildApiLink('search'),
+            'navigation' => XenForo_Link::buildApiLink('navigation', array(), array('parent' => 0)),
+            'threads/recent' => XenForo_Link::buildApiLink('threads/recent'),
+            'users' => XenForo_Link::buildApiLink('users'),
         );
 
-        if (XenForo_Visitor::getUserId() > 0) {
+        if ($visitor['user_id'] > 0) {
             $data['links']['conversations'] = XenForo_Link::buildApiLink('conversations');
             $data['links']['forums/followed'] = XenForo_Link::buildApiLink('forums/followed');
             $data['links']['notifications'] = XenForo_Link::buildApiLink('notifications');
@@ -41,7 +41,13 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
             $data['links']['users/ignored'] = XenForo_Link::buildApiLink('users/ignored');
             $data['links']['users/me'] = XenForo_Link::buildApiLink('users', array(
                 'user_id' => XenForo_Visitor::getInstance()->toArray()), array('oauth_token' => ''));
+
+            if ($visitor->canUpdateStatus()) {
+                $data['post']['status'] = XenForo_Link::buildApiLink('users/me/timeline');
+            }
         }
+
+        $data['system_info'] = $systemInfo;
 
         return $this->responseData('bdApi_ViewApi_Index', $data);
     }
@@ -54,7 +60,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
     protected function _getModules()
     {
         return array(
-            'forum' => 2015091102,
+            'forum' => 2015091103,
             'oauth2' => 2015060501,
             'subscription' => 2014092301,
         );

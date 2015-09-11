@@ -1486,6 +1486,7 @@ Create a new profile post on a user timeline. Since forum-2015042001.
 Parameters:
 
  * `post_body` (__required__): content of the new profile post.
+ * `status` (_optional_, since forum-2015091103): if posting to authorized user timeline, `status` can be used instead of `post_body` for content of the new profile post.
 
 Required scopes:
 
@@ -1495,7 +1496,7 @@ Required scopes:
 ### GET `/users/me/timeline`
 Alias for GET `/users/:userId/timeline` for authorized user. Since forum-2015042001.
 
-### POST `/users/me/groups`
+### POST `/users/me/timeline`
 Alias for POST `/users/:userId/timeline` for authorized user. Since forum-2015042001.
 
 ### GET `/profile-posts/:profilePostId`

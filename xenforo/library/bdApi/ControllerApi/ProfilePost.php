@@ -102,7 +102,16 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
                 return $this->responseNoPermission();
             }
 
-            $profilePostId = $userProfileModel->updateStatus($postBody);
+            if (empty($postBody)) {
+                // special support for status
+                $postBody = $this->_input->filterSingle('status', XenForo_Input::STRING);
+            }
+
+            try {
+                $profilePostId = $userProfileModel->updateStatus($postBody);
+            } catch (XenForo_Exception $e) {
+                return $this->responseError($e->getMessage(), 400);
+            }
         } else {
             if (!$userProfileModel->canPostOnProfile($user)) {
                 return $this->responseNoPermission();
