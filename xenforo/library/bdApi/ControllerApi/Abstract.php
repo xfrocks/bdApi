@@ -6,6 +6,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
     const FIELDS_FILTER_INCLUDE = 'include';
     const FIELDS_FILTER_EXCLUDE = 'exclude';
 
+    const SPAM_RESULT_ALLOWED = 'allowed';
+    const SPAM_RESULT_MODERATED = 'moderated';
+    const SPAM_RESULT_DENIED = 'denied';
+
     protected $_fieldsFilterType = false;
     protected $_fieldsFilterList = array();
 
@@ -166,6 +170,58 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
             }
         }
     }
+
+    /**
+     * Try to check submitted data for spam.
+     * <code>$data</code> should have <code>'content'</code>
+     * and <code>'content_type'</code> for optimal operation.
+     *
+     * @param array $data
+     * @return string one of the SPAM_RESULT_* constants
+     */
+    protected function _spamCheck(array $data)
+    {
+        if (XenForo_Application::$versionId < 1020000) {
+            return self::SPAM_RESULT_ALLOWED;
+        }
+
+        /** @var XenForo_Model_SpamPrevention $spamModel */
+        $spamModel = $this->getModelFromCache('XenForo_Model_SpamPrevention');
+        $spamResult = self::SPAM_RESULT_ALLOWED;
+
+        if ($spamModel->visitorRequiresSpamCheck()) {
+            if (isset($data['content'])) {
+                switch ($spamModel->checkMessageSpam($data['content'], $data, $this->_request)) {
+                    case XenForo_Model_SpamPrevention::RESULT_ALLOWED:
+                        $spamResult = self::SPAM_RESULT_ALLOWED;
+                        break;
+                    case XenForo_Model_SpamPrevention::RESULT_MODERATED:
+                        $spamResult = self::SPAM_RESULT_MODERATED;
+                        break;
+                    case XenForo_Model_SpamPrevention::RESULT_DENIED:
+                        $spamResult = self::SPAM_RESULT_DENIED;
+                        break;
+                }
+            }
+
+            switch ($spamResult) {
+                case self::SPAM_RESULT_MODERATED:
+                case self::SPAM_RESULT_DENIED;
+                    if (isset($data['content_type'])) {
+                        $contentId = null;
+                        if (isset($data['content_id'])) {
+                            $contentId = $data['content_id'];
+                        }
+
+                        $spamModel->logSpamTrigger($data['content_type'], $contentId);
+                    }
+                    break;
+            }
+        }
+
+        return $spamResult;
+    }
+
 
     /**
      * Gets the required scope for a controller action. By default,

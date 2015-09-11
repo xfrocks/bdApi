@@ -85,7 +85,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         $profilePostModel = $this->getModelFromCache('XenForo_Model_ProfilePost');
 
         $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
-        $user = $userModel->getUserById($userId);
+        $user = $userModel->getFullUserById($userId);
         if (empty($user)) {
             return $this->responseNoPermission();
         }
@@ -118,6 +118,20 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             $writer->setExtraData(XenForo_DataWriter_DiscussionMessage_ProfilePost::DATA_PROFILE_USER, $user);
             $writer->setOption(XenForo_DataWriter_DiscussionMessage_ProfilePost::OPTION_MAX_TAGGED_USERS, $visitor->hasPermission('general', 'maxTaggedUsers'));
 
+            if ($writer->get('message_state') == 'visible') {
+                switch ($this->_spamCheck(array(
+                    'content_type' => 'profile_post',
+                    'content' => $postBody,
+                ))) {
+                    case XenForo_Model_SpamPrevention::RESULT_MODERATED:
+                        $writer->set('message_state', 'moderated');
+                        break;
+                    case XenForo_Model_SpamPrevention::RESULT_DENIED;
+                        return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
+                        break;
+                }
+            }
+
             $writer->preSave();
 
             if ($writer->hasErrors()) {
@@ -143,9 +157,33 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
         }
 
+        $postBody = $this->_input->filterSingle('post_body', XenForo_Input::STRING);
+
         $dw = XenForo_DataWriter::create('XenForo_DataWriter_DiscussionMessage_ProfilePost');
         $dw->setExistingData($profilePost, true);
-        $dw->set('message', $this->_input->filterSingle('post_body', XenForo_Input::STRING));
+        $dw->set('message', $postBody);
+
+        if ($dw->get('message_state') == 'visible') {
+            switch ($this->_spamCheck(array(
+                'content_type' => 'profile_post',
+                'content_id' => $profilePostId,
+                'content' => $postBody,
+            ))) {
+                case XenForo_Model_SpamPrevention::RESULT_MODERATED:
+                    $dw->set('message_state', 'moderated');
+                    break;
+                case XenForo_Model_SpamPrevention::RESULT_DENIED;
+                    return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
+                    break;
+            }
+        }
+
+        $dw->preSave();
+
+        if ($dw->hasErrors()) {
+            return $this->responseErrors($dw->getErrors(), 400);
+        }
+
         $dw->save();
 
         return $this->responseReroute(__CLASS__, 'single');
@@ -371,6 +409,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         $dw = XenForo_DataWriter::create('XenForo_DataWriter_ProfilePostComment');
         $dw->setExtraData(XenForo_DataWriter_ProfilePostComment::DATA_PROFILE_USER, $user);
         $dw->setExtraData(XenForo_DataWriter_ProfilePostComment::DATA_PROFILE_POST, $profilePost);
+        $dw->set('message_state', $this->_getProfilePostModel()->getProfilePostCommentInsertMessageState($profilePost));
         $dw->bulkSet(array(
             'profile_post_id' => $profilePost['profile_post_id'],
             'user_id' => $visitor['user_id'],
@@ -378,6 +417,21 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             'message' => $commentBody
         ));
         $dw->setOption(XenForo_DataWriter_ProfilePostComment::OPTION_MAX_TAGGED_USERS, $visitor->hasPermission('general', 'maxTaggedUsers'));
+
+        if ($dw->get('message_state') == 'visible') {
+            switch ($this->_spamCheck(array(
+                'content_type' => 'profile_post_comment',
+                'content' => $commentBody,
+            ))) {
+                case XenForo_Model_SpamPrevention::RESULT_MODERATED:
+                    $dw->set('message_state', 'moderated');
+                    break;
+                case XenForo_Model_SpamPrevention::RESULT_DENIED;
+                    return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
+                    break;
+            }
+        }
+
         $dw->preSave();
 
         if ($dw->hasErrors()) {

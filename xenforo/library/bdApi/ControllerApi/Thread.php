@@ -259,6 +259,20 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             $writer->mergeErrors($tagger->getErrors());
         }
 
+        if ($writer->get('discussion_state') == 'visible') {
+            switch ($this->_spamCheck(array(
+                'content_type' => 'thread',
+                'content' => $input['thread_title'] . "\n" . $input['post_body'],
+            ))) {
+                case XenForo_Model_SpamPrevention::RESULT_MODERATED:
+                    $writer->set('discussion_state', 'moderated');
+                    break;
+                case XenForo_Model_SpamPrevention::RESULT_DENIED;
+                    return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
+                    break;
+            }
+        }
+
         $writer->preSave();
 
         if ($writer->hasErrors()) {

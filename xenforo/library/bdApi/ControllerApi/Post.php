@@ -171,6 +171,17 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             $writer->set('bdapi_origin', $clientId);
         }
 
+        switch ($this->_spamCheck(array(
+            'content_type' => 'post',
+            'content' => $input['post_body'],
+            'permalink' => XenForo_Link::buildPublicLink('canonical:threads', $thread),
+        ))) {
+            case self::SPAM_RESULT_MODERATED:
+            case self::SPAM_RESULT_DENIED;
+                return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
+                break;
+        }
+
         $writer->preSave();
 
         if ($writer->hasErrors()) {
@@ -229,6 +240,18 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         $dw->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($post));
         $dw->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
+
+        switch ($this->_spamCheck(array(
+            'content_type' => 'post',
+            'content_id' => $postId,
+            'content' => $input['post_body'],
+            'permalink' => XenForo_Link::buildPublicLink('canonical:threads', $thread),
+        ))) {
+            case self::SPAM_RESULT_MODERATED:
+            case self::SPAM_RESULT_DENIED;
+                return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
+                break;
+        }
 
         $dw->preSave();
 

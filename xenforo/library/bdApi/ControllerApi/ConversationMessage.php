@@ -106,6 +106,16 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $messageDw->set('message', $input['message_body']);
         $messageDw->setExtraData(XenForo_DataWriter_ConversationMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($conversation));
 
+        switch ($this->_spamCheck(array(
+            'content_type' => 'conversation_message',
+            'content' => $input['message_body'],
+        ))) {
+            case self::SPAM_RESULT_MODERATED:
+            case self::SPAM_RESULT_DENIED;
+                return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
+                break;
+        }
+
         $messageDw->preSave();
 
         if ($messageDw->hasErrors()) {
@@ -146,6 +156,24 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $messageDw->setExistingData($message, true);
         $messageDw->set('message', $input['message_body']);
         $messageDw->setExtraData(XenForo_DataWriter_ConversationMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($message));
+
+        switch ($this->_spamCheck(array(
+            'content_type' => 'conversation_message',
+            'content_id' => $messageId,
+            'content' => $input['message_body'],
+        ))) {
+            case self::SPAM_RESULT_MODERATED:
+            case self::SPAM_RESULT_DENIED;
+                return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
+                break;
+        }
+
+        $messageDw->preSave();
+
+        if ($messageDw->hasErrors()) {
+            return $this->responseErrors($messageDw->getErrors(), 400);
+        }
+
         $messageDw->save();
 
         return $this->responseReroute(__CLASS__, 'single');

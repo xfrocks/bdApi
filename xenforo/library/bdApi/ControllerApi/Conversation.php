@@ -103,11 +103,21 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
         $conversationDw->set('username', $visitor['username']);
         $conversationDw->set('title', $input['conversation_title']);
         $conversationDw->addRecipientUserNames(explode(',', $input['recipients']));
-        // checks permissions
 
         $messageDw = $conversationDw->getFirstMessageDw();
         $messageDw->set('message', $input['message_body']);
-        $messageDw->setExtraData(XenForo_DataWriter_ConversationMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash());
+        $messageDw->setExtraData(XenForo_DataWriter_ConversationMessage::DATA_ATTACHMENT_HASH,
+            $this->_getAttachmentHelper()->getAttachmentTempHash());
+
+        switch ($this->_spamCheck(array(
+            'content_type' => 'conversation',
+            'content' => $input['conversation_title'] . "\n" . $input['message_body'],
+        ))) {
+            case self::SPAM_RESULT_MODERATED:
+            case self::SPAM_RESULT_DENIED;
+                return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
+                break;
+        }
 
         $conversationDw->preSave();
 
