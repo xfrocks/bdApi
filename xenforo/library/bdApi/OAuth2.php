@@ -222,7 +222,13 @@ class bdApi_OAuth2 extends \OAuth2\Server
 
     protected function _generateOAuth2Request()
     {
-        return new OAuth2\Request($_GET, $_POST, array(), $_COOKIE, $_FILES, $_SERVER);
+        $server = $_SERVER;
+        if (isset($server['CONTENT_TYPE'])) {
+            // workaround to accept multi-part request
+            unset($server['CONTENT_TYPE']);
+        }
+
+        return new OAuth2\Request($_GET, $_POST, array(), $_COOKIE, $_FILES, $server);
     }
 
     protected function _generateControllerResponse(XenForo_Controller $controller, OAuth2\Response $response)
