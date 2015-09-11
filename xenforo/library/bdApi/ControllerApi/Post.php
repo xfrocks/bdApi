@@ -210,8 +210,6 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $input['post_body'] = $editorHelper->getMessageText('post_body', $this->_input);
         $input['post_body'] = XenForo_Helper_String::autoLinkBbCode($input['post_body']);
 
-        XenForo_Db::beginTransaction();
-
         $dw = XenForo_DataWriter::create('XenForo_DataWriter_DiscussionMessage_Post');
         $dw->setExistingData($post, true);
         $dw->set('message', $input['post_body']);
@@ -231,10 +229,22 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         $dw->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($post));
         $dw->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
-        $dw->save();
 
-        if ($post['post_id'] == $thread['first_post_id'] AND $this->_getThreadModel()->canEditThread($thread, $forum)) {
-            $threadInput = $this->_input->filter(array('thread_title' => XenForo_Input::STRING));
+        $dw->preSave();
+
+        if ($dw->hasErrors()) {
+            return $this->responseErrors($dw->getErrors(), 400);
+        }
+
+        $threadDw = null;
+        $threadTagger = null;
+        if ($post['post_id'] == $thread['first_post_id']
+            && $this->_getThreadModel()->canEditThread($thread, $forum)
+        ) {
+            $threadInput = $this->_input->filter(array(
+                'thread_title' => XenForo_Input::STRING,
+                'thread_tags' => XenForo_Input::STRING,
+            ));
 
             $threadDw = XenForo_DataWriter::create('XenForo_DataWriter_Discussion_Thread');
             $threadDw->setExistingData($thread, true);
@@ -243,9 +253,36 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 $threadDw->set('title', $threadInput['thread_title']);
             }
 
-            if ($threadDw->hasChanges()) {
-                $threadDw->save();
+            if (XenForo_Application::$versionId > 1050000
+                && $this->_input->inRequest('thread_tags')
+                && $this->_getThreadModel()->canEditTags($thread, $forum)
+            ) {
+                // thread tagging is available since XenForo 1.5.0
+                /** @var XenForo_Model_Tag $tagModel */
+                $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
+                $threadTagger = $tagModel->getTagger('thread');
+                $threadTagger->setContent($thread['thread_id'])->setPermissionsFromContext($thread, $forum);
+                $threadTagger->setTags($tagModel->splitTags($threadInput['thread_tags']));
+                $threadDw->mergeErrors($threadTagger->getErrors());
             }
+
+            if ($threadDw->hasErrors()) {
+                return $this->responseErrors($threadDw->getErrors(), 400);
+            }
+        }
+
+        XenForo_Db::beginTransaction();
+
+        $dw->save();
+
+        if ($threadDw != null
+            && $threadDw->hasChanges()
+        ) {
+            $threadDw->save();
+        }
+
+        if ($threadTagger != null) {
+            $threadTagger->save();
         }
 
         XenForo_Db::commit();
