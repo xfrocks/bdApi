@@ -97,6 +97,60 @@
 <xen:if is="{$filterView} AND {$total} > {$perPage}">
 	<li class="listNote">{xen:phrase more_records_matching_filter_more_specific}</li>
 </xen:if>]]></template>
+    <template title="bdapi_client_content_delete"><![CDATA[<xen:title>{xen:phrase bdapi_client_content_confirm_deletion}: {$clientContent.title}</xen:title>
+<xen:h1>{xen:phrase bdapi_client_content_confirm_deletion}</xen:h1>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:adminlink 'api-client-contents', '', 'client_id={$clientContent.client_id}'}">{$clientContent.name}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:require css="delete_confirmation.css" />
+
+<xen:form action="{xen:adminlink 'api-client-contents/delete', $clientContent}" class="deleteConfirmForm formOverlay">
+
+	<p>{xen:phrase bdapi_client_content_please_confirm}:</p>
+	<strong><a href="{$clientContent.link}" target="_blank">{$clientContent.title}</a></strong>
+
+	<xen:submitunit save="{xen:phrase bdapi_client_content_delete}" />
+
+	<input type="hidden" name="_xfConfirm" value="1" />
+</xen:form>]]></template>
+    <template title="bdapi_client_content_list"><![CDATA[<xen:title>{xen:phrase bdapi_client_contents}</xen:title>
+
+<xen:if is="{$client}">
+	<xen:navigation>
+		<xen:breadcrumb href="{xen:adminlink 'api-clients/edit', $client}">{$client.name}</xen:breadcrumb>
+	</xen:navigation>
+</xen:if>
+
+<xen:require css="filter_list.css" />
+<xen:require js="js/xenforo/filter_list.js" />
+
+<xen:form action="{xen:adminlink 'api-client-contents'}" class="section">
+	<xen:if is="{$clientContents}">
+		<h2 class="subHeading">
+			<xen:include template="filter_list_controls" />
+			{xen:phrase bdapi_client_contents}
+		</h2>
+
+		<ol class="FilterList Scrollable">
+			<xen:include template="bdapi_client_content_list_items" />
+		</ol>
+
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $clientContents}</span>', 'total={xen:count $clientContents}'}</p>
+	<xen:else />
+		<div class="noResults">{xen:phrase bdapi_client_content_no_results}</div>
+	</xen:if>
+</xen:form>]]></template>
+    <template title="bdapi_client_content_list_items"><![CDATA[<xen:foreach loop="$clientContents" value="$clientContent">
+	<xen:listitem
+		id="{$clientContent.client_content_id}"
+		href="{$clientContent.link}" target="_blank"
+		delete="{xen:adminlink 'api-client-contents/delete', $clientContent}">
+		<xen:label>{$clientContent.title}</xen:label>
+		<xen:snippet>{$clientContent.body}</xen:snippet>
+	</xen:listitem>
+</xen:foreach>]]></template>
     <template title="bdapi_client_delete"><![CDATA[<xen:title>{xen:phrase bdapi_client_confirm_deletion}: {$client.name}</xen:title>
 <xen:h1>{xen:phrase bdapi_client_confirm_deletion}</xen:h1>
 
@@ -153,6 +207,13 @@
 			/>
 	</xen:checkboxunit>
 
+	<xen:checkboxunit label="" explain="{xen:phrase bdapi_client_allow_search_indexing_explain}">
+		<xen:option label="{xen:phrase bdapi_client_allow_search_indexing}"
+			name="options[allow_search_indexing]" value="1"
+			selected="{$client.options.allow_search_indexing}"
+			/>
+	</xen:checkboxunit>
+
 	<xen:hook name="admin_bdapi_client_edit" />
 
 	<xen:submitunit save="{xen:phrase bdapi_client_save}">
@@ -205,6 +266,7 @@
 			<xen:link href="{xen:adminlink 'api-auth-codes', '', 'client_id={$client.client_id}'}">{xen:phrase bdapi_auth_codes}</xen:link>
 			<xen:link href="{xen:adminlink 'api-refresh-tokens', '', 'client_id={$client.client_id}'}">{xen:phrase bdapi_refresh_tokens}</xen:link>
 			<xen:link href="{xen:adminlink 'api-subscriptions', '', 'client_id={$client.client_id}'}">{xen:phrase bdapi_subscriptions}</xen:link>
+			<xen:link href="{xen:adminlink 'api-client-contents', '', 'client_id={$client.client_id}'}">{xen:phrase bdapi_client_contents}</xen:link>
 		</xen:popup>
 	</xen:listitem>
 </xen:foreach>
@@ -637,7 +699,15 @@ step=3600</edit_format_params>
     <phrase title="bdapi_client" version_id="1" version_string="0.1"><![CDATA[Client]]></phrase>
     <phrase title="bdapi_clients" version_id="4" version_string="0.9-dev"><![CDATA[API Clients]]></phrase>
     <phrase title="bdapi_client_add" version_id="1" version_string="0.1"><![CDATA[Add New Client]]></phrase>
+    <phrase title="bdapi_client_allow_search_indexing" version_id="77" version_string="1.4.5"><![CDATA[Can index search contents]]></phrase>
+    <phrase title="bdapi_client_allow_search_indexing_explain" version_id="77" version_string="1.4.5"><![CDATA[Client with this option enabled will be able to POST /search/indexing to put custom contents into XenForo search index.]]></phrase>
     <phrase title="bdapi_client_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Client]]></phrase>
+    <phrase title="bdapi_client_contents" version_id="77" version_string="1.4.5"><![CDATA[Client Contents]]></phrase>
+    <phrase title="bdapi_client_content_confirm_deletion" version_id="77" version_string="1.4.5"><![CDATA[Confirm Deletion of Client Content]]></phrase>
+    <phrase title="bdapi_client_content_delete" version_id="77" version_string="1.4.5"><![CDATA[Delete Client Content]]></phrase>
+    <phrase title="bdapi_client_content_not_found" version_id="77" version_string="1.4.5"><![CDATA[The requested client content could not be found]]></phrase>
+    <phrase title="bdapi_client_content_no_results" version_id="77" version_string="1.4.5"><![CDATA[No client content could be found...]]></phrase>
+    <phrase title="bdapi_client_content_please_confirm" version_id="77" version_string="1.4.5"><![CDATA[Please confirm that you want to delete the following client content]]></phrase>
     <phrase title="bdapi_client_delete" version_id="1" version_string="0.1"><![CDATA[Delete Client]]></phrase>
     <phrase title="bdapi_client_edit" version_id="1" version_string="0.1"><![CDATA[Edit Client]]></phrase>
     <phrase title="bdapi_client_ids_must_be_unique" version_id="4" version_string="0.9-dev"><![CDATA[API keys must be unique. The specified key is already in use.]]></phrase>
@@ -777,6 +847,7 @@ step=3600</edit_format_params>
   <route_prefixes>
     <route_type type="admin">
       <prefix original_prefix="api-auth-codes" class="bdApi_Route_PrefixAdmin_AuthCode" build_link="data_only"/>
+      <prefix original_prefix="api-client-contents" class="bdApi_Route_PrefixAdmin_ClientContent" build_link="data_only"/>
       <prefix original_prefix="api-clients" class="bdApi_Route_PrefixAdmin_Client" build_link="data_only"/>
       <prefix original_prefix="api-logs" class="bdApi_Route_PrefixAdmin_Log" build_link="data_only"/>
       <prefix original_prefix="api-refresh-tokens" class="bdApi_Route_PrefixAdmin_RefreshToken" build_link="data_only"/>
@@ -1423,6 +1494,27 @@ step=3600</edit_format_params>
     <template title="bdapi_navigation_visitor_tab" version_id="67" version_string="1.4.3-BETA"><![CDATA[<xen:if is="{xen:property bdApi_linkNavVisitor} && {xen:helper api_visitorHasPermission, clientNew}">
 	<li><a href="{xen:link account/api}">{xen:phrase bdapi_clients}</a></li>
 </xen:if>]]></template>
+    <template title="bdapi_search_result_client_content" version_id="77" version_string="1.4.5"><![CDATA[<li id="clientContent-{$clientContent.client_content_id}" class="searchResult clientContent primaryContent clientContent-{$clientContent.client_id}">
+
+	<div class="listBlock posterAvatar">
+		<xen:avatar user="$clientContent" size="s" img="true" />
+	</div>
+
+	<div class="listBlock main">
+		<div class="titleText">
+			<span class="contentType"><a href="{$clientContent.redirect_uri}" target="_blank">{$clientContent.name}</a></span>
+			<h3 class="title"><a href="{$clientContent.link}" target="_blank">{$clientContent.title}</a></h3>
+		</div>
+
+		<blockquote class="snippet">
+			<a href="{$clientContent.link}" target="_blank">{xen:helper snippet, $clientContent.body, 150, {xen:array 'term={$search.search_query}', 'emClass=highlight', 'stripHtml=1'}}</a>
+		</blockquote>	
+
+		<div class="meta">
+			<xen:datetime time="{$clientContent.date}" />
+		</div>
+	</div>
+</li>]]></template>
   </templates>
   <public_template_modifications/>
   <bb_code_media_sites/>

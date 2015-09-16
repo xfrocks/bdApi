@@ -25,17 +25,57 @@ class bdApi_Session extends XenForo_Session
         return '';
     }
 
-    public function getOAuthClientSecret()
+    /**
+     * Gets the effective OAuth client full data.
+     *
+     * @return array|false
+     */
+    public function getOAuthClient()
     {
         if (!empty($this->_oauthToken)) {
-            if (empty($this->_oauthClient)) {
+            if ($this->_oauthClient === false) {
                 $this->_oauthClient = self::_bdApi_getClientModel()->getClientById($this->_oauthToken['client_id']);
             }
 
-            return $this->_oauthClient['client_secret'];
+            return $this->_oauthClient;
         }
 
         return false;
+    }
+
+    /**
+     * Gets the effective OAuth client secret.
+     *
+     * @return string|false
+     */
+    public function getOAuthClientSecret()
+    {
+        $client = $this->getOAuthClient();
+
+        if (!empty($client['client_secret'])) {
+            return $client['client_secret'];
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets the effective OAuth client option by key.
+     *
+     * @param string $key
+     * @return mixed|null
+     */
+    public function getOAuthClientOption($key)
+    {
+        $client = $this->getOAuthClient();
+
+        if (!empty($client['options'])
+            && isset($client['options'][$key])
+        ) {
+            return $client['options'][$key];
+        }
+
+        return null;
     }
 
     /**

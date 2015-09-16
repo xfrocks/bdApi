@@ -146,6 +146,10 @@ class bdApi_Model_Client extends XenForo_Model
         }
 
         $data = $this->getClients(array('client_id' => $clientId), $fetchOptions);
+        if (empty($data)) {
+            return null;
+        }
+
         $client = reset($data);
         $this->_clients[$client['client_id']] = $client;
 

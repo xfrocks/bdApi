@@ -59,11 +59,18 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 
     protected function _getModules()
     {
-        return array(
+        $modules = array(
             'forum' => 2015091103,
             'oauth2' => 2015060501,
             'subscription' => 2014092301,
         );
+
+        $option = bdApi_Data_Helper_Core::safeGetSession()->getOAuthClientOption('allow_search_indexing');
+        if (!empty($option)) {
+            $modules['search/indexing'] = 2015091601;
+        }
+
+        return $modules;
     }
 
     protected function _getScopeForAction($action)

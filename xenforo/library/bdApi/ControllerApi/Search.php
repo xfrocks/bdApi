@@ -188,7 +188,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             return $this->responseError(new XenForo_Phrase('requested_tag_not_found'), 404);
         }
 
-        $limit = XenForo_Application::getOptions()->maximumSearchResults;
+        $limit = XenForo_Application::getOptions()->get('maximumSearchResults');
         $contentTags = $tagModel->getContentIdsByTagId($tag['tag_id'], $limit);
 
         $search = $this->_getSearchModel()->insertSearch($contentTags, self::OPTION_SEARCH_TYPE_TAGGED, '', array(), 'date', false);
@@ -207,6 +207,68 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
         $this->_request->setParam('search_id', $search['search_id']);
         return $this->responseReroute(__CLASS__, 'get-results');
+    }
+
+    public function actionPostIndexing()
+    {
+        $session = bdApi_Data_Helper_Core::safeGetSession();
+        $option = $session->getOAuthClientOption('allow_search_indexing');
+        if (empty($option)) {
+            return $this->responseNoPermission();
+        }
+
+        $input = $this->_input->filter(array(
+            'content_type' => XenForo_Input::STRING,
+            'content_id' => XenForo_Input::UINT,
+            'title' => XenForo_Input::STRING,
+            'body' => XenForo_Input::STRING,
+            'date' => array(XenForo_Input::UINT, 'default' => XenForo_Application::$time),
+            'link' => XenForo_Input::STRING,
+            'extra_data' => XenForo_Input::ARRAY_SIMPLE,
+        ));
+
+        $dbKeys = array(
+            'client_id' => $session->getOAuthClientId(),
+            'content_type' => $input['content_type'],
+            'content_id' => $input['content_id'],
+        );
+        /** @var bdApi_Model_ClientContent $clientContentModel */
+        $clientContentModel = $this->getModelFromCache('bdApi_Model_ClientContent');
+        $existingContents = $clientContentModel->getClientContents($dbKeys);
+        $existingContent = null;
+        if (!empty($existingContents)) {
+            $existingContent = reset($existingContents);
+        }
+
+        $dw = XenForo_DataWriter::create('bdApi_DataWriter_ClientContent');
+        if (!empty($existingContent)) {
+            $dw->setExistingData($existingContent, true);
+            $input['extra_data'] = array_merge($existingContent['extraData'], $input['extra_data']);
+        } else {
+            $dw->bulkSet($dbKeys);
+        }
+
+        $dw->set('title', $input['title']);
+        $dw->set('body', $input['body']);
+        $dw->set('date', $input['date']);
+        $dw->set('link', $input['link']);
+        $dw->set('extra_data', $input['extra_data']);
+
+        if ($dw->isInsert()
+            || XenForo_Visitor::getUserId() > 0
+        ) {
+            $dw->set('user_id', XenForo_Visitor::getUserId());
+        }
+
+        $dw->preSave();
+
+        if ($dw->hasErrors()) {
+            return $this->responseErrors($dw->getErrors(), 400);
+        }
+
+        $dw->save();
+
+        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
     }
 
     public function _doSearch($contentType = '', array $constraints = array(), array $options = array())

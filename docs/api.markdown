@@ -2312,6 +2312,27 @@ Required scopes:
 
  * N/A
 
+### POST `/search/indexing`
+Index external content data into search system to be searched later. Client must have the option "Can index search contents" enabled to use this feature. Since search/indexing-2015091501.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * `content_type` (__required__)
+ * `content_id` (__required__)
+ * `title` (__required__)
+ * `body` (__required__)
+ * `date` (_optional_): unix timestamp in second of the content. If missing, current time will be used.
+ * `link` (__required__)
+
+Required scopes:
+
+ * `post`
+
 ## Subscriptions
 Clients can subscribe to certain events to receive real time ping when data is changed within the system. The subscription system uses the [PubSubHubbub protocol](https://code.google.com/p/pubsubhubbub/) to communicate with hubs and subscribers. Since subscription-2014081001.
 

@@ -7,99 +7,116 @@ class bdApi_Installer
     protected static $_tables = array(
         'client' => array(
             'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_client` (
-				`client_id` VARCHAR(255) NOT NULL
-				,`client_secret` VARCHAR(255) NOT NULL
-				,`redirect_uri` TEXT NOT NULL
-				,`name` VARCHAR(255) NOT NULL
-				,`description` TEXT NOT NULL
-				,`user_id` INT(10) UNSIGNED NOT NULL
-				,`options` MEDIUMBLOB
-				, PRIMARY KEY (`client_id`)
-				
-			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
+                `client_id` VARCHAR(255) NOT NULL
+                ,`client_secret` VARCHAR(255) NOT NULL
+                ,`redirect_uri` TEXT NOT NULL
+                ,`name` VARCHAR(255) NOT NULL
+                ,`description` TEXT NOT NULL
+                ,`user_id` INT(10) UNSIGNED NOT NULL
+                ,`options` MEDIUMBLOB
+                , PRIMARY KEY (`client_id`)
+                
+            ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
             'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_client`',
         ),
         'token' => array(
             'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_token` (
-				`token_id` INT(10) UNSIGNED AUTO_INCREMENT
-				,`client_id` VARCHAR(255) NOT NULL
-				,`token_text` VARCHAR(255) NOT NULL
-				,`expire_date` INT(10) UNSIGNED NOT NULL
-				,`user_id` INT(10) UNSIGNED NOT NULL
-				,`scope` TEXT NOT NULL
-				, PRIMARY KEY (`token_id`)
-				,UNIQUE INDEX `token_text` (`token_text`)
-			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
+                `token_id` INT(10) UNSIGNED AUTO_INCREMENT
+                ,`client_id` VARCHAR(255) NOT NULL
+                ,`token_text` VARCHAR(255) NOT NULL
+                ,`expire_date` INT(10) UNSIGNED NOT NULL
+                ,`user_id` INT(10) UNSIGNED NOT NULL
+                ,`scope` TEXT NOT NULL
+                , PRIMARY KEY (`token_id`)
+                ,UNIQUE INDEX `token_text` (`token_text`)
+            ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
             'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_token`',
         ),
         'auth_code' => array(
             'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_auth_code` (
-				`auth_code_id` INT(10) UNSIGNED AUTO_INCREMENT
-				,`client_id` VARCHAR(255) NOT NULL
-				,`auth_code_text` VARCHAR(255) NOT NULL
-				,`redirect_uri` TEXT NOT NULL
-				,`expire_date` INT(10) UNSIGNED NOT NULL
-				,`user_id` INT(10) UNSIGNED NOT NULL
-				,`scope` TEXT NOT NULL
-				, PRIMARY KEY (`auth_code_id`)
-				,UNIQUE INDEX `auth_code_text` (`auth_code_text`)
-			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
+                `auth_code_id` INT(10) UNSIGNED AUTO_INCREMENT
+                ,`client_id` VARCHAR(255) NOT NULL
+                ,`auth_code_text` VARCHAR(255) NOT NULL
+                ,`redirect_uri` TEXT NOT NULL
+                ,`expire_date` INT(10) UNSIGNED NOT NULL
+                ,`user_id` INT(10) UNSIGNED NOT NULL
+                ,`scope` TEXT NOT NULL
+                , PRIMARY KEY (`auth_code_id`)
+                ,UNIQUE INDEX `auth_code_text` (`auth_code_text`)
+            ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
             'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_auth_code`',
         ),
         'refresh_token' => array(
             'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_refresh_token` (
-				`refresh_token_id` INT(10) UNSIGNED AUTO_INCREMENT
-				,`client_id` VARCHAR(255) NOT NULL
-				,`refresh_token_text` VARCHAR(255) NOT NULL
-				,`expire_date` INT(10) UNSIGNED NOT NULL
-				,`user_id` INT(10) UNSIGNED NOT NULL
-				,`scope` TEXT NOT NULL
-				, PRIMARY KEY (`refresh_token_id`)
-				,UNIQUE INDEX `refresh_token_text` (`refresh_token_text`)
-			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
+                `refresh_token_id` INT(10) UNSIGNED AUTO_INCREMENT
+                ,`client_id` VARCHAR(255) NOT NULL
+                ,`refresh_token_text` VARCHAR(255) NOT NULL
+                ,`expire_date` INT(10) UNSIGNED NOT NULL
+                ,`user_id` INT(10) UNSIGNED NOT NULL
+                ,`scope` TEXT NOT NULL
+                , PRIMARY KEY (`refresh_token_id`)
+                ,UNIQUE INDEX `refresh_token_text` (`refresh_token_text`)
+            ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
             'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_refresh_token`',
         ),
         'log' => array(
             'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_log` (
-				`log_id` INT(10) UNSIGNED AUTO_INCREMENT
-				,`client_id` VARCHAR(255) NOT NULL
-				,`user_id` INT(10) UNSIGNED NOT NULL
-				,`ip_address` VARCHAR(50) NOT NULL
-				,`request_date` INT(10) UNSIGNED NOT NULL
-				,`request_method` VARCHAR(10) NOT NULL
-				,`request_uri` TEXT
-				,`request_data` MEDIUMBLOB
-				,`response_code` INT(10) UNSIGNED NOT NULL
-				,`response_output` MEDIUMBLOB
-				, PRIMARY KEY (`log_id`)
-				
-			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
+                `log_id` INT(10) UNSIGNED AUTO_INCREMENT
+                ,`client_id` VARCHAR(255) NOT NULL
+                ,`user_id` INT(10) UNSIGNED NOT NULL
+                ,`ip_address` VARCHAR(50) NOT NULL
+                ,`request_date` INT(10) UNSIGNED NOT NULL
+                ,`request_method` VARCHAR(10) NOT NULL
+                ,`request_uri` TEXT
+                ,`request_data` MEDIUMBLOB
+                ,`response_code` INT(10) UNSIGNED NOT NULL
+                ,`response_output` MEDIUMBLOB
+                , PRIMARY KEY (`log_id`)
+                
+            ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
             'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_log`',
         ),
         'subscription' => array(
             'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_subscription` (
-				`subscription_id` INT(10) UNSIGNED AUTO_INCREMENT
-				,`client_id` VARCHAR(255) NOT NULL
-				,`callback` TEXT
-				,`topic` VARCHAR(255) NOT NULL
-				,`subscribe_date` INT(10) UNSIGNED NOT NULL
-				,`expire_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'
-				, PRIMARY KEY (`subscription_id`)
-				, INDEX `client_id` (`client_id`)
-				, INDEX `topic` (`topic`)
-			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
+                `subscription_id` INT(10) UNSIGNED AUTO_INCREMENT
+                ,`client_id` VARCHAR(255) NOT NULL
+                ,`callback` TEXT
+                ,`topic` VARCHAR(255) NOT NULL
+                ,`subscribe_date` INT(10) UNSIGNED NOT NULL
+                ,`expire_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'
+                , PRIMARY KEY (`subscription_id`)
+                , INDEX `client_id` (`client_id`)
+                , INDEX `topic` (`topic`)
+            ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
             'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_subscription`',
         ),
         'user_scope' => array(
             'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_user_scope` (
-				`client_id` VARCHAR(255) NOT NULL
-				,`user_id` INT(10) UNSIGNED NOT NULL
-				,`scope` VARCHAR(255) NOT NULL
-				,`accept_date` INT(10) UNSIGNED NOT NULL
-				
-				, INDEX `user_id` (`user_id`)
-			) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
+                `client_id` VARCHAR(255) NOT NULL
+                ,`user_id` INT(10) UNSIGNED NOT NULL
+                ,`scope` VARCHAR(255) NOT NULL
+                ,`accept_date` INT(10) UNSIGNED NOT NULL
+                
+                , INDEX `user_id` (`user_id`)
+            ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
             'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_user_scope`',
+        ),
+        'client_content' => array(
+            'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdapi_client_content` (
+                `client_content_id` INT(10) UNSIGNED AUTO_INCREMENT
+                ,`client_id` VARCHAR(255) NOT NULL
+                ,`content_type` VARCHAR(25) NOT NULL
+                ,`content_id` INT(10) UNSIGNED NOT NULL
+                ,`title` VARCHAR(255) NOT NULL
+                ,`body` TEXT NOT NULL
+                ,`date` INT(10) UNSIGNED NOT NULL
+                ,`link` TEXT NOT NULL
+                ,`user_id` INT(10) UNSIGNED NOT NULL
+                ,`extra_data` MEDIUMBLOB
+                , PRIMARY KEY (`client_content_id`)
+                , INDEX `content_type_content_id` (`content_type`,`content_id`)
+            ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
+            'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_client_content`',
         ),
     );
     protected static $_patches = array(
@@ -239,6 +256,8 @@ class bdApi_Installer
 
         $db->query('REPLACE INTO `xf_content_type` (content_type, addon_id, fields) VALUES ("api_ping", "bdApi", "")');
         $db->query('REPLACE INTO `xf_content_type_field` (content_type, field_name, field_value) VALUES ("api_ping", "alert_handler_class", "bdApi_AlertHandler_Ping")');
+        $db->query('REPLACE INTO `xf_content_type` (content_type, addon_id, fields) VALUES ("api_client_content", "bdApi", "")');
+        $db->query('REPLACE INTO `xf_content_type_field` (content_type, field_name, field_value) VALUES ("api_client_content", "search_handler_class", "bdApi_Search_DataHandler_ClientContent")');
         /** @var XenForo_Model_ContentType $contentTypeModel */
         $contentTypeModel = XenForo_Model::create('XenForo_Model_ContentType');
         $contentTypeModel->rebuildContentTypeCache();
@@ -266,6 +285,9 @@ class bdApi_Installer
         $db = XenForo_Application::getDb();
 
         $db->query('DROP TABLE IF EXISTS `xf_bdapi_ping_queue`');
+        $db->query('DELETE FROM `xf_content_type` WHERE addon_id = ?', "bdApi");
+        $db->query('DELETE FROM `xf_content_type_field` WHERE content_type = ?', "api_ping");
+        $db->query('DELETE FROM `xf_content_type_field` WHERE content_type = ?', "api_client_content");
     }
 
     protected static function _installPhpDemoClient()

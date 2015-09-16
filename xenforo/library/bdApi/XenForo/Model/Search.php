@@ -21,6 +21,7 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
     public function checkApiSupportsContentType($contentType)
     {
         switch ($contentType) {
+            case 'api_client_content':
             case 'thread':
             case 'post':
             case 'profile_post':
@@ -32,6 +33,7 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
 
     public function prepareApiContentDataForSearch(array $preparedResults)
     {
+        $clientContentIds = array();
         $threadIds = array();
         $postIds = array();
         $profilePostIds = array();
@@ -39,6 +41,9 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
 
         foreach ($preparedResults as $key => $preparedResult) {
             switch ($preparedResult['content_type']) {
+                case 'api_client_content':
+                    $clientContentIds[$preparedResult['content_id']] = $key;
+                    break;
                 case 'thread':
                     $threadIds[$preparedResult['content_id']] = $key;
                     break;
@@ -48,6 +53,35 @@ class bdApi_XenForo_Model_Search extends XFCP_bdApi_XenForo_Model_Search
                 case 'profile_post':
                     $profilePostIds[$preparedResult['content_id']] = $key;
                     break;
+            }
+        }
+
+        if (!empty($clientContentIds)) {
+            /** @var bdApi_Model_ClientContent $clientContentModel */
+            $clientContentModel = $this->getModelFromCache('bdApi_Model_ClientContent');
+            $clientContents = $clientContentModel->getClientContents(array(
+                'client_content_id' => array_keys($clientContentIds),
+            ));
+
+            foreach ($clientContents as $clientContentId => $clientContent) {
+                if (!isset($clientContentIds[$clientContentId])) {
+                    // key not found?!
+                    continue;
+                }
+
+                $key = $clientContentIds[$clientContentId];
+                $data[$key] = array_merge($preparedResults[$key],
+                    array_intersect_key($clientContent,
+                        array_flip(array(
+                                'title',
+                                'body',
+                                'date',
+                                'link',
+                                'user_id',
+                            )
+                        )
+                    )
+                );
             }
         }
 

@@ -2,6 +2,9 @@
 
 class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
 {
+    /** @noinspection PhpMissingParentConstructorInspection
+     * @param string $routeType
+     */
     public function __construct($routeType)
     {
         $this->_routeType = $routeType;

@@ -704,7 +704,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return XenForo_Model_UserIgnore
+     * @return bdApi_XenForo_Model_UserIgnore
      */
     protected function _getIgnoreModel()
     {

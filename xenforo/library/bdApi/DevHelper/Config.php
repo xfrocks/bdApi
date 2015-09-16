@@ -186,6 +186,41 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base
             ),
             'files' => array('data_writer' => false, 'model' => false, 'route_prefix_admin' => false, 'controller_admin' => false),
         ),
+        'client_content' => array(
+            'name' => 'client_content',
+            'camelCase' => 'ClientContent',
+            'camelCasePlural' => 'ClientContents',
+            'camelCaseWSpace' => 'Client Content',
+            'camelCasePluralWSpace' => 'Client Contents',
+            'fields' => array(
+                'client_content_id' => array('name' => 'client_content_id', 'type' => 'uint', 'autoIncrement' => true),
+                'client_id' => array('name' => 'client_id', 'type' => 'string', 'length' => 255, 'required' => true),
+                'content_type' => array('name' => 'content_type', 'type' => 'string', 'length' => 25, 'required' => true),
+                'content_id' => array('name' => 'content_id', 'type' => 'uint', 'required' => true),
+                'title' => array('name' => 'title', 'type' => 'string', 'length' => 255, 'required' => true),
+                'body' => array('name' => 'body', 'type' => 'string', 'required' => true),
+                'date' => array('name' => 'date', 'type' => 'uint', 'required' => true),
+                'link' => array('name' => 'link', 'type' => 'string', 'required' => true),
+                'user_id' => array('name' => 'user_id', 'type' => 'uint', 'required' => true),
+                'extra_data' => array('name' => 'extra_data', 'type' => 'serialized'),
+            ),
+            'phrases' => array(),
+            'title_field' => 'client_id',
+            'primaryKey' => array('client_content_id'),
+            'indeces' => array(
+                'content_type_content_id' => array(
+                    'name' => 'content_type_content_id',
+                    'fields' => array('content_type', 'content_id'),
+                    'type' => 'NORMAL',
+                ),
+            ),
+            'files' => array(
+                'data_writer' => array('className' => 'bdApi_DataWriter_ClientContent', 'hash' => '768e9d0f0daf1b06d922c0a7fb85e948'),
+                'model' => array('className' => 'bdApi_Model_ClientContent', 'hash' => 'f5d7ecc874121a8b1f796dd619d69aaa'),
+                'route_prefix_admin' => array('className' => 'bdApi_Route_PrefixAdmin_ClientContent', 'hash' => 'c349ce827df98df310a98d4505f86356'),
+                'controller_admin' => array('className' => 'bdApi_ControllerAdmin_ClientContent', 'hash' => 'b5b8ae7006c06b41736cb7da82eb5d1d'),
+            ),
+        ),
     );
     protected $_dataPatches = array(
         'xf_bdapi_token' => array(
@@ -213,6 +248,7 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base
     protected $_exportExcludes = array('library/bdApi/Lib/oauth2-server-php/test');
     protected $_exportAddOns = array();
     protected $_exportStyles = array();
+    protected $_options = array();
 
     /**
      * Return false to trigger the upgrade!

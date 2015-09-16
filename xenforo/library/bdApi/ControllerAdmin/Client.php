@@ -79,6 +79,7 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
             'whitelisted_domains' => XenForo_Input::STRING,
             'public_key' => XenForo_Input::STRING,
             'auto_authorize' => XenForo_Input::ARRAY_SIMPLE,
+            'allow_search_indexing' => XenForo_Input::BOOLEAN,
         ));
 
         $dw = $this->_getClientDataWriter();

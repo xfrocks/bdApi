@@ -14,7 +14,7 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
             }
         }
 
-        return parent::resetUnreadAlertsCounter($userId);
+        parent::resetUnreadAlertsCounter($userId);
     }
 
     public function bdApi_getAlertsByIds($alertIds)
