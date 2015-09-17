@@ -22,10 +22,12 @@ function xfac_admin_init()
         register_setting('xfac_post_comment', 'xfac_sync_post_wp_xf_link');
         register_setting('xfac_post_comment', 'xfac_sync_post_xf_wp');
         register_setting('xfac_post_comment', 'xfac_sync_post_xf_wp_publish');
+        register_setting('xfac_post_comment', 'xfac_search_index_post');
         register_setting('xfac_post_comment', 'xfac_sync_comment_wp_xf');
         register_setting('xfac_post_comment', 'xfac_sync_comment_wp_xf_as_guest');
         register_setting('xfac_post_comment', 'xfac_sync_comment_xf_wp');
         register_setting('xfac_post_comment', 'xfac_sync_comment_xf_wp_as_guest');
+        register_setting('xfac_post_comment', 'xfac_search_index_comment');
 
         register_setting('xfac_user_role', 'xfac_sync_avatar_xf_wp');
         register_setting('xfac_user_role', 'xfac_bypass_users_can_register');
@@ -90,10 +92,12 @@ function xfac_whitelist_options($whitelist_options)
         $whitelist_options['xfac'][] = 'xfac_sync_post_wp_xf_link';
         $whitelist_options['xfac'][] = 'xfac_sync_post_xf_wp';
         $whitelist_options['xfac'][] = 'xfac_sync_post_xf_wp_publish';
+        $whitelist_options['xfac'][] = 'xfac_search_index_post';
         $whitelist_options['xfac'][] = 'xfac_sync_comment_wp_xf';
         $whitelist_options['xfac'][] = 'xfac_sync_comment_wp_xf_as_guest';
         $whitelist_options['xfac'][] = 'xfac_sync_comment_xf_wp';
         $whitelist_options['xfac'][] = 'xfac_sync_comment_xf_wp_as_guest';
+        $whitelist_options['xfac'][] = 'xfac_search_index_comment';
 
         $whitelist_options['xfac'][] = 'xfac_sync_avatar_xf_wp';
         $whitelist_options['xfac'][] = 'xfac_bypass_users_can_register';

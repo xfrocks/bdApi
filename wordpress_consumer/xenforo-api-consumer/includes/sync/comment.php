@@ -57,6 +57,14 @@ function _xfac_save_comment($comment)
         }
     }
 
+    if (empty($xfPosts)) {
+        // not pushed yet
+        $config = xfac_option_getConfig();
+        if (!empty($config)) {
+            xfac_search_indexComment($config, $comment);
+        }
+    }
+
     return $xfPosts;
 }
 

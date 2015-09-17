@@ -260,6 +260,36 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
                                     <p class="description"><?php _e('Publish sync\'d WordPress post immediately.', 'xenforo-api-consumer'); ?></p>
                                 </div>
                             </fieldset>
+
+                            <fieldset>
+                                <label for="xfac_search_index_post">
+                                    <input name="xfac_search_index_post" type="checkbox" id="xfac_search_index_post"
+                                           value="1" <?php checked('1', get_option('xfac_search_index_post')); ?> />
+                                    <?php _e('Search Indexing', 'xenforo-api-consumer'); ?>
+                                </label>
+
+                                <p class="description">
+                                    <?php _e('Index WordPress post in XenForo search engine, '
+                                        . 'making it possible to show blog entries when doing a regular search within the forums.',
+                                        'xenforo-api-consumer'); ?>
+
+                                    <?php if (!isset($meta['modules']['search/indexing']) || $meta['modules']['search/indexing'] < 2015091501): ?>
+                                        <span style="color: red">
+                                            <?php echo sprintf(
+                                                __('This feature requires %s-%s, it will not work until API server is updated.', 'xenforo-api-consumer'),
+                                                'search/indexing',
+                                                2015091501
+                                            ); ?>
+                                            <?php _e('You may need to edit the client in XenForo AdminCP'
+                                                . ' and enable the "Can index search contents" option in order to use search/indexing.',
+                                                'xenforo-api-consumer'); ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <a href="<?php echo admin_url('tools.php?action=xfac_tools_search_index&type=post'); ?>">
+                                            <?php _e('Rebuild search index', 'xenforo-api-consumer'); ?></a>.
+                                    <?php endif; ?>
+                                </p>
+                            </fieldset>
                         </td>
                     </tr>
 
@@ -314,6 +344,36 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
                                     <p class="description"><?php _e('If no WordPress account can be found for reply poster, '
                                             . 'create the comment as a guest comment.', 'xenforo-api-consumer'); ?></p>
                                 </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <label for="xfac_search_index_comment">
+                                    <input name="xfac_search_index_comment" type="checkbox" id="xfac_search_index_comment"
+                                           value="1" <?php checked('1', get_option('xfac_search_index_comment')); ?> />
+                                    <?php _e('Search Indexing', 'xenforo-api-consumer'); ?>
+                                </label>
+
+                                <p class="description">
+                                    <?php _e('Index WordPress comment in XenForo search engine, '
+                                        . 'making it possible to show comments when doing a regular search within the forums.',
+                                        'xenforo-api-consumer'); ?>
+
+                                    <?php if (!isset($meta['modules']['search/indexing']) || $meta['modules']['search/indexing'] < 2015091501): ?>
+                                        <span style="color: red">
+                                            <?php echo sprintf(
+                                                __('This feature requires %s-%s, it will not work until API server is updated.', 'xenforo-api-consumer'),
+                                                'search/indexing',
+                                                2015091501
+                                            ); ?>
+                                            <?php _e('You may need to edit the client in XenForo AdminCP'
+                                                . ' and enable the "Can index search contents" option in order to use search/indexing.',
+                                                'xenforo-api-consumer'); ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <a href="<?php echo admin_url('tools.php?action=xfac_tools_search_index&type=comment'); ?>">
+                                            <?php _e('Rebuild search index', 'xenforo-api-consumer'); ?></a>.
+                                    <?php endif; ?>
+                                </p>
                             </fieldset>
                         </td>
                     </tr>
@@ -387,7 +447,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
                                             . 'Please note that due to technical limitation, XenForo password change cannot be detected from WordPress. A workaround for this is to enable "%s".',
                                             'xenforo-api-consumer'), __('Accept XenForo login credentials', 'xenforo-api-consumer')); ?>
 
-                                        <?php if (isset($meta['modules']['forum']) AND $meta['modules']['forum'] < 2014112801): ?>
+                                        <?php if (!isset($meta['modules']['forum']) || $meta['modules']['forum'] < 2014112801): ?>
                                             <span style="color: red"><?php echo sprintf(
                                                     __('This feature requires %s-%s, it will not work until API server is updated.', 'xenforo-api-consumer'),
                                                     'forum',
@@ -409,7 +469,7 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
                                     <?php _e('Try to create XenForo account for WordPress user if he/she has\'t have a XenForo account yet. '
                                         . 'This is done everytime user logs into WordPress using a WordPress credential.', 'xenforo-api-consumer'); ?>
 
-                                    <?php if (isset($meta['modules']['oauth2']) AND $meta['modules']['oauth2'] < 2014030701): ?>
+                                    <?php if (!isset($meta['modules']['oauth2']) || $meta['modules']['oauth2'] < 2014030701): ?>
                                         <span style="color: red"><?php echo sprintf(
                                                 __('This feature requires %s-%s, it will not work until API server is updated.', 'xenforo-api-consumer'),
                                                 'oauth2',

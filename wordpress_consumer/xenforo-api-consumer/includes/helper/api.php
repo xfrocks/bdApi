@@ -36,6 +36,7 @@ function xfac_api_getVersionSuggestionText($config, $meta)
         'forum' => 2015030901,
         'oauth2' => 2015030902,
         'subscription' => 2014092301,
+        'search/indexing' => 2015091501,
     );
 
     if (empty($config)) {
@@ -658,6 +659,35 @@ function xfac_api_putUser($config, $accessToken, $userId, array $postFields)
     extract($curl);
 
     if (isset($parts['status']) AND $parts['status'] == 'ok') {
+        return true;
+    } else {
+        return _xfac_api_getFailedResponse($curl);
+    }
+}
+
+function xfac_api_postSearchIndexing($config, $accessToken, $contentType, $contentId,
+                                     $title, $body, $date, $link)
+{
+    $url = call_user_func_array('sprintf', array(
+        '%s/index.php?search/indexing',
+        rtrim($config['root'], '/'),
+    ));
+    $postFields = array(
+        'oauth_token' => $accessToken,
+        'content_type' => $contentType,
+        'content_id' => $contentId,
+        'title' => $title,
+        'body' => $body,
+        'date' => $date,
+        'link' => $link,
+    );
+
+    $curl = _xfac_api_curl($url, 'POST', $postFields);
+    extract($curl);
+
+    if (isset($parts['status'])
+        && $parts['status'] == 'ok'
+    ) {
         return true;
     } else {
         return _xfac_api_getFailedResponse($curl);

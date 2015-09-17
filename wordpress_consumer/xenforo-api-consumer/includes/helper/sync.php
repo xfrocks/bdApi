@@ -66,19 +66,24 @@ function xfac_sync_updateRecordDate($record, $syncDate = 0)
 
 function xfac_sync_getRecordsByProviderTypeAndSyncId($provider, $cType, $syncId)
 {
-    global $wpdb;
+    return xfac_sync_getRecordsByProviderTypeAndSyncIds($provider, $cType, array($syncId));
+}
 
-    $records = $wpdb->get_results($wpdb->prepare("
+function xfac_sync_getRecordsByProviderTypeAndSyncIds($provider, $cType, array $syncIds)
+{
+	global $wpdb;
+
+	$records = $wpdb->get_results($wpdb->prepare("
 		SELECT *
 		FROM {$wpdb->prefix}xfac_sync
 		WHERE provider = %s
 			AND provider_content_type = %s
-			AND sync_id = %d
-	", $provider, $cType, $syncId));
+			AND sync_id IN (" . implode(',', array_map('intval', $syncIds)) . ")
+	", $provider, $cType));
 
-    _xfac_sync_prepareRecords($records);
+	_xfac_sync_prepareRecords($records);
 
-    return $records;
+	return $records;
 }
 
 function xfac_sync_getRecordsByProviderTypeAndIds($provider, $cType, array $cIds)

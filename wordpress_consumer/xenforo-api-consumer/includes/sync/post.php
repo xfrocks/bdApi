@@ -5,28 +5,33 @@ if (!defined('ABSPATH')) {
     exit();
 }
 
-function xfac_save_post($postId, WP_Post $post, $update)
+function xfac_save_post($postId, WP_Post $post)
 {
     if (!empty($GLOBALS['XFAC_SKIP_xfac_save_post'])) {
         return;
     }
 
-    if ($post->post_type != 'post') {
+    if (empty($postId)
+        || $post->post_type != 'post'
+        || $post->post_status != 'publish'
+    ) {
         return;
     }
 
-    if ($post->post_status == 'publish') {
-        $tagForumMappings = get_option('xfac_tag_forum_mappings');
-        if (empty($tagForumMappings)) {
-            return;
-        }
+    $config = xfac_option_getConfig();
+    if (empty($config)) {
+        return;
+    }
 
-        $forumIds = array();
+    $tagForumMappings = get_option('xfac_tag_forum_mappings');
+    $forumIds = array();
+    $pushed = false;
 
-        if (!empty($_POST['xfac_forum_id'])) {
-            $forumIds[] = $_POST['xfac_forum_id'];
-        }
+    if (!empty($_POST['xfac_forum_id'])) {
+        $forumIds[] = $_POST['xfac_forum_id'];
+    }
 
+    if (!empty($tagForumMappings)) {
         foreach ($tagForumMappings as $tagForumMapping) {
             if (!empty($tagForumMapping['term_id'])) {
                 if (is_object_in_term($post->ID, 'post_tag', $tagForumMapping['term_id'])) {
@@ -34,93 +39,97 @@ function xfac_save_post($postId, WP_Post $post, $update)
                 }
             }
         }
+    }
 
-        if (!empty($forumIds)) {
-            $accessToken = xfac_user_getAccessToken($post->post_author);
+    if (!empty($forumIds)) {
+        $accessToken = xfac_user_getAccessToken($post->post_author);
+        if (!empty($accessToken)) {
+            $existingSyncRecords = xfac_sync_getRecordsByProviderTypeAndSyncId('', 'thread', $post->ID);
+            foreach ($existingSyncRecords as $existingSyncRecord) {
+                foreach (array_keys($forumIds) as $key) {
+                    if (!empty($existingSyncRecord->syncData['thread']['forum_id'])
+                        && $existingSyncRecord->syncData['thread']['forum_id'] == $forumIds[$key]
+                    ) {
+                        unset($forumIds[$key]);
+                        break;
+                    }
+                }
+            }
 
-            if (!empty($accessToken)) {
-                $config = xfac_option_getConfig();
+            $postBody = _xfac_syncPost_getPostBody($post);
 
-                if (!empty($config)) {
-                    $existingSyncRecords = xfac_sync_getRecordsByProviderTypeAndSyncId('', 'thread', $post->ID);
-                    foreach ($existingSyncRecords as $existingSyncRecord) {
-                        foreach (array_keys($forumIds) as $key) {
-                            if (!empty($existingSyncRecord->syncData['thread']['forum_id']) AND $existingSyncRecord->syncData['thread']['forum_id'] == $forumIds[$key]) {
-                                unset($forumIds[$key]);
-                                break;
+            foreach ($forumIds as $forumId) {
+                $thread = xfac_api_postThread($config, $accessToken, $forumId, $post->post_title, $postBody);
+
+                if (!empty($thread['thread']['thread_id'])) {
+                    $pushed = true;
+                    $subscribed = array();
+
+                    if (intval(get_option('xfac_sync_comment_xf_wp')) > 0) {
+                        $xfPosts = xfac_api_getPostsInThread($config, $thread['thread']['thread_id'], $accessToken);
+                        if (empty($xfPosts['subscription_callback']) AND !empty($xfPosts['_headerLinkHub'])) {
+                            if (xfac_api_postSubscription($config, $accessToken, $xfPosts['_headerLinkHub'])) {
+                                $subscribed = array(
+                                    'hub' => $xfPosts['_headerLinkHub'],
+                                    'time' => time(),
+                                );
                             }
                         }
                     }
 
-                    $postBody = _xfac_syncPost_getPostBody($post);
+                    xfac_sync_updateRecord('', 'thread', $thread['thread']['thread_id'], $post->ID, 0, array(
+                        'forumId' => $forumId,
+                        'thread' => $thread['thread'],
+                        'direction' => 'push',
+                        'subscribed' => $subscribed,
+                    ));
 
-                    foreach ($forumIds as $forumId) {
-                        $thread = xfac_api_postThread($config, $accessToken, $forumId, $post->post_title, $postBody);
+                    xfac_log('xfac_save_post pushed to $forum (#%d) as $xfThread (#%d)', $forumId, $thread['thread']['thread_id']);
+                } else {
+                    xfac_log('xfac_save_post failed pushing to $forum (#%d)', $forumId);
+                }
+            }
 
-                        if (!empty($thread['thread']['thread_id'])) {
-                            $subscribed = array();
+            foreach ($existingSyncRecords as $existingSyncRecord) {
+                if (!empty($_POST['xfac_delete_sync']) AND in_array($existingSyncRecord->provider_content_id, $_POST['xfac_delete_sync'])) {
+                    // user chose to delete this sync record
+                    xfac_sync_deleteRecord($existingSyncRecord);
 
-                            if (intval(get_option('xfac_sync_comment_xf_wp')) > 0) {
-                                $xfPosts = xfac_api_getPostsInThread($config, $thread['thread']['thread_id'], $accessToken);
-                                if (empty($xfPosts['subscription_callback']) AND !empty($xfPosts['_headerLinkHub'])) {
-                                    if (xfac_api_postSubscription($config, $accessToken, $xfPosts['_headerLinkHub'])) {
-                                        $subscribed = array(
-                                            'hub' => $xfPosts['_headerLinkHub'],
-                                            'time' => time(),
-                                        );
-                                    }
-                                }
-                            }
-
-                            xfac_sync_updateRecord('', 'thread', $thread['thread']['thread_id'], $post->ID, 0, array(
-                                'forumId' => $forumId,
-                                'thread' => $thread['thread'],
-                                'direction' => 'push',
-                                'subscribed' => $subscribed,
-                            ));
-
-                            xfac_log('xfac_save_post pushed to $forum (#%d) as $xfThread (#%d)', $forumId, $thread['thread']['thread_id']);
-                        } else {
-                            xfac_log('xfac_save_post failed pushing to $forum (#%d)', $forumId);
-                        }
+                    if (!empty($existingSyncRecord->syncData['subscribed']['hub'])) {
+                        xfac_api_postSubscription($config, $accessToken, $existingSyncRecord->syncData['subscribed']['hub'], 'unsubscribe');
                     }
 
-                    foreach ($existingSyncRecords as $existingSyncRecord) {
-                        if (!empty($_POST['xfac_delete_sync']) AND in_array($existingSyncRecord->provider_content_id, $_POST['xfac_delete_sync'])) {
-                            // user chose to delete this sync record
-                            xfac_sync_deleteRecord($existingSyncRecord);
+                    continue;
+                }
 
-                            if (!empty($existingSyncRecord->syncData['subscribed']['hub'])) {
-                                xfac_api_postSubscription($config, $accessToken, $existingSyncRecord->syncData['subscribed']['hub'], 'unsubscribe');
-                            }
+                if (empty($existingSyncRecord->syncData['thread']['first_post']['post_id'])) {
+                    // no information about first post to update
+                    continue;
+                }
 
-                            continue;
-                        }
+                $xfPost = xfac_api_putPost($config, $accessToken, $existingSyncRecord->syncData['thread']['first_post']['post_id'], $postBody, array('thread_title' => $post->post_title));
 
-                        if (empty($existingSyncRecord->syncData['thread']['first_post']['post_id'])) {
-                            // no information about first post to update
-                            continue;
-                        }
+                if (!empty($xfPost['post']['post_id'])) {
+                    $pushed = true;
 
-                        $xfPost = xfac_api_putPost($config, $accessToken, $existingSyncRecord->syncData['thread']['first_post']['post_id'], $postBody, array('thread_title' => $post->post_title));
+                    $syncData = $existingSyncRecord->syncData;
+                    $syncData['direction'] = 'push';
+                    $syncData['thread']['first_post'] = $xfPost['post'];
 
-                        if (!empty($xfPost['post']['post_id'])) {
-                            $syncData = $existingSyncRecord->syncData;
-                            $syncData['direction'] = 'push';
-                            $syncData['thread']['first_post'] = $xfPost['post'];
-
-                            xfac_sync_updateRecord('', 'thread', $xfPost['post']['thread_id'], $post->ID, 0, $syncData);
-                            xfac_log('xfac_save_post pushed an update for $xfPost (#%d)', $xfPost['post']['post_id']);
-                        }
-                    }
+                    xfac_sync_updateRecord('', 'thread', $xfPost['post']['thread_id'], $post->ID, 0, $syncData);
+                    xfac_log('xfac_save_post pushed an update for $xfPost (#%d)', $xfPost['post']['post_id']);
                 }
             }
         }
     }
+
+    if (!$pushed) {
+        xfac_search_indexPost($config, $post);
+    }
 }
 
 if (intval(get_option('xfac_sync_post_wp_xf')) > 0) {
-    add_action('save_post', 'xfac_save_post', 10, 3);
+    add_action('save_post', 'xfac_save_post', 10, 2);
 }
 
 function xfac_syncPost_cron()
@@ -377,7 +386,7 @@ function xfac_syncPost_pullPost($config, $thread, $tags, $direction = 'pull')
     return $wpPostId;
 }
 
-function _xfac_syncPost_getPostBody($post)
+function _xfac_syncPost_getPostBody($post, $linkBack = true)
 {
     if (!!get_option('xfac_sync_post_wp_xf_excerpt')) {
         // this method is implemented with ideas from get_the_excerpt()
@@ -413,7 +422,9 @@ function _xfac_syncPost_getPostBody($post)
     $text = trim($text);
     $text = nl2br($text);
 
-    if (!!get_option('xfac_sync_post_wp_xf_link')) {
+    if ($linkBack
+        && !!get_option('xfac_sync_post_wp_xf_link')
+    ) {
         $text .= '<br /><a href="' . get_permalink($post->ID) . '">' . __('Read the whole post here.', 'xenforo-api-consumer') . '</a>';
     }
 
