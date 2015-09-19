@@ -90,4 +90,5 @@ require_once(dirname(__FILE__) . '/includes/sync/comment.php');
 require_once(dirname(__FILE__) . '/includes/sync/subscription.php');
 require_once(dirname(__FILE__) . '/includes/sync/login.php');
 
+require_once(dirname(__FILE__) . '/includes/widget/search.php');
 require_once(dirname(__FILE__) . '/includes/widget/threads.php');

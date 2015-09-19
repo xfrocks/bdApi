@@ -7,9 +7,12 @@ if (!defined('ABSPATH')) {
 
 class XFAC_Widget_Threads extends WP_Widget
 {
-    function XFAC_Widget_Threads()
+    function __construct()
     {
-        parent::WP_Widget(false, $name = __('XenForo Threads', 'xenforo-api-consumer'));
+        parent::__construct(false, __('XenForo Threads', 'xenforo-api-consumer'), array(
+            'classname' => 'widget_xfac_threads widget_links',
+            'description' => __('A list of threads from XenForo.')
+        ));
     }
 
     function form($instance)
@@ -109,7 +112,9 @@ class XFAC_Widget_Threads extends WP_Widget
         $config = xfac_option_getConfig();
         $threads = array();
 
-        if (!empty($config) AND !empty($instance['forumIds'])) {
+        if (!empty($config)
+            && !empty($instance['forumIds'])
+        ) {
             $forumId = implode(',', $instance['forumIds']);
 
             $extraParams = array(

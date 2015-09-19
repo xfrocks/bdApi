@@ -694,6 +694,28 @@ function xfac_api_postSearchIndexing($config, $accessToken, $contentType, $conte
     }
 }
 
+function xfac_api_postSearchThreads($config, $accessToken, $q, $limit = 5)
+{
+    $url = call_user_func_array('sprintf', array(
+        '%s/index.php?search/threads',
+        rtrim($config['root'], '/'),
+    ));
+    $postFields = array(
+        'oauth_token' => $accessToken,
+        'q' => $q,
+        'data_limit' => $limit,
+    );
+
+    $curl = _xfac_api_curl($url, 'POST', $postFields);
+    extract($curl);
+
+    if (isset($parts['data'])) {
+        return $parts;
+    } else {
+        return _xfac_api_getFailedResponse($curl);
+    }
+}
+
 function xfac_api_filterHtmlFromXenForo($html)
 {
     $offset = 0;
@@ -780,7 +802,10 @@ function _xfac_api_curl($url, $method = 'GET', $postFields = null, $curlOptions 
         $result['parts'] = array();
     }
 
-    if ($httpCode < 200 || $httpCode > 299 || empty($result['parts']) || !empty($result['parts']['error'])) {
+    if (WP_DEBUG
+        || $httpCode < 200 || $httpCode > 299
+        || empty($result['parts']) || !empty($result['parts']['error'])
+    ) {
         xfac_log('_xfac_api_curl %s (%s, %s) -> %s', $method, $url, var_export($postFields, true), $httpCode);
         foreach ($result['headers'] as $headerLine) {
             xfac_log('               | %s', $headerLine);
