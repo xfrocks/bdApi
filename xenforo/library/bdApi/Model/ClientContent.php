@@ -201,6 +201,7 @@ class bdApi_Model_ClientContent extends XenForo_Model
     public function prepareClientContentOrderOptions(array $fetchOptions = array(), $defaultOrderSql = '')
     {
         $choices = array(
+            'client_content_id' => 'client_content.client_content_id',
             'date' => 'client_content.date',
         );
 

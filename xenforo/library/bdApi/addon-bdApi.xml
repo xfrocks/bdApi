@@ -115,12 +115,36 @@
 
 	<input type="hidden" name="_xfConfirm" value="1" />
 </xen:form>]]></template>
+    <template title="bdapi_client_content_delete_all"><![CDATA[<xen:title>{xen:phrase bdapi_client_content_confirm_deletion}: {$client.name}</xen:title>
+<xen:h1>{xen:phrase bdapi_client_content_confirm_deletion}</xen:h1>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:adminlink 'api-client-contents', '', 'client_id={$clientContent.client_id}'}">{$client.name}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:require css="delete_confirmation.css" />
+
+<xen:form action="{xen:adminlink 'api-client-contents/delete-all','',
+				  'client_id={$client.client_id}'}" class="deleteConfirmForm formOverlay">
+
+	<p>{xen:phrase bdapi_client_content_please_confirm_delete_all}:</p>
+	<strong>{$client.name}</strong>
+
+	<xen:submitunit save="{xen:phrase bdapi_client_content_delete}" />
+
+	<input type="hidden" name="_xfConfirm" value="1" />
+</xen:form>]]></template>
     <template title="bdapi_client_content_list"><![CDATA[<xen:title>{xen:phrase bdapi_client_contents}</xen:title>
 
 <xen:if is="{$client}">
 	<xen:navigation>
 		<xen:breadcrumb href="{xen:adminlink 'api-clients/edit', $client}">{$client.name}</xen:breadcrumb>
 	</xen:navigation>
+
+	<xen:topctrl>
+		<a href="{xen:adminlink 'api-client-contents/delete-all', '', 'client_id={$client.client_id}'}"
+		   class="button OverlayTrigger">{xen:phrase bdapi_delete_all_client_content}</a>
+	</xen:topctrl>
 </xen:if>
 
 <xen:require css="filter_list.css" />
@@ -708,6 +732,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_client_content_not_found" version_id="77" version_string="1.4.5"><![CDATA[The requested client content could not be found]]></phrase>
     <phrase title="bdapi_client_content_no_results" version_id="77" version_string="1.4.5"><![CDATA[No client content could be found...]]></phrase>
     <phrase title="bdapi_client_content_please_confirm" version_id="77" version_string="1.4.5"><![CDATA[Please confirm that you want to delete the following client content]]></phrase>
+    <phrase title="bdapi_client_content_please_confirm_delete_all" version_id="77" version_string="1.4.5"><![CDATA[Please confirm that you want to delete the all contents of this client:]]></phrase>
     <phrase title="bdapi_client_delete" version_id="1" version_string="0.1"><![CDATA[Delete Client]]></phrase>
     <phrase title="bdapi_client_edit" version_id="1" version_string="0.1"><![CDATA[Edit Client]]></phrase>
     <phrase title="bdapi_client_ids_must_be_unique" version_id="4" version_string="0.9-dev"><![CDATA[API keys must be unique. The specified key is already in use.]]></phrase>
@@ -724,6 +749,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_client_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following client]]></phrase>
     <phrase title="bdapi_client_save" version_id="1" version_string="0.1"><![CDATA[Save Client]]></phrase>
     <phrase title="bdapi_client_secret" version_id="4" version_string="0.9-dev"><![CDATA[API Secret]]></phrase>
+    <phrase title="bdapi_delete_all_client_content" version_id="77" version_string="1.4.5"><![CDATA[Delete All]]></phrase>
     <phrase title="bdapi_description" version_id="1" version_string="0.1"><![CDATA[Description]]></phrase>
     <phrase title="bdapi_expire_date" version_id="1" version_string="0.1"><![CDATA[Expire Date]]></phrase>
     <phrase title="bdapi_home" version_id="4" version_string="0.9-dev"><![CDATA[API Access]]></phrase>

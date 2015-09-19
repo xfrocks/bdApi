@@ -56,6 +56,33 @@ class bdApi_ControllerAdmin_ClientContent extends XenForo_ControllerAdmin_Abstra
         }
     }
 
+    public function actionDeleteAll()
+    {
+        /** @var bdApi_Model_Client $clientModel */
+        $clientModel = $this->getModelFromCache('bdApi_Model_Client');
+        $clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
+        $client = $clientModel->getClientById($clientId);
+        if (empty($client)) {
+            return $this->responseNoPermission();
+        }
+
+        if ($this->isConfirmedPost()) {
+            $this->_request->setParam('cache', 'bdApi_CacheRebuilder_ClientContentDeleteAll');
+            $this->_request->setParam('options', array(
+                'client_id' => $client['client_id'],
+            ));
+
+            return $this->responseReroute('XenForo_ControllerAdmin_Tools', 'cache-rebuild');
+        } else {
+            $viewParams = array(
+                'client' => $client,
+            );
+
+            return $this->responseView('bdApi_ViewAdmin_ClientContent_DeleteAll',
+                'bdapi_client_content_delete_all', $viewParams);
+        }
+    }
+
     /**
      * @return bdApi_Model_ClientContent
      */

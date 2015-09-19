@@ -65,6 +65,9 @@ class bdApi_Listener
                 $methodName
             );
         }
+
+        XenForo_CacheRebuilder_Abstract::$builders['bdApi_CacheRebuilder_ClientContentDeleteAll']
+            = 'bdApi_CacheRebuilder_ClientContentDeleteAll';
     }
 
     public static function template_create($templateName, array &$params, XenForo_Template_Abstract $template)
