@@ -11,7 +11,7 @@ class bdApi_ControllerApi_Asset extends bdApi_ControllerApi_Abstract
         $sdk = file_get_contents($sdkPath);
         $sdk = str_replace('{prefix}', $prefix, $sdk);
         $sdk = str_replace('{data_uri}', XenForo_Link::buildPublicLink('canonical:misc/api-data'), $sdk);
-        $sdk = str_replace('{request_uri}', XenForo_Link::buildApiLink('index'), $sdk);
+        $sdk = str_replace('{request_uri}', bdApi_Data_Helper_Core::safeBuildApiLink('index'), $sdk);
 
         header('Content-Type: application/x-javascript; charset=utf-8');
         header('Cache-Control: public, max-age=31536000');

@@ -112,7 +112,7 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
                             $element['links'] = array();
                         }
 
-                        $element['links']['sub-elements'] = XenForo_Link::buildApiLink('navigation', '', array('parent' => $element['navigation_id']));
+                        $element['links']['sub-elements'] = bdApi_Data_Helper_Core::safeBuildApiLink('navigation', '', array('parent' => $element['navigation_id']));
                     }
 
                     $elements[] = $element;

@@ -10,7 +10,7 @@ class bdApi_ViewApi_Helper_Subscription
         }
 
         // subscription discovery
-        $hubLink = XenForo_Link::buildApiLink('subscriptions', null, array(
+        $hubLink = bdApi_Data_Helper_Core::safeBuildApiLink('subscriptions', null, array(
             'hub.topic' => bdApi_Model_Subscription::getTopic($topicType, $topicId),
             'oauth_token' => '',
         ));

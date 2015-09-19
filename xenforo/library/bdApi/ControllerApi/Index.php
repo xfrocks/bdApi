@@ -12,8 +12,8 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
         $systemInfo = array();
         if ($session->getOAuthClientId() === '') {
             $systemInfo += array(
-                'oauth/authorize' => XenForo_Link::buildApiLink('oauth/authorize', array(), array('oauth_token' => '')),
-                'oauth/token' => XenForo_Link::buildApiLink('oauth/token', array(), array('oauth_token' => '')),
+                'oauth/authorize' => bdApi_Data_Helper_Core::safeBuildApiLink('oauth/authorize', array(), array('oauth_token' => '')),
+                'oauth/token' => bdApi_Data_Helper_Core::safeBuildApiLink('oauth/token', array(), array('oauth_token' => '')),
             );
         }
         if ($session->checkScope(bdApi_Model_OAuth2::SCOPE_POST)) {
@@ -26,24 +26,24 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
 
         $data = array();
         $data['links'] = array(
-            'search' => XenForo_Link::buildApiLink('search'),
-            'navigation' => XenForo_Link::buildApiLink('navigation', array(), array('parent' => 0)),
-            'threads/recent' => XenForo_Link::buildApiLink('threads/recent'),
-            'users' => XenForo_Link::buildApiLink('users'),
+            'search' => bdApi_Data_Helper_Core::safeBuildApiLink('search'),
+            'navigation' => bdApi_Data_Helper_Core::safeBuildApiLink('navigation', array(), array('parent' => 0)),
+            'threads/recent' => bdApi_Data_Helper_Core::safeBuildApiLink('threads/recent'),
+            'users' => bdApi_Data_Helper_Core::safeBuildApiLink('users'),
         );
 
         if ($visitor['user_id'] > 0) {
-            $data['links']['conversations'] = XenForo_Link::buildApiLink('conversations');
-            $data['links']['forums/followed'] = XenForo_Link::buildApiLink('forums/followed');
-            $data['links']['notifications'] = XenForo_Link::buildApiLink('notifications');
-            $data['links']['threads/followed'] = XenForo_Link::buildApiLink('threads/followed');
-            $data['links']['threads/new'] = XenForo_Link::buildApiLink('threads/new');
-            $data['links']['users/ignored'] = XenForo_Link::buildApiLink('users/ignored');
-            $data['links']['users/me'] = XenForo_Link::buildApiLink('users', array(
+            $data['links']['conversations'] = bdApi_Data_Helper_Core::safeBuildApiLink('conversations');
+            $data['links']['forums/followed'] = bdApi_Data_Helper_Core::safeBuildApiLink('forums/followed');
+            $data['links']['notifications'] = bdApi_Data_Helper_Core::safeBuildApiLink('notifications');
+            $data['links']['threads/followed'] = bdApi_Data_Helper_Core::safeBuildApiLink('threads/followed');
+            $data['links']['threads/new'] = bdApi_Data_Helper_Core::safeBuildApiLink('threads/new');
+            $data['links']['users/ignored'] = bdApi_Data_Helper_Core::safeBuildApiLink('users/ignored');
+            $data['links']['users/me'] = bdApi_Data_Helper_Core::safeBuildApiLink('users', array(
                 'user_id' => XenForo_Visitor::getInstance()->toArray()), array('oauth_token' => ''));
 
             if ($visitor->canUpdateStatus()) {
-                $data['post']['status'] = XenForo_Link::buildApiLink('users/me/timeline');
+                $data['post']['status'] = bdApi_Data_Helper_Core::safeBuildApiLink('users/me/timeline');
             }
         }
 

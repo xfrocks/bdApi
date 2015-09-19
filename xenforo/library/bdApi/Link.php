@@ -18,8 +18,6 @@ eval($xenforoLinkContents);
 
 class bdApi_Link extends _XenForo_Link
 {
-    const API_LINK_GROUP = 'api';
-
     public function __construct($linkString, $canPrependFull = true)
     {
         if ($canPrependFull) {
@@ -76,7 +74,7 @@ class bdApi_Link extends _XenForo_Link
 
         $type = XenForo_Link::_checkForFullLink($type, $fullLink, $fullLinkPrefix);
 
-        $link = XenForo_Link::_buildLink(self::API_LINK_GROUP, $type, $data, $extraParams);
+        $link = XenForo_Link::_buildLink('api', $type, $data, $extraParams);
         $queryString = XenForo_Link::buildQueryString($extraParams);
 
         if ($link instanceof XenForo_Link) {

@@ -18,7 +18,7 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
         // setup our routes
         $routes = array();
         bdApi_Route_PrefixApi::setupRoutes($routes);
-        XenForo_Link::setHandlerInfoForGroup(XenForo_Link::API_LINK_GROUP, $routes);
+        XenForo_Link::setHandlerInfoForGroup('api', $routes);
 
         parent::_handleCustomPreloadedData($data);
     }
@@ -110,7 +110,7 @@ if (XenForo_Application::$versionId >= 1020000) {
         {
             $router = new XenForo_Router();
             $router->addRule(new XenForo_Route_ResponseSuffix(), 'ResponseSuffix');
-            $router->addRule(new bdApi_Route_PrefixApi(XenForo_Link::API_LINK_GROUP), 'Prefix');
+            $router->addRule(new bdApi_Route_PrefixApi('api'), 'Prefix');
 
             return $router;
         }
@@ -130,7 +130,7 @@ if (XenForo_Application::$versionId >= 1020000) {
         {
             $router = new XenForo_Router();
             $router->addRule(new XenForo_Route_ResponseSuffix(), 'ResponseSuffix');
-            $router->addRule(new bdApi_Route_PrefixApi(XenForo_Link::API_LINK_GROUP), 'Prefix');
+            $router->addRule(new bdApi_Route_PrefixApi('api'), 'Prefix');
 
             $routeMatch = $router->match($request);
 

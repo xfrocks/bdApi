@@ -340,7 +340,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionPostPassword()
     {
-        $link = XenForo_Link::buildApiLink('users', array('user_id' => $this->_input->filterSingle('user_id', XenForo_Input::UINT)));
+        $link = bdApi_Data_Helper_Core::safeBuildApiLink('users', array('user_id' => $this->_input->filterSingle('user_id', XenForo_Input::UINT)));
         $this->_setDeprecatedHeaders('PUT', $link);
 
         return $this->responseReroute(__CLASS__, 'put-index');

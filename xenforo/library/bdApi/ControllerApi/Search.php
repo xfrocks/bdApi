@@ -11,13 +11,13 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
     public function actionGetIndex()
     {
         $data = array('links' => array(
-            'posts' => XenForo_Link::buildApiLink('search/posts'),
-            'threads' => XenForo_Link::buildApiLink('search/threads'),
-            'profile-posts' => XenForo_Link::buildApiLink('search/profile-posts'),
+            'posts' => bdApi_Data_Helper_Core::safeBuildApiLink('search/posts'),
+            'threads' => bdApi_Data_Helper_Core::safeBuildApiLink('search/threads'),
+            'profile-posts' => bdApi_Data_Helper_Core::safeBuildApiLink('search/profile-posts'),
         ));
 
         if (XenForo_Application::$versionId > 1050000) {
-            $data['links']['tagged'] = XenForo_Link::buildApiLink('search/tagged');
+            $data['links']['tagged'] = bdApi_Data_Helper_Core::safeBuildApiLink('search/tagged');
         }
 
         return $this->responseData('bdApi_ViewApi_Index', $data);

@@ -392,12 +392,12 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             $pageNavParams['fields_exclude'] = $inputData['fields_exclude'];
         }
         if ($oldestComment['comment_date'] != $profilePost['first_comment_date']) {
-            $data['links']['prev'] = XenForo_Link::buildApiLink('profile-posts/comments', $profilePost, array_merge($pageNavParams, array(
+            $data['links']['prev'] = bdApi_Data_Helper_Core::safeBuildApiLink('profile-posts/comments', $profilePost, array_merge($pageNavParams, array(
                 'before' => $oldestComment['comment_date'],
             )));
         }
         if ($latestComment['comment_date'] != $profilePost['last_comment_date']) {
-            $data['links']['latest'] = XenForo_Link::buildApiLink('profile-posts/comments', $profilePost, $pageNavParams);
+            $data['links']['latest'] = bdApi_Data_Helper_Core::safeBuildApiLink('profile-posts/comments', $profilePost, $pageNavParams);
         }
 
         return $this->responseData('bdApi_ViewApi_ProfilePost_Comments', $data);

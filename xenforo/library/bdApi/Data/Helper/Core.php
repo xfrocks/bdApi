@@ -12,7 +12,7 @@ class bdApi_Data_Helper_Core
         if (XenForo_Application::debugMode()) {
             $data['debug'] = XenForo_Debug::getDebugTemplateParams();
             if (!empty($data['debug']['debug_url'])) {
-                $data['debug']['debug_url'] = XenForo_Link::convertApiUriToAbsoluteUri($data['debug']['debug_url'], true);
+                $data['debug']['debug_url'] = self::safeConvertApiUriToAbsoluteUri($data['debug']['debug_url'], true);
             }
 
             $session = self::safeGetSession();
@@ -74,12 +74,12 @@ class bdApi_Data_Helper_Core
 
         if ($page > 1) {
             // a previous link should only be added if we are not at page 1
-            $pageNav['prev'] = XenForo_Link::buildApiLink($linkType, $linkData, array_merge($linkParams, array('page' => $page - 1)));
+            $pageNav['prev'] = bdApi_Data_Helper_Core::safeBuildApiLink($linkType, $linkData, array_merge($linkParams, array('page' => $page - 1)));
         }
 
         if ($page < $pageNav['pages']) {
             // a next link should only be added if we are not at the last page
-            $pageNav['next'] = XenForo_Link::buildApiLink($linkType, $linkData, array_merge($linkParams, array('page' => $page + 1)));
+            $pageNav['next'] = bdApi_Data_Helper_Core::safeBuildApiLink($linkType, $linkData, array_merge($linkParams, array('page' => $page + 1)));
         }
 
         // add the page navigation into `links`
@@ -144,6 +144,21 @@ class bdApi_Data_Helper_Core
     {
         $args = func_get_args();
         $func = array('XenForo_Link', 'buildApiLink');
+
+        if (is_callable($func)) {
+            return call_user_func_array($func, $args);
+        } else {
+            return '';
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public static function safeConvertApiUriToAbsoluteUri()
+    {
+        $args = func_get_args();
+        $func = array('XenForo_Link', 'convertApiUriToAbsoluteUri');
 
         if (is_callable($func)) {
             return call_user_func_array($func, $args);

@@ -35,7 +35,7 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
             'notifications' => $this->_filterDataMany($this->_getAlertModel()->prepareApiDataForAlerts($alerts)),
             'notifications_total' => $total,
             'links' => array(
-                'read' => XenForo_Link::buildApiLink('notifications/read'),
+                'read' => bdApi_Data_Helper_Core::safeBuildApiLink('notifications/read'),
             ),
 
             '_alerts' => $alerts,
