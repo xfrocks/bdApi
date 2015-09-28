@@ -113,14 +113,18 @@ class bdApiConsumer_Option
 				$provider['root'] = rtrim($provider['root'], '/');
 			}
 
-			if (!empty($provider['name']) AND !empty($provider['root']) AND !empty($provider['client_id']) AND !empty($provider['client_secret']))
-			{
-				$code = substr(md5($provider['root'] . $provider['client_id'] . $provider['client_secret']), -5);
+			if (!empty($provider['name'])
+				&& !empty($provider['root'])
+                && !empty($provider['client_id'])
+                && !empty($provider['client_secret'])
+            ) {
+                if (empty($provider['code'])) {
+                    $provider['code'] = substr(md5($provider['root'] . $provider['client_id'] . $provider['client_secret']), -5);
+                }
 
-				$output[$code] = array_merge($provider, array(
-					'code' => $code,
-					'verified' => XenForo_Application::$time,
-				));
+                $provider['verified'] = XenForo_Application::$time;
+
+				$output[$provider['code']] = $provider;
 			}
 		}
 

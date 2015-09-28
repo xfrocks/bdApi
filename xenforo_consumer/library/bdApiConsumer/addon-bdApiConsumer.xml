@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.8-dev" version_id="22" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="0.9.8-dev" version_id="23" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -37,6 +37,11 @@
 	placeholder="{xen:phrase bdapi_consumer_client_id}" />
 <xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][client_secret]" value="{xen:if '{$provider}', $provider.client_secret}"
 	placeholder="{xen:phrase bdapi_consumer_client_secret}" />
+
+<xen:if is="!empty({$provider.code})">
+	<input type="hidden" name="{$fieldPrefix}[{$preparedOption.option_id}][{$counter}][code]"
+		value="{$provider.code}" />
+</xen:if>
 
 ]]></template>
   </admin_templates>
