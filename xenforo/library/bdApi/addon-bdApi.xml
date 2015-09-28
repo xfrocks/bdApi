@@ -714,6 +714,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_authorize_error_client_x_not_found" version_id="1" version_string="0.1"><![CDATA[Client {client} could not be found.]]></phrase>
     <phrase title="bdapi_authorize_error_invalid_or_expired_access_token" version_id="1" version_string="0.1"><![CDATA[Invalid or expired access token.]]></phrase>
     <phrase title="bdapi_authorize_error_scope_x_not_granted" version_id="1" version_string="0.1"><![CDATA[Scope {scope} has not been granted.]]></phrase>
+    <phrase title="bdapi_authorize_no_client_create_one_question" version_id="77" version_string="1.4.5"><![CDATA[Client could not be found. You can create one <a href="{link}">here</a> and try again.]]></phrase>
     <phrase title="bdapi_auth_codes" version_id="54" version_string="1.3.1b"><![CDATA[Authentication Codes]]></phrase>
     <phrase title="bdapi_auth_code_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Authentication Code]]></phrase>
     <phrase title="bdapi_auth_code_delete" version_id="1" version_string="0.1"><![CDATA[Delete Authentication Code]]></phrase>
@@ -773,6 +774,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_no_twitter_association_found" version_id="62" version_string="1.4.2-BETA"><![CDATA[No user has been registered with this Twitter account.]]></phrase>
     <phrase title="bdapi_only_accepts_post_requests" version_id="75" version_string="1.4.4c"><![CDATA[This entry point only accepts POST requests.]]></phrase>
     <phrase title="bdapi_please_confirm_to_authorize_access" version_id="1" version_string="0.1"><![CDATA[Please confirm to authorize access to the listed client with below permissions.]]></phrase>
+    <phrase title="bdapi_please_confirm_to_authorize_access_auto" version_id="77" version_string="1.4.5"><![CDATA[You are trying to authorize with no `client_id` therefore a random client of yours is being used. For security reason, the implicit grant flow is used and no other flows are available. Please confirm to continue.]]></phrase>
     <phrase title="bdapi_post_slash_users_requires_client_id" version_id="26" version_string="1.0.1"><![CDATA[POST /users requires `client_id`.
 ]]></phrase>
     <phrase title="bdapi_private_key" version_id="67" version_string="1.4.3-BETA"><![CDATA[Private Key]]></phrase>
@@ -1446,7 +1448,7 @@ step=3600</edit_format_params>
 		</xen:if>
 	</ol>
 </div>]]></template>
-    <template title="bdapi_account_authorize" version_id="56" version_string="1.3.3"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
+    <template title="bdapi_account_authorize" version_id="77" version_string="1.4.5"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
 <form method="post" class="xenForm"
 	action="{xen:link
@@ -1459,7 +1461,11 @@ step=3600</edit_format_params>
 		'scope={$authorizeParams.scope}'
 	}">
 	
-	<p>{xen:phrase bdapi_please_confirm_to_authorize_access}</p>
+	<xen:if is="{$clientIsAuto}">
+		<p>{xen:phrase bdapi_please_confirm_to_authorize_access_auto}</p>
+	<xen:else />
+		<p>{xen:phrase bdapi_please_confirm_to_authorize_access}</p>
+	</xen:if>
 	
 	<dl class="ctrlUnit">
 		<dt>{xen:phrase bdapi_client}:</dt>
@@ -1489,7 +1495,8 @@ step=3600</edit_format_params>
 		</dd>
 	</dl>
 	
-	<p>{xen:phrase bdapi_you_will_be_redirected_x, 'redirectUri={$authorizeRedirectUri}', 'clientName={$client.name}'}</p>
+	<p>{xen:phrase bdapi_you_will_be_redirected_x, 'redirectUri={xen:if '{$authorizeParams.redirect_uri}',
+		$authorizeParams.redirect_uri, $client.redirect_uri}', 'clientName={$client.name}'}</p>
 
 	<dl class="ctrlUnit submitUnit">
 		<dt></dt>

@@ -260,8 +260,42 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
             }
         }
 
-        $client = $oauth2Model->getClientModel()->getClientById($authorizeParams['client_id']);
+        $client = null;
+        $clientIsAuto = false;
+        if (empty($authorizeParams['client_id'])) {
+            // try to get the first client of user if available
+            $visitorClients = $this->_bdApi_getClientModel()->getClients(array(
+                'user_id' => XenForo_Visitor::getUserId()
+            ), array(
+                'limit' => 1,
+            ));
+            if (!empty($visitorClients)) {
+                $randClientId = array_rand($visitorClients, 1);
+                $client = $visitorClients[$randClientId];
+                $clientIsAuto = true;
+                $authorizeParams['client_id'] = $client['client_id'];
+
+                // auto assign at least the READ scope
+                if (empty($authorizeParams['scope'])) {
+                    $authorizeParams['scope'] = bdApi_Model_OAuth2::SCOPE_READ;
+                }
+
+                // reset the redirect uri to prevent security issue
+                $authorizeParams['redirect_uri'] = '';
+
+                // force to use implicit authentication flow2
+                $authorizeParams['response_type'] = 'token';
+            }
+        } else {
+            $client = $oauth2Model->getClientModel()->getClientById($authorizeParams['client_id']);
+        }
+
         if (empty($client)) {
+            if (XenForo_Visitor::getInstance()->hasPermission('general', 'bdApi_clientNew')) {
+                return $this->responseError(new XenForo_Phrase('bdapi_authorize_no_client_create_one_question',
+                    array('link' => XenForo_Link::buildPublicLink('account/api/client-add'))), 404);
+            }
+
             return $this->responseError(new XenForo_Phrase('bdapi_authorize_error_client_x_not_found',
                 array('client' => $authorizeParams['client_id'])), 404);
         }
@@ -291,6 +325,12 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
             $bypassConfirmation = true;
         } else {
             $authorizeParams['scope'] = bdApi_Template_Helper_Core::getInstance()->scopeJoin($paramScopesNew);
+        }
+
+        // sondh@2015-09-28
+        // disable bypassing confirmation for testing purpose
+        if ($clientIsAuto) {
+            $bypassConfirmation = false;
         }
 
         $response = $oauth2Model->getServer()->actionOauthAuthorize1($this, $authorizeParams);
@@ -331,6 +371,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
             $viewParams = array(
                 'client' => $client,
                 'authorizeParams' => $authorizeParams,
+                'clientIsAuto' => $clientIsAuto,
             );
 
             return $this->_getWrapper('account', 'api', $this->responseView('bdApi_ViewPublic_Account_Authorize', 'bdapi_account_authorize', $viewParams));
