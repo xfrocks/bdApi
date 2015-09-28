@@ -11,6 +11,8 @@ class bdApi_Option
                 return 10;
             case 'secretLength':
                 return 15;
+            case 'authorizeBypassSecs':
+                return 600;
         }
 
         return $options->get('bdApi_' . $key);

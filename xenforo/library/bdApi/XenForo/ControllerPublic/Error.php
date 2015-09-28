@@ -34,12 +34,21 @@ class bdApi_XenForo_ControllerPublic_Error extends XFCP_bdApi_XenForo_Controller
                 array('client' => $clientId)), 404);
         }
 
+        $authorizeParams = $this->_input->filter($oauth2Model->getAuthorizeParamsInputFilter());
+        $redirectParams = $authorizeParams;
+        $redirectParams['timestamp'] = time() + bdApi_Option::get('authorizeBypassSecs');
+        $redirectParams['hash'] = bdApi_Crypt::encryptTypeOne(serialize($authorizeParams), $redirectParams['timestamp']);
+        $redirect = XenForo_Link::buildPublicLink('account/authorize', null, $redirectParams);
+
         $viewParams = array(
             'client' => $client,
+            'authorizeParams' => $authorizeParams,
+
             'social' => $social,
+            'redirect' => $redirect,
         );
 
-        $view = $this->responseView('bdApi_ViewPublic_Error_AuthorizeGuest', 'bdapi_error_authorize_guest', $viewParams);
+        $view = $this->responseView('bdApi_ViewPublic_Account_Authorize', 'bdapi_error_authorize_guest', $viewParams);
         $view->responseCode = 403;
 
         return $view;

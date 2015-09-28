@@ -308,6 +308,25 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
             $bypassConfirmation = true;
         }
 
+        // sondh@2015-09-28
+        // bypass confirmation if user logged in to authorize
+        // this is secured by checking our encrypted time-expiring hash
+        $hashInput = $this->_input->filter(array(
+            'hash' => XenForo_Input::STRING,
+            'timestamp' => XenForo_Input::UINT,
+        ));
+        if (!empty($hashInput['hash'])
+            && !empty($hashInput['timestamp'])
+        ) {
+            try {
+                if (bdApi_Crypt::decryptTypeOne($hashInput['hash'], $hashInput['timestamp'])) {
+                    $bypassConfirmation = true;
+                }
+            } catch (XenForo_Exception $e) {
+                // ignore
+            }
+        }
+
         // sondh@2014-09-26
         // bypass confirmation if all requested scopes have been granted at some point
         // in old version of this add-on, it checked for scope from active tokens
@@ -374,7 +393,8 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
                 'clientIsAuto' => $clientIsAuto,
             );
 
-            return $this->_getWrapper('account', 'api', $this->responseView('bdApi_ViewPublic_Account_Authorize', 'bdapi_account_authorize', $viewParams));
+            return $this->_getWrapper('account', 'api',
+                $this->responseView('bdApi_ViewPublic_Account_Authorize', 'bdapi_account_authorize', $viewParams));
         }
     }
 
