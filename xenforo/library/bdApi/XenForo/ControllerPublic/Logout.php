@@ -30,10 +30,24 @@ class bdApi_XenForo_ControllerPublic_Logout extends XFCP_bdApi_XenForo_Controlle
         ));
 
         if (!empty($input['md5'])
-            && md5($input['redirect']) === bdApi_Crypt::decryptTypeOne($input['md5'], $input['timestamp'])
+            && !empty($input['timestamp'])
+            && !empty($input['redirect'])
         ) {
-            $this->_bdApi_redirect = $input['redirect'];
-            return $input['redirect'];
+            $md5 = '';
+            try {
+                $md5 = bdApi_Crypt::decryptTypeOne($input['md5'], $input['timestamp']);
+            } catch (XenForo_Exception $e) {
+                if (XenForo_Application::debugMode()) {
+                    $this->_response->setHeader('X-Api-Exception', $e->getMessage());
+                }
+            }
+
+            if (!empty($md5)
+                && $md5 === md5($input['redirect'])
+            ) {
+                $this->_bdApi_redirect = $input['redirect'];
+                return $input['redirect'];
+            }
         }
 
         return parent::getDynamicRedirect($fallbackUrl, $useReferrer);

@@ -10,7 +10,18 @@ class bdApi_XenForo_ControllerPublic_Login extends XFCP_bdApi_XenForo_Controller
             'user_id' => XenForo_Input::STRING,
         ));
 
-        $userId = intval(bdApi_Crypt::decryptTypeOne($input['user_id'], $input['timestamp']));
+        $userId = 0;
+        if (!empty($input['user_id'])
+            && !empty($input['timestamp'])
+        ) {
+            try {
+                $userId = intval(bdApi_Crypt::decryptTypeOne($input['user_id'], $input['timestamp']));
+            } catch (XenForo_Exception $e) {
+                if (XenForo_Application::debugMode()) {
+                    $this->_response->setHeader('X-Api-Exception', $e->getMessage());
+                }
+            }
+        }
 
         if ($userId > 0) {
             $this->_response->setHeader('X-Api-Login-User', $userId);

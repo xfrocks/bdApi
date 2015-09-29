@@ -323,7 +323,9 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
                     $bypassConfirmation = true;
                 }
             } catch (XenForo_Exception $e) {
-                // ignore
+                if (XenForo_Application::debugMode()) {
+                    $this->_response->setHeader('X-Api-Exception', $e->getMessage());
+                }
             }
         }
 
