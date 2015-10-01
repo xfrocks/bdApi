@@ -122,12 +122,15 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 
         $data['permissions'] = array(
             'view' => $this->canViewThread($thread, $forum),
-            'edit' => $this->canEditThread($thread, $forum),
             'delete' => $this->canDeleteThread($thread, $forum),
             'follow' => $this->canWatchThread($thread, $forum),
             'post' => $this->canReplyToThread($thread, $forum),
             'upload_attachment' => $this->_getForumModel()->canUploadAndManageAttachment($forum),
         );
+
+        if (!empty($firstPost)) {
+            $data['permissions']['edit'] = $this->_getPostModel()->canEditPost($firstPost, $thread, $forum);
+        }
 
         if (XenForo_Application::$versionId > 1050000) {
             $data['permissions']['edit_tags'] = $this->canEditTags($thread, $forum);
