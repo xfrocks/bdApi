@@ -71,20 +71,20 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
         return $params;
     }
 
-    public static function jsonEncodeForOutput($input, $addDefaultParams = true)
+    public function renderViewObject($class, $responseType, array &$params = array(), &$templateName = '')
     {
-        if ($addDefaultParams) {
-            self::_addDefaultParams($input);
-        }
+        $return = parent::renderViewObject($class, $responseType, $params, $templateName);
 
-        foreach (array_keys($input) as $inputKey) {
-            if (strpos($inputKey, '_') === 0) {
-                // filter out internal params
-                unset($input[$inputKey]);
+        if ($return === null) {
+            foreach (array_keys($params) as $paramKey) {
+                if (strpos($paramKey, '_') === 0) {
+                    // filter out internal params
+                    unset($params[$paramKey]);
+                }
             }
         }
 
-        return XenForo_ViewRenderer_Json::jsonEncodeForOutput($input, false);
+        return $return;
     }
 
     protected static function _addDefaultParams(array &$params = array())
