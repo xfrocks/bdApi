@@ -71,6 +71,15 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
         return $params;
     }
 
+    public static function jsonEncodeForOutput($input, $addDefaultParams = true)
+    {
+        if ($addDefaultParams) {
+            self::_addDefaultParams($input);
+        }
+
+        return XenForo_ViewRenderer_Json::jsonEncodeForOutput($input, false);
+    }
+
     public function renderViewObject($class, $responseType, array &$params = array(), &$templateName = '')
     {
         $return = parent::renderViewObject($class, $responseType, $params, $templateName);
