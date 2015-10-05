@@ -182,16 +182,60 @@ class bdApi_Session extends XenForo_Session
         $session->set('canAdminUsers', false);
         $session->set('userModerationCounts', array('total' => 0, 'lastBuildDate' => XenForo_Application::$time));
 
+        // sondh@2015-10-04
+        // added support for locale via XenForo languages
+        // api requests containing `locale` parameter will use one of the installed languages that matches
+        // the specified locale. The value must be a valid language code (ISO 639-1) with optional inclusion of
+        // a valid country code (ISO 3166-1 alpha 2) separated by hyphen ("-").
+        $requestLanguageId = 0;
+        $requestLocale = $request->getParam('locale');
+        if (!empty($requestLocale)
+            && preg_match('#^(?<lang>\w{2})(\-(?<country>\w{2}))?$#', $requestLocale, $matches)
+        ) {
+            $requestLang = utf8_strtolower($matches['lang']);
+            $requestCountry = utf8_strtoupper(isset($matches['country']) ? $matches['country'] : '');
+            $requestLocale = !empty($requestCountry) ? sprintf('%s-%s', $requestLang, $requestCountry) : $requestLang;
+            $languages = XenForo_Application::get('languages');
+            ksort($languages);
+
+            foreach ($languages as $language) {
+                if (utf8_substr($language['language_code'], 0, 2) === $requestLang
+                    && (
+                        empty($requestLanguageId)
+                        || (
+                            !empty($requestCountry)
+                            && $requestLocale === $language['language_code']
+                        )
+                    )
+                ) {
+                    $requestLanguageId = $language['language_id'];
+                }
+            }
+        }
+        $session->set('languageId', $requestLanguageId);
+
         XenForo_Application::set('session', $session);
-
         $options = $session->getAll();
-
         $visitor = XenForo_Visitor::setup($session->get('user_id'), $options);
 
         if (empty($visitor['user_id'])) {
             $guestUsername = $request->getParam('guestUsername');
             if (!empty($guestUsername)) {
                 $visitor['username'] = $guestUsername;
+            }
+        }
+
+        if (!empty($requestLocale)
+            && $requestLanguageId > 0
+        ) {
+            if ($visitor['user_id'] == 0) {
+                if ($requestLanguageId != XenForo_Application::getOptions()->get('defaultLanguageId')) {
+                    $session->set('requestLocale', $requestLocale);
+                }
+            } else {
+                if ($requestLanguageId != $visitor['language_id']) {
+                    $session->set('requestLocale', $requestLocale);
+                }
             }
         }
 

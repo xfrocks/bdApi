@@ -17,8 +17,20 @@ class bdApi_Data_Helper_Core
 
             $session = self::safeGetSession();
             if (!empty($session)) {
-                $data['debug']['client_id'] = $session->getOAuthClientId();
-                $data['debug']['oauth_token'] = $session->getOAuthTokenText();
+                $clientId = $session->getOAuthClientId();
+                if (!empty($clientId)) {
+                    $data['debug']['client_id'] = $clientId;
+
+                    $oauthToken = $session->getOAuthTokenText();;
+                    if (!empty($oauthToken)) {
+                        $data['debug']['oauth_token'] = $oauthToken;
+                    }
+                }
+
+                $languageId = $session->get('languageId');
+                if (!empty($languageId)) {
+                    $data['debug']['language_id'] = $languageId;
+                }
             }
         }
 

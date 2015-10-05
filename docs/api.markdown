@@ -115,6 +115,9 @@ System information and availability can be determined by sending a GET request t
 
 ## Common Parameters
 
+### i18n
+All API requests accept `locale` parameter to switch user facing messages to specified language. The value must be a valid language code (ISO 639-1) with optional inclusion of a valid country code (ISO 3166-1 alpha 2) separated by hyphen ("-"). If no complete match can be found, a language with the same language code (even with different country code) will be used. In the worst case that there are no installed languages of requested language code, the default language will be used. Since forum-2015100401.
+
 ### Fields filtering
 For API method with resource data like a forum or a thread, the data can be filtered to get interested fields only. When there are no filter
 

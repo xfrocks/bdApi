@@ -32,9 +32,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class Api {
+
+    public static final String PARAM_LOCALE = "locale";
 
     public static final String URL_OAUTH_TOKEN = "oauth/token";
     public static final String URL_OAUTH_TOKEN_FACEBOOK = "oauth/token/facebook";
@@ -205,6 +208,13 @@ public class Api {
     private static String makeUrl(int method, String url, Map<String, String> params) {
         if (!url.contains("://")) {
             url = String.format("%s/index.php?%s", BuildConfig.API_ROOT, url.replace('?', '&'));
+        }
+
+        if (!url.contains("&locale=")
+                && !params.containsKey(PARAM_LOCALE)) {
+            Locale locale = Locale.getDefault();
+            params.put(PARAM_LOCALE, String.format("%s-%s", locale.getLanguage(),
+                    locale.getCountry()));
         }
 
         if (method == com.android.volley.Request.Method.GET) {

@@ -40,6 +40,20 @@ class bdApi_Link extends _XenForo_Link
             $type = 'canonical:' . $type;
         }
 
+        $session = bdApi_Data_Helper_Core::safeGetSession();
+        if (!empty($session)) {
+            // auto appends locale param from session
+            if (!isset($extraParams['locale'])) {
+                $locale = $session->get('requestLocale');
+                if (!empty($locale)) {
+                    $timestamp = time() + 86400;
+                    $extraParams['_apiLanguageId'] = sprintf('%s %s', $timestamp,
+                        bdApi_Crypt::encryptTypeOne($session->get('languageId'), $timestamp)
+                    );
+                }
+            }
+        }
+
         return parent::buildPublicLink($type, $data, $extraParams, $skipPrepend);
     }
 
@@ -55,10 +69,10 @@ class bdApi_Link extends _XenForo_Link
             $type = 'full:' . $type;
         }
 
-        // auto appends oauth_token param from the session
-        if (!isset($extraParams['oauth_token'])) {
-            $session = bdApi_Data_Helper_Core::safeGetSession();
-            if (!empty($session)) {
+        $session = bdApi_Data_Helper_Core::safeGetSession();
+        if (!empty($session)) {
+            // auto appends oauth_token param from the session
+            if (!isset($extraParams['oauth_token'])) {
                 $oauthToken = $session->getOAuthTokenText();
                 if (!empty($oauthToken)
                     && !empty($_REQUEST['oauth_token'])
@@ -68,6 +82,14 @@ class bdApi_Link extends _XenForo_Link
                     // this will prevent token in links if it's requested with OTT, token in Auth header
                     // or token in body (PUT/POST requests)
                     $extraParams['oauth_token'] = $oauthToken;
+                }
+            }
+
+            // auto appends locale param from session
+            if (!isset($extraParams['locale'])) {
+                $locale = $session->get('requestLocale');
+                if (!empty($locale)) {
+                    $extraParams['locale'] = $locale;
                 }
             }
         }
