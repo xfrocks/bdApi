@@ -9,14 +9,26 @@
     android:padding="@dimen/activity_horizontal_margin"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-    <ImageView
-        android:id="@+id/header_img"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:contentDescription="@string/avatar"
-        android:scaleType="fitCenter"
-        tools:src="@drawable/avatar_l" />
+        android:layout_weight="1">
+
+        <ImageView
+            android:id="@+id/header_img"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/avatar"
+            android:scaleType="fitCenter"
+            tools:src="@drawable/avatar_l" />
+
+        <ProgressBar
+            android:id="@+id/header_progress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            tools:visibility="visible" />
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/header_txt"

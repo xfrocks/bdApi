@@ -1,10 +1,14 @@
 package com.xfrocks.api.androiddemo;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
+
+import java.io.File;
 
 public class App extends android.app.Application {
 
@@ -56,6 +60,10 @@ public class App extends android.app.Application {
 
     public synchronized static App getInstance() {
         return sInstance;
+    }
+
+    public static Uri getAvatarUri(Context context) {
+        return Uri.fromFile(new File(context.getExternalFilesDir(null), "avatar.jpg"));
     }
 
 }

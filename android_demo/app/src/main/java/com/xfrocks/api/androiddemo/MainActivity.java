@@ -1,10 +1,15 @@
 package com.xfrocks.api.androiddemo;
 
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -13,28 +18,37 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.xfrocks.api.androiddemo.persist.Row;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener,
+        View.OnClickListener {
 
     public static final String EXTRA_ACCESS_TOKEN = "access_token";
     public static final String EXTRA_URL = "url";
     private static final String STATE_NAVIGATION_ROWS = "navigation_rows";
     private static final String STATE_USER = "user";
+    private static final int RC_SELECT_AVATAR = 1;
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -43,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView mNavigationView;
     private ImageView mHeaderImg;
     private TextView mHeaderTxt;
+    private ProgressBar mHeaderProgress;
 
     private Api.AccessToken mAccessToken;
     private ArrayList<Row> mNavigationRows = new ArrayList<>();
@@ -67,9 +82,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
         mHeaderImg = (ImageView) findViewById(R.id.header_img);
+        mHeaderImg.setOnClickListener(this);
         mHeaderTxt = (TextView) findViewById(R.id.header_txt);
+        mHeaderProgress = (ProgressBar) findViewById(R.id.header_progress);
         mNavigationView.setNavigationItemSelectedListener(this);
         mDrawerLayout.openDrawer(mNavigationView);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case RC_SELECT_AVATAR:
+                if (resultCode == RESULT_OK) {
+                    Uri avatarUri = null;
+                    if (data != null) {
+                        avatarUri = data.getData();
+                    }
+                    if (avatarUri == null) {
+                        avatarUri = App.getAvatarUri(this);
+                    }
+
+                    if (avatarUri != null) {
+                        try {
+                            InputStream inputStream = getContentResolver().openInputStream(avatarUri);
+
+                            String fileName = "avatar.jpg";
+                            String mimeType = getContentResolver().getType(avatarUri);
+                            if (mimeType != null) {
+                                fileName = String.format("avatar.%s", mimeType.substring(mimeType.indexOf("/") + 1));
+                            }
+                            new UsersMeAvatarRequest(mAccessToken, fileName, inputStream).start();
+
+                            mHeaderImg.setImageURI(avatarUri);
+                            mHeaderProgress.setVisibility(View.VISIBLE);
+                        } catch (FileNotFoundException e) {
+                            Log.e(getClass().getSimpleName(), e.toString());
+                        }
+                    }
+                }
+                break;
+        }
     }
 
     @Override
@@ -154,6 +208,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    public void onClick(View v) {
+        if (v == mHeaderImg) {
+            Intent pickIntent = new Intent();
+            pickIntent.setType("image/*");
+            pickIntent.setAction(Intent.ACTION_GET_CONTENT);
+
+            Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            Uri avatarUri = App.getAvatarUri(this);
+            List<Intent> cameraIntents = new ArrayList<>();
+            PackageManager packageManager = getPackageManager();
+            List<ResolveInfo> listCam = packageManager.queryIntentActivities(captureIntent, 0);
+            for (ResolveInfo res : listCam) {
+                final Intent intent = new Intent(captureIntent);
+                intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+                intent.setPackage(res.activityInfo.packageName);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, avatarUri);
+                cameraIntents.add(intent);
+            }
+
+            Intent chooserIntent = Intent.createChooser(pickIntent, getString(R.string.avatar_pick_image));
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
+                    cameraIntents.toArray(new Intent[cameraIntents.size()]));
+
+            startActivityForResult(chooserIntent, RC_SELECT_AVATAR);
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
             getSupportFragmentManager().popBackStack();
@@ -195,6 +277,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mHeaderImg.setImageDrawable(null);
             mHeaderTxt.setText("");
         }
+
+        mHeaderProgress.setVisibility(View.GONE);
     }
 
     public void setTheProgressBarVisibility(boolean visible) {
@@ -277,6 +361,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Fragment fragment = DataSubFragment.newInstance(null, rows);
                 MainActivity.this.addFragmentToBackStack(fragment, true);
             }
+        }
+    }
+
+    private class UsersMeAvatarRequest extends Api.PostRequest {
+        public UsersMeAvatarRequest(Api.AccessToken at, String fileName, InputStream inputStream) {
+            super(Api.URL_USERS_ME_AVATAR, new Api.Params(at));
+
+            try {
+                addFile(Api.URL_USERS_ME_AVATAR_PARAM_AVATAR, fileName, inputStream);
+            } catch (IllegalAccessException e) {
+                Log.e(getTag().toString(), e.toString());
+            }
+        }
+
+        @Override
+        protected void onSuccess(JSONObject response) {
+            String message = getErrorMessage(response);
+
+            if (message != null) {
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+            }
+        }
+
+        @Override
+        void onError(VolleyError error) {
+            String message = getErrorMessage(error);
+
+            if (message != null) {
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+            }
+        }
+
+        @Override
+        void onComplete() {
+            new UsersMeRequest(mAccessToken).start();
         }
     }
 

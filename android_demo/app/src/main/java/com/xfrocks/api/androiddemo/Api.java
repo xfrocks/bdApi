@@ -11,10 +11,17 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.xfrocks.api.androiddemo.persist.Row;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.InputStreamBody;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -36,6 +43,7 @@ public class Api {
     public static final String URL_INDEX = "index";
     public static final String URL_USERS = "users";
     public static final String URL_USERS_ME = "users/me";
+    public static final String URL_USERS_ME_AVATAR = "users/me/avatar";
     public static final String URL_TOOLS_LOGIN_SOCIAL = "tools/login/social";
 
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE = "grant_type";
@@ -60,6 +68,8 @@ public class Api {
     public static final String URL_USERS_PARAM_DOB_DAY = "user_dob_day";
     public static final String URL_USERS_PARAM_EXTRA_DATA = "extra_data";
     public static final String URL_USERS_PARAM_EXTRA_TIMESTAMP = "extra_timestamp";
+
+    public static final String URL_USERS_ME_AVATAR_PARAM_AVATAR = "avatar";
 
     public static AccessToken makeAccessToken(JSONObject response) {
         try {
@@ -172,11 +182,17 @@ public class Api {
 
     public static String makeAuthorizeUri(String redirectTo) {
         try {
+            String authorizeRedirectUri = makeAuthorizeRedirectUri(redirectTo);
+            String encodedRedirectTo = "";
+            if (authorizeRedirectUri != null) {
+                URLEncoder.encode(authorizeRedirectUri, "UTF-8");
+            }
+
             return String.format(
                     "%s/index.php?oauth/authorize/&client_id=%s&redirect_uri=%s&response_type=code&scope=%s",
                     BuildConfig.API_ROOT,
                     URLEncoder.encode(BuildConfig.CLIENT_ID, "UTF-8"),
-                    URLEncoder.encode(makeAuthorizeRedirectUri(redirectTo), "UTF-8"),
+                    encodedRedirectTo,
                     URLEncoder.encode("read", "UTF-8")
             );
         } catch (UnsupportedEncodingException e) {
@@ -317,18 +333,36 @@ public class Api {
                             HttpHeaderParser.parseCharset(error.networkResponse.headers));
 
                     JSONObject jsonObject = new JSONObject(jsonString);
-
-                    if (jsonObject.has("error_description")) {
-                        message = jsonObject.getString("error_description");
-                    } else if (jsonObject.has("errors")) {
-                        JSONArray errors = jsonObject.getJSONArray("errors");
-                        if (errors.length() > 0) {
-                            message = errors.getString(0);
-                        }
-                    }
+                    message = getErrorMessage(jsonObject);
                 } catch (Exception e) {
                     // ignore
                 }
+            }
+
+            return message;
+        }
+
+        String getErrorMessage(JSONObject response) {
+            String message = null;
+
+            try {
+                if (response.has("error_description")) {
+                    message = response.getString("error_description");
+                } else if (response.has("errors")) {
+                    try {
+                        JSONArray errors = response.getJSONArray("errors");
+                        if (errors.length() > 0) {
+                            message = errors.getString(0);
+                        }
+                    } catch (JSONException je) {
+                        JSONObject errors = response.getJSONObject("errors");
+                        JSONArray names = errors.names();
+                        String name = names.getString(0);
+                        message = errors.getString(name);
+                    }
+                }
+            } catch (Exception e) {
+                // ignore
             }
 
             return message;
@@ -385,8 +419,72 @@ public class Api {
     }
 
     public static class PostRequest extends Request {
+
+        private Map<String, InputStreamBody> mFiles = new HashMap<>();
+        private MultipartEntityBuilder mBodyBuilder = null;
+        private HttpEntity mBuiltBody = null;
+
         public PostRequest(String url, Map<String, String> params) {
             super(Method.POST, makeUrl(Method.POST, url, params), params);
+        }
+
+        @Override
+        public void start() {
+            super.start();
+
+            if (BuildConfig.DEBUG) {
+                for (String key : mFiles.keySet()) {
+                    Log.v(getTag().toString(), "Request[" + key + "](file)=" + mFiles.get(key).getFilename());
+                }
+            }
+        }
+
+        @Override
+        public String getBodyContentType() {
+            if (mFiles.size() == 0) {
+                return super.getBodyContentType();
+            }
+
+            return mBuiltBody.getContentType().getValue();
+        }
+
+        @Override
+        public byte[] getBody() throws AuthFailureError {
+            if (mFiles.size() == 0) {
+                return super.getBody();
+            }
+
+            if (mBuiltBody == null) {
+                mBodyBuilder = MultipartEntityBuilder.create();
+                mBodyBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+
+                for (Map.Entry<String, String> param : mParams.entrySet()) {
+                    mBodyBuilder.addTextBody(param.getKey(), param.getValue());
+                }
+
+                for (Map.Entry<String, InputStreamBody> file : mFiles.entrySet()) {
+                    mBodyBuilder.addPart(file.getKey(), file.getValue());
+                }
+
+                mBuiltBody = mBodyBuilder.build();
+            }
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            try {
+                mBuiltBody.writeTo(bos);
+            } catch (IOException e) {
+                Log.e(getTag().toString(), e.toString());
+            }
+
+            return bos.toByteArray();
+        }
+
+        void addFile(String key, String fileName, InputStream inputStream) throws IllegalAccessException {
+            if (mBuiltBody != null) {
+                throw new IllegalAccessException("Cannot addFile after body has been built.");
+            }
+
+            mFiles.put(key, new InputStreamBody(inputStream, fileName));
         }
     }
 
