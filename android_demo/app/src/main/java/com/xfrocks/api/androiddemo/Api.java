@@ -188,7 +188,7 @@ public class Api {
             String authorizeRedirectUri = makeAuthorizeRedirectUri(redirectTo);
             String encodedRedirectTo = "";
             if (authorizeRedirectUri != null) {
-                URLEncoder.encode(authorizeRedirectUri, "UTF-8");
+                encodedRedirectTo = URLEncoder.encode(authorizeRedirectUri, "UTF-8");
             }
 
             return String.format(
