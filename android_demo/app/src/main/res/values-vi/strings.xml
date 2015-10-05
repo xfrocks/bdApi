@@ -19,7 +19,6 @@
     <string name="error_google_no_token">Không tìm thấy tài khoản Google</string>
     <string name="error_invalid_email">Địa chỉ thư điện tử không đúng</string>
     <string name="error_invalid_password">Mật khẩu không đúng</string>
-    <string name="error_no_access_token">Không có mã truy cập, thử khởi động lại ứng dụng?</string>
     <string name="error_no_authorization_code">Không tìm thấy mã cho phép</string>
     <string name="error_no_refresh_token">Không tìm thấy mã làm mới</string>
     <string name="error_twitter_failed">Không thể đăng nhập với Twitter</string>

@@ -1,30 +1,23 @@
 package com.xfrocks.api.androiddemo;
 
 import android.app.AlertDialog;
-import android.app.LoaderManager.LoaderCallbacks;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.Loader;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -58,10 +51,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.fabric.sdk.android.Fabric;
@@ -70,8 +61,7 @@ import io.fabric.sdk.android.Fabric;
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity
-        implements LoaderCallbacks<Cursor>,
-        GoogleApiClient.ConnectionCallbacks,
+        implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
     public static final String EXTRA_REDIRECT_TO = "redirect_to";
@@ -94,7 +84,7 @@ public class LoginActivity extends AppCompatActivity
     private TwitterAuthClient mTwitterAuthClient;
 
     // UI references.
-    private AutoCompleteTextView mEmailView;
+    private EditText mEmailView;
     private EditText mPasswordView;
     private CheckBox mRememberView;
     private Button mGcmUnregister;
@@ -117,9 +107,7 @@ public class LoginActivity extends AppCompatActivity
                 .addScope(new Scope(Scopes.PROFILE))
                 .build();
 
-        // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
+        mEmailView = (EditText) findViewById(R.id.email);
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -393,10 +381,6 @@ public class LoginActivity extends AppCompatActivity
         mGoogleApiClient.disconnect();
     }
 
-    private void populateAutoComplete() {
-        getLoaderManager().initLoader(0, null, this);
-    }
-
     private void authorize() {
         Intent loginIntent = getIntent();
         String redirectTo = null;
@@ -513,40 +497,6 @@ public class LoginActivity extends AppCompatActivity
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this,
-                // Retrieve data rows for the device user's 'profile' contact.
-                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
-
-                // Select only email addresses.
-                ContactsContract.Contacts.Data.MIMETYPE +
-                        " = ?", new String[]{ContactsContract.CommonDataKinds.Email
-                .CONTENT_ITEM_TYPE},
-
-                // Show primary email addresses first. Note that there won't be
-                // a primary email address if the user hasn't specified one.
-                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            emails.add(cursor.getString(ProfileQuery.ADDRESS));
-            cursor.moveToNext();
-        }
-
-        addEmailsToAutoComplete(emails);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
-    }
-
-    @Override
     public void onConnected(Bundle bundle) {
         mGoogleApiShouldResolve = false;
 
@@ -579,24 +529,6 @@ public class LoginActivity extends AppCompatActivity
         if (!resolved) {
             Toast.makeText(this, R.string.error_google_failed, Toast.LENGTH_LONG).show();
         }
-    }
-
-    private interface ProfileQuery {
-        String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS,
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
-        };
-
-        int ADDRESS = 0;
-    }
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
     }
 
     private void setViewsEnabled(final boolean enabled) {
@@ -655,7 +587,7 @@ public class LoginActivity extends AppCompatActivity
         }
 
         @Override
-        protected void onStart() {
+        void onStart() {
             mTokenRequest = this;
             setViewsEnabled(false);
             AccessTokenHelper.save(LoginActivity.this, null);
@@ -766,7 +698,7 @@ public class LoginActivity extends AppCompatActivity
 
     private class ToolsLoginSocialRequest extends Api.PostRequest {
         ToolsLoginSocialRequest() {
-            super(Api.URL_TOOLS_LOGIN_SOCIAL, new Api.Params(0, null));
+            super(Api.URL_TOOLS_LOGIN_SOCIAL, new Api.Params(Api.makeOneTimeToken(0, null)));
         }
 
         @Override

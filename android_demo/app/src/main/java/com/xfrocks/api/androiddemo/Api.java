@@ -131,7 +131,7 @@ public class Api {
         return null;
     }
 
-    private static String makeOneTimeToken(long userId, AccessToken at) {
+    public static String makeOneTimeToken(long userId, AccessToken at) {
         long timestamp = new Date().getTime() / 1000 + (long) 3600;
 
         MessageDigest md;
@@ -430,7 +430,7 @@ public class Api {
 
     public static class PostRequest extends Request {
 
-        private Map<String, InputStreamBody> mFiles = new HashMap<>();
+        private final Map<String, InputStreamBody> mFiles = new HashMap<>();
         private MultipartEntityBuilder mBodyBuilder = null;
         private HttpEntity mBuiltBody = null;
 
@@ -534,13 +534,9 @@ public class Api {
             }
         }
 
-        public Params(long userId, AccessToken at) {
+        public Params(String token) {
             super(1);
-
-            String ott = Api.makeOneTimeToken(userId, at);
-            if (ott != null) {
-                put("oauth_token", ott);
-            }
+            put("oauth_token", token);
         }
 
         public Params and(String key, Object value) {

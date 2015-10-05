@@ -63,7 +63,7 @@ public class App extends android.app.Application {
     }
 
     public static Uri getAvatarUri(Context context) {
-        return Uri.fromFile(new File(context.getExternalFilesDir(null), "avatar.jpg"));
+        return Uri.fromFile(new File(context.getExternalCacheDir(), "avatar.jpg"));
     }
 
 }

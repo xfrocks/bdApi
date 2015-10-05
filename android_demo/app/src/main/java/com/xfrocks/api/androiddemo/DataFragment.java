@@ -124,7 +124,7 @@ public class DataFragment extends ListFragment {
         }
     }
 
-    protected void restoreData(Bundle savedInstanceState) {
+    void restoreData(Bundle savedInstanceState) {
         if (savedInstanceState != null && savedInstanceState.containsKey(STATE_DATA)) {
             mData = savedInstanceState.getParcelableArrayList(STATE_DATA);
         }
