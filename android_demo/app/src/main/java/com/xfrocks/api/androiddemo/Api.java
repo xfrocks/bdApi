@@ -236,7 +236,7 @@ public class Api {
         return url;
     }
 
-    public static class Request extends com.android.volley.Request<JSONObject> {
+    private static class Request extends com.android.volley.Request<JSONObject> {
 
         final Map<String, String> mParams;
 

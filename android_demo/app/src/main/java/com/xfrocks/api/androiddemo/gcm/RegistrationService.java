@@ -129,10 +129,9 @@ public class RegistrationService extends IntentService {
         }
     }
 
-    private static class UnregisterRequest extends Api.Request {
+    private static class UnregisterRequest extends Api.PostRequest {
         public UnregisterRequest(String gcmToken) {
             super(
-                    Method.POST,
                     BuildConfig.PUSH_SERVER + "/unregister",
                     new Api.Params("device_type", "android")
                             .and("device_id", gcmToken)
