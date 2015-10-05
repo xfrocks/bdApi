@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_authorize">Đăng nhập qua trình duyệt</string>
+    <string name="action_gcm_unregister">Hủy đăng ký GCM</string>
+    <string name="action_or_register">…hoặc Đăng ký?</string>
+    <string name="action_register">Đăng ký</string>
+    <string name="action_sign_in">Đăng nhập</string>
+    <string name="action_sign_in_facebook">Đăng nhập với Facebook</string>
+    <string name="action_sign_in_google">Đăng nhập với Google+</string>
+    <string name="action_sign_in_short">Đăng nhập</string>
+    <string name="action_sign_in_twitter">Đăng nhập với Twitter</string>
+    <string name="are_you_sure_quit">Bạn có chắc chắn muốn thoát khỏi ứng dụng?</string>
+    <string name="avatar">Hình đại diện</string>
+    <string name="avatar_pick_image">Chụp hình hoặc chọn ảnh để làm hình đại diện</string>
+    <string name="error_facebook_cancelled">Đăng nhập với Facebook đã bị hủy giữa chừng</string>
+    <string name="error_facebook_failed">Không thể đăng nhập với Facebook</string>
+    <string name="error_field_required">Vui lòng nhập</string>
+    <string name="error_google_failed">Không thể đăng nhập với Google+</string>
+    <string name="error_google_no_token">Không tìm thấy tài khoản Google</string>
+    <string name="error_invalid_email">Địa chỉ thư điện tử không đúng</string>
+    <string name="error_invalid_password">Mật khẩu không đúng</string>
+    <string name="error_no_access_token">Không có mã truy cập, thử khởi động lại ứng dụng?</string>
+    <string name="error_no_authorization_code">Không tìm thấy mã cho phép</string>
+    <string name="error_no_refresh_token">Không tìm thấy mã làm mới</string>
+    <string name="error_twitter_failed">Không thể đăng nhập với Twitter</string>
+    <string name="gcm_register_success">Đã đăng ký GCM thành công</string>
+    <string name="gcm_subscribe_x_success">Đã đăng ký nhận thông báo cho %1$s</string>
+    <string name="gcm_unregister_success">Đã hủy đăng ký GCM</string>
+    <string name="navigation_drawer_close">Đóng khung địa chỉ</string>
+    <string name="navigation_drawer_open">Mở khung địa chỉ</string>
+    <string name="prompt_dob">Ngày sinh</string>
+    <string name="prompt_email">Địa chỉ thư điện tử</string>
+    <string name="prompt_email_or_username">Tên đăng nhập</string>
+    <string name="prompt_password">Mật khẩu</string>
+    <string name="prompt_username">Tên đăng nhập</string>
+    <string name="remember_token">Ghi nhớ mã truy cập?</string>
+    <string name="sign_in_with_remember">Đăng nhập với mã truy cập cũ?</string>
+    <string name="title_activity_register">Đăng ký</string>
+</resources>
