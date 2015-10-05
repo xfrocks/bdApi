@@ -33,9 +33,6 @@ class bdApi_Listener
             'XenForo_Model_User',
             'XenForo_Model_UserIgnore',
             'XenForo_Model_UserGroup',
-
-            'XenForo_Search_DataHandler_Post',
-            'XenForo_Search_DataHandler_Thread',
         );
 
         if (in_array($class, $classes)) {
