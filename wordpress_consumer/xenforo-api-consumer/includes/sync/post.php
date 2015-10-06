@@ -158,7 +158,7 @@ function xfac_syncPost_cron()
     }
 
     // now start syncing normal threads
-    $threads = xfac_api_getThreadsInForums($config, $forumIds);
+    $threads = xfac_api_getThreadsInForums($config, $forumIds, '', 'sticky=0');
     if (!empty($threads['threads'])) {
         xfac_syncPost_processThreads($config, $threads['threads'], $mappedTags);
     }

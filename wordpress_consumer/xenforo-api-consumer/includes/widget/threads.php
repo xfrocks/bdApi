@@ -120,6 +120,7 @@ class XFAC_Widget_Threads extends WP_Widget
             $extraParams = array(
                 '_xfac' => 'threads.php',
                 'limit' => $limit,
+                'sticky' => 0,
             );
 
             switch ($instance['type']) {
