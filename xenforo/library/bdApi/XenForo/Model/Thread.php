@@ -2,6 +2,7 @@
 
 class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 {
+    protected $_bdApi_polls = array();
     protected $_bdApi_limitQueryResults_nodeId = false;
 
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
@@ -36,9 +37,6 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 
     public function prepareApiDataForThread(array $thread, array $forum, array $firstPost)
     {
-        /* @var $postModel bdApi_XenForo_Model_Post */
-        $postModel = $this->_getPostModel();
-
         $thread = $this->prepareThread($thread, $forum);
 
         $publicKeys = array(
@@ -84,7 +82,20 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
         $data['thread_is_followed'] = !empty($thread['thread_is_watched']);
 
         if (!empty($firstPost)) {
+            /* @var $postModel bdApi_XenForo_Model_Post */
+            $postModel = $this->_getPostModel();
             $data['first_post'] = $postModel->prepareApiDataForPost($firstPost, $thread, $forum);
+        }
+
+        if ($thread['discussion_type'] === 'poll'
+            && isset($this->_bdApi_polls[$thread['thread_id']])
+        ) {
+            $poll = $this->_bdApi_polls[$thread['thread_id']];
+            /** @var bdApi_XenForo_Model_Poll $pollModel */
+            $pollModel = $this->getModelFromCache('XenForo_Model_Poll');
+            $data['poll'] = $pollModel->prepareApiDataForPoll($poll, $this->canVoteOnPoll($poll, $thread, $forum));
+            $data['poll']['links']['vote'] = bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll/votes', $thread);
+            $data['poll']['links']['results'] = bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll/results', $thread);
         }
 
         if (XenForo_Application::$versionId > 1050000
@@ -146,6 +157,15 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
         $this->_bdApi_limitQueryResults_nodeId = false;
 
         return $threadIds;
+    }
+
+    public function bdApi_setPolls(array $polls = null)
+    {
+        if (is_array($polls)) {
+            $this->_bdApi_polls += $polls;
+        }
+
+        return $this->_bdApi_polls;
     }
 
     public function limitQueryResults($query, $limit, $offset = 0)

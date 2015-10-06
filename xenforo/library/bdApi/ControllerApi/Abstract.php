@@ -47,7 +47,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
      * @param array $resourcesData
      * @return array
      */
-    protected function _filterDataMany(array $resourcesData)
+    public function _filterDataMany(array $resourcesData)
     {
         $filtered = array();
 
@@ -65,7 +65,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
      * @param array $prefixes
      * @return array
      */
-    protected function _filterDataSingle(array $resourceData, array $prefixes = array())
+    public function _filterDataSingle(array $resourceData, array $prefixes = array())
     {
         $this->_prepareFieldsFilter();
 
@@ -121,7 +121,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         return $filtered;
     }
 
-    protected function _isFieldExcluded($field)
+    public function _isFieldExcluded($field)
     {
         $this->_prepareFieldsFilter();
 

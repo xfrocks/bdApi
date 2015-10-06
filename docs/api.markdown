@@ -535,6 +535,30 @@ Detail information of a thread.
             thread_is_sticky: (boolean),
             thread_is_followed: (boolean), # since forum-2014052903
             first_post: (post),
+            poll: { # since forum-2015100601
+                poll_id: (int),
+                poll_question: (string),
+                poll_vote_count: (int),
+                poll_is_open: (boolean),
+                poll_is_voted: (boolean),
+                poll_max_votes: (int),
+                responses: [
+                    {
+                        response_id: (int),
+                        response_answer: (string),
+                        response_is_voted: (boolean)
+                    },
+                    ...
+                ],
+                permissions: {
+                    vote: (boolean),
+                    result: (boolean)
+                },
+                links: {
+                    votes: (uri),
+                    results: (uri)
+                }
+            },
             thread_tags { # since forum-2015091001
                 (tag id): (tag text),
                 ...
@@ -663,6 +687,52 @@ List of followed threads by current user. Since forum-2014053002.
 Parameters:
 
  * `total` (_optional_): if included in the request, only the thread count is returned as `threads_total`. Since forum-2015072305.
+
+Required scopes:
+
+ * `read`
+
+### POST `/threads/:threadId/poll/votes`
+Vote on a thread poll. Since forum-2015100601.
+
+    {
+        status: "ok",
+        message: "Changes Saved"
+    }
+
+Parameters:
+
+ * `response_id` (__required__): the id of the response to vote for.
+ * `response_ids` (_optional_): an array of ids of responses (if the poll allows multiple choices).
+
+Required scopes:
+
+ * `post`
+
+### GET `/threads/:threadId/poll/results`
+List of poll responses with their results. Since forum-2015100601.
+
+    {
+        results: [
+            {
+                response_id: (int),
+                response_answer: (string),
+                response_is_voted: (boolean),
+                response_vote_count: (int),
+                voters: [
+                    {
+                        user_id: (int),
+                        username: (string)
+                    },
+                    ...
+                ]
+            }
+        ]
+    }
+
+Parameters:
+
+ * N/A
 
 Required scopes:
 
