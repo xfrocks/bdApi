@@ -18,7 +18,7 @@ class bdApi_CacheRebuilder_ClientContentDeleteAll extends XenForo_CacheRebuilder
 
         /** @var bdApi_Model_ClientContent $clientContentModel */
         $clientContentModel = XenForo_Model::create('bdApi_Model_ClientContent');
-        $clientContents =$clientContentModel->getClientContents(array(
+        $clientContents = $clientContentModel->getClientContents(array(
             'client_id' => $options['client_id'],
         ), array(
             'limit' => $options['batch'],

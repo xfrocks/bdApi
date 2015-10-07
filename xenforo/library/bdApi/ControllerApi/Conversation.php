@@ -74,15 +74,11 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
 
         $data = array('conversation' => $this->_filterDataSingle($this->_getConversationModel()->prepareApiDataForConversation($conversation, $getRecipients)));
 
-        return $this->responseData('bdApi_ViewApi_Thread_Single', $data);
+        return $this->responseData('bdApi_ViewApi_Conversation_Single', $data);
     }
 
     public function actionPostIndex()
     {
-        if (!$this->_getConversationModel()->canStartConversations($errorPhraseKey)) {
-            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
-        }
-
         $input = $this->_input->filter(array(
             'recipients' => XenForo_Input::STRING,
             'conversation_title' => XenForo_Input::STRING
@@ -92,6 +88,10 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
         $editorHelper = $this->getHelper('Editor');
         $input['message_body'] = $editorHelper->getMessageText('message_body', $this->_input);
         $input['message_body'] = XenForo_Helper_String::autoLinkBbCode($input['message_body']);
+
+        if (!$this->_getConversationModel()->canStartConversations($errorPhraseKey)) {
+            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+        }
 
         $visitor = XenForo_Visitor::getInstance();
 

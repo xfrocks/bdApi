@@ -81,20 +81,20 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 
     public function actionPostIndex()
     {
-        $conversationId = $this->_input->filterSingle('conversation_id', XenForo_Input::UINT);
-        $conversation = $this->_getConversationOrError($conversationId);
-
-        if (!$this->_getConversationModel()->canReplyToConversation($conversation, $errorPhraseKey)) {
-            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
-        }
-
-        // TODO
-        $input = $this->_input->filter(array());
+        $input = $this->_input->filter(array(
+            'conversation_id' => XenForo_Input::UINT,
+        ));
 
         /* @var $editorHelper XenForo_ControllerHelper_Editor */
         $editorHelper = $this->getHelper('Editor');
         $input['message_body'] = $editorHelper->getMessageText('message_body', $this->_input);
         $input['message_body'] = XenForo_Helper_String::autoLinkBbCode($input['message_body']);
+
+        $conversation = $this->_getConversationOrError($input['conversation_id']);
+
+        if (!$this->_getConversationModel()->canReplyToConversation($conversation, $errorPhraseKey)) {
+            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+        }
 
         $visitor = XenForo_Visitor::getInstance();
 
@@ -135,22 +135,21 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 
     public function actionPutIndex()
     {
-        $messageId = $this->_input->filterSingle('message_id', XenForo_Input::UINT);
-
-        $message = $this->_getMessageOrError($messageId);
-        $conversation = $this->_getConversationOrError($message['conversation_id']);
-
-        if (!$this->_getConversationModel()->canEditMessage($message, $conversation, $errorPhraseKey)) {
-            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
-        }
-
-        // TODO
-        $input = $this->_input->filter(array());
+        $input = $this->_input->filter(array(
+            'message_id' => XenForo_Input::UINT,
+        ));
 
         /* @var $editorHelper XenForo_ControllerHelper_Editor */
         $editorHelper = $this->getHelper('Editor');
         $input['message_body'] = $editorHelper->getMessageText('message_body', $this->_input);
         $input['message_body'] = XenForo_Helper_String::autoLinkBbCode($input['message_body']);
+
+        $message = $this->_getMessageOrError($input['message_id']);
+        $conversation = $this->_getConversationOrError($message['conversation_id']);
+
+        if (!$this->_getConversationModel()->canEditMessage($message, $conversation, $errorPhraseKey)) {
+            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+        }
 
         $messageDw = XenForo_DataWriter::create('XenForo_DataWriter_ConversationMessage');
         $messageDw->setExistingData($message, true);
@@ -159,7 +158,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 
         switch ($this->_spamCheck(array(
             'content_type' => 'conversation_message',
-            'content_id' => $messageId,
+            'content_id' => $message['message_id'],
             'content' => $input['message_body'],
         ))) {
             case self::SPAM_RESULT_MODERATED:
@@ -251,11 +250,11 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
             'conversation_id' => XenForo_Input::UINT,
             'message_id' => XenForo_Input::UINT,
         ));
+        $attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
+
         if (empty($contentData['conversation_id']) AND empty($contentData['message_id'])) {
             return $this->responseError(new XenForo_Phrase('bdapi_slash_conversation_messages_attachments_requires_ids'), 400);
         }
-
-        $attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
 
         $attachmentHelper = $this->_getAttachmentHelper();
         $hash = $attachmentHelper->getAttachmentTempHash($contentData);
@@ -265,6 +264,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
     public function actionPostReport()
     {
         $messageId = $this->_input->filterSingle('message_id', XenForo_Input::UINT);
+        $reportMessage = $this->_input->filterSingle('message', XenForo_Input::STRING);
 
         $message = $this->_getMessageOrError($messageId);
         $conversation = $this->_getConversationOrError($message['conversation_id']);
@@ -273,7 +273,6 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
         }
 
-        $reportMessage = $this->_input->filterSingle('message', XenForo_Input::STRING);
         if (!$reportMessage) {
             return $this->responseError(new XenForo_Phrase('bdapi_slash_x_report_requires_message', array('route' => 'conversation-messages')), 400);
         }

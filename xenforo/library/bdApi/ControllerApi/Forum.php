@@ -79,11 +79,11 @@ class bdApi_ControllerApi_Forum extends bdApi_ControllerApi_Node
         }
 
         $nodeId = $this->_input->filterSingle('node_id', XenForo_Input::UINT);
-        $forum = $this->_getForumThreadPostHelper()->assertForumValidAndViewable($nodeId);
-
         $post = $this->_input->filterSingle('post', XenForo_Input::UINT);
         $sendAlert = $this->_input->filterSingle('alert', XenForo_Input::UINT, array('default' => 1));
         $sendEmail = $this->_input->filterSingle('email', XenForo_Input::UINT);
+
+        $forum = $this->_getForumThreadPostHelper()->assertForumValidAndViewable($nodeId);
 
         if (!$this->_getForumModel()->canWatchForum($forum)) {
             return $this->responseNoPermission();

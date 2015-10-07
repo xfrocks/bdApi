@@ -15,6 +15,9 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         $forumIdInput = $this->_input->filterSingle('forum_id', XenForo_Input::STRING);
+        $sticky = $this->_input->filterSingle('sticky', XenForo_Input::STRING);
+        $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
+
         if (strlen($forumIdInput) === 0) {
             return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_requires_forum_id'), 400);
         }
@@ -40,8 +43,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $forumIdArray = array_unique($forumIdArray);
         asort($forumIdArray);
 
-        $sticky = $this->_input->filterSingle('sticky', XenForo_Input::STRING);
-
         $pageNavParams = array('forum_id' => implode(',', $forumIdArray));
         $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
         $limit = XenForo_Application::get('options')->discussionsPerPage;
@@ -63,7 +64,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             'page' => $page
         );
 
-        $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
         switch ($order) {
             case 'thread_create_date':
                 $fetchOptions['order'] = 'post_date';
@@ -193,17 +193,8 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
     public function actionPostIndex()
     {
-        $forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
-        $forum = $this->_getForumThreadPostHelper()->assertForumValidAndViewable($forumId);
-
-        $visitor = XenForo_Visitor::getInstance();
-
-        if (!$this->_getForumModel()->canPostThreadInForum($forum, $errorPhraseKey)) {
-            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
-        }
-
-        // the routine is very similar to XenForo_ControllerPublic_Forum::actionAddThread
         $input = $this->_input->filter(array(
+            'forum_id' => XenForo_Input::UINT,
             'thread_title' => XenForo_Input::STRING,
             'thread_tags' => XenForo_Input::STRING,
         ));
@@ -212,6 +203,14 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $editorHelper = $this->getHelper('Editor');
         $input['post_body'] = $editorHelper->getMessageText('post_body', $this->_input);
         $input['post_body'] = XenForo_Helper_String::autoLinkBbCode($input['post_body']);
+
+        $forum = $this->_getForumThreadPostHelper()->assertForumValidAndViewable($input['forum_id']);
+
+        $visitor = XenForo_Visitor::getInstance();
+
+        if (!$this->_getForumModel()->canPostThreadInForum($forum, $errorPhraseKey)) {
+            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+        }
 
         /* @var $writer XenForo_DataWriter_Discussion_Thread */
         $writer = XenForo_DataWriter::create('XenForo_DataWriter_Discussion_Thread');
@@ -355,11 +354,11 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     public function actionDeleteAttachments()
     {
         $contentData = $this->_input->filter(array('forum_id' => XenForo_Input::UINT));
+        $attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
+
         if (empty($contentData['forum_id'])) {
             return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_attachments_requires_forum_id'), 400);
         }
-
-        $attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
 
         $attachmentHelper = $this->_getAttachmentHelper();
         $hash = $attachmentHelper->getAttachmentTempHash($contentData);
@@ -459,9 +458,9 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     public function actionPostFollowers()
     {
         $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
-        list($thread, $forum) = $this->_getForumThreadPostHelper()->assertThreadValidAndViewable($threadId);
-
         $email = $this->_input->filterSingle('email', XenForo_Input::UINT);
+
+        list($thread, $forum) = $this->_getForumThreadPostHelper()->assertThreadValidAndViewable($threadId);
 
         if (!$this->_getThreadModel()->canWatchThread($thread, $forum)) {
             return $this->responseNoPermission();
@@ -493,7 +492,8 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $pollModel = $this->_getPollModel();
         $poll = $pollModel->getPollByContent('thread', $threadId);
         if (empty($poll)
-            || !$this->_getThreadModel()->canVoteOnPoll($poll, $thread, $forum)) {
+            || !$this->_getThreadModel()->canVoteOnPoll($poll, $thread, $forum)
+        ) {
             return $this->responseNoPermission();
         }
 
@@ -520,18 +520,19 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
     public function actionGetNew()
     {
+        $forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
+        $limit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
+
         $this->_assertRegistrationRequired();
 
         $visitor = XenForo_Visitor::getInstance();
         $threadModel = $this->_getThreadModel();
 
-        $limit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
         $maxResults = XenForo_Application::getOptions()->get('maximumSearchResults');
         if ($limit > 0) {
             $maxResults = min($maxResults, $limit);
         }
 
-        $forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
         if (empty($forumId)) {
             $threadIds = $threadModel->getUnreadThreadIds($visitor->get('user_id'), array('limit' => $maxResults));
         } else {

@@ -211,12 +211,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function actionPostIndexing()
     {
-        $session = bdApi_Data_Helper_Core::safeGetSession();
-        $option = $session->getOAuthClientOption('allow_search_indexing');
-        if (empty($option)) {
-            return $this->responseNoPermission();
-        }
-
         $input = $this->_input->filter(array(
             'content_type' => XenForo_Input::STRING,
             'content_id' => XenForo_Input::UINT,
@@ -226,6 +220,12 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             'link' => XenForo_Input::STRING,
             'extra_data' => XenForo_Input::ARRAY_SIMPLE,
         ));
+
+        $session = bdApi_Data_Helper_Core::safeGetSession();
+        $option = $session->getOAuthClientOption('allow_search_indexing');
+        if (empty($option)) {
+            return $this->responseNoPermission();
+        }
 
         $dbKeys = array(
             'client_id' => $session->getOAuthClientId(),
@@ -273,6 +273,10 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function _doSearch($contentType = '', array $constraints = array(), array $options = array())
     {
+        $tagText = $this->_input->filterSingle('tag', XenForo_Input::STRING);
+        $forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
+        $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+
         if (!XenForo_Visitor::getInstance()->canSearch()) {
             throw $this->getNoPermissionResponseException();
         }
@@ -296,7 +300,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             $input['order'] = $options[self::OPTION_ORDER];
         }
 
-        $tagText = $this->_input->filterSingle('tag', XenForo_Input::STRING);
         if (!empty($tagText)) {
             /** @var XenForo_Model_Tag $tagModel */
             $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
@@ -321,7 +324,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
                 }
         }
 
-        $forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
         if (!empty($forumId)) {
             $childNodeIds = array_keys($this->_getNodeModel()->getChildNodesForNodeIds(array($forumId)));
             $nodeIds = array_unique(array_merge(array($forumId), $childNodeIds));
@@ -331,7 +333,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             }
         }
 
-        $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
         if (!empty($userId)) {
             $constraints['user'] = array($userId);
         }

@@ -4,6 +4,13 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
 {
     public function actionPostIndex()
     {
+        $input = $this->_input->filter(array(
+            'hub_callback' => XenForo_Input::STRING,
+            'hub_mode' => XenForo_Input::STRING,
+            'hub_topic' => XenForo_Input::STRING,
+            'hub_lease_seconds' => XenForo_Input::STRING,
+        ));
+
         /* @var $session bdApi_Session */
         $session = XenForo_Application::getSession();
         $clientId = $session->getOAuthClientId();;
@@ -15,13 +22,6 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
         if (empty($clientId)) {
             return $this->responseNoPermission();
         }
-
-        $input = $this->_input->filter(array(
-            'hub_callback' => XenForo_Input::STRING,
-            'hub_mode' => XenForo_Input::STRING,
-            'hub_topic' => XenForo_Input::STRING,
-            'hub_lease_seconds' => XenForo_Input::STRING,
-        ));
 
         if (!Zend_Uri::check($input['hub_callback'])) {
             return $this->_responseError(new XenForo_Phrase('bdapi_subscription_callback_is_required'));

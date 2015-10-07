@@ -4,8 +4,15 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
 {
     public function preLoadData()
     {
-        // trigger auto loading of bdApi_Link
+        // trigger auto loading of our classes
         class_exists('bdApi_Link');
+
+        if (isset($_SERVER['REQUEST_METHOD'])
+            && $_SERVER['REQUEST_METHOD'] === 'OPTIONS'
+        ) {
+            class_exists('bdApi_Input');
+            class_exists('bdApi_Upload');
+        }
 
         $this->_dataPreLoadFromRegistry += array(// TODO
         );
@@ -85,9 +92,9 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
                         $method = 'get';
                     }
 
-                    if ($method === 'options' AND bdApi_Option::get('cors')) {
-                        $routeMatch->setControllerName('bdApi_ControllerApi_Index');
-                        $routeMatch->setAction('options-cors');
+                    if ($method === 'options') {
+                        $routeMatch->setAction('options');
+                        $request->setParam('action', $action);
                     } else {
                         $routeMatch->setAction($method . '-' . $action);
                     }

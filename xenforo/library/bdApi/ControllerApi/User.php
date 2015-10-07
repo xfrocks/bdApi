@@ -230,10 +230,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionPutIndex()
     {
-        $user = $this->_getUserOrError();
-        $visitor = XenForo_Visitor::getInstance();
-
-        $inputFilters = array(
+        $input = $this->_input->filter(array(
             'password' => XenForo_Input::STRING,
             'password_old' => XenForo_Input::STRING,
             'password_algo' => XenForo_Input::STRING,
@@ -248,8 +245,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             'user_dob_year' => XenForo_Input::UINT,
 
             'user_fields' => XenForo_Input::ARRAY_SIMPLE,
-        );
-        $input = $this->_input->filter($inputFilters);
+        ));
+
+        $user = $this->_getUserOrError();
+        $visitor = XenForo_Visitor::getInstance();
 
         $session = bdApi_Data_Helper_Core::safeGetSession();
         $isAdmin = $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM) && $visitor->hasAdminPermission('user');
@@ -382,12 +381,6 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             ) {
                 // this has to be checked here because `secondary_group_ids` only get set within preSave()
                 return $this->responseError(new XenForo_Phrase('bdapi_slash_users_denied_user_group'), 403);
-            }
-        }
-
-        if (!$writer->hasChanges()) {
-            foreach ($inputFilters as $inputKey => $inputFilter) {
-                $this->_response->setHeader('X-Api-Param', $inputKey);
             }
         }
 

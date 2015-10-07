@@ -9,10 +9,10 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
 
         $authorizeParams = $this->_input->filter($oauth2Model->getAuthorizeParamsInputFilter());
 
-        $targetLink = XenForo_Link::buildPublicLink('account/authorize', array(), $authorizeParams);
-
-        header('Location: ' . $targetLink);
-        exit;
+        return $this->responseRedirect(
+            XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
+            XenForo_Link::buildPublicLink('account/authorize', array(), $authorizeParams)
+        );
     }
 
     public function actionPostToken()
@@ -131,6 +131,8 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
 
         $twitterUri = $this->_input->filterSingle('twitter_uri', XenForo_Input::STRING);
+        $twitterAuth = $this->_input->filterSingle('twitter_auth', XenForo_Input::STRING);
+
         if (!Zend_Uri::check($twitterUri)) {
             return $this->responseNoPermission();
         }
@@ -143,7 +145,6 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
             return $this->responseNoPermission();
         }
 
-        $twitterAuth = $this->_input->filterSingle('twitter_auth', XenForo_Input::STRING);
         $twitterClient = XenForo_Helper_Http::getClient($twitterUri);
         $twitterClient->setHeaders('Authorization', $twitterAuth);
         $twitterResponse = $twitterClient->request('GET');

@@ -28,6 +28,8 @@ class bdApi_ControllerApi_Tag extends bdApi_ControllerApi_Abstract
 
     public function actionGetFind()
     {
+        $q = $this->_input->filterSingle('tag', XenForo_Input::STRING);
+
         if (XenForo_Application::$versionId < 1050000) {
             return $this->responseNoPermission();
         }
@@ -36,8 +38,6 @@ class bdApi_ControllerApi_Tag extends bdApi_ControllerApi_Abstract
 
         /** @var bdApi_Extend_Model_Tag $tagModel */
         $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
-
-        $q = $this->_input->filterSingle('tag', XenForo_Input::STRING);
         $q = $tagModel->normalizeTag($q);
 
         if (strlen($q) >= 2) {

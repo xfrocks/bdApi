@@ -138,22 +138,22 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
     public function actionPostIndex()
     {
-        $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
-        list($thread, $forum) = $this->_getForumThreadPostHelper()->assertThreadValidAndViewable($threadId);
+        $input = $this->_input->filter(array(
+            'thread_id' => XenForo_Input::UINT,
+        ));
+
+        /* @var $editorHelper XenForo_ControllerHelper_Editor */
+        $editorHelper = $this->getHelper('Editor');
+        $input['post_body'] = $editorHelper->getMessageText('post_body', $this->_input);
+        $input['post_body'] = XenForo_Helper_String::autoLinkBbCode($input['post_body']);
+
+        list($thread, $forum) = $this->_getForumThreadPostHelper()->assertThreadValidAndViewable($input['thread_id']);
 
         $visitor = XenForo_Visitor::getInstance();
 
         if (!$this->_getThreadModel()->canReplyToThread($thread, $forum, $errorPhraseKey)) {
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
         }
-
-        // TODO
-        $input = $this->_input->filter(array());
-
-        /* @var $editorHelper XenForo_ControllerHelper_Editor */
-        $editorHelper = $this->getHelper('Editor');
-        $input['post_body'] = $editorHelper->getMessageText('post_body', $this->_input);
-        $input['post_body'] = XenForo_Helper_String::autoLinkBbCode($input['post_body']);
 
         $writer = XenForo_DataWriter::create('XenForo_DataWriter_DiscussionMessage_Post');
         $writer->set('user_id', $visitor['user_id']);
@@ -206,20 +206,22 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
     public function actionPutIndex()
     {
-        $postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
-        list($post, $thread, $forum) = $this->_getForumThreadPostHelper()->assertPostValidAndViewable($postId);
-
-        if (!$this->_getPostModel()->canEditPost($post, $thread, $forum, $errorPhraseKey)) {
-            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
-        }
-
-        // TODO
-        $input = $this->_input->filter(array());
+        $input = $this->_input->filter(array(
+            'post_id' => XenForo_Input::UINT,
+            'thread_title' => XenForo_Input::STRING,
+            'thread_tags' => XenForo_Input::STRING,
+        ));
 
         /* @var $editorHelper XenForo_ControllerHelper_Editor */
         $editorHelper = $this->getHelper('Editor');
         $input['post_body'] = $editorHelper->getMessageText('post_body', $this->_input);
         $input['post_body'] = XenForo_Helper_String::autoLinkBbCode($input['post_body']);
+
+        list($post, $thread, $forum) = $this->_getForumThreadPostHelper()->assertPostValidAndViewable($input['post_id']);
+
+        if (!$this->_getPostModel()->canEditPost($post, $thread, $forum, $errorPhraseKey)) {
+            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+        }
 
         $dw = XenForo_DataWriter::create('XenForo_DataWriter_DiscussionMessage_Post');
         $dw->setExistingData($post, true);
@@ -243,7 +245,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         switch ($this->_spamCheck(array(
             'content_type' => 'post',
-            'content_id' => $postId,
+            'content_id' => $post['post_id'],
             'content' => $input['post_body'],
             'permalink' => XenForo_Link::buildPublicLink('canonical:threads', $thread),
         ))) {
@@ -264,16 +266,11 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         if ($post['post_id'] == $thread['first_post_id']
             && $this->_getThreadModel()->canEditThread($thread, $forum)
         ) {
-            $threadInput = $this->_input->filter(array(
-                'thread_title' => XenForo_Input::STRING,
-                'thread_tags' => XenForo_Input::STRING,
-            ));
-
             $threadDw = XenForo_DataWriter::create('XenForo_DataWriter_Discussion_Thread');
             $threadDw->setExistingData($thread, true);
 
-            if (!empty($threadInput['thread_title'])) {
-                $threadDw->set('title', $threadInput['thread_title']);
+            if ($this->_input->inRequest('thread_title')) {
+                $threadDw->set('title', $input['thread_title']);
             }
 
             if (XenForo_Application::$versionId > 1050000
@@ -285,7 +282,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
                 $threadTagger = $tagModel->getTagger('thread');
                 $threadTagger->setContent($thread['thread_id'])->setPermissionsFromContext($thread, $forum);
-                $threadTagger->setTags($tagModel->splitTags($threadInput['thread_tags']));
+                $threadTagger->setTags($tagModel->splitTags($input['thread_tags']));
                 $threadDw->mergeErrors($threadTagger->getErrors());
             }
 
@@ -471,11 +468,11 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             'post_id' => XenForo_Input::UINT,
             'thread_id' => XenForo_Input::UINT,
         ));
+        $attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
+
         if (empty($contentData['post_id']) AND empty($contentData['thread_id'])) {
             return $this->responseError(new XenForo_Phrase('bdapi_slash_posts_attachments_requires_ids'), 400);
         }
-
-        $attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
 
         $attachmentHelper = $this->_getAttachmentHelper();
         $hash = $attachmentHelper->getAttachmentTempHash($contentData);
@@ -485,6 +482,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     public function actionPostReport()
     {
         $postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
+        $message = $this->_input->filterSingle('message', XenForo_Input::STRING);
 
         list($post, $thread, $forum) = $this->_getForumThreadPostHelper()->assertPostValidAndViewable($postId);
 
@@ -492,7 +490,6 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
         }
 
-        $message = $this->_input->filterSingle('message', XenForo_Input::STRING);
         if (!$message) {
             return $this->responseError(new XenForo_Phrase('bdapi_slash_x_report_requires_message', array('route' => 'posts')), 400);
         }

@@ -23,6 +23,15 @@ class bdApi_Data_Helper_Batch
 
     public static function doJob($method, $uri, array $params)
     {
+        if (XenForo_Application::isRegistered('_bdApi_disableBatch')
+            && XenForo_Application::get('_bdApi_disableBatch')
+        ) {
+            return array(
+                '_job_result' => 'error',
+                '_job_error' => 'Batch running has been disabled.',
+            );
+        }
+
         $fc = self::getFc();
 
         $request = new bdApi_Zend_Controller_Request_Http(bdApi_Data_Helper_Core::safeConvertApiUriToAbsoluteUri($uri, true));

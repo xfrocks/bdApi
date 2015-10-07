@@ -85,6 +85,8 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         $profilePostModel = $this->getModelFromCache('XenForo_Model_ProfilePost');
 
         $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+        $postBody = $this->_input->filterSingle('post_body', XenForo_Input::STRING);
+
         $user = $userModel->getFullUserById($userId);
         if (empty($user)) {
             return $this->responseNoPermission();
@@ -93,8 +95,6 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         if (!$userProfileModel->canViewProfilePosts($user)) {
             return $this->responseNoPermission();
         }
-
-        $postBody = $this->_input->filterSingle('post_body', XenForo_Input::STRING);
 
         $visitor = XenForo_Visitor::getInstance();
         if ($user['user_id'] == $visitor->get('user_id')) {
@@ -160,13 +160,13 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
     public function actionPutIndex()
     {
         $profilePostId = $this->_input->filterSingle('profile_post_id', XenForo_Input::UINT);
+        $postBody = $this->_input->filterSingle('post_body', XenForo_Input::STRING);
+
         list($profilePost, $user) = $this->_getUserProfileHelper()->assertProfilePostValidAndViewable($profilePostId);
 
         if (!$this->_getProfilePostModel()->canEditProfilePost($profilePost, $user, $errorPhraseKey)) {
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
         }
-
-        $postBody = $this->_input->filterSingle('post_body', XenForo_Input::STRING);
 
         $dw = XenForo_DataWriter::create('XenForo_DataWriter_DiscussionMessage_ProfilePost');
         $dw->setExistingData($profilePost, true);
@@ -298,6 +298,9 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
     {
         $pageOfCommentId = $this->_input->filterSingle('page_of_comment_id', XenForo_Input::UINT);
         $pageOfComment = null;
+        $commentId = $this->_input->filterSingle('comment_id', XenForo_Input::UINT);
+        $beforeDate = $this->_input->filterSingle('before', XenForo_Input::UINT);
+
         if (!empty($pageOfCommentId)) {
             list($pageOfComment, $profilePost, $user) = $this->_getUserProfileHelper()->assertProfilePostCommentValidAndViewable(
                 $pageOfCommentId,
@@ -319,7 +322,6 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             );
 
             // special case for single comment
-            $commentId = $this->_input->filterSingle('comment_id', XenForo_Input::UINT);
             if (!empty($commentId)) {
                 list($comment, ,) = $this->_getUserProfileHelper()->assertProfilePostCommentValidAndViewable(
                     $commentId,
@@ -338,8 +340,6 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         }
 
         $pageNavParams = array();
-
-        $beforeDate = $this->_input->filterSingle('before', XenForo_Input::UINT);
 
         $limit = XenForo_Application::get('options')->messagesPerPage;
         $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
@@ -406,13 +406,14 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
     public function actionPostComments()
     {
         $profilePostId = $this->_input->filterSingle('profile_post_id', XenForo_Input::UINT);
+        $commentBody = $this->_input->filterSingle('comment_body', XenForo_Input::STRING);
+
         list($profilePost, $user) = $this->_getUserProfileHelper()->assertProfilePostValidAndViewable($profilePostId);
 
         if (!$this->_getProfilePostModel()->canCommentOnProfilePost($profilePost, $user, $errorPhraseKey)) {
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
         }
 
-        $commentBody = $this->_input->filterSingle('comment_body', XenForo_Input::STRING);
         $visitor = XenForo_Visitor::getInstance();
 
         $dw = XenForo_DataWriter::create('XenForo_DataWriter_ProfilePostComment');
@@ -504,13 +505,14 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
     public function actionPostReport()
     {
         $profilePostId = $this->_input->filterSingle('profile_post_id', XenForo_Input::UINT);
+        $message = $this->_input->filterSingle('message', XenForo_Input::STRING);
+
         list($profilePost, $user) = $this->_getUserProfileHelper()->assertProfilePostValidAndViewable($profilePostId);
 
         if (!$this->_getProfilePostModel()->canReportProfilePost($profilePost, $user, $errorPhraseKey)) {
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
         }
 
-        $message = $this->_input->filterSingle('message', XenForo_Input::STRING);
         if (!$message) {
             return $this->responseError(new XenForo_Phrase('bdapi_slash_x_report_requires_message', array('route' => 'profile-posts')), 400);
         }

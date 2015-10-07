@@ -13,6 +13,81 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
     protected $_fieldsFilterType = false;
     protected $_fieldsFilterList = array();
 
+    public function actionOptions()
+    {
+        $cors = $this->_request->getHeader('Access-Control-Request-Method');
+        if (!empty($cors)) {
+            return $this->responseData('bdApi_ViewApi_Helper_Options');
+        }
+
+        $action = $this->_input->filterSingle('action', XenForo_Input::STRING);
+        $action = str_replace(array('-', '/'), ' ', utf8_strtolower($action));
+        $action = str_replace(' ', '', utf8_ucwords($action));
+
+        $methods = array();
+
+        /* @var $fc XenForo_FrontController */
+        $fc = XenForo_Application::get('_bdApi_fc');
+
+        XenForo_Application::set('_bdApi_disableBatch', true);
+
+        foreach (array(
+                     'Get',
+                     'Post',
+                     'Put'
+                 ) as $method) {
+            $controllerMethod = sprintf('action%s%s', $method, $action);
+
+            if (is_callable(array($this, $controllerMethod))) {
+                $method = utf8_strtoupper($method);
+                $methods[$method] = array();
+
+                bdApi_Input::bdApi_resetFilters();
+
+                $routeMatch = new XenForo_RouteMatch($this->_routeMatch->getControllerName(),
+                    sprintf('%s-%s', $method, $action));
+
+                try {
+                    $fc->dispatch($routeMatch);
+                } catch (Exception $e) {
+                    // ignore
+                }
+
+                $params = bdApi_Input::bdApi_getFilters();
+                foreach (array_keys($params) as $paramKey) {
+                    if (in_array($paramKey, array(
+                        'fields_include',
+                        'fields_exclude',
+                        'limit',
+                        'locale',
+                        'page',
+                    ), true)) {
+                        // system wide params, ignore
+                        unset($params[$paramKey]);
+                        continue;
+                    }
+
+                    if (!isset($_GET[$paramKey])
+                        && $this->_input->inRequest($paramKey)
+                    ) {
+                        // apparently this param is set by the route class
+                        unset($params[$paramKey]);
+                        continue;
+                    }
+                }
+
+                ksort($params);
+                $methods[$method]['parameters'] = array_values($params);
+            }
+        }
+
+        $allowedMethods = array_keys($methods);
+        $allowedMethods[] = 'OPTIONS';
+        $this->_response->setHeader('Allow', implode(',', $allowedMethods));
+
+        return $this->responseData('bdApi_ViewApi_Helper_Options', $methods);
+    }
+
     /**
      * Builds are response with specified data. Basically it's the same
      * XenForo_ControllerPublic_Abstract::responseView() but with the
