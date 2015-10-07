@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_ForumWatch extends XFCP_bdApi_XenForo_Model_ForumWatch
+class bdApi_Extend_Model_ForumWatch extends XFCP_bdApi_Extend_Model_ForumWatch
 {
     public function bdApi_countUserForumWatchByUser($userId)
     {

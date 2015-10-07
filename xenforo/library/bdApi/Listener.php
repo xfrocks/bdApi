@@ -4,6 +4,7 @@ class bdApi_Listener
 {
     public static function load_class($class, array &$extend)
     {
+        // these classes are always extended
         static $classes = array(
             'XenForo_ControllerPublic_Account',
             'XenForo_ControllerPublic_Error',
@@ -18,6 +19,20 @@ class bdApi_Listener
             'XenForo_DataWriter_User',
 
             'XenForo_Model_Alert',
+            'XenForo_Model_User',
+            'XenForo_Model_UserGroup',
+        );
+
+        if (in_array($class, $classes)) {
+            $extend[] = 'bdApi_' . $class;
+        }
+    }
+
+    public static function extend($class, array &$extend)
+    {
+        // these classes are extended only within api context
+        // this is done to reduce performance impact for public context
+        static $classes = array(
             'XenForo_Model_Category',
             'XenForo_Model_Conversation',
             'XenForo_Model_Forum',
@@ -31,18 +46,8 @@ class bdApi_Listener
             'XenForo_Model_Tag',
             'XenForo_Model_Thread',
             'XenForo_Model_ThreadWatch',
-            'XenForo_Model_User',
             'XenForo_Model_UserIgnore',
-            'XenForo_Model_UserGroup',
-        );
 
-        if (in_array($class, $classes)) {
-            $extend[] = 'bdApi_' . $class;
-        }
-    }
-
-    public static function extend($class, array &$extend) {
-        static $classes = array(
             'XenForo_Visitor',
         );
 
@@ -61,8 +66,10 @@ class bdApi_Listener
         $templateHelperReflector = new ReflectionClass(get_class($templateHelper));
         $methods = $templateHelperReflector->getMethods();
         foreach ($methods as $method) {
-            if (!($method->getModifiers() & ReflectionMethod::IS_PUBLIC) OR ($method->getModifiers() & ReflectionMethod::IS_STATIC)) {
-                // ignore non-public instance methods
+            if (!($method->getModifiers() & ReflectionMethod::IS_PUBLIC)
+                || ($method->getModifiers() & ReflectionMethod::IS_STATIC)
+            ) {
+                // ignore restricted or static methods
                 continue;
             }
 

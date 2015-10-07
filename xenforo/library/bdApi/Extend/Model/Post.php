@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_Post extends XFCP_bdApi_XenForo_Model_Post
+class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
 {
     const FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE = 'bdApi_postsInThread_orderReverse';
 

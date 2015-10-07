@@ -66,7 +66,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         if (XenForo_Application::$versionId > 1050000
             && !empty($search['searchConstraints']['tag'])
         ) {
-            /** @var bdApi_XenForo_Model_Tag $tagModel */
+            /** @var bdApi_Extend_Model_Tag $tagModel */
             $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
             $tags = $tagModel->bdApi_getTagsByIds(explode(' ', $search['searchConstraints']['tag']));
 
@@ -379,7 +379,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_Search
+     * @return bdApi_Extend_Model_Search
      */
     protected function _getSearchModel()
     {

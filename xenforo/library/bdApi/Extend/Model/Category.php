@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_Category extends XFCP_bdApi_XenForo_Model_Category
+class bdApi_Extend_Model_Category extends XFCP_bdApi_Extend_Model_Category
 {
     public function prepareApiDataForCategories(array $categories)
     {

@@ -615,13 +615,13 @@ Arguments:
   </code_events>
   <code_event_listeners>
     <listener event_id="file_health_check" execute_order="5" callback_class="bdApi_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
-    <listener event_id="front_controller_pre_route" execute_order="10" callback_class="bdApi_Listener" callback_method="front_controller_pre_route" active="1" hint="" description=""/>
+    <listener event_id="front_controller_pre_route" execute_order="5" callback_class="bdApi_Listener" callback_method="front_controller_pre_route" active="1" hint="" description=""/>
     <listener event_id="init_dependencies" execute_order="5" callback_class="bdApi_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
     <listener event_id="load_class_controller" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" hint="" description=""/>
-    <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdApi_Listener" callback_method="load_class" active="1" hint="" description=""/>
+    <listener event_id="load_class_datawriter" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="load_class_model" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" hint="" description=""/>
-    <listener event_id="template_create" execute_order="10" callback_class="bdApi_Listener" callback_method="template_create" active="1" hint="" description=""/>
-    <listener event_id="template_hook" execute_order="10" callback_class="bdApi_Listener" callback_method="template_hook" active="1" hint="" description=""/>
+    <listener event_id="template_create" execute_order="5" callback_class="bdApi_Listener" callback_method="template_create" active="1" hint="" description=""/>
+    <listener event_id="template_hook" execute_order="5" callback_class="bdApi_Listener" callback_method="template_hook" active="1" hint="" description=""/>
   </code_event_listeners>
   <cron>
     <entry entry_id="bdApi_cleanUpExpired" cron_class="bdApi_CronEntry_CleanUp" cron_method="pruneExpired" active="1"><![CDATA[{"day_type":"dom","dom":["-1"],"hours":["6"],"minutes":["29"]}]]></entry>

@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_ThreadWatch extends XFCP_bdApi_XenForo_Model_ThreadWatch
+class bdApi_Extend_Model_ThreadWatch extends XFCP_bdApi_Extend_Model_ThreadWatch
 {
     public function prepareApiDataForThreadWatches(array $data, array $threadWatch)
     {

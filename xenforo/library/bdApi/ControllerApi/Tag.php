@@ -8,7 +8,7 @@ class bdApi_ControllerApi_Tag extends bdApi_ControllerApi_Abstract
             return $this->responseNoPermission();
         }
 
-        /** @var bdApi_XenForo_Model_Tag $tagModel */
+        /** @var bdApi_Extend_Model_Tag $tagModel */
         $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
 
         $options = XenForo_Application::getOptions();
@@ -34,7 +34,7 @@ class bdApi_ControllerApi_Tag extends bdApi_ControllerApi_Abstract
 
         $this->_assertRequiredScope(bdApi_Model_OAuth2::SCOPE_POST);
 
-        /** @var bdApi_XenForo_Model_Tag $tagModel */
+        /** @var bdApi_Extend_Model_Tag $tagModel */
         $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
 
         $q = $this->_input->filterSingle('tag', XenForo_Input::STRING);

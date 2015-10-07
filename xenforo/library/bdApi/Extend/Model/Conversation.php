@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversation
+class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversation
 {
     const FETCH_OPTIONS_JOIN = 'bdApi_join';
     const FETCH_OPTIONS_JOIN_FETCH_FIRST_MESSAGE_AVATAR = 0x01;

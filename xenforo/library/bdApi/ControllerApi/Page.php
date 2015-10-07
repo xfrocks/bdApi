@@ -85,7 +85,7 @@ class bdApi_ControllerApi_Page extends bdApi_ControllerApi_Node
     }
 
     /**
-     * @return bdApi_XenForo_Model_Page
+     * @return bdApi_Extend_Model_Page
      */
     protected function _getPageModel()
     {

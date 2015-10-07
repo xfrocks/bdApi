@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_ProfilePost extends XFCP_bdApi_XenForo_Model_ProfilePost
+class bdApi_Extend_Model_ProfilePost extends XFCP_bdApi_Extend_Model_ProfilePost
 {
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
     {

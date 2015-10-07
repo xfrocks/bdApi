@@ -126,7 +126,7 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_Category
+     * @return bdApi_Extend_Model_Category
      */
     protected function _getCategoryModel()
     {
@@ -134,7 +134,7 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_Forum
+     * @return bdApi_Extend_Model_Forum
      */
     protected function _getForumModel()
     {
@@ -142,7 +142,7 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_LinkForum
+     * @return bdApi_Extend_Model_LinkForum
      */
     protected function _getLinkForumModel()
     {
@@ -158,7 +158,7 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_Page
+     * @return bdApi_Extend_Model_Page
      */
     protected function _getPageModel()
     {

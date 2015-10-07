@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_Poll extends XFCP_bdApi_XenForo_Model_Poll
+class bdApi_Extend_Model_Poll extends XFCP_bdApi_Extend_Model_Poll
 {
     public function prepareApiDataForPoll(array $poll, $canVote)
     {

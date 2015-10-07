@@ -435,7 +435,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         if ($this->_getThreadModel()->canWatchThread($thread, $forum)) {
             $visitor = XenForo_Visitor::getInstance();
 
-            /* @var $threadWatchModel bdApi_XenForo_Model_ThreadWatch */
+            /* @var $threadWatchModel bdApi_Extend_Model_ThreadWatch */
             $threadWatchModel = $this->getModelFromCache('XenForo_Model_ThreadWatch');
             $threadWatch = $threadWatchModel->getUserThreadWatchByThreadId($visitor['user_id'], $thread['thread_id']);
 
@@ -697,7 +697,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_Forum
+     * @return bdApi_Extend_Model_Forum
      */
     protected function _getForumModel()
     {
@@ -705,7 +705,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_Thread
+     * @return bdApi_Extend_Model_Thread
      */
     protected function _getThreadModel()
     {
@@ -713,7 +713,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_Post
+     * @return bdApi_Extend_Model_Post
      */
     protected function _getPostModel()
     {
@@ -721,7 +721,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_Poll
+     * @return bdApi_Extend_Model_Poll
      */
     protected function _getPollModel()
     {
@@ -729,7 +729,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_ThreadWatch
+     * @return bdApi_Extend_Model_ThreadWatch
      */
     protected function _getThreadWatchModel()
     {

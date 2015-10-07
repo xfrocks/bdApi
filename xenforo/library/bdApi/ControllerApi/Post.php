@@ -58,7 +58,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             case 'natural_reverse':
                 // load the class to make our constant accessible
                 $this->_getPostModel();
-                $fetchOptions[bdApi_XenForo_Model_Post::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE] = true;
+                $fetchOptions[bdApi_Extend_Model_Post::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE] = true;
                 $pageNavParams['order'] = $order;
                 break;
         }
@@ -622,7 +622,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_Post
+     * @return bdApi_Extend_Model_Post
      */
     protected function _getPostModel()
     {
@@ -630,7 +630,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_Thread
+     * @return bdApi_Extend_Model_Thread
      */
     protected function _getThreadModel()
     {
@@ -638,7 +638,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_Forum
+     * @return bdApi_Extend_Model_Forum
      */
     protected function _getForumModel()
     {
@@ -654,7 +654,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_ThreadWatch
+     * @return bdApi_Extend_Model_ThreadWatch
      */
     protected function _getThreadWatchModel()
     {

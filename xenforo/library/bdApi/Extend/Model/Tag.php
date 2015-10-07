@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_Tag extends XFCP_bdApi_XenForo_Model_Tag
+class bdApi_Extend_Model_Tag extends XFCP_bdApi_Extend_Model_Tag
 {
     public function bdApi_getTagsByIds(array $ids)
     {

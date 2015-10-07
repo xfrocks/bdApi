@@ -81,7 +81,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         $userModel = $this->getModelFromCache('XenForo_Model_User');
         /** @var XenForo_Model_UserProfile $userProfileModel */
         $userProfileModel = $this->getModelFromCache('XenForo_Model_UserProfile');
-        /** @var bdApi_XenForo_Model_ProfilePost $profilePostModel */
+        /** @var bdApi_Extend_Model_ProfilePost $profilePostModel */
         $profilePostModel = $this->getModelFromCache('XenForo_Model_ProfilePost');
 
         $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
@@ -541,7 +541,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_ProfilePost
+     * @return bdApi_Extend_Model_ProfilePost
      */
     protected function _getProfilePostModel()
     {

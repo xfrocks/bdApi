@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
+class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
 {
     protected $_bdApi_polls = array();
     protected $_bdApi_limitQueryResults_nodeId = false;
@@ -82,7 +82,7 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
         $data['thread_is_followed'] = !empty($thread['thread_is_watched']);
 
         if (!empty($firstPost)) {
-            /* @var $postModel bdApi_XenForo_Model_Post */
+            /* @var $postModel bdApi_Extend_Model_Post */
             $postModel = $this->_getPostModel();
             $data['first_post'] = $postModel->prepareApiDataForPost($firstPost, $thread, $forum);
         }
@@ -91,7 +91,7 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
             && isset($this->_bdApi_polls[$thread['thread_id']])
         ) {
             $poll = $this->_bdApi_polls[$thread['thread_id']];
-            /** @var bdApi_XenForo_Model_Poll $pollModel */
+            /** @var bdApi_Extend_Model_Poll $pollModel */
             $pollModel = $this->getModelFromCache('XenForo_Model_Poll');
             $data['poll'] = $pollModel->prepareApiDataForPoll($poll, $this->canVoteOnPoll($poll, $thread, $forum));
             $data['poll']['links']['vote'] = bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll/votes', $thread);
@@ -104,7 +104,7 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
             $tags = @unserialize($thread['tags']);
 
             if (is_array($tags)) {
-                /** @var bdApi_XenForo_Model_Tag $tagModel */
+                /** @var bdApi_Extend_Model_Tag $tagModel */
                 $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
                 $data['thread_tags'] = $tagModel->prepareApiDataForTags($tags);
             }

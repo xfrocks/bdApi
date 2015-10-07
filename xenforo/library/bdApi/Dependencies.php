@@ -10,9 +10,12 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
         $this->_dataPreLoadFromRegistry += array(// TODO
         );
 
-        parent::preLoadData();
+        XenForo_CodeEvent::addListener('load_class_model', array('bdApi_Listener', 'extend'));
 
+        // XenForo 1.2.0+ only
         XenForo_CodeEvent::addListener('load_class', array('bdApi_Listener', 'extend'), 'XenForo_Visitor');
+
+        parent::preLoadData();
     }
 
     protected function _handleCustomPreloadedData(array &$data)

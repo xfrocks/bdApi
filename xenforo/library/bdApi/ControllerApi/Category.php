@@ -68,7 +68,7 @@ class bdApi_ControllerApi_Category extends bdApi_ControllerApi_Node
     }
 
     /**
-     * @return bdApi_XenForo_Model_Category
+     * @return bdApi_Extend_Model_Category
      */
     protected function _getCategoryModel()
     {

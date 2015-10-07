@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_Page extends XFCP_bdApi_XenForo_Model_Page
+class bdApi_Extend_Model_Page extends XFCP_bdApi_Extend_Model_Page
 {
     public function prepareApiDataForPages(array $pages)
     {

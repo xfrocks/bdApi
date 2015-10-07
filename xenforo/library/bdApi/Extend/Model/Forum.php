@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_Forum extends XFCP_bdApi_XenForo_Model_Forum
+class bdApi_Extend_Model_Forum extends XFCP_bdApi_Extend_Model_Forum
 {
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
     {

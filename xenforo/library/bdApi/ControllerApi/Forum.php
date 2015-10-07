@@ -167,7 +167,7 @@ class bdApi_ControllerApi_Forum extends bdApi_ControllerApi_Node
     }
 
     /**
-     * @return bdApi_XenForo_Model_Forum
+     * @return bdApi_Extend_Model_Forum
      */
     protected function _getForumModel()
     {
@@ -175,7 +175,7 @@ class bdApi_ControllerApi_Forum extends bdApi_ControllerApi_Node
     }
 
     /**
-     * @return bdApi_XenForo_Model_ForumWatch
+     * @return bdApi_Extend_Model_ForumWatch
      */
     protected function _getForumWatchModel()
     {
