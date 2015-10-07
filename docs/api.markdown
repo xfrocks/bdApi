@@ -1259,16 +1259,18 @@ Edit a user. Since forum-2015041501. The introduction of this method makes POST 
 
 Parameters:
 
- * `user_email` (_optional_): new email of the user.
- * `username` (_optional_): new username of the user. Changing username requires Administrator permission.
  * `password` (_optional_): data of the new password.
+ * `password_old` (_optional_): data of the existing password, it is not required if (1) the current authenticated user has `user` admin permission, (2) the `admincp` scope is granted and (3) the user being edited is not the current authenticated user.
+ * `password_algo` (_optional_): algorithm used to encrypt the `password` and `password_old` parameters. See [Encryption](#encryption) section for more information.
+ * `user_email` (_optional_): new email of the user.
+
+ * `username` (_optional_): new username of the user. Changing username requires Administrator permission.
  * `primary_group_id` (_optional_): id of new primary group. Since forum-2015100702.
  * `secondary_group_ids` (_optional_): array of ids of new secondary groups. Since forum-2015100702.
+
  * `user_dob_day` (_optional_): new date of birth (day) of the user. This parameter must come together with `user_dob_month` and `user_dob_year`. User can add his/her own date of birth but changing existing data requires Administrator permission.
  * `user_dob_month` (_optional_): new date of birth (month) of the user.
  * `user_dob_year` (_optional_): new date of birth (year) of the user.
- * `password_old` (_optional_): data of the existing password, it is not required if (1) the current authenticated user has `user` admin permission, (2) the `admincp` scope is granted and (3) the user being edited is not the current authenticated user.
- * `password_algo` (_optional_): algorithm used to encrypt the `password` and `password_old` parameters. See [Encryption](#encryption) section for more information.
 
 Required scopes:
 

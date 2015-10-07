@@ -233,30 +233,32 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $user = $this->_getUserOrError();
         $visitor = XenForo_Visitor::getInstance();
 
-        $input = $this->_input->filter(array(
+        $inputFilters = array(
+            'password' => XenForo_Input::STRING,
             'password_old' => XenForo_Input::STRING,
             'password_algo' => XenForo_Input::STRING,
-
             'user_email' => XenForo_Input::STRING,
+
             'username' => XenForo_Input::STRING,
-            'password' => XenForo_Input::STRING,
             'primary_group_id' => XenForo_Input::UINT,
             'secondary_group_ids' => array(XenForo_Input::UINT, 'array' => true),
+
             'user_dob_day' => XenForo_Input::UINT,
             'user_dob_month' => XenForo_Input::UINT,
             'user_dob_year' => XenForo_Input::UINT,
 
             'user_custom_fields' => array(XenForo_Input::STRING, 'array' => true),
-        ));
+        );
+        $input = $this->_input->filter($inputFilters);
 
         $session = bdApi_Data_Helper_Core::safeGetSession();
         $isAdmin = $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM) && $visitor->hasAdminPermission('user');
 
         $requiredAuth = 0;
-        if (!empty($input['user_email'])) {
+        if (!empty($input['password'])) {
             $requiredAuth++;
         }
-        if (!empty($input['password'])) {
+        if (!empty($input['user_email'])) {
             $requiredAuth++;
         }
         if ($requiredAuth > 0) {
@@ -283,6 +285,11 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $writer->setExistingData($user, true);
         if ($isAdmin) {
             $writer->setOption(XenForo_DataWriter_User::OPTION_ADMIN_EDIT, true);
+        }
+
+        if (!empty($input['password'])) {
+            $password = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
+            $writer->setPassword($password, $password);
         }
 
         if (!empty($input['user_email'])) {
@@ -312,11 +319,6 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             ) {
                 return $this->responseError(new XenForo_Phrase('bdapi_slash_users_denied_username'), 403);
             }
-        }
-
-        if (!empty($input['password'])) {
-            $password = bdApi_Crypt::decrypt($input['password'], $input['password_algo']);
-            $writer->setPassword($password, $password);
         }
 
         if ($input['primary_group_id'] > 0) {
@@ -371,6 +373,13 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
                 return $this->responseError(new XenForo_Phrase('bdapi_slash_users_denied_user_group'), 403);
             }
         }
+
+        if (!$writer->hasChanges()) {
+            foreach ($inputFilters as $inputKey => $inputFilter) {
+                $this->_response->setHeader('X-Api-Param', $inputKey);
+            }
+        }
+
         $writer->save();
 
         $user = $writer->getMergedData();
