@@ -243,30 +243,45 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             'user_dob_day' => XenForo_Input::UINT,
             'user_dob_month' => XenForo_Input::UINT,
             'user_dob_year' => XenForo_Input::UINT,
+
+            'user_custom_fields' => array(XenForo_Input::STRING, 'array' => true),
         ));
 
         $session = bdApi_Data_Helper_Core::safeGetSession();
         $isAdmin = $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM) && $visitor->hasAdminPermission('user');
 
-        $isAuth = false;
-        if ($isAdmin && $visitor['user_id'] != $user['user_id']) {
-            $isAuth = true;
-        } elseif (!empty($input['password_old'])) {
-            $auth = $this->_getUserModel()->getUserAuthenticationObjectByUserId($user['user_id']);
-            if (!empty($auth)) {
-                $passwordOld = bdApi_Crypt::decrypt($input['password_old'], $input['password_algo']);
-                if ($auth->hasPassword() && $auth->authenticate($user['user_id'], $passwordOld)) {
-                    $isAuth = true;
+        $requiredAuth = 0;
+        if (!empty($input['user_email'])) {
+            $requiredAuth++;
+        }
+        if (!empty($input['password'])) {
+            $requiredAuth++;
+        }
+        if ($requiredAuth > 0) {
+            $isAuth = false;
+            if ($isAdmin && $visitor['user_id'] != $user['user_id']) {
+                $isAuth = true;
+            } elseif (!empty($input['password_old'])) {
+                $auth = $this->_getUserModel()->getUserAuthenticationObjectByUserId($user['user_id']);
+                if (!empty($auth)) {
+                    $passwordOld = bdApi_Crypt::decrypt($input['password_old'], $input['password_algo']);
+                    if ($auth->hasPassword() && $auth->authenticate($user['user_id'], $passwordOld)) {
+                        $isAuth = true;
+                    }
                 }
             }
-        }
-        if (!$isAuth) {
-            return $this->responseNoPermission();
+
+            if (!$isAuth) {
+                return $this->responseError(new XenForo_Phrase('bdapi_slash_users_requires_password_old'), 403);
+            }
         }
 
         /* @var $writer XenForo_DataWriter_User */
         $writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
         $writer->setExistingData($user, true);
+        if ($isAdmin) {
+            $writer->setOption(XenForo_DataWriter_User::OPTION_ADMIN_EDIT, true);
+        }
 
         if (!empty($input['user_email'])) {
             $writer->set('email', $input['user_email']);
@@ -288,11 +303,13 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         }
 
         if (!empty($input['username'])) {
-            if (!$isAdmin) {
-                return $this->responseNoPermission();
-            }
-
             $writer->set('username', $input['username']);
+
+            if ($writer->isChanged('username')
+                && !$isAdmin
+            ) {
+                return $this->responseError(new XenForo_Phrase('bdapi_slash_users_denied_username'), 403);
+            }
         }
 
         if (!empty($input['password'])) {
@@ -301,27 +318,26 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         }
 
         if (!empty($input['user_dob_day']) && !empty($input['user_dob_month']) && !empty($input['user_dob_year'])) {
+            $writer->set('dob_day', $input['user_dob_day']);
+            $writer->set('dob_month', $input['user_dob_month']);
+            $writer->set('dob_year', $input['user_dob_year']);
+
             $hasExistingDob = false;
             $hasExistingDob = $hasExistingDob || !!$writer->getExisting('dob_day');
             $hasExistingDob = $hasExistingDob || !!$writer->getExisting('dob_month');
             $hasExistingDob = $hasExistingDob || !!$writer->getExisting('dob_year');
 
-            if ($hasExistingDob) {
-                if (!$isAdmin) {
-                    // changing dob requires admin permission
-                    return $this->responseNoPermission();
-                }
-            } else {
-                // new dob just needs auth
+            if ($hasExistingDob
+                && (
+                    $writer->isChanged('dob_day')
+                    || $writer->isChanged('dob_month')
+                    || $writer->isChanged('dob_year')
+                )
+                && !$isAdmin
+            ) {
+                // setting new dob is fine but changing dob requires admin permission
+                return $this->responseError(new XenForo_Phrase('bdapi_slash_users_denied_dob'), 403);
             }
-
-            $writer->set('dob_day', $input['user_dob_day']);
-            $writer->set('dob_month', $input['user_dob_month']);
-            $writer->set('dob_year', $input['user_dob_year']);
-        }
-
-        if (!$writer->hasChanges()) {
-            return $this->responseError(new XenForo_Phrase('error_occurred_or_request_stopped'), 400);
         }
 
         $writer->save();

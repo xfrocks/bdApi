@@ -816,6 +816,9 @@ step=3600</edit_format_params>
     <phrase title="bdapi_slash_threads_attachments_requires_forum_id" version_id="20" version_string="0.9.5"><![CDATA[/threads/attachments requires `forum_id`.]]></phrase>
     <phrase title="bdapi_slash_threads_requires_forum_id" version_id="20" version_string="0.9.5"><![CDATA[/threads requires `forum_id`.]]></phrase>
     <phrase title="bdapi_slash_tools_login_requires_redirect_uri" version_id="45" version_string="1.1.6"><![CDATA[/tools/login requires `redirect_uri`.]]></phrase>
+    <phrase title="bdapi_slash_users_denied_dob" version_id="79" version_string="1.4.6b"><![CDATA[You cannot change Date of Birth.]]></phrase>
+    <phrase title="bdapi_slash_users_denied_username" version_id="79" version_string="1.4.6b"><![CDATA[You cannot change `username`.]]></phrase>
+    <phrase title="bdapi_slash_users_requires_password_old" version_id="79" version_string="1.4.6b"><![CDATA[PUT /users/:userId requires a valid `password_old`. Usage of `password_algo` is also highly recommended.]]></phrase>
     <phrase title="bdapi_slash_x_report_requires_message" version_id="75" version_string="1.4.4c"><![CDATA[/{route}/report requires `message`.]]></phrase>
     <phrase title="bdapi_subscriptions" version_id="50" version_string="1.2.1b"><![CDATA[Subscriptions]]></phrase>
     <phrase title="bdapi_subscription_callback_is_required" version_id="50" version_string="1.2.1b"><![CDATA[`hub.callback` is required.]]></phrase>
