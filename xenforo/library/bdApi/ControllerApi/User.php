@@ -240,6 +240,8 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             'user_email' => XenForo_Input::STRING,
             'username' => XenForo_Input::STRING,
             'password' => XenForo_Input::STRING,
+            'primary_group_id' => XenForo_Input::UINT,
+            'secondary_group_ids' => array(XenForo_Input::UINT, 'array' => true),
             'user_dob_day' => XenForo_Input::UINT,
             'user_dob_month' => XenForo_Input::UINT,
             'user_dob_year' => XenForo_Input::UINT,
@@ -317,6 +319,24 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             $writer->setPassword($password, $password);
         }
 
+        if ($input['primary_group_id'] > 0) {
+            $userGroups = $this->_getUserGroupModel()->getAllUserGroups();
+            if (!isset($userGroups[$input['primary_group_id']])) {
+                return $this->responseError(new XenForo_Phrase('requested_user_group_not_found'));
+            }
+
+            if (!empty($input['secondary_group_ids'])) {
+                foreach ($input['secondary_group_ids'] as $secondaryGroupId) {
+                    if (!isset($userGroups[$secondaryGroupId])) {
+                        return $this->responseError(new XenForo_Phrase('requested_user_group_not_found'));
+                    }
+                }
+            }
+
+            $writer->set('user_group_id', $input['primary_group_id']);
+            $writer->setSecondaryGroups($input['secondary_group_ids']);
+        }
+
         if (!empty($input['user_dob_day']) && !empty($input['user_dob_month']) && !empty($input['user_dob_year'])) {
             $writer->set('dob_day', $input['user_dob_day']);
             $writer->set('dob_month', $input['user_dob_month']);
@@ -340,6 +360,17 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             }
         }
 
+
+        $writer->preSave();
+
+        if (!$isAdmin) {
+            if ($writer->isChanged('user_group_id')
+                || $writer->isChanged('secondary_group_ids')
+            ) {
+                // this has to be checked here because `secondary_group_ids` only get set within preSave()
+                return $this->responseError(new XenForo_Phrase('bdapi_slash_users_denied_user_group'), 403);
+            }
+        }
         $writer->save();
 
         $user = $writer->getMergedData();
@@ -567,33 +598,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionPostGroups()
     {
-        $this->_assertAdminPermission('user');
+        $link = bdApi_Data_Helper_Core::safeBuildApiLink('users', array('user_id' => $this->_input->filterSingle('user_id', XenForo_Input::UINT)));
+        $this->_setDeprecatedHeaders('PUT', $link);
 
-        $user = $this->_getUserOrError();
-
-        $primaryGroupId = $this->_input->filterSingle('primary_group_id', XenForo_Input::UINT);
-        $secondaryGroupIds = $this->_input->filterSingle('secondary_group_ids', XenForo_Input::UINT, array('array' => true));
-
-        $userGroups = $this->_getUserGroupModel()->getAllUserGroups();
-        if (!isset($userGroups[$primaryGroupId])) {
-            return $this->responseError(new XenForo_Phrase('requested_user_group_not_found'));
-        }
-        if (!empty($secondaryGroupIds)) {
-            foreach ($secondaryGroupIds as $secondaryGroupId) {
-                if (!isset($userGroups[$secondaryGroupId])) {
-                    return $this->responseError(new XenForo_Phrase('requested_user_group_not_found'));
-                }
-            }
-        }
-
-        /* @var $writer XenForo_DataWriter_User */
-        $writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
-        $writer->setExistingData($user, true);
-        $writer->set('user_group_id', $primaryGroupId);
-        $writer->setSecondaryGroups($secondaryGroupIds);
-        $writer->save();
-
-        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+        return $this->responseReroute('bdApi_ControllerApi_User', 'put-index');
     }
 
     public function actionGetTimeline()

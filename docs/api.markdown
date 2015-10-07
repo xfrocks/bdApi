@@ -1262,6 +1262,8 @@ Parameters:
  * `user_email` (_optional_): new email of the user.
  * `username` (_optional_): new username of the user. Changing username requires Administrator permission.
  * `password` (_optional_): data of the new password.
+ * `primary_group_id` (_optional_): id of new primary group. Since forum-2015100702.
+ * `secondary_group_ids` (_optional_): array of ids of new secondary groups. Since forum-2015100702.
  * `user_dob_day` (_optional_): new date of birth (day) of the user. This parameter must come together with `user_dob_month` and `user_dob_year`. User can add his/her own date of birth but changing existing data requires Administrator permission.
  * `user_dob_month` (_optional_): new date of birth (month) of the user.
  * `user_dob_year` (_optional_): new date of birth (year) of the user.
@@ -1478,24 +1480,6 @@ Required scopes:
  * `read`
  * `admincp` (not required if viewing groups of current authenticated user)
 
-### POST `/users/:userId/groups`
-Change user groups of a user. Since forum-2014092301.
-
-    {
-        status: "ok",
-        message: "Changes Saved"
-    }
-
-Parameters:
-
- * `primary_group_id` (__required__): id of new primary group.
- * `secondary_group_ids` (__required__): array of ids of new secondary groups.
-
-Required scopes:
-
- * `post`
- * `admincp`
-
 ### GET `/users/me`
 Alias for GET `/users/:userId` for authorized user.
 
@@ -1516,9 +1500,6 @@ Alias for GET `/users/:userId/followings` for authorized user.
 
 ### GET `/users/me/groups`
 Alias for GET `/users/:userId/groups` for authorized user. Since forum-2014092301.
-
-### POST `/users/me/groups`
-Alias for POST `/users/:userId/groups` for authorized user. Since forum-2014092301.
 
 ## Profile Posts
 
