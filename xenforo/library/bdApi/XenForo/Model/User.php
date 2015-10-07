@@ -139,12 +139,7 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
             $auth = $this->getUserAuthenticationObjectByUserId($user['user_id']);
             $data['user_has_password'] = $auth->hasPassword();
 
-            if (!empty($user['custom_fields'])) {
-                $data['user_custom_fields'] = unserialize($user['custom_fields']);
-                if (empty($data['user_custom_fields'])) {
-                    unset($data['user_custom_fields']);
-                }
-            }
+            $data['user_fields'] = $this->prepareApiDataForUserFields($user);
 
             $thisUserGroups = array();
             $userGroups = $userGroupModel->bdApi_getAllUserGroupsCached();
@@ -178,6 +173,44 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
                 $data['permissions']['profile_post'] = $visitor->canUpdateStatus();
             } else {
                 $data['permissions']['profile_post'] = $userProfileModel->canPostOnProfile($user);
+            }
+        }
+
+        return $data;
+    }
+
+    public function prepareApiDataForUserFields(array $user)
+    {
+        $data = array();
+
+        foreach (array('about' => 'about',
+                     'homepage' => 'home_page',
+                     'location' => 'location',
+                     'occupation' => 'occupation',
+                 ) as $systemFieldId => $titlePhraseTitle) {
+            if (!isset($user[$systemFieldId])) {
+                continue;
+            }
+
+            $data[$systemFieldId] = array(
+                'title' => new XenForo_Phrase($titlePhraseTitle),
+                'description' => '',
+                'display_group' => 'personal',
+                'is_required' => false,
+                'value' => $user[$systemFieldId],
+            );
+        }
+
+        if (!empty($user['custom_fields'])) {
+            /** @var bdApi_XenForo_Model_UserField $fieldModel */
+            $fieldModel = $this->_getFieldModel();
+            $fields = $fieldModel->bdApi_getUserFields();
+            $values = unserialize($user['custom_fields']);
+
+            foreach ($fields as $fieldId => $field) {
+                $fieldValue = isset($values[$fieldId]) ? $values[$fieldId] : null;
+                $fieldData = $fieldModel->prepareApiDataForField($field, $fieldValue);
+                $data[$fieldId] = $fieldData;
             }
         }
 

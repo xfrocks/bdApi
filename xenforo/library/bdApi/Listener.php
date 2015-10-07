@@ -20,6 +20,7 @@ class bdApi_Listener
 
             'XenForo_Model_Alert',
             'XenForo_Model_User',
+            'XenForo_Model_UserField',
             'XenForo_Model_UserGroup',
         );
 

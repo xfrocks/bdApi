@@ -1205,9 +1205,29 @@ Detail information of a user.
             user_is_verified: (boolean),
             user_is_followed: (boolean), # since forum-2014052902
             user_is_ignored: (boolean), # since forum-2015072303
-            *user_custom_fields: { # since forum-2013110601
-                field_id: (field_value),
-                ...
+            *user_fields: { # since forum-2015100703
+                (field_id): {
+                    title: (string),
+                    description: (string),
+                    display_group: (string),
+                    choices: [
+                        {
+                            key: (string),
+                            value: (string),
+                        },
+                        ...
+                    ],
+                    is_multiple_choice: (boolean),
+                    is_required: (boolean),
+                    value: (string),
+                    values: [
+                        {
+                            key: (string),
+                            value: (string),
+                        },
+                        ...
+                    ]
+                },
             },
             *user_groups: [ # since forum-2014092301
                 {
@@ -1271,6 +1291,8 @@ Parameters:
  * `user_dob_day` (_optional_): new date of birth (day) of the user. This parameter must come together with `user_dob_month` and `user_dob_year`. User can add his/her own date of birth but changing existing data requires Administrator permission.
  * `user_dob_month` (_optional_): new date of birth (month) of the user.
  * `user_dob_year` (_optional_): new date of birth (year) of the user.
+
+ * `user_fields` (_optional_): array of values for user fields. If the field is not of choice type, the value should be a string. If the field is single choice, the value should be a key of the choice. If the field is multiple choice, the value should be an array of keys. Since forum-2015100703.
 
 Required scopes:
 

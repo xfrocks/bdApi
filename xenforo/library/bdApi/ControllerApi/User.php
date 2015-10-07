@@ -247,7 +247,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             'user_dob_month' => XenForo_Input::UINT,
             'user_dob_year' => XenForo_Input::UINT,
 
-            'user_custom_fields' => array(XenForo_Input::STRING, 'array' => true),
+            'user_fields' => XenForo_Input::ARRAY_SIMPLE,
         );
         $input = $this->_input->filter($inputFilters);
 
@@ -362,6 +362,17 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             }
         }
 
+        if (!empty($input['user_fields'])) {
+            $profileFieldsInput = new XenForo_Input($input['user_fields']);
+            $profileFields = $profileFieldsInput->filter(array(
+                'about' => XenForo_Input::STRING,
+                'homepage' => XenForo_Input::STRING,
+                'location' => XenForo_Input::STRING,
+                'occupation' => XenForo_Input::STRING,
+            ));
+            $writer->bulkSet($profileFields);
+            $writer->setCustomFields($input['user_fields']);
+        }
 
         $writer->preSave();
 
