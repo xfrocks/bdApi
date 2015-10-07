@@ -141,10 +141,14 @@ class bdApi_XenForo_Model_Thread extends XFCP_bdApi_XenForo_Model_Thread
 
         if (!empty($firstPost)) {
             $data['permissions']['edit'] = $this->_getPostModel()->canEditPost($firstPost, $thread, $forum);
-        }
 
-        if (XenForo_Application::$versionId > 1050000) {
-            $data['permissions']['edit_tags'] = $this->canEditTags($thread, $forum);
+            if (!empty($data['permissions']['edit'])) {
+                $data['permissions']['edit_title'] = $this->canEditThread($thread, $forum);
+
+                if (XenForo_Application::$versionId > 1050000) {
+                    $data['permissions']['edit_tags'] = $this->canEditTags($thread, $forum);
+                }
+            }
         }
 
         return $data;

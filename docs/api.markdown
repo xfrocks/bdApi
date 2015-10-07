@@ -575,11 +575,12 @@ Detail information of a thread.
             },
             permissions: {
                 view: (boolean),
-                edit: (boolean),
                 delete: (boolean),
                 follow: (boolean), # since forum-2014052903
                 post: (boolean),
                 upload_attachment: (boolean), # since forum-2014081203
+                edit: (boolean),
+                edit_title: (boolean), # since forum-2015100701
                 edit_tags: (boolean), # since forum-2015091102
             }
         }
