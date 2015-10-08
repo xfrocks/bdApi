@@ -419,7 +419,12 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         $dw = XenForo_DataWriter::create('XenForo_DataWriter_ProfilePostComment');
         $dw->setExtraData(XenForo_DataWriter_ProfilePostComment::DATA_PROFILE_USER, $user);
         $dw->setExtraData(XenForo_DataWriter_ProfilePostComment::DATA_PROFILE_POST, $profilePost);
-        $dw->set('message_state', $this->_getProfilePostModel()->getProfilePostCommentInsertMessageState($profilePost));
+
+        if (XenForo_Application::$versionId > 1050000) {
+            $dw->set('message_state', call_user_func(array(
+                $this->_getProfilePostModel(), 'getProfilePostCommentInsertMessageState'), $profilePost));
+        }
+
         $dw->bulkSet(array(
             'profile_post_id' => $profilePost['profile_post_id'],
             'user_id' => $visitor['user_id'],
