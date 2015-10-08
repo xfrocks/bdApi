@@ -10,9 +10,9 @@ android {
         applicationId "com.xfrocks.api.androiddemo"
         resValue "string", "app_name", "Android Demo"
 
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 23
-        versionCode 3
+        versionCode 4
         versionName "1.0.0"
     }
 

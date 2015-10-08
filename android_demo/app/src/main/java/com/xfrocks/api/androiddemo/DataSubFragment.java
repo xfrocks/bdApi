@@ -23,7 +23,7 @@ public class DataSubFragment extends DataFragment {
     }
 
     @Override
-    protected void restoreData(Bundle savedInstanceState) {
+    void restoreData(Bundle savedInstanceState) {
         Bundle args = getArguments();
         if (args.containsKey(ARG_PARENT_ROW) && args.containsKey(ARG_ROWS)) {
             mParentRow = args.getParcelable(ARG_PARENT_ROW);

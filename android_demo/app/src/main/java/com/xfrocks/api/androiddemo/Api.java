@@ -37,7 +37,7 @@ import java.util.Map;
 
 public class Api {
 
-    public static final String PARAM_LOCALE = "locale";
+    private static final String PARAM_LOCALE = "locale";
 
     public static final String URL_OAUTH_TOKEN = "oauth/token";
     public static final String URL_OAUTH_TOKEN_FACEBOOK = "oauth/token/facebook";
@@ -217,7 +217,7 @@ public class Api {
                     locale.getCountry()));
         }
 
-        if (method == com.android.volley.Request.Method.GET) {
+        if (method != com.android.volley.Request.Method.POST) {
             // append params to url automatically, and clear the map
             for (String paramKey : params.keySet()) {
                 String paramValue = params.get(paramKey);
@@ -233,6 +233,11 @@ public class Api {
             params.clear();
         }
 
+        if (url.contains("&oauth_token=")
+                && params.containsKey("oauth_token")) {
+            params.remove("oauth_token");
+        }
+
         return url;
     }
 
@@ -241,7 +246,7 @@ public class Api {
         final Map<String, String> mParams;
 
         public Request(int method, String url, Map<String, String> params) {
-            super(method, url, null);
+            super(method, makeUrl(method, url, params), null);
 
             mParams = params;
 
@@ -422,20 +427,26 @@ public class Api {
         }
     }
 
-    public static class GetRequest extends Request {
+    public static class GetRequest extends Api.Request {
         public GetRequest(String url, Map<String, String> params) {
-            super(Method.GET, makeUrl(Method.GET, url, params), params);
+            super(Method.GET, url, params);
         }
     }
 
-    public static class PostRequest extends Request {
+    public static class OptionsRequest extends Api.Request {
+        public OptionsRequest(String url, Map<String, String> params) {
+            super(Method.OPTIONS, url, params);
+        }
+    }
+
+    public static class PostRequest extends Api.Request {
 
         private final Map<String, InputStreamBody> mFiles = new HashMap<>();
         private MultipartEntityBuilder mBodyBuilder = null;
         private HttpEntity mBuiltBody = null;
 
         public PostRequest(String url, Map<String, String> params) {
-            super(Method.POST, makeUrl(Method.POST, url, params), params);
+            super(Method.POST, url, params);
         }
 
         @Override
@@ -498,7 +509,7 @@ public class Api {
         }
     }
 
-    public static class PushServerRequest extends Request {
+    public static class PushServerRequest extends Api.Request {
         public PushServerRequest(String deviceId, String topic, AccessToken at) {
             super(
                     Method.POST,
@@ -541,6 +552,19 @@ public class Api {
 
         public Params and(String key, Object value) {
             put(key, value);
+
+            return this;
+        }
+
+        public Params and(List<Row> data) {
+            for (Row row : data) {
+                if (row.value != null
+                        && !row.value.isEmpty()) {
+                    if (!"file".equals(row.type)) {
+                        put(row.key, row.value);
+                    }
+                }
+            }
 
             return this;
         }

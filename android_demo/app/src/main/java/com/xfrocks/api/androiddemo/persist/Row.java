@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public class Row implements Parcelable {
     public String key;
     public String value;
+    public String type;
     public ArrayList<Row> subRows;
 
     public Row() {
@@ -17,6 +18,7 @@ public class Row implements Parcelable {
     private Row(Parcel in) {
         key = in.readString();
         value = in.readString();
+        type = in.readString();
         subRows = in.createTypedArrayList(Row.CREATOR);
     }
 
@@ -41,6 +43,7 @@ public class Row implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(key);
         parcel.writeString(value);
+        parcel.writeString(type);
         parcel.writeTypedList(subRows);
     }
 

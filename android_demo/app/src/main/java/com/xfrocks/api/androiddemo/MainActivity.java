@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -37,8 +38,10 @@ import org.json.JSONObject;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -58,6 +61,9 @@ public class MainActivity extends AppCompatActivity
     private ImageView mHeaderImg;
     private TextView mHeaderTxt;
     private ProgressBar mHeaderProgress;
+
+    private FloatingActionButton mPost;
+    private final Map<String, String> mPostLinks = new HashMap<>();
 
     private Api.AccessToken mAccessToken;
     private ArrayList<Row> mNavigationRows = new ArrayList<>();
@@ -87,6 +93,9 @@ public class MainActivity extends AppCompatActivity
         mHeaderProgress = (ProgressBar) findViewById(R.id.header_progress);
         mNavigationView.setNavigationItemSelectedListener(this);
         mDrawerLayout.openDrawer(mNavigationView);
+
+        mPost = (FloatingActionButton) findViewById(R.id.post);
+        mPost.setOnClickListener(this);
     }
 
     @Override
@@ -232,6 +241,35 @@ public class MainActivity extends AppCompatActivity
                     cameraIntents.toArray(new Intent[cameraIntents.size()]));
 
             startActivityForResult(chooserIntent, RC_SELECT_AVATAR);
+        } else if (v == mPost) {
+            FragmentManager fm = getSupportFragmentManager();
+            List<Fragment> fs = fm.getFragments();
+            if (fm.getBackStackEntryCount() == 1
+                    && fs.size() > 0
+                    && fs.get(0) instanceof PostFragment) {
+                // a post fragment is active, submit it now
+                PostFragment postFragment = (PostFragment) fs.get(0);
+                postFragment.submit();
+                return;
+            }
+
+            // show dialog for user to choose a content type to post
+            final String[] keys = mPostLinks.keySet().toArray(new String[mPostLinks.size()]);
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.post_prompt)
+                    .setItems(keys,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    String url = mPostLinks.get(keys[which]);
+                                    if (url != null) {
+                                        Fragment fragment = PostFragment.newInstance(url, mAccessToken);
+                                        addFragmentToBackStack(fragment, true);
+                                    }
+                                }
+                            })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
         }
     }
 
@@ -312,6 +350,12 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
+        void onStart() {
+            mPost.setVisibility(View.GONE);
+            mPostLinks.clear();
+        }
+
+        @Override
         protected void onSuccess(JSONObject response) {
             if (response.has("links")) {
                 try {
@@ -330,6 +374,23 @@ public class MainActivity extends AppCompatActivity
                 } catch (JSONException e) {
                     // ignore
                 }
+            }
+
+            if (response.has("post")) {
+                try {
+                    JSONObject postLinks = response.getJSONObject("post");
+
+                    Iterator<String> keys = postLinks.keys();
+                    while (keys.hasNext()) {
+                        final String key = keys.next();
+                        mPostLinks.put(key, postLinks.getString(key));
+                    }
+                } catch (JSONException e) {
+                    // ignore
+                }
+            }
+            if (mPostLinks.size() > 0) {
+                mPost.setVisibility(View.VISIBLE);
             }
         }
     }

@@ -27,6 +27,8 @@
     <string name="gcm_unregister_success">Đã hủy đăng ký GCM</string>
     <string name="navigation_drawer_close">Đóng khung địa chỉ</string>
     <string name="navigation_drawer_open">Mở khung địa chỉ</string>
+    <string name="post_prompt">Chọn nội dung để đăng</string>
+    <string name="post_success">Đã gửi nội dung mới thành công</string>
     <string name="prompt_dob">Ngày sinh</string>
     <string name="prompt_email">Địa chỉ thư điện tử</string>
     <string name="prompt_email_or_username">Tên đăng nhập</string>
