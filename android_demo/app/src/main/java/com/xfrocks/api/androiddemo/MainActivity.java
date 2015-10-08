@@ -1,15 +1,11 @@
 package com.xfrocks.api.androiddemo;
 
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -30,6 +26,7 @@ import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
+import com.xfrocks.api.androiddemo.helper.ChooserIntent;
 import com.xfrocks.api.androiddemo.persist.Row;
 
 import org.json.JSONException;
@@ -105,24 +102,13 @@ public class MainActivity extends AppCompatActivity
         switch (requestCode) {
             case RC_SELECT_AVATAR:
                 if (resultCode == RESULT_OK) {
-                    Uri avatarUri = null;
-                    if (data != null) {
-                        avatarUri = data.getData();
-                    }
-                    if (avatarUri == null) {
-                        avatarUri = App.getAvatarUri(this);
-                    }
+                    Uri avatarUri = ChooserIntent.getUriFromChooser(this, data);
 
                     if (avatarUri != null) {
                         try {
-                            InputStream inputStream = getContentResolver().openInputStream(avatarUri);
-
-                            String fileName = "avatar.jpg";
-                            String mimeType = getContentResolver().getType(avatarUri);
-                            if (mimeType != null) {
-                                fileName = String.format("avatar.%s", mimeType.substring(mimeType.indexOf("/") + 1));
-                            }
-                            new UsersMeAvatarRequest(mAccessToken, fileName, inputStream).start();
+                            new UsersMeAvatarRequest(mAccessToken,
+                                    ChooserIntent.getFileNameFromUri(this, avatarUri),
+                                    getContentResolver().openInputStream(avatarUri)).start();
 
                             mHeaderImg.setImageURI(avatarUri);
                             mHeaderProgress.setVisibility(View.VISIBLE);
@@ -219,27 +205,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onClick(View v) {
         if (v == mHeaderImg) {
-            Intent pickIntent = new Intent();
-            pickIntent.setType("image/*");
-            pickIntent.setAction(Intent.ACTION_GET_CONTENT);
-
-            Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            Uri avatarUri = App.getAvatarUri(this);
-            List<Intent> cameraIntents = new ArrayList<>();
-            PackageManager packageManager = getPackageManager();
-            List<ResolveInfo> listCam = packageManager.queryIntentActivities(captureIntent, 0);
-            for (ResolveInfo res : listCam) {
-                final Intent intent = new Intent(captureIntent);
-                intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-                intent.setPackage(res.activityInfo.packageName);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, avatarUri);
-                cameraIntents.add(intent);
-            }
-
-            Intent chooserIntent = Intent.createChooser(pickIntent, getString(R.string.avatar_pick_image));
-            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
-                    cameraIntents.toArray(new Intent[cameraIntents.size()]));
-
+            Intent chooserIntent = ChooserIntent.create(this, R.string.avatar_pick_image, "image/*");
             startActivityForResult(chooserIntent, RC_SELECT_AVATAR);
         } else if (v == mPost) {
             FragmentManager fm = getSupportFragmentManager();

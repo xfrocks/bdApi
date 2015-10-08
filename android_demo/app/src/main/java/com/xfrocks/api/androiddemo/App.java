@@ -62,8 +62,8 @@ public class App extends android.app.Application {
         return sInstance;
     }
 
-    public static Uri getAvatarUri(Context context) {
-        return Uri.fromFile(new File(context.getExternalCacheDir(), "avatar.jpg"));
+    public static Uri getTempForCamera(Context context) {
+        return Uri.fromFile(new File(context.getExternalCacheDir(), "camera.jpg"));
     }
 
 }

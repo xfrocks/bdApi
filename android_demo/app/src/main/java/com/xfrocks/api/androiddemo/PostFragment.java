@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
@@ -24,12 +25,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
+import com.xfrocks.api.androiddemo.helper.ChooserIntent;
 import com.xfrocks.api.androiddemo.persist.Row;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,12 +45,15 @@ public class PostFragment extends ListFragment {
     private static final String STATE_DATA = "data";
     private static final String STATE_URL = "url";
     private static final String STATE_ACCESS_TOKEN = "access_token";
+    private static final String STATE_CURRENT_KEY = "current_key";
+    private static final int RC_PICK_FILE = 1;
 
     private ArrayList<Row> mData = new ArrayList<>();
 
     private BaseAdapter mDataAdapter;
     private String mUrl;
     private Api.AccessToken mAccessToken;
+    private String mCurrentKey = null;
 
     public static PostFragment newInstance(String url, Api.AccessToken at) {
         PostFragment fragment = new PostFragment();
@@ -71,6 +78,37 @@ public class PostFragment extends ListFragment {
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case RC_PICK_FILE:
+                if (mCurrentKey != null
+                        && resultCode == Activity.RESULT_OK) {
+                    ContentResolver cr = getContext().getContentResolver();
+                    Uri uri = ChooserIntent.getUriFromChooser(getContext(), data);
+
+                    try {
+                        InputStream inputStream = cr.openInputStream(uri);
+                        if (inputStream != null) {
+                            inputStream.close();
+
+                            for (Row dataRow : mData) {
+                                if (mCurrentKey.equals(dataRow.key)) {
+                                    dataRow.value = uri.toString();
+                                    mDataAdapter.notifyDataSetChanged();
+                                }
+                            }
+                        }
+                    } catch (IOException e) {
+                        Log.e(getClass().getSimpleName(), e.toString());
+                    }
+                }
+                break;
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
@@ -92,6 +130,7 @@ public class PostFragment extends ListFragment {
         outState.putParcelableArrayList(STATE_DATA, mData);
         outState.putString(STATE_URL, mUrl);
         outState.putSerializable(STATE_ACCESS_TOKEN, mAccessToken);
+        outState.putString(STATE_CURRENT_KEY, mCurrentKey);
     }
 
     @Override
@@ -119,6 +158,10 @@ public class PostFragment extends ListFragment {
             if (savedInstanceState.containsKey(STATE_ACCESS_TOKEN)) {
                 mAccessToken = (Api.AccessToken) savedInstanceState.getSerializable(STATE_ACCESS_TOKEN);
             }
+
+            if (savedInstanceState.containsKey(STATE_CURRENT_KEY)) {
+                mCurrentKey = savedInstanceState.getString(STATE_CURRENT_KEY);
+            }
         }
     }
 
@@ -130,9 +173,14 @@ public class PostFragment extends ListFragment {
     }
 
     private void promptParam(Row row) {
+        mCurrentKey = row.key;
         AlertDialog dialog = null;
 
         switch (row.type) {
+            case "file":
+                Intent chooserIntent = ChooserIntent.create(getContext(), R.string.post_pick_file, "*/*");
+                startActivityForResult(chooserIntent, RC_PICK_FILE);
+                break;
             case "string":
                 dialog = createPromptString(row);
                 break;
@@ -226,25 +274,11 @@ public class PostFragment extends ListFragment {
                         && !row.value.isEmpty()
                         && "file".equals(row.type)) {
                     Uri uri = Uri.parse(row.value);
-                    ContentResolver cr = getContext().getContentResolver();
 
                     try {
-                        InputStream inputStream = cr.openInputStream(uri);
-                        String fileName = "file.bin";
-
-                        String[] projection = {MediaStore.MediaColumns.DISPLAY_NAME};
-                        Cursor metaCursor = cr.query(uri, projection, null, null, null);
-                        if (metaCursor != null) {
-                            try {
-                                if (metaCursor.moveToFirst()) {
-                                    fileName = metaCursor.getString(0);
-                                }
-                            } finally {
-                                metaCursor.close();
-                            }
-                        }
-
-                        addFile(row.key, fileName, inputStream);
+                        addFile(row.key,
+                                ChooserIntent.getFileNameFromUri(getContext(), uri),
+                                getContext().getContentResolver().openInputStream(uri));
                     } catch (Exception e) {
                         Log.e(getClass().getSimpleName(), e.toString());
                     }
