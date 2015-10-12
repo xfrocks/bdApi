@@ -237,6 +237,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             'user_email' => XenForo_Input::STRING,
 
             'username' => XenForo_Input::STRING,
+            'user_title' => XenForo_Input::STRING,
             'primary_group_id' => XenForo_Input::UINT,
             'secondary_group_ids' => array(XenForo_Input::UINT, 'array' => true),
 
@@ -317,6 +318,19 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
                 && !$isAdmin
             ) {
                 return $this->responseError(new XenForo_Phrase('bdapi_slash_users_denied_username'), 403);
+            }
+        }
+
+        if ($this->_input->inRequest('user_title')) {
+            $tmpUser = $this->_getUserModel()->prepareApiDataForUser($user);
+            if ($input['user_title'] !== $tmpUser['user_title']) {
+                $writer->set('custom_title', $input['user_title']);
+
+                if ($writer->isChanged('custom_title')
+                    && !$isAdmin
+                ) {
+                    return $this->responseError(new XenForo_Phrase('bdapi_slash_users_denied_user_title'), 403);
+                }
             }
         }
 

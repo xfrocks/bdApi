@@ -43,15 +43,14 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
         /* @var $conversationModel XenForo_Model_Conversation */
         $conversationModel = $this->getModelFromCache('XenForo_Model_Conversation');
 
-        $hasAdminScope = (!empty($session) AND $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM));
-        $isAdminRequest = ($hasAdminScope AND $visitor->hasAdminPermission('user'));
-        $prepareProtectedData = (($user['user_id'] == $visitor->get('user_id')) OR $isAdminRequest);
+        $hasAdminScope = (!empty($session) && $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM));
+        $isAdminRequest = ($hasAdminScope && $visitor->hasAdminPermission('user'));
+        $prepareProtectedData = (($user['user_id'] == $visitor->get('user_id')) || $isAdminRequest);
 
         $publicKeys = array(
             // xf_user
             'user_id' => 'user_id',
             'username' => 'username',
-            'custom_title' => 'user_title',
             'message_count' => 'user_message_count',
             'register_date' => 'user_register_date',
             'like_count' => 'user_like_count',
@@ -75,6 +74,8 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
         }
 
         $data = bdApi_Data_Helper_Core::filter($user, $publicKeys);
+
+        $data['user_title'] = XenForo_Template_Helper_Core::helperUserTitle($user);
 
         if (isset($user['user_state']) AND isset($user['is_banned'])) {
             if (!empty($user['is_banned'])) {
@@ -120,7 +121,10 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
             'ignore' => bdApi_Data_Helper_Core::safeBuildApiLink('users/ignore', $user),
         );
 
-        $data['permissions'] = array('follow' => ($user['user_id'] != $visitor->get('user_id')) AND $visitor->canFollow());
+        $data['permissions'] = array(
+            'edit' => $prepareProtectedData,
+            'follow' => ($user['user_id'] != $visitor->get('user_id')) && $visitor->canFollow(),
+        );
 
         /** @var XenForo_Model_UserIgnore $ignoreModel */
         $ignoreModel = $this->getModelFromCache('XenForo_Model_UserIgnore');
@@ -162,6 +166,43 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
                 'create_conversation' => $conversationModel->canStartConversations(),
                 'upload_attachment_conversation' => $conversationModel->canUploadAndManageAttachment(),
             );
+
+            $data['edit_permissions'] = array(
+                'password' => true,
+                'user_email' => true,
+
+                'username' => false,
+                'user_title' => false,
+                'primary_group_id' => false,
+                'secondary_group_ids' => false,
+
+                'user_dob_day' => false,
+                'user_dob_month' => false,
+                'user_dob_year' => false,
+
+                'user_fields' => true,
+            );
+
+            if ($isAdminRequest) {
+                $data['edit_permissions'] = array_merge($data['edit_permissions'], array(
+                    'username' => true,
+                    'user_title' => true,
+                    'primary_group_id' => true,
+                    'secondary_group_ids' => true,
+                ));
+            }
+
+            if ((empty($data['user_dob_day'])
+                    && empty($data['user_dob_month'])
+                    && empty($data['user_dob_year']))
+                || $isAdminRequest
+            ) {
+                $data['edit_permissions'] = array_merge($data['edit_permissions'], array(
+                    'user_dob_day' => true,
+                    'user_dob_month' => true,
+                    'user_dob_year' => true,
+                ));
+            }
         }
 
         /** @var XenForo_Model_UserProfile $userProfileModel */

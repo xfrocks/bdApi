@@ -1248,12 +1248,25 @@ Detail information of a user.
                 ignore: (uri) # since forum-2015072303
             },
             permissions: {
+                edit: (boolean), # since forum-2015101201
                 follow: (boolean),
                 ignore: (boolean) # since forum-2015072303
             },
             *self_permissions: {
                 create_conversation: (boolean),
                 upload_attachment_conversation: (boolean) # since forum-2014081801
+            },
+            *edit_permissions: { # since forum-2015101201
+                password: (boolean),
+                user_email: (boolean),
+                username: (boolean),
+                user_title: (boolean),
+                primary_group_id: (boolean),
+                secondary_group_ids: (boolean),
+                user_dob_day: (boolean),
+                user_dob_month: (boolean),
+                user_dob_year: (boolean),
+                user_fields: (boolean)
             }
         },
         subscription_callback: (uri) # since subscription-2014092301
@@ -1285,6 +1298,7 @@ Parameters:
  * `user_email` (_optional_): new email of the user.
 
  * `username` (_optional_): new username of the user. Changing username requires Administrator permission.
+ * `user_title` (_optional_): new custom title of the user. Changing user title requires Administrator permission. Since forum-2015101201.
  * `primary_group_id` (_optional_): id of new primary group. Since forum-2015100702.
  * `secondary_group_ids` (_optional_): array of ids of new secondary groups. Since forum-2015100702.
 
