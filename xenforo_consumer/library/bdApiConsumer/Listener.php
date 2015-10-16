@@ -50,6 +50,8 @@ class bdApiConsumer_Listener
 		{
 			bdApiConsumer_Helper_Avatar::setupHelper();
 		}
+
+		bdApiConsumer_ShippableHelper_Updater::onInitDependencies($dependencies, bdApiConsumer_Option::UPDATER_URL);
 	}
 
 	public static function visitor_setup(XenForo_Visitor &$visitor)

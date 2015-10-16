@@ -91,6 +91,8 @@ class bdApiConsumer_Installer
 		$db->query("DELETE FROM `xf_user_alert` WHERE content_type = ?", array('bdapi_consumer'));
 		$db->query("DELETE FROM `xf_user_alert_optout` WHERE alert LIKE 'bdapiconsumer_%s'");
 		XenForo_Model::create('XenForo_Model_ContentType')->rebuildContentTypeCache();
+
+		bdApiConsumer_ShippableHelper_Updater::onUninstall(bdApiConsumer_Option::UPDATER_URL);
 	}
 
 }

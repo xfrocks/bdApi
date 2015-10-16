@@ -2,6 +2,8 @@
 
 class bdApiConsumer_Option
 {
+	const UPDATER_URL = 'https://xfrocks.com/api/index.php?updater';
+
 	protected static $_providers = null;
 	protected static $_activated = null;
 	protected static $_showButtons = null;
