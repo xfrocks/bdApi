@@ -245,6 +245,14 @@ class bdApi_Model_Log extends XenForo_Model
             'order',
             'page',
             'q',
+            'hub.mode',
+            'hub.topic',
+            'hub.challenge',
+            'topic',
+            'action',
+            'object_data',
+            'link',
+            '_retries',
 
             // response
             'access_token',

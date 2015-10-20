@@ -312,7 +312,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 
     /**
      *
-     * @return bdApi_Extend_Model_Conversation
+     * @return bdApi_XenForo_Model_Conversation
      */
     protected function _getConversationModel()
     {

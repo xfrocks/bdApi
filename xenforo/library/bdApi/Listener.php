@@ -19,6 +19,7 @@ class bdApi_Listener
             'XenForo_DataWriter_User',
 
             'XenForo_Model_Alert',
+            'XenForo_Model_Conversation',
             'XenForo_Model_User',
             'XenForo_Model_UserField',
             'XenForo_Model_UserGroup',
@@ -35,7 +36,6 @@ class bdApi_Listener
         // this is done to reduce performance impact for public context
         static $classes = array(
             'XenForo_Model_Category',
-            'XenForo_Model_Conversation',
             'XenForo_Model_Forum',
             'XenForo_Model_ForumWatch',
             'XenForo_Model_LinkForum',

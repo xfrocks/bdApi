@@ -182,7 +182,7 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
 
     /**
      *
-     * @return bdApi_Extend_Model_Conversation
+     * @return bdApi_XenForo_Model_Conversation
      */
     protected function _getConversationModel()
     {

@@ -129,7 +129,10 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
             $data['creator_username'] = $alert['user']['username'];
         }
 
-        if (!empty($alert['content_type']) AND !empty($alert['content_id']) AND !empty($alert['action'])) {
+        if (!empty($alert['content_type'])
+            && !empty($alert['content_id'])
+            && !empty($alert['action'])
+        ) {
             $data['notification_type'] = sprintf('%s_%d_%s', $alert['content_type'], $alert['content_id'], $alert['action']);
         }
 

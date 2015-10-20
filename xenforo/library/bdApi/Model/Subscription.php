@@ -172,10 +172,27 @@ class bdApi_Model_Subscription extends XenForo_Model
         $alertModel = $this->getModelFromCache('XenForo_Model_Alert');
 
         $alertIds = array();
-        foreach ($pingDataMany as $pingData) {
-            $alertIds[] = $pingData['object_data'];
+        $alerts = array();
+        foreach ($pingDataMany as $key => &$pingDataRef) {
+            if (is_numeric($pingDataRef['object_data'])) {
+                $alertIds[] = $pingDataRef['object_data'];
+            } elseif (is_array($pingDataRef['object_data'])
+                && isset($pingDataRef['object_data']['alert_id'])
+                && $pingDataRef['object_data']['alert_id'] == 0
+            ) {
+                $fakeAlertId = sprintf(md5($key));
+                $pingDataRef['object_data']['alert_id'] = $fakeAlertId;
+                $alerts[$fakeAlertId] = $pingDataRef['object_data'];
+                $pingDataRef['object_data'] = $fakeAlertId;
+            }
         }
-        $alerts = $alertModel->bdApi_getAlertsByIds($alertIds);
+
+        if (!empty($alertIds)) {
+            $realAlerts = $alertModel->bdApi_getAlertsByIds($alertIds);
+            foreach ($realAlerts as $alertId => $alert) {
+                $alerts[$alertId] = $alert;
+            }
+        }
 
         $userIds = array();
         $alertsByUser = array();
@@ -202,7 +219,8 @@ class bdApi_Model_Subscription extends XenForo_Model
             $userAlerts = $alertModel->bdApi_prepareContentForAlerts($userAlerts, $viewingUsers[$userId]);
 
             bdApi_Template_Simulation_Template::$bdApi_visitor = $viewingUsers[$userId];
-            $userAlerts = bdApi_ViewApi_Helper_Alert::getTemplates(bdApi_Template_Simulation_View::create(), $userAlerts, $alertModel->bdApi_getAlertHandlers());
+            $userAlerts = bdApi_ViewApi_Helper_Alert::getTemplates(bdApi_Template_Simulation_View::create(),
+                $userAlerts, $alertModel->bdApi_getAlertHandlers());
 
             foreach (array_keys($userAlerts) as $userAlertId) {
                 $alerts[$userAlertId] = $userAlerts[$userAlertId];
@@ -227,6 +245,12 @@ class bdApi_Model_Subscription extends XenForo_Model
             $pingDataRef['object_data'] = $alertModel->prepareApiDataForAlert($alertRef);
             if (isset($alertRef['template'])) {
                 $pingDataRef['object_data']['notification_html'] = strval($alertRef['template']);
+            }
+            if (!is_numeric($alertRef['alert_id'])
+                && !empty($alertRef['extra']['object_data'])
+            ) {
+                // fake alert, use the included object_data
+                $pingDataRef['object_data'] = array_merge($pingDataRef['object_data'], $alertRef['extra']['object_data']);
             }
         }
 
