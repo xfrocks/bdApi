@@ -1,5 +1,7 @@
 package com.xfrocks.api.androiddemo;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -8,10 +10,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -70,6 +75,7 @@ public class LoginActivity extends AppCompatActivity
     private static final String STATE_GOOGLE_SIGN_IN = "googleSignIn";
     private static final int RC_GOOGLE_API_RESOLVE = 1;
     private static final int RC_REGISTER = 2;
+    private static final int RC_LOGIN_GOOGLE_PERM_GET_ACCOUNTS = 3;
 
     private TokenRequest mTokenRequest;
     private BroadcastReceiver mGcmReceiver;
@@ -208,8 +214,7 @@ public class LoginActivity extends AppCompatActivity
             mGoogleSignIn.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    mGoogleApiShouldResolve = true;
-                    mGoogleApiClient.connect();
+                    attemptLoginGoogle();
                 }
             });
         }
@@ -305,6 +310,20 @@ public class LoginActivity extends AppCompatActivity
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case RC_LOGIN_GOOGLE_PERM_GET_ACCOUNTS:
+                if (grantResults.length == 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    attemptLoginGoogle();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
@@ -312,8 +331,8 @@ public class LoginActivity extends AppCompatActivity
         if (at != null) {
             mRememberView.setChecked(true);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.sign_in_with_remember)
+            new AlertDialog.Builder(this)
+                    .setMessage(R.string.sign_in_with_remember)
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -415,6 +434,39 @@ public class LoginActivity extends AppCompatActivity
         String auth = headers.get("Authorization");
 
         new TokenTwitterRequest(uri, auth).start();
+    }
+
+    private void attemptLoginGoogle() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            int hasPerm = checkSelfPermission(android.Manifest.permission.GET_ACCOUNTS);
+
+            if (hasPerm != PackageManager.PERMISSION_GRANTED) {
+                if (!shouldShowRequestPermissionRationale(android.Manifest.permission.GET_ACCOUNTS)) {
+                    new AlertDialog.Builder(this)
+                            .setMessage(R.string.action_sign_in_google_get_accounts)
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                @SuppressLint("NewApi")
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                        requestPermissions(new String[]{Manifest.permission.GET_ACCOUNTS},
+                                                RC_LOGIN_GOOGLE_PERM_GET_ACCOUNTS);
+                                    }
+                                }
+                            })
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show();
+                    return;
+                }
+
+                requestPermissions(new String[]{android.Manifest.permission.GET_ACCOUNTS},
+                        RC_LOGIN_GOOGLE_PERM_GET_ACCOUNTS);
+                return;
+            }
+        }
+
+        mGoogleApiShouldResolve = true;
+        mGoogleApiClient.connect();
     }
 
     private void attemptLogin() {

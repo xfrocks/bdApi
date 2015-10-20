@@ -17,6 +17,7 @@
     <string name="error_no_refresh_token">No refresh token could be found</string>
 
     <string name="action_sign_in_google">Sign in with Google+</string>
+    <string name="action_sign_in_google_get_accounts">You need to allow access to contacts to continue with Google+</string>
     <string name="error_google_failed">Unable to sign in with Google+</string>
     <string name="error_google_no_token">No Google ID token could be found</string>
 
