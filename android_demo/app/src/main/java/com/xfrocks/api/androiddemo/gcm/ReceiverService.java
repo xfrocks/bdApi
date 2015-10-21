@@ -23,9 +23,13 @@ public class ReceiverService extends GcmListenerService {
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        int notificationId = data.getInt("notification_id", 0);
+        if (BuildConfig.DEBUG) {
+            Log.v(getClass().getSimpleName(), String.format("%s: %s", from, data));
+        }
+
+        String notificationId = data.getString("notification_id");
         String notification = data.getString("notification");
-        if (notificationId > 0
+        if (!TextUtils.isEmpty(notificationId)
                 && !TextUtils.isEmpty(notification)) {
             sendNotification(notificationId, notification);
         } else if (data.containsKey("message")) {
@@ -52,9 +56,9 @@ public class ReceiverService extends GcmListenerService {
         }
     }
 
-    private void sendNotification(int notificationId, String message) {
+    private void sendNotification(String notificationId, String message) {
         if (BuildConfig.DEBUG) {
-            Log.i(ReceiverService.class.getSimpleName(), String.format("notification #%d: %s", notificationId, message));
+            Log.i(ReceiverService.class.getSimpleName(), String.format("notification #%s: %s", notificationId, message));
         }
 
         Intent intent = new Intent(this, MainActivity.class);
