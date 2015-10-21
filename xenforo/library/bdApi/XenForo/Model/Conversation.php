@@ -4,6 +4,9 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 {
     const FETCH_OPTIONS_JOIN = 'bdApi_join';
     const FETCH_OPTIONS_JOIN_FETCH_FIRST_MESSAGE_AVATAR = 0x01;
+    const FETCH_OPTIONS_MESSAGES_ORDER_REVERSE = 'bdApi_messages_orderReverse';
+
+    protected $_bdApi_messages_orderReverse = false;
 
     public function insertConversationAlert(
         array $conversation,
@@ -40,14 +43,15 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
             'notification_id' => 0,
             'notification_html' => '',
         );
-        if (!isset($messageInfo['messageText'])) {
-            $bbCodeParserText = XenForo_BbCode_Parser::create(XenForo_BbCode_Formatter_Base::create('Text'));
-            $messageInfo['messageText'] = strval(new XenForo_BbCode_TextWrapper($messageInfo['message'], $bbCodeParserText));
-        }
         $extraData['object_data']['message'] = array(
             'message_id' => $extraData['message_id'],
             'conversation_id' => $conversation['conversation_id'],
-            'message' => strval($messageInfo['messageText']),
+            'title' => $conversation['title'],
+            'message' => XenForo_Template_Helper_Core::callHelper('snippet', array(
+                $messageInfo['message'], 140, array(
+                    'stripQuote' => true,
+                )
+            )),
         );
 
         $fakeAlert = array(
@@ -85,6 +89,31 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
         }
 
         return;
+    }
+
+    public function getConversationMessages($conversationId, array $fetchOptions = array())
+    {
+        if (!empty($fetchOptions[self::FETCH_OPTIONS_MESSAGES_ORDER_REVERSE])) {
+            $this->_bdApi_messages_orderReverse = true;
+        }
+
+        return parent::getConversationMessages($conversationId, $fetchOptions);
+    }
+
+    public function fetchAllKeyed($sql, $key, $bind = array(), $nullPrefix = '')
+    {
+        if ($this->_bdApi_messages_orderReverse) {
+            $sql = str_replace('ORDER BY message.message_date', 'ORDER BY message.message_date DESC', $sql, $count);
+
+            if ($count !== 1) {
+                throw new XenForo_Exception('Fatal Conflict: Could not change ORDER BY statement');
+            }
+
+            // reset the flag
+            $this->_bdApi_messages_orderReverse = false;
+        }
+
+        return parent::fetchAllKeyed($sql, $key, $bind, $nullPrefix);
     }
 
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())

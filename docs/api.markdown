@@ -2001,6 +2001,7 @@ Parameters:
  * `conversation_id` (__required__): id of needed conversation.
  * `page` (_optional_): page number of messages.
  * `limit` (_optional_): number of messages in a page. Default value depends on the system configuration.
+ * `order` (_optional_, since forum-2015102101): ordering of messages. Support `natural`, `natural_reverse`.
 
 Required scopes:
 

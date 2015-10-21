@@ -20,7 +20,7 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
         if ($this->_bdApi_postsInThread_orderReverse) {
             $sql = str_replace('ORDER BY post.position ASC, post.post_date ASC', 'ORDER BY post.position DESC, post.post_date DESC', $sql, $count);
 
-            if (empty($count)) {
+            if ($count !== 1) {
                 throw new XenForo_Exception('Fatal Conflict: Could not change ORDER BY statement');
             }
 

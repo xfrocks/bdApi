@@ -40,7 +40,18 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
             'page' => $page
         );
 
-        $messages = $this->_getConversationModel()->getConversationMessages($conversation['conversation_id'], $this->_getConversationModel()->getFetchOptionsToPrepareApiDataForMessages($fetchOptions));
+        $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
+        switch ($order) {
+            case 'natural_reverse':
+                // load the class to make our constant accessible
+                $this->_getConversationModel();
+                $fetchOptions[bdApi_XenForo_Model_Conversation::FETCH_OPTIONS_MESSAGES_ORDER_REVERSE] = true;
+                $pageNavParams['order'] = $order;
+                break;
+        }
+
+        $messages = $this->_getConversationModel()->getConversationMessages($conversation['conversation_id'],
+            $this->_getConversationModel()->getFetchOptionsToPrepareApiDataForMessages($fetchOptions));
         if (!$this->_isFieldExcluded('attachments')) {
             $messages = $this->_getConversationModel()->getAndMergeAttachmentsIntoConversationMessages($messages);
         }
