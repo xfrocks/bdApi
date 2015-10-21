@@ -79,6 +79,7 @@ public class Api {
     public static final String URL_CONVERSATION_MESSAGES_PARAM_PAGE = "page";
     public static final String URL_CONVERSATION_MESSAGES_PARAM_ORDER = "order";
     public static final String URL_CONVERSATION_MESSAGES_ORDER_REVERSE = "natural_reverse";
+    public static final String URL_CONVERSATION_MESSAGES_PARAM_MESSAGE_BODY = "message_body";
 
     public static AccessToken makeAccessToken(JSONObject response) {
         try {
@@ -103,6 +104,7 @@ public class Api {
             User u = new User();
 
             if (obj.has("user_id")) {
+                u.userId = obj.getInt("user_id");
                 u.username = obj.getString("username");
                 u.avatar = obj.getJSONObject("links").getString("avatar_big");
             } else {
@@ -155,6 +157,44 @@ public class Api {
             }
 
             return m;
+        } catch (JSONException e) {
+            // ignore
+        }
+
+        return null;
+    }
+
+    public static Message makeMessage(Api.User user, String messageBodyPlainText) {
+        Message m = new Message();
+
+        m.creatorUserId = user.getUserId();
+        m.creatorName = user.getUsername();
+        m.creatorAvatar = user.getAvatar();
+        m.messageBodyPlainText = messageBodyPlainText;
+        m.messageCreateDate = (int) new Date().getTime() / 1000;
+
+        return m;
+    }
+
+    public static Conversation makeConversation(JSONObject obj) {
+        try {
+            Conversation c = new Conversation();
+
+            c.conversationId = obj.getInt("conversation_id");
+            c.conversationTitle = obj.getString("conversation_title");
+
+            if (obj.has("links")) {
+                JSONObject links = obj.getJSONObject("links");
+                c.permalink = links.getString("permalink");
+            }
+
+            if (obj.has("permissions")) {
+                JSONObject permissions = obj.getJSONObject("permissions");
+                c.canReply = permissions.getBoolean("reply");
+                c.canUploadAttachment = permissions.getBoolean("upload_attachment");
+            }
+
+            return c;
         } catch (JSONException e) {
             // ignore
         }
@@ -587,6 +627,14 @@ public class Api {
             return this;
         }
 
+        public Params andIf(boolean expression, String key, Object value) {
+            if (expression) {
+                put(key, value);
+            }
+
+            return this;
+        }
+
         public Params and(List<Row> data) {
             for (Row row : data) {
                 if (row.value != null
@@ -636,6 +684,7 @@ public class Api {
 
     public static class User implements Serializable {
 
+        private Integer userId;
         private String username;
         private String userEmail;
         private Integer userDobYear;
@@ -646,6 +695,10 @@ public class Api {
 
         private String extraData;
         private long extraTimestamp;
+
+        public Integer getUserId() {
+            return userId;
+        }
 
         public String getUsername() {
             return username;
@@ -681,6 +734,38 @@ public class Api {
 
     }
 
+    public static class Conversation implements Serializable {
+
+        private Integer conversationId;
+        private String conversationTitle;
+
+        private String permalink;
+
+        private boolean canReply;
+        private boolean canUploadAttachment;
+
+        public Integer getConversationId() {
+            return conversationId;
+        }
+
+        public String getConversationTitle() {
+            return conversationTitle;
+        }
+
+        public String getPermalink() {
+            return permalink;
+        }
+
+        public boolean canReply() {
+            return canReply;
+        }
+
+        public boolean canUploadAttachment() {
+            return canUploadAttachment;
+        }
+
+    }
+
     public static class Message implements Serializable {
 
         private Integer creatorUserId;
@@ -691,7 +776,7 @@ public class Api {
         private Integer messageCreateDate;
         private String messageBodyPlainText;
 
-        public int getCreatorId() {
+        public Integer getCreatorId() {
             return creatorUserId;
         }
 

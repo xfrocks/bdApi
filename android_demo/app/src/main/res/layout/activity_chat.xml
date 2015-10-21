@@ -1,4 +1,4 @@
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
@@ -7,20 +7,8 @@
     android:keepScreenOn="true"
     tools:context=".ChatActivity">
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/messages"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical" />
-    </android.support.v4.widget.SwipeRefreshLayout>
-
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -30,21 +18,55 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:minHeight="?attr/actionBarSize"
-            app:layout_scrollFlags="scroll|enterAlways"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:indeterminate="true"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/post"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/footer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_send_12dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
         android:visibility="gone"
-        app:layout_anchorGravity="bottom|right"
-        tools:visibility="visible" />
+        tools:visibility="visible">
 
-</android.support.design.widget.CoordinatorLayout>
+        <EditText
+            android:id="@+id/message"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1.0"
+            android:textSize="17sp"
+            android:hint="@string/write_a_reply"
+            android:inputType="textCapSentences"
+            tools:ignore="LabelFor" />
+
+        <ImageButton
+            android:id="@+id/reply"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@color/tw__transparent"
+            android:contentDescription="@string/post_reply"
+            android:src="@drawable/ic_send_24dp" />
+    </LinearLayout>
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/messages"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/footer"
+        android:layout_below="@id/header"
+        android:scrollbars="vertical" />
+
+</RelativeLayout>

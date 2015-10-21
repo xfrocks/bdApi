@@ -410,7 +410,6 @@ public class LoginActivity extends AppCompatActivity
         String authorizeUri = Api.makeAuthorizeUri(redirectTo);
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(authorizeUri));
         startActivity(intent);
-        finish();
     }
 
     private void register(Api.User u) {

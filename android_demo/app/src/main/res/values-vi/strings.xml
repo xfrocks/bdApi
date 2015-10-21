@@ -28,14 +28,20 @@
     <string name="gcm_unregister_success">Đã hủy đăng ký GCM</string>
     <string name="navigation_drawer_close">Đóng khung địa chỉ</string>
     <string name="navigation_drawer_open">Mở khung địa chỉ</string>
+    <string name="now">Vừa mới</string>
+    <string name="open_in_browser">Mở trong Trình duyệt</string>
+    <string name="post_pick_file">Chọn tập tin để tải lên</string>
     <string name="post_prompt">Chọn nội dung để đăng</string>
+    <string name="post_reply">Đăng trả lời</string>
     <string name="post_success">Đã gửi nội dung mới thành công</string>
     <string name="prompt_dob">Ngày sinh</string>
     <string name="prompt_email">Địa chỉ thư điện tử</string>
     <string name="prompt_email_or_username">Tên đăng nhập</string>
     <string name="prompt_password">Mật khẩu</string>
     <string name="prompt_username">Tên đăng nhập</string>
+    <string name="refresh">Tải lại</string>
     <string name="remember_token">Ghi nhớ mã truy cập?</string>
     <string name="sign_in_with_remember">Đăng nhập với mã truy cập cũ?</string>
     <string name="title_activity_register">Đăng ký</string>
+    <string name="write_a_reply">Viết nội dung trả lời</string>
 </resources>

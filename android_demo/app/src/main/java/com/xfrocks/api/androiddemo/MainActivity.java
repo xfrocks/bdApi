@@ -318,6 +318,10 @@ public class MainActivity extends AppCompatActivity
         return mAccessToken;
     }
 
+    public Api.User getUser() {
+        return mUser;
+    }
+
     private class IndexRequest extends Api.GetRequest {
         public IndexRequest(Api.AccessToken at) {
             super(Api.URL_INDEX, new Api.Params(at));

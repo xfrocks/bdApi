@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -126,6 +125,7 @@ public class DataFragment extends ListFragment {
                     if (conversationId > 0) {
                         intent = new Intent(getContext(), ChatActivity.class);
                         intent.putExtra(ChatActivity.EXTRA_ACCESS_TOKEN, ma.getAccessToken());
+                        intent.putExtra(ChatActivity.EXTRA_USER, ma.getUser());
                         intent.putExtra(ChatActivity.EXTRA_CONVERSATION_ID, conversationId);
                     }
                 }
