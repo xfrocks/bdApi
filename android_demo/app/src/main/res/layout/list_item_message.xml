@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingEnd="?attr/listPreferredItemPaddingRight"
+    android:paddingStart="?attr/listPreferredItemPaddingLeft">
+
+    <ImageView
+        android:id="@+id/avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="8dp"
+        android:contentDescription="@string/avatar"
+        tools:src="@drawable/avatar_l" />
+
+    <TextView
+        android:id="@+id/message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="8dp"
+        android:background="?attr/colorAccent"
+        android:textColor="?attr/colorButtonNormal"
+        android:padding="4dp"
+        android:textAppearance="?attr/textAppearanceListItem"
+        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce pretium tortor vel tortor fringilla semper. Aliquam sit amet ligula porttitor, euismod turpis vel, malesuada eros. Mauris at hendrerit turpis, et pellentesque sapien. Donec pretium ultricies nisl quis consectetur. Etiam tincidunt metus nec tellus dapibus, vitae dictum leo mattis. Pellentesque efficitur dui urna, quis vulputate odio rutrum id. Vestibulum sed dignissim ex." />
+
+    <TextView
+        android:id="@+id/info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/message"
+        android:layout_below="@id/message"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:textColor="?attr/colorControlNormal"
+        android:textSize="12sp"
+        tools:text="Username · 10:10" />
+
+</RelativeLayout>

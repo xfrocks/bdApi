@@ -98,6 +98,18 @@
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <activity
+            android:name=".ChatActivity"
+            android:label="@string/app_name" />
+
+        <receiver
+            android:name=".gcm.ChatOrNotifReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.xfrocks.api.androiddemo.ChatOrNotif" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

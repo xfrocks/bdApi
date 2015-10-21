@@ -667,15 +667,34 @@ public class LoginActivity extends AppCompatActivity
                 AccessTokenHelper.save(LoginActivity.this, at);
             }
 
-            Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
-            mainIntent.putExtra(MainActivity.EXTRA_ACCESS_TOKEN, at);
-
+            Intent nextIntent = null;
             Intent loginIntent = getIntent();
+            String redirectTo = "";
             if (loginIntent != null && loginIntent.hasExtra(EXTRA_REDIRECT_TO)) {
-                mainIntent.putExtra(MainActivity.EXTRA_URL, loginIntent.getStringExtra(EXTRA_REDIRECT_TO));
+                redirectTo = loginIntent.getStringExtra(EXTRA_REDIRECT_TO);
             }
 
-            startActivity(mainIntent);
+            final String chatActivityPrefix = "ChatActivity://";
+            if (redirectTo.startsWith(chatActivityPrefix)) {
+                try {
+                    int conversationId = Integer.parseInt(redirectTo.substring(chatActivityPrefix.length()));
+                    nextIntent = new Intent(LoginActivity.this, ChatActivity.class);
+                    nextIntent.putExtra(ChatActivity.EXTRA_ACCESS_TOKEN, at);
+                    nextIntent.putExtra(ChatActivity.EXTRA_CONVERSATION_ID, conversationId);
+                } catch (NumberFormatException nfe) {
+                    // ignore
+                }
+            }
+
+            if (nextIntent == null) {
+                nextIntent = new Intent(LoginActivity.this, MainActivity.class);
+                nextIntent.putExtra(MainActivity.EXTRA_ACCESS_TOKEN, at);
+                if (!redirectTo.isEmpty()) {
+                    nextIntent.putExtra(MainActivity.EXTRA_URL, redirectTo);
+                }
+            }
+
+            startActivity(nextIntent);
 
             if (RegistrationService.canRun(LoginActivity.this)) {
                 Intent gcmIntent = new Intent(LoginActivity.this, RegistrationService.class);

@@ -14,6 +14,9 @@ android {
         targetSdkVersion 23
         versionCode 4
         versionName "1.0.0"
+
+        // oops, too many dependencies apparently?
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -33,9 +36,9 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.0.1'
+    compile 'com.android.support:appcompat-v7:23.1.0'
     compile 'com.google.android.gms:play-services:8.1.0'
-    compile 'com.android.support:design:23.0.1'
+    compile 'com.android.support:design:23.1.0'
     compile 'com.mcxiaoke.volley:library:1.0.19'
     compile 'com.facebook.android:facebook-android-sdk:4.1.0'
     compile('com.twitter.sdk.android:twitter:1.6.0@aar') {
@@ -43,5 +46,8 @@ dependencies {
     }
     compile 'org.apache.httpcomponents:httpcore:4.3.2'
     compile 'org.apache.httpcomponents:httpmime:4.3.5'
-    compile 'com.android.support:design:23.0.1'
+    compile 'com.android.support:design:23.1.0'
+    compile 'com.android.support:recyclerview-v7:23.1.0'
+    compile 'com.android.support:cardview-v7:23.1.0'
+    compile 'com.android.support:multidex:1.0.1'
 }

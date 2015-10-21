@@ -48,6 +48,7 @@ public class Api {
     public static final String URL_USERS_ME = "users/me";
     public static final String URL_USERS_ME_AVATAR = "users/me/avatar";
     public static final String URL_TOOLS_LOGIN_SOCIAL = "tools/login/social";
+    public static final String URL_CONVERSATION_MESSAGES = "conversation-messages";
 
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE = "grant_type";
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_PASSWORD = "password";
@@ -73,6 +74,11 @@ public class Api {
     public static final String URL_USERS_PARAM_EXTRA_TIMESTAMP = "extra_timestamp";
 
     public static final String URL_USERS_ME_AVATAR_PARAM_AVATAR = "avatar";
+
+    public static final String URL_CONVERSATION_MESSAGES_PARAM_CONVERSATION_ID = "conversation_id";
+    public static final String URL_CONVERSATION_MESSAGES_PARAM_PAGE = "page";
+    public static final String URL_CONVERSATION_MESSAGES_PARAM_ORDER = "order";
+    public static final String URL_CONVERSATION_MESSAGES_ORDER_REVERSE = "natural_reverse";
 
     public static AccessToken makeAccessToken(JSONObject response) {
         try {
@@ -124,6 +130,31 @@ public class Api {
             }
 
             return u;
+        } catch (JSONException e) {
+            // ignore
+        }
+
+        return null;
+    }
+
+    public static Message makeMessage(JSONObject obj) {
+        try {
+            Message m = new Message();
+
+            m.creatorUserId = obj.getInt("creator_user_id");
+            m.creatorName = obj.getString("creator_username");
+            m.messageId = obj.getInt("message_id");
+            m.messageCreateDate = obj.getInt("message_create_date");
+            m.messageBodyPlainText = obj.getString("message_body_plain_text");
+
+            if (obj.has("links")) {
+                JSONObject links = obj.getJSONObject("links");
+                if (links.has("creator_avatar")) {
+                    m.creatorAvatar = links.getString("creator_avatar");
+                }
+            }
+
+            return m;
         } catch (JSONException e) {
             // ignore
         }
@@ -646,6 +677,42 @@ public class Api {
 
         public String getAvatar() {
             return avatar;
+        }
+
+    }
+
+    public static class Message implements Serializable {
+
+        private Integer creatorUserId;
+        private String creatorName;
+        private String creatorAvatar;
+
+        private Integer messageId;
+        private Integer messageCreateDate;
+        private String messageBodyPlainText;
+
+        public int getCreatorId() {
+            return creatorUserId;
+        }
+
+        public String getCreatorName() {
+            return creatorName;
+        }
+
+        public String getCreatorAvatar() {
+            return creatorAvatar;
+        }
+
+        public Integer getMessageId() {
+            return messageId;
+        }
+
+        public Integer getMessageCreateDate() {
+            return messageCreateDate;
+        }
+
+        public String getMessageBodyPlainText() {
+            return messageBodyPlainText;
         }
 
     }

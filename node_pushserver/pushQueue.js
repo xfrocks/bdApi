@@ -32,6 +32,17 @@ jobs.process(config.pushQueue.queueId, function(job, done) {
 			if (data.payload.notification_id > 0) {
 				payload['notification_id'] = data.payload.notification_id;
 				payload['notification'] = message;
+			} else {
+				for (var i in data.payload) {
+					switch (i) {
+						case 'notification_id':
+						case 'notification_html':
+							// ignore;
+							break;
+						default:
+							payload[i] = data.payload[i];
+					}
+				}
 			}
 
 			var gcmKeyId;
@@ -47,11 +58,13 @@ jobs.process(config.pushQueue.queueId, function(job, done) {
 			break;
 		case 'ios':
 			var apnMessage = require('./helper').prepareApnMessage(message);
-			pusher.apn(data.device_id, {
-				'aps': {
-					'alert': apnMessage
-				}
-			}, callback);
+			if (apnMessage) {
+				pusher.apn(data.device_id, {
+					'aps': {
+						'alert': apnMessage
+					}
+				}, callback);
+			}
 			break;
 		case 'windows':
 			if (data.extra_data.channel_uri) {

@@ -3,6 +3,7 @@ package com.xfrocks.api.androiddemo;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.multidex.MultiDexApplication;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
@@ -10,7 +11,7 @@ import com.android.volley.toolbox.Volley;
 
 import java.io.File;
 
-public class App extends android.app.Application {
+public class App extends MultiDexApplication {
 
     private static App sInstance;
 
