@@ -27,6 +27,8 @@ import org.json.JSONObject;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -34,6 +36,8 @@ public class ChatActivity extends AppCompatActivity {
     public static final String EXTRA_CONVERSATION_ID = "conversation_id";
     private static final String STATE_ACCESS_TOKEN = "accessToken";
     private static final String STATE_CONVERSATION_ID = "conversationId";
+
+    private static Pattern patternUrl = Pattern.compile("(index\\.php\\?|/)conversations/(\\d+)/");
 
     private SwipeRefreshLayout mSwipeRefresh;
     private LinearLayoutManager mMessagesLayoutManager;
@@ -396,5 +400,15 @@ public class ChatActivity extends AppCompatActivity {
             message = (TextView) v.findViewById(R.id.message);
             info = (TextView) v.findViewById(R.id.info);
         }
+    }
+
+    public static int getConversationIdFromUrl(String url) {
+        Matcher m = patternUrl.matcher(url);
+        if (m.find()) {
+            String conversationId = m.group(2);
+            return Integer.parseInt(conversationId);
+        }
+
+        return 0;
     }
 }

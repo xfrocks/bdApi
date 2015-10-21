@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -114,8 +115,22 @@ public class DataFragment extends ListFragment {
             ma.addFragmentToBackStack(fragment, false);
         } else if (mParentRow != null) {
             if ("links".equals(mParentRow.key)) {
+                Intent intent = null;
+
                 if (!row.value.contains(BuildConfig.API_ROOT)) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(row.value));
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(row.value));
+                }
+
+                if (intent == null) {
+                    int conversationId = ChatActivity.getConversationIdFromUrl(row.value);
+                    if (conversationId > 0) {
+                        intent = new Intent(getContext(), ChatActivity.class);
+                        intent.putExtra(ChatActivity.EXTRA_ACCESS_TOKEN, ma.getAccessToken());
+                        intent.putExtra(ChatActivity.EXTRA_CONVERSATION_ID, conversationId);
+                    }
+                }
+
+                if (intent != null) {
                     startActivity(intent);
                 } else {
                     ma.addDataFragment(row.value, null, false);
