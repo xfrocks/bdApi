@@ -44,7 +44,6 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
             'notification_html' => '',
         );
         $extraData['object_data']['message'] = array(
-            'message_id' => $extraData['message_id'],
             'conversation_id' => $conversation['conversation_id'],
             'title' => $conversation['title'],
             'message' => XenForo_Template_Helper_Core::callHelper('snippet', array(
@@ -53,6 +52,11 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
                 )
             )),
         );
+        if (isset($extraData['message_id'])) {
+            $extraData['object_data']['message']['message_id'] = $extraData['message_id'];
+        } else {
+            $extraData['object_data']['message']['message_id'] = $conversation['first_message_id'];
+        }
 
         $fakeAlert = array(
             'alert_id' => 0,
