@@ -84,12 +84,16 @@ public class MainActivity extends AppCompatActivity
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
-        mHeaderImg = (ImageView) findViewById(R.id.header_img);
-        mHeaderImg.setOnClickListener(this);
-        mHeaderTxt = (TextView) findViewById(R.id.header_txt);
-        mHeaderProgress = (ProgressBar) findViewById(R.id.header_progress);
         mNavigationView.setNavigationItemSelectedListener(this);
         mDrawerLayout.openDrawer(mNavigationView);
+
+        // TODO: revert programmatically inflating the header view when the bug is fixed
+        // https://code.google.com/p/android/issues/detail?id=190226
+        View headerLayout = mNavigationView.inflateHeaderView(R.layout.drawer_header);
+        mHeaderImg = (ImageView) headerLayout.findViewById(R.id.header_img);
+        mHeaderImg.setOnClickListener(this);
+        mHeaderTxt = (TextView) headerLayout.findViewById(R.id.header_txt);
+        mHeaderProgress = (ProgressBar) headerLayout.findViewById(R.id.header_progress);
 
         mPost = (FloatingActionButton) findViewById(R.id.post);
         mPost.setOnClickListener(this);
