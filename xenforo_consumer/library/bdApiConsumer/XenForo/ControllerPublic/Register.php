@@ -8,8 +8,8 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
     {
         $providerCode = $this->_input->filterSingle('provider', XenForo_Input::STRING);
         $assocUserId = $this->_input->filterSingle('assoc', XenForo_Input::UINT);
-        $redirect = $this->_input->filterSingle('redirect', XenForo_Input::STRING);
         $externalCode = $this->_input->filterSingle('code', XenForo_Input::STRING);
+        $redirect = $this->_bdApiConsumer_getRedirect();
 
         $state = $this->_input->filterSingle('state', XenForo_Input::STRING);
         if (!empty($state)) {
@@ -48,7 +48,6 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
         ));
 
         if ($this->_input->filterSingle('reg', XenForo_Input::UINT)) {
-            $redirect = XenForo_Link::convertUriToAbsoluteUri($this->getDynamicRedirect());
             XenForo_Application::get('session')->set(self::SESSION_KEY_REDIRECT, $redirect);
 
             $social = $this->_input->filterSingle('social', XenForo_Input::STRING);
@@ -58,18 +57,66 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
             return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL, $requestUrl);
         }
 
-        // try to use the non-standard query parameter `t` first,
-        // continue exchange code for access token later if that fails
-        if (empty($externalCode)) {
-            return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x',
-                array('provider' => $provider['name'])));
+        $externalToken = null;
+
+        if (empty($externalToken)) {
+            $_token = $this->_input->filterSingle('_token', XenForo_Input::STRING);
+            if (!empty($_token)) {
+                $_token = @base64_decode($_token);
+                if (!empty($_token)) {
+                    $_token = @json_decode($_token, true);
+                    if (!empty($_token)) {
+                        $externalToken = $_token;
+                    }
+                }
+            }
         }
 
-        $externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromCode($provider,
-            $externalCode, $externalRedirectUri);
         if (empty($externalToken)) {
-            return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x',
-                array('provider' => $provider['name'])));
+            // there should be `code` at this point...
+            if (empty($externalCode)) {
+                return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x',
+                    array('provider' => $provider['name'])));
+            }
+
+            $externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromCode($provider,
+                $externalCode, $externalRedirectUri);
+
+            if (!empty($externalToken)) {
+                $selfRedirect = $this->_request->getRequestUri();
+                $selfRedirect = preg_replace('#(\?|&)code=.+(&|$)#', '$1', $selfRedirect);
+                $selfRedirect = preg_replace('#(\?|&)state=.+(&|$)#', '$1', $selfRedirect);
+
+                // filter $externalToken keys to make it more lightweight
+                foreach (array_keys($externalToken) as $_key) {
+                    if ($_key === 'debug'
+                        || substr($_key, 0, 1) === '_'
+                    ) {
+                        unset($externalToken[$_key]);
+                    }
+                }
+                $selfRedirect .= sprintf('%1$s_token=%2$s',
+                    strpos($selfRedirect, '?') === false ? '?' : '&',
+                    rawurlencode(base64_encode(json_encode($externalToken))));
+
+                // do a self redirect immediately so user won't refresh the page
+                // TODO: improve this
+                return $this->responseRedirect(
+                    XenForo_ControllerResponse_Redirect::SUCCESS,
+                    $selfRedirect
+                );
+            }
+        }
+
+        if (empty($externalToken)) {
+            if (!XenForo_Visitor::getUserId()) {
+                // report error only if user hasn't been logged in
+                return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x',
+                    array('provider' => $provider['name'])));
+            } else {
+                // or try to be friendly and just redirect user back to where s/he was
+                return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, $redirect);
+            }
         }
 
         $externalVisitor = bdApiConsumer_Helper_Api::getVisitor($provider, $externalToken['access_token']);
@@ -107,16 +154,11 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
             }
         }
 
-        if ($existingAssoc && $userModel->getUserById($existingAssoc['user_id'])) {
-            $redirect = XenForo_Application::get('session')->get(self::SESSION_KEY_REDIRECT);
-
+        if ($existingAssoc
+            && $userModel->getUserById($existingAssoc['user_id'])
+        ) {
             XenForo_Application::get('session')->changeUserId($existingAssoc['user_id']);
             XenForo_Visitor::setup($existingAssoc['user_id']);
-
-            XenForo_Application::get('session')->remove(self::SESSION_KEY_REDIRECT);
-            if (empty($redirect)) {
-                $redirect = $this->getDynamicRedirect(false, false);
-            }
 
             if (!$autoRegistered) {
                 $userExternalModel->bdApiConsumer_updateExternalAuthAssociation($provider,
@@ -190,6 +232,8 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
     {
         $this->_assertPostOnly();
 
+        $redirect = $this->_bdApiConsumer_getRedirect();
+
         $userModel = $this->_getUserModel();
         /** @var bdApiConsumer_XenForo_Model_UserExternal $userExternalModel */
         $userExternalModel = $this->_getUserExternalModel();
@@ -252,14 +296,8 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
                 $externalVisitor['user_id'], $userId,
                 array_merge($externalVisitor, array('token' => $externalToken)));
 
-            $redirect = XenForo_Application::get('session')->get(self::SESSION_KEY_REDIRECT);
-            XenForo_Application::get('session')->changeUserId($userId);
+            XenForo_Application::getSession()->changeUserId($userId);
             XenForo_Visitor::setup($userId);
-
-            XenForo_Application::get('session')->remove(self::SESSION_KEY_REDIRECT);
-            if (!$redirect) {
-                $redirect = $this->getDynamicRedirect(false, false);
-            }
 
             return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, $redirect);
         }
@@ -286,14 +324,12 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
         $user = bdApiConsumer_Helper_AutoRegister::createUser($data, $provider,
             $externalToken, $externalVisitor, $this->_getUserExternalModel());
 
-        XenForo_Application::get('session')->changeUserId($user['user_id']);
+        XenForo_Application::getSession()->changeUserId($user['user_id']);
         XenForo_Visitor::setup($user['user_id']);
-
-        $redirect = $this->_input->filterSingle('redirect', XenForo_Input::STRING);
 
         $viewParams = array(
             'user' => $user,
-            'redirect' => ($redirect ? XenForo_Link::convertUriToAbsoluteUri($redirect) : ''),
+            'redirect' => $redirect,
         );
 
         return $this->responseView(
@@ -344,6 +380,21 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 
         return $userExternalModel->getExternalAuthAssociation(
             $userExternalModel->bdApiConsumer_getProviderCode($provider), $externalVisitor['user_id']);
+    }
+
+    protected function _bdApiConsumer_getRedirect()
+    {
+        $redirect = $this->_input->filterSingle('redirect', XenForo_Input::STRING);
+
+        if (empty($redirect)) {
+            $redirect = XenForo_Application::getSession()->get(self::SESSION_KEY_REDIRECT);
+        }
+
+        if (empty($redirect)) {
+            $redirect = XenForo_Link::convertUriToAbsoluteUri($this->getDynamicRedirect());
+        }
+
+        return $redirect;
     }
 
 }
