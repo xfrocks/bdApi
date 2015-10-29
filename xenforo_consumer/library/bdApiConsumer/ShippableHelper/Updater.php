@@ -1,10 +1,10 @@
 <?php
 
-// updated by DevHelper_Helper_ShippableHelper at 2015-10-16T07:15:03+00:00
+// updated by DevHelper_Helper_ShippableHelper at 2015-10-19T19:22:45+00:00
 
 /**
  * Class bdApiConsumer_ShippableHelper_Updater
- * @version 1
+ * @version 2
  * @see DevHelper_Helper_ShippableHelper_Updater
  */
 class bdApiConsumer_ShippableHelper_Updater
@@ -19,6 +19,7 @@ class bdApiConsumer_ShippableHelper_Updater
     const PARAM_IMPORT_XML_PATH = 'updater-xmlPath';
     const PARAM_AUTHORIZE = 'updater-authorize';
     const PARAM_ACCESS_TOKEN = 'updater-accessToken';
+    const PARAM_IGNORE = 'updater-ignore';
 
     protected static $_version = 2015101508;
     protected static $_isBeta = true;
@@ -258,7 +259,7 @@ class bdApiConsumer_ShippableHelper_Updater
                     );
 
                     if (self::$_isBeta) {
-                        $message .= ' Please note that this is currently in beta, use at your own risk.';
+                        $message .= ' Warning: The Updater is currently in beta.';
                     }
                 }
             }
@@ -267,68 +268,106 @@ class bdApiConsumer_ShippableHelper_Updater
             $data = self::_refreshData(self::$_config['apiUrl'], self::$_config['addOnIds'], $forceRefresh);
 
             if (!empty($data)) {
-                $xenAddOns = XenForo_Application::get('addOns');
+                $message .= self::_onAddOnShowStatuses($data, $forceRefresh);
+            }
 
-                foreach ($xenAddOns as $addOnId => $addOnVersionId) {
-                    if (!in_array($addOnId, self::$_config['addOnIds'], true)) {
-                        continue;
+        }
+
+        $paramKey = '_' . md5(self::$_config['apiUrl']);
+        $containerParams[$paramKey] = array('message' => $message);
+    }
+
+    private static function _onAddOnShowStatuses(array $data, $forceRefresh)
+    {
+        $statuses = '';
+        $xenAddOns = XenForo_Application::get('addOns');
+
+        foreach ($xenAddOns as $addOnId => $addOnVersionId) {
+            if (!in_array($addOnId, self::$_config['addOnIds'], true)) {
+                continue;
+            }
+
+            if (!isset($data[$addOnId])) {
+                if ($forceRefresh) {
+                    $statuses .= sprintf('%1$s cannot be verified with the Updater Server.<br />', $addOnId);
+                }
+                continue;
+            }
+
+            if ($addOnVersionId < $data[$addOnId]['version_id']) {
+                $ignoredVersionId = 0;
+                if (!empty(self::$_config['ignored'][$addOnId])) {
+                    $ignoredVersionId = self::$_config['ignored'][$addOnId];
+                }
+                $isIgnored = $data[$addOnId]['version_id'] <= $ignoredVersionId;
+
+                $actions = array();
+                if ($forceRefresh
+                    || !$isIgnored
+                ) {
+                    if (!empty($data[$addOnId]['links']['permalink'])) {
+                        /** @noinspection HtmlUnknownTarget */
+                        $actions[] = sprintf('<a href="%1$s">read more</a>', $data[$addOnId]['links']['permalink']);
                     }
 
-                    if (isset($data[$addOnId])) {
-                        if ($addOnVersionId < $data[$addOnId]['version_id']) {
-                            $message .= sprintf('%1$s is out of date, latest version is v%3$s (#%4$d, yours is #%2$d).',
-                                $addOnId,
-                                $addOnVersionId,
-                                $data[$addOnId]['version_string'],
-                                $data[$addOnId]['version_id']);
+                    if (!empty($data[$addOnId]['links']['content'])) {
+                        /** @noinspection HtmlUnknownTarget */
+                        $actions[] = sprintf('<a href="%1$s">update</a>',
+                            XenForo_Link::buildAdminLink('full:add-ons/upgrade',
+                                array('addon_id' => $addOnId),
+                                array(self::PARAM_DOWNLOAD => self::$_config['apiUrl'])));
+                    } elseif (!empty($data[$addOnId]['links']['authorize'])) {
+                        $authorizeUrl = sprintf('%s&redirect_uri=%s',
+                            $data[$addOnId]['links']['authorize'],
+                            rawurlencode(XenForo_Link::buildAdminLink('full:add-ons/upgrade',
+                                array('addon_id' => $addOnId),
+                                array(self::PARAM_AUTHORIZE => self::$_config['apiUrl'])))
+                        );
 
-                            if (!empty($data[$addOnId]['links']['content'])) {
-                                /** @noinspection HtmlUnknownTarget */
-                                $message .= sprintf(' Click <a href="%1$s">here</a> to update.',
-                                    XenForo_Link::buildAdminLink('full:add-ons/upgrade', array('addon_id' => $addOnId), array(
-                                        self::PARAM_DOWNLOAD => self::$_config['apiUrl'])));
-                            } elseif (!empty($data[$addOnId]['links']['authorize'])) {
-                                $authorizeUrl = sprintf('%s&redirect_uri=%s',
-                                    $data[$addOnId]['links']['authorize'],
-                                    rawurlencode(XenForo_Link::buildAdminLink('full:add-ons/upgrade', array('addon_id' => $addOnId),
-                                        array(self::PARAM_AUTHORIZE => self::$_config['apiUrl'])))
-                                );
-                                /** @noinspection HtmlUnknownTarget */
-                                $message .= sprintf(' Click <a href="%1$s">here</a> to update.',
-                                    $authorizeUrl);
-                            } elseif (!empty($data[$addOnId]['links']['permalink'])) {
-                                /** @noinspection HtmlUnknownTarget */
-                                $message .= sprintf(' Click <a href="%1$s">here</a> for more information.',
-                                    $data[$addOnId]['links']['permalink']);
-                            }
+                        /** @noinspection HtmlUnknownTarget */
+                        $actions[] = sprintf('<a href="%1$s">authorize an update</a>', $authorizeUrl);
+                    }
+                }
 
-                            $message .= '<br />';
-                        } else {
-                            if ($forceRefresh) {
-                                if ($addOnVersionId > $data[$addOnId]['version_id']) {
-                                    $message .= sprintf('%1$s appears to be even newer than'
-                                        . ' reported from the Updater Server: their v%3$s (#%4$d) vs. your #%2$d.'
-                                        . ' Awesome!<br />',
-                                        $addOnId,
-                                        $addOnVersionId,
-                                        $data[$addOnId]['version_string'],
-                                        $data[$addOnId]['version_id']);
-                                } else {
-                                    $message .= sprintf('%1$s is up to date.<br />', $addOnId);
-                                }
-                            }
-                        }
+                if (!empty($actions)) {
+                    $outOfDateMessage = sprintf('%1$s is out of date, latest version is v%3$s (#%4$d, yours is #%2$d).',
+                        $addOnId,
+                        $addOnVersionId,
+                        $data[$addOnId]['version_string'],
+                        $data[$addOnId]['version_id']);
+
+                    $ignoreMessage = '';
+                    if (!$isIgnored) {
+                        /** @noinspection HtmlUnknownTarget */
+                        $ignoreMessage = sprintf(' or <a href="%1$s">ignore this version</a>',
+                            XenForo_Link::buildAdminLink('full:add-ons/upgrade',
+                                array('addon_id' => $addOnId),
+                                array(self::PARAM_IGNORE => self::$_config['apiUrl'])));
+                    }
+
+                    $statuses .= sprintf('%1$s You may: %2$s%3$s.<br />',
+                        $outOfDateMessage,
+                        implode(', ', $actions),
+                        $ignoreMessage);
+                }
+            } else {
+                if ($forceRefresh) {
+                    if ($addOnVersionId > $data[$addOnId]['version_id']) {
+                        $statuses .= sprintf('%1$s appears to be even newer than'
+                            . ' reported from the Updater Server: their v%3$s (#%4$d) vs. your #%2$d.'
+                            . ' Awesome!<br />',
+                            $addOnId,
+                            $addOnVersionId,
+                            $data[$addOnId]['version_string'],
+                            $data[$addOnId]['version_id']);
                     } else {
-                        if ($forceRefresh) {
-                            $message .= sprintf('%1$s cannot be verified with the Updater Server.<br />', $addOnId);
-                        }
+                        $statuses .= sprintf('%1$s is up to date.<br />', $addOnId);
                     }
                 }
             }
         }
 
-        $paramKey = '_' . md5(self::$_config['apiUrl']);
-        $containerParams[$paramKey] = array('message' => $message);
+        return $statuses;
     }
 
     private static function _onAddOnUpgrade(XenForo_ControllerResponse_View &$controllerResponse)
@@ -405,6 +444,21 @@ EOF;
                     'redirect' => XenForo_Link::buildAdminLink('full:add-ons')
                 )))));
         }
+
+        if (!empty($_GET[self::PARAM_IGNORE])
+            && $_GET[self::PARAM_IGNORE] === self::$_config['apiUrl']
+        ) {
+            $addOnId = $controllerResponse->params['addOn']['addon_id'];
+            $data = self::_refreshData(self::$_config['apiUrl'], self::$_config['addOnIds'], false);
+            if (!empty($data[$addOnId]['version_id'])) {
+                self::$_config['ignored'][$addOnId] = $data[$addOnId]['version_id'];
+                self::_saveConfig(self::$_config);
+            }
+
+            $controllerResponse = new XenForo_ControllerResponse_Redirect();
+            $controllerResponse->redirectType = XenForo_ControllerResponse_Redirect::RESOURCE_UPDATED;
+            $controllerResponse->redirectTarget = XenForo_Link::buildAdminLink('add-ons');
+        }
     }
 
     private static function _getConfig($addOnId, $apiUrl)
@@ -423,7 +477,9 @@ EOF;
                 'version' => self::$_version,
                 'apiUrl' => $apiUrl,
                 'addOnIds' => array($addOnId),
+
                 'enabled' => false,
+                'ignored' => array(),
             );
             $configUpdated[] = '$config';
         } else {

@@ -2,242 +2,217 @@
 
 class bdApiConsumer_ControllerPublic_Callback extends XenForo_ControllerPublic_Abstract
 {
-	public function actionIndex()
-	{
-		$method = $this->_request->getMethod();
-		if (empty($method))
-		{
-			throw new XenForo_Exception('Unable to determine request method');
-		}
-		if (strtoupper($method) === 'GET')
-		{
-			return $this->responseReroute(__CLASS__, 'IntentVerification');
-		}
-		elseif (strtoupper($method) !== 'POST')
-		{
-			throw new XenForo_Exception('Unrecognized request method: ' . $method);
-		}
+    public function actionIndex()
+    {
+        $method = $this->_request->getMethod();
+        if (empty($method)) {
+            throw new XenForo_Exception('Unable to determine request method');
+        }
+        if (strtoupper($method) === 'GET') {
+            return $this->responseReroute(__CLASS__, 'IntentVerification');
+        } elseif (strtoupper($method) !== 'POST') {
+            throw new XenForo_Exception('Unrecognized request method: ' . $method);
+        }
 
-		return $this->responseReroute(__CLASS__, 'PingPong');
-	}
+        return $this->responseReroute(__CLASS__, 'PingPong');
+    }
 
-	public function actionIntentVerification()
-	{
-		$params = $this->_input->filter(array(
-			'client_id' => XenForo_Input::STRING,
-			'hub_topic' => XenForo_Input::STRING,
-			'hub_challenge' => XenForo_Input::STRING,
-		));
+    public function actionIntentVerification()
+    {
+        $params = $this->_input->filter(array(
+            'client_id' => XenForo_Input::STRING,
+            'hub_topic' => XenForo_Input::STRING,
+            'hub_challenge' => XenForo_Input::STRING,
+        ));
 
-		if (empty($params['client_id']))
-		{
-			// unable to determine hub authorized client
-			header('HTTP/1.0 404 Not Found');
-			exit ;
-		}
-		$providers = bdApiConsumer_Option::get('providers');
-		$foundProvider = null;
-		foreach ($providers as $provider)
-		{
-			if (!empty($provider['client_id']) AND $provider['client_id'] == $params['client_id'])
-			{
-				$foundProvider = $provider;
-				break;
-			}
-		}
-		if (empty($foundProvider))
-		{
-			// client not found
-			header('HTTP/1.0 401 Unauthorized');
-			exit ;
-		}
+        if (empty($params['client_id'])) {
+            // unable to determine hub authorized client
+            header('HTTP/1.0 404 Not Found');
+            exit;
+        }
+        $providers = bdApiConsumer_Option::get('providers');
+        $foundProvider = null;
+        foreach ($providers as $provider) {
+            if (!empty($provider['client_id']) AND $provider['client_id'] == $params['client_id']) {
+                $foundProvider = $provider;
+                break;
+            }
+        }
+        if (empty($foundProvider)) {
+            // client not found
+            header('HTTP/1.0 401 Unauthorized');
+            exit;
+        }
 
-		// TODO: verify $params['hub_topic']?
+        // TODO: verify $params['hub_topic']?
 
-		echo $params['hub_challenge'];
-		exit ;
-	}
+        echo $params['hub_challenge'];
+        exit;
+    }
 
-	public function actionPingPong()
-	{
-		$results = array();
-		$raw = file_get_contents('php://input');
-		$json = @json_decode($raw, true);
-		if (!is_array($json))
-		{
-			throw new XenForo_Exception('Unable to parse JSON: ' . $raw);
-		}
+    public function actionPingPong()
+    {
+        $results = array();
+        $raw = file_get_contents('php://input');
+        $json = @json_decode($raw, true);
+        if (!is_array($json)) {
+            throw new XenForo_Exception('Unable to parse JSON: ' . $raw);
+        }
 
-		$providers = $providers = bdApiConsumer_Option::get('providers');
-		$providerPings = array();
+        $providers = $providers = bdApiConsumer_Option::get('providers');
+        $providerPings = array();
 
-		foreach ($json as $ping)
-		{
-			if (empty($ping['client_id']))
-			{
-				continue;
-			}
-			$foundProviderKey = null;
-			foreach ($providers as $providerKey => $provider)
-			{
-				if (!empty($provider['client_id']) AND $provider['client_id'] == $ping['client_id'])
-				{
-					$foundProviderKey = $providerKey;
-					break;
-				}
-			}
-			if (empty($foundProviderKey))
-			{
-				continue;
-			}
+        foreach ($json as $ping) {
+            if (empty($ping['client_id'])) {
+                continue;
+            }
+            $foundProviderKey = null;
+            foreach ($providers as $providerKey => $provider) {
+                if (!empty($provider['client_id']) AND $provider['client_id'] == $ping['client_id']) {
+                    $foundProviderKey = $providerKey;
+                    break;
+                }
+            }
+            if (empty($foundProviderKey)) {
+                continue;
+            }
 
-			if (empty($ping['topic']))
-			{
-				continue;
-			}
-			$parts = explode('_', $ping['topic']);
-			$ping['topic_id'] = array_pop($parts);
-			$ping['topic_type'] = implode('_', $parts);
+            if (empty($ping['topic'])) {
+                continue;
+            }
+            $parts = explode('_', $ping['topic']);
+            $ping['topic_id'] = array_pop($parts);
+            $ping['topic_type'] = implode('_', $parts);
 
-			$providerPings[$providerKey][$ping['topic_type']][$ping['topic_id']] = $ping;
-		}
+            $providerPings[$foundProviderKey][$ping['topic_type']][$ping['topic_id']] = $ping;
+        }
 
-		foreach ($providerPings as $providerKey => &$manyTopics)
-		{
-			foreach ($manyTopics as $topicType => &$topicPings)
-			{
-				$result = null;
+        foreach ($providerPings as $providerKey => &$manyTopics) {
+            foreach ($manyTopics as $topicType => &$topicPings) {
+                $result = null;
 
-				switch ($topicType)
-				{
-					case 'user':
-						$this->_handleUserPings($providers[$providerKey], $topicPings);
-					case 'user_notification':
-						$this->_handleUserNotificationPings($providers[$providerKey], $topicPings);
-				}
+                switch ($topicType) {
+                    case 'user':
+                        $this->_handleUserPings($providers[$providerKey], $topicPings);
+                        break;
+                    case 'user_notification':
+                        $this->_handleUserNotificationPings($providers[$providerKey], $topicPings);
+                        break;
+                }
 
-				foreach ($topicPings as $ping)
-				{
-					if (!empty($ping['result']))
-					{
-						$results[] = $ping;
-					}
-				}
-			}
-		}
+                foreach ($topicPings as $ping) {
+                    if (!empty($ping['result'])) {
+                        $results[] = $ping;
+                    }
+                }
+            }
+        }
 
-		echo json_encode($results);
-		exit ;
-	}
+        echo json_encode($results);
+        exit;
+    }
 
-	protected function _handleUserPings(array $provider, array &$pings)
-	{
-		$userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
+    protected function _handleUserPings(array $provider, array &$pings)
+    {
+        /** @var bdApiConsumer_XenForo_Model_UserExternal $userExternalModel */
+        $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
 
-		$providerKeys = array();
-		foreach ($pings as &$ping)
-		{
-			$providerKeys[] = $ping['object_data'];
-		}
+        $providerKeys = array();
+        foreach ($pings as &$ping) {
+            $providerKeys[] = $ping['object_data'];
+        }
 
-		$auths = $userExternalModel->bdApiConsumer_getExternalAuthAssociationsForProviderUser($provider, $providerKeys);
+        $auths = $userExternalModel->bdApiConsumer_getExternalAuthAssociationsForProviderUser($provider, $providerKeys);
 
-		foreach ($auths as $auth)
-		{
-			$accessToken = $userExternalModel->bdApiConsumer_getAccessTokenFromAuth($provider, $auth);
-			if (empty($accessToken))
-			{
-				continue;
-			}
+        foreach ($auths as $auth) {
+            $accessToken = $userExternalModel->bdApiConsumer_getAccessTokenFromAuth($provider, $auth);
+            if (empty($accessToken)) {
+                continue;
+            }
 
-			$externalVisitor = bdApiConsumer_Helper_Api::getVisitor($provider, $accessToken, false);
-			if (empty($externalVisitor))
-			{
-				continue;
-			}
+            $externalVisitor = bdApiConsumer_Helper_Api::getVisitor($provider, $accessToken, false);
+            if (empty($externalVisitor)) {
+                continue;
+            }
 
-			$userExternalModel->bdApiConsumer_updateExternalAuthAssociation($provider, $auth['provider_key'], $auth['user_id'], array_merge($auth['extra_data'], $externalVisitor));
+            $userExternalModel->bdApiConsumer_updateExternalAuthAssociation($provider,
+                $auth['provider_key'], $auth['user_id'], array_merge($auth['extra_data'], $externalVisitor));
 
-			foreach ($pings as &$ping)
-			{
-				if ($ping['object_data'] == $auth['provider_key'])
-				{
-					$ping['result'] = 'updated user data';
-				}
-			}
-		}
-	}
+            foreach ($pings as &$ping) {
+                if ($ping['object_data'] == $auth['provider_key']) {
+                    $ping['result'] = 'updated user data';
+                }
+            }
+        }
+    }
 
-	protected function _handleUserNotificationPings(array $provider, array &$pings)
-	{
-		$providerKeys = array();
-		foreach ($pings as &$pingRef)
-		{
-			$providerKeys[] = $pingRef['topic_id'];
-		}
-		$auths = $this->getModelFromCache('XenForo_Model_UserExternal')->bdApiConsumer_getExternalAuthAssociationsForProviderUser($provider, $providerKeys);
+    protected function _handleUserNotificationPings(array $provider, array &$pings)
+    {
+        $providerKeys = array();
+        foreach ($pings as &$pingRef) {
+            $providerKeys[] = $pingRef['topic_id'];
+        }
 
-		$userIds = array();
-		foreach ($auths as &$authRef)
-		{
-			$provider = bdApiConsumer_Option::getProviderByCode($authRef['provider']);
-			if (empty($provider))
-			{
-				continue;
-			}
+        /** @var bdApiConsumer_XenForo_Model_UserExternal $userExternalModel */
+        $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
+        $auths = $userExternalModel->bdApiConsumer_getExternalAuthAssociationsForProviderUser($provider, $providerKeys);
 
-			$authRef['_provider'] = $provider;
+        $userIds = array();
+        foreach ($auths as &$authRef) {
+            $provider = bdApiConsumer_Option::getProviderByCode($authRef['provider']);
+            if (empty($provider)) {
+                continue;
+            }
 
-			$userIds[] = $authRef['user_id'];
-		}
-		$users = $this->getModelFromCache('XenForo_Model_User')->getUsersByIds($userIds, array('join' => XenForo_Model_User::FETCH_USER_OPTION));
+            $authRef['_provider'] = $provider;
 
-		foreach ($pings as &$pingRef)
-		{
-			$auth = null;
-			foreach ($auths as $_auth)
-			{
-				if ($_auth['provider_key'] == $pingRef['topic_id'])
-				{
-					$auth = $_auth;
-				}
-			}
-			if (empty($auth))
-			{
-				continue;
-			}
+            $userIds[] = $authRef['user_id'];
+        }
 
-			$user = null;
-			if (!isset($users[$auth['user_id']]))
-			{
-				continue;
-			}
-			$user = $users[$auth['user_id']];
+        /** @var XenForo_Model_User $userModel */
+        $userModel = $this->getModelFromCache('XenForo_Model_User');
+        $users = $userModel->getUsersByIds($userIds, array('join' => XenForo_Model_User::FETCH_USER_OPTION));
 
-			if ($pingRef['action'] == 'insert' AND !empty($pingRef['object_data']['notification_id']))
-			{
-				if (XenForo_Model_Alert::userReceivesAlert($user, 'bdapi_consumer', $auth['provider']))
-				{
-					$this->getModelFromCache('XenForo_Model_Alert')->bdApiConsumer_alertUser($auth['_provider'], $user, $pingRef['object_data']);
-					$pingRef['result'] = 'inserted alert';
-				}
-				else
-				{
-					$pingRef['result'] = 'user opted out';
-				}
-			}
-			elseif ($pingRef['action'] = 'read')
-			{
-				$this->getModelFromCache('XenForo_Model_Alert')->bdApiConsumer_markAlertsRead($auth['_provider'], $user);
-				$pingRef['result'] = 'marked as read';
-			}
-		}
-	}
+        /** @var bdApiConsumer_XenForo_Model_Alert $alertModel */
+        $alertModel = $this->getModelFromCache('XenForo_Model_Alert');
 
-	protected function _checkCsrf($action)
-	{
-		// no csrf check for this
-		return;
-	}
+        foreach ($pings as &$pingRef) {
+            $auth = null;
+            foreach ($auths as $_auth) {
+                if ($_auth['provider_key'] == $pingRef['topic_id']) {
+                    $auth = $_auth;
+                }
+            }
+            if (empty($auth)) {
+                continue;
+            }
+
+            $user = null;
+            if (!isset($users[$auth['user_id']])) {
+                continue;
+            }
+            $user = $users[$auth['user_id']];
+
+            if ($pingRef['action'] == 'insert'
+                && !empty($pingRef['object_data']['notification_id'])
+            ) {
+                if (XenForo_Model_Alert::userReceivesAlert($user, 'bdapi_consumer', $auth['provider'])) {
+                    $alertModel->bdApiConsumer_alertUser($auth['_provider'], $user, $pingRef['object_data']);
+                    $pingRef['result'] = 'inserted alert';
+                } else {
+                    $pingRef['result'] = 'user opted out';
+                }
+            } elseif ($pingRef['action'] = 'read') {
+                $alertModel->bdApiConsumer_markAlertsRead($auth['_provider'], $user);
+                $pingRef['result'] = 'marked as read';
+            }
+        }
+    }
+
+    protected function _checkCsrf($action)
+    {
+        // no csrf check for this
+        return;
+    }
 
 }
