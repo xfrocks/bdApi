@@ -20,7 +20,13 @@ class bdApiConsumer_AlertHandler_Provider extends XenForo_AlertHandler_Abstract
 
     protected function _prepareAlertAfterAction(array $item, $content, array $viewingUser)
     {
-        $item['extra_data'] = unserialize($item['extra_data']);
+        $provider = bdApiConsumer_Option::getProviderByCode($item['action']);
+        if (!empty($provider)
+            && !empty($item['extra']['notification']['notification_html'])
+        ) {
+            $item['notificationHtml'] = strip_tags($item['extra']['notification']['notification_html'], '<a>');
+            $item['notificationProvider'] = $provider;
+        }
 
         return $item;
     }

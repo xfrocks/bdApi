@@ -131,6 +131,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <interface_groups/>
   </permissions>
   <phrases>
+    <phrase title="bdapi_consumer_alert_via_provider" version_id="24" version_string="0.9.8-dev"><![CDATA[(via <a href="{link}" target="_blank" tabindex="-1" rel="nofollow">{provider}</a>)]]></phrase>
     <phrase title="bdapi_consumer_associated_x_account" version_id="8" version_string="0.9.2"><![CDATA[Associated {provider} Account]]></phrase>
     <phrase title="bdapi_consumer_associate_with_x" version_id="8" version_string="0.9.2"><![CDATA[Associate with {provider}]]></phrase>
     <phrase title="bdapi_consumer_auto_login_with_x_failed" version_id="3" version_string="0.9-dev"><![CDATA[Attempt to auto login with {provider} has been failed.]]></phrase>
@@ -289,6 +290,10 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 		</a>
 	</li>
 </xen:if>]]></template>
+    <template title="bdapi_consumer_alert_provider" version_id="24" version_string="0.9.8-dev"><![CDATA[{xen:raw $notificationHtml}
+<span class="faint">{xen:phrase bdapi_consumer_alert_via_provider,
+	'link={$provider.root}',
+	'provider={$notificationProvider.name}'}</span>]]></template>
     <template title="bdapi_consumer_navigation_visitor_tab_links1" version_id="15" version_string="0.9.6b"><![CDATA[<xen:if is="!{xen:helper bdApiConsumer_getOption, '_is130+'} AND {xen:helper bdApiConsumer_getOption, _activated}">
 	<li><a href="{xen:link account/external-accounts}">{xen:phrase bdapi_consumer_external}</a></li>
 </xen:if>]]></template>
