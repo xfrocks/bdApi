@@ -14,6 +14,15 @@ class bdApiConsumer_Helper_Api
             rawurlencode(self::SCOPE),
         ));
 
+        if (XenForo_Application::getConfig()->get(bdApiConsumer_Option::CONFIG_TRACK_AUTHORIZE_URL_STATE)
+            && !isset($extraParams['state'])
+        ) {
+            $extraParams['state'] = base64_encode(json_encode(array(
+                'time' => XenForo_Application::$time,
+                'ip' => XenForo_Helper_Ip::convertIpBinaryToString(XenForo_Application::getSession()->get('ip')),
+            )));
+        }
+
         foreach ($extraParams as $key => $value) {
             $url .= sprintf('&%s=%s', $key, rawurlencode($value));
         }

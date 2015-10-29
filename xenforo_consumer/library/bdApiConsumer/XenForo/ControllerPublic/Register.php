@@ -9,11 +9,37 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
         $providerCode = $this->_input->filterSingle('provider', XenForo_Input::STRING);
         $assocUserId = $this->_input->filterSingle('assoc', XenForo_Input::UINT);
         $redirect = $this->_input->filterSingle('redirect', XenForo_Input::STRING);
+        $externalCode = $this->_input->filterSingle('code', XenForo_Input::STRING);
+
+        $state = $this->_input->filterSingle('state', XenForo_Input::STRING);
+        if (!empty($state)) {
+            // looks like bdApiConsumer_Option::CONFIG_TRACK_AUTHORIZE_URL_STATE has been enabled
+            // attempt to unpack the state data now
+            $stateData = @base64_decode($state);
+            if ($stateData !== false) {
+                $stateData = @json_decode($stateData, true, 2);
+                if ($stateData !== null) {
+                    if (isset($stateData['time'])) {
+                        $stateData['timeElapsed'] = XenForo_Application::$time - $stateData['time'];
+                    }
+
+                    // make it available in server error log (if an error occurs)
+                    $_POST['.state'] = $stateData;
+                }
+            }
+        }
 
         $provider = bdApiConsumer_Option::getProviderByCode($providerCode);
         if (empty($provider)) {
-            // this is one serious error
-            throw new XenForo_Exception('Provider could not be determined');
+            if (!empty($externalCode)) {
+                // make this available in server error log
+                $_POST['.dynamicRedirect'] = $this->getDynamicRedirect();
+
+                // this is one serious error
+                throw new XenForo_Exception('Provider could not be determined');
+            } else {
+                return $this->responseNoPermission();
+            }
         }
 
         $externalRedirectUri = XenForo_Link::buildPublicLink('canonical:register/external', false, array(
@@ -34,7 +60,6 @@ class bdApiConsumer_XenForo_ControllerPublic_Register extends XFCP_bdApiConsumer
 
         // try to use the non-standard query parameter `t` first,
         // continue exchange code for access token later if that fails
-        $externalCode = $this->_input->filterSingle('code', XenForo_Input::STRING);
         if (empty($externalCode)) {
             return $this->responseError(new XenForo_Phrase('bdapi_consumer_error_occurred_while_connecting_with_x',
                 array('provider' => $provider['name'])));
