@@ -134,6 +134,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <phrase title="bdapi_consumer_alert_via_provider" version_id="24" version_string="0.9.8-dev"><![CDATA[(via <a href="{link}" target="_blank" tabindex="-1" rel="nofollow">{provider}</a>)]]></phrase>
     <phrase title="bdapi_consumer_associated_x_account" version_id="8" version_string="0.9.2"><![CDATA[Associated {provider} Account]]></phrase>
     <phrase title="bdapi_consumer_associate_with_x" version_id="8" version_string="0.9.2"><![CDATA[Associate with {provider}]]></phrase>
+    <phrase title="bdapi_consumer_auto_login_user_x_requires_tfa" version_id="28" version_string="0.9.8-dev"><![CDATA[Welcome back {username}, you need to finish <a href="{twoStepLink}">two step verification</a> to login.]]></phrase>
     <phrase title="bdapi_consumer_auto_login_with_x_failed" version_id="3" version_string="0.9-dev"><![CDATA[Attempt to auto login with {provider} has been failed.]]></phrase>
     <phrase title="bdapi_consumer_auto_login_with_x_succeeded_y" version_id="3" version_string="0.9-dev"><![CDATA[Welcome back {username}, you have been logged in via {provider}.]]></phrase>
     <phrase title="bdapi_consumer_auto_register_id_sync" version_id="7" version_string="0.9.1"><![CDATA[Enabled with ID sync]]></phrase>
@@ -297,8 +298,9 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <template title="bdapi_consumer_navigation_visitor_tab_links1" version_id="15" version_string="0.9.6b"><![CDATA[<xen:if is="!{xen:helper bdApiConsumer_getOption, '_is130+'} AND {xen:helper bdApiConsumer_getOption, _activated}">
 	<li><a href="{xen:link account/external-accounts}">{xen:phrase bdapi_consumer_external}</a></li>
 </xen:if>]]></template>
-    <template title="bdapi_consumer_page_container_head" version_id="16" version_string="0.9.7"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} != '0'
+    <template title="bdapi_consumer_page_container_head" version_id="28" version_string="0.9.8-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} != '0'
 	AND {$visitor.user_id} == 0
+	AND {$controllerName} != 'XenForo_ControllerPublic_Login'
 	AND {$controllerName} != 'XenForo_ControllerPublic_Register'">
 	<xen:foreach loop="$providers" value="$provider">
 		<xen:set var="$js">{xen:helper bdApiConsumer_getProviderSdkJs, $provider, {$provider.code}}</xen:set>
@@ -331,12 +333,28 @@ window['{$provider.code}Init'] = function()
 				loginData,
 				function(ajaxData, textStatus)
 				{
-					if (ajaxData._redirectMessage && ajaxData._redirectTarget)
+					if (ajaxData._redirectTarget)
 					{
-						XenForo.alert(ajaxData._redirectMessage, '', 2000);
-						document.location = ajaxData._redirectTarget;
+						if (ajaxData._redirectMessage)
+						{
+							XenForo.alert(ajaxData._redirectMessage, '', 2000, function() {
+								document.location = ajaxData._redirectTarget;
+							});
+						}
+						else
+						{
+							document.location = ajaxData._redirectTarget;
+						}
 					}
-				}
+					else
+					{
+						if (ajaxData.message)
+						{
+							XenForo.alert(ajaxData.message, '', 5000);
+						}
+					}
+				},
+				{ error: null, global: false }
 			);
 		}
 	});

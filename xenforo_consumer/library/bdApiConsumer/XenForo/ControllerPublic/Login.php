@@ -68,27 +68,51 @@ class bdApiConsumer_XenForo_ControllerPublic_Login extends XFCP_bdApiConsumer_Xe
             }
         }
 
-        if ($existingAssoc AND ($user = $userModel->getUserById($existingAssoc['user_id']))) {
-            $userModel->setUserRememberCookie($user['user_id']);
+        if (!$existingAssoc) {
+            return $this->responseError(new XenForo_Phrase('bdapi_consumer_auto_login_with_x_failed',
+                array('provider' => $provider['name'])));
+        }
+        $user = $userModel->getFullUserById($existingAssoc['user_id']);
+        if (empty($user)) {
+            return $this->responseError(new XenForo_Phrase('requested_user_not_found'));
+        }
 
-            XenForo_Model_Ip::log($user['user_id'], 'user', $user['user_id'], 'login_api_consumer');
+        if (XenForo_Application::$versionId > 1050000) {
+            /** @var XenForo_ControllerHelper_Login $loginHelper */
+            $loginHelper = $this->getHelper('Login');
 
-            $userModel->deleteSessionActivity(0, $this->_request->getClientIp(false));
+            if ($loginHelper->userTfaConfirmationRequired($user)) {
+                $loginHelper->setTfaSessionCheck($user['user_id']);
 
-            $session = XenForo_Application::get('session');
+                return $this->responseMessage(new XenForo_Phrase('bdapi_consumer_auto_login_user_x_requires_tfa', array(
+                    'username' => $user['username'],
+                    'twoStepLink' => XenForo_Link::buildPublicLink('login/two-step', null, array(
+                        'redirect' => $this->getDynamicRedirect(),
+                        'remember' => 1,
+                    ))
+                )));
+            }
+        }
 
-            $session->changeUserId($user['user_id']);
+        $userModel->setUserRememberCookie($user['user_id']);
+        XenForo_Model_Ip::log($user['user_id'], 'user', $user['user_id'], 'login_api_consumer');
+        $userModel->deleteSessionActivity(0, $this->_request->getClientIp(false));
+
+        if (XenForo_Application::$versionId < 1050000) {
+            XenForo_Application::getSession()->changeUserId($user['user_id']);
             XenForo_Visitor::setup($user['user_id']);
+        } else {
+            $visitor = XenForo_Visitor::setup($user['user_id']);
+            XenForo_Application::getSession()->userLogin($user['user_id'], $visitor['password_date']);
+        }
 
-            $message = new XenForo_Phrase('bdapi_consumer_auto_login_with_x_succeeded_y', array(
+        return $this->responseRedirect(
+            XenForo_ControllerResponse_Redirect::SUCCESS,
+            $this->getDynamicRedirect(),
+            new XenForo_Phrase('bdapi_consumer_auto_login_with_x_succeeded_y', array(
                 'provider' => $provider['name'],
                 'username' => $user['username']
-            ));
-
-            return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, $this->getDynamicRedirect(), $message);
-        } else {
-            return $this->responseError(new XenForo_Phrase('bdapi_consumer_auto_login_with_x_failed', array('provider' => $provider['name'])));
-        }
+            ))
+        );
     }
-
 }
