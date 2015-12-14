@@ -102,7 +102,13 @@ class bdApiConsumer_ControllerPublic_Callback extends XenForo_ControllerPublic_A
 
                 foreach ($topicPings as $ping) {
                     if (!empty($ping['result'])) {
-                        $results[] = $ping;
+                        $results[] = array_intersect_key($ping, array(
+                            'result' => true,
+                            'topic' => true,
+                            'action' => true,
+                        ));
+                    } else {
+                        // TODO: unsubscribe
                     }
                 }
             }
@@ -193,7 +199,9 @@ class bdApiConsumer_ControllerPublic_Callback extends XenForo_ControllerPublic_A
             }
             $user = $users[$auth['user_id']];
 
-            if ($pingRef['action'] == 'insert'
+            if (!bdApiConsumer_Option::get('displayExternalNotifications')) {
+                $pingRef['result'] = 'system turned off';
+            } elseif ($pingRef['action'] == 'insert'
                 && !empty($pingRef['object_data']['notification_id'])
             ) {
                 if (XenForo_Model_Alert::userReceivesAlert($user, 'bdapi_consumer', $auth['provider'])) {
