@@ -26,6 +26,8 @@ class bdApiConsumer_Helper_AutoRegister
         array $externalVisitor,
         XenForo_Model_UserExternal $userExternalModel)
     {
+        $user = null;
+
         /** @var bdApiConsumer_XenForo_Model_UserExternal $userExternalModel */
         $options = XenForo_Application::get('options');
 
@@ -80,18 +82,25 @@ class bdApiConsumer_Helper_AutoRegister
         $writer->set('language_id', XenForo_Visitor::getInstance()->get('language_id'));
 
         $writer->advanceRegistrationUserState(false);
-        $writer->preSave();
 
         // TODO: option for extra user group
 
-        $writer->save();
+        $writer->preSave();
+        if ($writer->hasErrors()) {
+            return $user;
+        }
 
-        $user = $writer->getMergedData();
+        try {
+            $writer->save();
+            $user = $writer->getMergedData();
 
-        $userExternalModel->bdApiConsumer_updateExternalAuthAssociation($provider, $externalVisitor['user_id'],
-            $user['user_id'], array_merge($externalVisitor, array('token' => $externalToken)));
+            $userExternalModel->bdApiConsumer_updateExternalAuthAssociation($provider, $externalVisitor['user_id'],
+                $user['user_id'], array_merge($externalVisitor, array('token' => $externalToken)));
 
-        XenForo_Model_Ip::log($user['user_id'], 'user', $user['user_id'], 'register_api_consumer');
+            XenForo_Model_Ip::log($user['user_id'], 'user', $user['user_id'], 'register_api_consumer');
+        } catch (XenForo_Exception $e) {
+            XenForo_Error::logException($e, false);
+        }
 
         return $user;
     }
