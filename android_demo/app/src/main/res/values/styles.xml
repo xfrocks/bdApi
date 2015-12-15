@@ -4,6 +4,7 @@
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
+        <item name="android:dialogTheme">@style/DialogWithTitle</item>
     </style>
 
     <style name="FacebookButton" parent="@android:style/Widget.Button">
@@ -16,6 +17,10 @@
 
     <style name="GoogleButton" parent="@android:style/Widget.Button">
         <item name="colorButtonNormal">@color/google_red</item>
+    </style>
+
+    <style name="DialogWithTitle" parent="@style/Theme.AppCompat.Light.Dialog">
+        <item name="android:windowNoTitle">false</item>
     </style>
 
 </resources>

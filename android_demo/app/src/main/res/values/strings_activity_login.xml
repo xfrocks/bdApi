@@ -29,4 +29,11 @@
     <string name="error_twitter_failed">Unable to sign in with Twitter</string>
 
     <string name="action_or_register">…Or Register?</string>
+
+    <string name="tfa_required">Verification Required</string>
+    <string name="tfa_email">Receive Code via Email</string>
+    <string name="tfa_totp">Generate Code via App</string>
+    <string name="tfa_backup">Use Backup Codes</string>
+    <string name="tfa_x_not_supported">%1$s (not supported)</string>
+    <string name="tfa_code">Verification Code</string>
 </resources>

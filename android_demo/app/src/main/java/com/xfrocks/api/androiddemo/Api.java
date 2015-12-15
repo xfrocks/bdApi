@@ -56,6 +56,9 @@ public class Api {
     public static final String URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_AUTHORIZATION_CODE = "authorization_code";
     public static final String URL_OAUTH_TOKEN_PARAM_USERNAME = "username";
     public static final String URL_OAUTH_TOKEN_PARAM_PASSWORD = "password";
+    public static final String URL_OAUTH_TOKEN_PARAM_TFA_PROVIDER_ID = "tfa_provider";
+    public static final String URL_OAUTH_TOKEN_PARAM_TFA_TRIGGER = "tfa_trigger";
+    public static final String URL_OAUTH_TOKEN_PARAM_TFA_PROVIDER_CODE = "code";
     public static final String URL_OAUTH_TOKEN_PARAM_REFRESH_TOKEN = "refresh_token";
     public static final String URL_OAUTH_TOKEN_PARAM_CODE = "code";
     public static final String URL_OAUTH_TOKEN_PARAM_REDIRECT_URI = "redirect_uri";
@@ -63,6 +66,7 @@ public class Api {
     public static final String URL_OAUTH_TOKEN_TWITTER_PARAM_URI = "twitter_uri";
     public static final String URL_OAUTH_TOKEN_TWITTER_PARAM_AUTH = "twitter_auth";
     public static final String URL_OAUTH_TOKEN_GOOGLE_PARAM_TOKEN = "google_token";
+    public static final String URL_OAUTH_TOKEN_RESPONSE_HEADER_TFA_PROVIDERS = "X-Api-Tfa-Providers";
 
     public static final String URL_USERS_PARAM_USERNAME = "username";
     public static final String URL_USERS_PARAM_EMAIL = "user_email";
@@ -315,6 +319,7 @@ public class Api {
     private static class Request extends com.android.volley.Request<JSONObject> {
 
         final Map<String, String> mParams;
+        Map<String, String> mResponseHeaders;
 
         public Request(int method, String url, Map<String, String> params) {
             super(method, makeUrl(method, url, params), null);
@@ -353,12 +358,18 @@ public class Api {
 
         @Override
         protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+            mResponseHeaders = response.headers;
+
             try {
                 String jsonString =
                         new String(response.data, HttpHeaderParser.parseCharset(response.headers));
 
                 if (BuildConfig.DEBUG) {
                     Log.v(getTag().toString(), "Response=" + jsonString);
+                    for (Map.Entry<String, String> header : response.headers.entrySet()) {
+                        Log.v(getTag().toString(),
+                                "Response[" + header.getKey() + "]=" + header.getValue());
+                    }
                 }
 
                 JSONObject jsonObject = new JSONObject(jsonString);

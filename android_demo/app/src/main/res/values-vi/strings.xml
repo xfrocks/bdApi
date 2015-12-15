@@ -42,6 +42,12 @@
     <string name="refresh">Tải lại</string>
     <string name="remember_token">Ghi nhớ mã truy cập?</string>
     <string name="sign_in_with_remember">Đăng nhập với mã truy cập cũ?</string>
+    <string name="tfa_required">Xác Thực Bắt Buộc</string>
+    <string name="tfa_email">Nhận mã qua thư</string>
+    <string name="tfa_totp">Sinh mã bằng ứng dụng</string>
+    <string name="tfa_backup">Sử dụng mã dự phòng</string>
+    <string name="tfa_x_not_supported">%1$s (không hỗ trợ)</string>
+    <string name="tfa_code">Xã xác thực</string>
     <string name="title_activity_register">Đăng ký</string>
     <string name="write_a_reply">Viết nội dung trả lời</string>
 </resources>

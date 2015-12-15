@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -67,7 +68,8 @@ import io.fabric.sdk.android.Fabric;
  */
 public class LoginActivity extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener,
+        TfaDialogFragment.TfaDialogListener {
 
     public static final String EXTRA_REDIRECT_TO = "redirect_to";
     private static final String STATE_FACEBOOK_SIGN_IN = "facebookSignIn";
@@ -120,7 +122,7 @@ public class LoginActivity extends AppCompatActivity
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
+                    attemptLogin(null, null);
                     return true;
                 }
                 return false;
@@ -133,7 +135,7 @@ public class LoginActivity extends AppCompatActivity
         mSignIn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                attemptLogin(null, null);
             }
         });
 
@@ -468,7 +470,7 @@ public class LoginActivity extends AppCompatActivity
         mGoogleApiClient.connect();
     }
 
-    private void attemptLogin() {
+    private void attemptLogin(String tfaProviderId, String tfaProviderCode) {
         if (mTokenRequest != null) {
             return;
         }
@@ -505,7 +507,7 @@ public class LoginActivity extends AppCompatActivity
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            new PasswordRequest(email, password).start();
+            new PasswordRequest(email, password, tfaProviderId, tfaProviderCode).start();
         }
     }
 
@@ -582,6 +584,16 @@ public class LoginActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onTfaTrigger(String providerId) {
+        attemptLogin(providerId, null);
+    }
+
+    @Override
+    public void onTfaFinishDialog(String providerId, String code) {
+        attemptLogin(providerId, code);
+    }
+
     private void setViewsEnabled(final boolean enabled) {
         mViewsEnabled = enabled;
 
@@ -654,9 +666,28 @@ public class LoginActivity extends AppCompatActivity
                         if (u != null) {
                             register(u);
                         }
+                        return;
                     } catch (JSONException e) {
                         // ignore
                     }
+                }
+
+                if (mResponseHeaders != null
+                        && mResponseHeaders.containsKey(Api.URL_OAUTH_TOKEN_RESPONSE_HEADER_TFA_PROVIDERS)) {
+                    String headerValue = mResponseHeaders.get(Api.URL_OAUTH_TOKEN_RESPONSE_HEADER_TFA_PROVIDERS);
+                    String[] providerIds = headerValue.split(",");
+
+                    FragmentManager fm = getSupportFragmentManager();
+                    TfaDialogFragment tfaDialog = TfaDialogFragment.newInstance(providerIds);
+                    tfaDialog.show(fm, tfaDialog.getClass().getSimpleName());
+
+                    return;
+                }
+
+                String errorMessage = getErrorMessage(response);
+                if (errorMessage != null) {
+                    Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    return;
                 }
 
                 return;
@@ -721,13 +752,19 @@ public class LoginActivity extends AppCompatActivity
     }
 
     private class PasswordRequest extends TokenRequest {
-        PasswordRequest(String email, String password) {
+        PasswordRequest(String email, String password, String tfaProviderId, String tfaProviderCode) {
             super(
                     new Api.Params(
                             Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE,
                             Api.URL_OAUTH_TOKEN_PARAM_GRANT_TYPE_PASSWORD)
                             .and(Api.URL_OAUTH_TOKEN_PARAM_USERNAME, email)
                             .and(Api.URL_OAUTH_TOKEN_PARAM_PASSWORD, password)
+                            .andIf(tfaProviderId != null,
+                                    Api.URL_OAUTH_TOKEN_PARAM_TFA_PROVIDER_ID, tfaProviderId)
+                            .andIf(tfaProviderId != null && tfaProviderCode == null,
+                                    Api.URL_OAUTH_TOKEN_PARAM_TFA_TRIGGER, 1)
+                            .andIf(tfaProviderId != null && tfaProviderCode != null,
+                                    Api.URL_OAUTH_TOKEN_PARAM_TFA_PROVIDER_CODE, tfaProviderCode)
                             .andClientCredentials()
             );
         }
