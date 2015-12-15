@@ -10,6 +10,8 @@ class bdApi_OAuth2 extends \OAuth2\Server
      */
     protected $_model;
 
+    protected $_actionOauthToken_tfaProviders = array();
+
     /**
      * Process /oauth/token request.
      *
@@ -19,10 +21,39 @@ class bdApi_OAuth2 extends \OAuth2\Server
      */
     public function actionOauthToken(bdApi_ControllerApi_Abstract $controller)
     {
+        foreach ($this->storages as $storage) {
+            if ($storage instanceof bdApi_OAuth2_Storage) {
+                $storage->setControllerApi($controller);
+                break;
+            }
+        }
+
         $request = $this->_generateOAuth2Request();
         $response = $this->handleTokenRequest($request);
 
+        if ($response->isClientError()
+            && count($this->_actionOauthToken_tfaProviders) > 0
+        ) {
+            // supports XenForo 1.5+ two factor authentication
+            $response->setStatusCode(202);
+
+            $errorDescription = $response->getParameter('error_description');
+            if (!empty($errorDescription)) {
+                $response->setParameter('error_description', 'Two-factor authorization code is required');
+            }
+
+            $response->addHttpHeaders(array(
+                'X-Api-Tfa-Providers' => implode(', ', array_keys($this->_actionOauthToken_tfaProviders)),
+            ));
+        }
+
         return $this->_generateControllerResponse($controller, $response);
+    }
+
+    public function actionOauthToken_setTfaProviders(array $providers)
+    {
+        // supports XenForo 1.5+ two factor authentication
+        $this->_actionOauthToken_tfaProviders = $providers;
     }
 
     /**
@@ -65,7 +96,7 @@ class bdApi_OAuth2 extends \OAuth2\Server
     public function actionOauthAuthorize2(XenForo_Controller $controller, array $authorizeParams, $accepted, $userId)
     {
         if (!empty($authorizeParams['redirect_uri'])) {
-            $storage = $this->storages['client'];
+            $storage = $this->getStorage('client');
             if ($storage instanceof bdApi_OAuth2_Storage) {
                 $storage->setRequestRedirectUri($authorizeParams['redirect_uri']);
             }
@@ -177,7 +208,7 @@ class bdApi_OAuth2 extends \OAuth2\Server
      */
     public function __construct(bdApi_Model_OAuth2 $model)
     {
-        $storage = new bdApi_OAuth2_Storage($model);
+        $storage = new bdApi_OAuth2_Storage($model, $this);
 
         parent::__construct(array(
             'access_token' => $storage,
@@ -268,7 +299,13 @@ class bdApi_OAuth2_Storage implements
     /** @var bdApi_Model_OAuth2 */
     protected $_model;
 
+    /** @var bdApi_OAuth2 */
+    protected $_server;
+
     protected $_requestRedirectUri = '';
+
+    /** @var bdApi_ControllerApi_Abstract */
+    protected $_controller = null;
 
     public function getModel()
     {
@@ -280,9 +317,15 @@ class bdApi_OAuth2_Storage implements
         $this->_requestRedirectUri = $redirectUri;
     }
 
-    public function __construct(bdApi_Model_OAuth2 $model)
+    public function setControllerApi(bdApi_ControllerApi_Abstract $controller)
+    {
+        $this->_controller = $controller;
+    }
+
+    public function __construct(bdApi_Model_OAuth2 $model, bdApi_OAuth2 $server)
     {
         $this->_model = $model;
+        $this->_server = $server;
     }
 
     public function getAccessToken($oauthToken)
@@ -491,11 +534,66 @@ class bdApi_OAuth2_Storage implements
     {
         $userId = $this->_model->getUserModel()->validateAuthentication($nameOrEmail, $password);
 
+        if (!$this->_checkUserCredentials_runTfaValidation($userId)) {
+            return false;
+        }
+
         if (!empty($userId)) {
             return true;
         } else {
             return false;
         }
+    }
+
+    protected function _checkUserCredentials_runTfaValidation($userId)
+    {
+        if ($userId < 1
+            || XenForo_Application::$versionId < 1050000
+        ) {
+            return true;
+        }
+
+        if ($this->_controller === null) {
+            // since XenForo 1.5+, $_controller must be set to check for two factor authentication
+            // otherwise, deny access immediately
+            return false;
+        }
+
+        /** @var XenForo_ControllerHelper_Login $loginHelper */
+        $loginHelper = $this->_controller->getHelper('Login');
+        $user = $this->_model->getUserModel()->getFullUserById($userId);
+
+        if (!$loginHelper->userTfaConfirmationRequired($user)) {
+            return true;
+        }
+
+        /** @var XenForo_Model_Tfa $tfaModel */
+        $tfaModel = $this->_model->getModelFromCache('XenForo_Model_Tfa');
+        $providers = $tfaModel->getTfaConfigurationForUser($user['user_id'], $userData);
+        if (empty($providers)) {
+            return true;
+        }
+        $this->_server->actionOauthToken_setTfaProviders($providers);
+
+        $tfaProvider = $this->_controller->getInput()->filterSingle('tfa_provider', XenForo_Input::STRING);
+        if (strlen($tfaProvider) === 0) {
+            return false;
+        }
+
+        $tfaTrigger = $this->_controller->getInput()->filterSingle('tfa_trigger', XenForo_Input::BOOLEAN);
+        if ($tfaTrigger) {
+            $loginHelper->triggerTfaCheck($user, $tfaProvider, $providers, $userData);
+            throw $this->_controller->responseException($this->_controller->responseMessage(
+                new XenForo_Phrase('changes_saved')));
+        }
+
+        $loginHelper->assertNotTfaAttemptLimited($user['user_id']);
+        if ($loginHelper->runTfaValidation($user, $tfaProvider, $providers, $userData) === true) {
+            return true;
+        }
+
+        throw $this->_controller->responseException($this->_controller->responseError(
+            new XenForo_Phrase('two_step_verification_value_could_not_be_confirmed')));
     }
 
     public function getUserDetails($nameOrEmail)

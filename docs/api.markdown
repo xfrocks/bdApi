@@ -46,7 +46,7 @@ Please note that the TTL can be reconfigured in XenForo AdminCP options page.
 ### Social Logins
 Since oauth2-2015030602, social logins are accepted as a way to authorize access to an user account. List of supported services: Facebook, Twitter and Google. The common flow is:
 
- 1. Third party client authorize user via social service (e.g. awesomewebsite.com use Facebook Application A to authorize user).
+ 1. Third party client authorizes user via social service (e.g. awesomewebsite.com use Facebook Application A to authorize user).
  2. Third party client obtains access token to social service (e.g. awesomewebsite.com has Facebook access token T).
  3. Third party client submits access token to API endpoint to request access token to XenForo (e.g. awesomewebsite.com sends Facebook access token T to xenforo.com).
  4. XenForo verifies that access token is valid and third party client does have access to a XenForo account (e.g. xenforo.com contacts Facebook server to verify access token T then cross-matches to a XenForo user account U).
@@ -109,6 +109,30 @@ Parameters:
 Required scopes:
 
  * `admincp`
+
+### Two-Factor Authentication
+Since oauth2-2015121501, user credentials grant flow will require additional verfications for users who have tfa configured (available since XenForo 1.5.0). If username and password can be verified, client will receive a response with HTTP Status Code 202 (Accepted) to continue verifying tfa. The response will also include the header `X-Api-Tfa-Providers` which is a comma separated list of available tfa providers. Client needs to resend POST `/oauth/token` with additional parameters:
+
+ * `tfa_provider`: id of the chosen provider.
+ * `tfa_trigger`: 1 if the provider requires trigger to work. Currently, only `email` provider needs this.
+ * `code`: the verification code.
+ * Note: other parameters may be required by third party tfa providers.
+
+Normal flow for `totp` and `backup` verification:
+
+ 1. Client sends standard POST `/oauth/token`
+ 2. Server responses with HTTP 202 Accepted, `X-Api-Tfa-Providers` = `totp, backup`
+ 3. Client sends POST `/oauth/token` with all standard parameters plus `tfa_provider` = `totp`/`backup` and `code` = `123456`
+ 4. Server responses with API access tokens
+
+Flow for `email` tfa verification:
+
+ 1. Client sends standard POST `/oauth/token`
+ 2. Server responses with HTTP 202 Accepted, `X-Api-Tfa-Providers` = `email`
+ 3. Client sends POST `/oauth/token` with all standard parameters plus `tfa_provider` = `email` and `tfa_trigger` = `1`
+ 4. User waits for his/her email from XenForo
+ 5. Client sends POST `/oauth/token` with all standard parameters plus `tfa_provider` = `email` and `code` = `123456`
+ 6. Server responses with API access tokens
 
 ## Discoverability
 System information and availability can be determined by sending a GET request to `/` (index route). A list of resources will be returned. If the request is authenticated, the revisions of API system and installed modules will also made available for further inspection.
