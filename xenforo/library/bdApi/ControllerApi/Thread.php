@@ -543,7 +543,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             $threadIds = $threadModel->bdApi_getUnreadThreadIdsInForum($visitor->get('user_id'), array_merge(array($forum['node_id']), $childNodeIds), array('limit' => $maxResults));
         }
 
-        return $this->_getNewOrRecentResponse($threadIds);
+        return $this->_getNewOrRecentResponse('threads_new', $threadIds);
     }
 
     public function actionGetRecent()
@@ -587,7 +587,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
         $threadIds = array_keys($threadModel->getThreads($conditions, $fetchOptions));
 
-        return $this->_getNewOrRecentResponse($threadIds);
+        return $this->_getNewOrRecentResponse('threads_recent', $threadIds);
     }
 
     protected function _prepareThreads(array $threads)
@@ -688,7 +688,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         return $threadsData;
     }
 
-    protected function _getNewOrRecentResponse(array $threadIds)
+    protected function _getNewOrRecentResponse($searchType, array $threadIds)
     {
         $visitor = XenForo_Visitor::getInstance();
         $threadModel = $this->_getThreadModel();
@@ -699,18 +699,44 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             'permissionCombinationId' => $visitor['permission_combination_id'],
         ));
         foreach ($threadIds AS $threadId) {
-            if (!isset($threads[$threadId]))
+            if (!isset($threads[$threadId])) {
                 continue;
+            }
             $threadRef = &$threads[$threadId];
 
             $threadRef['permissions'] = XenForo_Permission::unserializePermissions($threadRef['node_permission_cache']);
 
-            if ($threadModel->canViewThreadAndContainer($threadRef, $threadRef, $null, $threadRef['permissions'])) {
+            if ($threadModel->canViewThreadAndContainer($threadRef, $threadRef, $null, $threadRef['permissions'])
+                && !$visitor->isIgnoring($threadRef['user_id'])
+            ) {
                 $results[] = array('thread_id' => $threadId);
             }
         }
 
         $data = array('threads' => $results);
+
+        $dataLimit = $this->_input->filterSingle('data_limit', XenForo_Input::UINT);
+        if ($dataLimit > 0) {
+            $searchResults = array();
+            foreach ($results as $result) {
+                $searchResults[] = array(
+                    XenForo_Model_Search::CONTENT_TYPE => 'thread',
+                    XenForo_Model_Search::CONTENT_ID => $result['thread_id']
+                );
+            }
+
+            /** @var bdApi_Extend_Model_Search $searchModel */
+            $searchModel = $this->getModelFromCache('XenForo_Model_Search');
+            $search = $searchModel->insertSearch($searchResults, $searchType, '', array(), 'date', false);
+
+            $dataResults = array_slice($searchResults, 0, $dataLimit);
+            $dataResults = $searchModel->prepareApiDataForSearchResults($dataResults);
+            $data['data'] = $searchModel->prepareApiContentDataForSearch($dataResults);
+
+            bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data,
+                $dataLimit, $search['result_count'], 1,
+                'search/results', $search, array('limit' => $dataLimit));
+        }
 
         return $this->responseData('bdApi_ViewApi_Thread_NewOrRecent', $data);
     }

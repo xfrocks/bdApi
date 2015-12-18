@@ -59,7 +59,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
         $data = array(
             '_search' => $search,
-            'data' => $this->_filterDataMany(array_values($contentData)),
+            'data' => array_values($contentData),
             'data_total' => $search['result_count'],
         );
 
@@ -110,7 +110,11 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
         $resultsData = $this->_fetchResultsData($results);
         if (!empty($resultsData)) {
-            $data['data'] = $resultsData;
+            $data['data'] = $resultsData['data'];
+
+            bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data,
+                $resultsData['limit'], $search['result_count'], $resultsData['page'],
+                'search/results', $search, $resultsData['pageLinkParams']);
         }
 
         return $this->responseData('bdApi_ViewApi_Search_Threads', $data);
@@ -156,7 +160,11 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
         $resultsData = $this->_fetchResultsData($results);
         if (!empty($resultsData)) {
-            $data['data'] = $resultsData;
+            $data['data'] = $resultsData['data'];
+
+            bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data,
+                $resultsData['limit'], $search['result_count'], $resultsData['page'],
+                'search/results', $search, $resultsData['pageLinkParams']);
         }
 
         return $this->responseData('bdApi_ViewApi_Search_Posts', $data);
@@ -376,7 +384,12 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         $searchModel = $this->_getSearchModel();
         $contentData = $searchModel->prepareApiContentDataForSearch($dataResults);
 
-        return array_values($contentData);
+        return array(
+            'data' => array_values($contentData),
+            'limit' => $dataLimit,
+            'page' => 1,
+            'pageLinkParams' => array('limit' => $dataLimit),
+        );
     }
 
     /**

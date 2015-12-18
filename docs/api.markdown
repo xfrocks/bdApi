@@ -773,6 +773,10 @@ List of unread threads (must be logged in).
                 thread_id: (int)
             },
             ...
+        ],
+        data: [ # since forum-2015121802
+            (thread),
+            ...
         ]
     }
 
@@ -780,6 +784,7 @@ Parameters:
 
  * `limit` (_optional_): maximum number of result threads. The limit may get decreased if the value is too large (depending on the system configuration).
  * `forum_id` (_optional_): id of the container forum to search for threads. Child forums of the specified forum will be included in the search.
+ * `data_limit` (_optional_): number of thread data to be returned. By default, no data is returned. Since forum-2015121802.
 
 Required scopes:
 
@@ -794,6 +799,10 @@ List of recent threads.
                 thread_id: (int)
             },
             ...
+        ],
+        data: [ # since forum-2015121802
+            (thread),
+            ...
         ]
     }
 
@@ -802,6 +811,7 @@ Parameters:
  * `days` (_optional_): maximum number of days to search for threads.
  * `limit` (_optional_): maximum number of result threads. The limit may get decreased if the value is too large (depending on the system configuration).
  * `forum_id` (_optional_): id of the container forum to search for threads. Child forums of the specified forum will be included in the search.
+ * `data_limit` (_optional_): number of thread data to be returned. By default, no data is returned. Since forum-2015121802.
 
 Required scopes:
 
@@ -2284,7 +2294,7 @@ Search for threads.
             },
             ...
         ],
-        data: [
+        data: [ # since forum-2015032403
             (thread),
             ...
         ]
@@ -2296,7 +2306,7 @@ Parameters:
  * `limit` (_optional_): maximum number of results. The limit may get decreased if the value is too large (depending on the system configuration).
  * `forum_id` (_optional_): id of the container forum to search for contents. Child forums of the specified forum will be included in the search.
  * `user_id` (_optional_): id of the creator to search for contents. Since forum-2015041502.
- * `data_limit` (_optional_): number of content data to be returned. By default, no data is returned. Since forum-2015032403.
+ * `data_limit` (_optional_): number of thread data to be returned. By default, no data is returned. Since forum-2015032403.
 
 Required scopes:
 
@@ -2312,7 +2322,7 @@ Search for posts.
             },
             ...
         ],
-        data: [
+        data: [ # since forum-2015032403
             (post),
             ...
         ]
@@ -2325,7 +2335,7 @@ Parameters:
  * `forum_id` (_optional_): id of the container forum to search for contents. Child forums of the specified forum will be included in the search.
  * `thread_id` (_optional_): id of the container thread to search for posts.
  * `user_id` (_optional_): id of the creator to search for contents. Since forum-2015041502.
- * `data_limit` (_optional_): number of content data to be returned. By default, no data is returned. Since forum-2015032403.
+ * `data_limit` (_optional_): number of post data to be returned. By default, no data is returned. Since forum-2015032403.
 
 Required scopes:
 
