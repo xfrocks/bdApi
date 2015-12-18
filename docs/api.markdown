@@ -140,13 +140,13 @@ System information and availability can be determined by sending a GET request t
 ## Common Parameters
 
 ### i18n
-All API requests accept `locale` parameter to switch user facing messages to specified language. The value must be a valid language code (ISO 639-1) with optional inclusion of a valid country code (ISO 3166-1 alpha 2) separated by hyphen ("-"). If no complete match can be found, a language with the same language code (even with different country code) will be used. In the worst case that there are no installed languages of requested language code, the default language will be used. Since forum-2015100401.
+All API requests accept `locale` parameter to switch user facing messages to specified language. The value must be a valid language code (ISO 639-1) with optional inclusion of a valid country code (ISO 3166-1 alpha 2) separated by hyphen ("-"). If no complete match can be found, a language with the same language code (even with different country code) will be used. In the worst case that there are no installed languages of requested language code, the default language will be used. Since api-2015100401.
 
 ### Fields filtering
 For API method with resource data like a forum or a thread, the data can be filtered to get interested fields only. When there are no filter
 
- * `fields_include`: coma-separated list of fields of a resource. If this parameter is used along with `fields_exclude`, the other parameter will be ignored.
- * `fields_exclude`: coma-separated list of fields of a resource to exclude in the response. Cannot be used with `fields_include` or this parameter will be ignored.
+ * `fields_include`: coma-separated list of fields of a resource. For additional fields, it is possible to use wildcard (`*`) to include all default fields before specifying addtional ones.
+ * `fields_exclude`: coma-separated list of fields of a resource to exclude in the response.
 
 ### Resource ordering
 For API method with list of resources, the resources can be ordered differently with the parameter `order`. List of supported orders will be specified for each method. The default order will always be `natural`. Most of the time, the natural order is the order of which each resource is added to the system (resource id for example).

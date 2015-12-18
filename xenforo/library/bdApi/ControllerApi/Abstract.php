@@ -2,16 +2,18 @@
 
 abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abstract
 {
-    const FIELDS_FILTER_NONE = '';
-    const FIELDS_FILTER_INCLUDE = 'include';
-    const FIELDS_FILTER_EXCLUDE = 'exclude';
+    const FIELDS_FILTER_NONE = 0;
+    const FIELDS_FILTER_INCLUDE = 0x01;
+    const FIELDS_FILTER_EXCLUDE = 0x02;
 
     const SPAM_RESULT_ALLOWED = 'allowed';
     const SPAM_RESULT_MODERATED = 'moderated';
     const SPAM_RESULT_DENIED = 'denied';
 
     protected $_fieldsFilterType = false;
-    protected $_fieldsFilterList = array();
+    protected $_fieldsFilterInclude = array();
+    protected $_fieldsFilterExclude = array();
+    protected $_fieldsFilterDefaults = array();
 
     public function actionOptions()
     {
@@ -117,24 +119,29 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
     }
 
     /**
-     * Filters data for many resources
+     * Filters data for many resources.
+     * This method name had been prefixed with "_" before it was updated to public visibility.
+     * The name is kept for backward compatibility.
      *
      * @param array $resourcesData
+     * @param array $prefixes
      * @return array
      */
-    public function _filterDataMany(array $resourcesData)
+    public function _filterDataMany(array $resourcesData, array $prefixes = array())
     {
         $filtered = array();
 
         foreach ($resourcesData as $key => $resourceData) {
-            $filtered[$key] = $this->_filterDataSingle($resourceData);
+            $filtered[$key] = $this->_filterDataSingle($resourceData, $prefixes);
         }
 
         return $filtered;
     }
 
     /**
-     * Filters data for one resource
+     * Filters data for one resource.
+     * This method name had been prefixed with "_" before it was updated to public visibility.
+     * The name is kept for backward compatibility.
      *
      * @param array $resourceData
      * @param array $prefixes
@@ -144,80 +151,121 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
     {
         $this->_prepareFieldsFilter();
 
-        switch ($this->_fieldsFilterType) {
-            case self::FIELDS_FILTER_INCLUDE:
-                $filtered = array();
-                foreach (array_keys($resourceData) as $field) {
-                    $fieldWithPrefixes = implode('.', array_merge($prefixes, array($field)));
+        if ($this->_fieldsFilterType === self::FIELDS_FILTER_NONE) {
+            return $resourceData;
+        }
 
-                    if (in_array($fieldWithPrefixes, $this->_fieldsFilterList)) {
-                        $filtered[$field] = $resourceData[$field];
-                    } else {
-                        if (is_array($resourceData[$field])) {
-                            $_prefixes = $prefixes;
-                            if (!is_int($field)) {
-                                $_prefixes[] = $field;
-                            }
-                            $_filtered = $this->_filterDataSingle($resourceData[$field], $_prefixes);
-                            if (!empty($_filtered)) {
-                                $filtered[$field] = $_filtered;
-                            }
-                        }
-                    }
-                }
-                break;
-            case self::FIELDS_FILTER_EXCLUDE:
-                $filtered = $resourceData;
-                foreach (array_keys($resourceData) as $field) {
-                    $fieldWithPrefixes = implode('.', array_merge($prefixes, array($field)));
+        $filtered = array();
+        foreach (array_keys($resourceData) as $field) {
+            if ($this->_isFieldExcluded($field, $prefixes)) {
+                continue;
+            }
 
-                    if (in_array($fieldWithPrefixes, $this->_fieldsFilterList)) {
-                        unset($filtered[$field]);
-                    } else {
-                        if (is_array($resourceData[$field])) {
-                            $_prefixes = $prefixes;
-                            if (!is_int($field)) {
-                                $_prefixes[] = $field;
-                            }
-                            $_filtered = $this->_filterDataSingle($resourceData[$field], $_prefixes);
-                            if (!empty($_filtered)) {
-                                $filtered[$field] = $_filtered;
-                            } else {
-                                unset($filtered[$field]);
-                            }
-                        }
-                    }
+            if (is_array($resourceData[$field])) {
+                $_prefixes = $prefixes;
+                if (!is_int($field)) {
+                    $_prefixes[] = $field;
                 }
-                break;
-            default:
-                $filtered = $resourceData;
+                $_filtered = $this->_filterDataSingle($resourceData[$field], $_prefixes);
+                if (count($_filtered) > 0) {
+                    $filtered[$field] = $_filtered;
+                }
+            } else {
+                $filtered[$field] = $resourceData[$field];
+            }
         }
 
         return $filtered;
     }
 
-    public function _isFieldExcluded($field)
+    /**
+     * Checks if a field is specifically requested to be included.
+     * This method name had been prefixed with "_" before it was updated to public visibility.
+     * The name is kept for backward compatibility.
+     *
+     * @param $field
+     * @param array $prefixes
+     * @return bool
+     */
+    public function _isFieldIncluded($field, array $prefixes = array())
     {
         $this->_prepareFieldsFilter();
 
-        $fieldAndDot = sprintf('%s.', $field);
-        $fieldAndDotStrlen = strlen($fieldAndDot);
+        if (!($this->_fieldsFilterType & self::FIELDS_FILTER_INCLUDE)) {
+            return false;
+        }
 
-        switch ($this->_fieldsFilterType) {
-            case self::FIELDS_FILTER_INCLUDE:
-                foreach ($this->_fieldsFilterList as $_field) {
-                    if ($_field == $field) {
-                        return false;
-                    }
+        $pattern = $field;
+        if (count($prefixes)) {
+            $pattern = sprintf('%s.%s', implode('.', $prefixes), $field);
+        }
+        $patternAndDot = $pattern . '.';
+        $patternAndDotLength = strlen($patternAndDot);
 
-                    if (substr($_field, 0, $fieldAndDotStrlen) == $fieldAndDot) {
-                        return false;
+        foreach ($this->_fieldsFilterInclude as $_field) {
+            if ($_field === $pattern
+                || substr($_field, 0, $patternAndDotLength) === $patternAndDot
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if a field is specifically requested to be excluded.
+     * This method name had been prefixed with "_" before it was updated to public visibility.
+     * The name is kept for backward compatibility.
+     *
+     * @param $field
+     * @param array $prefixes
+     * @return bool
+     */
+    public function _isFieldExcluded($field, array $prefixes = array())
+    {
+        $this->_prepareFieldsFilter();
+
+        if ($this->_fieldsFilterType & self::FIELDS_FILTER_INCLUDE) {
+            if ($this->_isFieldIncluded($field, $prefixes)) {
+                return false;
+            }
+
+            $includeDefault = false;
+            $_prefixes = $prefixes;
+            while (true) {
+                $_prefixesStr = implode('.', $_prefixes);
+                if (isset($this->_fieldsFilterDefaults[$_prefixesStr])) {
+                    if ($this->_fieldsFilterDefaults[$_prefixesStr]) {
+                        $includeDefault = true;
                     }
+                    break;
                 }
 
+                if (empty($_prefixes)) {
+                    break;
+                } else {
+                    array_pop($_prefixes);
+                }
+            }
+            if (!$includeDefault) {
                 return true;
-            case self::FIELDS_FILTER_EXCLUDE:
-                return in_array($field, $this->_fieldsFilterList);
+            }
+        }
+
+        if (!($this->_fieldsFilterType & self::FIELDS_FILTER_EXCLUDE)) {
+            return false;
+        }
+
+        $pattern = $field;
+        if (count($prefixes)) {
+            $pattern = sprintf('%s.%s', implode('.', $prefixes), $field);
+        }
+
+        foreach ($this->_fieldsFilterExclude as $_field) {
+            if ($_field === $pattern) {
+                return true;
+            }
         }
 
         return false;
@@ -228,19 +276,35 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         if ($this->_fieldsFilterType === false) {
             $this->_fieldsFilterType = self::FIELDS_FILTER_NONE;
 
-            $include = $this->_input->filterSingle('fields_include', XenForo_Input::STRING);
+            $include = filter_input(INPUT_GET, 'fields_include');
             if (!empty($include)) {
-                $this->_fieldsFilterType = self::FIELDS_FILTER_INCLUDE;
+                $this->_fieldsFilterType |= self::FIELDS_FILTER_INCLUDE;
                 foreach (explode(',', $include) as $field) {
-                    $this->_fieldsFilterList[] = trim($field);
-                }
-            } else {
-                $exclude = $this->_input->filterSingle('fields_exclude', XenForo_Input::STRING);
-                if (!empty($exclude)) {
-                    $this->_fieldsFilterType = self::FIELDS_FILTER_EXCLUDE;
-                    foreach (explode(',', $exclude) as $field) {
-                        $this->_fieldsFilterList[] = trim($field);
+                    $field = trim($field);
+                    $prefixes = explode('.', $field);
+                    $_field = array_pop($prefixes);
+                    $_prefixes = implode('.', $prefixes);
+                    if ($_field === '*') {
+                        $this->_fieldsFilterDefaults[$_prefixes] = true;
+                        if (!empty($_prefixes)) {
+                            $this->_fieldsFilterInclude[] = $_prefixes;
+                        }
+                    } else {
+                        $this->_fieldsFilterInclude[] = $field;
+                        $this->_fieldsFilterDefaults[$field] = true;
+                        if (!isset($this->_fieldsFilterDefaults[$_prefixes])) {
+                            $this->_fieldsFilterDefaults[$_prefixes] = false;
+                        }
                     }
+                }
+            }
+
+            $exclude = filter_input(INPUT_GET, 'fields_exclude');
+            if (!empty($exclude)) {
+                $this->_fieldsFilterType |= self::FIELDS_FILTER_EXCLUDE;
+                foreach (explode(',', $exclude) as $field) {
+                    $field = trim($field);
+                    $this->_fieldsFilterExclude[] = $field;
                 }
             }
         }
