@@ -559,6 +559,7 @@ Detail information of a thread.
             thread_is_sticky: (boolean),
             thread_is_followed: (boolean), # since forum-2014052903
             first_post: (post),
+            last_post: (post), # must be in fields_include to work, since forum-2015121801
             poll: { # since forum-2015100601
                 poll_id: (int),
                 poll_question: (string),

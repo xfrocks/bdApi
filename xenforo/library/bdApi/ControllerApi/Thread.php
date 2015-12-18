@@ -615,17 +615,25 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                 continue;
             }
 
-            if (!$this->_getThreadModel()->canViewThread($threads[$threadId], $threads[$threadId]['forum'])) {
+            if (!$this->_getThreadModel()->canViewThreadAndContainer($threads[$threadId], $threads[$threadId]['forum'])) {
                 unset($threads[$threadId]);
                 continue;
             }
         }
 
         $firstPostIds = array();
+        $lastPostIds = array();
         $pollThreadIds = array();
         foreach ($threads as $thread) {
             if (!$this->_isFieldExcluded('first_post')) {
-                $firstPostIds[] = $thread['first_post_id'];
+                $firstPostIds[$thread['thread_id']] = $thread['first_post_id'];
+            }
+
+            if ($this->_isFieldIncluded('last_post')
+                && (!isset($firstPostIds[$thread['thread_id']])
+                    || $thread['last_post_id'] != $thread['first_post_id'])
+            ) {
+                $lastPostIds[$thread['thread_id']] = $thread['last_post_id'];
             }
 
             if (!$this->_isFieldExcluded('poll')
@@ -635,12 +643,18 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             }
         }
 
-        $firstPosts = array();
-        if (!empty($firstPostIds)) {
-            $firstPosts = $this->_getPostModel()->getPostsByIds($firstPostIds, $this->_getPostModel()->getFetchOptionsToPrepareApiData());
+        $posts = array();
+        if (!empty($firstPostIds)
+            || !empty($lastPostIds)
+        ) {
+            $posts = $this->_getPostModel()->getPostsByIds(
+                array_merge(array_values($firstPostIds), array_values($lastPostIds)),
+                $this->_getPostModel()->getFetchOptionsToPrepareApiData());
 
-            if (!$this->_isFieldExcluded('first_post.attachments')) {
-                $firstPosts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($firstPosts);
+            if ((!empty($firstPostIds) && !$this->_isFieldExcluded('first_post.attachments'))
+                || (!empty($lastPostIds) && !$this->_isFieldExcluded('last_post.attachments'))
+            ) {
+                $posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
             }
         }
 
@@ -650,13 +664,25 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         $threadsData = array();
-        foreach (array_keys($threads) as $threadId) {
+        foreach ($threads as $threadId => $thread) {
             $firstPost = array();
-            if (isset($firstPosts[$threads[$threadId]['first_post_id']])) {
-                $firstPost = $firstPosts[$threads[$threadId]['first_post_id']];
+            if (isset($firstPostIds[$threadId])
+                && isset($posts[$thread['first_post_id']])
+            ) {
+                $firstPost = $posts[$thread['first_post_id']];
             }
 
-            $threadsData[] = $this->_getThreadModel()->prepareApiDataForThread($threads[$threadId], $threads[$threadId]['forum'], $firstPost);
+            $threadData = $this->_getThreadModel()->prepareApiDataForThread($thread, $thread['forum'], $firstPost);
+
+            if (isset($lastPostIds[$threadId])
+                && isset($posts[$thread['last_post_id']])
+            ) {
+                $postModel = $this->_getPostModel();
+                $threadData['last_post'] = $postModel->prepareApiDataForPost(
+                    $posts[$thread['last_post_id']], $thread, $thread['forum']);
+            }
+
+            $threadsData[] = $threadData;
         }
 
         return $threadsData;

@@ -126,7 +126,9 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
                     }
 
                     $key = $postIds[$post['post_id']];
-                    if (!empty($post['thread']['first_post'])) {
+                    if (!empty($post['thread']['first_post'])
+                        || empty($post['thread'])
+                    ) {
                         // the found post is a reply
                         $data[$key] = array_merge($preparedResults[$key], $post);
                     } else {

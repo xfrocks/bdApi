@@ -537,6 +537,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         $forumIds = array();
         $firstPostIds = array();
+        $lastPostIds = array();
         foreach ($dbThreads as $dbThread) {
             $threads[$dbThread['thread_id']] = $dbThread;
 
@@ -545,7 +546,14 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             }
 
             if (!isset($posts[$dbThread['first_post_id']])) {
-                $firstPostIds[] = $dbThread['first_post_id'];
+                $firstPostIds[$dbThread['thread_id']] = $dbThread['first_post_id'];
+            }
+
+            if ($preparePostThread
+                && $this->_isFieldIncluded('thread.last_post')
+                && !isset($posts[$dbThread['last_post_id']])
+            ) {
+                $lastPostIds[$dbThread['thread_id']] = $dbThread['last_post_id'];
             }
         }
         if (!empty($forumIds)) {
@@ -554,9 +562,12 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 $forums[$dbForum['node_id']] = $dbForum;
             }
         }
-        if ($preparePostThread && !empty($firstPostIds)) {
+        if ($preparePostThread
+            && (!empty($firstPostIds)
+                || !empty($lastPostIds))
+        ) {
             $dbPosts = $this->_getPostModel()->getPostsByIds(
-                $firstPostIds,
+                array_merge(array_values($firstPostIds), array_values($lastPostIds)),
                 $this->_getPostModel()->getFetchOptionsToPrepareApiData()
             );
             foreach ($dbPosts as $dbPost) {
@@ -590,7 +601,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             }
             $forumRef = &$forums[$threadRef['node_id']];
 
-            if (!$this->_getPostModel()->canViewPost($postRef, $threadRef, $forumRef)) {
+            if (!$this->_getPostModel()->canViewPostAndContainer($postRef, $threadRef, $forumRef)) {
                 continue;
             }
 
@@ -609,7 +620,15 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             $postData = $this->_getPostModel()->prepareApiDataForPost($postRef, $threadRef, $forumRef);
 
             if ($preparePostThread) {
-                $postData['thread'] = $this->_getThreadModel()->prepareApiDataForThread($threadRef, $forumRef, $firstPostRef);
+                $postData['thread'] = $this->_getThreadModel()->prepareApiDataForThread(
+                    $threadRef, $forumRef, $firstPostRef);
+
+                if (!empty($lastPostIds)
+                    && isset($posts[$threadRef['last_post_id']])
+                ) {
+                    $postData['thread']['last_post'] = $this->_getPostModel()->prepareApiDataForPost(
+                        $posts[$threadRef['last_post_id']], $threadRef, $forumRef);
+                }
             }
 
             $postsData[] = $postData;
