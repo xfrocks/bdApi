@@ -120,7 +120,16 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                     'page' => 0,
                 ))
             );
-            $threads = array_merge($stickyThreads, $threads);
+            if (!empty($stickyThreads)) {
+                $_threads = array();
+                foreach (array_keys($stickyThreads) as $_stickyThreadId) {
+                    $_threads[$_stickyThreadId] = $stickyThreads[$_stickyThreadId];
+                }
+                foreach (array_keys($threads) as $_threadId) {
+                    $_threads[$_threadId] = $threads[$_threadId];
+                }
+                $threads = $_threads;
+            }
         }
 
         $threadsData = $this->_prepareThreads($threads);
@@ -624,22 +633,22 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $firstPostIds = array();
         $lastPostIds = array();
         $pollThreadIds = array();
-        foreach ($threads as $thread) {
+        foreach ($threads as $threadId => $thread) {
             if (!$this->_isFieldExcluded('first_post')) {
-                $firstPostIds[$thread['thread_id']] = $thread['first_post_id'];
+                $firstPostIds[$threadId] = $thread['first_post_id'];
             }
 
             if ($this->_isFieldIncluded('last_post')
-                && (!isset($firstPostIds[$thread['thread_id']])
+                && (!isset($firstPostIds[$threadId])
                     || $thread['last_post_id'] != $thread['first_post_id'])
             ) {
-                $lastPostIds[$thread['thread_id']] = $thread['last_post_id'];
+                $lastPostIds[$threadId] = $thread['last_post_id'];
             }
 
             if (!$this->_isFieldExcluded('poll')
                 && $thread['discussion_type'] === 'poll'
             ) {
-                $pollThreadIds[] = $thread['thread_id'];
+                $pollThreadIds[] = $threadId;
             }
         }
 
