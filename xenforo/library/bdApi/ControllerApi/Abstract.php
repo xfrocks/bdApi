@@ -276,7 +276,15 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         if ($this->_fieldsFilterType === false) {
             $this->_fieldsFilterType = self::FIELDS_FILTER_NONE;
 
-            $include = filter_input(INPUT_GET, 'fields_include');
+            // use values from this request specifically
+            $include = $this->_input->filterSingle('fields_include', XenForo_Input::STRING);
+            $exclude = $this->_input->filterSingle('fields_exclude', XenForo_Input::STRING);
+            if (empty($include) && empty($exclude)) {
+                // use values from $_GET, useful with /search or /batch
+                $include = filter_input(INPUT_GET, 'fields_include');
+                $exclude = filter_input(INPUT_GET, 'fields_exclude');
+            }
+
             if (!empty($include)) {
                 $this->_fieldsFilterType |= self::FIELDS_FILTER_INCLUDE;
                 foreach (explode(',', $include) as $field) {
@@ -299,7 +307,6 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
                 }
             }
 
-            $exclude = filter_input(INPUT_GET, 'fields_exclude');
             if (!empty($exclude)) {
                 $this->_fieldsFilterType |= self::FIELDS_FILTER_EXCLUDE;
                 foreach (explode(',', $exclude) as $field) {
