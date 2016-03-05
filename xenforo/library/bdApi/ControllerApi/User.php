@@ -76,10 +76,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
                 // perform email search only if visitor is an admin and granted admincp scope
                 $user = $this->_getUserModel()->getUserByEmail(
                     $email,
-                    array(
-                        'join'            => XenForo_Model_User::FETCH_USER_PRIVACY,
-                        'followingUserId' => XenForo_Visitor::getUserId(),
-                    )
+                    $this->_getUserModel()->getFetchOptionsToPrepareApiData()
                 );
                 if (!empty($user)) {
                     $users[$user['user_id']] = $user;
@@ -91,10 +88,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             // perform username search only if nothing found and username is long enough
             $users = $this->_getUserModel()->getUsers(
                 array('username' => array($username, 'r')),
-                array(
-                    'limit'           => 10,
-                    'join'            => XenForo_Model_User::FETCH_USER_PRIVACY,
-                    'followingUserId' => XenForo_Visitor::getUserId(),
+                $this->_getUserModel()->getFetchOptionsToPrepareApiData(
+                    array(
+                        'limit' => 10,
+                    )
                 )
             );
         }
