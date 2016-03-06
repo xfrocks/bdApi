@@ -759,6 +759,11 @@ function _xfac_api_curl($url, $method = 'GET', $postFields = null, $curlOptions 
     }
     curl_setopt($ch, CURLOPT_URL, $url);
 
+    if (!!get_option('xfac_curl_verify_off')) {
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    }
+
     switch ($method) {
         case 'GET':
             // default is GET
@@ -787,6 +792,10 @@ function _xfac_api_curl($url, $method = 'GET', $postFields = null, $curlOptions 
 
     $body = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    if ($httpCode === 0) {
+        $body = curl_error($ch);
+    }
+
     curl_close($ch);
 
     $result = array(

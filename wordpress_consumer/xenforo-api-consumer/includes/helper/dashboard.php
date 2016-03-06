@@ -51,6 +51,7 @@ function xfac_admin_init()
 
     // always show advanced sections
     register_setting('xfac_advanced', 'xfac_server_ip');
+    register_setting('xfac_advanced', 'xfac_curl_verify_off');
 }
 
 add_action('admin_init', 'xfac_admin_init');
@@ -121,6 +122,7 @@ function xfac_whitelist_options($whitelist_options)
 
     // always show advanced sections
     $whitelist_options['xfac'][] = 'xfac_server_ip';
+    $whitelist_options['xfac'][] = 'xfac_curl_verify_off';
 
     return $whitelist_options;
 }

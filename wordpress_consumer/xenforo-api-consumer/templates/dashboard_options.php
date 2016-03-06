@@ -715,6 +715,28 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
                                 . 'Enter the private / internal XenForo server IP address here to connect directly to it.', 'xenforo-api-consumer'); ?></p>
                     </td>
                 </tr>
+
+                <tr valign="top">
+                    <th scope="row">&nbsp;</label>
+                    </th>
+                    <td>
+                        <label for="xfac_curl_verify_off">
+                            <input name="xfac_curl_verify_off" type="checkbox" id="xfac_curl_verify_off"
+                                   value="1" <?php checked('1', get_option('xfac_curl_verify_off')); ?> />
+                            <?php _e('Disable libcurl Verifications', 'xenforo-api-consumer'); ?>
+                        </label>
+
+                        <p class="description"><?php echo sprintf(__('It\'s not recommended to enable this option '
+                                . 'unless the option "%s" has been set to a secure internal ip. '
+                                . 'The affected options are:<ul style="font-family: \'Courier New\'"><li>'
+                                . '<a href="http://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYPEER.html" '
+                                . 'target="_blank" tabindex="-1">CURLOPT_SSL_VERIFYPEER</a> = false</li>'
+                                . '<li><a href="http://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYHOST.html" '
+                                . 'target="_blank" tabindex="-1">CURLOPT_SSL_VERIFYHOST</a> = 0</li></ul>',
+                                'xenforo-api-consumer'),
+                                __('XenForo Server IP Address', 'xenforo-api-consumer')); ?></p>
+                    </td>
+                </tr>
             <?php endif; ?>
 
         </table>
