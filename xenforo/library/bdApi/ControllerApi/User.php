@@ -74,7 +74,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
                 && $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM)
             ) {
                 // perform email search only if visitor is an admin and granted admincp scope
-                $user = $this->_getUserModel()->getUserByEmail($email);
+                $user = $this->_getUserModel()->getUserByEmail(
+                    $email,
+                    $this->_getUserModel()->getFetchOptionsToPrepareApiData()
+                );
                 if (!empty($user)) {
                     $users[$user['user_id']] = $user;
                 }
@@ -85,7 +88,11 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             // perform username search only if nothing found and username is long enough
             $users = $this->_getUserModel()->getUsers(
                 array('username' => array($username, 'r')),
-                array('limit' => 10)
+                $this->_getUserModel()->getFetchOptionsToPrepareApiData(
+                    array(
+                        'limit' => 10,
+                    )
+                )
             );
         }
 
