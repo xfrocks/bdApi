@@ -4,23 +4,26 @@ var deviceDb = require('./db').devices;
 var pushQueue = require('./pushQueue');
 var debug = require('debug')('web');
 var express = require('express');
+var bodyParser = require('body-parser');
+var compression = require('compression');
 var request = require('request');
 var url = require('url');
 
 var app = express();
 
-app.use(express.compress());
-app.use(express.bodyParser());
+app.use(compression({}));
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
 
-var getCallbackUri = function(req) {
+var getCallbackUri = function (req) {
     if (config.web.callback) {
         return config.web.callback;
     }
 
     return req.protocol + '://' + req.get('host') + '/callback';
-}
+};
 
-var prepareSubscribeData = function(req, res) {
+var prepareSubscribeData = function (req) {
     var hubUri = req.body.hub_uri;
     if (!hubUri) {
         hubUri = '';
@@ -64,7 +67,7 @@ var prepareSubscribeData = function(req, res) {
         extraData = null;
     }
 
-    var data = {
+    return {
         'callback': getCallbackUri(req),
 
         'hub_uri': hubUri,
@@ -74,10 +77,8 @@ var prepareSubscribeData = function(req, res) {
 
         'device_type': deviceType,
         'device_id': deviceId,
-        'extra_data': extraData,
+        'extra_data': extraData
     };
-
-    return data;
 };
 
 app.post('/subscribe', function (req, res) {
@@ -103,7 +104,7 @@ app.post('/subscribe', function (req, res) {
         'hub.topic': data.hub_topic,
 
         'oauth_token': data.oauth_token,
-        'client_id': data.oauth_client_id,
+        'client_id': data.oauth_client_id
     };
 
     // save the device first, so when server verifies intent, we can look it up
@@ -112,7 +113,7 @@ app.post('/subscribe', function (req, res) {
     request.post({
         'url': data.hub_uri,
         'form': formData
-    }, function(err, httpResponse, body) {
+    }, function (err, httpResponse, body) {
         if (httpResponse) {
             var success = false;
             if (httpResponse.statusCode >= 200 && httpResponse.statusCode < 300) {
@@ -147,14 +148,13 @@ app.post('/unsubscribe', function (req, res) {
         return res.status(403).send();
     }
 
-    deviceDb.findDevices(data.oauth_client_id, data.hub_topic, function(devices) {
+    deviceDb.findDevices(data.oauth_client_id, data.hub_topic, function (devices) {
         var deviceFound = false;
-
-        for (var i in devices) {
-            if (data.device_id == devices[i].device_id) {
-                deviceFound = devices[i];
+        devices.forEach(function (device) {
+            if (data.device_id == device.device_id) {
+                deviceFound = device;
             }
-        }
+        });
 
         if (deviceFound) {
             deviceDb.save(deviceFound.device_type, deviceFound.device_id, deviceFound.oauth_client_id, '', deviceFound.extra_data);
@@ -165,13 +165,13 @@ app.post('/unsubscribe', function (req, res) {
                 'hub.topic': data.hub_topic,
 
                 'oauth_token': data.oauth_token,
-                'client_id': data.oauth_client_id,
+                'client_id': data.oauth_client_id
             };
 
             request.post({
                 'url': data.hub_uri,
                 'form': formData
-            }, function(err, httpResponse, body) {
+            }, function (err, httpResponse, body) {
                 if (httpResponse) {
                     var success = false;
                     if (httpResponse.statusCode >= 200 && httpResponse.statusCode < 300) {
@@ -193,7 +193,7 @@ app.post('/unsubscribe', function (req, res) {
     });
 });
 
-app.post('/unregister', function(req, res) {
+app.post('/unregister', function (req, res) {
     var data = prepareSubscribeData(req, res);
 
     if (!data.oauth_client_id) {
@@ -241,7 +241,7 @@ app.get('/callback', function (req, res) {
         hubTopic = '';
     }
 
-    deviceDb.findDevices(parsed.query['client_id'], hubTopic, function(devices) {
+    deviceDb.findDevices(parsed.query['client_id'], hubTopic, function (devices) {
         var isSubscribe = (parsed.query['hub.mode'] === 'subscribe');
         var devicesFound = devices.length > 0;
 
@@ -258,22 +258,26 @@ app.get('/callback', function (req, res) {
 app.post('/callback', function (req, res) {
     if (typeof req.body == 'object') {
         for (var i in req.body) {
+            if (!req.body.hasOwnProperty(i)) {
+                continue;
+            }
             var ping = req.body[i];
 
             if (typeof ping != 'object') {
                 debug('/callback', 'ping is not an object', ping);
                 continue;
-            } 
-
-            if (!ping.client_id) {
-                debug('/callback', 'ping does not has client information', ping);
-                continue;
             }
 
-            deviceDb.findDevices(ping.client_id, ping.topic, function(devices) {
-                for (var i in devices) {
-                    pushQueue.enqueue(devices[i].device_type, devices[i].device_id, ping.object_data, devices[i].extra_data);
-                }
+            if (!ping.client_id || !ping.topic || !ping.object_data) {
+                debug('/callback', 'ping does not has enough information', ping);
+                continue;
+            }
+            var objectData = ping.object_data;
+
+            deviceDb.findDevices(ping.client_id, ping.topic, function (devices) {
+                devices.forEach(function (device) {
+                    pushQueue.enqueue(device.device_type, device.device_id, objectData, device.extra_data);
+                });
             });
         }
     }
@@ -281,7 +285,7 @@ app.post('/callback', function (req, res) {
     return res.send();
 });
 
-app.get('*', function(req, res) {
+app.get('*', function (req, res) {
     res.send('Hi, I am ' + getCallbackUri(req));
 });
 
