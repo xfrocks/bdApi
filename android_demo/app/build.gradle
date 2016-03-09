@@ -4,7 +4,7 @@ apply from: 'config.gradle'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         applicationId "com.xfrocks.api.androiddemo"

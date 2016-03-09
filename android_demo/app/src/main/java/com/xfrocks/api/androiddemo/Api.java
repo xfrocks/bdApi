@@ -43,6 +43,7 @@ public class Api {
     public static final String URL_OAUTH_TOKEN_FACEBOOK = "oauth/token/facebook";
     public static final String URL_OAUTH_TOKEN_TWITTER = "oauth/token/twitter";
     public static final String URL_OAUTH_TOKEN_GOOGLE = "oauth/token/google";
+    public static final String URL_OAUTH_TOKEN_ASSOCIATE = "oauth/token/associate";
     public static final String URL_INDEX = "index";
     public static final String URL_USERS = "users";
     public static final String URL_USERS_ME = "users/me";
@@ -68,6 +69,7 @@ public class Api {
     public static final String URL_OAUTH_TOKEN_GOOGLE_PARAM_TOKEN = "google_token";
     public static final String URL_OAUTH_TOKEN_RESPONSE_HEADER_TFA_PROVIDERS = "X-Api-Tfa-Providers";
 
+    public static final String URL_USERS_PARAM_USER_ID = "user_id";
     public static final String URL_USERS_PARAM_USERNAME = "username";
     public static final String URL_USERS_PARAM_EMAIL = "user_email";
     public static final String URL_USERS_PARAM_PASSWORD = "password";
@@ -109,23 +111,20 @@ public class Api {
 
             if (obj.has("user_id")) {
                 u.userId = obj.getInt("user_id");
-                u.username = obj.getString("username");
-                u.avatar = obj.getJSONObject("links").getString("avatar_big");
+
+                if (obj.has("links")) {
+                    u.avatar = obj.getJSONObject("links").getString("avatar_big");
+                }
             } else {
-                if (obj.has("username")) {
-                    u.username = obj.getString("username");
-                }
-
-                if (obj.has("user_email")) {
-                    u.userEmail = obj.getString("user_email");
-                }
-
-                if (obj.has("user_dob_year")
-                        && obj.has("user_dob_month")
-                        && obj.has("user_dob_day")) {
-                    u.userDobYear = obj.getInt("user_dob_year");
-                    u.userDobMonth = obj.getInt("user_dob_month");
-                    u.userDobDay = obj.getInt("user_dob_day");
+                if (obj.has("associatable")) {
+                    JSONObject assoc = obj.getJSONObject("associatable");
+                    Iterator<String> assocUserIds = assoc.keys();
+                    while (assocUserIds.hasNext()) {
+                        String assocUserId = assocUserIds.next();
+                        JSONObject assocUserJson = assoc.getJSONObject(assocUserId);
+                        User assocUser = makeUser(assocUserJson);
+                        u.associatable.add(assocUser);
+                    }
                 }
 
                 if (obj.has("extra_data")
@@ -133,6 +132,22 @@ public class Api {
                     u.extraData = obj.getString("extra_data");
                     u.extraTimestamp = obj.getLong("extra_timestamp");
                 }
+            }
+
+            if (obj.has("username")) {
+                u.username = obj.getString("username");
+            }
+
+            if (obj.has("user_email")) {
+                u.userEmail = obj.getString("user_email");
+            }
+
+            if (obj.has("user_dob_year")
+                    && obj.has("user_dob_month")
+                    && obj.has("user_dob_day")) {
+                u.userDobYear = obj.getInt("user_dob_year");
+                u.userDobMonth = obj.getInt("user_dob_month");
+                u.userDobDay = obj.getInt("user_dob_day");
             }
 
             return u;
@@ -457,6 +472,8 @@ public class Api {
                         String name = names.getString(0);
                         message = errors.getString(name);
                     }
+                } else if (response.has("error")) {
+                    message = response.getString("error");
                 }
             } catch (Exception e) {
                 // ignore
@@ -704,6 +721,7 @@ public class Api {
 
         private String avatar;
 
+        private final List<User> associatable = new ArrayList<>();
         private String extraData;
         private long extraTimestamp;
 
@@ -729,6 +747,10 @@ public class Api {
 
         public Integer getDobDay() {
             return userDobDay;
+        }
+
+        public User[] getAssocs() {
+            return associatable.toArray(new User[associatable.size()]);
         }
 
         public String getExtraData() {
