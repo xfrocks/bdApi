@@ -86,6 +86,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
             } else {
                 $userData['associatable'][$user['user_id']] = array(
                     'user_id' => $user['user_id'],
+                    'username' => $user['username'],
                     'user_email' => $user['email'],
                 );
             }
@@ -246,6 +247,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
                 } else {
                     $userData['associatable'][$emailUserFound['user_id']] = array(
                         'user_id' => $emailUserFound['user_id'],
+                        'username' => $emailUserFound['username'],
                         'user_email' => $emailUserFound['email'],
                     );
                 }

@@ -69,6 +69,7 @@ Otherwise, the response is as follow:
             associatable: {
                 (user_id): {
                     user_id: (int),
+                    username: (string), # since oauth2-2016030902
                     user_email: (string)
                 },
                 ...
