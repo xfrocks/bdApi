@@ -52,15 +52,36 @@ Since oauth2-2015030602, social logins are accepted as a way to authorize access
  4. XenForo verifies that access token is valid and third party client does have access to a XenForo account (e.g. xenforo.com contacts Facebook server to verify access token T then cross-matches to a XenForo user account U).
  5. XenForo generates API access token for its account (e.g. xenforo.com generates access token T2 which can be used in future API requests).
 
-It's important to note that third party client and XenForo systems don't need to use the same social service credentials (e.g. awesomewebsite.com use Facebook Application A while xenforo.com can use Facebook Application B).
-
 #### Responses
 If an API access token can be generated, the response is similar to a regular POST `/oauth/token` with token and refresh_token amongst other things. Previously user-granted scopes and auto-authorized scopes will be attached to the token.
 
-Otherwise, the API will try to response with as much information for a new user account as possible. The data is ready to be used with POST `/users`.
+Otherwise, the response is as follow:
+
+    {
+        status: 'ok',
+        message: (string),
+        user_data: {
+            username: (string),
+            user_email: (string),
+            user_dob_year: (int),
+            user_dob_month: (int),
+            user_dob_day: (int),
+            associatable: {
+                (user_id): {
+                    user_id: (int),
+                    user_email: (string)
+                },
+                ...
+            },
+            extra_data: (string),
+            extra_timestamp: (unix timestamp in seconds)
+        }
+    }
+
+Information in `user_data` is optional and can be used to pre-fill register forms (POST `/users`). `extra_data` and `extra_timestamp` contain encrypted information that needs to be submitted upon registration to associate social account and the newly created user account. In case existing accounts are found with the social account information, `associatable` contains id and email of those account for manual association via POST `/oauth/token/associate`.
 
 #### POST `/oauth/token/facebook`
-Request API access token using Facebook access token. Because Facebook uses app-scoped user_id, it is not possible to recognize user across different Facebook Applications using any unique ID. Therefore email is used to find registered user.
+Request API access token using Facebook access token. Please note that because Facebook uses app-scoped user_id, it is not possible to recognize user across different Facebook Applications.
 
 Parameters:
 
@@ -109,6 +130,21 @@ Parameters:
 Required scopes:
 
  * `admincp`
+
+#### POST `/oauth/token/associate`
+Request API access token and associate social account with an existing user account. Since oauth2-2016030901.
+
+Parameters:
+
+ * `client_id` (__required__)
+ * `user_id` (__required__)
+ * `password` (__required__): can be used with `password_algo` for better security. See [Encryption](#encryption) section for more information.
+ * `extra_data` (__required__)
+ * `extra_timestamp` (__required__)
+
+Required scopes:
+
+ * N/A
 
 ### Two-Factor Authentication
 Since oauth2-2015121501, user credentials grant flow will require additional verfications for users who have tfa configured (available since XenForo 1.5.0). If username and password can be verified, client will receive a response with HTTP Status Code 202 (Accepted) to continue verifying tfa. The response will also include the header `X-Api-Tfa-Providers` which is a comma separated list of available tfa providers. Client needs to resend POST `/oauth/token` with additional parameters:
@@ -1190,6 +1226,7 @@ Parameters:
  * `user_dob_month` (_optional_): date of birth (month) of the new user.
  * `user_dob_year` (_optional_): date of birth (year) of the new user.
  * `client_id` (_optional_): client ID of the Client. This parameter is required if the request is unauthorized (no `oauth_token`).
+ * `extra_data`, `extra_timestamp` (_optional_): encrypted information generated previously for internal tasks.
 
 Required scopes:
 

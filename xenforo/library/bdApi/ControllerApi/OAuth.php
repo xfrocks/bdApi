@@ -59,7 +59,8 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         // create a provider key tied between current API client and Facebook ID
         // this needs to be done because Facebook uses app-scoped user IDs and they are
         // different from app to app (even with the same user)
-        $providerKey = sprintf('api:%s:fb:%s', $client['client_id'], $facebookUser['id']);
+        $externalProvider = 'bdapi_' . $client['client_id'];
+        $externalProviderKey = sprintf('fb_%s', $facebookUser['id']);
         $facebookApp = XenForo_Helper_Facebook::getUserInfo($facebookToken, 'app');
         if (!empty($facebookApp['id'])
             && $facebookApp['id'] === XenForo_Application::getOptions()->get('facebookAppId')
@@ -67,28 +68,27 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
             // looks like the facebook_token is generated using the same app configured for XenForo
             // we will use the reported Facebook user ID directly to make it easier for user
             // when he/she login via Facebook on the web
-            $providerKey = $facebookUser['id'];
+            $externalProvider = 'facebook';
+            $externalProviderKey = $facebookUser['id'];
         }
 
         // attempt #1: try to find the association using our provider key
-        $facebookAssoc = $userExternalModel->getExternalAuthAssociation('facebook', $providerKey);
+        $facebookAssoc = $userExternalModel->getExternalAuthAssociation($externalProvider, $externalProviderKey);
         if (!empty($facebookAssoc)) {
             return $this->_actionPostTokenNonStandard($client, $facebookAssoc['user_id']);
         }
 
         if (!empty($facebookUser['email'])) {
-            // attempt #2: try to find user using email
-            // this is a security risk but in most case it's acceptable
-            // user who is knowledgeable can avoid this by do not associate a Facebook account
             $user = $userModel->getUserByEmail($facebookUser['email']);
-            if ($user['user_state'] == 'valid') {
-                $facebookAssoc = $userExternalModel->getExternalAuthAssociationForUser('facebook', $user['user_id']);
-                if (!empty($facebookAssoc)) {
-                    return $this->_actionPostTokenNonStandard($client, $facebookAssoc['user_id']);
-                }
+            if (empty($user)) {
+                // good email
+                $userData['user_email'] = $facebookUser['email'];
+            } else {
+                $userData['associatable'][$user['user_id']] = array(
+                    'user_id' => $user['user_id'],
+                    'user_email' => $user['email'],
+                );
             }
-
-            $userData['user_email'] = $facebookUser['email'];
         }
 
         if (!empty($facebookUser['name'])) {
@@ -101,8 +101,8 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         }
 
         $extraData = array(
-            'external_provider' => 'facebook',
-            'external_provider_key' => $providerKey,
+            'external_provider' => $externalProvider,
+            'external_provider_key' => $externalProviderKey,
         );
         if (!empty($userData['user_email'])) {
             $extraData['user_email'] = $userData['user_email'];
@@ -154,45 +154,47 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         }
 
         $twitterAssoc = $userExternalModel->getExternalAuthAssociation('twitter', $twitterUser['id']);
-        if (empty($twitterAssoc)) {
-            $userData = array();
-
-            if (!empty($twitterUser['screen_name'])) {
-                $testDw = XenForo_DataWriter::create('XenForo_DataWriter_User');
-                $testDw->set('username', $twitterUser['screen_name']);
-                if (!$testDw->hasErrors()) {
-                    // good username
-                    $userData['username'] = $twitterUser['screen_name'];
-                }
-            }
-
-            $extraData = array(
-                'external_provider' => 'twitter',
-                'external_provider_key' => $twitterUser['id'],
-            );
-            $extraData = serialize($extraData);
-            $extraTimestamp = time() + bdApi_Option::get('refreshTokenTTLDays') * 86400;
-            $userData += array(
-                'extra_data' => bdApi_Crypt::encryptTypeOne($extraData, $extraTimestamp),
-                'extra_timestamp' => $extraTimestamp,
-            );
-
-            $data = array(
-                'status' => 'ok',
-                'message' => new XenForo_Phrase('bdapi_no_twitter_association_found'),
-                'user_data' => $userData,
-            );
-
-            return $this->responseData('bdApi_ViewApi_OAuth_TokenTwitter_NoAssoc', $data);
+        if (!empty($twitterAssoc)) {
+            return $this->_actionPostTokenNonStandard($client, $twitterAssoc['user_id']);
         }
 
-        return $this->_actionPostTokenNonStandard($client, $twitterAssoc['user_id']);
+        $userData = array();
+
+        if (!empty($twitterUser['screen_name'])) {
+            $testDw = XenForo_DataWriter::create('XenForo_DataWriter_User');
+            $testDw->set('username', $twitterUser['screen_name']);
+            if (!$testDw->hasErrors()) {
+                // good username
+                $userData['username'] = $twitterUser['screen_name'];
+            }
+        }
+
+        $extraData = array(
+            'external_provider' => 'twitter',
+            'external_provider_key' => $twitterUser['id'],
+        );
+        $extraData = serialize($extraData);
+        $extraTimestamp = time() + bdApi_Option::get('refreshTokenTTLDays') * 86400;
+        $userData += array(
+            'extra_data' => bdApi_Crypt::encryptTypeOne($extraData, $extraTimestamp),
+            'extra_timestamp' => $extraTimestamp,
+        );
+
+        $data = array(
+            'status' => 'ok',
+            'message' => new XenForo_Phrase('bdapi_no_twitter_association_found'),
+            'user_data' => $userData,
+        );
+
+        return $this->responseData('bdApi_ViewApi_OAuth_TokenTwitter_NoAssoc', $data);
     }
 
     public function actionPostTokenGoogle()
     {
         $client = $this->_getClientOrError();
 
+        /* @var $userModel XenForo_Model_User */
+        $userModel = $this->getModelFromCache('XenForo_Model_User');
         /* @var $userExternalModel XenForo_Model_UserExternal */
         $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
 
@@ -206,57 +208,80 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         }
 
         $googleAssoc = $userExternalModel->getExternalAuthAssociation('google', $googleUser['id']);
-        if (empty($googleAssoc)) {
-            $userData = array();
-
-            if (!empty($googleUser['displayName'])) {
-                $testDw = XenForo_DataWriter::create('XenForo_DataWriter_User');
-                $testDw->set('username', $googleUser['displayName']);
-                if (!$testDw->hasErrors()) {
-                    // good username
-                    $userData['username'] = $googleUser['displayName'];
-                }
-            }
-
-            if (!empty($googleUser['emails'])) {
-                foreach ($googleUser['emails'] as $googleEmail) {
-                    $userData['user_email'] = $googleEmail['value'];
-                    break;
-                }
-            }
-
-            if (!empty($googleUser['birthday'])) {
-                if (preg_match('#^(?<year>\d+)-(?<month>\d+)-(?<day>\d+)$#', $googleUser['birthday'], $birthdayMatches)) {
-                    $userData['user_dob_year'] = $birthdayMatches['year'];
-                    $userData['user_dob_month'] = $birthdayMatches['month'];
-                    $userData['user_dob_day'] = $birthdayMatches['day'];
-                }
-            }
-
-            $extraData = array(
-                'external_provider' => 'google',
-                'external_provider_key' => $googleUser['id'],
-            );
-            if (!empty($userData['user_email'])) {
-                $extraData['user_email'] = $userData['user_email'];
-            }
-            $extraData = serialize($extraData);
-            $extraTimestamp = time() + bdApi_Option::get('refreshTokenTTLDays') * 86400;
-            $userData += array(
-                'extra_data' => bdApi_Crypt::encryptTypeOne($extraData, $extraTimestamp),
-                'extra_timestamp' => $extraTimestamp,
-            );
-
-            $data = array(
-                'status' => 'ok',
-                'message' => new XenForo_Phrase('bdapi_no_google_association_found'),
-                'user_data' => $userData,
-            );
-
-            return $this->responseData('bdApi_ViewApi_OAuth_TokenGoogle_NoAssoc', $data);
+        if (!empty($googleAssoc)) {
+            return $this->_actionPostTokenNonStandard($client, $googleAssoc['user_id']);
         }
 
-        return $this->_actionPostTokenNonStandard($client, $googleAssoc['user_id']);
+        $userData = array();
+
+        if (!empty($googleUser['displayName'])) {
+            $testDw = XenForo_DataWriter::create('XenForo_DataWriter_User');
+            $testDw->set('username', $googleUser['displayName']);
+            if (!$testDw->hasErrors()) {
+                // good username
+                $userData['username'] = $googleUser['displayName'];
+            }
+        }
+
+        if (!empty($googleUser['emails'])) {
+            $googleEmails = array();
+            foreach ($googleUser['emails'] as $_googleEmail) {
+                $googleEmails[] = $_googleEmail['value'];
+            }
+
+            $emailUsers = $userModel->getUsers(array(
+                'emails' => $googleEmails,
+            ));
+            foreach ($googleEmails as $googleEmail) {
+                $emailUserFound = null;
+                foreach ($emailUsers as $emailUser) {
+                    if ($emailUser['email'] == $googleEmail) {
+                        $emailUserFound = $emailUser;
+                        break;
+                    }
+                }
+
+                if ($emailUserFound === null) {
+                    $userData['user_email'] = $googleEmail;
+                } else {
+                    $userData['associatable'][$emailUserFound['user_id']] = array(
+                        'user_id' => $emailUserFound['user_id'],
+                        'user_email' => $emailUserFound['email'],
+                    );
+                }
+            }
+        }
+
+        if (!empty($googleUser['birthday'])) {
+            if (preg_match('#^(?<year>\d+)-(?<month>\d+)-(?<day>\d+)$#', $googleUser['birthday'],
+                $birthdayMatches)) {
+                $userData['user_dob_year'] = $birthdayMatches['year'];
+                $userData['user_dob_month'] = $birthdayMatches['month'];
+                $userData['user_dob_day'] = $birthdayMatches['day'];
+            }
+        }
+
+        $extraData = array(
+            'external_provider' => 'google',
+            'external_provider_key' => $googleUser['id'],
+        );
+        if (!empty($userData['user_email'])) {
+            $extraData['user_email'] = $userData['user_email'];
+        }
+        $extraData = serialize($extraData);
+        $extraTimestamp = time() + bdApi_Option::get('refreshTokenTTLDays') * 86400;
+        $userData += array(
+            'extra_data' => bdApi_Crypt::encryptTypeOne($extraData, $extraTimestamp),
+            'extra_timestamp' => $extraTimestamp,
+        );
+
+        $data = array(
+            'status' => 'ok',
+            'message' => new XenForo_Phrase('bdapi_no_google_association_found'),
+            'user_data' => $userData,
+        );
+
+        return $this->responseData('bdApi_ViewApi_OAuth_TokenGoogle_NoAssoc', $data);
     }
 
     public function actionPostTokenAdmin()
@@ -271,6 +296,61 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         }
 
         return $this->_actionPostTokenNonStandard($client, $userId, false);
+    }
+
+    public function actionPostTokenAssociate()
+    {
+        $input = $this->_input->filter(array(
+            'user_id' => XenForo_Input::UINT,
+            'password' => XenForo_Input::STRING,
+            'extra_data' => XenForo_Input::STRING,
+            'extra_timestamp' => XenForo_Input::UINT,
+        ));
+        if (empty($input['user_id'])
+            || empty($input['password'])
+            || empty($input['extra_data'])
+            || empty($input['extra_timestamp'])
+        ) {
+            return $this->responseNoPermission();
+        }
+
+        /** @var XenForo_Model_User $userModel */
+        $userModel = $this->getModelFromCache('XenForo_Model_User');
+        $user = $userModel->getUserById($input['user_id']);
+        if (empty($user)) {
+            return $this->responseError(new XenForo_Phrase('requested_user_not_found'), 400);
+        }
+
+        $_POST['username'] = $user['username'];
+        $_POST['grant_type'] = 'password';
+        $response = $this->actionPostToken();
+        if ($response instanceof XenForo_ControllerResponse_View
+            && !empty($response->params['_statusCode'])
+            && $response->params['_statusCode'] == 200
+        ) {
+            // good
+        } else {
+            return $response;
+        }
+
+        $extraData = bdApi_Crypt::decryptTypeOne($input['extra_data'], $input['extra_timestamp']);
+        if (!empty($extraData)) {
+            $extraData = @unserialize($extraData);
+        }
+        if (empty($extraData)) {
+            $extraData = array();
+        }
+
+        if (!empty($extraData['external_provider'])
+            && !empty($extraData['external_provider_key'])
+        ) {
+            /* @var $userExternalModel XenForo_Model_UserExternal */
+            $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
+            $userExternalModel->updateExternalAuthAssociation($extraData['external_provider'],
+                $extraData['external_provider_key'], $user['user_id']);
+        }
+
+        return $response;
     }
 
     protected function _getClientOrError()
@@ -308,7 +388,8 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         $oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
         $scopes = $oauth2Model->getAutoAndUserScopes($client['client_id'], $userId);
 
-        $token = $oauth2Model->getServer()->createAccessToken($client['client_id'], $userId, $scopes, null, $includeRefreshToken);
+        $token = $oauth2Model->getServer()->createAccessToken($client['client_id'],
+            $userId, $scopes, null, $includeRefreshToken);
 
         return $this->responseData('bdApi_ViewApi_OAuth_TokenNonStandard', $token);
     }

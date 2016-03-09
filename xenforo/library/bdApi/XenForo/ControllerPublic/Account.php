@@ -223,6 +223,11 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
                     // unsubscribe for user and notification
                     $oauth2Model->getSubscriptionModel()->deleteSubscriptions($client['client_id'], bdApi_Model_Subscription::TYPE_USER, $visitor['user_id']);
                     $oauth2Model->getSubscriptionModel()->deleteSubscriptions($client['client_id'], bdApi_Model_Subscription::TYPE_NOTIFICATION, $visitor['user_id']);
+
+                    // remove external authentication
+                    /* @var $userExternalModel XenForo_Model_UserExternal */
+                    $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
+                    $userExternalModel->deleteExternalAuthAssociationForUser('bdapi_' . $client['client_id'], $visitor['user_id']);
                 }
 
                 XenForo_Db::commit();
