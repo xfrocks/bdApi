@@ -227,7 +227,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
                     // remove external authentication
                     /* @var $userExternalModel XenForo_Model_UserExternal */
                     $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
-                    $userExternalModel->deleteExternalAuthAssociationForUser('bdapi_' . $client['client_id'], $visitor['user_id']);
+                    $userExternalModel->deleteExternalAuthAssociationForUser('api_' . $client['client_id'], $visitor['user_id']);
                 }
 
                 XenForo_Db::commit();
