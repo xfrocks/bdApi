@@ -2,10 +2,72 @@
 
 class bdApi_Extend_Model_Forum extends XFCP_bdApi_Extend_Model_Forum
 {
+    const CONDITION_NODE_ID = 'bdApi_nodeId';
+    const GET_THREAD_PREFIXES = 'bdApi_getThreadPrefixes';
+
+    public function getForumById($id, array $fetchOptions = array())
+    {
+        $forums = $this->getForums(array(self::CONDITION_NODE_ID => $id), $fetchOptions);
+
+        return reset($forums);
+    }
+
+    public function getForumsByIds(array $forumIds, array $fetchOptions = array())
+    {
+        return $this->getForums(array(self::CONDITION_NODE_ID => $forumIds), $fetchOptions);
+    }
+
+    public function getForums(array $conditions = array(), array $fetchOptions = array())
+    {
+        $forums = parent::getForums($conditions, $fetchOptions);
+
+        if (!empty($forums)
+            && !empty($fetchOptions[self::GET_THREAD_PREFIXES])
+        ) {
+            /** @var bdApi_Extend_Model_ThreadPrefix $prefixModel */
+            $prefixModel = $this->getModelFromCache('XenForo_Model_ThreadPrefix');
+            $prefixes = $prefixModel->bdApi_getUsablePrefixesByForums(array_keys($forums));
+
+            foreach ($forums as &$forumRef) {
+                $forumRef['prefixes'] = array();
+
+                if (isset($prefixes[$forumRef['node_id']])) {
+                    $forumRef['prefixes'] = $prefixes[$forumRef['node_id']];
+                }
+            }
+        }
+
+        return $forums;
+    }
+
+    public function prepareForumConditions(array $conditions, array &$fetchOptions)
+    {
+        $db = $this->_getDb();
+        $sqlConditions = array(parent::prepareForumConditions($conditions, $fetchOptions));
+
+        if (isset($conditions[self::CONDITION_NODE_ID])) {
+            if (is_array($conditions[self::CONDITION_NODE_ID])) {
+                $sqlConditions[] = 'forum.node_id IN (' . $db->quote($conditions[self::CONDITION_NODE_ID]) . ')';
+            } else {
+                $sqlConditions[] = 'forum.node_id = ' . $db->quote($conditions[self::CONDITION_NODE_ID]);
+            }
+        }
+
+        if (count($sqlConditions)) {
+            return $this->getConditionsForClause($sqlConditions);
+        } else {
+            return reset($sqlConditions);
+        }
+    }
+
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
     {
         $fetchOptions['watchUserId'] = XenForo_Visitor::getUserId();
         $fetchOptions['permissionCombinationId'] = XenForo_Visitor::getInstance()->get('permission_combination_id');
+
+        if (!isset($fetchOptions[self::GET_THREAD_PREFIXES])) {
+            $fetchOptions[self::GET_THREAD_PREFIXES] = true;
+        }
 
         return $fetchOptions;
     }
@@ -39,6 +101,14 @@ class bdApi_Extend_Model_Forum extends XFCP_bdApi_Extend_Model_Forum
         );
 
         $data = bdApi_Data_Helper_Core::filter($forum, $publicKeys);
+
+        if (isset($forum['prefixes'])) {
+            /** @var bdApi_Extend_Model_ThreadPrefix $prefixModel */
+            $prefixModel = $this->getModelFromCache('XenForo_Model_ThreadPrefix');
+            $data['forum_prefixes'] = $prefixModel->prepareApiDataForPrefixes($forum['prefixes']);
+            $data['thread_default_prefix_id'] = $forum['default_prefix_id'];
+            $data['thread_prefix_is_required'] = !empty($forum['require_prefix']);
+        }
 
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('forums', $forum),

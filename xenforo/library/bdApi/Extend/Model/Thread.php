@@ -87,6 +87,13 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
             $data['first_post'] = $postModel->prepareApiDataForPost($firstPost, $thread, $forum);
         }
 
+        $data['thread_prefixes'] = array();
+        if (!empty($thread['prefix_id'])) {
+            /** @var bdApi_Extend_Model_ThreadPrefix $prefixModel */
+            $prefixModel = $this->getModelFromCache('XenForo_Model_ThreadPrefix');
+            $data['thread_prefixes'][] = $prefixModel->prepareApiDataForPrefix($thread);
+        }
+
         if ($thread['discussion_type'] === 'poll'
             && isset($this->_bdApi_polls[$thread['thread_id']])
         ) {

@@ -209,6 +209,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $input = $this->_input->filter(array(
             'post_id' => XenForo_Input::UINT,
             'thread_title' => XenForo_Input::STRING,
+            'thread_prefix_id' => XenForo_Input::STRING,
             'thread_tags' => XenForo_Input::STRING,
         ));
 
@@ -225,7 +226,12 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         $dw = XenForo_DataWriter::create('XenForo_DataWriter_DiscussionMessage_Post');
         $dw->setExistingData($post, true);
-        $dw->set('message', $input['post_body']);
+
+        if ($this->_input->inRequest('post_body')
+            || $this->_input->inRequest('post_body_html')
+        ) {
+            $dw->set('message', $input['post_body']);
+        }
 
         switch ($post['message_state']) {
             case 'deleted':
@@ -273,6 +279,16 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 $threadDw->set('title', $input['thread_title']);
             }
 
+            if ($this->_input->inRequest('thread_prefix_id')) {
+                $prefixId = $input['thread_prefix_id'];
+                if (!is_numeric($prefixId)
+                    && !empty($forum['default_prefix_id'])
+                ) {
+                    $prefixId = $forum['default_prefix_id'];
+                }
+                $threadDw->set('prefix_id', $prefixId);
+            }
+
             if (XenForo_Application::$versionId > 1050000
                 && $this->_input->inRequest('thread_tags')
                 && $this->_getThreadModel()->canEditTags($thread, $forum)
@@ -284,6 +300,18 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 $threadTagger->setContent($thread['thread_id'])->setPermissionsFromContext($thread, $forum);
                 $threadTagger->setTags($tagModel->splitTags($input['thread_tags']));
                 $threadDw->mergeErrors($threadTagger->getErrors());
+            }
+
+            $threadDw->preSave();
+
+            if (!$threadDw->get('prefix_id')
+                && !empty($forum['require_prefix'])
+            ) {
+                /** @var bdApi_Extend_Model_ThreadPrefix $prefixModel */
+                $prefixModel = $this->getModelFromCache('XenForo_Model_ThreadPrefix');
+                if ($prefixModel->getUsablePrefixesInForums($forum['node_id'])) {
+                    $threadDw->error(new XenForo_Phrase('please_select_a_prefix'), 'prefix_id');
+                }
             }
 
             if ($threadDw->hasErrors()) {
@@ -306,6 +334,11 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         }
 
         XenForo_Db::commit();
+
+        if (XenForo_Application::isRegistered('bdApi_responseReroute')) {
+            return call_user_func_array(array($this, 'responseReroute'),
+                XenForo_Application::get('bdApi_responseReroute'));
+        }
 
         return $this->responseReroute(__CLASS__, 'single');
     }
