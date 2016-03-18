@@ -61,7 +61,9 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         // different from app to app (even with the same user)
         $externalProvider = 'api_' . $client['client_id'];
         $externalProviderKey = sprintf('fb_%s', $facebookUser['id']);
-        $facebookApp = XenForo_Helper_Facebook::getUserInfo($facebookToken, 'app');
+        $facebookApp = @file_get_contents(sprintf('https://graph.facebook.com/app?access_token=%s',
+            rawurlencode($facebookToken)));
+        $facebookApp = @json_decode($facebookApp, true);
         if (!empty($facebookApp['id'])
             && $facebookApp['id'] === XenForo_Application::getOptions()->get('facebookAppId')
         ) {
