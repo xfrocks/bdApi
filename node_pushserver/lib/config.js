@@ -64,12 +64,17 @@ if (process.env.PORT) {
     config.web.port = process.env.PORT;
 }
 
-if (process.env.REDISTOGO_URL) {
-    var redisToGo = url.parse(process.env.REDISTOGO_URL);
-    config.redis.port = redisToGo.port;
-    config.redis.host = redisToGo.hostname;
-    config.redis.auth = redisToGo.auth.split(":")[1];
-}
+_.forEach([
+    'REDISCLOUD_URL',
+    'REDISTOGO_URL'
+], function (redisUrlKey) {
+    if (process.env[redisUrlKey]) {
+        var redisUrlParsed = url.parse(process.env[redisUrlKey]);
+        config.redis.port = redisUrlParsed.port;
+        config.redis.host = redisUrlParsed.hostname;
+        config.redis.auth = redisUrlParsed.auth.split(":")[1];
+    }
+});
 
 if (process.env.CONFIG_WEB_CALLBACK) {
     config.web.callback = process.env.CONFIG_WEB_CALLBACK;
