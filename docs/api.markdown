@@ -280,6 +280,21 @@ Detail information of a category.
             forum_thread_count: (int),
             forum_post_count: (int),
             forum_is_follow: (boolean), # since forum-2014053001
+            forum_prefixes: { # since forum-2016031001
+                {
+                    group_title: (string),
+                    group_prefixes: [
+                        {
+                            prefix_id: (int),
+                            prefix_title: (string)
+                        },
+                        ...
+                    ]
+                },
+                ...
+            },
+            thread_default_prefix_id: (int), # since forum-2016031001
+            thread_prefix_is_required: (boolean), # since forum-2016031001
             links: {
                 permalink: (uri),
                 detail: (uri),
@@ -535,6 +550,7 @@ Parameters:
  * `forum_id` (__required__): id of the target forum.
  * `thread_title` (__required__): title of the new thread.
  * `post_body` (__required__): content of the new thread.
+ * `thread_prefix_id` (_optional_): id of a prefix for the new thread. Since forum-2016031001.
  * `thread_tags` (_optional_): thread tags for the new thread. Since forum-2015091002.
 
 Required scopes:
@@ -597,6 +613,13 @@ Detail information of a thread.
             thread_is_followed: (boolean), # since forum-2014052903
             first_post: (post),
             last_post: (post), # must be in fields_include to work, since forum-2015121801
+            thread_prefixes: [ # since forum-2016031001
+                {
+                    prefix_id: (int),
+                    prefix_title: (string)
+                },
+                ...
+            ],
             poll: { # since forum-2015100601
                 poll_id: (int),
                 poll_question: (string),
@@ -1007,8 +1030,9 @@ Edit a post.
 Parameters:
 
  * `post_body` (__required__): new content of the post.
- * `thread_title` (_optional_, since forum-2014052203): new title of the thread (only used if the post is the first post in the thread and the user can edit thread).
- * `thread_tags` (_optional_, since forum-2015091101): new tags of the thread (only used if the post is the first post in the thread and the user can edit thread tags).
+ * `thread_title` (_optional_, since forum-2014052203): new title of the thread (only used if the post is the first post in the thread and the authenticated user can edit thread).
+ * `thread_prefix_id` (_optional_, since forum-2016031001): new id of the thread's prefix (only used if the post is the first post in the thread and the authenticated user can edit thread).
+ * `thread_tags` (_optional_, since forum-2015091101): new tags of the thread (only used if the post is the first post in the thread and the authenticated user can edit thread tags).
 
 Required scopes:
 

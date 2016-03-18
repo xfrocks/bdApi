@@ -205,6 +205,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $input = $this->_input->filter(array(
             'forum_id' => XenForo_Input::UINT,
             'thread_title' => XenForo_Input::STRING,
+            'thread_prefix_id' => XenForo_Input::STRING,
             'thread_tags' => XenForo_Input::STRING,
         ));
 
@@ -231,6 +232,14 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             'title' => $input['thread_title'],
             'node_id' => $forum['node_id'],
         ));
+
+        $prefixId = $input['thread_prefix_id'];
+        if (!is_numeric($prefixId)
+            && !empty($forum['default_prefix_id'])
+        ) {
+            $prefixId = $forum['default_prefix_id'];
+        }
+        $writer->set('prefix_id', $prefixId);
 
         // discussion state changes instead of first message state
         $writer->set('discussion_state', $this->_getPostModel()->getPostInsertMessageState(array(), $forum));
@@ -278,6 +287,16 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
         $writer->preSave();
 
+        if (!$writer->get('prefix_id')
+            && !empty($forum['require_prefix'])
+        ) {
+            /** @var bdApi_Extend_Model_ThreadPrefix $prefixModel */
+            $prefixModel = $this->getModelFromCache('XenForo_Model_ThreadPrefix');
+            if ($prefixModel->getUsablePrefixesInForums($forum['node_id'])) {
+                $writer->error(new XenForo_Phrase('please_select_a_prefix'), 'prefix_id');
+            }
+        }
+
         if ($writer->hasErrors()) {
             return $this->responseErrors($writer->getErrors(), 400);
         }
@@ -315,6 +334,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         $this->_request->setParam('post_id', $thread['first_post_id']);
+        XenForo_Application::set('bdApi_responseReroute', array(__CLASS__, 'single'));
         return $this->responseReroute('bdApi_ControllerApi_Post', 'put-index');
     }
 
