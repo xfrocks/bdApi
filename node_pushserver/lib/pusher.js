@@ -1,8 +1,12 @@
+'use strict';
+
+// TODO: tests
+
 var pusher = exports;
 var config = require('./config');
 var deviceDb = require('./db').devices;
 var apn = require('apn');
-var debug = require('debug')('pusher');
+var debug = require('debug')('pushserver:pusher');
 var _ = require('lodash');
 var gcm = require('node-gcm');
 var wns = require('wns');
@@ -19,15 +23,20 @@ if (config.apn.enabled) {
 
     var apnFeedback = new apn.Feedback(apnFeedbackOptions);
     apnFeedback.on('feedback', function (devices) {
-        debug('APN feedback', devices);
         devices.forEach(function (item) {
+            debug('apnFeedback', item);
             deviceDb.delete('ios', item.device);
-            debug('apnFeedback', 'delete device', 'ios', item.device);
         });
     });
 }
 
 pusher.apn = function (token, payload, callback) {
+    if (!config.apn.enabled || !apnConnection) {
+        if (typeof callback == 'function') {
+            callback('apn', 'Pusher has been disabled');
+        }
+    }
+
     var device = new apn.Device(token);
 
     var notification = new apn.Notification(payload);
@@ -39,7 +48,7 @@ pusher.apn = function (token, payload, callback) {
     if (!payload.expire && config.apn.notificationOptions.expiry) {
         notification.expiry = config.apn.notificationOptions.expiry;
     } else {
-        // expire must has default value of 0
+        // expire must have some value
         notification.expiry = 0;
     }
 
@@ -47,19 +56,16 @@ pusher.apn = function (token, payload, callback) {
         notification.sound = config.apn.notificationOptions.sound;
     }
 
-    if (apnConnection != null) {
-        apnConnection.pushNotification(notification, device);
-    }
-
+    apnConnection.pushNotification(notification, device);
     if (typeof callback == 'function') {
         callback();
     }
 };
 
-pusher.gcm = function (gcmKey, registrationIds, data, callback) {
+pusher.gcm = function (gcmKey, registrationId, data, callback) {
     if (!config.gcm.enabled) {
         if (typeof callback == 'function') {
-            callback('GCM is disabled.');
+            callback('gcm', 'Pusher has been disabled');
         }
         return;
     }
@@ -69,7 +75,7 @@ pusher.gcm = function (gcmKey, registrationIds, data, callback) {
     var message = new gcm.Message(config.gcm.messageOptions);
     message.addDataWithObject(data);
 
-    sender.send(message, registrationIds, 1, function (err, result) {
+    sender.send(message, [registrationId], 1, function (err, result) {
         if (typeof callback == 'function') {
             callback(err, result);
         }
@@ -81,7 +87,7 @@ var accessToken = '';
 pusher.wns = function (channelUri, dataRaw, callback) {
     if (!config.wns.enabled) {
         if (typeof callback == 'function') {
-            callback('WNS is disabled.');
+            callback('wns', 'Pusher has been disabled');
         }
         return;
     }

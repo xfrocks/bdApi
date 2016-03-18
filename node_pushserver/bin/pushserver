@@ -1,0 +1,54 @@
+#!/usr/bin/env node
+
+'use strict';
+
+var debug = require('debug')('pushserver:app');
+debug('Booting up...');
+
+var config = require('../lib/config');
+if (config.apn.enabled) {
+    if (!config.hasApnConfig()) {
+        debug('No APN cert.');
+        return;
+    }
+} else {
+    debug('APN is disabled.');
+}
+
+if (config.gcm.enabled) {
+    if (!config.hasGcmConfig()) {
+        debug('No GCM key.');
+        return;
+    }
+} else {
+    debug('GCM is disabled.');
+}
+
+if (config.wns.enabled) {
+    if (!config.hasWnsConfig()) {
+        debug('No WNS client credentials.');
+        return;
+    }
+} else {
+    debug('WNS is disabled.');
+}
+
+debug('Loading…');
+var web = require('../lib/web');
+var adminSections = {};
+
+// setup db
+var db = require('../lib/db');
+if (config.db.web) {
+    adminSections.db = db.expressMiddleware();
+}
+
+// setup push queue
+var pusher = require('../lib/pusher');
+var pushQueue = require('../lib/pushQueue');
+if (config.pushQueue.web) {
+    adminSections.queue = pushQueue.expressMiddleware();
+}
+
+debug('Starting web…');
+web.start(config.web.port, db.devices, pushQueue, adminSections);

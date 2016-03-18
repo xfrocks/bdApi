@@ -1,12 +1,20 @@
+'use strict';
+
 var config = exports;
 var _ = require('lodash');
 var url = require('url');
-var debug = require('debug')('config');
+var debug = require('debug')('pushserver:config');
 
 var defaultConfig = {
+    db: {
+        mongoUri: 'mongodb://localhost/node-test',
+        web: false
+    },
     web: {
         port: 18080,
-        callback: ''
+        callback: '',
+        username: '',
+        password: ''
     },
     redis: {
         port: 6379,
@@ -15,8 +23,9 @@ var defaultConfig = {
     },
     pushQueue: {
         queueId: 'push',
-        attempts: 86400,
-        webPort: 18081
+        attempts: 3,
+        ttlInMs: 5000,
+        web: false
     },
     apn: {
         enabled: false,
@@ -47,9 +56,12 @@ var defaultConfig = {
 
 _.merge(config, defaultConfig);
 
+if (process.env.MONGOLAB_URI) {
+    config.db.mongoUri = process.env.MONGOLAB_URI;
+}
+
 if (process.env.PORT) {
     config.web.port = process.env.PORT;
-    config.pushQueue.webPort = 0;
 }
 
 if (process.env.REDISTOGO_URL) {
@@ -63,11 +75,15 @@ if (process.env.CONFIG_WEB_CALLBACK) {
     config.web.callback = process.env.CONFIG_WEB_CALLBACK;
 }
 
+if (process.env.CONFIG_WEB_USERNAME && process.env.CONFIG_WEB_PASSWORD) {
+    config.web.username = process.env.CONFIG_WEB_USERNAME;
+    config.web.password = process.env.CONFIG_WEB_PASSWORD;
+    config.db.web = true;
+    config.pushQueue.web = true;
+}
+
 if (process.env.CONFIG_PUSH_QUEUE_ID) {
     config.pushQueue.queueId = process.env.CONFIG_PUSH_QUEUE_ID;
-}
-if (process.env.CONFIG_PUSH_QUEUE_PORT) {
-    config.pushQueue.webPort = process.env.CONFIG_PUSH_QUEUE_PORT;
 }
 
 if (process.env.CONFIG_APN_CERT_FILE && process.env.CONFIG_APN_KEY_FILE) {
@@ -88,6 +104,7 @@ if (process.env.CONFIG_APN_GATEWAY) {
 }
 
 if (process.env.CONFIG_GCM_KEY) {
+    // single gcm key
     config.gcm.enabled = true;
 
     var keyId = '_default_';
@@ -96,6 +113,7 @@ if (process.env.CONFIG_GCM_KEY) {
 }
 
 if (process.env.CONFIG_GCM_KEYS) {
+    // multiple gcm keys
     config.gcm.enabled = true;
 
     var n = parseInt(process.env.CONFIG_GCM_KEYS);
@@ -110,8 +128,6 @@ if (process.env.CONFIG_GCM_KEYS) {
             }
         }
     }
-
-    debug('CONFIG_GCM_KEYS', config.gcm);
 }
 
 if (process.env.CONFIG_WNS_CLIENT_ID && process.env.CONFIG_WNS_CLIENT_SECRET) {
@@ -119,3 +135,15 @@ if (process.env.CONFIG_WNS_CLIENT_ID && process.env.CONFIG_WNS_CLIENT_SECRET) {
     config.wns.client_id = process.env.CONFIG_WNS_CLIENT_ID;
     config.wns.client_secret = process.env.CONFIG_WNS_CLIENT_SECRET;
 }
+
+config.hasApnConfig = function () {
+    return config.apn.connectionOptions.cert || config.apn.connectionOptions.certData;
+};
+
+config.hasGcmConfig = function () {
+    return !!config.gcm.defaultKeyId;
+};
+
+config.hasWnsConfig = function () {
+    return config.wns.client_id && config.wns.client_secret;
+};
