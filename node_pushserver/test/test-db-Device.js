@@ -4,7 +4,7 @@ var chai = require('chai');
 chai.should();
 var expect = chai.expect;
 
-describe('db', function () {
+describe('db/Device', function () {
 
     db.devices._model.collection.drop();
 
@@ -37,8 +37,6 @@ describe('db', function () {
                 devices.length.should.equal(1);
 
                 var device = devices[0];
-                device.device_type.should.equal(deviceType);
-                device.device_id.should.equal(deviceId);
                 device.oauth_client_id.should.equal(oauthClientId);
                 device.hub_topic.should.be.a('array');
                 device.hub_topic.length.should.equal(1);

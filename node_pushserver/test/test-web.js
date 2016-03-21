@@ -8,8 +8,9 @@ var _ = require('lodash');
 chai.should();
 chai.use(require('chai-http'));
 
-var deviceDb = require('./mock/db').devices;
-web._deviceDb = deviceDb;
+var db = require('./mock/db');
+web._deviceDb = db.devices;
+web._projectDb = db.projects;
 var pushQueue = require('./mock/pushQueue');
 web._pushQueue = pushQueue;
 var webApp = chai.request(web._app);
@@ -26,7 +27,8 @@ var testAppUri = 'http://localhost:' + testAppPort;
 describe('web', function () {
 
     beforeEach(function (done) {
-        deviceDb._reset();
+        db.devices._reset();
+        db.projects._reset();
         pushQueue._reset();
         done();
     });
@@ -70,7 +72,7 @@ describe('web', function () {
         };
 
         var step2 = function () {
-            deviceDb.findDevices(oauthClientId, hubTopic, function (devices) {
+            db.devices.findDevices(oauthClientId, hubTopic, function (devices) {
                 devices.length.should.equal(1);
 
                 var device = devices[0];
@@ -164,7 +166,7 @@ describe('web', function () {
         var deviceId = 'di';
 
         var init = function () {
-            deviceDb.save(deviceType, deviceId, oauthClientId, hubTopic, null, function (isSaved) {
+            db.devices.save(deviceType, deviceId, oauthClientId, hubTopic, null, function (isSaved) {
                 isSaved.should.equal('saved');
                 step1();
             });
@@ -188,7 +190,7 @@ describe('web', function () {
         };
 
         var step2 = function () {
-            deviceDb.findDevices(oauthClientId, null, function (devices) {
+            db.devices.findDevices(oauthClientId, null, function (devices) {
                 devices.length.should.equal(1);
 
                 var device = devices[0];
@@ -264,7 +266,7 @@ describe('web', function () {
         var deviceId = 'di';
 
         var init = function () {
-            deviceDb.save(deviceType, deviceId, oauthClientId, hubTopic, null, function (isSaved) {
+            db.devices.save(deviceType, deviceId, oauthClientId, hubTopic, null, function (isSaved) {
                 isSaved.should.equal('saved');
                 step1();
             });
@@ -296,7 +298,7 @@ describe('web', function () {
         var deviceId = 'di';
 
         var init = function () {
-            deviceDb.save(deviceType, deviceId, oauthClientId, null, null, function (isSaved) {
+            db.devices.save(deviceType, deviceId, oauthClientId, null, null, function (isSaved) {
                 isSaved.should.equal('saved');
                 step1();
             });
@@ -318,7 +320,7 @@ describe('web', function () {
         };
 
         var step2 = function () {
-            deviceDb.findDevices(oauthClientId, null, function (devices) {
+            db.devices.findDevices(oauthClientId, null, function (devices) {
                 devices.length.should.equal(0);
             });
 
@@ -372,7 +374,7 @@ describe('web', function () {
         var challenge = '' + Math.random();
 
         var init = function () {
-            deviceDb.save(deviceType, deviceId, oauthClientId, hubTopic, null, function (isSaved) {
+            db.devices.save(deviceType, deviceId, oauthClientId, hubTopic, null, function (isSaved) {
                 isSaved.should.equal('saved');
                 test();
             });
@@ -485,7 +487,7 @@ describe('web', function () {
         var payload = 'p';
 
         var init = function () {
-            deviceDb.save(deviceType, deviceId, oauthClientId, hubTopic, extraData, function (isSaved) {
+            db.devices.save(deviceType, deviceId, oauthClientId, hubTopic, extraData, function (isSaved) {
                 isSaved.should.equal('saved');
                 test();
             });
@@ -526,10 +528,10 @@ describe('web', function () {
         var deviceId2 = 'di2';
 
         var init = function () {
-            deviceDb.save(deviceType, deviceId, oauthClientId, hubTopic, null, function (isSaved) {
+            db.devices.save(deviceType, deviceId, oauthClientId, hubTopic, null, function (isSaved) {
                 isSaved.should.equal('saved');
 
-                deviceDb.save(deviceType, deviceId2, oauthClientId, hubTopic, null, function (isSaved) {
+                db.devices.save(deviceType, deviceId2, oauthClientId, hubTopic, null, function (isSaved) {
                     isSaved.should.equal('saved');
                     test();
                 });
@@ -572,7 +574,7 @@ describe('web', function () {
         var payload2 = 'p2';
 
         var init = function () {
-            deviceDb.save(deviceType, deviceId, oauthClientId, hubTopic, null, function (isSaved) {
+            db.devices.save(deviceType, deviceId, oauthClientId, hubTopic, null, function (isSaved) {
                 isSaved.should.equal('saved');
                 test();
             });
@@ -606,6 +608,67 @@ describe('web', function () {
         };
 
         init();
+    });
+
+    it('should save gcm project', function (done) {
+        var packageId = 'pi';
+        var apiKey = 'ak';
+
+        var step1 = function () {
+            webApp
+                .post('/admin/gcm')
+                .send({
+                    package_id: packageId,
+                    api_key: apiKey
+                })
+                .end(function (err, res) {
+                    res.should.have.status(202);
+                    step2();
+                });
+        };
+
+        var step2 = function () {
+            db.projects.findConfig('gcm', packageId, function (projectConfig) {
+                projectConfig.should.not.be.null;
+                projectConfig.api_key.should.equal(apiKey);
+
+                done();
+            });
+        };
+
+        step1();
+    });
+
+    it('should save wns project', function (done) {
+        var packageId = 'pi';
+        var clientId = 'ci';
+        var clientSecret = 'cs';
+
+        var step1 = function () {
+            webApp
+                .post('/admin/wns')
+                .send({
+                    package_id: packageId,
+                    client_id: clientId,
+                    client_secret: clientSecret
+                })
+                .end(function (err, res) {
+                    res.should.have.status(202);
+                    step2();
+                });
+        };
+
+        var step2 = function () {
+            db.projects.findConfig('wns', packageId, function (projectConfig) {
+                projectConfig.should.not.be.null;
+                projectConfig.client_id.should.equal(clientId);
+                projectConfig.client_secret.should.equal(clientSecret);
+
+                done();
+            });
+        };
+
+        step1();
     });
 
 });

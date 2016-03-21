@@ -285,12 +285,64 @@ app.get('/admin', function (req, res) {
     res.send(output);
 });
 
+app.post('/admin/gcm', function (req, res) {
+    if (!req.body.package_id
+        || !req.body.api_key) {
+        return res.sendStatus(400);
+    }
+    var packageId = req.body.package_id;
+    var apiKey = req.body.api_key;
+
+    if (!web._projectDb) {
+        debug('POST /admin/gcm', 'projectDb has not been setup properly');
+        return res.sendStatus(500);
+    }
+
+    web._projectDb.saveGcm(packageId, apiKey,
+        function (isSaved) {
+            if (isSaved !== false) {
+                debug('POST /admin/gcm', 'Saved GCM project', packageId);
+                return res.sendStatus(202);
+            } else {
+                return res.sendStatus(500);
+            }
+        });
+});
+
+app.post('/admin/wns', function (req, res) {
+    if (!req.body.package_id
+        || !req.body.client_id
+        || !req.body.client_secret) {
+        return res.sendStatus(400);
+    }
+    var packageId = req.body.package_id;
+    var clientId = req.body.client_id;
+    var clientSecret = req.body.client_secret;
+
+    if (!web._projectDb) {
+        debug('POST /admin/wns', 'projectDb has not been setup properly');
+        return res.sendStatus(500);
+    }
+
+    web._projectDb.saveWns(packageId, clientId, clientSecret,
+        function (isSaved) {
+            if (isSaved !== false) {
+                debug('POST /admin/wns', 'Saved WNS project', packageId);
+                return res.sendStatus(202);
+            } else {
+                return res.sendStatus(500);
+            }
+        });
+});
+
 web._app = app;
 web._deviceDb = null;
+web._projectDb = null;
 web._pushQueue = null;
 web._adminSections = [];
-web.start = function (port, deviceDb, pushQueue, adminSections) {
+web.start = function (port, deviceDb, projectDb, pushQueue, adminSections) {
     web._deviceDb = deviceDb;
+    web._projectDb = projectDb;
     web._pushQueue = pushQueue;
 
     _.forEach(adminSections, function (middleware, route) {

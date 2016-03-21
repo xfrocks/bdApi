@@ -82,9 +82,9 @@ pusher.gcm = function (gcmKey, registrationId, data, callback) {
     });
 };
 
-// store access token in memory only
-var accessToken = '';
-pusher.wns = function (channelUri, dataRaw, callback) {
+// store access tokens in memory only
+var wnsAccessTokens = [];
+pusher.wns = function (clientId, clientSecret, channelUri, dataRaw, callback) {
     if (!config.wns.enabled) {
         if (typeof callback == 'function') {
             callback('wns', 'Pusher has been disabled');
@@ -92,20 +92,24 @@ pusher.wns = function (channelUri, dataRaw, callback) {
         return;
     }
 
-    var options = _.merge({
-        'accessToken': accessToken
-    }, config.wns);
+    var options = {
+        client_id: clientId,
+        client_secret: clientSecret
+    };
+    if (typeof wnsAccessTokens[clientId] === 'string') {
+        options.accessToken = wnsAccessTokens[clientId];
+    }
 
     wns.sendRaw(channelUri, dataRaw, options, function (err, result) {
         if (err) {
             if (err.newAccessToken) {
                 debug('wns', 'updated access token (from error)');
-                accessToken = err.newAccessToken;
+                wnsAccessTokens[clientId] = err.newAccessToken;
             }
         } else if (result) {
             if (result.newAccessToken) {
                 debug('wns', 'updated access token (from result)');
-                accessToken = result.newAccessToken;
+                wnsAccessTokens[clientId] = result.newAccessToken;
             }
         }
 

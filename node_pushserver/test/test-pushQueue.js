@@ -11,8 +11,12 @@ config.gcm.keys = {
     key1: 'key1',
     key2: 'key2'
 };
+config.wns.client_id = 'wns_ci';
+config.wns.client_secret = 'wns_cs';
 var pusher = require('./mock/pusher');
 pushQueue.setPusher(pusher);
+var db = require('./mock/db');
+pushQueue.setProjectDb(db.projects);
 
 var notificationId = 0;
 var generatePayload = function () {
@@ -101,6 +105,54 @@ describe('pushQueue', function () {
         test1();
     });
 
+    it('[android] db key', function (done) {
+        var packageId = 'pi-db';
+        var apiKey = 'ak-db';
+        var deviceType = 'android';
+        var deviceId = 'di-db';
+        var payload = generatePayload();
+        var extraData = {package: packageId};
+
+        var init = function () {
+            db.projects.saveGcm(packageId, apiKey, function () {
+                test();
+            });
+        };
+
+        var test = function () {
+            pushQueue.enqueue(deviceType, deviceId, payload, extraData);
+
+            setTimeout(function () {
+                var latestPush = pusher._getLatestPush();
+                latestPush.type.should.equal('gcm');
+                latestPush.gcmKey.should.equal(apiKey);
+
+                done();
+            }, 1000);
+        };
+
+        init();
+    });
+
+    it.only('[android] no key', function (done) {
+        this.timeout(6000);
+
+        var packageId = 'pi-db-no-client';
+        var deviceType = 'android';
+        var deviceId = 'di-no-client';
+        var payload = generatePayload();
+        var extraData = {package: packageId};
+
+        pushQueue.enqueue(deviceType, deviceId, payload, extraData);
+
+        setTimeout(function () {
+            var pushes = pusher._getPushes();
+            pushes.length.should.equal(0);
+
+            done();
+        }, 5000);
+    });
+
     it('should process ios queue', function (done) {
         var deviceType = 'ios';
         var deviceId = 'di';
@@ -140,6 +192,25 @@ describe('pushQueue', function () {
             data.notification_id.should.equal(payload.notification_id);
             data.notification_html.should.equal(payload.notification_html);
             data.extra_data.foo.should.equal(extraData.foo);
+
+            done();
+        }, 1000);
+    });
+
+    it('[windows] default key', function (done) {
+        var deviceType = 'windows';
+        var deviceId = 'di';
+        var payload = generatePayload();
+        var channelUri = 'https://microsoft.com/wns/channel/uri';
+        var extraData = {channel_uri: channelUri};
+
+        pushQueue.enqueue(deviceType, deviceId, payload, extraData);
+
+        setTimeout(function () {
+            var latestPush = pusher._getLatestPush();
+            latestPush.type.should.equal('wns');
+            latestPush.clientId.should.equal(config.wns.client_id);
+            latestPush.clientSecret.should.equal(config.wns.client_secret);
 
             done();
         }, 1000);

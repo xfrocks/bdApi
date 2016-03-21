@@ -59,6 +59,10 @@ pushQueue._onJob = function (job, done) {
 };
 
 pushQueue._onAndroidJob = function (job, callback) {
+    if (!pusher) {
+        return callback('pusher has not been setup properly');
+    }
+
     var data = job.data;
     var gcmPayload = {
         action: data.action
@@ -79,20 +83,33 @@ pushQueue._onAndroidJob = function (job, callback) {
         });
     }
 
-    var gcmKeyId;
-    if (data.extra_data
-        && typeof data.extra_data.package == 'string'
-        && typeof config.gcm.keys[data.extra_data.package] == 'string') {
-        gcmKeyId = data.extra_data.package;
+    var packageId = '';
+    var gcmKey = '';
+    if (data.extra_data && typeof data.extra_data.package == 'string') {
+        packageId = data.extra_data.package;
+        gcmKey = config.gcm.keys[packageId];
     } else {
-        gcmKeyId = config.gcm.defaultKeyId;
+        gcmKey = config.gcm.keys[config.gcm.defaultKeyId];
     }
 
-    if (pusher) {
-        job.log('gcmKeyId = %s', gcmKeyId);
-        pusher.gcm(config.gcm.keys[gcmKeyId], data.device_id, gcmPayload, callback);
+    if (gcmKey) {
+        pusher.gcm(gcmKey, data.device_id, gcmPayload, callback);
     } else {
-        callback('pusher has not been setup properly');
+        if (!packageId) {
+            return callback('extra_data.package is missing');
+        }
+
+        if (!projectDb) {
+            return callback('projectDb has not been setup properly');
+        }
+
+        projectDb.findConfig('gcm', packageId, function (projectConfig) {
+            if (!projectConfig || !projectConfig.api_key) {
+                return callback('Project could not be found', packageId);
+            }
+
+            pusher.gcm(projectConfig.api_key, data.device_id, gcmPayload, callback);
+        });
     }
 };
 
@@ -118,26 +135,58 @@ pushQueue._oniOSJob = function (job, callback) {
 };
 
 pushQueue._onWindowsJob = function (job, callback) {
-    var data = job.data;
-    if (data.extra_data.channel_uri) {
-        var wnsPayload = data.payload;
-
-        wnsPayload.extra_data = {};
-        _.forEach(data.extra_data, function (extraData, i) {
-            if (i != 'channel_uri') {
-                // forward all extra data, except the channel_uri
-                wnsPayload.extra_data[i] = extraData;
-            }
-        });
-
-        if (pusher) {
-            pusher.wns(data.extra_data.channel_uri, JSON.stringify(wnsPayload), callback);
-        } else {
-            callback('pusher has not been setup properly');
-        }
-    } else {
-        callback('channel_uri is missing');
+    if (!pusher) {
+        return callback('pusher has not been setup properly');
     }
+
+    var data = job.data;
+    var payload = data.payload;
+    var packageId = '';
+    var clientId = config.wns.client_id;
+    var clientSecret = config.wns.client_secret;
+    var channelUri = '';
+
+    payload.extra_data = {};
+    _.forEach(data.extra_data, function (value, key) {
+        switch (key) {
+            case 'channel_uri':
+                channelUri = value;
+                break;
+            case 'package':
+                packageId = value;
+                clientId = '';
+                clientSecret = '';
+                break;
+            default:
+                payload.extra_data[key] = value;
+        }
+    });
+
+    if (!channelUri) {
+        return callback('channel_uri is missing');
+    }
+    var payloadJson = JSON.stringify(payload);
+
+    if (clientId && clientSecret) {
+        pusher.wns(clientId, clientSecret, channelUri, payloadJson, callback);
+    } else {
+        if (!packageId) {
+            return callback('extra_data.package is missing');
+        }
+
+        if (!projectDb) {
+            return callback('projectDb has not been setup properly');
+        }
+
+        projectDb.findConfig('wns', packageId, function (projectConfig) {
+            if (!projectConfig.client_id || !projectConfig.client_secret) {
+                return callback('Project could not be found', packageId);
+            }
+
+            pusher.wns(projectConfig.client_id, projectConfig.client_secret, channelUri, payloadJson, callback);
+        });
+    }
+
 };
 
 pushQueue.expressMiddleware = function () {
@@ -147,6 +196,11 @@ pushQueue.expressMiddleware = function () {
 var pusher = null;
 pushQueue.setPusher = function (_pusher) {
     pusher = _pusher;
+};
+
+var projectDb = null;
+pushQueue.setProjectDb = function (_projectDb) {
+    projectDb = _projectDb;
 };
 
 var pushKue = kue.createQueue({

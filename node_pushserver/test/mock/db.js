@@ -2,6 +2,7 @@ var db = exports;
 var _ = require('lodash');
 
 var devices = {};
+var projects = {};
 
 db.devices = {
 
@@ -60,7 +61,9 @@ db.devices = {
             }
         });
 
-        callback(results);
+        if (typeof callback == 'function') {
+            callback(results);
+        }
     },
 
     delete: function (deviceType, deviceId, oauthClientId, hubTopic, callback) {
@@ -88,5 +91,72 @@ db.devices = {
         };
 
         mock();
+    }
+};
+
+db.projects = {
+
+    _reset: function () {
+        projects = {};
+    },
+
+    saveGcm: function (packageId, apiKey, callback) {
+        return this.save('gcm', packageId, {api_key: apiKey}, callback);
+    },
+
+    saveWns: function (packageId, clientId, clientSecret, callback) {
+        return this.save('wns', packageId, {
+            client_id: clientId,
+            client_secret: clientSecret
+        }, callback);
+    },
+
+    save: function (projectType, projectId, configuration, callback) {
+        var mock = function () {
+            if (projectId === 'error') {
+                done(false);
+            }
+
+            var key = projectType + projectId;
+
+            if (typeof projects[key] === 'object') {
+                var project = projects[key];
+                project.configuration = _.assign({}, project.configuration, extraData);
+
+                done('updated');
+            } else {
+                projects[key] = {
+                    project_type: projectType,
+                    project_id: projectId,
+                    configuration: configuration
+                };
+
+                done('saved');
+            }
+        };
+
+        var done = function (result) {
+            if (typeof callback == 'function') {
+                callback(result);
+            }
+        };
+
+        mock();
+    },
+
+    findConfig: function (projectType, projectId, callback) {
+        var projectConfig = null;
+
+        _.forEach(projects, function (project) {
+            if (project.project_type == projectType
+                && project.project_id == projectId) {
+                projectConfig = project.configuration;
+                return false;
+            }
+        });
+
+        if (typeof callback == 'function') {
+            callback(projectConfig);
+        }
     }
 };

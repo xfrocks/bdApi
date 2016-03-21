@@ -52,9 +52,11 @@ pusher.gcm = function (gcmKey, registrationId, data, callback) {
     }, registrationId, callback);
 };
 
-pusher.wns = function (channelUri, dataRaw, callback) {
+pusher.wns = function (clientId, clientSecret, channelUri, dataRaw, callback) {
     mock({
         type: 'wns',
+        clientId: clientId,
+        clientSecret: clientSecret,
         channelUri: channelUri,
         dataRaw: dataRaw
     }, channelUri, callback);
