@@ -1,6 +1,7 @@
 'use strict';
 
 var helper = exports;
+var config = require('./config');
 var debug = require('debug')('pushserver:helper');
 var _ = require('lodash');
 var string = require('string');
@@ -94,4 +95,13 @@ helper.prepareSubscribeData = function (reqBody, requiredKeys) {
     }
 
     return data;
+};
+
+
+helper.getCallbackUri = function (req) {
+    if (config.web.callback) {
+        return config.web.callback;
+    }
+
+    return req.protocol + '://' + req.get('host') + '/callback';
 };

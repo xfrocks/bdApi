@@ -131,13 +131,17 @@ db.projects = {
             if (typeof projects[key] === 'object') {
                 var project = projects[key];
                 project.configuration = _.assign({}, project.configuration, extraData);
+                project.last_updated = Date.now();
 
                 done('updated');
             } else {
                 projects[key] = {
+                    _id: _.keys(projects).length + 1,
                     project_type: projectType,
                     project_id: projectId,
-                    configuration: configuration
+                    configuration: configuration,
+                    created: Date.now(),
+                    last_updated: Date.now()
                 };
 
                 done('saved');
@@ -153,19 +157,32 @@ db.projects = {
         mock();
     },
 
-    findConfig: function (projectType, projectId, callback) {
-        var projectConfig = null;
+    findProject: function (projectType, projectId, callback) {
+        var found = null;
 
         _.forEach(projects, function (project) {
             if (project.project_type == projectType
                 && project.project_id == projectId) {
-                projectConfig = project.configuration;
+                found = project;
                 return false;
             }
         });
 
         if (typeof callback == 'function') {
-            callback(projectConfig);
+            callback(found);
         }
+    },
+
+    findConfig: function (projectType, projectId, callback) {
+        this.findProject(projectType, projectId, function (project) {
+            if (typeof callback == 'function') {
+                if (project) {
+                    callback(project.configuration);
+                } else {
+                    callback(null);
+                }
+
+            }
+        });
     }
 };

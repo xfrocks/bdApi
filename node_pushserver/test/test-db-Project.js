@@ -170,6 +170,8 @@ describe('db/Project', function () {
                 project.configuration.should.has.all.keys('foo', 'bar');
                 project.configuration.foo.should.equal(configuration.foo);
                 project.configuration.bar.should.equal(configuration2.bar);
+                project.created.getTime().should.equal(theProject.created.getTime());
+                project.last_updated.getTime().should.above(theProject.last_updated.getTime());
 
                 done();
             });
@@ -181,6 +183,38 @@ describe('db/Project', function () {
     it('should return project', function (done) {
         var projectType = 'dt';
         var projectId = 'di';
+        var configuration = {foo: 'bar'};
+        var now = Date.now();
+
+        var init = function () {
+            db.projects._model.create({
+                project_type: projectType,
+                project_id: projectId,
+                configuration: configuration
+            }, function () {
+                step1();
+            });
+        };
+
+        var step1 = function () {
+            db.projects.findProject(projectType, projectId, function (project) {
+                project.should.be.a('object');
+                project.project_type.should.equal(projectType);
+                project.project_id.should.equal(projectId);
+                project.configuration.should.deep.equal(configuration);
+                project.created.getTime().should.be.at.least(now);
+                project.last_updated.getTime().should.be.at.least(now);
+
+                done();
+            });
+        };
+
+        init();
+    });
+
+    it('should return project configuration', function (done) {
+        var projectType = 'dt-config';
+        var projectId = 'di-config';
         var configuration = {foo: 'bar'};
 
         var init = function () {

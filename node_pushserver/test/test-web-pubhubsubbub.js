@@ -9,10 +9,8 @@ chai.should();
 chai.use(require('chai-http'));
 
 var db = require('./mock/db');
-web._deviceDb = db.devices;
-web._projectDb = db.projects;
 var pushQueue = require('./mock/pushQueue');
-web._pushQueue = pushQueue;
+require('../lib/web/pubhubsubbub').setup(web._app, db.devices, pushQueue);
 var webApp = chai.request(web._app);
 
 var testApp = express();
@@ -24,11 +22,10 @@ var testServer = http.createServer(testApp).listen();
 var testAppPort = testServer.address().port;
 var testAppUri = 'http://localhost:' + testAppPort;
 
-describe('web', function () {
+describe('web/pubhubsubbub', function () {
 
     beforeEach(function (done) {
         db.devices._reset();
-        db.projects._reset();
         pushQueue._reset();
         done();
     });
@@ -608,102 +605,6 @@ describe('web', function () {
         };
 
         init();
-    });
-
-    it('should save apn project', function (done) {
-        var appId = 'ai';
-        var certData = 'cd';
-        var keyData = 'kd';
-        var otherOptions = {gateway: 'co.gateway'};
-
-        var step1 = function () {
-            webApp
-                .post('/admin/apn')
-                .send({
-                    app_id: appId,
-                    cert_data: certData,
-                    key_data: keyData,
-                    other_options: otherOptions
-                })
-                .end(function (err, res) {
-                    res.should.have.status(202);
-                    step2();
-                });
-        };
-
-        var step2 = function () {
-            db.projects.findConfig('apn', appId, function (projectConfig) {
-                projectConfig.should.not.be.null;
-                projectConfig.cert_data.should.equal(certData);
-                projectConfig.key_data.should.equal(keyData);
-                projectConfig.gateway.should.equal(otherOptions.gateway);
-
-                done();
-            });
-        };
-
-        step1();
-    });
-
-    it('should save gcm project', function (done) {
-        var packageId = 'pi';
-        var apiKey = 'ak';
-
-        var step1 = function () {
-            webApp
-                .post('/admin/gcm')
-                .send({
-                    package_id: packageId,
-                    api_key: apiKey
-                })
-                .end(function (err, res) {
-                    res.should.have.status(202);
-                    step2();
-                });
-        };
-
-        var step2 = function () {
-            db.projects.findConfig('gcm', packageId, function (projectConfig) {
-                projectConfig.should.not.be.null;
-                projectConfig.api_key.should.equal(apiKey);
-
-                done();
-            });
-        };
-
-        step1();
-    });
-
-    it('should save wns project', function (done) {
-        var packageId = 'pi';
-        var clientId = 'ci';
-        var clientSecret = 'cs';
-
-        var step1 = function () {
-            webApp
-                .post('/admin/wns')
-                .send({
-                    package_id: packageId,
-                    client_id: clientId,
-                    client_secret: clientSecret
-                })
-                .end(function (err, res) {
-                    res.should.have.status(202);
-                    step2();
-                });
-        };
-
-        var step2 = function () {
-            db.projects.findConfig('wns', packageId, function (projectConfig) {
-                projectConfig.should.not.be.null;
-                projectConfig.client_id.should.equal(clientId);
-                projectConfig.client_secret.should.equal(clientSecret);
-
-                done();
-            });
-        };
-
-        step1();
     });
 
 });

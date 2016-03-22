@@ -7,7 +7,9 @@ var Project = exports = module.exports = function (mongoose) {
     var projectSchema = new mongoose.Schema({
         project_type: {type: String, required: true},
         project_id: {type: String, required: true},
-        configuration: {type: Object, required: true}
+        configuration: {type: Object, required: true},
+        created: {type: Date, default: Date.now},
+        last_updated: {type: Date, default: Date.now}
     });
     projectSchema.index({project_type: 1, project_id: 1});
     var projectModel = mongoose.model('projects', projectSchema);
@@ -43,6 +45,7 @@ var Project = exports = module.exports = function (mongoose) {
                 }, function (err, project) {
                     if (!err && project) {
                         project.configuration = _.assign({}, project.configuration, configuration);
+                        project.last_updated = Date.now();
                         project.save(function (err, updatedProject) {
                             if (!err && updatedProject) {
                                 updateDone(updatedProject);
@@ -103,10 +106,10 @@ var Project = exports = module.exports = function (mongoose) {
             tryUpdating();
         },
 
-        findConfig: function (projectType, projectId, callback) {
-            var done = function (projectConfig) {
+        findProject: function (projectType, projectId, callback) {
+            var done = function (project) {
                 if (typeof callback == 'function') {
-                    callback(projectConfig);
+                    callback(project);
                 }
             };
 
@@ -115,10 +118,23 @@ var Project = exports = module.exports = function (mongoose) {
                 project_id: projectId
             }, function (err, project) {
                 if (!err && project) {
-                    done(project.configuration);
+                    done(project);
                 } else {
                     debug('Error finding project', projectType, projectId, err);
                     done(null);
+                }
+            });
+        },
+
+        findConfig: function (projectType, projectId, callback) {
+            this.findProject(projectType, projectId, function (project) {
+                if (typeof callback == 'function') {
+                    if (project) {
+                        callback(project.configuration);
+                    } else {
+                        callback(null);
+                    }
+
                 }
             });
         }

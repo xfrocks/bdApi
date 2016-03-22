@@ -13,6 +13,7 @@ var defaultConfig = {
     web: {
         port: 18080,
         callback: '',
+        adminPrefix: '/admin',
         username: '',
         password: ''
     },
