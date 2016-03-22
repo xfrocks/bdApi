@@ -44,10 +44,17 @@ if (config.db.web) {
 }
 
 // setup push queue
-var pusher = require('../lib/pusher');
 var pushQueue = require('../lib/pushQueue');
+var kue = require('kue');
+var pushKue = kue.createQueue({
+    disableSearch: true,
+    jobEvents: false,
+    redis: config.redis
+});
+pushKue.watchStuckJobs(1000);
+pushQueue.start(pushKue, require('../lib/pusher'), db.projects);
 if (config.pushQueue.web) {
-    adminSections.queue = pushQueue.expressMiddleware();
+    adminSections.queue = kue.app;
 }
 
 debug('Starting web…');

@@ -4,7 +4,6 @@ var pushQueue = exports;
 var config = require('./config');
 var helper = require('./helper');
 var debug = require('debug')('pushserver:pushQueue');
-var kue = require('kue');
 var _ = require('lodash');
 var string = require('string');
 
@@ -34,10 +33,10 @@ pushQueue.enqueue = function (deviceType, deviceId, payload, extraData) {
 pushQueue._onJob = function (job, done) {
     var callback = function (err, result) {
         if (!err) {
-            debug('pushed', job.data.device_type, job.data.device_id);
+            debug('Pushed', job.data.device_type, job.data.device_id);
             done(null, result);
         } else {
-            debug('could not push', job.data.device_type, job.data.device_id, err);
+            debug('Could not push', job.data.device_type, job.data.device_id, err);
             if (err instanceof Error) {
                 done(err);
             } else {
@@ -179,34 +178,24 @@ pushQueue._onWindowsJob = function (job, callback) {
         }
 
         projectDb.findConfig('wns', packageId, function (projectConfig) {
-            if (!projectConfig.client_id || !projectConfig.client_secret) {
+            if (!projectConfig
+                || !projectConfig.client_id
+                || !projectConfig.client_secret) {
                 return callback('Project could not be found', packageId);
             }
 
             pusher.wns(projectConfig.client_id, projectConfig.client_secret, channelUri, payloadJson, callback);
         });
     }
-
 };
 
-pushQueue.expressMiddleware = function () {
-    return kue.app;
-};
-
+var pushKue = null;
 var pusher = null;
-pushQueue.setPusher = function (_pusher) {
-    pusher = _pusher;
-};
-
 var projectDb = null;
-pushQueue.setProjectDb = function (_projectDb) {
+pushQueue.start = function (_pushKue, _pusher, _projectDb) {
+    pushKue = _pushKue;
+    _pushKue.process(config.pushQueue.queueId, 1, pushQueue._onJob);
+
+    pusher = _pusher;
     projectDb = _projectDb;
 };
-
-var pushKue = kue.createQueue({
-    disableSearch: true,
-    jobEvents: false,
-    redis: config.redis
-});
-pushKue.watchStuckJobs(1000);
-pushKue.process(config.pushQueue.queueId, 1, pushQueue._onJob);
