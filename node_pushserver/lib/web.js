@@ -14,7 +14,7 @@ var url = require('url');
 
 var app = express();
 app.use(compression({}));
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 if (config.web.username && config.web.password) {
