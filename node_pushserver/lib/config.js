@@ -29,7 +29,10 @@ var defaultConfig = {
     },
     apn: {
         enabled: false,
+        connectionTtlInMs: 3600000,
+
         connectionOptions: {
+            packageId: 'default',
             cert: '',
             certData: null,
             key: '',

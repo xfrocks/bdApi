@@ -610,6 +610,41 @@ describe('web', function () {
         init();
     });
 
+    it('should save apn project', function (done) {
+        var appId = 'ai';
+        var certData = 'cd';
+        var keyData = 'kd';
+        var otherOptions = {gateway: 'co.gateway'};
+
+        var step1 = function () {
+            webApp
+                .post('/admin/apn')
+                .send({
+                    app_id: appId,
+                    cert_data: certData,
+                    key_data: keyData,
+                    other_options: otherOptions
+                })
+                .end(function (err, res) {
+                    res.should.have.status(202);
+                    step2();
+                });
+        };
+
+        var step2 = function () {
+            db.projects.findConfig('apn', appId, function (projectConfig) {
+                projectConfig.should.not.be.null;
+                projectConfig.cert_data.should.equal(certData);
+                projectConfig.key_data.should.equal(keyData);
+                projectConfig.gateway.should.equal(otherOptions.gateway);
+
+                done();
+            });
+        };
+
+        step1();
+    });
+
     it('should save gcm project', function (done) {
         var packageId = 'pi';
         var apiKey = 'ak';

@@ -35,9 +35,10 @@ var mock = function (push, hint, callback) {
     }
 };
 
-pusher.apn = function (token, payload, callback) {
+pusher.apn = function (connectionOptions, token, payload, callback) {
     mock({
         type: 'apn',
+        connectionOptions: connectionOptions,
         token: token,
         payload: payload
     }, token, callback);

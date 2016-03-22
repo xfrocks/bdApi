@@ -100,6 +100,15 @@ db.projects = {
         projects = {};
     },
 
+    saveApn: function (appId, certData, keyData, otherOptions, callback) {
+        var configuration = _.assign({}, {
+            cert_data: certData,
+            key_data: keyData
+        }, otherOptions);
+
+        return this.save('apn', appId, configuration, callback);
+    },
+
     saveGcm: function (packageId, apiKey, callback) {
         return this.save('gcm', packageId, {api_key: apiKey}, callback);
     },

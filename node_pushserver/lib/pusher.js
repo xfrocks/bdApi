@@ -1,51 +1,96 @@
 'use strict';
 
-// TODO: tests
-
 var pusher = exports;
 var config = require('./config');
 var deviceDb = require('./db').devices;
-var apn = require('apn');
 var debug = require('debug')('pushserver:pusher');
 var _ = require('lodash');
-var gcm = require('node-gcm');
-var wns = require('wns');
 
-var apnConnection = null;
-if (config.apn.enabled) {
-    apnConnection = new apn.Connection(config.apn.connectionOptions);
+var apn, gcm, wns;
+pusher.setup = function (_apn, _gcm, _wns) {
+    apn = _apn;
+    gcm = _gcm;
+    wns = _wns;
 
-    var apnFeedbackOptions = {
-        'batchFeedback': true,
-        'interval': config.apn.feedback.interval
-    };
-    _.merge(apnFeedbackOptions, config.apn.connectionOptions);
+    return pusher;
+};
 
-    var apnFeedback = new apn.Feedback(apnFeedbackOptions);
-    apnFeedback.on('feedback', function (devices) {
-        devices.forEach(function (item) {
-            debug('apnFeedback', item);
-            deviceDb.delete('ios', item.device);
-        });
-    });
-}
+var apnConnections = {};
+pusher._resetApnConnections = function () {
+    apnConnections = {};
+};
 
-pusher.apn = function (token, payload, callback) {
-    if (!config.apn.enabled || !apnConnection) {
-        if (typeof callback == 'function') {
-            callback('apn', 'Pusher has been disabled');
+pusher.cleanUpApnConnections = function (ttlInMs) {
+    var cutoff = _.now() - ttlInMs;
+
+    _.filter(apnConnections, function (ac) {
+        if (ac.connection.terminated
+            || ac.lastUsed < cutoff) {
+            ac.connection.shutdown();
+            ac.feedback.cancel();
+            return false;
         }
+
+        // keep this connection
+        return true;
+    });
+};
+
+var createApnConnection = function (packageId, connectionOptions) {
+    if (!apn) {
+        debug('apn has not been setup properly');
+        return null;
+    }
+
+    if (typeof apnConnections[packageId] == 'undefined'
+        || apnConnections[packageId].connection.terminated) {
+        if (config.apn.connectionTtlInMs > 0) {
+            pusher.cleanUpApnConnections(config.apn.connectionTtlInMs);
+        }
+
+        var connection = new apn.Connection(connectionOptions);
+
+        var feedback = null;
+        if (config.apn.feedback.interval > 0) {
+            var feedbackOptions = {
+                batchFeedback: true,
+                interval: config.apn.feedback.interval
+            };
+            _.merge(feedbackOptions, connectionOptions);
+            feedback = new apn.Feedback(feedbackOptions);
+            feedback.on('feedback', function (devices) {
+                devices.forEach(function (item) {
+                    debug('apnFeedback', packageId, item);
+                    deviceDb.delete('ios', item.device);
+                });
+            });
+        }
+
+        apnConnections[packageId] = {
+            connection: connection,
+            feedback: feedback,
+            lastUsed: _.now()
+        };
+    } else {
+        apnConnections[packageId].lastUsed = _.now();
+    }
+
+    return apnConnections[packageId];
+};
+
+pusher.apn = function (connectionOptions, token, payload, callback) {
+    var ac = createApnConnection(connectionOptions.packageId, connectionOptions);
+    if (ac === null) {
+        return callback('Unable to create APN connection');
     }
 
     var device = new apn.Device(token);
 
     var notification = new apn.Notification(payload);
-
     if (!payload.badge && config.apn.notificationOptions.badge) {
         notification.badge = config.apn.notificationOptions.badge;
     }
-
-    if (!payload.expire && config.apn.notificationOptions.expiry) {
+    if (!payload.expiry && config.apn.notificationOptions.expiry) {
         notification.expiry = config.apn.notificationOptions.expiry;
     } else {
         // expire must have some value
@@ -56,18 +101,16 @@ pusher.apn = function (token, payload, callback) {
         notification.sound = config.apn.notificationOptions.sound;
     }
 
-    apnConnection.pushNotification(notification, device);
+    ac.connection.pushNotification(notification, device);
     if (typeof callback == 'function') {
-        callback();
+        return callback();
     }
 };
 
 pusher.gcm = function (gcmKey, registrationId, data, callback) {
-    if (!config.gcm.enabled) {
-        if (typeof callback == 'function') {
-            callback('gcm', 'Pusher has been disabled');
-        }
-        return;
+    if (!gcm) {
+        debug('gcm has not been setup properly');
+        return callback('Unable to create GCM sender');
     }
 
     var sender = new gcm.Sender(gcmKey);
@@ -77,7 +120,7 @@ pusher.gcm = function (gcmKey, registrationId, data, callback) {
 
     sender.send(message, [registrationId], 1, function (err, result) {
         if (typeof callback == 'function') {
-            callback(err, result);
+            return callback(err, result);
         }
     });
 };
@@ -85,11 +128,9 @@ pusher.gcm = function (gcmKey, registrationId, data, callback) {
 // store access tokens in memory only
 var wnsAccessTokens = [];
 pusher.wns = function (clientId, clientSecret, channelUri, dataRaw, callback) {
-    if (!config.wns.enabled) {
-        if (typeof callback == 'function') {
-            callback('wns', 'Pusher has been disabled');
-        }
-        return;
+    if (!wns) {
+        debug('wns has not been setup properly');
+        return callback('Unable to send data to WNS');
     }
 
     var options = {
@@ -114,7 +155,7 @@ pusher.wns = function (clientId, clientSecret, channelUri, dataRaw, callback) {
         }
 
         if (typeof callback == 'function') {
-            callback(err, result);
+            return callback(err, result);
         }
     });
 };

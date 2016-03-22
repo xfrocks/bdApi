@@ -113,23 +113,49 @@ pushQueue._onAndroidJob = function (job, callback) {
 };
 
 pushQueue._oniOSJob = function (job, callback) {
+    if (!pusher) {
+        return callback('pusher has not been setup properly');
+    }
+
     var data = job.data;
     var message = helper.stripHtml(data.payload.notification_html);
     var apnMessage = helper.prepareApnMessage(message);
-    if (apnMessage) {
-        job.log('apnMessage = %s', apnMessage);
+    if (!apnMessage) {
+        return callback('No APN message');
+    }
+    job.log('apnMessage = %s', apnMessage);
+    var payload = {aps: {alert: apnMessage}};
 
-        if (pusher) {
-            pusher.apn(data.device_id, {
-                aps: {
-                    alert: apnMessage
-                }
-            }, callback);
-        } else {
-            callback('pusher has not been setup properly');
-        }
+    var packageId = '';
+    var connectionOptions = config.apn.connectionOptions;
+    if (data.extra_data && typeof data.extra_data.package == 'string') {
+        packageId = data.extra_data.package;
+        connectionOptions = null;
+    }
+
+    if (connectionOptions) {
+        pusher.apn(connectionOptions, data.device_id, payload, callback);
     } else {
-        callback('No APN message');
+        if (!packageId) {
+            return callback('extra_data.package is missing');
+        }
+
+        if (!projectDb) {
+            return callback('projectDb has not been setup properly');
+        }
+
+        projectDb.findConfig('apn', packageId, function (projectConfig) {
+            if (!projectConfig
+                || !projectConfig.cert_data
+                || !projectConfig.key_data) {
+                return callback('Project could not be found', packageId);
+            }
+
+            var connectionOptions = projectConfig;
+            connectionOptions.packageId = packageId;
+
+            pusher.apn(connectionOptions, data.device_id, payload, callback);
+        });
     }
 };
 
@@ -198,4 +224,6 @@ pushQueue.start = function (_pushKue, _pusher, _projectDb) {
 
     pusher = _pusher;
     projectDb = _projectDb;
+
+    return pushQueue;
 };

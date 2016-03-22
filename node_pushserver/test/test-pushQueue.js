@@ -167,6 +167,76 @@ describe('pushQueue', function () {
         done();
     });
 
+    it('[ios] default client', function (done) {
+        var deviceType = 'ios';
+        var deviceId = 'di';
+        var payload = generatePayload();
+
+        pushQueue.enqueue(deviceType, deviceId, payload);
+
+        var latestPush = pusher._getLatestPush();
+        latestPush.type.should.equal('apn');
+        latestPush.connectionOptions.should.equal(config.apn.connectionOptions);
+
+        done();
+    });
+
+    it('[ios] db client', function (done) {
+        var packageId = 'pi-db';
+        var certData = 'cd-db';
+        var keyData = 'kd-db';
+        var deviceType = 'ios';
+        var deviceId = 'di';
+        var payload = generatePayload();
+        var extraData = {package: packageId};
+
+        var init = function () {
+            db.projects.saveApn(packageId, certData, keyData, {}, function () {
+                test();
+            });
+        };
+
+        var test = function () {
+            pushQueue.enqueue(deviceType, deviceId, payload, extraData);
+
+            var latestPush = pusher._getLatestPush();
+            latestPush.type.should.equal('apn');
+            latestPush.connectionOptions.packageId.should.equal(packageId);
+            latestPush.connectionOptions.cert_data.should.equal(certData);
+            latestPush.connectionOptions.key_data.should.equal(keyData);
+
+            done();
+        };
+
+        init();
+    });
+
+    it('[ios] no client', function (done) {
+        var packageId = 'pi-db-no-client';
+        var deviceType = 'ios';
+        var deviceId = 'di-no-client';
+        var payload = generatePayload();
+        var extraData = {package: packageId};
+
+        pushQueue.enqueue(deviceType, deviceId, payload, extraData);
+
+        var jobs = pushKue._getJobs(config.pushQueue.queueId);
+        jobs.length.should.equal(1);
+
+        var job = pushKue._getLatestJob(config.pushQueue.queueId);
+        job.should.not.be.null;
+        job.data.device_type.should.equal(deviceType);
+        job.data.device_id.should.equal(deviceId);
+        job.data.payload.should.deep.equal(payload);
+        job.data.extra_data.should.deep.equal(extraData);
+        job.attempts.should.equal(config.pushQueue.attempts);
+
+        var pushes = pusher._getPushes();
+        pushes.length.should.equal(0);
+
+        done();
+    });
+
     it('should process windows queue', function (done) {
         var deviceType = 'windows';
         var deviceId = 'di';

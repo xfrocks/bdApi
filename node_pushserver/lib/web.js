@@ -285,6 +285,39 @@ app.get('/admin', function (req, res) {
     res.send(output);
 });
 
+app.post('/admin/apn', function (req, res) {
+    if (!req.body.app_id
+        || !req.body.cert_data
+        || !req.body.key_data) {
+        return res.sendStatus(400);
+    }
+    var appId = req.body.app_id;
+    var certData = req.body.cert_data;
+    var keyData = req.body.key_data;
+
+    var otherOptions = {};
+    if (req.body.other_options) {
+        _.forEach(req.body.other_options, function (value, key) {
+            otherOptions[key] = value;
+        });
+    }
+
+    if (!web._projectDb) {
+        debug('POST /admin/apn', 'projectDb has not been setup properly');
+        return res.sendStatus(500);
+    }
+
+    web._projectDb.saveApn(appId, certData, keyData, otherOptions,
+        function (isSaved) {
+            if (isSaved !== false) {
+                debug('POST /admin/apn', 'Saved APN project', appId);
+                return res.sendStatus(202);
+            } else {
+                return res.sendStatus(500);
+            }
+        });
+});
+
 app.post('/admin/gcm', function (req, res) {
     if (!req.body.package_id
         || !req.body.api_key) {
@@ -355,4 +388,6 @@ web.start = function (port, deviceDb, projectDb, pushQueue, adminSections) {
 
     app.listen(port);
     debug('Listening on port', port, '…');
+
+    return web;
 };

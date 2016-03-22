@@ -44,6 +44,40 @@ describe('db/Project', function () {
         step1();
     });
 
+    it('should save apn', function (done) {
+        var appId = 'ai';
+        var certData = 'cd';
+        var keyData = 'kd';
+        var otherOptions = {gateway: 'co.gateway'};
+
+        var step1 = function () {
+            db.projects.saveApn(appId, certData, keyData, otherOptions, function (isSaved) {
+                isSaved.should.not.be.false;
+                step2();
+            });
+        };
+
+        var step2 = function () {
+            db.projects._model.find({
+                project_type: 'apn',
+                project_id: appId
+            }, function (err, projects) {
+                projects.should.be.a('array');
+                projects.length.should.equal(1);
+
+                var project = projects[0];
+                project.configuration.should.be.a('object');
+                project.configuration.cert_data.should.equal(certData);
+                project.configuration.key_data.should.equal(keyData);
+                project.configuration.gateway.should.equal(otherOptions.gateway);
+
+                done();
+            });
+        };
+
+        step1();
+    });
+
     it('should save gcm', function (done) {
         var packageId = 'pi';
         var apiKey = 'ak';
