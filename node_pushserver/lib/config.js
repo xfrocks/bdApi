@@ -7,7 +7,7 @@ var debug = require('debug')('pushserver:config');
 
 var defaultConfig = {
     db: {
-        mongoUri: 'mongodb://localhost/node-test',
+        mongoUri: 'mongodb://localhost/pushserver',
         web: false
     },
     web: {
@@ -28,7 +28,6 @@ var defaultConfig = {
         web: false
     },
     apn: {
-        enabled: false,
         connectionTtlInMs: 3600000,
 
         connectionOptions: {
@@ -45,13 +44,11 @@ var defaultConfig = {
         }
     },
     gcm: {
-        enabled: false,
         keys: {},
         defaultKeyId: '',
         messageOptions: {}
     },
     wns: {
-        enabled: false,
         client_id: '',
         client_secret: ''
     }
@@ -95,26 +92,21 @@ if (process.env.CONFIG_PUSH_QUEUE_ID) {
 }
 
 if (process.env.CONFIG_APN_CERT_FILE && process.env.CONFIG_APN_KEY_FILE) {
-    config.apn.enabled = true;
     config.apn.connectionOptions.cert = process.env.CONFIG_APN_CERT_FILE;
     config.apn.connectionOptions.key = process.env.CONFIG_APN_KEY_FILE;
 }
 
 if (process.env.CONFIG_APN_CERT && process.env.CONFIG_APN_KEY) {
-    config.apn.enabled = true;
     config.apn.connectionOptions.certData = process.env.CONFIG_APN_CERT;
     config.apn.connectionOptions.keyData = process.env.CONFIG_APN_KEY;
 }
 
 if (process.env.CONFIG_APN_GATEWAY) {
-    config.apn.enabled = true;
     config.apn.connectionOptions.gateway = process.env.CONFIG_APN_GATEWAY;
 }
 
 if (process.env.CONFIG_GCM_KEY) {
     // single gcm key
-    config.gcm.enabled = true;
-
     var keyId = '_default_';
     config.gcm.keys[keyId] = process.env.CONFIG_GCM_KEY;
     config.gcm.defaultKeyId = keyId;
@@ -122,8 +114,6 @@ if (process.env.CONFIG_GCM_KEY) {
 
 if (process.env.CONFIG_GCM_KEYS) {
     // multiple gcm keys
-    config.gcm.enabled = true;
-
     var n = parseInt(process.env.CONFIG_GCM_KEYS);
     for (var i = 0; i < n; i++) {
         if (process.env['CONFIG_GCM_KEYS_' + i]) {
@@ -139,7 +129,6 @@ if (process.env.CONFIG_GCM_KEYS) {
 }
 
 if (process.env.CONFIG_WNS_CLIENT_ID && process.env.CONFIG_WNS_CLIENT_SECRET) {
-    config.wns.enabled = true;
     config.wns.client_id = process.env.CONFIG_WNS_CLIENT_ID;
     config.wns.client_secret = process.env.CONFIG_WNS_CLIENT_SECRET;
 }

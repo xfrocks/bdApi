@@ -1,6 +1,6 @@
 {
   "name": "node_pushserver",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Pubhubsubbub-compatible push server for Apple, Google and Microsoft services.",
   "dependencies": {
     "apn": "~1.7.5",
@@ -25,8 +25,11 @@
     "chai": "^3.5.0",
     "chai-http": "^2.0.1"
   },
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "scripts": {
-    "start": "node --harmony bin/pushserver",
+    "start": "node bin/pushserver",
     "test": "mocha"
   }
 }

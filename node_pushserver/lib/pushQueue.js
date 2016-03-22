@@ -218,7 +218,7 @@ pushQueue._onWindowsJob = function (job, callback) {
 var pushKue = null;
 var pusher = null;
 var projectDb = null;
-pushQueue.start = function (_pushKue, _pusher, _projectDb) {
+pushQueue.setup = function (_pushKue, _pusher, _projectDb) {
     pushKue = _pushKue;
     _pushKue.process(config.pushQueue.queueId, 1, pushQueue._onJob);
 

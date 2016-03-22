@@ -15,7 +15,7 @@ config.wns.client_secret = 'wns_cs';
 var pushKue = require('./mock/pushKue');
 var pusher = require('./mock/pusher');
 var db = require('./mock/db');
-pushQueue.start(pushKue, pusher, db.projects);
+pushQueue.setup(pushKue, pusher, db.projects);
 
 var notificationId = 0;
 var generatePayload = function () {

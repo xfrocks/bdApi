@@ -3,47 +3,19 @@
 'use strict';
 
 var debug = require('debug')('pushserver:app');
-debug('Booting up...');
-
 var config = require('../lib/config');
-if (config.apn.enabled) {
-    if (!config.hasApnConfig()) {
-        debug('No APN cert.');
-        return;
-    }
-} else {
-    debug('APN is disabled.');
-}
 
-if (config.gcm.enabled) {
-    if (!config.hasGcmConfig()) {
-        debug('No GCM key.');
-        return;
-    }
-} else {
-    debug('GCM is disabled.');
-}
-
-if (config.wns.enabled) {
-    if (!config.hasWnsConfig()) {
-        debug('No WNS client credentials.');
-        return;
-    }
-} else {
-    debug('WNS is disabled.');
-}
-
-debug('Loading…');
+debug('Loading web…');
 var web = require('../lib/web');
 var adminSections = {};
 
-// setup db
+debug('Loading db…');
 var db = require('../lib/db');
 if (config.db.web) {
     adminSections.db = db.expressMiddleware();
 }
 
-// setup push queue
+debug('Loading push queue…');
 var pushQueue = require('../lib/pushQueue');
 var kue = require('kue');
 var pushKue = kue.createQueue({
@@ -52,11 +24,11 @@ var pushKue = kue.createQueue({
     redis: config.redis
 });
 pushKue.watchStuckJobs(1000);
-pushQueue.start(pushKue, require('../lib/pusher').setup(
+pushQueue.setup(pushKue, require('../lib/pusher').setup(
     require('apn'), require('node-gcm'), require('wns')), db.projects);
 if (config.pushQueue.web) {
     adminSections.queue = kue.app;
 }
 
-debug('Starting web…');
+debug('Starting…');
 web.start(config.web.port, db.devices, db.projects, pushQueue, adminSections);
