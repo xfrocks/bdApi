@@ -53,8 +53,6 @@
     <listener event_id="init_dependencies" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
     <listener event_id="load_class_controller" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="load_class_model" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="load_class" active="1" hint="" description=""/>
-    <listener event_id="template_create" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_create" active="1" hint="" description=""/>
-    <listener event_id="template_hook" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="template_hook" active="1" hint="" description=""/>
     <listener event_id="visitor_setup" execute_order="10" callback_class="bdApiConsumer_Listener" callback_method="visitor_setup" active="1" hint="" description=""/>
   </code_event_listeners>
   <cron/>
@@ -284,96 +282,52 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 <span class="faint">{xen:phrase bdapi_consumer_alert_via_provider,
 	'link={$provider.root}',
 	'provider={$notificationProvider.name}'}</span>]]></template>
-    <template title="bdapi_consumer_page_container_head" version_id="28" version_string="0.9.8-dev"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} != '0'
+    <template title="bdapi_consumer_auto_login_js" version_id="1000101" version_string="1.0.1"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} != '0'
 	AND {$visitor.user_id} == 0
 	AND {$controllerName} != 'XenForo_ControllerPublic_Login'
 	AND {$controllerName} != 'XenForo_ControllerPublic_Register'">
-	<xen:foreach loop="$providers" value="$provider">
-		<xen:set var="$js">{xen:helper bdApiConsumer_getProviderSdkJs, $provider, {$provider.code}}</xen:set>
-		<xen:if is="{$js}">
-<script src="{xen:raw $js}"></script>
-<script type="text/javascript">
-window['{$provider.code}Init'] = function()
-{
-	var SDK = window['{$provider.code}SDK'];
-	SDK.init({
-		'client_id': '{$provider.client_id}'
-	});
-	SDK.isAuthorized('read', function(isAuthorized, apiData)
-	{
-		if (isAuthorized)
-		{
-			var loginData = {
-				'redirect': window.location.href,
-				'provider': '{$provider.code}',
-				'external_user_id': apiData['user_id']
-			};
-			for (i in apiData)
-			{
-				loginData['_api_data_' + i] = apiData[i];
-			}
-			
-			// try to auto login this user
-			XenForo.ajax(
-				'{xen:link login/external}',
-				loginData,
-				function(ajaxData, textStatus)
-				{
-					if (ajaxData._redirectTarget)
-					{
-						if (ajaxData._redirectMessage)
-						{
-							XenForo.alert(ajaxData._redirectMessage, '', 2000, function() {
-								document.location = ajaxData._redirectTarget;
-							});
-						}
-						else
-						{
-							document.location = ajaxData._redirectTarget;
-						}
-					}
-					else
-					{
-						if (ajaxData.message)
-						{
-							XenForo.alert(ajaxData.message, '', 5000);
-						}
-					}
-				},
-				{ error: null, global: false }
-			);
-		}
-	});
-}
-</script>
-		</xen:if>
-	</xen:foreach>
+	<xen:if hascontent="true">
+		<xen:require js="js/bdApiConsumer/login.js" />
+		<xen:contentcheck>
+			<xen:callback class="bdApiConsumer_Helper_Template" method="renderProviderInLoop">
+				<script src="{provider.root}/index.php?assets/sdk.js&prefix={provider.code}"
+						class="bdApiConsumer_AutoLogin"
+						data-code="{provider.code}"
+						data-client-id="{provider.client_id}"
+						data-login-link="{xen:link full:login/external}"></script>
+			</xen:callback>
+		</xen:contentcheck>
+	</xen:if>
 </xen:if>]]></template>
-    <template title="bdapi_consumer_providers" version_id="20" version_string="0.9.8-dev"><![CDATA[<xen:if is="{$from} == 'login_bar'" >
+    <template title="bdapi_consumer_providers" version_id="1000101" version_string="1.0.1"><![CDATA[<xen:set var="$facebookProviderCode">{xen:helper bdApiConsumer_getOption, providerCode, loginFacebook}</xen:set>
+<xen:set var="$twitterProviderCode">{xen:helper bdApiConsumer_getOption, providerCode, loginTwitter}</xen:set>
+<xen:set var="$googleProviderCode">{xen:helper bdApiConsumer_getOption, providerCode, loginGoogle}</xen:set>
+
+<xen:if is="{$from} == 'login_bar'" >
 	<xen:edithint template="login_bar_form" />
 
-	<xen:if is="{$loginFacebookProvider}">
+	<xen:if is="{$facebookProviderCode}">
 		<xen:require css="facebook.css" />
-		<li id="provider-{$loginFacebookProvider.code}-facebook" class="bdApiConsumer_Provider {$loginFacebookProvider.code} facebook">
-			<a href="{xen:link register/external, '', 'provider={$loginFacebookProvider.code}', 'reg=1', 'social=facebook'}" class="fbLogin" tabindex="10">
+		<li id="provider-{$facebookProviderCode}-facebook" class="bdApiConsumer_Provider {$facebookProviderCode} facebook">
+			<a href="{xen:link register/external, '', 'provider={$facebookProviderCode}', 'reg=1', 'social=facebook'}" class="fbLogin" tabindex="10">
 				<span>{xen:phrase login_with_facebook}</span>
 			</a>
 		</li>
 	</xen:if>
 
-	<xen:if is="{$loginTwitterProvider} AND {xen:helper bdApiConsumer_getOption, '_is130+'}">
+	<xen:if is="{$twitterProviderCode}">
 		<xen:require css="twitter.css" />
-		<li id="provider-{$loginTwitterProvider.code}-twitter" class="bdApiConsumer_Provider {$loginTwitterProvider.code} twitter">
-			<a href="{xen:link register/external, '', 'provider={$loginTwitterProvider.code}', 'reg=1', 'social=twitter'}" class="twitterLogin" tabindex="10">
+		<li id="provider-{$twitterProviderCode}-twitter" class="bdApiConsumer_Provider {$twitterProviderCode} twitter">
+			<a href="{xen:link register/external, '', 'provider={$twitterProviderCode}', 'reg=1', 'social=twitter'}" class="twitterLogin" tabindex="10">
 				<span>{xen:phrase login_with_twitter}</span>
 			</a>
 		</li>
 	</xen:if>
 
-	<xen:if is="{$loginGoogleProvider} AND {xen:helper bdApiConsumer_getOption, '_is130+'}">
+	<xen:if is="{$googleProviderCode}">
 		<xen:require css="google.css" />
-		<li id="provider-{$loginGoogleProvider.code}-google" class="bdApiConsumer_Provider {$loginGoogleProvider.code} google">
-			<a href="{xen:link register/external, '', 'provider={$loginGoogleProvider.code}', 'reg=1', 'social=google'}" class="googleLogin" tabindex="10">
+		<li id="provider-{$googleProviderCode}-google" class="bdApiConsumer_Provider {$googleProviderCode} google">
+			<a href="{xen:link register/external, '', 'provider={$googleProviderCode}', 'reg=1', 'social=google'}" class="googleLogin" tabindex="10">
 				<span>{xen:phrase login_with_google}</span>
 			</a>
 		</li>
@@ -381,49 +335,49 @@ window['{$provider.code}Init'] = function()
 
 	<xen:if is="!{xen:helper bdApiConsumer_getOption, takeOver,login}">
 		<xen:require css="bdapi_consumer.css" />
-		<xen:foreach loop="{$providers}" value="$provider">
-			<li id="provider-{$provider.code}" class="bdApiConsumer_Provider {$provider.code}">
-				<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1'}" tabindex="110" class="button">
-					<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
+		<xen:callback class="bdApiConsumer_Helper_Template" method="renderProviderInLoop">
+			<li id="provider-{provider.code}" class="bdApiConsumer_Provider {provider.code}">
+				<a href="{xen:link register/external, '', 'provider={provider.code}', 'reg=1'}" tabindex="110" class="button">
+					<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={provider.name}'}</span>
 				</a>
 			</li>
-		</xen:foreach>
+		</xen:callback>
 	</xen:if>
 
 <xen:elseif is="{$from} == 'login_form'" />
 	<xen:edithint template="helper_login_form" />
 	<xen:set var="$redirect">{xen:if $redirect, $redirect, $requestPaths.fullUri}</xen:set>
 
-	<xen:if is="{$loginFacebookProvider}">
+	<xen:if is="{$facebookProviderCode}">
 		<xen:require css="facebook.css" />
-		<dl id="provider-{$loginFacebookProvider.code}-facebook" class="ctrlUnit bdApiConsumer_Provider {$loginFacebookProvider.code} facebook">
+		<dl id="provider-{$facebookProviderCode}-facebook" class="ctrlUnit bdApiConsumer_Provider {$facebookProviderCode} facebook">
 			<dt></dt>
 			<dd>
-				<a href="{xen:link register/external, '', 'provider={$loginFacebookProvider.code}', 'reg=1', 'redirect={$redirect}', 'social=facebook'}" class="fbLogin" tabindex="10">
+				<a href="{xen:link register/external, '', 'provider={$facebookProviderCode}', 'reg=1', 'redirect={$redirect}', 'social=facebook'}" class="fbLogin" tabindex="10">
 					<span>{xen:phrase login_with_facebook}</span>
 				</a>
 			</dd>
 		</dl>
 	</xen:if>
 
-	<xen:if is="{$loginTwitterProvider} AND {xen:helper bdApiConsumer_getOption, '_is130+'}">
+	<xen:if is="{$twitterProviderCode}">
 		<xen:require css="twitter.css" />
-		<dl id="provider-{$loginTwitterProvider.code}-twitter" class="ctrlUnit bdApiConsumer_Provider {$loginTwitterProvider.code} twitter">
+		<dl id="provider-{$twitterProviderCode}-twitter" class="ctrlUnit bdApiConsumer_Provider {$twitterProviderCode} twitter">
 			<dt></dt>
 			<dd>
-				<a href="{xen:link register/external, '', 'provider={$loginTwitterProvider.code}', 'reg=1', 'redirect={$redirect}', 'social=twitter'}" class="twitterLogin" tabindex="10">
+				<a href="{xen:link register/external, '', 'provider={$twitterProviderCode}', 'reg=1', 'redirect={$redirect}', 'social=twitter'}" class="twitterLogin" tabindex="10">
 					<span>{xen:phrase login_with_twitter}</span>
 				</a>
 			</dd>
 		</dl>
 	</xen:if>
 
-	<xen:if is="{$loginGoogleProvider} AND {xen:helper bdApiConsumer_getOption, '_is130+'}">
+	<xen:if is="{$googleProviderCode}">
 		<xen:require css="google.css" />
-		<dl id="provider-{$loginGoogleProvider.code}-google" class="ctrlUnit bdApiConsumer_Provider {$loginGoogleProvider.code} google">
+		<dl id="provider-{$googleProviderCode}-google" class="ctrlUnit bdApiConsumer_Provider {$googleProviderCode} google">
 			<dt></dt>
 			<dd>
-				<a href="{xen:link register/external, '', 'provider={$loginGoogleProvider.code}', 'reg=1', 'redirect={$redirect}', 'social=google'}" class="googleLogin" tabindex="10">
+				<a href="{xen:link register/external, '', 'provider={$googleProviderCode}', 'reg=1', 'redirect={$redirect}', 'social=google'}" class="googleLogin" tabindex="10">
 					<span>{xen:phrase login_with_google}</span>
 				</a>
 			</dd>
@@ -431,17 +385,17 @@ window['{$provider.code}Init'] = function()
 	</xen:if>
 
 	<xen:if is="!{xen:helper bdApiConsumer_getOption, takeOver,login}">
-		<xen:foreach loop="$providers" value="$provider">
+		<xen:callback class="bdApiConsumer_Helper_Template" method="renderProviderInLoop">
 			<xen:require css="bdapi_consumer.css" />
-			<dl id="provider-{$provider.code}" class="ctrlUnit bdApiConsumer_Provider {$provider.code}">
+			<dl id="provider-{provider.code}" class="ctrlUnit bdApiConsumer_Provider {provider.code}">
 				<dt></dt>
 				<dd>
-					<a href="{xen:link register/external, '', 'provider={$provider.code}', 'reg=1', 'redirect={$redirect}'}" tabindex="110" class="button">
-						<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={$provider.name}'}</span>
+					<a href="{xen:link register/external, '', 'provider={provider.code}', 'reg=1', 'redirect={$redirect}'}" tabindex="110" class="button">
+						<span>{xen:phrase bdapi_consumer_login_with_x, 'provider={provider.name}'}</span>
 					</a>
 				</dd>
 			</dl>
-		</xen:foreach>
+		</xen:callback>
 	</xen:if>
 
 </xen:if>]]></template>
@@ -556,7 +510,9 @@ window['{$provider.code}Init'] = function()
     <modification template="helper_login_form" modification_key="bdapi_consumer_login" description="Insert providers" execution_order="10" enabled="1" action="str_replace">
       <find><![CDATA[</form>]]></find>
       <replace><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
-	<xen:hook name="bdapi_consumer_providers" params="{xen:array 'from=login_form'}" />
+	<xen:include template="bdapi_consumer_providers">
+		<xen:set var="$from">login_form</xen:set>
+	</xen:include>
 </xen:if>
 
 $0]]></replace>
@@ -566,7 +522,9 @@ $0]]></replace>
       <replace><![CDATA[$1
 
 <xen:if is="{xen:helper bdApiConsumer_getOption, _activated}">
-	<xen:hook name="bdapi_consumer_providers" params="{xen:array 'from=login_bar'}" />
+	<xen:include template="bdapi_consumer_providers">
+		<xen:set var="$from">login_bar</xen:set>
+	</xen:include>
 </xen:if>
 
 $2]]></replace>
@@ -582,6 +540,12 @@ $2]]></replace>
     <modification template="navigation_visitor_tab" modification_key="bdapi_consumer_navigation_visitor_tab" description="Enable account/externalAccounts link" execution_order="10" enabled="1" action="str_replace">
       <find><![CDATA[{$xenOptions.facebookAppId} OR]]></find>
       <replace><![CDATA[$0 {xen:helper bdApiConsumer_getOption, _activated} OR]]></replace>
+    </modification>
+    <modification template="page_container_js_body" modification_key="bdapi_consumer_page_container_js_body" description="Insert auto login scripts" execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#\A.+\z#s]]></find>
+      <replace><![CDATA[$0
+
+<xen:include template="bdapi_consumer_auto_login_js" />]]></replace>
     </modification>
     <modification template="account_external_accounts" modification_key="bdapiconsumer_account_external_accounts" description="Merge our page with system External Accounts page" execution_order="10" enabled="1" action="preg_replace">
       <find><![CDATA[#.+#s]]></find>

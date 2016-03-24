@@ -41,6 +41,16 @@ class bdApiConsumer_Option
                     self::$_providers = $options->get('bdapi_consumer_providers');
                 }
                 return self::$_providers;
+            case 'providerCode':
+                $providerCode = '';
+
+                $providers = self::get('providers');
+                $requestedCode = self::get($subKey);
+                if (isset($providers[$requestedCode])) {
+                    $providerCode = $providers[$requestedCode]['code'];
+                }
+
+                return $providerCode;
         }
 
         return $options->get('bdapi_consumer_' . $key, $subKey);
