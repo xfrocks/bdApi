@@ -15,10 +15,6 @@ class bdApiConsumer_Option
         $options = XenForo_Application::getOptions();
 
         switch ($key) {
-            case '_is120+':
-                return XenForo_Application::$versionId >= 1020000;
-            case '_is130+':
-                return XenForo_Application::$versionId >= 1030000;
             case '_activated':
                 if (self::$_activated === null) {
                     $providers = self::getProviders();
@@ -101,8 +97,13 @@ class bdApiConsumer_Option
         ));
     }
 
-    public static function verifyOptionProviders(array &$providers, XenForo_DataWriter $dw, $fieldName)
-    {
+    public static function verifyOptionProviders(
+        array &$providers,
+        /** @noinspection PhpUnusedParameterInspection */
+        XenForo_DataWriter $dw,
+        /** @noinspection PhpUnusedParameterInspection */
+        $fieldName
+    ) {
         $output = array();
 
         foreach ($providers as $provider) {
@@ -116,7 +117,8 @@ class bdApiConsumer_Option
                 && !empty($provider['client_secret'])
             ) {
                 if (empty($provider['code'])) {
-                    $provider['code'] = substr(md5($provider['root'] . $provider['client_id'] . $provider['client_secret']), -5);
+                    $provider['code'] = substr(md5($provider['root']
+                        . $provider['client_id'] . $provider['client_secret']), -5);
                 }
 
                 $provider['verified'] = XenForo_Application::$time;
@@ -138,14 +140,10 @@ class bdApiConsumer_Option
                 $social = 'facebook';
                 break;
             case 'bdapi_consumer_loginTwitter':
-                if (self::get('_is130+')) {
-                    $social = 'twitter';
-                }
+                $social = 'twitter';
                 break;
             case 'bdapi_consumer_loginGoogle':
-                if (self::get('_is130+')) {
-                    $social = 'google';
-                }
+                $social = 'google';
                 break;
         }
         if (empty($social)) {
@@ -162,7 +160,8 @@ class bdApiConsumer_Option
         }
         $preparedOption['formatParams'] = $choices;
 
-        return XenForo_ViewAdmin_Helper_Option::renderOptionTemplateInternal('option_list_option_select', $view, $fieldPrefix, $preparedOption, $canEdit);
+        return XenForo_ViewAdmin_Helper_Option::renderOptionTemplateInternal('option_list_option_select', $view,
+            $fieldPrefix, $preparedOption, $canEdit);
     }
 
 }
