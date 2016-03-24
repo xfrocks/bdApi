@@ -36,6 +36,14 @@ class bdApiConsumer_Option
                     }
                 }
                 return self::$_showButtons;
+            case 'autoLogin':
+                $autoLogin = $options->get('bdapi_consumer_autoLogin');
+
+                if (XenForo_Application::isRegistered('_bdCloudServerHelper_readonly')) {
+                    $autoLogin = '0';
+                }
+
+                return $autoLogin;
             case 'providers':
                 if (self::$_providers === null) {
                     self::$_providers = $options->get('bdapi_consumer_providers');

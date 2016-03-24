@@ -20,6 +20,11 @@ class bdApiConsumer_XenForo_ControllerPublic_Login extends XFCP_bdApiConsumer_Xe
     {
         $this->_assertPostOnly();
 
+        if (XenForo_Application::isRegistered('_bdCloudServerHelper_readonly')) {
+            // disable external login if [bd] Cloud Server Helper Read Only mode is turned on
+            return $this->responseNoPermission();
+        }
+
         $providerCode = $this->_input->filterSingle('provider', XenForo_Input::STRING);
         $provider = bdApiConsumer_Option::getProviderByCode($providerCode);
         if (empty($provider)) {
