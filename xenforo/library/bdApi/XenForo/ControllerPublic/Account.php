@@ -443,7 +443,7 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
             throw $this->getNoPermissionResponseException();
         }
 
-        $client = $this->_bdApi_getClientModel()->getClientByid($clientId);
+        $client = $this->_bdApi_getClientModel()->getClientById($clientId);
         if (empty($client)) {
             throw $this->getNoPermissionResponseException();
         }

@@ -56,10 +56,13 @@ class bdApi_ViewApi_Helper_Attachment_Data extends bdApi_ViewApi_Base
                     if ($image->getWidth() >= $resize['max_width'] AND $image->getHeight() >= $resize['max_height']) {
                         $x = ($image->getWidth() - $resize['max_width']) / 2;
                         $y = ($image->getHeight() - $resize['max_height']) / 2;
+
+                        /** @noinspection PhpParamsInspection */
                         $image->crop($x, $y, $resize['max_width'], $resize['max_height']);
                     }
                 }
 
+                /** @noinspection PhpParamsInspection */
                 $image->output($imageType, $tempFile);
                 $attachmentFile = $tempFile;
                 $attachmentFileSize = filesize($tempFile);

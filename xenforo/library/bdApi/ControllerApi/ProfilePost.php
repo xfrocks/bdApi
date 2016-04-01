@@ -53,7 +53,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         if (!empty($profileUserIds)) {
             /** @var XenForo_Model_User $userModel */
             $userModel = $this->getModelFromCache('XenForo_Model_User');
-            $profileUsers = $userModel->getUsersByids($profileUserIds, array(
+            $profileUsers = $userModel->getUsersByIds($profileUserIds, array(
                 'join' => XenForo_Model_User::FETCH_USER_FULL,
             ));
         }

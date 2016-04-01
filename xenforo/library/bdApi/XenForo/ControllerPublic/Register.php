@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_ControllerPublic_Register_Base extends XFCP_bdApi_Xenforo_ControllerPublic_Register
+class bdApi_XenForo_ControllerPublic_Register_Base extends XFCP_bdApi_XenForo_ControllerPublic_Register
 {
     private $_authorizePending = false;
 

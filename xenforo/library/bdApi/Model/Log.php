@@ -90,10 +90,7 @@ class bdApi_Model_Log extends XenForo_Model
     public function countLogs(array $conditions = array(), array $fetchOptions = array())
     {
         $whereConditions = $this->prepareLogConditions($conditions, $fetchOptions);
-
-        $orderClause = $this->prepareLogOrderOptions($fetchOptions);
         $joinOptions = $this->prepareLogFetchOptions($fetchOptions);
-        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
         return $this->_getDb()->fetchOne("
 				SELECT COUNT(*)

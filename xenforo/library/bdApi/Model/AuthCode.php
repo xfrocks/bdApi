@@ -71,10 +71,7 @@ class bdApi_Model_AuthCode extends XenForo_Model
     public function countAuthCodes(array $conditions = array(), array $fetchOptions = array())
     {
         $whereConditions = $this->prepareAuthCodeConditions($conditions, $fetchOptions);
-
-        $orderClause = $this->prepareAuthCodeOrderOptions($fetchOptions);
         $joinOptions = $this->prepareAuthCodeFetchOptions($fetchOptions);
-        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
         return $this->_getDb()->fetchOne("
 			SELECT COUNT(*)

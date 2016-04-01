@@ -457,10 +457,7 @@ class bdApi_Model_Subscription extends XenForo_Model
     public function countSubscriptions(array $conditions = array(), array $fetchOptions = array())
     {
         $whereConditions = $this->prepareSubscriptionConditions($conditions, $fetchOptions);
-
-        $orderClause = $this->prepareSubscriptionOrderOptions($fetchOptions);
         $joinOptions = $this->prepareSubscriptionFetchOptions($fetchOptions);
-        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
         return $this->_getDb()->fetchOne("
 			SELECT COUNT(*)

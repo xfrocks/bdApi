@@ -30,6 +30,7 @@ if (XenForo_Application::$versionId >= 1020000) {
         {
             $this->_bdApi_discussionPostDelete();
 
+            /** @noinspection PhpMethodParametersCountMismatchInspection */
             parent::_discussionPostDelete($messages);
         }
 

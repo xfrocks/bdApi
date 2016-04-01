@@ -71,10 +71,7 @@ class bdApi_Model_RefreshToken extends XenForo_Model
     public function countRefreshTokens(array $conditions = array(), array $fetchOptions = array())
     {
         $whereConditions = $this->prepareRefreshTokenConditions($conditions, $fetchOptions);
-
-        $orderClause = $this->prepareRefreshTokenOrderOptions($fetchOptions);
         $joinOptions = $this->prepareRefreshTokenFetchOptions($fetchOptions);
-        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
         return $this->_getDb()->fetchOne("
 			SELECT COUNT(*)

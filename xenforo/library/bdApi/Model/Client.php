@@ -186,10 +186,7 @@ class bdApi_Model_Client extends XenForo_Model
     public function countClients(array $conditions = array(), array $fetchOptions = array())
     {
         $whereConditions = $this->prepareClientConditions($conditions, $fetchOptions);
-
-        $orderClause = $this->prepareClientOrderOptions($fetchOptions);
         $joinOptions = $this->prepareClientFetchOptions($fetchOptions);
-        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
         return $this->_getDb()->fetchOne("
 			SELECT COUNT(*)

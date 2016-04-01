@@ -96,10 +96,7 @@ class bdApi_Model_Token extends XenForo_Model
     public function countTokens(array $conditions = array(), array $fetchOptions = array())
     {
         $whereConditions = $this->prepareTokenConditions($conditions, $fetchOptions);
-
-        $orderClause = $this->prepareTokenOrderOptions($fetchOptions);
         $joinOptions = $this->prepareTokenFetchOptions($fetchOptions);
-        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
         return $this->_getDb()->fetchOne("
 			SELECT COUNT(*)
