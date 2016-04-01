@@ -309,6 +309,9 @@ class bdApi_Session extends XenForo_Session
         if (!empty($this->_oauthToken)) {
             if (!empty($this->_oauthToken['user_id'])) {
                 $this->changeUserId($this->_oauthToken['user_id']);
+                $this->_sessionId = md5($this->_oauthToken['user_id']);
+            } else {
+                $this->_sessionId = md5($this->_oauthToken['token_text']);
             }
 
             $scopes = $helper->scopeSplit($this->_oauthToken['scope']);
