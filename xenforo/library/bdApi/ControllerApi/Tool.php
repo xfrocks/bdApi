@@ -176,6 +176,15 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
     {
         $link = $this->_input->filterSingle('link', XenForo_Input::STRING);
         $link = XenForo_Link::convertUriToAbsoluteUri($link, true);
+
+        // http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+        if (strlen($link) > 2000
+            || !Zend_Uri::check($link)
+        ) {
+            // invalid link, do not continue
+            return $this->_actionGetParseLink_getControllerResponseNop($link, false);
+        }
+
         $fc = XenForo_Application::get('_bdApi_fc');
         /* @var $dependencies bdApi_Dependencies */
         $dependencies = $fc->getDependencies();
