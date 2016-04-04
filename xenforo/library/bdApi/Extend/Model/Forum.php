@@ -47,7 +47,11 @@ class bdApi_Extend_Model_Forum extends XFCP_bdApi_Extend_Model_Forum
 
         if (isset($conditions[self::CONDITION_NODE_ID])) {
             if (is_array($conditions[self::CONDITION_NODE_ID])) {
-                $sqlConditions[] = 'forum.node_id IN (' . $db->quote($conditions[self::CONDITION_NODE_ID]) . ')';
+                if (count($conditions[self::CONDITION_NODE_ID]) > 0) {
+                    $sqlConditions[] = 'forum.node_id IN (' . $db->quote($conditions[self::CONDITION_NODE_ID]) . ')';
+                } else {
+                    $sqlConditions[] = '1=2';
+                }
             } else {
                 $sqlConditions[] = 'forum.node_id = ' . $db->quote($conditions[self::CONDITION_NODE_ID]);
             }
