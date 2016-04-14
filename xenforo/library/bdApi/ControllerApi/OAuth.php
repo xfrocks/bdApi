@@ -202,12 +202,44 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
 
         $googleToken = $this->_input->filterSingle('google_token', XenForo_Input::STRING);
-        $httpClient = XenForo_Helper_Http::getClient('https://www.googleapis.com/plus/v1/people/me');
-        $httpClient->setParameterGet('access_token', $googleToken);
-        $response = $httpClient->request('GET');
-        $googleUser = json_decode($response->getBody(), true);
-        if (empty($googleUser['id'])) {
-            return $this->responseError(new XenForo_Phrase('bdapi_invalid_google_token'));
+        $isAccessToken = true;
+
+        $parts = explode('.', $googleToken);
+        if (count($parts) === 3) {
+            $jwt = @json_decode(base64_decode($parts[1]), true);
+            if (!empty($jwt['sub'])) {
+                // looks like a valid jwt
+                $isAccessToken = false;
+            }
+        }
+
+        if ($isAccessToken) {
+            $httpClient = XenForo_Helper_Http::getClient('https://www.googleapis.com/plus/v1/people/me');
+            $httpClient->setParameterGet('access_token', $googleToken);
+            $response = $httpClient->request('GET');
+            $googleUser = json_decode($response->getBody(), true);
+            if (empty($googleUser['id'])) {
+                return $this->responseError(new XenForo_Phrase('bdapi_invalid_google_token'));
+            }
+        } else {
+            $httpClient = XenForo_Helper_Http::getClient('https://www.googleapis.com/oauth2/v3/tokeninfo');
+            $httpClient->setParameterGet('id_token', $googleToken);
+            $response = $httpClient->request('GET');
+            $googleTokenInfo = json_decode($response->getBody(), true);
+            if (empty($googleTokenInfo['sub'])) {
+                return $this->responseError(new XenForo_Phrase('bdapi_invalid_google_token'));
+            }
+            $googleUser = array(
+                'id' => $googleTokenInfo['sub'],
+            );
+            if (!empty($googleTokenInfo['name'])) {
+                $googleUser['displayName'] = $googleTokenInfo['name'];
+            }
+            if (!empty($googleTokenInfo['email'])
+                && !empty($googleTokenInfo['email_verified'])
+            ) {
+                $googleUser['emails'] = array(array('value' => $googleTokenInfo['email']));
+            }
         }
 
         $googleAssoc = $userExternalModel->getExternalAuthAssociation('google', $googleUser['id']);
