@@ -107,7 +107,12 @@ pushQueue._onAndroidJob = function (job, callback) {
                 return callback('Project could not be found', packageId);
             }
 
-            pusher.gcm(projectConfig.api_key, data.device_id, gcmPayload, callback);
+            try {
+                pusher.gcm(projectConfig.api_key, data.device_id, gcmPayload, callback);
+            } catch (e) {
+                debug('Error pushing via GCM', e);
+                callback('Unable to push via GCM');
+            }
         });
     }
 };
@@ -118,13 +123,18 @@ pushQueue._oniOSJob = function (job, callback) {
     }
 
     var data = job.data;
+
+    if (!data.payload.notification_html) {
+        return callback('payload.notification_html is missing');
+    }
     var message = helper.stripHtml(data.payload.notification_html);
+
     var apnMessage = helper.prepareApnMessage(message);
     if (!apnMessage) {
         return callback('No APN message');
     }
     job.log('apnMessage = %s', apnMessage);
-    var payload = {aps: {alert: apnMessage}};
+    var payload = {aps: {alert: apnMessage}, 'content-available': 1};
 
     var packageId = '';
     var connectionOptions = config.apn.connectionOptions;
@@ -145,16 +155,39 @@ pushQueue._oniOSJob = function (job, callback) {
         }
 
         projectDb.findConfig('apn', packageId, function (projectConfig) {
-            if (!projectConfig
-                || !projectConfig.cert_data
-                || !projectConfig.key_data) {
+            if (!projectConfig) {
                 return callback('Project could not be found', packageId);
             }
 
-            var connectionOptions = projectConfig;
-            connectionOptions.packageId = packageId;
+            var connectionOptions = {
+                packageId: packageId
+            };
 
-            pusher.apn(connectionOptions, data.device_id, payload, callback);
+            _.forEach(projectConfig, function(configValue, configKey) {
+                switch (configKey) {
+                    case 'address':
+                    case 'gateway':
+                        connectionOptions.address = configValue;
+                        break;
+                    case 'cert':
+                    case 'cert_data':
+                        connectionOptions.cert = configValue;
+                        break;
+                    case 'key':
+                    case 'key_data':
+                        connectionOptions.key = configValue;
+                        break;
+                    default:
+                        connectionOptions[configKey] = configValue;
+                }
+            });
+
+            try {
+                pusher.apn(connectionOptions, data.device_id, payload, callback);
+            } catch (e) {
+                debug('Error pushing via APN', e);
+                callback('Unable to push via APN');
+            }
         });
     }
 };
@@ -210,7 +243,12 @@ pushQueue._onWindowsJob = function (job, callback) {
                 return callback('Project could not be found', packageId);
             }
 
-            pusher.wns(projectConfig.client_id, projectConfig.client_secret, channelUri, payloadJson, callback);
+            try {
+                pusher.wns(projectConfig.client_id, projectConfig.client_secret, channelUri, payloadJson, callback);
+            } catch (e) {
+                debug('Error pushing via WNS', e);
+                callback('Unable to push via WNS');
+            }
         });
     }
 };

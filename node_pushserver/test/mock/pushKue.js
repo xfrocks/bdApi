@@ -32,6 +32,7 @@ pushKue.create = function (queueId, jobData) {
 
     var job = {
         data: jobData,
+        error: null,
         result: null,
         attempts: 0,
         logs: [],
@@ -55,12 +56,17 @@ pushKue.create = function (queueId, jobData) {
 
         processCallbacks[queueId](job, function (err, result) {
             if (err) {
+                job.error = err;
+                job.result = null;
                 remainingAttempts--;
                 if (remainingAttempts > 0) {
                     attempt();
                 }
+
+                return;
             }
 
+            job.error = null;
             job.result = result;
         });
     };

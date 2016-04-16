@@ -102,8 +102,8 @@ db.projects = {
 
     saveApn: function (appId, certData, keyData, otherOptions, callback) {
         var configuration = _.assign({}, {
-            cert_data: certData,
-            key_data: keyData
+            cert: certData,
+            key: keyData
         }, otherOptions);
 
         return this.save('apn', appId, configuration, callback);
@@ -140,8 +140,8 @@ db.projects = {
                     project_type: projectType,
                     project_id: projectId,
                     configuration: configuration,
-                    created: Date.now(),
-                    last_updated: Date.now()
+                    created: new Date(),
+                    last_updated: new Date()
                 };
 
                 done('saved');

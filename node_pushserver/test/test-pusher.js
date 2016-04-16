@@ -19,11 +19,11 @@ describe('pusher', function () {
     it('should push apn', function (done) {
         var connectionOptions = {
             packageId: 'pi',
-            cert_data: 'cd',
-            key_data: 'kd'
+            cert: 'cd',
+            key: 'kd'
         };
         var token = 't';
-        var payload = {foo: 'bar'};
+        var payload = {aps: {alert: 'foo'}};
 
         pusher.apn(connectionOptions, token, payload, function (err, result) {
             expect(err).to.be.undefined;
@@ -31,7 +31,8 @@ describe('pusher', function () {
             var push = apn._getLatestPush();
             push.connection.options.should.deep.equal(connectionOptions);
             push.device.token.should.equal(token);
-            push.notification.payload.should.deep.equal(payload);
+            push.notification.alert.should.equal(payload.aps.alert);
+            push.notification.expiry.should.equal(0);
 
             apn._getConnectionCount().should.equal(1);
             apn._getFeedbackCount().should.equal(1);
@@ -40,15 +41,63 @@ describe('pusher', function () {
         });
     });
 
+    it('should not push apn without payload.aps.alert', function (done) {
+        var connectionOptions = {
+            packageId: 'pi',
+            cert: 'cd',
+            key: 'kd'
+        };
+        var token = 't';
+        var payload = {};
+
+        pusher.apn(connectionOptions, token, payload, function (err, result) {
+            err.should.be.string;
+            done();
+        });
+    });
+
+    it('[apn] should configure notification correctly', function(done) {
+        var connectionOptions = {
+            packageId: 'pi',
+            cert: 'cd',
+            key: 'kd'
+        };
+        var token = 't';
+        var payload = {
+            aps: {
+                alert: 'foo',
+                badge: 'b',
+                sound: 's'
+            },
+            expiry: 123,
+            'content-available': 1
+        };
+
+        pusher.apn(connectionOptions, token, payload, function (err, result) {
+            expect(err).to.be.undefined;
+
+            var push = apn._getLatestPush();
+            push.notification.alert.should.equal(payload.aps.alert);
+            push.notification.badge.should.equal(payload.aps.badge);
+            push.notification.sound.should.equal(payload.aps.sound);
+            push.notification.expiry.should.equal(payload.expiry);
+            push.notification.payload.should.deep.equal({
+                'content-available': payload['content-available']
+            });
+
+            done();
+        });
+    });
+
     it('[apn] should reuse connection', function (done) {
         var connectionOptions = {
             packageId: 'pi',
-            cert_data: 'cd',
-            key_data: 'kd'
+            cert: 'cd',
+            key: 'kd'
         };
         var token = 't';
         var token2 = 't';
-        var payload = {foo: 'bar'};
+        var payload = {aps: {alert: 'foo'}};
 
         var test1 = function () {
             pusher.apn(connectionOptions, token, payload, function () {
@@ -71,17 +120,17 @@ describe('pusher', function () {
     it('[apn] should create connections', function (done) {
         var connectionOptions = {
             packageId: 'pi',
-            cert_data: 'cd',
-            key_data: 'kd'
+            cert: 'cd',
+            key: 'kd'
         };
         var token = 't';
         var connectionOptions2 = {
             packageId: 'pi2',
-            cert_data: 'cd2',
-            key_data: 'kd2'
+            cert: 'cd2',
+            key: 'kd2'
         };
         var token2 = 't';
-        var payload = {foo: 'bar'};
+        var payload = {aps: {alert: 'foo'}};
 
         var test1 = function () {
             pusher.apn(connectionOptions, token, payload, function () {
@@ -106,17 +155,17 @@ describe('pusher', function () {
 
         var connectionOptions = {
             packageId: 'pi',
-            cert_data: 'cd',
-            key_data: 'kd'
+            cert: 'cd',
+            key: 'kd'
         };
         var token = 't';
         var connectionOptions2 = {
             packageId: 'pi2',
-            cert_data: 'cd2',
-            key_data: 'kd2'
+            cert: 'cd2',
+            key: 'kd2'
         };
         var token2 = 't';
-        var payload = {foo: 'bar'};
+        var payload = {aps: {alert: 'foo'}};
         var push1 = null;
         var push2 = null;
 

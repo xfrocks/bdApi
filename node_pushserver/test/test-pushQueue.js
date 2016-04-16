@@ -3,6 +3,7 @@ var pushQueue = require('../lib/pushQueue');
 var chai = require('chai');
 
 chai.should();
+var expect = chai.expect;
 
 // setup push queue
 config.gcm.defaultKeyId = 'key1';
@@ -202,13 +203,73 @@ describe('pushQueue', function () {
             var latestPush = pusher._getLatestPush();
             latestPush.type.should.equal('apn');
             latestPush.connectionOptions.packageId.should.equal(packageId);
-            latestPush.connectionOptions.cert_data.should.equal(certData);
-            latestPush.connectionOptions.key_data.should.equal(keyData);
+            latestPush.connectionOptions.cert.should.equal(certData);
+            latestPush.connectionOptions.key.should.equal(keyData);
 
             done();
         };
 
         init();
+    });
+
+    it('[ios] db client (sandbox)', function (done) {
+        var packageId = 'pi-db';
+        var certData = 'cd-db';
+        var keyData = 'kd-db';
+        var gateway = 'gateway.sandbox.push.apple.com';
+        var deviceType = 'ios';
+        var deviceId = 'di';
+        var payload = generatePayload();
+        var extraData = {package: packageId};
+
+        var init = function () {
+            db.projects.saveApn(packageId, certData, keyData, {
+                gateway: gateway
+            }, function () {
+                test();
+            });
+        };
+
+        var test = function () {
+            pushQueue.enqueue(deviceType, deviceId, payload, extraData);
+
+            var latestPush = pusher._getLatestPush();
+            latestPush.type.should.equal('apn');
+            latestPush.connectionOptions.packageId.should.equal(packageId);
+            latestPush.connectionOptions.address.should.equal(gateway);
+            latestPush.connectionOptions.cert.should.equal(certData);
+            latestPush.connectionOptions.key.should.equal(keyData);
+
+            done();
+        };
+
+        init();
+    });
+
+    it('[ios] no notification_html', function (done) {
+        var deviceType = 'ios';
+        var deviceId = 'di';
+        var payload = generatePayload();
+        payload.notification_html = '';
+
+        pushQueue.enqueue(deviceType, deviceId, payload);
+
+        var jobs = pushKue._getJobs(config.pushQueue.queueId);
+        jobs.length.should.equal(1);
+
+        var job = pushKue._getLatestJob(config.pushQueue.queueId);
+        job.should.not.be.null;
+        job.error.should.be.a('Error');
+        job.error.message.should.equal('payload.notification_html is missing');
+        job.data.device_type.should.equal(deviceType);
+        job.data.device_id.should.equal(deviceId);
+        job.data.payload.should.deep.equal(payload);
+        job.attempts.should.equal(config.pushQueue.attempts);
+
+        var pushes = pusher._getPushes();
+        pushes.length.should.equal(0);
+
+        done();
     });
 
     it('[ios] no client', function (done) {

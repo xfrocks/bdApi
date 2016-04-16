@@ -67,8 +67,8 @@ describe('db/Project', function () {
 
                 var project = projects[0];
                 project.configuration.should.be.a('object');
-                project.configuration.cert_data.should.equal(certData);
-                project.configuration.key_data.should.equal(keyData);
+                project.configuration.cert.should.equal(certData);
+                project.configuration.key.should.equal(keyData);
                 project.configuration.gateway.should.equal(otherOptions.gateway);
 
                 done();

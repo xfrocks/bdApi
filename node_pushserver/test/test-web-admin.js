@@ -41,8 +41,8 @@ describe('web/admin', function () {
                 .post('/admin/projects/apn')
                 .send({
                     app_id: appId,
-                    cert_data: certData,
-                    key_data: keyData,
+                    cert: certData,
+                    key: keyData,
                     other_options: otherOptions
                 })
                 .end(function (err, res) {
@@ -54,8 +54,8 @@ describe('web/admin', function () {
         var step2 = function () {
             db.projects.findConfig('apn', appId, function (projectConfig) {
                 projectConfig.should.not.be.null;
-                projectConfig.cert_data.should.equal(certData);
-                projectConfig.key_data.should.equal(keyData);
+                projectConfig.cert.should.equal(certData);
+                projectConfig.key.should.equal(keyData);
                 projectConfig.gateway.should.equal(otherOptions.gateway);
 
                 done();

@@ -50,13 +50,13 @@ admin.setup = function (app, adminPrefix, username, password, projectDb, _sectio
 
     app.post(adminPrefix + '/projects/apn', function (req, res) {
         if (!req.body.app_id
-            || !req.body.cert_data
-            || !req.body.key_data) {
+            || !req.body.cert
+            || !req.body.key) {
             return res.sendStatus(400);
         }
         var appId = req.body.app_id;
-        var certData = req.body.cert_data;
-        var keyData = req.body.key_data;
+        var certData = req.body.cert;
+        var keyData = req.body.key;
 
         var otherOptions = {};
         if (req.body.other_options) {

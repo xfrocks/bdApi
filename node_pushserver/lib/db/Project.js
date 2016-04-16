@@ -19,8 +19,8 @@ var Project = exports = module.exports = function (mongoose) {
 
         saveApn: function (appId, certData, keyData, otherOptions, callback) {
             var configuration = _.assign({}, {
-                cert_data: certData,
-                key_data: keyData
+                cert: certData,
+                key: keyData
             }, otherOptions);
 
             return this.save('apn', appId, configuration, callback);

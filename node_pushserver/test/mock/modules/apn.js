@@ -53,6 +53,10 @@ apn.Connection = function (options) {
         connection.terminated = true;
     };
 
+    this.on = function() {
+        // NOP
+    };
+
     connections.push(this);
 };
 
@@ -96,7 +100,7 @@ apn.Device = function (token) {
 
 apn.Notification = function (payload) {
     this.payload = payload;
-
+    this.alert = '';
     this.badge = '';
     this.expiry = null;
     this.sound = '';
