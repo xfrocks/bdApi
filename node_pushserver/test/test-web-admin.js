@@ -8,10 +8,15 @@ chai.should();
 chai.use(require('chai-http'));
 
 var db = require('./mock/db');
-require('../lib/web/admin').setup(web._app, '/admin', null, null, db.projects);
+var admin = require('../lib/web/admin');
 var webApp = chai.request(web._app);
 
 describe('web/admin', function() {
+
+    before(function(done) {
+        admin.setup(web._app, '/admin', null, null, db.projects);
+        done();
+      });
 
     beforeEach(function(done) {
         db.projects._reset();
@@ -64,6 +69,67 @@ describe('web/admin', function() {
         step1();
       });
 
+    it('should not save apn project', function(done) {
+        var appId = 'ai';
+        var certData = 'cd';
+        var keyData = 'kd';
+
+        var test1 = function() {
+            webApp
+                .post('/admin/projects/apn')
+                .send({
+                    cert: certData,
+                    key: keyData
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(400);
+                    test2();
+                  });
+          };
+
+        var test2 = function() {
+            webApp
+                .post('/admin/projects/apn')
+                .send({
+                    app_id: appId,
+                    key: keyData
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(400);
+                    test3();
+                  });
+          };
+
+        var test3 = function() {
+            webApp
+                .post('/admin/projects/apn')
+                .send({
+                    app_id: appId,
+                    cert: certData
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(400);
+                    test4();
+                  });
+          };
+
+        var test4 = function() {
+            webApp
+                .post('/admin/projects/apn')
+                .send({
+                    app_id: 'error',
+                    cert: certData,
+                    key: keyData
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(500);
+                    done();
+                  });
+          };
+
+        test1();
+      });
+
     it('should save gcm project', function(done) {
         var packageId = 'pi';
         var apiKey = 'ak';
@@ -91,6 +157,50 @@ describe('web/admin', function() {
           };
 
         step1();
+      });
+
+    it('should not save gcm project', function(done) {
+        var packageId = 'pi';
+        var apiKey = 'ak';
+
+        var test1 = function() {
+            webApp
+                .post('/admin/projects/gcm')
+                .send({
+                    api_key: apiKey
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(400);
+                    test2();
+                  });
+          };
+
+        var test2 = function() {
+            webApp
+                .post('/admin/projects/gcm')
+                .send({
+                    package_id: packageId
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(400);
+                    test3();
+                  });
+          };
+
+        var test3 = function() {
+            webApp
+                .post('/admin/projects/gcm')
+                .send({
+                    package_id: 'error',
+                    api_key: apiKey
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(500);
+                    done();
+                  });
+          };
+
+        test1();
       });
 
     it('should save wns project', function(done) {
@@ -123,6 +233,67 @@ describe('web/admin', function() {
           };
 
         step1();
+      });
+
+    it('should not save wns project', function(done) {
+        var packageId = 'pi';
+        var clientId = 'ci';
+        var clientSecret = 'cs';
+
+        var test1 = function() {
+            webApp
+                .post('/admin/projects/wns')
+                .send({
+                    client_id: clientId,
+                    client_secret: clientSecret
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(400);
+                    test2();
+                  });
+          };
+
+        var test2 = function() {
+            webApp
+                .post('/admin/projects/wns')
+                .send({
+                    package_id: packageId,
+                    client_secret: clientSecret
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(400);
+                    test3();
+                  });
+          };
+
+        var test3 = function() {
+            webApp
+                .post('/admin/projects/wns')
+                .send({
+                    package_id: packageId,
+                    client_id: clientId
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(400);
+                    test4();
+                  });
+          };
+
+        var test4 = function() {
+            webApp
+                .post('/admin/projects/wns')
+                .send({
+                    package_id: 'error',
+                    client_id: clientId,
+                    client_secret: clientSecret
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(500);
+                    done();
+                  });
+          };
+
+        test1();
       });
 
     it('should respond with project info', function(done) {
@@ -165,4 +336,108 @@ describe('web/admin', function() {
               });
       });
 
+    it('should require auth', function(done) {
+        var adminPrefix = '/admin-auth';
+        var username = 'username';
+        var password = 'password';
+        admin.setup(web._app, adminPrefix, username, password);
+
+        var test1 = function() {
+            webApp
+                .get(adminPrefix)
+                .end(function(err, res) {
+                    res.should.have.status(401);
+                    test2();
+                  });
+          };
+
+        var test2 = function() {
+            webApp
+                .get(adminPrefix)
+                .auth(username, password + 'z')
+                .end(function(err, res) {
+                    res.should.have.status(401);
+                    test3();
+                  });
+          };
+
+        var test3 = function() {
+            webApp
+                .get(adminPrefix)
+                .auth(username, password)
+                .end(function(err, res) {
+                    res.should.have.status(200);
+                    done();
+                  });
+          };
+
+        test1();
+      });
+
+    it('should setup sections', function(done) {
+        var adminPrefix = '/admin-sections';
+        var sections = {
+            one: function(req, res, next) {
+                res.send({section: 1});
+                next();
+              },
+            two2: function(req, res, next) {
+                res.send({section: 2});
+                next();
+              },
+            three_: function(req, res, next) {
+                res.send({section: 3});
+                next();
+              },
+            '!@#$': function(req, res, next) {
+                res.send({section: 'invalid'});
+                next();
+              },
+            five: null
+          };
+
+        admin.setup(web._app, adminPrefix, null, null, null, sections);
+
+        var test0 = function() {
+            webApp
+                .get(adminPrefix)
+                .end(function(err, res) {
+                    res.should.have.status(200);
+                    res.body.should.have.all.keys('one', 'two', 'three');
+                    test1();
+                  });
+          };
+
+        var test1 = function() {
+            webApp
+                .get(adminPrefix + '/one')
+                .end(function(err, res) {
+                    res.should.have.status(200);
+                    res.body.should.deep.equal({section: 1});
+                    test2();
+                  });
+          };
+
+        var test2 = function() {
+            webApp
+                .get(adminPrefix + '/two')
+                .end(function(err, res) {
+                    res.should.have.status(200);
+                    res.body.should.deep.equal({section: 2});
+                    test3();
+                  });
+          };
+
+        var test3 = function() {
+            webApp
+                .get(adminPrefix + '/three')
+                .end(function(err, res) {
+                    res.should.have.status(200);
+                    res.body.should.deep.equal({section: 3});
+                    done();
+                  });
+          };
+
+        test0();
+      });
   });

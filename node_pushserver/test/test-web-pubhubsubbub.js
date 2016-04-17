@@ -1,7 +1,9 @@
 /*jshint expr: true*/
 'use strict';
 
+var config = require('../lib/config');
 var web = require('../lib/web');
+var pubhubsubbub = require('../lib/web/pubhubsubbub');
 var chai = require('chai');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -10,10 +12,10 @@ var _ = require('lodash');
 
 chai.should();
 chai.use(require('chai-http'));
+var expect = chai.expect;
 
 var db = require('./mock/db');
 var pushQueue = require('./mock/pushQueue');
-require('../lib/web/pubhubsubbub').setup(web._app, db.devices, pushQueue);
 var webApp = chai.request(web._app);
 
 var testApp = express();
@@ -27,6 +29,11 @@ var testAppUri = 'http://localhost:' + testAppPort;
 
 describe('web/pubhubsubbub', function() {
 
+    before(function(done) {
+        pubhubsubbub.setup(web._app, '', db.devices, pushQueue);
+        done();
+      });
+
     beforeEach(function(done) {
         db.devices._reset();
         pushQueue._reset();
@@ -39,6 +46,21 @@ describe('web/pubhubsubbub', function() {
             .end(function(err, res) {
                 res.should.have.status(200);
                 res.text.should.have.string('Hi, I am');
+
+                done();
+              });
+      });
+
+    it('should say hi with config.web.callback', function(done) {
+        var callback = 'http://push.server/callback';
+        config.web.callback = callback;
+
+        webApp
+            .get('/')
+            .end(function(err, res) {
+                res.should.have.status(200);
+                res.text.should.have.string('Hi, I am ' + callback);
+                config._reload();
 
                 done();
               });
@@ -130,11 +152,11 @@ describe('web/pubhubsubbub', function() {
             .post('/subscribe')
             .send({
                 hub_uri: testAppUri + '/status/202',
-                hub_topic: 'error',
+                hub_topic: 'ht',
                 oauth_client_id: 'oci',
                 oauth_token: 'ot',
                 device_type: 'dt',
-                device_id: 'di'
+                device_id: 'error'
               })
             .end(function(err, res) {
                 res.should.have.status(500);
@@ -155,6 +177,22 @@ describe('web/pubhubsubbub', function() {
             .end(function(err, res) {
                 res.should.have.status(403);
                 res.text.should.equal('failed');
+                done();
+              });
+      });
+
+    it('should not subscribe with invalid hub', function(done) {
+        webApp
+            .post('/subscribe')
+            .send({
+                hub_uri: 'http://a.b.c/hub',
+                oauth_client_id: 'oci',
+                oauth_token: 'ot',
+                device_type: 'dt',
+                device_id: 'di'
+              })
+            .end(function(err, res) {
+                res.should.have.status(503);
                 done();
               });
       });
@@ -296,6 +334,40 @@ describe('web/pubhubsubbub', function() {
         init();
       });
 
+    it('should not unsubscribe with invalid hub', function(done) {
+        var hubTopic = 'ht';
+        var oauthClientId = 'oci';
+        var deviceType = 'dt';
+        var deviceId = 'di';
+
+        var init = function() {
+            db.devices.save(deviceType, deviceId,
+                oauthClientId, hubTopic, null,
+                function(isSaved) {
+                    isSaved.should.equal('saved');
+                    step1();
+                  });
+          };
+
+        var step1 = function() {
+            webApp
+                .post('/unsubscribe')
+                .send({
+                    hub_uri: 'http://a.b.c/hub',
+                    hub_topic: hubTopic,
+                    oauth_client_id: oauthClientId,
+                    device_type: deviceType,
+                    device_id: deviceId
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(503);
+                    done();
+                  });
+          };
+
+        init();
+      });
+
     it('should unregister', function(done) {
         var oauthClientId = 'oci';
         var deviceType = 'dt';
@@ -370,6 +442,20 @@ describe('web/pubhubsubbub', function() {
 
         test();
       });
+
+    it('should not unregister with db error', function(done) {
+            webApp
+                .post('/unregister')
+                .send({
+                    oauth_client_id: 'oci',
+                    device_type: 'dt',
+                    device_id: 'error'
+                  })
+                .end(function(err, res) {
+                    res.should.have.status(500);
+                    done();
+                  });
+          });
 
     it('should answer subscribe challenge', function(done) {
         var hubTopic = 'ht';
@@ -513,7 +599,7 @@ describe('web/pubhubsubbub', function() {
                       }
                 ])
                 .end(function(err, res) {
-                    res.should.have.status(200);
+                    res.should.have.status(202);
 
                     var job = pushQueue._getLatestJob();
                     job.should.not.be.null;
@@ -561,9 +647,7 @@ describe('web/pubhubsubbub', function() {
                         object_data: 'od'
                       }
                 ])
-                .end(function(err, res) {
-                    res.should.have.status(200);
-
+                .end(function() {
                     var jobs = pushQueue._getJobs();
                     jobs.length.should.equal(2);
                     jobs[0].device_type.should.equal(deviceType);
@@ -610,9 +694,7 @@ describe('web/pubhubsubbub', function() {
                         object_data: payload2
                       }
                 ])
-                .end(function(err, res) {
-                    res.should.have.status(200);
-
+                .end(function() {
                     var jobs = pushQueue._getJobs();
                     jobs.length.should.equal(2);
                     jobs[0].payload.should.equal(payload);
@@ -623,6 +705,145 @@ describe('web/pubhubsubbub', function() {
           };
 
         init();
+      });
+
+    it('should not enqueue invalid data', function(done) {
+        var hubTopic = 'ht';
+        var oauthClientId = 'oci';
+        var payload = 'p';
+
+        var test1 = function() {
+            webApp
+                .post('/callback')
+                .send('text')
+                .end(function(err, res) {
+                    res.should.have.status(200);
+                    var job = pushQueue._getLatestJob();
+                    expect(job).to.be.null;
+
+                    test2();
+                  });
+          };
+
+        var test2 = function() {
+            webApp
+                .post('/callback')
+                .send([
+                    {
+                        topic: hubTopic,
+                        object_data: payload
+                      }
+                ])
+                .end(function(err, res) {
+                    res.should.have.status(200);
+                    var job = pushQueue._getLatestJob();
+                    expect(job).to.be.null;
+
+                    test3();
+                  });
+          };
+
+        var test3 = function() {
+            webApp
+                .post('/callback')
+                .send([
+                    {
+                        client_id: oauthClientId,
+                        object_data: payload
+                      }
+                ])
+                .end(function(err, res) {
+                    res.should.have.status(200);
+                    var job = pushQueue._getLatestJob();
+                    expect(job).to.be.null;
+
+                    test4();
+                  });
+          };
+
+        var test4 = function() {
+            webApp
+                .post('/callback')
+                .send([
+                    {
+                        client_id: oauthClientId,
+                        topic: hubTopic
+                      }
+                ])
+                .end(function(err, res) {
+                    res.should.have.status(200);
+                    var job = pushQueue._getLatestJob();
+                    expect(job).to.be.null;
+
+                    done();
+                  });
+          };
+
+        test1();
+      });
+
+    it('should not register some routes without db', function(done) {
+        var pubhubsubbubPrefix = '/no-device-db';
+        pubhubsubbub.setup(web._app, pubhubsubbubPrefix);
+
+        var test1 = function() {
+            webApp
+                .post(pubhubsubbubPrefix + '/subscribe')
+                .end(function(err, res) {
+                    res.should.have.status(404);
+                    test2();
+                  });
+          };
+
+        var test2 = function() {
+            webApp
+                .post(pubhubsubbubPrefix + '/unsubscribe')
+                .end(function(err, res) {
+                    res.should.have.status(404);
+                    test3();
+                  });
+          };
+
+        var test3 = function() {
+            webApp
+                .post(pubhubsubbubPrefix + '/unregister')
+                .end(function(err, res) {
+                    res.should.have.status(404);
+                    test4();
+                  });
+          };
+
+        var test4 = function() {
+            webApp
+                .get(pubhubsubbubPrefix + '/callback')
+                .end(function(err, res) {
+                    res.should.have.status(404);
+                    test5();
+                  });
+          };
+
+        var test5 = function() {
+            webApp
+                .post(pubhubsubbubPrefix + '/callback')
+                .end(function(err, res) {
+                    res.should.have.status(404);
+                    done();
+                  });
+          };
+
+        test1();
+      });
+
+    it('should not register /callback without queue', function(done) {
+        var pubhubsubbubPrefix = '/no-device-db';
+        pubhubsubbub.setup(web._app, pubhubsubbubPrefix, db.devices);
+
+        webApp
+            .post(pubhubsubbubPrefix + '/callback')
+            .end(function(err, res) {
+                res.should.have.status(404);
+                done();
+              });
       });
 
   });

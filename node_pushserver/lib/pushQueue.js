@@ -62,15 +62,16 @@ pushQueue._onAndroidJob = function(job, callback) {
     }
 
     var data = job.data;
-    var gcmPayload = {
-        action: data.action
-      };
+    var gcmPayload = {};
+    if (_.has(data.payload, 'action')) {
+      gcmPayload.action = data.payload.action;
+    }
     if (data.payload.notification_id > 0) {
       gcmPayload.notification_id = data.payload.notification_id;
       gcmPayload.notification =
         helper.stripHtml(data.payload.notification_html);
     } else {
-      data.payload.forEach(function(dataPayload, i) {
+      _.forEach(data.payload, function(dataPayload, i) {
           switch (i) {
           case 'notification_id':
           case 'notification_html':

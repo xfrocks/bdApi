@@ -2,17 +2,18 @@
 
 var pusher = exports;
 var config = require('./config');
-var deviceDb = require('./db').devices;
 var debug = require('debug')('pushserver:pusher');
 var _ = require('lodash');
 
 var apn;
 var gcm;
 var wns;
-pusher.setup = function(_apn, _gcm, _wns) {
+var deviceDb;
+pusher.setup = function(_apn, _gcm, _wns, _deviceDb) {
     apn = _apn;
     gcm = _gcm;
     wns = _wns;
+    deviceDb = _deviceDb;
 
     return pusher;
   };
@@ -83,8 +84,8 @@ var createApnConnection = function(connectionOptions) {
           };
         _.merge(feedbackOptions, connectionOptions);
         feedback = new apn.Feedback(feedbackOptions);
-        feedback.on('feedback', function(devices) {
-            devices.forEach(function(item) {
+        feedback.on('feedback', function(items) {
+            items.forEach(function(item) {
                 debug('apn', connectionId, 'feedback', item);
                 deviceDb.delete('ios', item.device);
               });

@@ -6,6 +6,7 @@ var latestJob = null;
 var jobs = [];
 
 pushQueue._reset = function() {
+    latestJob = null;
     jobs = [];
   };
 

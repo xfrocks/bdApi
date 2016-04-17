@@ -15,7 +15,7 @@ db.devices = {
     save: function(deviceType, deviceId, oauthClientId,
       hubTopic, extraData, callback) {
         var mock = function() {
-            if (hubTopic === 'error') {
+            if (deviceId === 'error') {
               done(false);
             }
 
@@ -71,20 +71,52 @@ db.devices = {
 
     delete: function(deviceType, deviceId, oauthClientId, hubTopic, callback) {
         var mock = function() {
-            var key = deviceType + deviceId + oauthClientId;
-
-            if (_.has(devices, key)) {
-              if (hubTopic) {
-                var device = devices[key];
-                device.hub_topic = _.without(device.hub_topic, hubTopic);
-                done('updated');
-              } else {
-                delete devices[key];
-                done('removed');
-              }
-            } else {
-              done(false);
+            if (deviceId === 'error') {
+              return done(false);
             }
+
+            var result = false;
+            var updatedDevices = {};
+
+            if (!oauthClientId || !hubTopic) {
+              // delete device
+              updatedDevices = _.filter(devices, function(device) {
+                if (device.device_type !== deviceType) {
+                  // keep this device
+                  return true;
+                }
+
+                if (device.device_id !== deviceId) {
+                  // keep this device
+                  return true;
+                }
+
+                if (oauthClientId &&
+                  device.oauth_client_id !== oauthClientId) {
+                  // keep this device
+                  return true;
+                }
+
+                result = 'deleted';
+                return false;
+              });
+            } else {
+              // update device
+              _.forEach(devices, function(device, key) {
+                if (device.device_type === deviceType &&
+                  device.device_id === deviceId &&
+                  device.oauth_client_id === oauthClientId) {
+                  device.hub_topic = _.without(device.hub_topic, hubTopic);
+                  result = 'updated';
+                }
+
+                updatedDevices[key] = device;
+              });
+            }
+
+            devices = updatedDevices;
+
+            return done(result);
           };
 
         var done = function(result) {
@@ -126,7 +158,7 @@ db.projects = {
     save: function(projectType, projectId, configuration, callback) {
         var mock = function() {
             if (projectId === 'error') {
-              done(false);
+              return done(false);
             }
 
             var key = projectType + projectId;
@@ -137,7 +169,7 @@ db.projects = {
                 project.configuration, configuration);
               project.last_updated = Date.now();
 
-              done('updated');
+              return done('updated');
             } else {
               projects[key] = {
                   _id: _.keys(projects).length + 1,
@@ -148,7 +180,7 @@ db.projects = {
                   last_updated: new Date()
                 };
 
-              done('saved');
+              return done('saved');
             }
           };
 

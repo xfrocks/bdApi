@@ -8,13 +8,6 @@ var chai = require('chai');
 chai.should();
 
 // setup push queue
-config.gcm.defaultKeyId = 'key1';
-config.gcm.keys = {
-    key1: 'key1',
-    key2: 'key2'
-  };
-config.wns.client_id = 'wns_ci';
-config.wns.client_secret = 'wns_cs';
 var pushKue = require('./mock/pushKue');
 var pusher = require('./mock/pusher');
 var db = require('./mock/db');
@@ -34,9 +27,18 @@ var generatePayload = function() {
 describe('pushQueue', function() {
 
     beforeEach(function(done) {
+        config.gcm.defaultKeyId = 'key1';
+        config.gcm.keys = {
+            key1: 'key1',
+            key2: 'key2'
+          };
+        config.wns.client_id = 'wns_ci';
+        config.wns.client_secret = 'wns_cs';
+
         pushKue._reset();
         pusher._reset();
         db.projects._reset();
+
         done();
       });
 
@@ -148,6 +150,40 @@ describe('pushQueue', function() {
         job.data.payload.should.deep.equal(payload);
         job.data.extra_data.should.deep.equal(extraData);
         job.attempts.should.equal(config.pushQueue.attempts);
+
+        var pushes = pusher._getPushes();
+        pushes.length.should.equal(0);
+
+        done();
+      });
+
+    it('[android] non-notification payload', function(done) {
+        var deviceType = 'android';
+        var deviceId = 'di';
+        var payload = {
+            notification_id: 0,
+            notification_html: '',
+            foo: 'bar'
+          };
+
+        pushQueue.enqueue(deviceType, deviceId, payload);
+
+        var latestPush = pusher._getLatestPush();
+        latestPush.type.should.equal('gcm');
+        latestPush.data.should.deep.equal({foo: payload.foo});
+
+        done();
+      });
+
+    it('[android] no default package', function(done) {
+        config.gcm.defaultKeyId = '';
+        config.gcm.keys = {};
+
+        var deviceType = 'android';
+        var deviceId = 'di';
+        var payload = generatePayload();
+
+        pushQueue.enqueue(deviceType, deviceId, payload);
 
         var pushes = pusher._getPushes();
         pushes.length.should.equal(0);
@@ -421,6 +457,31 @@ describe('pushQueue', function() {
 
         var pushes = pusher._getPushes();
         pushes.length.should.equal(config.pushQueue.attempts);
+
+        done();
+      });
+
+    it('should encounter job.save error', function(done) {
+        var deviceType = 'save';
+        var deviceId = 'error';
+        var payload = generatePayload();
+
+        pushQueue.enqueue(deviceType, deviceId, payload);
+
+        var jobs = pushKue._getJobs(config.pushQueue.queueId);
+        jobs.length.should.equal(0);
+
+        done();
+      });
+
+    it('should handle unrecognized device type', function(done) {
+        pushQueue.enqueue('unrecognized', 'di', generatePayload());
+
+        var jobs = pushKue._getJobs(config.pushQueue.queueId);
+        jobs.length.should.equal(1);
+
+        var pushes = pusher._getPushes();
+        pushes.length.should.equal(0);
 
         done();
       });

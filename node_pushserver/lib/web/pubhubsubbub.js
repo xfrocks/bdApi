@@ -1,14 +1,23 @@
 'use strict';
 
 var pubhubsubbub = exports;
+var config = require('../config');
 var helper = require('../helper');
 var debug = require('debug')('pushserver:web');
 var _ = require('lodash');
 var request = require('request');
 var url = require('url');
 
-pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
-    app.post('/subscribe', function(req, res) {
+pubhubsubbub.setup = function(app, prefix, deviceDb, pushQueue) {
+    app.get(prefix + '/', function(req, res) {
+        res.send('Hi, I am ' + pubhubsubbub._getCallbackUri(req, prefix));
+      });
+
+    if (!deviceDb) {
+      return;
+    }
+
+    app.post(prefix + '/subscribe', function(req, res) {
         var requiredKeys = [];
         requiredKeys.push('hub_uri');
         requiredKeys.push('oauth_client_id');
@@ -22,11 +31,6 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
         }
 
         var saveDevice = function() {
-            if (!deviceDb) {
-              debug('POST /subscribe', 'deviceDb missing');
-              return res.sendStatus(500);
-            }
-
             deviceDb.save(
                 data.device_type, data.device_id,
                 data.oauth_client_id, data.hub_topic,
@@ -44,7 +48,7 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
             request.post({
                 url: data.hub_uri,
                 form: {
-                    'hub.callback': helper.getCallbackUri(req),
+                    'hub.callback': pubhubsubbub._getCallbackUri(req, prefix),
                     'hub.mode': 'subscribe',
                     'hub.topic': data.hub_topic,
 
@@ -70,7 +74,7 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
         saveDevice();
       });
 
-    app.post('/unsubscribe', function(req, res) {
+    app.post(prefix + '/unsubscribe', function(req, res) {
         var requiredKeys = [];
         requiredKeys.push('hub_uri');
         requiredKeys.push('hub_topic');
@@ -84,11 +88,6 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
         }
 
         var deleteDevice = function() {
-            if (!deviceDb) {
-              debug('POST /unsubscribe', 'deviceDb missing');
-              return res.sendStatus(500);
-            }
-
             deviceDb.delete(
                 data.device_type, data.device_id,
                 data.oauth_client_id, data.hub_topic,
@@ -106,7 +105,7 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
             request.post({
                 url: data.hub_uri,
                 form: {
-                    'hub.callback': helper.getCallbackUri(req),
+                    'hub.callback': pubhubsubbub._getCallbackUri(req, prefix),
                     'hub.mode': 'unsubscribe',
                     'hub.topic': data.hub_topic,
 
@@ -116,7 +115,7 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
               }, function(err, httpResponse, body) {
                 if (httpResponse) {
                   var success = _.inRange(httpResponse.statusCode, 200, 300);
-                  var txt = success ? 'succeeded' : (body ? body : 'failed');
+                  var txt = success ? 'succeeded' : (body || 'failed');
 
                   debug('POST /unsubscribe', data.device_type, data.device_id,
                     data.hub_uri, data.hub_topic, txt);
@@ -132,7 +131,7 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
         deleteDevice();
       });
 
-    app.post('/unregister', function(req, res) {
+    app.post(prefix + '/unregister', function(req, res) {
         var requiredKeys = [];
         requiredKeys.push('oauth_client_id');
         requiredKeys.push('device_type');
@@ -141,11 +140,6 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
         if (!data.has_all_required_keys) {
           debug('POST /unregister', 'data missing', data.missing_keys);
           return res.sendStatus(400);
-        }
-
-        if (!deviceDb) {
-          debug('POST /unregister', 'deviceDb missing');
-          return res.sendStatus(500);
         }
 
         deviceDb.delete(
@@ -164,7 +158,7 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
         );
       });
 
-    app.get('/callback', function(req, res) {
+    app.get(prefix + '/callback', function(req, res) {
         var parsed = url.parse(req.url, true);
 
         if (!parsed.query.client_id) {
@@ -184,15 +178,7 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
         }
         var hubMode = parsed.query['hub.mode'];
 
-        var hubTopic = parsed.query['hub.topic'];
-        if (!hubTopic) {
-          hubTopic = '';
-        }
-
-        if (!deviceDb) {
-          debug('GET /callback', 'deviceDb missing');
-          return res.sendStatus(500);
-        }
+        var hubTopic = parsed.query['hub.topic'] || '';
 
         deviceDb.findDevices(clientId, hubTopic, function(devices) {
             var isSubscribe = (hubMode === 'subscribe');
@@ -208,35 +194,42 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
           });
       });
 
-    app.post('/callback', function(req, res) {
+    if (!pushQueue) {
+      return;
+    }
+
+    app.post(prefix + '/callback', function(req, res) {
+        var error = false;
+
         _.forEach(req.body, function(ping) {
             if (!_.isObject(ping)) {
               debug('POST /callback', 'Unexpected data in callback', ping);
-              return;
+              error = true;
+              return false;
             }
 
             if (!ping.client_id || !ping.topic || !ping.object_data) {
               debug('POST /callback', 'Insufficient data in callback', ping);
-              return;
-            }
-
-            if (!deviceDb) {
-              debug('POST /callback', 'deviceDb missing');
-              return res.sendStatus(500);
+              error = true;
+              return false;
             }
 
             deviceDb.findDevices(ping.client_id, ping.topic, function(devices) {
                 _.forEach(devices, function(device) {
-                    if (pushQueue) {
                       pushQueue.enqueue(device.device_type, device.device_id,
                         ping.object_data, device.extra_data);
-                    } else {
-                      debug('POST /callback', 'pushQueue missing');
-                    }
-                  });
+                    });
               });
           });
 
-        return res.sendStatus(200);
+        return res.sendStatus(error ? 200 : 202);
       });
+  };
+
+pubhubsubbub._getCallbackUri = function(req, prefix) {
+    if (config.web.callback) {
+      return config.web.callback;
+    }
+
+    return req.protocol + '://' + req.get('host') + prefix + '/callback';
   };

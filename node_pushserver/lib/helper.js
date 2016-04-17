@@ -1,7 +1,6 @@
 'use strict';
 
 var helper = exports;
-var config = require('./config');
 var debug = require('debug')('pushserver:helper');
 var _ = require('lodash');
 var string = require('string');
@@ -34,7 +33,7 @@ helper.prepareSubscribeData = function(reqBody, requiredKeys) {
     if (!_.isString(hubTopic) && hubUri.length > 0) {
       // try to get hub topic from hub uri
       var hubUriParsed = url.parse(hubUri, true);
-      if (!!hubUriParsed.query || !!hubUriParsed.query['hub.topic']) {
+      if (hubUriParsed.query && _.isString(hubUriParsed.query['hub.topic'])) {
         debug('prepareSubscribeData', 'extracted `hub_topic` from `hub_uri`');
         hubTopic = hubUriParsed.query['hub.topic'];
       }
@@ -95,12 +94,4 @@ helper.prepareSubscribeData = function(reqBody, requiredKeys) {
     }
 
     return data;
-  };
-
-helper.getCallbackUri = function(req) {
-    if (config.web.callback) {
-      return config.web.callback;
-    }
-
-    return req.protocol + '://' + req.get('host') + '/callback';
   };

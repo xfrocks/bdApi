@@ -2,7 +2,6 @@
 
 var web = exports;
 var config = require('./config');
-var helper = require('./helper');
 var debug = require('debug')('pushserver:web');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -13,13 +12,9 @@ app.use(compression({}));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
-app.get('/', function(req, res) {
-    res.send('Hi, I am ' + helper.getCallbackUri(req));
-  });
-
 web._app = app;
 web.start = function(port, deviceDb, projectDb, pushQueue, adminSections) {
-    require('./web/pubhubsubbub').setup(app, deviceDb, pushQueue);
+    require('./web/pubhubsubbub').setup(app, '', deviceDb, pushQueue);
 
     if (config.web.adminPrefix &&
         config.web.username &&

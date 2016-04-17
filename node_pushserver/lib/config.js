@@ -1,10 +1,11 @@
 'use strict';
 
 var config = exports;
+var debug = require('debug')('pushserver:config');
 var _ = require('lodash');
 var url = require('url');
 
-var defaultConfig = {
+config._defaultConfig = {
     db: {
         mongoUri: 'mongodb://localhost/pushserver',
         web: false
@@ -33,9 +34,7 @@ var defaultConfig = {
         connectionOptions: {
             packageId: 'default',
             cert: '',
-            certData: null,
-            key: '',
-            keyData: null
+            key: ''
           },
         notificationOptions: {},
 
@@ -54,98 +53,89 @@ var defaultConfig = {
       }
   };
 
-_.merge(config, defaultConfig);
+config._reload = function() {
+    _.forEach(config._defaultConfig, function(value, key) {
+      config[key] = _.merge({}, value);
+    });
 
-if (process.env.MONGOLAB_URI) {
-  config.db.mongoUri = process.env.MONGOLAB_URI;
-}
-
-if (process.env.PORT) {
-  config.web.port = process.env.PORT;
-}
-
-_.forEach([
-    'REDISCLOUD_URL',
-    'REDISTOGO_URL'
-], function(redisUrlKey) {
-    if (process.env[redisUrlKey]) {
-      var redisUrlParsed = url.parse(process.env[redisUrlKey]);
-      config.redis.port = redisUrlParsed.port;
-      config.redis.host = redisUrlParsed.hostname;
-      config.redis.auth = redisUrlParsed.auth.split(':')[1];
-    }
-  });
-
-if (process.env.CONFIG_WEB_CALLBACK) {
-  config.web.callback = process.env.CONFIG_WEB_CALLBACK;
-}
-
-if (process.env.CONFIG_WEB_USERNAME && process.env.CONFIG_WEB_PASSWORD) {
-  config.web.username = process.env.CONFIG_WEB_USERNAME;
-  config.web.password = process.env.CONFIG_WEB_PASSWORD;
-  config.db.web = true;
-  config.pushQueue.web = true;
-}
-
-if (process.env.CONFIG_PUSH_QUEUE_ID) {
-  config.pushQueue.queueId = process.env.CONFIG_PUSH_QUEUE_ID;
-}
-
-if (process.env.CONFIG_APN_CERT_FILE && process.env.CONFIG_APN_KEY_FILE) {
-  config.apn.connectionOptions.cert = process.env.CONFIG_APN_CERT_FILE;
-  config.apn.connectionOptions.key = process.env.CONFIG_APN_KEY_FILE;
-}
-
-if (process.env.CONFIG_APN_CERT && process.env.CONFIG_APN_KEY) {
-  config.apn.connectionOptions.certData = process.env.CONFIG_APN_CERT;
-  config.apn.connectionOptions.keyData = process.env.CONFIG_APN_KEY;
-}
-
-if (process.env.CONFIG_APN_GATEWAY) {
-  config.apn.connectionOptions.gateway = process.env.CONFIG_APN_GATEWAY;
-}
-
-if (process.env.CONFIG_GCM_KEY) {
-  // single gcm key
-  var keyId = '_default_';
-  config.gcm.keys[keyId] = process.env.CONFIG_GCM_KEY;
-  config.gcm.defaultKeyId = keyId;
-}
-
-if (process.env.CONFIG_GCM_KEYS) {
-  // multiple gcm keys
-  var n = parseInt(process.env.CONFIG_GCM_KEYS);
-  for (var i = 0; i < n; i++) {
-    if (!_.has(process.env, 'CONFIG_GCM_KEYS_' + i)) {
-      continue;
+    if (process.env.MONGOLAB_URI) {
+      config.db.mongoUri = process.env.MONGOLAB_URI;
     }
 
-    var keyPair = process.env['CONFIG_GCM_KEYS_' + i].split(',');
-    if (keyPair.length !== 2) {
-      continue;
+    if (process.env.PORT) {
+      config.web.port = process.env.PORT;
     }
 
-    config.gcm.keys[keyPair[0]] = keyPair[1];
-    if (!config.gcm.defaultKeyId) {
-      config.gcm.defaultKeyId = keyPair[0];
+    _.forEach([
+        'REDISCLOUD_URL',
+        'REDISTOGO_URL'
+    ], function(redisUrlKey) {
+        if (process.env[redisUrlKey]) {
+          var redisUrlParsed = url.parse(process.env[redisUrlKey]);
+          config.redis.port = redisUrlParsed.port;
+          config.redis.host = redisUrlParsed.hostname;
+          config.redis.auth = redisUrlParsed.auth.split(':')[1];
+        }
+      });
+
+    if (process.env.CONFIG_WEB_CALLBACK) {
+      config.web.callback = process.env.CONFIG_WEB_CALLBACK;
     }
-  }
-}
 
-if (process.env.CONFIG_WNS_CLIENT_ID && process.env.CONFIG_WNS_CLIENT_SECRET) {
-  config.wns.client_id = process.env.CONFIG_WNS_CLIENT_ID;
-  config.wns.client_secret = process.env.CONFIG_WNS_CLIENT_SECRET;
-}
+    if (process.env.CONFIG_WEB_USERNAME && process.env.CONFIG_WEB_PASSWORD) {
+      config.web.username = process.env.CONFIG_WEB_USERNAME;
+      config.web.password = process.env.CONFIG_WEB_PASSWORD;
+      config.db.web = true;
+      config.pushQueue.web = true;
+    }
 
-config.hasApnConfig = function() {
-    return config.apn.connectionOptions.cert ||
-      config.apn.connectionOptions.certData;
+    if (process.env.CONFIG_PUSH_QUEUE_ID) {
+      config.pushQueue.queueId = process.env.CONFIG_PUSH_QUEUE_ID;
+    }
+
+    if (process.env.CONFIG_APN_CERT && process.env.CONFIG_APN_KEY) {
+      config.apn.connectionOptions.cert = process.env.CONFIG_APN_CERT;
+      config.apn.connectionOptions.key = process.env.CONFIG_APN_KEY;
+    }
+
+    if (process.env.CONFIG_APN_GATEWAY) {
+      config.apn.connectionOptions.gateway = process.env.CONFIG_APN_GATEWAY;
+    }
+
+    if (process.env.CONFIG_GCM_KEY) {
+      // single gcm key
+      var keyId = '_default_';
+      config.gcm.keys[keyId] = process.env.CONFIG_GCM_KEY;
+      config.gcm.defaultKeyId = keyId;
+    }
+
+    if (process.env.CONFIG_GCM_KEYS) {
+      // multiple gcm keys
+      var n = parseInt(process.env.CONFIG_GCM_KEYS);
+      for (var i = 0; i < n; i++) {
+        if (!_.has(process.env, 'CONFIG_GCM_KEYS_' + i)) {
+          continue;
+        }
+
+        var keyPair = process.env['CONFIG_GCM_KEYS_' + i].split(',');
+        if (keyPair.length !== 2) {
+          continue;
+        }
+
+        config.gcm.keys[keyPair[0]] = keyPair[1];
+        if (!config.gcm.defaultKeyId) {
+          config.gcm.defaultKeyId = keyPair[0];
+        }
+      }
+    }
+
+    if (process.env.CONFIG_WNS_CLIENT_ID &&
+        process.env.CONFIG_WNS_CLIENT_SECRET) {
+      config.wns.client_id = process.env.CONFIG_WNS_CLIENT_ID;
+      config.wns.client_secret = process.env.CONFIG_WNS_CLIENT_SECRET;
+    }
+
+    debug('Reload ok');
   };
 
-config.hasGcmConfig = function() {
-    return !!config.gcm.defaultKeyId;
-  };
-
-config.hasWnsConfig = function() {
-    return config.wns.client_id && config.wns.client_secret;
-  };
+config._reload();

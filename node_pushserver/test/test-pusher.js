@@ -1,6 +1,7 @@
 /*jshint expr: true*/
 'use strict';
 
+var config = require('../lib/config');
 var pusher = require('../lib/pusher');
 var chai = require('chai');
 
@@ -8,11 +9,13 @@ chai.should();
 var expect = chai.expect;
 
 var apn = require('./mock/_modules-apn');
-pusher.setup(apn);
+var db = require('./mock/db');
+pusher.setup(apn, null, null, db.devices);
 
 describe('pusher', function() {
 
     beforeEach(function(done) {
+        config.apn.notificationOptions = {};
         apn._reset();
         pusher._resetApnConnections();
         done();
@@ -43,22 +46,42 @@ describe('pusher', function() {
           });
       });
 
-    it('should not push apn without payload.aps.alert', function(done) {
-        var connectionOptions = {
-            packageId: 'pi',
-            cert: 'cd',
-            key: 'kd'
-          };
-        var token = 't';
-        var payload = {};
+    it('[apn] should guard against missing data', function(done) {
+        var test1 = function() {
+          pusher.apn({
+              cert: 'cd',
+              key: 'kd'
+            }, 't', {aps: {alert: 'foo'}}, function(err) {
+              err.should.be.string;
+              test2();
+            });
+        };
 
-        pusher.apn(connectionOptions, token, payload, function(err) {
-            err.should.be.string;
-            done();
-          });
+        var test2 = function() {
+          pusher.apn({
+              packageId: 'pi',
+              key: 'kd'
+            }, 't', {aps: {alert: 'foo'}}, function(err) {
+              err.should.be.string;
+              test3();
+            });
+        };
+
+        var test3 = function() {
+          pusher.apn({
+              packageId: 'pi',
+              cert: 'cd',
+              key: 'kd'
+            }, 't', {}, function(err) {
+              err.should.be.string;
+              done();
+            });
+        };
+
+        test1();
       });
 
-    it('[apn] should configure notification correctly', function(done) {
+    it('[apn] should configure notification directly', function(done) {
         var connectionOptions = {
             packageId: 'pi',
             cert: 'cd',
@@ -86,6 +109,35 @@ describe('pusher', function() {
             push.notification.payload.should.deep.equal({
                 'content-available': payload['content-available']
               });
+
+            done();
+          });
+      });
+
+    it('[apn] should configure notification via config', function(done) {
+        config.apn.notificationOptions = {
+          badge: 'b',
+          sound: 's',
+          expiry: 123
+        };
+
+        var payload = {aps: {alert: 'foo'}};
+
+        pusher.apn({
+            packageId: 'pi',
+            cert: 'cd',
+            key: 'kd'
+          }, 't', payload, function(err) {
+            expect(err).to.be.undefined;
+
+            var push = apn._getLatestPush();
+            push.notification.alert.should.equal(payload.aps.alert);
+            push.notification.badge.
+              should.equal(config.apn.notificationOptions.badge);
+            push.notification.sound.
+              should.equal(config.apn.notificationOptions.sound);
+            push.notification.expiry.
+              should.equal(config.apn.notificationOptions.expiry);
 
             done();
           });
@@ -119,7 +171,7 @@ describe('pusher', function() {
         test1();
       });
 
-    it('[apn] should create connections', function(done) {
+    it('[apn] should create connections (diff packageIds)', function(done) {
         var connectionOptions = {
             packageId: 'pi',
             cert: 'cd',
@@ -128,6 +180,39 @@ describe('pusher', function() {
         var token = 't';
         var connectionOptions2 = {
             packageId: 'pi2',
+            cert: 'cd',
+            key: 'kd'
+          };
+        var token2 = 't';
+        var payload = {aps: {alert: 'foo'}};
+
+        var test1 = function() {
+            pusher.apn(connectionOptions, token, payload, function() {
+                test2();
+              });
+          };
+
+        var test2 = function() {
+            pusher.apn(connectionOptions2, token2, payload, function() {
+                apn._getConnectionCount().should.equal(2);
+                apn._getFeedbackCount().should.equal(2);
+
+                done();
+              });
+          };
+
+        test1();
+      });
+
+    it('[apn] should create connections (diff certs)', function(done) {
+        var connectionOptions = {
+            packageId: 'pi',
+            cert: 'cd',
+            key: 'kd'
+          };
+        var token = 't';
+        var connectionOptions2 = {
+            packageId: 'pi',
             cert: 'cd2',
             key: 'kd2'
           };
@@ -206,5 +291,49 @@ describe('pusher', function() {
 
         test1();
       });
+
+    it('[apn] feedback should delete device', function(done) {
+      var connectionOptions = {
+            packageId: 'pi',
+            cert: 'cd',
+            key: 'kd'
+          };
+      var token = 't';
+      var payload = {aps: {alert: 'foo'}};
+      var push = null;
+      var deviceId = 'di';
+      var oauthClientId = 'oci';
+      var hubTopic = 'ht';
+
+      var init = function() {
+        db.devices.save('ios', deviceId,
+          oauthClientId, hubTopic, null,
+          function() {
+          step1();
+        });
+      };
+
+      var step1 = function() {
+        pusher.apn(connectionOptions, token, payload, function() {
+            push = apn._getLatestPush();
+            step2();
+          });
+      };
+
+      var step2 = function() {
+        var fbs = apn._getFeedbacks(push.connection.options.packageId);
+        fbs.length.should.equal(1);
+        var fb = fbs[0];
+
+        fb.emit('feedback', [{device: deviceId}]);
+
+        db.devices.findDevices(oauthClientId, hubTopic, function(devices) {
+          devices.length.should.equal(0);
+          done();
+        });
+      };
+
+      init();
+    });
 
   });

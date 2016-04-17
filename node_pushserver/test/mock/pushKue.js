@@ -43,10 +43,6 @@ pushKue.create = function(queueId, jobData) {
             job.logs.push(arguments);
           }
       };
-    if (!_.has(queues, queueId)) {
-      queues[queueId] = [];
-    }
-    queues[queueId].push(job);
 
     var attempt = function() {
         if (!_.isFunction(processCallbacks[queueId])) {
@@ -88,6 +84,17 @@ pushKue.create = function(queueId, jobData) {
           },
 
         save: function(callback) {
+            if (job.data.device_type === 'save' &&
+                job.data.device_id === 'error'
+            )  {
+              return callback('job.save error');
+            }
+
+            if (!_.has(queues, queueId)) {
+              queues[queueId] = [];
+            }
+            queues[queueId].push(job);
+
             if (_.isFunction(callback)) {
               callback();
             }

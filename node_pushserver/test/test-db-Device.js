@@ -56,7 +56,48 @@ describe('db/Device', function() {
         step1();
       });
 
-    it('should update device', function(done) {
+    it('should update device hub topic', function(done) {
+        var deviceType = 'dt';
+        var deviceId = 'di';
+        var oauthClientId = 'oci';
+        var hubTopic = 'ht';
+        var hubTopic2 = 'ht2';
+        var extraData = {foo: 'bar'};
+        var theDevice = null;
+
+        var init = function() {
+            db.devices._model.create({
+                device_type: deviceType,
+                device_id: deviceId,
+                oauth_client_id: oauthClientId,
+                hub_topic: [hubTopic],
+                extra_data: extraData
+              }, function(err, device) {
+                theDevice = device;
+                step1();
+              });
+          };
+
+        var step1 = function() {
+            db.devices.save(deviceType, deviceId,
+              oauthClientId, hubTopic2, extraData,
+              function(isSaved) {
+                isSaved.should.not.be.false;
+                step2();
+              });
+          };
+
+        var step2 = function() {
+            db.devices._model.findById(theDevice._id, function(err, device) {
+                device.hub_topic.should.have.members([hubTopic, hubTopic2]);
+                done();
+              });
+          };
+
+        init();
+      });
+
+    it('should update device extra data', function(done) {
         var deviceType = 'dt';
         var deviceId = 'di';
         var oauthClientId = 'oci';
@@ -80,11 +121,11 @@ describe('db/Device', function() {
 
         var step1 = function() {
             db.devices.save(deviceType, deviceId,
-              oauthClientId, hubTopic, extraData2,
-              function(isSaved) {
-                isSaved.should.not.be.false;
-                step2();
-              });
+                oauthClientId, hubTopic, extraData2,
+                function(isSaved) {
+                    isSaved.should.not.be.false;
+                    step2();
+                  });
           };
 
         var step2 = function() {
