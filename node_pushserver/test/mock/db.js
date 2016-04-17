@@ -1,3 +1,5 @@
+'use strict';
+
 var db = exports;
 var _ = require('lodash');
 
@@ -18,9 +20,9 @@ db.devices = {
 
             var key = deviceType + deviceId + oauthClientId;
 
-            if (typeof devices[key] === 'object') {
+            if (_.has(devices, key)) {
                 var device = devices[key];
-                if (device.hub_topic.indexOf(hubTopic) == -1) {
+                if (device.hub_topic.indexOf(hubTopic) === -1) {
                     device.hub_topic.push(hubTopic);
                 }
                 device.extra_data = _.assign({}, device.extra_data, extraData);
@@ -40,7 +42,7 @@ db.devices = {
         };
 
         var done = function (result) {
-            if (typeof callback == 'function') {
+            if (_.isFunction(callback)) {
                 callback(result);
             }
         };
@@ -50,7 +52,7 @@ db.devices = {
 
     findDevices: function (oauthClientId, hubTopic, callback) {
         var results = _.filter(devices, function (device) {
-            if (device.oauth_client_id != oauthClientId) {
+            if (device.oauth_client_id !== oauthClientId) {
                 return false;
             }
 
@@ -61,7 +63,7 @@ db.devices = {
             }
         });
 
-        if (typeof callback == 'function') {
+        if (_.isFunction(callback)) {
             callback(results);
         }
     },
@@ -70,7 +72,7 @@ db.devices = {
         var mock = function () {
             var key = deviceType + deviceId + oauthClientId;
 
-            if (typeof devices[key] === 'object') {
+            if (_.has(devices, key)) {
                 if (hubTopic) {
                     var device = devices[key];
                     device.hub_topic = _.without(device.hub_topic, hubTopic);
@@ -85,7 +87,7 @@ db.devices = {
         };
 
         var done = function (result) {
-            if (typeof callback == 'function') {
+            if (_.isFunction(callback)) {
                 callback(result);
             }
         };
@@ -128,9 +130,9 @@ db.projects = {
 
             var key = projectType + projectId;
 
-            if (typeof projects[key] === 'object') {
+            if (_.has(projects, key)) {
                 var project = projects[key];
-                project.configuration = _.assign({}, project.configuration, extraData);
+                project.configuration = _.assign({}, project.configuration, configuration);
                 project.last_updated = Date.now();
 
                 done('updated');
@@ -149,7 +151,7 @@ db.projects = {
         };
 
         var done = function (result) {
-            if (typeof callback == 'function') {
+            if (_.isFunction(callback)) {
                 callback(result);
             }
         };
@@ -161,21 +163,21 @@ db.projects = {
         var found = null;
 
         _.forEach(projects, function (project) {
-            if (project.project_type == projectType
-                && project.project_id == projectId) {
+            if (project.project_type === projectType &&
+                project.project_id === projectId) {
                 found = project;
                 return false;
             }
         });
 
-        if (typeof callback == 'function') {
+        if (_.isFunction(callback)) {
             callback(found);
         }
     },
 
     findConfig: function (projectType, projectId, callback) {
         this.findProject(projectType, projectId, function (project) {
-            if (typeof callback == 'function') {
+            if (_.isFunction(callback)) {
                 if (project) {
                     callback(project.configuration);
                 } else {

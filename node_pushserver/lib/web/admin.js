@@ -20,8 +20,8 @@ admin.setup = function (app, adminPrefix, username, password, projectDb, _sectio
                 return unauthorized(res);
             }
 
-            if (user.name === username
-                && user.pass === password) {
+            if (user.name === username &&
+                user.pass === password) {
                 return next();
             } else {
                 return unauthorized(res);
@@ -49,9 +49,9 @@ admin.setup = function (app, adminPrefix, username, password, projectDb, _sectio
     });
 
     app.post(adminPrefix + '/projects/apn', function (req, res) {
-        if (!req.body.app_id
-            || !req.body.cert
-            || !req.body.key) {
+        if (!req.body.app_id ||
+            !req.body.cert ||
+            !req.body.key) {
             return res.sendStatus(400);
         }
         var appId = req.body.app_id;
@@ -82,8 +82,8 @@ admin.setup = function (app, adminPrefix, username, password, projectDb, _sectio
     });
 
     app.post(adminPrefix + '/projects/gcm', function (req, res) {
-        if (!req.body.package_id
-            || !req.body.api_key) {
+        if (!req.body.package_id ||
+            !req.body.api_key) {
             return res.sendStatus(400);
         }
         var packageId = req.body.package_id;
@@ -106,9 +106,9 @@ admin.setup = function (app, adminPrefix, username, password, projectDb, _sectio
     });
 
     app.post(adminPrefix + '/projects/wns', function (req, res) {
-        if (!req.body.package_id
-            || !req.body.client_id
-            || !req.body.client_secret) {
+        if (!req.body.package_id ||
+            !req.body.client_id ||
+            !req.body.client_secret) {
             return res.sendStatus(400);
         }
         var packageId = req.body.package_id;

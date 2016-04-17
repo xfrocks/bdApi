@@ -1,8 +1,10 @@
+/*jshint expr: true*/
+'use strict';
+
 var db = require('../lib/db');
 var chai = require('chai');
 
 chai.should();
-var expect = chai.expect;
 
 describe('db/Project', function () {
 

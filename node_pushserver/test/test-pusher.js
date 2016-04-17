@@ -1,11 +1,13 @@
-var config = require('../lib/config');
+/*jshint expr: true*/
+'use strict';
+
 var pusher = require('../lib/pusher');
 var chai = require('chai');
 
 chai.should();
 var expect = chai.expect;
 
-var apn = require('./mock/modules/apn');
+var apn = require('./mock/_modules-apn');
 pusher.setup(apn);
 
 describe('pusher', function () {
@@ -25,7 +27,7 @@ describe('pusher', function () {
         var token = 't';
         var payload = {aps: {alert: 'foo'}};
 
-        pusher.apn(connectionOptions, token, payload, function (err, result) {
+        pusher.apn(connectionOptions, token, payload, function (err) {
             expect(err).to.be.undefined;
 
             var push = apn._getLatestPush();
@@ -50,7 +52,7 @@ describe('pusher', function () {
         var token = 't';
         var payload = {};
 
-        pusher.apn(connectionOptions, token, payload, function (err, result) {
+        pusher.apn(connectionOptions, token, payload, function (err) {
             err.should.be.string;
             done();
         });
@@ -73,7 +75,7 @@ describe('pusher', function () {
             'content-available': 1
         };
 
-        pusher.apn(connectionOptions, token, payload, function (err, result) {
+        pusher.apn(connectionOptions, token, payload, function (err) {
             expect(err).to.be.undefined;
 
             var push = apn._getLatestPush();

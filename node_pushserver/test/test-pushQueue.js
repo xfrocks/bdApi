@@ -1,9 +1,11 @@
+/*jshint expr: true*/
+'use strict';
+
 var config = require('../lib/config');
 var pushQueue = require('../lib/pushQueue');
 var chai = require('chai');
 
 chai.should();
-var expect = chai.expect;
 
 // setup push queue
 config.gcm.defaultKeyId = 'key1';

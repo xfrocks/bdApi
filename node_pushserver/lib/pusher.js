@@ -26,8 +26,8 @@ pusher.cleanUpApnConnections = function (ttlInMs) {
     var cutoff = _.now() - ttlInMs;
 
     _.filter(apnConnections, function (ac) {
-        if (ac.connection.terminated
-            || ac.lastUsed < cutoff) {
+        if (ac.connection.terminated ||
+            ac.lastUsed < cutoff) {
             ac.connection.shutdown();
             ac.feedback.cancel();
             return false;
@@ -43,8 +43,8 @@ var createApnConnection = function (connectionOptions) {
         debug('apn has not been setup properly');
         return null;
     }
-    if (!connectionOptions.packageId
-        || !connectionOptions.cert) {
+    if (!connectionOptions.packageId ||
+        !connectionOptions.cert) {
         debug('connectionOptions has not been setup properly');
         return null;
     }
@@ -62,14 +62,14 @@ var createApnConnection = function (connectionOptions) {
         connectionId = acId;
     });
 
-    if (connectionId === -1
-        || apnConnections[connectionId].connection.terminated) {
+    if (connectionId === -1 ||
+        apnConnections[connectionId].connection.terminated) {
         if (config.apn.connectionTtlInMs > 0) {
             pusher.cleanUpApnConnections(config.apn.connectionTtlInMs);
         }
 
         var connection = new apn.Connection(connectionOptions);
-        connection.on('transmitted', function(notification, device) {
+        connection.on('transmitted', function() {
             debug('apn', connectionId, 'transmitted', ac.transmittedCount++);
         });
 
@@ -150,7 +150,7 @@ pusher.apn = function (connectionOptions, token, payload, callback) {
 
     debug('apn', 'pushing', device, notification);
     ac.connection.pushNotification(notification, device);
-    if (typeof callback == 'function') {
+    if (_.isFunction(callback)) {
         return callback();
     }
 };
@@ -167,7 +167,7 @@ pusher.gcm = function (gcmKey, registrationId, data, callback) {
     message.addDataWithObject(data);
 
     sender.send(message, [registrationId], 1, function (err, result) {
-        if (typeof callback == 'function') {
+        if (_.isFunction(callback)) {
             return callback(err, result);
         }
     });
@@ -185,7 +185,7 @@ pusher.wns = function (clientId, clientSecret, channelUri, dataRaw, callback) {
         client_id: clientId,
         client_secret: clientSecret
     };
-    if (typeof wnsAccessTokens[clientId] === 'string') {
+    if (_.isString(wnsAccessTokens[clientId])) {
         options.accessToken = wnsAccessTokens[clientId];
     }
 
@@ -202,7 +202,7 @@ pusher.wns = function (clientId, clientSecret, channelUri, dataRaw, callback) {
             }
         }
 
-        if (typeof callback == 'function') {
+        if (_.isFunction(callback)) {
             return callback(err, result);
         }
     });

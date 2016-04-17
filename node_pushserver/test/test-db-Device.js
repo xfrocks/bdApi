@@ -1,3 +1,6 @@
+/*jshint expr: true*/
+'use strict';
+
 var db = require('../lib/db');
 var chai = require('chai');
 

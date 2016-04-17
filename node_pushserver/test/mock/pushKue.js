@@ -1,3 +1,5 @@
+'use strict';
+
 var pushKue = exports;
 var _ = require('lodash');
 
@@ -9,7 +11,7 @@ pushKue._reset = function () {
 };
 
 pushKue._getLatestJob = function (queueId) {
-    if (typeof queues[queueId] == 'undefined') {
+    if (!_.has(queues, queueId)) {
         return null;
     }
 
@@ -17,7 +19,7 @@ pushKue._getLatestJob = function (queueId) {
 };
 
 pushKue._getJobs = function (queueId) {
-    if (typeof queues[queueId] == 'undefined') {
+    if (!_.has(queues, queueId)) {
         return [];
     }
 
@@ -41,13 +43,13 @@ pushKue.create = function (queueId, jobData) {
             job.logs.push(arguments);
         }
     };
-    if (typeof queues[queueId] == 'undefined') {
+    if (!_.has(queues, queueId)) {
         queues[queueId] = [];
     }
     queues[queueId].push(job);
 
     var attempt = function () {
-        if (typeof processCallbacks[queueId] != 'function') {
+        if (!_.isFunction(processCallbacks[queueId])) {
             console.log('what', processCallbacks);
             return;
         }
@@ -86,7 +88,7 @@ pushKue.create = function (queueId, jobData) {
         },
 
         save: function (callback) {
-            if (typeof callback == 'function') {
+            if (_.isFunction(callback)) {
                 callback();
             }
 

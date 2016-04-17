@@ -1,4 +1,7 @@
+'use strict';
+
 var pusher = exports;
+var _ = require('lodash');
 
 var latestPush = null;
 var pushes = [];
@@ -30,7 +33,7 @@ var mock = function (push, hint, callback) {
             break;
     }
 
-    if (typeof callback == 'function') {
+    if (_.isFunction(callback)) {
         callback(err);
     }
 };

@@ -3,7 +3,7 @@
 var debug = require('debug')('pushserver:db:Project');
 var _ = require('lodash');
 
-var Project = exports = module.exports = function (mongoose) {
+exports = module.exports = function (mongoose) {
     var projectSchema = new mongoose.Schema({
         project_type: {type: String, required: true},
         project_id: {type: String, required: true},
@@ -98,7 +98,7 @@ var Project = exports = module.exports = function (mongoose) {
             };
 
             var done = function (result) {
-                if (typeof callback == 'function') {
+                if (_.isFunction(callback)) {
                     callback(result);
                 }
             };
@@ -108,7 +108,7 @@ var Project = exports = module.exports = function (mongoose) {
 
         findProject: function (projectType, projectId, callback) {
             var done = function (project) {
-                if (typeof callback == 'function') {
+                if (_.isFunction(callback)) {
                     callback(project);
                 }
             };
@@ -128,7 +128,7 @@ var Project = exports = module.exports = function (mongoose) {
 
         findConfig: function (projectType, projectId, callback) {
             this.findProject(projectType, projectId, function (project) {
-                if (typeof callback == 'function') {
+                if (_.isFunction(callback)) {
                     if (project) {
                         callback(project.configuration);
                     } else {

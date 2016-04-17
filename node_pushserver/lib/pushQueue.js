@@ -5,7 +5,6 @@ var config = require('./config');
 var helper = require('./helper');
 var debug = require('debug')('pushserver:pushQueue');
 var _ = require('lodash');
-var string = require('string');
 
 pushQueue.enqueue = function (deviceType, deviceId, payload, extraData) {
     var job = pushKue.create(config.pushQueue.queueId, {
@@ -54,7 +53,7 @@ pushQueue._onJob = function (job, done) {
             return pushQueue._onWindowsJob(job, callback);
     }
 
-    return callback('Unrecognized device type ' + data.device_type);
+    return callback('Unrecognized device type ' + job.data.device_type);
 };
 
 pushQueue._onAndroidJob = function (job, callback) {
@@ -67,8 +66,8 @@ pushQueue._onAndroidJob = function (job, callback) {
         action: data.action
     };
     if (data.payload.notification_id > 0) {
-        gcmPayload['notification_id'] = data.payload.notification_id;
-        gcmPayload['notification'] = helper.stripHtml(data.payload.notification_html);
+        gcmPayload.notification_id = data.payload.notification_id;
+        gcmPayload.notification = helper.stripHtml(data.payload.notification_html);
     } else {
         data.payload.forEach(function (dataPayload, i) {
             switch (i) {
@@ -84,7 +83,7 @@ pushQueue._onAndroidJob = function (job, callback) {
 
     var packageId = '';
     var gcmKey = '';
-    if (data.extra_data && typeof data.extra_data.package == 'string') {
+    if (_.has(data, 'extra_data.package')) {
         packageId = data.extra_data.package;
         gcmKey = config.gcm.keys[packageId];
     } else {
@@ -138,7 +137,7 @@ pushQueue._oniOSJob = function (job, callback) {
 
     var packageId = '';
     var connectionOptions = config.apn.connectionOptions;
-    if (data.extra_data && typeof data.extra_data.package == 'string') {
+    if (_.has(data, 'extra_data.package')) {
         packageId = data.extra_data.package;
         connectionOptions = null;
     }
@@ -237,9 +236,9 @@ pushQueue._onWindowsJob = function (job, callback) {
         }
 
         projectDb.findConfig('wns', packageId, function (projectConfig) {
-            if (!projectConfig
-                || !projectConfig.client_id
-                || !projectConfig.client_secret) {
+            if (!projectConfig ||
+                !projectConfig.client_id ||
+                !projectConfig.client_secret) {
                 return callback('Project could not be found', packageId);
             }
 

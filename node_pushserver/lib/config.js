@@ -3,7 +3,6 @@
 var config = exports;
 var _ = require('lodash');
 var url = require('url');
-var debug = require('debug')('pushserver:config');
 
 var defaultConfig = {
     db: {
@@ -117,14 +116,18 @@ if (process.env.CONFIG_GCM_KEYS) {
     // multiple gcm keys
     var n = parseInt(process.env.CONFIG_GCM_KEYS);
     for (var i = 0; i < n; i++) {
-        if (process.env['CONFIG_GCM_KEYS_' + i]) {
-            var keyPair = process.env['CONFIG_GCM_KEYS_' + i].split(',');
-            if (keyPair.length == 2) {
-                config.gcm.keys[keyPair[0]] = keyPair[1];
-                if (!config.gcm.defaultKeyId) {
-                    config.gcm.defaultKeyId = keyPair[0];
-                }
-            }
+        if (!_.has(process.env, 'CONFIG_GCM_KEYS_' + i)) {
+            continue;
+        }
+
+        var keyPair = process.env['CONFIG_GCM_KEYS_' + i].split(',');
+        if (keyPair.length !== 2) {
+            continue;
+        }
+
+        config.gcm.keys[keyPair[0]] = keyPair[1];
+        if (!config.gcm.defaultKeyId) {
+            config.gcm.defaultKeyId = keyPair[0];
         }
     }
 }

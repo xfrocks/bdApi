@@ -3,7 +3,7 @@
 var debug = require('debug')('pushserver:db:Device');
 var _ = require('lodash');
 
-var Device = exports = module.exports = function (mongoose) {
+exports = module.exports = function (mongoose) {
     var deviceSchema = new mongoose.Schema({
         device_type: {type: String, required: true},
         device_id: {type: String, required: true},
@@ -27,7 +27,7 @@ var Device = exports = module.exports = function (mongoose) {
                     oauth_client_id: oauthClientId
                 }, function (err, device) {
                     if (!err && device) {
-                        if (device.hub_topic.indexOf(hubTopic) == -1) {
+                        if (device.hub_topic.indexOf(hubTopic) === -1) {
                             device.hub_topic.push(hubTopic);
                         }
                         device.extra_data = _.assign({}, device.extra_data, extraData);
@@ -85,7 +85,7 @@ var Device = exports = module.exports = function (mongoose) {
             };
 
             var done = function (result) {
-                if (typeof callback == 'function') {
+                if (_.isFunction(callback)) {
                     callback(result);
                 }
             };
@@ -96,7 +96,7 @@ var Device = exports = module.exports = function (mongoose) {
         findDevices: function (oauthClientId, hubTopic, callback) {
             var done = function (devices) {
                 debug('findDevices', oauthClientId, hubTopic ? hubTopic : 'N/A', devices.length);
-                if (typeof callback == 'function') {
+                if (_.isFunction(callback)) {
                     callback(devices);
                 }
             };
@@ -193,7 +193,7 @@ var Device = exports = module.exports = function (mongoose) {
             };
 
             var done = function (result) {
-                if (typeof callback == 'function') {
+                if (_.isFunction(callback)) {
                     callback(result);
                 }
             };

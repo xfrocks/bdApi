@@ -1,3 +1,5 @@
+'use strict';
+
 var pushQueue = exports;
 
 var latestJob = null;

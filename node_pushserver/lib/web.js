@@ -21,9 +21,9 @@ web._app = app;
 web.start = function (port, deviceDb, projectDb, pushQueue, adminSections) {
     require('./web/pubhubsubbub').setup(app, deviceDb, pushQueue);
 
-    if (config.web.adminPrefix
-        && config.web.username
-        && config.web.password) {
+    if (config.web.adminPrefix &&
+        config.web.username &&
+        config.web.password) {
         require('./web/admin').setup(app, config.web.adminPrefix,
             config.web.username, config.web.password,
             projectDb, adminSections);

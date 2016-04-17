@@ -1,3 +1,5 @@
+'use strict';
+
 var apn = exports;
 var _ = require('lodash');
 
@@ -31,7 +33,7 @@ apn._getFeedbackCount = function () {
 
 apn._getFeedbacks = function (packageId) {
     return _.filter(feedbacks, function (feedback) {
-        return feedback.options.packageId == packageId;
+        return feedback.options.packageId === packageId;
     });
 };
 
@@ -68,7 +70,7 @@ apn.Feedback = function (options) {
     this.interval = 1;
 
     this.on = function (event, listener) {
-        if (typeof listeners[event] == 'undefined') {
+        if (_.isUndefined(listeners[event])) {
             listeners[event] = [];
         }
 
@@ -76,7 +78,7 @@ apn.Feedback = function (options) {
     };
 
     this.emit = function (event) {
-        if (typeof listeners[event] == 'undefined') {
+        if (_.isUndefined(listeners[event])) {
             return;
         }
 

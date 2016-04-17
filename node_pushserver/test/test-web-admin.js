@@ -1,9 +1,8 @@
+/*jshint expr: true*/
+'use strict';
+
 var web = require('../lib/web');
 var chai = require('chai');
-var express = require('express');
-var bodyParser = require('body-parser');
-var http = require('http');
-var _ = require('lodash');
 
 chai.should();
 chai.use(require('chai-http'));
@@ -138,7 +137,7 @@ describe('web/admin', function () {
             });
         };
 
-        test = function () {
+        var test = function () {
             webApp
                 .get('/admin/projects/' + projectType + '/' + projectId)
                 .end(function (err, res) {

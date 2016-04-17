@@ -1,3 +1,6 @@
+/*jshint expr: true*/
+'use strict';
+
 var helper = require('../lib/helper.js');
 var chai = require('chai');
 var _ = require('lodash');

@@ -136,12 +136,12 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
         var data = helper.prepareSubscribeData(req.body, requiredKeys);
         if (!data.has_all_required_keys) {
             debug('POST /unregister', 'some keys are missing', data.missing_keys);
-            return res.sendStatus(400)
+            return res.sendStatus(400);
         }
 
         if (!deviceDb) {
             debug('POST /unregister', 'deviceDb has not been setup properly');
-            return res.sendStatus(500)
+            return res.sendStatus(500);
         }
 
         deviceDb.delete(
@@ -153,7 +153,7 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
                 if (isDeleted !== false) {
                     return res.send('succeeded');
                 } else {
-                    return res.sendStatus(500)
+                    return res.sendStatus(500);
                 }
             }
         );
@@ -191,7 +191,7 @@ pubhubsubbub.setup = function(app, deviceDb, pushQueue) {
             var isSubscribe = (parsed.query['hub.mode'] === 'subscribe');
             var devicesFound = devices.length > 0;
 
-            if (isSubscribe != devicesFound) {
+            if (isSubscribe !== devicesFound) {
                 return res.sendStatus(405);
             }
 

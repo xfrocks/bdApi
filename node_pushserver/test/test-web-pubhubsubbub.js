@@ -1,3 +1,6 @@
+/*jshint expr: true*/
+'use strict';
+
 var web = require('../lib/web');
 var chai = require('chai');
 var express = require('express');

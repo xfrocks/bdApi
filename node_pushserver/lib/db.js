@@ -40,8 +40,8 @@ db.expressMiddleware = function () {
         var auth = {
             database: mongoUriParsed.database
         };
-        if (mongoUriParsed.username !== null
-            && mongoUriParsed.password !== null) {
+        if (mongoUriParsed.username !== null &&
+            mongoUriParsed.password !== null) {
             auth.username = mongoUriParsed.username;
             auth.password = mongoUriParsed.password;
         }

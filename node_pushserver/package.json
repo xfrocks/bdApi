@@ -23,13 +23,33 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "chai-http": "^2.0.1"
+    "chai-http": "^2.0.1",
+    "jshint": "^2.9.1"
   },
   "engines": {
     "node": ">=4.0.0"
   },
   "scripts": {
+    "lint": "node_modules/.bin/jshint -- lib/*.js lib/*/*.js test/*.js test/*/*.js",
     "start": "node bin/pushserver",
     "test": "mocha"
+  },
+  "jshintConfig": {
+    "bitwise": true,
+    "curly": true,
+    "eqeqeq": true,
+    "forin": true,
+    "freeze": true,
+    "latedef": false,
+    "maxdepth": 3,
+    "noarg": true,
+    "noempty": true,
+    "nonbsp": true,
+    "notypeof": true,
+    "strict": true,
+    "undef": true,
+    "unused": true,
+    "mocha": true,
+    "node": true
   }
 }
