@@ -12,7 +12,7 @@ config.gcm.defaultKeyId = 'key1';
 config.gcm.keys = {
     key1: 'key1',
     key2: 'key2'
-};
+  };
 config.wns.client_id = 'wns_ci';
 config.wns.client_secret = 'wns_cs';
 var pushKue = require('./mock/pushKue');
@@ -21,26 +21,26 @@ var db = require('./mock/db');
 pushQueue.setup(pushKue, pusher, db.projects);
 
 var notificationId = 0;
-var generatePayload = function () {
+var generatePayload = function() {
     notificationId++;
 
     return {
         action: 'action',
         notification_id: notificationId,
         notification_html: 'Notification #' + notificationId
-    };
-};
+      };
+  };
 
-describe('pushQueue', function () {
+describe('pushQueue', function() {
 
-    beforeEach(function (done) {
+    beforeEach(function(done) {
         pushKue._reset();
         pusher._reset();
         db.projects._reset();
         done();
-    });
+      });
 
-    it('should process android queue', function (done) {
+    it('should process android queue', function(done) {
         var deviceType = 'android';
         var deviceId = 'di';
         var payload = generatePayload();
@@ -55,9 +55,9 @@ describe('pushQueue', function () {
         latestPush.data.notification.should.not.be.null;
 
         done();
-    });
+      });
 
-    it('[android] default key', function (done) {
+    it('[android] default key', function(done) {
         var deviceType = 'android';
         var deviceId = 'di';
         var payload = generatePayload();
@@ -66,19 +66,20 @@ describe('pushQueue', function () {
 
         var latestPush = pusher._getLatestPush();
         latestPush.type.should.equal('gcm');
-        latestPush.gcmKey.should.equal(config.gcm.keys[config.gcm.defaultKeyId]);
+        latestPush.gcmKey.
+            should.equal(config.gcm.keys[config.gcm.defaultKeyId]);
 
         done();
-    });
+      });
 
-    it('[android] specific keys', function (done) {
+    it('[android] specific keys', function(done) {
         var deviceType = 'android';
         var deviceId = 'di';
         var payload = generatePayload();
         var extraData = {package: 'key1'};
         var extraData2 = {package: 'key2'};
 
-        var test1 = function () {
+        var test1 = function() {
             pushQueue.enqueue(deviceType, deviceId, payload, extraData);
 
             var latestPush = pusher._getLatestPush();
@@ -86,9 +87,9 @@ describe('pushQueue', function () {
             latestPush.gcmKey.should.equal(config.gcm.keys[extraData.package]);
 
             test2();
-        };
+          };
 
-        var test2 = function () {
+        var test2 = function() {
             pushQueue.enqueue(deviceType, deviceId, payload, extraData2);
 
             var latestPush = pusher._getLatestPush();
@@ -96,12 +97,12 @@ describe('pushQueue', function () {
             latestPush.gcmKey.should.equal(config.gcm.keys[extraData2.package]);
 
             done();
-        };
+          };
 
         test1();
-    });
+      });
 
-    it('[android] db key', function (done) {
+    it('[android] db key', function(done) {
         var packageId = 'pi-db';
         var apiKey = 'ak-db';
         var deviceType = 'android';
@@ -109,13 +110,13 @@ describe('pushQueue', function () {
         var payload = generatePayload();
         var extraData = {package: packageId};
 
-        var init = function () {
-            db.projects.saveGcm(packageId, apiKey, function () {
+        var init = function() {
+            db.projects.saveGcm(packageId, apiKey, function() {
                 test();
-            });
-        };
+              });
+          };
 
-        var test = function () {
+        var test = function() {
             pushQueue.enqueue(deviceType, deviceId, payload, extraData);
 
             var latestPush = pusher._getLatestPush();
@@ -123,12 +124,12 @@ describe('pushQueue', function () {
             latestPush.gcmKey.should.equal(apiKey);
 
             done();
-        };
+          };
 
         init();
-    });
+      });
 
-    it('[android] no key', function (done) {
+    it('[android] no key', function(done) {
         var packageId = 'pi-db-no-client';
         var deviceType = 'android';
         var deviceId = 'di-no-client';
@@ -152,9 +153,9 @@ describe('pushQueue', function () {
         pushes.length.should.equal(0);
 
         done();
-    });
+      });
 
-    it('should process ios queue', function (done) {
+    it('should process ios queue', function(done) {
         var deviceType = 'ios';
         var deviceId = 'di';
         var payload = generatePayload();
@@ -168,9 +169,9 @@ describe('pushQueue', function () {
         latestPush.payload.aps.alert.should.not.be.null;
 
         done();
-    });
+      });
 
-    it('[ios] default client', function (done) {
+    it('[ios] default client', function(done) {
         var deviceType = 'ios';
         var deviceId = 'di';
         var payload = generatePayload();
@@ -182,9 +183,9 @@ describe('pushQueue', function () {
         latestPush.connectionOptions.should.equal(config.apn.connectionOptions);
 
         done();
-    });
+      });
 
-    it('[ios] db client', function (done) {
+    it('[ios] db client', function(done) {
         var packageId = 'pi-db';
         var certData = 'cd-db';
         var keyData = 'kd-db';
@@ -193,13 +194,13 @@ describe('pushQueue', function () {
         var payload = generatePayload();
         var extraData = {package: packageId};
 
-        var init = function () {
-            db.projects.saveApn(packageId, certData, keyData, {}, function () {
+        var init = function() {
+            db.projects.saveApn(packageId, certData, keyData, {}, function() {
                 test();
-            });
-        };
+              });
+          };
 
-        var test = function () {
+        var test = function() {
             pushQueue.enqueue(deviceType, deviceId, payload, extraData);
 
             var latestPush = pusher._getLatestPush();
@@ -209,12 +210,12 @@ describe('pushQueue', function () {
             latestPush.connectionOptions.key.should.equal(keyData);
 
             done();
-        };
+          };
 
         init();
-    });
+      });
 
-    it('[ios] db client (sandbox)', function (done) {
+    it('[ios] db client (sandbox)', function(done) {
         var packageId = 'pi-db';
         var certData = 'cd-db';
         var keyData = 'kd-db';
@@ -224,15 +225,15 @@ describe('pushQueue', function () {
         var payload = generatePayload();
         var extraData = {package: packageId};
 
-        var init = function () {
+        var init = function() {
             db.projects.saveApn(packageId, certData, keyData, {
                 gateway: gateway
-            }, function () {
+              }, function() {
                 test();
-            });
-        };
+              });
+          };
 
-        var test = function () {
+        var test = function() {
             pushQueue.enqueue(deviceType, deviceId, payload, extraData);
 
             var latestPush = pusher._getLatestPush();
@@ -243,12 +244,12 @@ describe('pushQueue', function () {
             latestPush.connectionOptions.key.should.equal(keyData);
 
             done();
-        };
+          };
 
         init();
-    });
+      });
 
-    it('[ios] no notification_html', function (done) {
+    it('[ios] no notification_html', function(done) {
         var deviceType = 'ios';
         var deviceId = 'di';
         var payload = generatePayload();
@@ -272,9 +273,9 @@ describe('pushQueue', function () {
         pushes.length.should.equal(0);
 
         done();
-    });
+      });
 
-    it('[ios] no client', function (done) {
+    it('[ios] no client', function(done) {
         var packageId = 'pi-db-no-client';
         var deviceType = 'ios';
         var deviceId = 'di-no-client';
@@ -298,9 +299,9 @@ describe('pushQueue', function () {
         pushes.length.should.equal(0);
 
         done();
-    });
+      });
 
-    it('should process windows queue', function (done) {
+    it('should process windows queue', function(done) {
         var deviceType = 'windows';
         var deviceId = 'di';
         var payload = generatePayload();
@@ -322,9 +323,9 @@ describe('pushQueue', function () {
         data.extra_data.foo.should.equal(extraData.foo);
 
         done();
-    });
+      });
 
-    it('[windows] default client', function (done) {
+    it('[windows] default client', function(done) {
         var deviceType = 'windows';
         var deviceId = 'di';
         var payload = generatePayload();
@@ -339,9 +340,9 @@ describe('pushQueue', function () {
         latestPush.clientSecret.should.equal(config.wns.client_secret);
 
         done();
-    });
+      });
 
-    it('[windows] db client', function (done) {
+    it('[windows] db client', function(done) {
         var packageId = 'pi-db';
         var clientId = 'ci-db';
         var clientSecret = 'cs-db';
@@ -351,13 +352,13 @@ describe('pushQueue', function () {
         var channelUri = 'https://microsoft.com/wns/channel/uri';
         var extraData = {channel_uri: channelUri, package: packageId};
 
-        var init = function () {
-            db.projects.saveWns(packageId, clientId, clientSecret, function () {
+        var init = function() {
+            db.projects.saveWns(packageId, clientId, clientSecret, function() {
                 test();
-            });
-        };
+              });
+          };
 
-        var test = function () {
+        var test = function() {
             pushQueue.enqueue(deviceType, deviceId, payload, extraData);
 
             var latestPush = pusher._getLatestPush();
@@ -366,12 +367,12 @@ describe('pushQueue', function () {
             latestPush.clientSecret.should.equal(clientSecret);
 
             done();
-        };
+          };
 
         init();
-    });
+      });
 
-    it('[windows] no client', function (done) {
+    it('[windows] no client', function(done) {
         var packageId = 'pi-db-no-client';
         var deviceType = 'windows';
         var deviceId = 'di-no-client';
@@ -396,9 +397,9 @@ describe('pushQueue', function () {
         pushes.length.should.equal(0);
 
         done();
-    });
+      });
 
-    it('should retry on text error', function (done) {
+    it('should retry on text error', function(done) {
         var deviceType = 'android';
         var deviceId = 'error';
         var payload = generatePayload();
@@ -409,9 +410,9 @@ describe('pushQueue', function () {
         pushes.length.should.equal(config.pushQueue.attempts);
 
         done();
-    });
+      });
 
-    it('should retry on Error', function (done) {
+    it('should retry on Error', function(done) {
         var deviceType = 'android';
         var deviceId = 'Error';
         var payload = generatePayload();
@@ -422,5 +423,5 @@ describe('pushQueue', function () {
         pushes.length.should.equal(config.pushQueue.attempts);
 
         done();
-    });
-});
+      });
+  });

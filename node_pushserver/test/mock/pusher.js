@@ -6,62 +6,62 @@ var _ = require('lodash');
 var latestPush = null;
 var pushes = [];
 
-pusher._reset = function () {
+pusher._reset = function() {
     pushes = [];
-};
+  };
 
-pusher._getLatestPush = function () {
+pusher._getLatestPush = function() {
     return latestPush;
-};
+  };
 
-pusher._getPushes = function () {
+pusher._getPushes = function() {
     return pushes;
-};
+  };
 
-var mock = function (push, hint, callback) {
+var mock = function(push, hint, callback) {
     latestPush = push;
     pushes.push(push);
 
     var err = null;
 
     switch (hint) {
-        case 'error':
-            err = 'Error';
-            break;
-        case 'Error':
-            err = new Error('Message');
-            break;
-    }
+    case 'error':
+      err = 'Error';
+    break;
+    case 'Error':
+      err = new Error('Message');
+    break;
+  }
 
     if (_.isFunction(callback)) {
-        callback(err);
+      callback(err);
     }
-};
+  };
 
-pusher.apn = function (connectionOptions, token, payload, callback) {
+pusher.apn = function(connectionOptions, token, payload, callback) {
     mock({
         type: 'apn',
         connectionOptions: connectionOptions,
         token: token,
         payload: payload
-    }, token, callback);
-};
+      }, token, callback);
+  };
 
-pusher.gcm = function (gcmKey, registrationId, data, callback) {
+pusher.gcm = function(gcmKey, registrationId, data, callback) {
     mock({
         type: 'gcm',
         gcmKey: gcmKey,
         registrationId: registrationId,
         data: data
-    }, registrationId, callback);
-};
+      }, registrationId, callback);
+  };
 
-pusher.wns = function (clientId, clientSecret, channelUri, dataRaw, callback) {
+pusher.wns = function(clientId, clientSecret, channelUri, dataRaw, callback) {
     mock({
         type: 'wns',
         clientId: clientId,
         clientSecret: clientSecret,
         channelUri: channelUri,
         dataRaw: dataRaw
-    }, channelUri, callback);
-};
+      }, channelUri, callback);
+  };

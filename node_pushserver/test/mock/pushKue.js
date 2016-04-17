@@ -6,27 +6,27 @@ var _ = require('lodash');
 var queues = {};
 var processCallbacks = {};
 
-pushKue._reset = function () {
+pushKue._reset = function() {
     queues = {};
-};
+  };
 
-pushKue._getLatestJob = function (queueId) {
+pushKue._getLatestJob = function(queueId) {
     if (!_.has(queues, queueId)) {
-        return null;
+      return null;
     }
 
     return _.last(queues[queueId]);
-};
+  };
 
-pushKue._getJobs = function (queueId) {
+pushKue._getJobs = function(queueId) {
     if (!_.has(queues, queueId)) {
-        return [];
+      return [];
     }
 
     return queues[queueId];
-};
+  };
 
-pushKue.create = function (queueId, jobData) {
+pushKue.create = function(queueId, jobData) {
     var remainingAttempts = 1;
     var backOff = null;
     var ttl = 1000;
@@ -41,62 +41,62 @@ pushKue.create = function (queueId, jobData) {
 
         log: function() {
             job.logs.push(arguments);
-        }
-    };
+          }
+      };
     if (!_.has(queues, queueId)) {
-        queues[queueId] = [];
+      queues[queueId] = [];
     }
     queues[queueId].push(job);
 
-    var attempt = function () {
+    var attempt = function() {
         if (!_.isFunction(processCallbacks[queueId])) {
-            console.log('what', processCallbacks);
-            return;
+          console.log('what', processCallbacks);
+          return;
         }
 
         job.attempts++;
 
-        processCallbacks[queueId](job, function (err, result) {
+        processCallbacks[queueId](job, function(err, result) {
             if (err) {
-                job.error = err;
-                job.result = null;
-                remainingAttempts--;
-                if (remainingAttempts > 0) {
-                    attempt();
-                }
+              job.error = err;
+              job.result = null;
+              remainingAttempts--;
+              if (remainingAttempts > 0) {
+                attempt();
+              }
 
-                return;
+              return;
             }
 
             job.error = null;
             job.result = result;
-        });
-    };
+          });
+      };
 
     return {
-        attempts: function (n) {
+        attempts: function(n) {
             remainingAttempts = n;
-        },
-        backoff: function (o) {
+          },
+        backoff: function(o) {
             backOff = o;
-        },
-        ttl: function (n) {
+          },
+        ttl: function(n) {
             ttl = n;
-        },
-        removeOnComplete: function (b) {
+          },
+        removeOnComplete: function(b) {
             removeOnComplete = b;
-        },
+          },
 
-        save: function (callback) {
+        save: function(callback) {
             if (_.isFunction(callback)) {
-                callback();
+              callback();
             }
 
             attempt();
-        }
-    };
-};
+          }
+      };
+  };
 
-pushKue.process = function (queueId, parallel, callback) {
+pushKue.process = function(queueId, parallel, callback) {
     processCallbacks[queueId] = callback;
-};
+  };

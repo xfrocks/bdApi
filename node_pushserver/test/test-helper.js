@@ -7,14 +7,15 @@ var _ = require('lodash');
 
 var expect = chai.expect;
 
-describe('helper', function () {
+describe('helper', function() {
 
-    it('should strip html', function (done) {
-        expect(helper.stripHtml('\t<b>Hello</b> <em>World</em>!\r\n')).to.equal('Hello World!');
+    it('should strip html', function(done) {
+        expect(helper.stripHtml('\t<b>Hello</b> ' +
+            '<em>World</em>!\r\n')).to.equal('Hello World!');
         done();
-    });
+      });
 
-    it('should prepare apn message', function (done) {
+    it('should prepare apn message', function(done) {
         var string229 = _.repeat('a', 229);
         expect(helper.prepareApnMessage(string229)).to.equal(string229);
 
@@ -25,9 +26,9 @@ describe('helper', function () {
         expect(helper.prepareApnMessage(string231)).to.equal(string229 + '…');
 
         done();
-    });
+      });
 
-    it('should prepare subscribe data', function (done) {
+    it('should prepare subscribe data', function(done) {
         var hubTopic = 'ht';
         var hubUri = 'http://domain.com/hub';
         var hubUriWithTopic = hubUri + '?hub.topic=' + hubTopic;
@@ -46,7 +47,7 @@ describe('helper', function () {
             device_type: deviceType,
             device_id: deviceId,
             extra_data: extraData
-        })).to.deep.equal({
+          })).to.deep.equal({
             hub_uri: hubUri,
             hub_topic: hubTopic,
             oauth_client_id: oauthClientId,
@@ -57,7 +58,7 @@ describe('helper', function () {
             extra_data: extraData,
 
             has_all_required_keys: true
-        });
+          });
 
         expect(helper.prepareSubscribeData({})).to.deep.equal({
             hub_uri: '',
@@ -70,11 +71,11 @@ describe('helper', function () {
             extra_data: null,
 
             has_all_required_keys: true
-        });
+          });
 
         expect(helper.prepareSubscribeData({
             hub_uri: hubUriWithTopic
-        })).to.deep.equal({
+          })).to.deep.equal({
             hub_uri: hubUriWithTopic,
             hub_topic: hubTopic,
             oauth_client_id: '',
@@ -85,7 +86,7 @@ describe('helper', function () {
             extra_data: null,
 
             has_all_required_keys: true
-        });
+          });
 
         expect(helper.prepareSubscribeData({}, ['hub_uri']))
             .to.have.property('has_all_required_keys')
@@ -96,6 +97,6 @@ describe('helper', function () {
             .that.is.true;
 
         done();
-    });
+      });
 
-});
+  });

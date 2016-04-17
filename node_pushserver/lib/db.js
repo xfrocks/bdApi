@@ -7,18 +7,18 @@ var _ = require('lodash');
 var mongoose = require('mongoose');
 
 var mongoUri = config.db.mongoUri;
-mongoose.connect(config.db.mongoUri, function (err) {
+mongoose.connect(config.db.mongoUri, function(err) {
     if (err) {
-        debug('Error connecting to the MongoDb.', err);
+      debug('Error connecting to the MongoDb.', err);
     } else {
-        debug('Connected', mongoUri);
+      debug('Connected', mongoUri);
     }
-});
+  });
 
 db.devices = require('./db/Device')(mongoose);
 db.projects = require('./db/Project')(mongoose);
 
-db.expressMiddleware = function () {
+db.expressMiddleware = function() {
     var mongoExpress = require('mongo-express/lib/middleware');
     var mongoUriParser = require('mongo-uri');
 
@@ -31,22 +31,22 @@ db.expressMiddleware = function () {
         server: _.first(mongoUriParsed.hosts),
         port: _.first(mongoUriParsed.ports),
         useSSL: false
-    });
+      });
     if (mec.mongodb.port === null) {
-        mec.mongodb.port = 27017;
+      mec.mongodb.port = 27017;
     }
     mec.mongodb.auth = [];
     if (mongoUriParsed.database) {
-        var auth = {
-            database: mongoUriParsed.database
+      var auth = {
+          database: mongoUriParsed.database
         };
-        if (mongoUriParsed.username !== null &&
-            mongoUriParsed.password !== null) {
-            auth.username = mongoUriParsed.username;
-            auth.password = mongoUriParsed.password;
-        }
-        mec.mongodb.auth.push(auth);
+      if (mongoUriParsed.username !== null &&
+          mongoUriParsed.password !== null) {
+        auth.username = mongoUriParsed.username;
+        auth.password = mongoUriParsed.password;
+      }
+      mec.mongodb.auth.push(auth);
     }
 
     return mongoExpress(mec);
-};
+  };

@@ -8,102 +8,102 @@ var feedbacks = [];
 var latestPush = null;
 var pushes = [];
 
-apn._reset = function () {
+apn._reset = function() {
     connections = [];
     feedbacks = [];
     latestPush = null;
     pushes = [];
-};
+  };
 
-apn._getLatestPush = function () {
+apn._getLatestPush = function() {
     return latestPush;
-};
+  };
 
-apn._getPushes = function () {
+apn._getPushes = function() {
     return pushes;
-};
+  };
 
-apn._getConnectionCount = function () {
+apn._getConnectionCount = function() {
     return connections.length;
-};
+  };
 
-apn._getFeedbackCount = function () {
+apn._getFeedbackCount = function() {
     return feedbacks.length;
-};
+  };
 
-apn._getFeedbacks = function (packageId) {
-    return _.filter(feedbacks, function (feedback) {
+apn._getFeedbacks = function(packageId) {
+    return _.filter(feedbacks, function(feedback) {
         return feedback.options.packageId === packageId;
-    });
-};
+      });
+  };
 
-apn.Connection = function (options) {
+apn.Connection = function(options) {
     var connection = this;
     this.options = options;
     this.terminated = false;
 
-    this.pushNotification = function (notification, device) {
+    this.pushNotification = function(notification, device) {
         latestPush = {
             connection: connection,
             device: device,
             notification: notification
-        };
+          };
         pushes.push(latestPush);
-    };
+      };
 
-    this.shutdown = function () {
+    this.shutdown = function() {
         connection.terminated = true;
-    };
+      };
 
     this.on = function() {
         // NOP
-    };
+      };
 
     connections.push(this);
-};
+  };
 
-apn.Feedback = function (options) {
+apn.Feedback = function(options) {
     var feedback = this;
     var listeners = {};
 
     this.options = options;
     this.interval = 1;
 
-    this.on = function (event, listener) {
+    this.on = function(event, listener) {
         if (_.isUndefined(listeners[event])) {
-            listeners[event] = [];
+          listeners[event] = [];
         }
 
         listeners[event].push(listener);
-    };
+      };
 
-    this.emit = function (event) {
+    this.emit = function(event) {
         if (_.isUndefined(listeners[event])) {
-            return;
+          return;
         }
 
         var eventArguments = Array.prototype.slice.call(arguments, 1);
 
-        _.forEach(listeners[event], function (listener) {
+        _.forEach(listeners[event], function(listener) {
             listener.apply(feedback, eventArguments);
-        });
-    };
+          });
+      };
 
-    this.cancel = function () {
+    this.cancel = function() {
         feedback.interval = undefined;
-    };
+      };
 
     feedbacks.push(this);
-};
+  };
 
-apn.Device = function (token) {
+apn.Device = function(token) {
     this.token = token;
-};
+  };
 
-apn.Notification = function (payload) {
+apn.Notification = function(payload) {
     this.payload = payload;
     this.alert = '';
     this.badge = '';
     this.expiry = null;
     this.sound = '';
-};
+  };
