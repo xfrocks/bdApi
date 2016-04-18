@@ -285,6 +285,22 @@ describe('pushQueue', function() {
         init();
       });
 
+    it('[ios] payload with user_unread_notification_count', function(done) {
+        var deviceType = 'ios';
+        var deviceId = 'di';
+        var payload = generatePayload();
+        payload.user_unread_notification_count = 1;
+
+        pushQueue.enqueue(deviceType, deviceId, payload);
+
+        var latestPush = pusher._getLatestPush();
+        latestPush.type.should.equal('apn');
+        latestPush.payload.aps.badge.
+            should.equal(payload.user_unread_notification_count);
+
+        done();
+      });
+
     it('[ios] no notification_html', function(done) {
         var deviceType = 'ios';
         var deviceId = 'di';

@@ -136,7 +136,11 @@ pushQueue._oniOSJob = function(job, callback) {
       return callback('No APN message');
     }
     job.log('apnMessage = %s', apnMessage);
-    var payload = {aps: {alert: apnMessage}, 'content-available': 1};
+    var payload = {aps: {alert: apnMessage}};
+
+    if (_.has(data, 'payload.user_unread_notification_count')) {
+      payload.aps.badge = data.payload.user_unread_notification_count;
+    }
 
     var packageId = '';
     var connectionOptions = config.apn.connectionOptions;
