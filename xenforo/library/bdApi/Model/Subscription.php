@@ -252,6 +252,14 @@ class bdApi_Model_Subscription extends XenForo_Model
                 // fake alert, use the included object_data
                 $pingDataRef['object_data'] = array_merge($pingDataRef['object_data'], $alertRef['extra']['object_data']);
             }
+
+            $alertedUserId = $alertRef['alerted_user_id'];
+            if (isset($viewingUsers[$alertedUserId])) {
+                $alertedUser = $viewingUsers[$alertedUserId];
+                if (isset($alertedUser['alerts_unread'])) {
+                    $pingDataRef['object_data']['user_unread_notification_count'] = $alertedUser['alerts_unread'];
+                }
+            }
         }
 
         return $pingDataMany;
