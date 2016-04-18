@@ -137,6 +137,8 @@ pusher.apn = function (connectionOptions, token, payload, callback) {
         notification.sound = payload.aps.sound;
     } else if (_.has(config, 'apn.notificationOptions.sound')) {
         notification.sound = config.apn.notificationOptions.sound;
+    } else {
+        notification.sound = 'default';
     }
 
     if (_.has(payload, 'expiry')) {
