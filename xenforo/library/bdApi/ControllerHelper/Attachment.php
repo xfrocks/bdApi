@@ -75,11 +75,17 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
 
         $this->_getAttachmentModel()->logAttachmentView($attachment['attachment_id']);
 
-        $resize = $this->_controller->getInput()->filter(array(
-            'max_width' => XenForo_Input::UINT,
-            'max_height' => XenForo_Input::UINT,
-            'keep_ratio' => XenForo_Input::UINT,
-        ));
+        $resize = array();
+        /** @var bdApi_Session $session */
+        $session = XenForo_Application::getSession();
+        if ($session->getOAuthTokenText() !== false) {
+            // requires a valid token to resize images to avoid being abused
+            $resize = $this->_controller->getInput()->filter(array(
+                'max_width' => XenForo_Input::UINT,
+                'max_height' => XenForo_Input::UINT,
+                'keep_ratio' => XenForo_Input::UINT,
+            ));
+        }
 
         $this->_controller->getRouteMatch()->setResponseType('raw');
 

@@ -7,6 +7,7 @@ class bdApi_ViewApi_Helper_Attachment_Data extends bdApi_ViewApi_Base
         $attachment = $this->_params['attachment'];
         $attachmentFile = $this->_params['attachmentFile'];
         $attachmentFileSize = $attachment['file_size'];
+        $isTempFile = false;
 
         $extension = XenForo_Helper_File::getFileExtension($attachment['filename']);
         $imageTypes = array(
@@ -66,6 +67,7 @@ class bdApi_ViewApi_Helper_Attachment_Data extends bdApi_ViewApi_Base
                 $image->output($imageType, $tempFile);
                 $attachmentFile = $tempFile;
                 $attachmentFileSize = filesize($tempFile);
+                $isTempFile = true;
 
                 unset($image);
             }
@@ -79,11 +81,19 @@ class bdApi_ViewApi_Helper_Attachment_Data extends bdApi_ViewApi_Base
         $this->_response->setHeader('X-Content-Type-Options', 'nosniff');
 
         if (!empty($this->_params['skipFileOutput'])) {
+            if ($isTempFile) {
+                @unlink($attachmentFile);
+            }
+
             $this->_response->setHeader('X-SKIP-FILE-OUTPUT', '1');
             return '';
         }
 
-        return new XenForo_FileOutput($attachmentFile);
+        if ($isTempFile) {
+            return new bdApi_Data_TempFileOutput($attachmentFile);
+        } else {
+            return new XenForo_FileOutput($attachmentFile);
+        }
     }
 
 }
