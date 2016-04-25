@@ -692,7 +692,7 @@ Delete a thread.
 
 Parameters:
 
- * N/A
+ * `reason` (_optional_, since forum-2016042501): reason of the thread removal.
 
 Required scopes:
 
@@ -1048,7 +1048,7 @@ Delete a post.
 
 Parameters:
 
- * N/A
+ * `reason` (_optional_, since forum-2016042501): reason of the post removal.
 
 Required scopes:
 
@@ -1761,7 +1761,7 @@ Delete a profile post. Since forum-2015042001.
 
 Parameters:
 
- * N/A
+ * `reason` (_optional_, since forum-2016042501): reason of the profile post removal.
 
 Required scopes:
 

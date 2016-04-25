@@ -201,10 +201,15 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
     public function actionDeleteIndex()
     {
         $profilePostId = $this->_input->filterSingle('profile_post_id', XenForo_Input::UINT);
+
+        /** @var bdApi_ControllerHelper_Delete $deleteHelper */
+        $deleteHelper = $this->getHelper('bdApi_ControllerHelper_Delete');
+        $reason = $deleteHelper->filterReason();
+
         list($profilePost, $user) = $this->_getUserProfileHelper()->assertProfilePostValidAndViewable($profilePostId);
 
         $deleteType = 'soft';
-        $options = array('reason' => '[bd] API');
+        $options = array('reason' => $reason);
 
         if (!$this->_getProfilePostModel()->canDeleteProfilePost($profilePost, $user, $deleteType, $errorPhraseKey)) {
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
@@ -465,8 +470,12 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
     public function actionDeleteComments()
     {
         $profilePostId = $this->_input->filterSingle('profile_post_id', XenForo_Input::UINT);
-
         $commentId = $this->_input->filterSingle('comment_id', XenForo_Input::UINT);
+
+        /** @var bdApi_ControllerHelper_Delete $deleteHelper */
+        $deleteHelper = $this->getHelper('bdApi_ControllerHelper_Delete');
+        $reason = $deleteHelper->filterReason();
+
         list($comment, $profilePost, $user) = $this->_getUserProfileHelper()->assertProfilePostCommentValidAndViewable(
             $commentId,
             $this->_getProfilePostModel()->getCommentFetchOptionsToPrepareApiData()
@@ -499,7 +508,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             'comment_delete',
             array(
                 'username' => $comment['username'],
-                'reason' => '[bd] API',
+                'reason' => $reason,
             ),
             $user
         );

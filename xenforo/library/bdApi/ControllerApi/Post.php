@@ -346,10 +346,15 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     public function actionDeleteIndex()
     {
         $postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
+
+        /** @var bdApi_ControllerHelper_Delete $deleteHelper */
+        $deleteHelper = $this->getHelper('bdApi_ControllerHelper_Delete');
+        $reason = $deleteHelper->filterReason();
+
         list($post, $thread, $forum) = $this->_getForumThreadPostHelper()->assertPostValidAndViewable($postId);
 
         $deleteType = 'soft';
-        $options = array('reason' => '[bd] API');
+        $options = array('reason' => $reason);
 
         if (!$this->_getPostModel()->canDeletePost($post, $thread, $forum, $deleteType, $errorPhraseKey)) {
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
@@ -358,9 +363,11 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $this->_getPostModel()->deletePost($postId, $deleteType, $options, $forum);
 
         if ($post['post_id'] == $thread['first_post_id']) {
-            XenForo_Model_Log::logModeratorAction('thread', $thread, 'delete_' . $deleteType, array('reason' => $options['reason']));
+            XenForo_Model_Log::logModeratorAction('thread', $thread,
+                'delete_' . $deleteType, array('reason' => $reason));
         } else {
-            XenForo_Model_Log::logModeratorAction('post', $post, 'delete_' . $deleteType, array('reason' => $options['reason']), $thread);
+            XenForo_Model_Log::logModeratorAction('post', $post,
+                'delete_' . $deleteType, array('reason' => $reason), $thread);
         }
 
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));

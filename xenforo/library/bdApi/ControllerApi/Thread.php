@@ -341,10 +341,15 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     public function actionDeleteIndex()
     {
         $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
+
+        /** @var bdApi_ControllerHelper_Delete $deleteHelper */
+        $deleteHelper = $this->getHelper('bdApi_ControllerHelper_Delete');
+        $reason = $deleteHelper->filterReason();
+
         list($thread, $forum) = $this->_getForumThreadPostHelper()->assertThreadValidAndViewable($threadId);
 
         $deleteType = 'soft';
-        $options = array('reason' => '[bd] API');
+        $options = array('reason' => $reason);
 
         if (!$this->_getThreadModel()->canDeleteThread($thread, $forum, $deleteType, $errorPhraseKey)) {
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
@@ -352,7 +357,8 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
         $this->_getThreadModel()->deleteThread($thread['thread_id'], $deleteType, $options);
 
-        XenForo_Model_Log::logModeratorAction('thread', $thread, 'delete_' . $deleteType, array('reason' => $options['reason']));
+        XenForo_Model_Log::logModeratorAction('thread', $thread,
+            'delete_' . $deleteType, array('reason' => $options['reason']));
 
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));
     }
