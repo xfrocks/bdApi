@@ -71,7 +71,12 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
         }
 
         if (!isset($post['messageHtml'])) {
-            $post['messageHtml'] = bdApi_Data_Helper_Message::getHtml($post);
+            $bbCodeOptions = array(
+                'states' => array(
+                    'viewAttachments' => $this->canViewAttachmentOnPost($post, $thread, $forum),
+                ),
+            );
+            $post['messageHtml'] = bdApi_Data_Helper_Message::getHtml($post, $bbCodeOptions);
         }
         if (isset($post['message'])) {
             $post['messagePlainText'] = bdApi_Data_Helper_Message::getPlainText($post['message']);
@@ -187,33 +192,13 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
 
     public function prepareApiDataForAttachment(array $attachment, array $post, array $thread, array $forum, $tempHash = '')
     {
-        /* @var $attachmentModel XenForo_Model_Attachment */
+        /** @var bdApi_Extend_Model_Attachment $attachmentModel */
         $attachmentModel = $this->getModelFromCache('XenForo_Model_Attachment');
-        $attachment = $attachmentModel->prepareAttachment($attachment);
-
-        $publicKeys = array(
-            // xf_attachment
-            'attachment_id' => 'attachment_id',
-            'content_id' => 'post_id',
-            'view_count' => 'attachment_download_count',
-            // xf_attachment_data
-            'filename' => 'filename',
-        );
-
-        $data = bdApi_Data_Helper_Core::filter($attachment, $publicKeys);
-
-        $paths = XenForo_Application::get('requestPaths');
-        $paths['fullBasePath'] = XenForo_Application::getOptions()->get('boardUrl') . '/';
-
-        $data['links'] = array('permalink' => XenForo_Link::buildPublicLink('attachments', $attachment));
-
-        if (!empty($attachment['thumbnailUrl'])) {
-            $data['links']['thumbnail'] = XenForo_Link::convertUriToAbsoluteUri($attachment['thumbnailUrl'], true, $paths);
-        }
+        $data = $attachmentModel->prepareApiDataForAttachment($attachment);
 
         if (!empty($post['post_id'])) {
+            $data['post_id'] = $post['post_id'];
             $data['links'] += array(
-                'data' => bdApi_Data_Helper_Core::safeBuildApiLink('posts/attachments', $post, array('attachment_id' => $attachment['attachment_id'])),
                 'post' => bdApi_Data_Helper_Core::safeBuildApiLink('posts', $post),
             );
         }

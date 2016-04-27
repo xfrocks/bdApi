@@ -186,7 +186,9 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         }
 
         $fc = XenForo_Application::get('_bdApi_fc');
-        /* @var $dependencies bdApi_Dependencies */
+
+        /** @noinspection PhpUndefinedClassInspection */
+        /** @var bdApi_Dependencies $dependencies */
         $dependencies = $fc->getDependencies();
 
         $request = new bdApi_Zend_Controller_Request_Http($link);

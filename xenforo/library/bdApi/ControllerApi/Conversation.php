@@ -147,6 +147,7 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
 
     public function actionPostAttachments()
     {
+        $contentData = array('message_id' => 0);
         $attachmentHelper = $this->_getAttachmentHelper();
         $hash = $attachmentHelper->getAttachmentTempHash();
         $response = $attachmentHelper->doUpload('file', $hash, 'conversation_message');
@@ -155,7 +156,9 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
             return $response;
         }
 
-        $data = array('attachment' => $this->_getConversationModel()->prepareApiDataForAttachment(array('message_id' => 0), $response, $hash));
+        $data = array('attachment' => $this->_filterDataSingle(
+            $this->_getConversationModel()->prepareApiDataForAttachment(
+                $response, $contentData, $contentData, $hash)));
 
         return $this->responseData('bdApi_ViewApi_Conversation_Attachments', $data);
     }
@@ -182,7 +185,7 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
 
     /**
      *
-     * @return bdApi_XenForo_Model_Conversation
+     * @return bdApi_Extend_Model_Conversation
      */
     protected function _getConversationModel()
     {

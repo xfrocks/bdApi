@@ -261,25 +261,24 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
     public function prepareUserFetchOptions(array $fetchOptions)
     {
         $prepared = parent::prepareUserFetchOptions($fetchOptions);
-        extract($prepared);
 
         if (isset($fetchOptions[self::FETCH_IS_FOLLOWED])) {
             $fetchOptions[self::FETCH_IS_FOLLOWED] = intval($fetchOptions[self::FETCH_IS_FOLLOWED]);
             if ($fetchOptions[self::FETCH_IS_FOLLOWED]) {
                 // note: quoting is skipped; intval'd above
-                $selectFields .= ',
+                $prepared['selectFields'] .= ',
 					IF(bdapi_user_follow.user_id IS NOT NULL, 1, 0) AS bdapi_user_is_followed';
-                $joinTables .= '
+                $prepared['joinTables'] .= '
 					LEFT JOIN xf_user_follow AS bdapi_user_follow ON
 						(bdapi_user_follow.user_id = ' . $fetchOptions[self::FETCH_IS_FOLLOWED] . '
 						AND bdapi_user_follow.follow_user_id = user.user_id)';
             } else {
-                $selectFields .= ',
+                $prepared['selectFields'] .= ',
 					0 AS bdapi_user_is_followed';
             }
         }
 
-        return compact(array_keys($prepared));
+        return $prepared;
     }
 
     public function getOrderByClause(array $choices, array $fetchOptions, $defaultOrderSql = '')

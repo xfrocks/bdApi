@@ -447,34 +447,22 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     public function actionGetAttachments()
     {
         $postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
+
         $attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
+        if (!empty($attachmentId)) {
+            return $this->responseReroute('bdApi_ControllerApi_Attachment',  'get-data');
+        }
+
         list($post, $thread, $forum) = $this->_getForumThreadPostHelper()->assertPostValidAndViewable($postId, $this->_getPostModel()->getFetchOptionsToPrepareApiData());
 
         $posts = array($post['post_id'] => $post);
         $posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
+        $posts = $this->_getPostModel()->prepareApiDataForPosts($posts, $thread, $forum);
+
         $post = reset($posts);
+        $attachments = isset($post['attachments']) ? $post['attachments'] : array();
 
-        if (empty($attachmentId)) {
-            $post = $this->_getPostModel()->prepareApiDataForPost($post, $thread, $forum);
-            $attachments = isset($post['attachments']) ? $post['attachments'] : array();
-
-            $data = array('attachments' => $this->_filterDataMany($attachments));
-        } else {
-            $attachments = isset($post['attachments']) ? $post['attachments'] : array();
-            $attachment = false;
-
-            foreach ($attachments as $_attachment) {
-                if ($_attachment['attachment_id'] == $attachmentId) {
-                    $attachment = $_attachment;
-                }
-            }
-
-            if (!empty($attachment)) {
-                return $this->_getAttachmentHelper()->doData($attachment);
-            } else {
-                return $this->responseError(new XenForo_Phrase('requested_attachment_not_found'), 404);
-            }
-        }
+        $data = array('attachments' => $this->_filterDataMany($attachments));
 
         return $this->responseData('bdApi_ViewApi_Post_Attachments', $data);
     }
@@ -497,7 +485,9 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             return $response;
         }
 
-        $data = array('attachment' => $this->_filterDataSingle($this->_getPostModel()->prepareApiDataForAttachment($response, $contentData, $contentData, $contentData, $hash)));
+        $data = array('attachment' => $this->_filterDataSingle(
+            $this->_getPostModel()->prepareApiDataForAttachment(
+                $response, $contentData, $contentData, $contentData, $hash)));
 
         return $this->responseData('bdApi_ViewApi_Post_Attachments', $data);
     }

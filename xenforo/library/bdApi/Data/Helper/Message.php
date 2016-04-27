@@ -2,12 +2,14 @@
 
 class bdApi_Data_Helper_Message
 {
-    public static function getHtml(&$message)
+    public static function getHtml(&$message, array $bbCodeOptions = array())
     {
         static $bbCodeParser = false;
 
         if ($bbCodeParser === false) {
-            $formatter = XenForo_BbCode_Formatter_Base::create('Base');
+            $formatter = XenForo_BbCode_Formatter_Base::create('Base', array(
+                'view' => bdApi_Template_Simulation_View::create(),
+            ));
 
             if (XenForo_Application::$versionId >= 1020000) {
                 $bbCodeParser = XenForo_BbCode_Parser::create($formatter);
@@ -16,7 +18,7 @@ class bdApi_Data_Helper_Message
             }
         }
 
-        return XenForo_ViewPublic_Helper_Message::getBbCodeWrapper($message, $bbCodeParser);
+        return XenForo_ViewPublic_Helper_Message::getBbCodeWrapper($message, $bbCodeParser, $bbCodeOptions);
     }
 
     public static function getPlainText($bbCode)

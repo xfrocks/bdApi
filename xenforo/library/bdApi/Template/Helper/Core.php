@@ -2,6 +2,12 @@
 
 class bdApi_Template_Helper_Core
 {
+    public function buildLink()
+    {
+        $args = func_get_args();
+        return call_user_func_array(array('bdApi_Data_Helper_Core', 'safeBuildApiLink'), $args);
+    }
+
     public function scopeSplit($scopesStr)
     {
         return array_map('trim', preg_split('#\s#', $scopesStr, -1, PREG_SPLIT_NO_EMPTY));

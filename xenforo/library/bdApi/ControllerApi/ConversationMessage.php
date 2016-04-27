@@ -45,7 +45,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
             case 'natural_reverse':
                 // load the class to make our constant accessible
                 $this->_getConversationModel();
-                $fetchOptions[bdApi_XenForo_Model_Conversation::FETCH_OPTIONS_MESSAGES_ORDER_REVERSE] = true;
+                $fetchOptions[bdApi_Extend_Model_Conversation::FETCH_OPTIONS_MESSAGES_ORDER_REVERSE] = true;
                 $pageNavParams['order'] = $order;
                 break;
         }
@@ -198,36 +198,23 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
     public function actionGetAttachments()
     {
         $messageId = $this->_input->filterSingle('message_id', XenForo_Input::UINT);
+
         $attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
+        if (!empty($attachmentId)) {
+            return $this->responseReroute('bdApi_ControllerApi_Attachment',  'get-data');
+        }
 
         $message = $this->_getMessageOrError($messageId);
         $conversation = $this->_getConversationOrError($message['conversation_id']);
 
         $messages = array($message['message_id'] => $message);
         $messages = $this->_getConversationModel()->getAndMergeAttachmentsIntoConversationMessages($messages);
+        $messages = $this->_getConversationModel()->prepareApiDataForMessages($messages, $conversation);
+
         $message = reset($messages);
+        $attachments = isset($message['attachments']) ? $message['attachments'] : array();
 
-        if (empty($attachmentId)) {
-            $message = $this->_getConversationModel()->prepareApiDataForMessage($message, $conversation);
-            $attachments = isset($message['attachments']) ? $message['attachments'] : array();
-
-            $data = array('attachments' => $this->_filterDataMany($attachments));
-        } else {
-            $attachments = isset($message['attachments']) ? $message['attachments'] : array();
-            $attachment = false;
-
-            foreach ($attachments as $_attachment) {
-                if ($_attachment['attachment_id'] == $attachmentId) {
-                    $attachment = $_attachment;
-                }
-            }
-
-            if (!empty($attachment)) {
-                return $this->_getAttachmentHelper()->doData($attachment);
-            } else {
-                return $this->responseError(new XenForo_Phrase('requested_attachment_not_found'), 404);
-            }
-        }
+        $data = array('attachments' => $this->_filterDataMany($attachments));
 
         return $this->responseData('bdApi_ViewApi_ConversationMessage_Attachments', $data);
     }
@@ -250,7 +237,9 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
             return $response;
         }
 
-        $data = array('attachment' => $this->_filterDataSingle($this->_getConversationModel()->prepareApiDataForAttachment($contentData, $response, $hash)));
+        $data = array('attachment' => $this->_filterDataSingle(
+            $this->_getConversationModel()->prepareApiDataForAttachment(
+                $response, $contentData, $contentData, $hash)));
 
         return $this->responseData('bdApi_ViewApi_ConversationMessage_Attachments', $data);
     }
@@ -323,7 +312,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 
     /**
      *
-     * @return bdApi_XenForo_Model_Conversation
+     * @return bdApi_Extend_Model_Conversation
      */
     protected function _getConversationModel()
     {

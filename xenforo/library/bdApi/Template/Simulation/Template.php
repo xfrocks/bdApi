@@ -3,9 +3,16 @@
 class bdApi_Template_Simulation_Template extends XenForo_Template_Public
 {
     public static $bdApi_visitor = null;
+    public static $bdApi_mapping = array(
+        'bb_code_tag_attach' => 'bdapi_bb_code_tag_attach',
+    );
 
     public function __construct($templateName, array $params = array())
     {
+        if (isset(self::$bdApi_mapping[$templateName])) {
+            $templateName = self::$bdApi_mapping[$templateName];
+        }
+
         if (self::$bdApi_visitor !== null) {
             $params['visitor'] = self::$bdApi_visitor;
         }

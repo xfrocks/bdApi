@@ -23,6 +23,7 @@ class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
 
         self::addRoute($routes, 'oauth', 'bdApi_Route_PrefixApi_OAuth');
 
+        self::addRoute($routes, 'attachments', 'bdApi_Route_PrefixApi_Attachments', 'data_only');
         self::addRoute($routes, 'categories', 'bdApi_Route_PrefixApi_Categories', 'data_only');
         self::addRoute($routes, 'conversations', 'bdApi_Route_PrefixApi_Conversations', 'data_only');
         self::addRoute($routes, 'conversation-messages', 'bdApi_Route_PrefixApi_ConversationMessages', 'data_only');

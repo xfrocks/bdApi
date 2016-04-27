@@ -1528,6 +1528,31 @@ step=3600</edit_format_params>
 		'primaryContent'}" href="{xen:link account/api}">{xen:phrase bdapi_home}</a></li>
 </xen:if>]]></template>
     <template title="bdapi_alert_ping_message" version_id="71" version_string="1.4.3c"><![CDATA[{xen:helper username, $user, 'subject'}: {$extra.message}]]></template>
+    <template title="bdapi_bb_code_tag_attach" version_id="1040706" version_string="1.4.7"><![CDATA[<xen:if is="!{$validAttachment}">
+
+	<a href="{xen:link attachments, $attachment}" target="_blank"><xen:comment>
+		</xen:comment>{xen:phrase view_attachment_x, 'name={$attachment.attachment_id}'}</a>
+
+<xen:elseif is="!{$attachment.thumbnailUrl}" />
+
+	<a href="{xen:helper api_buildLink, attachments, $attachment}" target="_blank"<xen:comment>
+		</xen:comment> data-permalink="{xen:link attachments, $attachment}"><xen:comment>
+		</xen:comment>{xen:phrase view_attachment_x, 'name={$attachment.filename}'}</a>
+
+<xen:elseif is="{$canView}" />
+
+	<img src="{xen:helper api_buildLink, attachments, $attachment}" alt="{$attachment.filename}"<xen:comment>
+		</xen:comment> data-permalink="{xen:link attachments, $attachment}" />
+
+<xen:else />
+
+	<a href="{xen:link attachments, $attachment}" target="_blank"<xen:comment>
+		</xen:comment> data-permalink="{xen:link attachments, $attachment}"><xen:comment>
+		</xen:comment><img src="{$attachment.thumbnailUrl}" alt="{$attachment.filename}" /></a>
+
+</xen:if>
+
+<xen:edithint template="bb_code_tag_attach" />]]></template>
     <template title="bdapi_error_authorize_guest" version_id="77" version_string="1.4.5"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
 <xen:set var="$text">

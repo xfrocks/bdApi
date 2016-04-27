@@ -381,7 +381,9 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         $contentData['post_id'] = 0;
-        $data = array('attachment' => $this->_getPostModel()->prepareApiDataForAttachment($response, $contentData, $contentData, $contentData, $hash));
+        $data = array('attachment' => $this->_filterDataSingle(
+            $this->_getPostModel()->prepareApiDataForAttachment(
+                $response, $contentData, $contentData, $contentData, $hash)));
 
         return $this->responseData('bdApi_ViewApi_Thread_Attachments', $data);
     }
