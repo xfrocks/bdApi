@@ -1535,19 +1535,18 @@ step=3600</edit_format_params>
 
 <xen:elseif is="!{$attachment.thumbnailUrl}" />
 
-	<a href="{xen:helper api_buildLink, attachments, $attachment}" target="_blank"<xen:comment>
+	<a href="{xen:helper api_buildLink, attachments/data, $attachment}" target="_blank"<xen:comment>
 		</xen:comment> data-permalink="{xen:link attachments, $attachment}"><xen:comment>
 		</xen:comment>{xen:phrase view_attachment_x, 'name={$attachment.filename}'}</a>
 
 <xen:elseif is="{$canView}" />
 
-	<img src="{xen:helper api_buildLink, attachments, $attachment}" alt="{$attachment.filename}"<xen:comment>
-		</xen:comment> data-permalink="{xen:link attachments, $attachment}" />
+	<img src="{xen:helper api_buildLink, attachments/data, $attachment}"<xen:comment>
+		</xen:comment> alt="{$attachment.filename}" data-permalink="{xen:link attachments, $attachment}" />
 
 <xen:else />
 
-	<a href="{xen:link attachments, $attachment}" target="_blank"<xen:comment>
-		</xen:comment> data-permalink="{xen:link attachments, $attachment}"><xen:comment>
+	<a href="{xen:link attachments, $attachment}" target="_blank"><xen:comment>
 		</xen:comment><img src="{$attachment.thumbnailUrl}" alt="{$attachment.filename}" /></a>
 
 </xen:if>
