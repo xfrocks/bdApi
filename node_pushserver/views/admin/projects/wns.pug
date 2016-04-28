@@ -1,0 +1,20 @@
+extends ../../layout/default.pug
+
+block title
+  title New WNS Project
+
+block content
+  h1 #{prefix}/projects/wns
+
+  form(action=prefix + "/projects/wns", method="POST")
+    div.form-group
+      label(for="ctrl_package_id") Package ID
+      input.form-control#ctrl_package_id(type="text", name="package_id", placeholder="Identifier", value=query.package_id)
+    div.form-group
+      label(for="ctrl_client_id") Client ID
+      input.form-control#ctrl_client_id(type="text", name="client_id", placeholder="Identifier", value=query.client_id)
+    div.form-group
+      label(for="ctrl_client_secret") Client Secret
+      input.form-control#ctrl_client_secret(type="text", name="client_secret", placeholder="Secret", value=query.client_secret)
+
+    button.btn.btn-default(type="submit") Submit

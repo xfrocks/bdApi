@@ -1,0 +1,17 @@
+extends ../../layout/default.pug
+
+block title
+  title New GCM Project
+
+block content
+  h1 #{prefix}/projects/gcm
+
+  form(action=prefix + "/projects/gcm", method="POST")
+    div.form-group
+      label(for="ctrl_package_id") Package ID
+      input.form-control#ctrl_package_id(type="text", name="package_id", placeholder="Identifier", value=query.package_id)
+    div.form-group
+      label(for="ctrl_api_key") API Key
+      input.form-control#ctrl_api_key(type="text", name="api_key", placeholder="Key", value=query.api_key)
+
+    button.btn.btn-default(type="submit") Submit

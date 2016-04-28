@@ -96,6 +96,15 @@ admin.setupProjects = function(app, prefix, projectDb) {
               });
       });
 
+    app.get(prefix + '/projects/gcm', function(req, res) {
+        var parsed = url.parse(req.url, true);
+
+        return res.render('admin/projects/gcm', {
+            prefix: prefix,
+            query: parsed.query
+        });
+    });
+
     app.post(prefix + '/projects/gcm', function(req, res) {
         if (!req.body.package_id ||
             !req.body.api_key) {
@@ -114,6 +123,15 @@ admin.setupProjects = function(app, prefix, projectDb) {
                 }
               });
       });
+
+    app.get(prefix + '/projects/wns', function(req, res) {
+        var parsed = url.parse(req.url, true);
+
+        return res.render('admin/projects/wns', {
+            prefix: prefix,
+            query: parsed.query
+        });
+    });
 
     app.post(prefix + '/projects/wns', function(req, res) {
         if (!req.body.package_id ||
