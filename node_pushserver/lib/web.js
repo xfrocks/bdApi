@@ -12,6 +12,9 @@ app.use(compression({}));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
+app.set('view engine', 'pug');
+app.use('/bs', express.static(__dirname + '/../node_modules/bootstrap/dist'));
+
 web._app = app;
 web.start = function(port, deviceDb, projectDb, pushQueue, adminSections) {
     require('./web/pubhubsubbub').setup(app, '', deviceDb, pushQueue);

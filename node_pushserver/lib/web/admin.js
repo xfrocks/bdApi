@@ -4,6 +4,7 @@ var admin = exports;
 var basicAuth = require('basic-auth');
 var debug = require('debug')('pushserver:web:admin');
 var _ = require('lodash');
+var url = require('url');
 
 var sections = {};
 
@@ -58,6 +59,15 @@ admin.setup = function(app, prefix, username, password, projectDb, _sections) {
 
 admin.setupProjects = function(app, prefix, projectDb) {
     sections[prefix].push('projects');
+
+    app.get(prefix + '/projects/apn', function(req, res) {
+        var parsed = url.parse(req.url, true);
+
+        return res.render('admin/projects/apn', {
+            prefix: prefix,
+            query: parsed.query
+          });
+      });
 
     app.post(prefix + '/projects/apn', function(req, res) {
         if (!req.body.app_id ||
