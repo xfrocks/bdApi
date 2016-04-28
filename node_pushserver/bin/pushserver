@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+
+'use strict';
+
+var debug = require('debug')('pushserver:app');
+var config = require('../lib/config');
+
+debug('Loading web…');
+var web = require('../lib/web');
+var adminSections = {};
+
+debug('Loading db…');
+var db = require('../lib/db');
+if (config.db.web) {
+    adminSections.db = db.expressMiddleware();
+}
+
+debug('Loading push queue…');
+var pushQueue = require('../lib/pushQueue');
+var kue = require('kue');
+var pushKue = kue.createQueue({
+    disableSearch: true,
+    jobEvents: false,
+    redis: config.redis
+});
+pushKue.watchStuckJobs(1000);
+pushQueue.setup(pushKue, require('../lib/pusher').setup(
+    require('apn'), require('node-gcm'), require('wns')), db.projects);
+if (config.pushQueue.web) {
+    adminSections.queue = kue.app;
+}
+
+debug('Starting…');
+web.start(config.web.port, db.devices, db.projects, pushQueue, adminSections);

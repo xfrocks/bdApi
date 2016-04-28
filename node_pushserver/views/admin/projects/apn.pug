@@ -1,0 +1,29 @@
+extends ../../layout/default.pug
+
+block title
+  title New APN Project
+
+block content
+  h1 #{prefix}/projects/apn
+
+  form(action=prefix + "/projects/apn", method="POST")
+    div.form-group
+      label(for="ctrl_app_id") Application ID
+      input.form-control#ctrl_app_id(type="text", name="app_id", placeholder="Identifier", value=query.app_id)
+    div.form-group
+      label(for="ctrl_cert") RSA Certificate
+      textarea.form-control#ctrl_cert(name="cert", placeholder="Certificate Plaintext", rows="5")= query.cert
+    div.form-group
+      label(for="ctrl_key") RSA Key
+      textarea.form-control#ctrl_key(name="key", placeholder="Key Plaintext", rows="5")= query.key
+    div.form-group
+      label(for="ctrl_passphrase") Key Passphrase
+      input.form-control#ctrl_passphrase(type="text", name="other_options[passphrase]",
+        placeholder="Passphrase", value=query["other_options[passphrase]"])
+    div.checkbox
+      label
+        input(type="checkbox", name="other_options[address]", value="gateway.sandbox.push.apple.com",
+          checked=(query["other_options[address]"] === "gateway.sandbox.push.apple.com") ? "checked" : undefined)
+        | Use Sandbox Gateway
+
+    button.btn.btn-default(type="submit") Submit

@@ -1,1 +1,1 @@
-web: node bin/pushserver.js
+web: node bin/pushserver
