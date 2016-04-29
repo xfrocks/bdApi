@@ -150,7 +150,9 @@ class bdApi_Link extends _XenForo_Link
         $boardUrlParsed = parse_url($boardUrl);
 
         $paths['protocol'] = $boardUrlParsed['scheme'];
-        $paths['host'] = $boardUrlParsed['host'] . (isset($boardUrlParsed['port']) ? (':' . $boardUrlParsed) : '');
+        $paths['host'] = $boardUrlParsed['host'] .
+            (isset($boardUrlParsed['port']) ?
+                (':' . $boardUrlParsed['port']) : '');
         $paths['fullBasePath'] = $boardUrl;
         $paths['basePath'] = $boardUrlParsed['path'];
 
