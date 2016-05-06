@@ -5,8 +5,12 @@ if (!defined('ABSPATH')) {
     exit();
 }
 
-function xfac_login_redirect($redirectTo, $redirectToRequested, $wpUser)
-{
+function xfac_login_redirect(
+    $redirectTo,
+    /** @noinspection PhpUnusedParameterInspection */
+    $redirectToRequested,
+    $wpUser
+) {
     $config = xfac_option_getConfig();
 
     if (!defined('XFAC_SYNC_LOGIN_SKIP_REDIRECT') AND !empty($config) AND !empty($wpUser->ID)) {
@@ -24,17 +28,13 @@ function xfac_login_redirect($redirectTo, $redirectToRequested, $wpUser)
     return $redirectTo;
 }
 
-function xfac_login_login_redirect_memberpress($redirectTo, $wpUser)
+function xfac_login_redirect_two_params($redirectTo, $wpUser)
 {
-    // this method is for MemberPress compatibility
-    $redirectTo = xfac_login_redirect($redirectTo, $redirectTo, $wpUser);
-
-    return $redirectTo;
+    return xfac_login_redirect($redirectTo, $redirectTo, $wpUser);
 }
 
 function xfac_login_pmpro_confirmation_url($redirectTo, $wpUserId, $level)
 {
-    // this method is for Paid Membership Pro
     global $current_user;
 
     if (!empty($current_user) && $current_user->ID == $wpUserId) {
@@ -147,12 +147,17 @@ if (!!get_option('xfac_sync_login')) {
 
     xfac_login_redirect_add_filter();
 
-    // s2member removes all filters so we have to add back ours afterwards
+    // MemberPress support
+    add_filter('mepr-process-login-redirect-url', 'xfac_login_redirect_two_params', 10, 2);
+
+    // Paid Membership Pro support
+    add_filter('pmpro_confirmation_url', 'xfac_login_pmpro_confirmation_url', 10, 3);
+
+    // s2member support: removes all filters so we have to add back ours afterwards
     add_action('ws_plugin__s2member_after_remove_login_redirect_filters', 'xfac_login_redirect_add_filter');
 
-    add_filter('mepr-process-login-redirect-url', 'xfac_login_login_redirect_memberpress', 10, 2);
-
-    add_filter('pmpro_confirmation_url', 'xfac_login_pmpro_confirmation_url', 10, 3);
+    // WooCommerce support
+    add_filter('woocommerce_login_redirect', 'xfac_login_login_redirect_memberpress', 10, 2);
 
     add_filter('allowed_redirect_hosts', 'xfac_allowed_redirect_hosts');
     add_action('wp_logout', 'xfac_wp_logout');
