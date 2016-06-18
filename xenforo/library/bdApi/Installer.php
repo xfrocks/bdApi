@@ -289,7 +289,7 @@ class bdApi_Installer
         $db->query('DELETE FROM `xf_content_type_field` WHERE content_type = ?', "api_ping");
         $db->query('DELETE FROM `xf_content_type_field` WHERE content_type = ?', "api_client_content");
 
-        bdApi_ShippableHelper_Updater::onUninstall(bdApi_Option::UPDATER_URL);
+        bdApi_ShippableHelper_Updater::onUninstall();
     }
 
     protected static function _installPhpDemoClient()
