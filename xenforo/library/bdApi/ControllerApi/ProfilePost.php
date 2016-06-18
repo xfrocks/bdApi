@@ -20,9 +20,11 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             $this->_getProfilePostModel()->getFetchOptionsToPrepareApiData()
         );
 
-        $data = array('profile_post' => $this->_filterDataSingle(
-            $this->_getProfilePostModel()->prepareApiDataForProfilePost($profilePost, $user)
-        ));
+        $profilePosts = array($profilePost['profile_post_id'] => $profilePost);
+        $profilePostsData = $this->_prepareProfilePosts($profilePosts, $user);
+        $profilePostData = reset($profilePostsData);
+
+        $data = array('profile_post' => $this->_filterDataSingle($profilePostData));
 
         return $this->responseData('bdApi_ViewApi_ProfilePost_Single', $data);
     }
@@ -41,32 +43,13 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         );
 
         $profilePostsOrdered = array();
-        $profileUserIds = array();
         foreach ($profilePostIds as $profilePostId) {
             if (isset($profilePosts[$profilePostId])) {
                 $profilePostsOrdered[$profilePostId] = $profilePosts[$profilePostId];
-                $profileUserIds[] = $profilePosts[$profilePostId]['profile_user_id'];
             }
         }
 
-        $profileUserIds = array_unique(array_map('intval', $profileUserIds));
-        if (!empty($profileUserIds)) {
-            /** @var XenForo_Model_User $userModel */
-            $userModel = $this->getModelFromCache('XenForo_Model_User');
-            $profileUsers = $userModel->getUsersByIds($profileUserIds, array(
-                'join' => XenForo_Model_User::FETCH_USER_FULL,
-            ));
-        }
-
-        $profilePostsData = array();
-        foreach ($profilePostsOrdered as $profilePost) {
-            if (!isset($profileUsers[$profilePost['profile_user_id']])) {
-                continue;
-            }
-            $profileUserRef = $profileUsers[$profilePost['profile_user_id']];
-
-            $profilePostsData[] = $this->_getProfilePostModel()->prepareApiDataForProfilePost($profilePost, $profileUserRef);
-        }
+        $profilePostsData = $this->_prepareProfilePosts($profilePostsOrdered);
 
         $data = array(
             'profile_posts' => $this->_filterDataMany($profilePostsData),
@@ -538,6 +521,69 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         $reportModel->reportContent('profile_post', $profilePost, $message);
 
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
+
+    protected function _prepareProfilePosts(array $profilePosts, array $timelineUser = null)
+    {
+        // check for $user being null because we only prepare `profile_post`.`timeline_user` for request
+        // of multiple profile posts from different users (likely from actionMultiple)
+        $prepareTimelineUser = (!$this->_isFieldExcluded('timeline_user') && $timelineUser === null);
+
+        $timelineUsers = array();
+        if ($timelineUser !== null) {
+            $timelineUsers[$timelineUser['user_id']] = $timelineUser;
+        }
+
+        $timelineUserIds = array();
+        foreach ($profilePosts as $profilePost) {
+            if (!isset($timelineUsers[$profilePost['profile_user_id']])) {
+                $timelineUserIds[] = $profilePost['profile_user_id'];
+            }
+        }
+        if (!empty($timelineUserIds)) {
+            $timelineUsers += $this->_getUserModel()->getUsersByIds(
+                $timelineUserIds,
+                $this->_getUserModel()->getFetchOptionsToPrepareApiData()
+            );
+        }
+
+        $prepareLatestComments = false;
+        if ($this->_isFieldIncluded('latest_comments')) {
+            $prepareLatestComments = true;
+            $profilePosts = $this->_getProfilePostModel()->addProfilePostCommentsToProfilePosts(
+                $profilePosts, $this->_getProfilePostModel()->getCommentFetchOptionsToPrepareApiData());
+        }
+
+        $profilePostsData = array();
+        foreach ($profilePosts as &$profilePostRef) {
+            if (!isset($timelineUsers[$profilePostRef['profile_user_id']])) {
+                continue;
+            }
+            $timelineUserRef =& $timelineUsers[$profilePostRef['profile_user_id']];
+
+            if (!$this->_getProfilePostModel()->canViewProfilePostAndContainer($profilePostRef, $timelineUserRef)) {
+                continue;
+            }
+
+            $profilePostData = $this->_getProfilePostModel()
+                ->prepareApiDataForProfilePost($profilePostRef, $timelineUserRef);
+
+            if ($prepareTimelineUser) {
+                $profilePostData['timeline_user'] = $this->_getUserModel()->prepareApiDataForUser($timelineUserRef);
+            }
+
+            if ($prepareLatestComments) {
+                $profilePostData['latest_comments'] = array();
+                if (!empty($profilePostRef['comments'])) {
+                    $profilePostData['latest_comments'] = $this->_getProfilePostModel()
+                        ->prepareApiDataForComments($profilePostRef['comments'], $profilePostRef, $timelineUserRef);
+                }
+            }
+
+            $profilePostsData[] = $profilePostData;
+        }
+
+        return $profilePostsData;
     }
 
     /**

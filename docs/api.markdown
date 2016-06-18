@@ -1710,6 +1710,10 @@ Detail information of a profile post. Since forum-2015042001.
             post_is_published: (boolean),
             post_is_deleted: (boolean),
             post_is_liked: (boolean),
+            latest_comments: [ # must be in fields_include to work, since forum-2016061802
+                (profile_post > comment),
+                ...
+            ],
             links: {
                 permalink: (uri),
                 detail: (uri),

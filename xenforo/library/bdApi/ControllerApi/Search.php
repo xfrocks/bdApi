@@ -75,6 +75,12 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
         switch ($search['search_type']) {
             case self::OPTION_SEARCH_TYPE_USER_TIMELINE:
+                foreach ($data['data'] as &$profilePostDataRef) {
+                    if (isset($profilePostDataRef['timeline_user'])) {
+                        unset($profilePostDataRef['timeline_user']);
+                    }
+                }
+
                 if (!$this->_isFieldExcluded('user')
                     && !empty($search['searchConstraints']['user'])
                     && is_array($search['searchConstraints']['user'])
