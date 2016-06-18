@@ -62,28 +62,7 @@ class bdApi_Listener
 
     public static function init_dependencies(XenForo_Dependencies_Abstract $dependencies, array $data)
     {
-        // initializes the core template helper object
-        // in the future, we may have different template helpers for public/admin/api context
-        $templateHelper = bdApi_Template_Helper_Core::getInstance();
 
-        // register the helper methods in the format `bdApi_<method_name>`
-        $templateHelperReflector = new ReflectionClass(get_class($templateHelper));
-        $methods = $templateHelperReflector->getMethods();
-        foreach ($methods as $method) {
-            if (!($method->getModifiers() & ReflectionMethod::IS_PUBLIC)
-                || ($method->getModifiers() & ReflectionMethod::IS_STATIC)
-            ) {
-                // ignore restricted or static methods
-                continue;
-            }
-
-            $methodName = $method->getName();
-            $helperCallbackName = utf8_strtolower('api_' . $methodName);
-            XenForo_Template_Helper_Core::$helperCallbacks[$helperCallbackName] = array(
-                $templateHelper,
-                $methodName
-            );
-        }
 
         XenForo_CacheRebuilder_Abstract::$builders['bdApi_CacheRebuilder_ClientContentDeleteAll']
             = 'bdApi_CacheRebuilder_ClientContentDeleteAll';
@@ -93,6 +72,14 @@ class bdApi_Listener
 
     public static function template_create($templateName, array &$params, XenForo_Template_Abstract $template)
     {
+        static $initTemplateHelper = false;
+        if ($initTemplateHelper === false) {
+            $initTemplateHelper = true;
+            if ($template instanceof XenForo_Template_Public) {
+                bdApi_Template_Helper_Core::initTemplateHelpers();
+            }
+        }
+
         if ($templateName == 'account_wrapper') {
             $template->preloadTemplate('bdapi_account_wrapper_sidebar');
         } elseif ($templateName == 'PAGE_CONTAINER') {
