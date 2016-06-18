@@ -228,15 +228,9 @@ class bdApi_Session extends XenForo_Session
         if (!empty($requestLocale)
             && $requestLanguageId > 0
         ) {
-            if ($visitor['user_id'] == 0) {
-                if ($requestLanguageId != XenForo_Application::getOptions()->get('defaultLanguageId')) {
-                    $session->set('requestLocale', $requestLocale);
-                }
-            } else {
-                if ($requestLanguageId != $visitor['language_id']) {
-                    $session->set('requestLocale', $requestLocale);
-                }
-            }
+            $languages = XenForo_Application::get('languages');
+            $requestLanguage = $languages[$requestLanguageId];
+            $session->set('requestLocale', $requestLanguage['language_code']);
         }
 
         return $session;

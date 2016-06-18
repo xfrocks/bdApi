@@ -44,12 +44,9 @@ class bdApi_Link extends _XenForo_Link
         if (!empty($session)) {
             // auto appends locale param from session
             if (!isset($extraParams['locale'])) {
-                $locale = $session->get('requestLocale');
-                if (!empty($locale)) {
-                    $timestamp = time() + 86400;
-                    $extraParams['_apiLanguageId'] = sprintf('%s %s', $timestamp,
-                        bdApi_Crypt::encryptTypeOne($session->get('languageId'), $timestamp)
-                    );
+                $requestLocale = $session->get('requestLocale');
+                if (!empty($requestLocale)) {
+                    $extraParams['locale'] = $requestLocale;
                 }
             }
         }

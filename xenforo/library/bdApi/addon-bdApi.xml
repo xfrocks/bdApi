@@ -615,7 +615,6 @@ Arguments:
   </code_events>
   <code_event_listeners>
     <listener event_id="file_health_check" execute_order="5" callback_class="bdApi_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
-    <listener event_id="front_controller_pre_route" execute_order="5" callback_class="bdApi_Listener" callback_method="front_controller_pre_route" active="1" hint="" description=""/>
     <listener event_id="init_dependencies" execute_order="5" callback_class="bdApi_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
     <listener event_id="load_class_controller" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="load_class_datawriter" execute_order="5" callback_class="bdApi_Listener" callback_method="load_class" active="1" hint="" description=""/>
