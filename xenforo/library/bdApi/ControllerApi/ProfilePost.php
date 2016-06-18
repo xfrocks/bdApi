@@ -549,7 +549,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_User
+     * @return bdApi_Extend_Model_User
      */
     protected function _getUserModel()
     {

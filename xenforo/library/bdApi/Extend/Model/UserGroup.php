@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_UserGroup extends XFCP_bdApi_XenForo_Model_UserGroup
+class bdApi_Extend_Model_UserGroup extends XFCP_bdApi_Extend_Model_UserGroup
 {
     public function bdApi_getAllUserGroupsCached()
     {

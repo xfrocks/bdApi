@@ -1,6 +1,6 @@
 <?php
 
-class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
+class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 {
     const FETCH_IS_FOLLOWED = 'bdApi_followedUserId';
     const ORDER_USER_ID = 'bdApi_user_id';
@@ -38,7 +38,7 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
     {
         $visitor = XenForo_Visitor::getInstance();
         $session = bdApi_Data_Helper_Core::safeGetSession();
-        /* @var $userGroupModel bdApi_XenForo_Model_UserGroup */
+        /* @var $userGroupModel bdApi_Extend_Model_UserGroup */
         $userGroupModel = $this->getModelFromCache('XenForo_Model_UserGroup');
         /* @var $conversationModel XenForo_Model_Conversation */
         $conversationModel = $this->getModelFromCache('XenForo_Model_Conversation');
@@ -243,7 +243,7 @@ class bdApi_XenForo_Model_User extends XFCP_bdApi_XenForo_Model_User
         }
 
         if (!empty($user['custom_fields'])) {
-            /** @var bdApi_XenForo_Model_UserField $fieldModel */
+            /** @var bdApi_Extend_Model_UserField $fieldModel */
             $fieldModel = $this->_getFieldModel();
             $fields = $fieldModel->bdApi_getUserFields();
             $values = unserialize($user['custom_fields']);

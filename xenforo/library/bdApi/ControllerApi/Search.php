@@ -82,7 +82,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
                 ) {
                     $userId = reset($search['searchConstraints']['user']);
 
-                    /** @var bdApi_XenForo_Model_User $userModel */
+                    /** @var bdApi_Extend_Model_User $userModel */
                     $userModel = $this->getModelFromCache('XenForo_Model_User');
                     $user = $userModel->getUserById($userId, $userModel->getFetchOptionsToPrepareApiData());
                     $data['user'] = $this->_filterDataSingle($userModel->prepareApiDataForUser($user), array('user'));

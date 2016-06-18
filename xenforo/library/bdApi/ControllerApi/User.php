@@ -28,7 +28,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $fetchOptions = array(
             'limit' => $limit,
             'page' => $page,
-            'order' => bdApi_XenForo_Model_User::ORDER_USER_ID,
+            'order' => bdApi_Extend_Model_User::ORDER_USER_ID,
         );
 
         $users = $userModel->getUsers($conditions, $userModel->getFetchOptionsToPrepareApiData($fetchOptions));
@@ -746,7 +746,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_User
+     * @return bdApi_Extend_Model_User
      */
     protected function _getUserModel()
     {
@@ -754,7 +754,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     * @return bdApi_XenForo_Model_UserGroup
+     * @return bdApi_Extend_Model_UserGroup
      */
     protected function _getUserGroupModel()
     {

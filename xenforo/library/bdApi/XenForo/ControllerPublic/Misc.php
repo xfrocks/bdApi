@@ -8,8 +8,6 @@ class bdApi_XenForo_ControllerPublic_Misc extends XFCP_bdApi_XenForo_ControllerP
         $clientModel = $this->getModelFromCache('bdApi_Model_Client');
         /* @var $userScopeModel bdApi_Model_UserScope */
         $userScopeModel = $this->getModelFromCache('bdApi_Model_UserScope');
-        /* @var $userModel bdApi_XenForo_Model_User */
-        $userModel = $this->getModelFromCache('XenForo_Model_User');
 
         $callback = $this->_input->filterSingle('callback', XenForo_Input::STRING);
         $cmd = $this->_input->filterSingle('cmd', XenForo_Input::STRING);
@@ -65,7 +63,8 @@ class bdApi_XenForo_ControllerPublic_Misc extends XFCP_bdApi_XenForo_ControllerP
                             $session = new bdApi_Session();
                             $session->fakeStart($client, $visitorObj, $requestedScopesAccepted);
 
-                            $visitorPrepared = $userModel->prepareApiDataForUser($visitorArray);
+                            $visitorPrepared = bdApi_Data_Helper_Core::filter($visitorArray,
+                                $this->_getFilterPublicKeysForVisitorData());
                             $data = array_merge($visitorPrepared, $data);
                         } else {
                             // just checking for connection status, return user_id only
@@ -90,6 +89,16 @@ class bdApi_XenForo_ControllerPublic_Misc extends XFCP_bdApi_XenForo_ControllerP
         $this->_routeMatch->setResponseType('raw');
 
         return $this->responseView('bdApi_ViewPublic_Misc_Api_Data', '', $viewParams);
+    }
+
+    protected function _getFilterPublicKeysForVisitorData()
+    {
+        return array(
+            'user_id' => 'user_id',
+            'username' => 'username',
+            'alerts_unread' => 'user_unread_notification_count',
+            'conversations_unread' => 'user_unread_conversation_count',
+        );
     }
 
     protected function _checkCsrf($action)

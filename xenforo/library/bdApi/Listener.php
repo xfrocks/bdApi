@@ -20,9 +20,6 @@ class bdApi_Listener
 
             'XenForo_Model_Alert',
             'XenForo_Model_Conversation',
-            'XenForo_Model_User',
-            'XenForo_Model_UserField',
-            'XenForo_Model_UserGroup',
         );
 
         if (in_array($class, $classes)) {
@@ -50,6 +47,9 @@ class bdApi_Listener
             'XenForo_Model_Thread',
             'XenForo_Model_ThreadPrefix',
             'XenForo_Model_ThreadWatch',
+            'XenForo_Model_User',
+            'XenForo_Model_UserField',
+            'XenForo_Model_UserGroup',
             'XenForo_Model_UserIgnore',
 
             'XenForo_Visitor',
