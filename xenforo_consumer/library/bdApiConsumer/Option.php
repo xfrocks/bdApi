@@ -4,8 +4,6 @@ class bdApiConsumer_Option
 {
     const CONFIG_TRACK_AUTHORIZE_URL_STATE = 'bdApiConsumer_trackAuthorizeUrlState';
 
-    const UPDATER_URL = 'https://xfrocks.com/api/index.php?updater';
-
     protected static $_providers = null;
     protected static $_activated = null;
     protected static $_showButtons = null;

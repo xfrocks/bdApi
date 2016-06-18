@@ -88,7 +88,7 @@ class bdApiConsumer_Installer
         $contentTypeModel = XenForo_Model::create('XenForo_Model_ContentType');
         $contentTypeModel->rebuildContentTypeCache();
 
-        bdApiConsumer_ShippableHelper_Updater::onUninstall(bdApiConsumer_Option::UPDATER_URL);
+        bdApiConsumer_ShippableHelper_Updater::onUninstall();
     }
 
 }
