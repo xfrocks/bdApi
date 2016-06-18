@@ -132,7 +132,13 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             }
         }
 
-        $threadsData = $this->_prepareThreads($threads);
+        $theForum = array();
+        if (!$this->_isFieldExcluded('forum') AND count($forumIdArray) == 1) {
+            $theForum = $this->_getForumModel()->getForumById(reset($forumIdArray),
+                $this->_getForumModel()->getFetchOptionsToPrepareApiData());
+        }
+
+        $threadsData = $this->_prepareThreads($threads, $theForum);
 
         $total = $this->_getThreadModel()->countThreads($conditions);
 
@@ -141,12 +147,9 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             'threads_total' => $total,
         );
 
-        if (!$this->_isFieldExcluded('forum') AND count($forumIdArray) == 1) {
-            $forumModel = $this->_getForumModel();
-            $forum = $forumModel->getForumById(reset($forumIdArray), $forumModel->getFetchOptionsToPrepareApiData());
-            if (!empty($forum)) {
-                $data['forum'] = $this->_filterDataSingle($forumModel->prepareApiDataForForum($forum), array('forum'));
-            }
+        if (!empty($theForum)) {
+            $data['forum'] = $this->_filterDataSingle($this->_getForumModel()
+                ->prepareApiDataForForum($theForum), array('forum'));
         }
 
         bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'threads', array(), $pageNavParams);
@@ -158,13 +161,14 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     {
         $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
 
-        list($thread,) = $this->_getForumThreadPostHelper()->assertThreadValidAndViewable(
+        list($thread, $forum) = $this->_getForumThreadPostHelper()->assertThreadValidAndViewable(
             $threadId,
-            $this->_getThreadModel()->getFetchOptionsToPrepareApiData()
+            $this->_getThreadModel()->getFetchOptionsToPrepareApiData(),
+            $this->_getForumModel()->getFetchOptionsToPrepareApiData()
         );
 
         $threads = array($threadId => $thread);
-        $threadsData = $this->_prepareThreads($threads);
+        $threadsData = $this->_prepareThreads($threads, $forum);
 
         $data = array('thread' => $this->_filterDataSingle(reset($threadsData)));
 
@@ -382,7 +386,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
         $contentData['post_id'] = 0;
         $data = array('attachment' => $this->_filterDataSingle(
-            $this->_getPostModel()->prepareApiDataForAttachment(
+                $this->_getPostModel()->prepareApiDataForAttachment(
                 $response, $contentData, $contentData, $contentData, $hash)));
 
         return $this->responseData('bdApi_ViewApi_Thread_Attachments', $data);
@@ -627,15 +631,26 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         return $this->_getNewOrRecentResponse('threads_recent', $threadIds);
     }
 
-    protected function _prepareThreads(array $threads)
+    protected function _prepareThreads(array $threads, array $forum = null)
     {
-        $forumIds = array();
+        // check for $forum being null because we only prepare `thread`.`forum` for request
+        // of multiple threads from different forums (likely from actionMultiple)
+        $prepareThreadForum = (!$this->_isFieldExcluded('forum') && $forum === null);
+
         $forums = array();
-        foreach ($threads as $thread) {
-            $forumIds[$thread['node_id']] = true;
+        if (!empty($forum)) {
+            $forums[$forum['node_id']] = $forum;
+        }
+
+        $forumIds = array();
+        foreach ($threads as $threadRef) {
+            if (!isset($forums[$threadRef['node_id']])) {
+                $forumIds[] = $threadRef['node_id'];
+            }
         }
         if (!empty($forumIds)) {
-            $forums = $this->_getForumModel()->getForumsByIds(array_keys($forumIds));
+            $forums += $this->_getForumModel()->getForumsByIds($forumIds,
+                $this->_getForumModel()->getFetchOptionsToPrepareApiData());
         }
 
         $visitor = XenForo_Visitor::getInstance();
@@ -644,52 +659,45 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             $visitor->setNodePermissions($nodeId, $permissions);
         }
 
-        foreach (array_keys($threads) as $threadId) {
-            if (!empty($forums[$threads[$threadId]['node_id']])) {
-                $threads[$threadId]['forum'] = $forums[$threads[$threadId]['node_id']];
-            } else {
-                unset($threads[$threadId]);
-                continue;
-            }
-
-            if (!$this->_getThreadModel()->canViewThreadAndContainer($threads[$threadId], $threads[$threadId]['forum'])) {
-                unset($threads[$threadId]);
-                continue;
-            }
-        }
-
         $firstPostIds = array();
         $lastPostIds = array();
+        $latestPostIds = array();
         $pollThreadIds = array();
-        foreach ($threads as $threadId => $thread) {
+        foreach ($threads as $threadId => $threadRef) {
             if (!$this->_isFieldExcluded('first_post')) {
-                $firstPostIds[$threadId] = $thread['first_post_id'];
+                $firstPostIds[$threadId] = $threadRef['first_post_id'];
             }
 
             if ($this->_isFieldIncluded('last_post')
                 && (!isset($firstPostIds[$threadId])
-                    || $thread['last_post_id'] != $thread['first_post_id'])
+                    || $threadRef['last_post_id'] != $threadRef['first_post_id'])
             ) {
-                $lastPostIds[$threadId] = $thread['last_post_id'];
+                $lastPostIds[$threadId] = $threadRef['last_post_id'];
             }
 
             if (!$this->_isFieldExcluded('poll')
-                && $thread['discussion_type'] === 'poll'
+                && $threadRef['discussion_type'] === 'poll'
             ) {
                 $pollThreadIds[] = $threadId;
             }
         }
 
+        if ($this->_isFieldIncluded('latest_posts')) {
+            $latestPostIds = $this->_getThreadModel()->bdApi_getLatestPostIds(array_keys($threads));
+        }
+
         $posts = array();
         if (!empty($firstPostIds)
             || !empty($lastPostIds)
+            || !empty($latestPostIds)
         ) {
             $posts = $this->_getPostModel()->getPostsByIds(
-                array_merge(array_values($firstPostIds), array_values($lastPostIds)),
+                array_merge(array_values($firstPostIds), array_values($lastPostIds), $latestPostIds),
                 $this->_getPostModel()->getFetchOptionsToPrepareApiData());
 
             if ((!empty($firstPostIds) && !$this->_isFieldExcluded('first_post.attachments'))
                 || (!empty($lastPostIds) && !$this->_isFieldExcluded('last_post.attachments'))
+                || (!empty($latestPostIds) && !$this->_isFieldExcluded('latest_posts.*.attachments'))
             ) {
                 $posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
             }
@@ -701,22 +709,46 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         $threadsData = array();
-        foreach ($threads as $threadId => $thread) {
+        foreach ($threads as &$threadRef) {
+            if (!isset($forums[$threadRef['node_id']])) {
+                continue;
+            }
+            $forumRef =& $forums[$threadRef['node_id']];
+
             $firstPost = array();
-            if (isset($firstPostIds[$threadId])
-                && isset($posts[$thread['first_post_id']])
+            if (!empty($firstPostIds)
+                && isset($posts[$threadRef['first_post_id']])
             ) {
-                $firstPost = $posts[$thread['first_post_id']];
+                $firstPost = $posts[$threadRef['first_post_id']];
             }
 
-            $threadData = $this->_getThreadModel()->prepareApiDataForThread($thread, $thread['forum'], $firstPost);
+            $threadData = $this->_getThreadModel()->prepareApiDataForThread($threadRef, $forumRef, $firstPost);
 
-            if (isset($lastPostIds[$threadId])
-                && isset($posts[$thread['last_post_id']])
+            if ($prepareThreadForum) {
+                $threadData['forum'] = $this->_getForumModel()->prepareApiDataForForum($forumRef);
+            }
+
+            if (!empty($latestPostIds)) {
+                $threadData['latest_posts'] = array();
+                foreach ($posts as $post) {
+                    if ($post['thread_id'] != $threadRef['thread_id']) {
+                        continue;
+                    }
+
+                    if (!empty($firstPost)
+                        && $post['post_id'] == $firstPost['post_id']
+                    ) {
+                        continue;
+                    }
+
+                    $threadData['latest_posts'][] = $this->_getPostModel()
+                        ->prepareApiDataForPost($post, $threadRef, $forumRef);
+                }
+            } elseif (!empty($lastPostIds)
+                && isset($posts[$threadRef['last_post_id']])
             ) {
-                $postModel = $this->_getPostModel();
-                $threadData['last_post'] = $postModel->prepareApiDataForPost(
-                    $posts[$thread['last_post_id']], $thread, $thread['forum']);
+                $threadData['last_post'] = $this->_getPostModel()->prepareApiDataForPost(
+                    $posts[$threadRef['last_post_id']], $threadRef, $forumRef);
             }
 
             $threadsData[] = $threadData;

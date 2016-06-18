@@ -5,6 +5,33 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
     protected $_bdApi_polls = array();
     protected $_bdApi_limitQueryResults_nodeId = false;
 
+    public function bdApi_getLatestPostIds(array $threadIds, $limit = null)
+    {
+        if (count($threadIds) == 0) {
+            return array();
+        }
+
+        if ($limit === null) {
+            $limit = 3;
+        }
+        $limit = intval($limit);
+        if ($limit === 0) {
+            return array();
+        }
+
+        $postIds = $this->_getDb()->fetchCol('
+            SELECT post_id
+            FROM `xf_post` AS post
+            INNER JOIN `xf_thread` AS thread
+            ON (thread.thread_id = post.thread_id)
+            WHERE post.thread_id IN (' . $this->_getDb()->quote($threadIds) . ')
+                AND position > IF(thread.reply_count >= ' . $limit . ',
+                    thread.reply_count - ' . $limit . ', 0)
+        ');
+
+        return $postIds;
+    }
+
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
     {
         if (empty($fetchOptions['join'])) {

@@ -613,6 +613,10 @@ Detail information of a thread.
             thread_is_followed: (boolean), # since forum-2014052903
             first_post: (post),
             last_post: (post), # must be in fields_include to work, since forum-2015121801
+            latest_posts: [ # must be in fields_include to work, since forum-2016061801
+                (post),
+                ...
+            ],
             thread_prefixes: [ # since forum-2016031001
                 {
                     prefix_id: (int),
