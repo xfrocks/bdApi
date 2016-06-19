@@ -210,7 +210,7 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
     protected function _prepareApiContentDataForSearch_doCustomContents(
         /** @noinspection PhpUnusedParameterInspection */
         $contentType,
-        array $profilePostIds,
+        array $contentIds,
         array $preparedResults,
         array &$data
     ) {
