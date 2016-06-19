@@ -2,6 +2,18 @@
 
 class bdApi_Model_Log extends XenForo_Model
 {
+    protected static $_logging = 1;
+
+    public function pauseLogging()
+    {
+        self::$_logging--;
+    }
+
+    public function resumeLogging()
+    {
+        self::$_logging++;
+    }
+
     public function pruneExpired()
     {
         $days = bdApi_Option::get('logRetentionDays');
@@ -10,8 +22,18 @@ class bdApi_Model_Log extends XenForo_Model
         return $this->_getDb()->query('DELETE FROM xf_bdapi_log WHERE request_date < ?', $cutoff);
     }
 
-    public function logRequest($requestMethod, $requestUri, array $requestData, $responseCode, array $responseOutput, array $bulkSet = array())
-    {
+    public function logRequest(
+        $requestMethod,
+        $requestUri,
+        array $requestData,
+        $responseCode,
+        array $responseOutput,
+        array $bulkSet = array()
+    ) {
+        if (self::$_logging < 1) {
+            return false;
+        }
+
         $days = bdApi_Option::get('logRetentionDays');
         if ($days == 0) {
             return false;
@@ -216,78 +238,47 @@ class bdApi_Model_Log extends XenForo_Model
 
     protected function _filterData(array &$data, $level = 0)
     {
-        static $whitelistedKeys = array(
-            // internal
-            '_exception',
-            '_origRoutePath',
-            '_matchedRoutePath',
-
-            // request
-            'client_id',
-            'client_secret',
-            'redirect_uri',
-            'scope',
-            'grant_type',
-            'username',
-            'code',
-            'refresh_token',
-            'fields_exclude',
-            'fields_include',
-            'facebook_token',
-            'twitter_uri',
-            'twitter_oauth',
-            'google_token',
-            'limit',
-            'oauth_token',
-            'order',
-            'page',
-            'q',
-            'hub.mode',
-            'hub.topic',
-            'hub.challenge',
-            'topic',
-            'action',
-            'object_data',
-            'link',
-            '_retries',
-
-            // response
-            'access_token',
-            'expires_in',
-            'token_type',
-            'refresh_token_expires_in',
-            'user_id',
-            'user_email',
-            'extra_data',
-            'extra_timestamp',
-            'status',
-            'error',
-            'error_description',
-            'error_uri',
-            'message',
-            'redirectType',
-            'redirectMessage',
-            'redirectUri',
-        );
-
         $filtered = array();
 
+        $i = 0;
         foreach ($data as $key => &$value) {
-            if (strpos($key, 0, 1) === '_') {
-                continue;
+            $i++;
+            if ($i === 2) {
+                // only expand the first item in a pure array
+                $keys = array_keys($data);
+                $isNotNumeric = false;
+                foreach ($keys as $_key) {
+                    if (!is_numeric($_key)) {
+                        $isNotNumeric = true;
+                    }
+                }
+                if (!$isNotNumeric) {
+                    $filtered['...'] = count($keys);
+                    return $filtered;
+                }
             }
 
             if (is_array($value)) {
-                if ($level < 2) {
+                if ($level < 3) {
                     $filtered[$key] = $this->_filterData($value, $level + 1);
                 } else {
                     $filtered[$key] = '(array)';
                 }
             } else {
-                if (in_array($key, $whitelistedKeys)) {
-                    $filtered[$key] = strval($value);
-                } elseif (!empty($value)) {
-                    $filtered[$key] = '*';
+                if (is_bool($value)) {
+                    $filtered[$key] = $value;
+                } elseif (is_numeric($value)) {
+                    $filtered[$key] = $value;
+                } else {
+                    $valueAsString = strval($value);
+                    if (strlen($valueAsString) > 0) {
+                        $maxLength = 32;
+                        if (utf8_strlen($valueAsString) > $maxLength) {
+                            $filtered[$key] = utf8_substr($valueAsString, 0, $maxLength - 1) . '…';
+                        } else {
+                            $filtered[$key] = $valueAsString;
+                        }
+                    }
                 }
             }
         }
