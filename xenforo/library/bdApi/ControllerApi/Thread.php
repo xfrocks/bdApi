@@ -722,6 +722,10 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                 $firstPost = $posts[$threadRef['first_post_id']];
             }
 
+            if (!$this->_getThreadModel()->canViewThreadAndContainer($threadRef, $forumRef)) {
+                continue;
+            }
+
             $threadData = $this->_getThreadModel()->prepareApiDataForThread($threadRef, $forumRef, $firstPost);
 
             if ($prepareThreadForum) {
