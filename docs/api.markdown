@@ -1700,6 +1700,7 @@ Detail information of a profile post. Since forum-2015042001.
         profile_post: {
             profile_post_id: (int),
             timeline_user_id: (int),
+            timeline_username: (string), # since forum-2016062002
             poster_user_id: (int),
             poster_username: (string),
             user_is_ignored: (boolean), # since forum-2015072304

@@ -43,6 +43,7 @@ class bdApi_Extend_Model_ProfilePost extends XFCP_bdApi_Extend_Model_ProfilePost
         );
 
         $data = bdApi_Data_Helper_Core::filter($profilePost, $publicKeys);
+        $data['timeline_username'] = $user['username'];
 
         $data['user_is_ignored'] = XenForo_Visitor::getInstance()->isIgnoring($profilePost['user_id']);
 
