@@ -19,7 +19,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
         if ($session->checkScope(bdApi_Model_OAuth2::SCOPE_POST)) {
             $systemInfo = array(
                 // YYYYMMDD and 2 digits number (01-99), allowing maximum 99 revisions/day
-                'api_revision' => 2015121801,
+                'api_revision' => 2016062001,
                 'api_modules' => $this->_getModules(),
             );
         }

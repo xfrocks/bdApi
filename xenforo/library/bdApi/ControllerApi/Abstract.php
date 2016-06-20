@@ -13,6 +13,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
     protected $_fieldsFilterType = false;
     protected $_fieldsFilterInclude = array();
     protected $_fieldsFilterExclude = array();
+    protected $_fieldsFilterExcludeHasWildcards = false;
     protected $_fieldsFilterDefaults = array();
 
     public function actionOptions()
@@ -261,9 +262,19 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         if (count($prefixes)) {
             $pattern = sprintf('%s.%s', implode('.', $prefixes), $field);
         }
+        $wildcardPattern = null;
+        if ($this->_fieldsFilterExcludeHasWildcards) {
+            $wildcardPattern = sprintf('*.%s', $field);
+        }
 
         foreach ($this->_fieldsFilterExclude as $_field) {
             if ($_field === $pattern) {
+                return true;
+            }
+
+            if ($wildcardPattern !== null
+                && $_field === $wildcardPattern
+            ) {
                 return true;
             }
         }
@@ -312,6 +323,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
                 foreach (explode(',', $exclude) as $field) {
                     $field = trim($field);
                     $this->_fieldsFilterExclude[] = $field;
+
+                    if (strpos($field, '*') !== false) {
+                        $this->_fieldsFilterExcludeHasWildcards = true;
+                    }
                 }
             }
         }
