@@ -270,14 +270,18 @@ class bdApi_Model_Log extends XenForo_Model
                 } elseif (is_numeric($value)) {
                     $filtered[$key] = $value;
                 } else {
-                    $valueAsString = strval($value);
-                    if (strlen($valueAsString) > 0) {
-                        $maxLength = 32;
-                        if (utf8_strlen($valueAsString) > $maxLength) {
-                            $filtered[$key] = utf8_substr($valueAsString, 0, $maxLength - 1) . '…';
-                        } else {
-                            $filtered[$key] = $valueAsString;
+                    try {
+                        $valueAsString = strval($value);
+                        if (strlen($valueAsString) > 0) {
+                            $maxLength = 32;
+                            if (utf8_strlen($valueAsString) > $maxLength) {
+                                $filtered[$key] = utf8_substr($valueAsString, 0, $maxLength - 1) . '…';
+                            } else {
+                                $filtered[$key] = $valueAsString;
+                            }
                         }
+                    } catch (Exception $e) {
+                        $filtered[$key] = sprintf('Exception(%s)', $e->getMessage());
                     }
                 }
             }
