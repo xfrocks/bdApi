@@ -9,6 +9,11 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             return $this->responseReroute(__CLASS__, 'single');
         }
 
+        $userIds = $this->_input->filterSingle('user_ids', XenForo_Input::STRING);
+        if (!empty($userIds)) {
+            return $this->responseReroute(__CLASS__, 'multiple');
+        }
+
         $userModel = $this->_getUserModel();
 
         $pageNavParams = array();
@@ -32,11 +37,12 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         );
 
         $users = $userModel->getUsers($conditions, $userModel->getFetchOptionsToPrepareApiData($fetchOptions));
+        $usersData = $this->_prepareUsers($users);
 
         $total = $userModel->countUsers($conditions);
 
         $data = array(
-            'users' => $this->_filterDataMany($userModel->prepareApiDataForUsers($users)),
+            'users' => $this->_filterDataMany($usersData),
             'users_total' => $total,
         );
 
@@ -49,12 +55,42 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     {
         $user = $this->_getUserOrError();
 
-        $data = array(
-            'user' => $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user)),
-            '_user' => $user,
-        );
+        $users = array($user['user_id'] => $user);
+        $usersData = $this->_prepareUsers($users);
+        $userData = reset($usersData);
+
+        $data = array('user' => $this->_filterDataSingle($userData));
 
         return $this->responseData('bdApi_ViewApi_User_Single', $data);
+    }
+
+    public function actionMultiple()
+    {
+        $userIdsInput = $this->_input->filterSingle('user_ids', XenForo_Input::STRING);
+        $userIds = array_map('intval', explode(',', $userIdsInput));
+        if (empty($userIds)) {
+            return $this->responseNoPermission();
+        }
+
+        $users = $this->_getUserModel()->getUsersByIds(
+            $userIds,
+            $this->_getUserModel()->getFetchOptionsToPrepareApiData()
+        );
+
+        $usersOrdered = array();
+        foreach ($userIds as $userId) {
+            if (isset($users[$userId])) {
+                $usersOrdered[$userId] = $users[$userId];
+            }
+        }
+
+        $usersData = $this->_prepareUsers($usersOrdered);
+
+        $data = array(
+            'users' => $this->_filterDataMany($usersData),
+        );
+
+        return $this->responseData('bdApi_ViewApi_User_List', $data);
     }
 
     public function actionGetFind()
@@ -743,6 +779,44 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
         $this->_request->setParam('user_id', XenForo_Visitor::getUserId());
         return $this->responseReroute(__CLASS__, 'post-timeline');
+    }
+
+    protected function _prepareUsers(array $users)
+    {
+        $usersData = array();
+
+        $userModel = $this->_getUserModel();
+
+        $followersTotals = null;
+        if ($this->_isFieldIncluded('user_followers_total')) {
+            $followersTotals = $userModel->bdApi_countUsersFollowingUserIds(array_keys($users));
+        }
+
+        $includeFollowingsTotal = $this->_isFieldIncluded('user_followings_total');
+
+        foreach ($users as &$userRef) {
+            $userData = $userModel->prepareApiDataForUser($userRef);
+
+            if (is_array($followersTotals)) {
+                if (!empty($followersTotals[$userRef['user_id']])) {
+                    $userData['user_followers_total'] = intval($followersTotals[$userRef['user_id']]);
+                } else {
+                    $userData['user_followers_total'] = 0;
+                }
+            }
+
+            if ($includeFollowingsTotal) {
+                $userFollowingUserIds = explode(',', isset($userRef['following']) ? $userRef['following'] : '');
+                if (empty($userFollowingUserIds)) {
+                    $userFollowingUserIds = array();
+                }
+                $userData['user_followings_total'] = count($userFollowingUserIds);
+            }
+
+            $usersData[] = $userData;
+        }
+
+        return $usersData;
     }
 
     /**

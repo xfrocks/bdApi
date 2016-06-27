@@ -14,6 +14,20 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 		', $userId);
     }
 
+    public function bdApi_countUsersFollowingUserIds(array $userIds)
+    {
+        if (count($userIds) === 0) {
+            return array();
+        }
+
+        return $this->_getDb()->fetchPairs('
+            SELECT follow_user_id, COUNT(*)
+            FROM xf_user_follow
+            WHERE follow_user_id IN (' . $this->_getDb()->quote($userIds) . ')
+            GROUP BY follow_user_id
+        ');
+    }
+
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
     {
         $fetchOptions['join'] = XenForo_Model_User::FETCH_USER_FULL;
