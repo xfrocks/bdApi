@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="1.0.1" version_id="1000101" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApiConsumer" title="[bd] API Consumer" version_string="1.0.1" version_id="1000102" url="" install_callback_class="bdApiConsumer_Installer" install_callback_method="install" uninstall_callback_class="bdApiConsumer_Installer" uninstall_callback_method="uninstall">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
