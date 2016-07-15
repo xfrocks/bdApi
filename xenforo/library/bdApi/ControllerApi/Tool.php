@@ -272,22 +272,26 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         switch ($action) {
             case 'GetLogin':
             case 'GetLogout':
-                $this->_redirectAsNoPermission = true;
+                $this->_redirectInsteadOfReroute = true;
                 break;
         }
 
         parent::_preDispatchFirst($action);
     }
 
-    protected $_redirectAsNoPermission = false;
+    protected $_redirectInsteadOfReroute = false;
 
-    public function responseNoPermission()
+    public function responseReroute($controllerName, $action, array $containerParams = array())
     {
-        if ($this->_redirectAsNoPermission) {
-            // this "hack" is required because other pre dispatch jobs may throw no permission response around
+        if ($this->_redirectInsteadOfReroute) {
+            // this "hack" is required because other pre dispatch jobs may throw reroute response around
             // and we want to redirect them all, not just from our actions
             $redirectUri = $this->_input->filterSingle('redirect_uri', XenForo_Input::STRING);
             if (!empty($redirectUri)) {
+                if ($controllerName === 'XenForo_ControllerPublic_Error') {
+                    $this->_response->setHeader('X-Api-Error', $action);
+                }
+
                 return $this->responseRedirect(
                     XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
                     $redirectUri
@@ -295,9 +299,8 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
             }
         }
 
-        return parent::responseNoPermission();
+        return parent::responseReroute($controllerName, $action, $containerParams);
     }
-
 
     protected function _getScopeForAction($action)
     {
