@@ -99,7 +99,9 @@ class bdApiConsumer_Helper_AutoRegister
 
             XenForo_Model_Ip::log($user['user_id'], 'user', $user['user_id'], 'register_api_consumer');
         } catch (XenForo_Exception $e) {
-            XenForo_Error::logException($e, false);
+            if (XenForo_Application::debugMode()) {
+                XenForo_Error::logException($e, false);
+            }
         }
 
         return $user;

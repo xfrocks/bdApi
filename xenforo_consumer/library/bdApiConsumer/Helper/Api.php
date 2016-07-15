@@ -240,8 +240,10 @@ class bdApiConsumer_Helper_Api
 
             if ($expectedKey !== false) {
                 if (!isset($json[$expectedKey])) {
-                    XenForo_Error::logException(new XenForo_Exception(sprintf(
-                        'Key "%s" not found in %s `%s`: %s', $expectedKey, $method, $path, $body)), false);
+                    if (XenForo_Application::debugMode()) {
+                        XenForo_Error::logError(sprintf('Key "%s" not found in %s `%s`: %s',
+                            $expectedKey, $method, $path, $body));
+                    }
                     return false;
                 }
             }
@@ -251,7 +253,9 @@ class bdApiConsumer_Helper_Api
 
             return $json;
         } catch (Zend_Http_Client_Exception $e) {
-            XenForo_Error::logException($e, false);
+            if (XenForo_Application::debugMode()) {
+                XenForo_Error::logException($e, false);
+            }
             return false;
         }
     }
