@@ -107,7 +107,8 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                 break;
         }
 
-        $threads = $this->_getThreadModel()->getThreads($conditions, $this->_getThreadModel()->getFetchOptionsToPrepareApiData($fetchOptions));
+        $fetchOptions = $this->_getThreadModel()->getFetchOptionsToPrepareApiData($fetchOptions);
+        $threads = $this->_getThreadModel()->getThreads($conditions, $fetchOptions);
 
         if (!is_numeric($sticky) && intval($page) <= 1) {
             // mixed mode, put sticky threads on top of result if this is the first page
