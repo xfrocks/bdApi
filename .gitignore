@@ -9,3 +9,4 @@ xenforo_consumer/library/bdApiConsumer/FileSums.php
 xenforo/js/bdApi/filter_list.js
 google-services.json
 xenforo_consumer/library/bdApiConsumer/DevHelper/XFCP
+xenforo_consumer/js/bdApiConsumer/*.js

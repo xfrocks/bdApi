@@ -65,8 +65,15 @@ class bdApiConsumer_Installer
 
     /* End auto-generated lines of code. Feel free to make changes below */
 
-    private static function installCustomized($existingAddOn, $addOnData)
-    {
+    private static function installCustomized(
+        /** @noinspection PhpUnusedParameterInspection */
+        $existingAddOn,
+        $addOnData
+    ) {
+        if (XenForo_Application::$versionId < 1030000) {
+            throw new XenForo_Exception('XenForo 1.3.0+ is required.');
+        }
+
         $db = XenForo_Application::getDb();
 
         $db->query("REPLACE INTO `xf_content_type` (content_type, addon_id, fields) VALUES ('bdapi_consumer', 'bdApiConsumer', '')");

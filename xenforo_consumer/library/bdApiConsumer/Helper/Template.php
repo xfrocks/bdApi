@@ -20,4 +20,28 @@ class bdApiConsumer_Helper_Template
         return sprintf('%s/index.php?assets/sdk.js&prefix=%s', $root, $prefix);
     }
 
+    public static function renderProviderInLoop($template)
+    {
+        $output = '';
+
+        $providers = bdApiConsumer_Option::getProviders();
+        foreach ($providers as $provider) {
+            $mapping = array();
+
+            foreach (array_keys($provider) as $providerKey) {
+                if (!is_string($provider[$providerKey])) {
+                    continue;
+                }
+
+                $placeholder = sprintf('{provider.%s}', $providerKey);
+                $mapping[$placeholder] = $provider[$providerKey];
+                $mapping[rawurlencode($placeholder)] = $provider[$providerKey];
+            }
+
+            $output .= str_replace(array_keys($mapping), array_values($mapping), $template);
+        }
+
+        return $output;
+    }
+
 }

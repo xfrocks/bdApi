@@ -16,7 +16,7 @@ class bdApiConsumer_XenForo_Model_Alert extends XFCP_bdApiConsumer_XenForo_Model
                 array_keys($this->_bdApiConsumer_unreadAlertProviders[$userId]));
         }
 
-        return parent::resetUnreadAlertsCounter($userId);
+        parent::resetUnreadAlertsCounter($userId);
     }
 
     public function bdApiConsumer_alertUser($provider, $user, $notification)
