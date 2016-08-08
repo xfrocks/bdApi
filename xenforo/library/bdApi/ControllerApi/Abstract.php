@@ -461,6 +461,18 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         }
     }
 
+    protected function _assertBoardActive($action)
+    {
+        parent::_assertBoardActive($action);
+
+        if (strpos($action, 'Get') !== 0
+            && XenForo_Application::isRegistered('_bdCloudServerHelper_readonly')
+        ) {
+            $response = $this->responseError(new XenForo_Phrase('bdcsh_forum_is_currently_read_only'), 503);
+            throw $this->responseException($response);
+        }
+    }
+
     public function responseNoPermission()
     {
         return $this->responseReroute('bdApi_ControllerApi_Error', 'no-permission');
