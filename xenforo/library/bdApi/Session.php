@@ -233,7 +233,37 @@ class bdApi_Session extends XenForo_Session
             $session->set('requestLocale', $requestLanguage['language_code']);
         }
 
+        self::_startApiSession_setupStyle($visitor);
+
         return $session;
+    }
+
+    /**
+     * @param XenForo_Visitor $visitor
+     * @see XenForo_Dependencies_Public::preRenderView
+     */
+    protected static function _startApiSession_setupStyle(XenForo_Visitor $visitor)
+    {
+        $styles = XenForo_Application::isRegistered('styles') ? XenForo_Application::get('styles') : array();
+        $defaultProperties = XenForo_Application::get('defaultStyleProperties');
+
+        $styleId = intval($visitor->get('style_id'));
+        $forceStyleId = !!$visitor->get('is_admin');
+        if ($styleId && isset($styles[$styleId]) && ($styles[$styleId]['user_selectable'] || $forceStyleId)) {
+            $style = $styles[$styleId];
+        } else {
+            $defaultStyleId = XenForo_Application::getOptions()->get('defaultStyleId');
+            $style = (isset($styles[$defaultStyleId]) ? $styles[$defaultStyleId] : reset($styles));
+        }
+
+        if ($style) {
+            $properties = XenForo_Helper_Php::safeUnserialize($style['properties']);
+            $properties = XenForo_Application::mapMerge($defaultProperties, $properties);
+            XenForo_Template_Helper_Core::setStyleProperties($properties);
+            XenForo_Template_Public::setStyleId($style['style_id']);
+        } else {
+            XenForo_Template_Helper_Core::setStyleProperties($defaultProperties);
+        }
     }
 
     public function start($sessionId = null, $ipAddress = null)
