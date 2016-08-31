@@ -62,12 +62,32 @@ class bdApi_Listener
 
     public static function init_dependencies(XenForo_Dependencies_Abstract $dependencies, array $data)
     {
-
-
         XenForo_CacheRebuilder_Abstract::$builders['bdApi_CacheRebuilder_ClientContentDeleteAll']
             = 'bdApi_CacheRebuilder_ClientContentDeleteAll';
 
         bdApi_ShippableHelper_Updater::onInitDependencies($dependencies);
+    }
+
+    public static function front_controller_pre_route(XenForo_FrontController $fc)
+    {
+        // use cookie flag to change web UI interface to match requested language_id from api
+        $request = $fc->getRequest();
+        $apiLanguageId = $request->getParam('_apiLanguageId');
+        if (!empty($apiLanguageId)
+            && preg_match('#^(?<timestamp>\d+) (?<data>.+)$#', $apiLanguageId, $matches)
+        ) {
+            try {
+                $languageId = bdApi_Crypt::decryptTypeOne($matches['data'], $matches['timestamp']);
+                if ($languageId > 0) {
+                    $cookiePrefix = XenForo_Application::getConfig()->get('cookie')->get('prefix');
+                    XenForo_Helper_Cookie::setCookie('language_id', $languageId);
+                    $_COOKIE[$cookiePrefix . 'language_id'] = $languageId;
+                    $fc->getResponse()->setHeader('X-Api-Language', $languageId);
+                }
+            } catch (XenForo_Exception $e) {
+                // ignore
+            }
+        }
     }
 
     public static function template_create($templateName, array &$params, XenForo_Template_Abstract $template)

@@ -40,17 +40,6 @@ class bdApi_Link extends _XenForo_Link
             $type = 'canonical:' . $type;
         }
 
-        $session = bdApi_Data_Helper_Core::safeGetSession();
-        if (!empty($session)) {
-            // auto appends locale param from session
-            if (!isset($extraParams['locale'])) {
-                $requestLocale = $session->get('requestLocale');
-                if (!empty($requestLocale)) {
-                    $extraParams['locale'] = $requestLocale;
-                }
-            }
-        }
-
         return parent::buildPublicLink($type, $data, $extraParams, $skipPrepend);
     }
 
@@ -175,6 +164,29 @@ class bdApi_Link extends _XenForo_Link
         }
 
         return $type;
+    }
+
+    protected static function _buildLink($group, $type, $data, array &$extraParams, &$prefix = null)
+    {
+        $built = parent::_buildLink($group, $type, $data, $extraParams, $prefix);
+
+        if ($group === 'public') {
+            $session = bdApi_Data_Helper_Core::safeGetSession();
+            if (!empty($session)) {
+                // auto appends locale param from session
+                if (!isset($extraParams['locale'])) {
+                    $locale = $session->get('requestLocale');
+                    if (!empty($locale)) {
+                        $timestamp = time() + 86400;
+                        $extraParams['_apiLanguageId'] = sprintf('%s %s', $timestamp,
+                            bdApi_Crypt::encryptTypeOne($session->get('languageId'), $timestamp)
+                        );
+                    }
+                }
+            }
+        }
+
+        return $built;
     }
 
 }
