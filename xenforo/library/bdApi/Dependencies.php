@@ -25,12 +25,6 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
         parent::preLoadData();
     }
 
-    public function preRenderView(XenForo_ControllerResponse_Abstract $controllerResponse = null)
-    {
-        // intentionally left blank to avoid current style information being reset
-        // also we don't render templates on api calls (do we?) so these are unnecessary anyway
-    }
-
     protected function _handleCustomPreloadedData(array &$data)
     {
         // setup our routes
