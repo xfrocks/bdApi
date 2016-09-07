@@ -1,21 +1,31 @@
-=== XenForo API Consumer ===
+# XenForo API Consumer
 Contributors: xfrocks
 Tags: xenforo, api, login, synchronization, sync, post, comment, user
 Requires at least: 3.5
 Tested up to: 3.8.1
 License: GPLv3
 
-== Description ==
+## Description
 
 Connects to XenForo API system.
 
-= Docs & Support =
+### Docs & Support
 
 You can find [howto](https://xfrocks.com/api-support/threads/177/), [FAQ](https://xfrocks.com/api-support/threads/178/) and more detailed information about XenForo API Consumer on [xfrocks.com](https://xfrocks.com/forums/16/).
 
-== Changelog ==
+## Changelog
 
-= 1.3.0 =
+### 1.3.3
+
+* Added support for post & comment search indexing
+* Added support for WooCommerce
+* Added new widget: Search
+* Added advanced option for `curl`
+* Added notice for user admin/guest access token
+* Improved user sync
+* Bug fixes
+
+### 1.3.0
 
 * Added two way post / comment sync
 * Added user group sync
@@ -27,7 +37,7 @@ You can find [howto](https://xfrocks.com/api-support/threads/177/), [FAQ](https:
 * Improved options page UX
 * Bug fixes
 
-= 1.1.0 =
+### 1.1.0
 
 * Added options to control how posts are pushed to XenForo
 * Added options to improve seamless login
