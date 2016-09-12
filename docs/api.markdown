@@ -658,6 +658,7 @@ Detail information of a thread.
                 forum: (uri),
                 posts: (uri),
                 first_poster: (uri),
+                first_poster_avatar: (uri), # since forum-2016091201
                 first_post: (uri),
                 last_poster: (uri),
                 last_post: (uri)

@@ -151,6 +151,8 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
             'forum' => bdApi_Data_Helper_Core::safeBuildApiLink('forums', $thread),
             'posts' => bdApi_Data_Helper_Core::safeBuildApiLink('posts', array(), array('thread_id' => $thread['thread_id'])),
             'first_poster' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $thread),
+            'first_poster_avatar' => XenForo_Template_Helper_Core::callHelper('avatar',
+                array($thread, 'm', false, true)),
             'first_post' => bdApi_Data_Helper_Core::safeBuildApiLink('posts', array('post_id' => $thread['first_post_id'])),
         );
 
