@@ -458,7 +458,9 @@ function xfac_api_postUser($config, $email, $username, $password, array $extraPa
     if (empty($postFields['oauth_token'])) {
         $postFields['client_id'] = $config['clientId'];
     }
-    $postFields = _xfac_api_encrypt($config, $postFields, 'password', $password);
+    if (!empty($password)) {
+        $postFields = _xfac_api_encrypt($config, $postFields, 'password', $password);
+    }
 
     $curl = _xfac_api_curl($url, 'POST', $postFields);
     extract($curl);

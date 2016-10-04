@@ -491,6 +491,19 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
                                                 . 'the new accounts\' state will be "valid", bypassing email confirmation even if XenForo was setup to require that.', 'xenforo-api-consumer'); ?></p>
                                     </div>
                                 <?php endif; ?>
+
+                                <div style="margin-left: 20px;">
+                                    <label for="xfac_sync_user_wp_xf_on_register">
+                                        <input name="xfac_sync_user_wp_xf_on_register" type="checkbox"
+                                               id="xfac_sync_user_wp_xf_on_register"
+                                               value="1" <?php checked('1', get_option('xfac_sync_user_wp_xf_on_register')); ?> />
+                                        <?php _e('Create new account on WordPress registration', 'xenforo-api-consumer'); ?>
+                                    </label>
+
+                                    <p class="description"><?php _e('Create XenForo account immediately after a successful WordPress signup '
+                                            . 'instead of waiting for the first login. Doing this may improve UX but user will have to '
+                                            . 'request a new XenForo password if he/she ever wants to disconnect between WordPress and XenForo', 'xenforo-api-consumer'); ?></p>
+                                </div>
                             </fieldset>
                         </td>
                     </tr>

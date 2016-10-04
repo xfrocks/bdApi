@@ -233,7 +233,7 @@ if (!!get_option('xfac_sync_password')) {
     add_filter('authenticate', 'xfac_authenticate', PHP_INT_MAX, 3);
 }
 
-function xfac_authenticate_syncUserWpXf($user, $username, $password)
+function xfac_authenticate_syncUserWpXf($user, $username = '', $password = '')
 {
     if (!is_a($user, 'WP_User')) {
         return $user;
@@ -304,6 +304,15 @@ function xfac_authenticate_syncUserWpXf($user, $username, $password)
 
 if (!!get_option('xfac_sync_user_wp_xf')) {
     add_filter('authenticate', 'xfac_authenticate_syncUserWpXf', PHP_INT_MAX - 1, 3);
+}
+
+function xfac_user_register($wpUserId) {
+    $wpUser = new WP_User($wpUserId);
+    xfac_authenticate_syncUserWpXf($wpUser);
+}
+
+if (!!get_option('xfac_sync_user_wp_xf') && !!get_option('xfac_sync_user_wp_xf_on_register')) {
+    add_action('user_register', 'xfac_user_register');
 }
 
 function xfac_syncLogin_syncBasic($config, WP_User $wpUser, array $xfUser, $xfToWp = true)
@@ -403,7 +412,7 @@ function xfac_profile_update($wpUserId)
 }
 
 if (!!get_option('xfac_sync_login')) {
-    add_action('profile_update', 'xfac_profile_update', 10, 2);
+    add_action('profile_update', 'xfac_profile_update');
 }
 
 function xfac_set_user_role($wpUserId, $newRole, $oldRoles)
