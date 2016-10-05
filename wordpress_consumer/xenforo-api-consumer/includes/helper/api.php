@@ -36,7 +36,7 @@ function xfac_api_getVersionSuggestionText($config, $meta)
         'forum' => 2015030901,
         'oauth2' => 2015030902,
         'subscription' => 2014092301,
-        'search/indexing' => 2015091501,
+        // 'search/indexing' => 2015091501,
     );
 
     if (empty($config)) {
