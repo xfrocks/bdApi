@@ -236,6 +236,10 @@
 			name="options[allow_search_indexing]" value="1"
 			selected="{$client.options.allow_search_indexing}"
 			/>
+		<xen:option label="{xen:phrase bdapi_client_allow_user_0_subscription}"
+			name="options[allow_user_0_subscription]" value="1"
+			selected="{$client.options.allow_user_0_subscription}"
+			/>
 	</xen:checkboxunit>
 
 	<xen:hook name="admin_bdapi_client_edit" />
@@ -733,6 +737,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_client_add" version_id="1" version_string="0.1"><![CDATA[Add New Client]]></phrase>
     <phrase title="bdapi_client_allow_search_indexing" version_id="77" version_string="1.4.5"><![CDATA[Can index search contents]]></phrase>
     <phrase title="bdapi_client_allow_search_indexing_explain" version_id="77" version_string="1.4.5"><![CDATA[Client with this option enabled will be able to POST /search/indexing to put custom contents into XenForo search index.]]></phrase>
+    <phrase title="bdapi_client_allow_user_0_subscription" version_id="1050100" version_string="1.5.1"><![CDATA[Can subscribe for new user pings]]></phrase>
     <phrase title="bdapi_client_confirm_deletion" version_id="1" version_string="0.1"><![CDATA[Confirm Deletion of Client]]></phrase>
     <phrase title="bdapi_client_contents" version_id="77" version_string="1.4.5"><![CDATA[Client Contents]]></phrase>
     <phrase title="bdapi_client_content_confirm_deletion" version_id="77" version_string="1.4.5"><![CDATA[Confirm Deletion of Client Content]]></phrase>

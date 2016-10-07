@@ -236,8 +236,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         ));
 
         $session = bdApi_Data_Helper_Core::safeGetSession();
-        $option = $session->getOAuthClientOption('allow_search_indexing');
-        if (empty($option)) {
+        if (!$session->getOAuthClientOption('allow_search_indexing')) {
             return $this->responseNoPermission();
         }
 

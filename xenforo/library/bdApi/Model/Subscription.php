@@ -4,7 +4,9 @@ class bdApi_Model_Subscription extends XenForo_Model
 {
     const TYPE_NOTIFICATION = 'user_notification';
     const TYPE_THREAD_POST = 'thread_post';
+
     const TYPE_USER = 'user';
+    const TYPE_USER_0_SIMPLE_CACHE = 'apiUser0';
 
     // this is a special type, blank topic will be detect as this type
     const TYPE_CLIENT = '__client__';
@@ -85,7 +87,13 @@ class bdApi_Model_Subscription extends XenForo_Model
                     $userOption = array();
                 }
 
-                $this->_getDb()->update('xf_user_option', array('bdapi_user' => serialize($userOption)), array('user_id = ?' => $id));
+                if ($id > 0) {
+                    $this->_getDb()->update('xf_user_option',
+                        array('bdapi_user' => serialize($userOption)),
+                        array('user_id = ?' => $id));
+                } else {
+                    XenForo_Application::setSimpleCacheData(self::TYPE_USER_0_SIMPLE_CACHE, $userOption);
+                }
                 break;
             case self::TYPE_CLIENT:
                 if (!empty($subscriptions)) {
@@ -299,7 +307,11 @@ class bdApi_Model_Subscription extends XenForo_Model
         }
 
         if (!empty($dbUserIds)) {
-            $dbUsers = $userModel->getUsersByIds($dbUserIds, array('join' => XenForo_Model_User::FETCH_USER_FULL | XenForo_Model_User::FETCH_USER_PERMISSIONS));
+            $dbUsers = $userModel->getUsersByIds($dbUserIds,
+                array(
+                    'join' => XenForo_Model_User::FETCH_USER_FULL
+                        | XenForo_Model_User::FETCH_USER_PERMISSIONS
+                ));
 
             foreach ($dbUsers as $user) {
                 $user = $userModel->prepareUser($user);
@@ -315,8 +327,6 @@ class bdApi_Model_Subscription extends XenForo_Model
 
     public function isValidTopic(&$topic, array $viewingUser = null)
     {
-        $this->standardizeViewingUserReference($viewingUser);
-
         list($type, $id) = self::parseTopic($topic);
 
         if ($type != self::TYPE_CLIENT
@@ -325,6 +335,9 @@ class bdApi_Model_Subscription extends XenForo_Model
             // subscription for this topic type has been disabled
             return false;
         }
+
+        $this->standardizeViewingUserReference($viewingUser);
+        $session = bdApi_Data_Helper_Core::safeGetSession();
 
         switch ($type) {
             case self::TYPE_NOTIFICATION:
@@ -348,10 +361,14 @@ class bdApi_Model_Subscription extends XenForo_Model
                     $topic = self::getTopic($type, $id);
                 }
 
-                return (($id > 0) AND ($id == $viewingUser['user_id']));
-            case self::TYPE_CLIENT:
-                $session = bdApi_Data_Helper_Core::safeGetSession();
+                if ($id === '0'
+                    && !$session->getOAuthClientOption('allow_user_0_subscription')
+                ) {
+                    return false;
+                }
 
+                return (intval($id) === intval($viewingUser['user_id']));
+            case self::TYPE_CLIENT:
                 return $session->getOAuthClientId() !== '';
         }
 

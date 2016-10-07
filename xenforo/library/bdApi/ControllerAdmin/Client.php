@@ -80,6 +80,7 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
             'public_key' => XenForo_Input::STRING,
             'auto_authorize' => XenForo_Input::ARRAY_SIMPLE,
             'allow_search_indexing' => XenForo_Input::BOOLEAN,
+            'allow_user_0_subscription' => XenForo_Input::BOOLEAN,
         ));
 
         $dw = $this->_getClientDataWriter();

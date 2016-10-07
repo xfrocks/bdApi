@@ -60,9 +60,12 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
             'subscription' => 2014092301,
         );
 
-        $option = bdApi_Data_Helper_Core::safeGetSession()->getOAuthClientOption('allow_search_indexing');
-        if (!empty($option)) {
+        $session = bdApi_Data_Helper_Core::safeGetSession();
+        if (!!$session->getOAuthClientOption('allow_search_indexing')) {
             $modules['search/indexing'] = 2015091601;
+        }
+        if (!!$session->getOAuthClientOption('allow_user_0_subscription')) {
+            $modules['subscriptions?hub_topic=user_0'] = 2016100501;
         }
 
         return $modules;

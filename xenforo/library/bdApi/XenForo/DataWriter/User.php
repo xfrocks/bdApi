@@ -34,6 +34,10 @@ class bdApi_XenForo_DataWriter_User extends XFCP_bdApi_XenForo_DataWriter_User
             $changeLogIgnoreFields = self::$changeLogIgnoreFields;
         }
 
+        if ($this->isInsert()) {
+            $this->_bdApi_pingUser('insert');
+        }
+
         if ($this->isUpdate() AND $optionLogChanges) {
             if ($changes = $this->getNewData()) {
                 $changedFields = array();
@@ -60,6 +64,16 @@ class bdApi_XenForo_DataWriter_User extends XFCP_bdApi_XenForo_DataWriter_User
         if (!bdApi_Option::getSubscription(bdApi_Model_Subscription::TYPE_USER)) {
             // subscription for user has been disabled
             return false;
+        }
+
+        if ($action === 'insert') {
+            $user0Option = XenForo_Application::getSimpleCacheData(bdApi_Model_Subscription::TYPE_USER_0_SIMPLE_CACHE);
+            if (!empty($user0Option)) {
+                /* @var $subscriptionModel bdApi_Model_Subscription */
+                $subscriptionModel = $this->getModelFromCache('bdApi_Model_Subscription');
+                $subscriptionModel->ping($user0Option, $action,
+                    bdApi_Model_Subscription::TYPE_USER, $this->get('user_id'));
+            }
         }
 
         $userOption = $this->get('bdapi_user');
