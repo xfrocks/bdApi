@@ -154,6 +154,13 @@ function xfac_option_getMeta($config)
                 if (!empty($userGroups['user_groups'])) {
                     $meta['userGroups'] = $userGroups['user_groups'];
                 }
+
+                if (!empty($meta['modules']['subscriptions?hub_topic=user_0'])) {
+                    $users = xfac_api_getUsers($config, xfac_api_generateOneTimeToken($config));
+                    if (!empty($users['subscription_callback'])) {
+                        $meta['user0Subscription'] = true;
+                    }
+                }
             }
         }
 

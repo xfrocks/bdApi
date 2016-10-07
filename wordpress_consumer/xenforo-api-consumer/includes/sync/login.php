@@ -205,25 +205,9 @@ function xfac_authenticate($user, $username, $password)
         return $wpUser;
     }
 
-    $wpUserMatchingEmail = get_user_by('email', $xfUser['user_email']);
-    if (!empty($wpUserMatchingEmail)) {
-        // this is not good, an user with matched email
-        // this user will have to associate manually
-        return $user;
-    }
-
-    if (!!get_option('users_can_register') OR !!get_option('xfac_bypass_users_can_register')) {
-        // try to register if possible
-        $newUserId = wp_create_user($xfUser['username'], wp_generate_password(), $xfUser['user_email']);
-        if (!is_wp_error($newUserId)) {
-            $newUser = new WP_User($newUserId);
-
-            xfac_syncLogin_syncRole($config, $newUser, $xfUser);
-            xfac_user_updateRecord($newUserId, $config['root'], $xfUser['user_id'], $xfUser, $token);
-            xfac_log('xfac_authenticate logged in via new XenForo connection (user #%d)', $newUser->ID);
-
-            return $newUser;
-        }
+    $newWpUser = xfac_syncLogin_tryToRegister($config, $xfUser, $password, $token);
+    if ($newWpUser !== null) {
+        return $newWpUser;
     }
 
     return $user;
@@ -307,12 +291,56 @@ if (!!get_option('xfac_sync_user_wp_xf')) {
 }
 
 function xfac_user_register($wpUserId) {
+    if (!empty($GLOBALS['XFAC_SKIP_xfac_user_register'])) {
+        return;
+    }
+
     $wpUser = new WP_User($wpUserId);
     xfac_authenticate_syncUserWpXf($wpUser);
 }
 
 if (!!get_option('xfac_sync_user_wp_xf') && !!get_option('xfac_sync_user_wp_xf_on_register')) {
     add_action('user_register', 'xfac_user_register');
+}
+
+function xfac_syncLogin_tryToRegister($config, $xfUser, $password = null, array $token = null)
+{
+    $wpUserMatchingEmail = get_user_by('email', $xfUser['user_email']);
+    if (!empty($wpUserMatchingEmail)) {
+        // this is not good, an user with matched email
+        // this user will have to associate manually
+        return null;
+    }
+
+    if (!get_option('users_can_register') && !get_option('xfac_bypass_users_can_register')) {
+        return null;
+    }
+
+    if ($password === null) {
+        $password = wp_generate_password();
+    }
+
+    $XFAC_SKIP_xfac_user_register = !empty($GLOBALS['XFAC_SKIP_xfac_user_register']);
+    $GLOBALS['XFAC_SKIP_xfac_user_register'] = true;
+    $created = wp_create_user($xfUser['username'], $password, $xfUser['user_email']);
+    $GLOBALS['XFAC_SKIP_xfac_user_register'] = $XFAC_SKIP_xfac_user_register;
+
+    if (is_wp_error($created)) {
+        xfac_log(
+            'xfac_syncLogin_tryToRegister wp_create_user(%s, xxx, %s) -> %s',
+            $xfUser['username'], $xfUser['user_email'],
+            implode(', ', $created->get_error_messages())
+        );
+        return null;
+    }
+
+    $wpUser = new WP_User($created);
+
+    xfac_syncLogin_syncRole($config, $wpUser, $xfUser);
+    xfac_user_updateRecord($created, $config['root'], $xfUser['user_id'], $xfUser, $token);
+    xfac_log('xfac_syncLogin_tryToRegister registered from XenForo (user #%d)', $wpUser->ID);
+
+    return $wpUser;
 }
 
 function xfac_syncLogin_syncBasic($config, WP_User $wpUser, array $xfUser, $xfToWp = true)
@@ -359,11 +387,11 @@ function xfac_syncLogin_syncBasic($config, WP_User $wpUser, array $xfUser, $xfTo
             $wpUserData['user_email'] = $xfUser['user_email'];
         }
 
-        $inserted = wp_update_user($wpUserData);
+        $updated = wp_update_user($wpUserData);
         xfac_log(
             'xfac_syncLogin_syncBasic wp_update_user(%s) -> %s',
             var_export($wpUserData, true),
-            $inserted
+            $updated
         );
         $GLOBALS['XFAC_SKIP_xfac_profile_update'] = $XFAC_SKIP_xfac_profile_update;
     } else {

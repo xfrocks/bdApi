@@ -37,6 +37,7 @@ function xfac_api_getVersionSuggestionText($config, $meta)
         'oauth2' => 2015030902,
         'subscription' => 2014092301,
         // 'search/indexing' => 2015091501,
+        // 'subscriptions?hub_topic=user_0' => 2016100501,
     );
 
     if (empty($config)) {
@@ -238,28 +239,6 @@ function xfac_api_getForums($config, $accessToken = '', $extraParams = '')
     }
 }
 
-function xfac_api_getUsersMe($config, $accessToken, $autoSubscribe = true)
-{
-    $curl = _xfac_api_curl(call_user_func_array('sprintf', array(
-        '%s/index.php?users/me/&oauth_token=%s',
-        rtrim($config['root'], '/'),
-        rawurlencode($accessToken)
-    )));
-    extract($curl);
-
-    if (isset($parts['user'])) {
-        $parts['_headerLinkHub'] = _xfac_api_getHeaderLinkHub($curl);
-
-        if ($autoSubscribe AND empty($parts['subscription_callback']) AND !empty($parts['_headerLinkHub'])) {
-            xfac_api_postSubscription($config, $accessToken, $parts['_headerLinkHub']);
-        }
-
-        return $parts;
-    } else {
-        return _xfac_api_getFailedResponse($curl);
-    }
-}
-
 function xfac_api_getThreadsInForums($config, $forumIds, $accessToken = '', $extraParams = '')
 {
     if ($accessToken === '') {
@@ -400,6 +379,59 @@ function xfac_api_getUserGroups($config, $userId = 0, $accessToken = '')
     } else {
         return _xfac_api_getFailedResponse($curl);
     }
+}
+
+function xfac_api_getUsers($config, $accessToken, $limit = 1, $autoSubscribe = true)
+{
+    $curl = _xfac_api_curl(call_user_func_array('sprintf', array(
+        '%s/index.php?users/&limit=%d&oauth_token=%s',
+        rtrim($config['root'], '/'),
+        $limit,
+        rawurlencode($accessToken)
+    )));
+    extract($curl);
+
+    if (isset($parts['users'])) {
+        $parts['_headerLinkHub'] = _xfac_api_getHeaderLinkHub($curl);
+
+        if ($autoSubscribe && empty($parts['subscription_callback']) && !empty($parts['_headerLinkHub'])) {
+            if (xfac_api_postSubscription($config, $accessToken, $parts['_headerLinkHub'])) {
+                $parts['subscription_callback'] = true;
+            }
+        }
+
+        return $parts;
+    } else {
+        return _xfac_api_getFailedResponse($curl);
+    }
+}
+
+function xfac_api_getUserById($config, $accessToken, $userId, $autoSubscribe = false)
+{
+    $curl = _xfac_api_curl(call_user_func_array('sprintf', array(
+        '%s/index.php?users/%s/&oauth_token=%s',
+        rtrim($config['root'], '/'),
+        $userId === 'me' ? 'me' : intval($userId),
+        rawurlencode($accessToken)
+    )));
+    extract($curl);
+
+    if (isset($parts['user'])) {
+        $parts['_headerLinkHub'] = _xfac_api_getHeaderLinkHub($curl);
+
+        if ($autoSubscribe AND empty($parts['subscription_callback']) AND !empty($parts['_headerLinkHub'])) {
+            xfac_api_postSubscription($config, $accessToken, $parts['_headerLinkHub']);
+        }
+
+        return $parts;
+    } else {
+        return _xfac_api_getFailedResponse($curl);
+    }
+}
+
+function xfac_api_getUsersMe($config, $accessToken, $autoSubscribe = true)
+{
+    return xfac_api_getUserById($config, $accessToken, 'me', $autoSubscribe);
 }
 
 function xfac_api_postThread($config, $accessToken, $forumId, $threadTitle, $postBody)

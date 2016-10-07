@@ -133,7 +133,7 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
     $accessToken = xfac_user_getAccessToken($wpUserData->ID);
 
     $xfPost = xfac_api_getPost($config, $ping['object_data'], $accessToken);
-    $xfPostIsDeleted = (empty($xfPost['post']) OR !empty($xfPost['post']['post_is_deleted']));
+    $xfPostIsDeleted = (empty($xfPost['post']) || !empty($xfPost['post']['post_is_deleted']));
 
     if (empty($commentSyncRecord)) {
         if (!$xfPostIsDeleted) {
@@ -153,9 +153,8 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
                 }
                 if ($recordPostUpdateDate > 0 && $xfPostUpdateDate > 0) {
                     if ($xfPostUpdateDate <= $recordPostUpdateDate) {
-                        // the new post is not newer than the post in record
                         // we used XenForo server time (which uses GMT) so it should be correct
-                        return false;
+                        return _xfac_subscription_callbackError('the post is outdated');
                     }
                 }
 
@@ -227,50 +226,49 @@ function _xfac_subscription_handleCallback_threadPost($config, $ping, $postSyncR
         }
     }
 
-    return false;
+    return _xfac_subscription_callbackError('oops');
 }
 
 function _xfac_subscription_handleCallback_userNotification($config, $ping)
 {
     $accessToken = xfac_user_getSystemAccessToken($config);
     if (empty($accessToken)) {
-        return false;
+        return _xfac_subscription_callbackError('no system access token');
     }
 
     if (empty($ping['object_data']['notification_id'])) {
-        return false;
+        return _xfac_subscription_callbackError('no notification_id');
     }
     $notification = $ping['object_data'];
 
     if (empty($notification['notification_type'])) {
-        return false;
+        return _xfac_subscription_callbackError('no notification_type');
     }
     if (!preg_match('/^post_(?<postId>\d+)_insert$/', $notification['notification_type'], $matches)
         || intval(get_option('xfac_sync_post_xf_wp')) == 0
     ) {
-        // currently we only handle post pull here
-        return false;
+        return _xfac_subscription_callbackError('post pull only for now');
     }
     $postId = $matches['postId'];
 
     $xfPost = xfac_api_getPost($config, $postId, $accessToken);
     if (empty($xfPost['post']['thread_id'])) {
-        return false;
+        return _xfac_subscription_callbackError('no /posts/:postId data');
     }
 
     $postSyncRecords = xfac_sync_getRecordsByProviderTypeAndIds('', 'thread', array($xfPost['post']['thread_id']));
     if (!empty($postSyncRecords)) {
-        return false;
+        return _xfac_subscription_callbackError('no post sync records');
     }
 
     $xfThread = xfac_api_getThread($config, $xfPost['post']['thread_id'], $accessToken);
     if (empty($xfThread['thread'])) {
-        return false;
+        return _xfac_subscription_callbackError('no /threads/:threadId data');
     }
 
     $wpTags = xfac_syncPost_getMappedTags($xfThread['thread']['forum_id']);
     if (empty($wpTags)) {
-        return false;
+        return _xfac_subscription_callbackError('no mapped tags');
     }
 
     $wpPostId = xfac_syncPost_pullPost($config, $xfThread['thread'], $wpTags, 'subscription');
@@ -285,17 +283,37 @@ function _xfac_subscription_handleCallback_user($config, $ping)
 {
     $wpUserData = xfac_user_getUserDataByApiData($config['root'], $ping['object_data']);
     if (empty($wpUserData)) {
-        return false;
+        if (!get_option('xfac_sync_password')) {
+            return _xfac_subscription_callbackError('disabled option sync password');
+        }
+
+        $accessToken = xfac_user_getAdminAccessToken($config);
+        if (empty($accessToken)) {
+            return _xfac_subscription_callbackError('no admin access token');
+        }
+
+        $userById = xfac_api_getUserById($config, $accessToken, $ping['object_data']);
+        if (empty($userById['user'])) {
+            return _xfac_subscription_callbackError('no /users/:userId data');
+        }
+        $xfUser = $userById['user'];
+
+        $newWpUser = xfac_syncLogin_tryToRegister($config, $xfUser);
+        if ($newWpUser === null) {
+            return _xfac_subscription_callbackError('cannot register');
+        }
+
+        return 'created new account';
     }
 
     $accessToken = xfac_user_getAccessToken($wpUserData->ID);
     if (empty($accessToken)) {
-        return false;
+        return _xfac_subscription_callbackError('no user access token');
     }
 
     $me = xfac_api_getUsersMe($config, $accessToken, false);
     if (empty($me)) {
-        return false;
+        return _xfac_subscription_callbackError('no /users/me data');
     }
     $xfUser = $me['user'];
 
@@ -307,8 +325,18 @@ function _xfac_subscription_handleCallback_user($config, $ping)
     if (xfac_user_updateRecord($wpUserData->ID, $config['root'], $xfUser['user_id'], $xfUser)) {
         return 'updated user record';
     } else {
+        return _xfac_subscription_callbackError('cannot update user record');
+    }
+}
+
+function _xfac_subscription_callbackError()
+{
+    if (!WP_DEBUG) {
         return false;
     }
+
+    $args = func_get_args();
+    return call_user_func_array('sprintf', $args);
 }
 
 function xfac_do_parse_request($bool, $wp, $extra_query_vars)

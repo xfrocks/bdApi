@@ -750,6 +750,28 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
                                 __('XenForo Server IP Address', 'xenforo-api-consumer')); ?></p>
                     </td>
                 </tr>
+
+                <?php if (!empty($meta['user0Subscription'])): ?>
+                <tr valign="top">
+                    <th scope="row"><label for="xfac_server_ip"><?php _e('New User Subscribed', 'xenforo-api-consumer'); ?></label></th>
+                    <td>
+                        <p><?php _e('Yes', 'xenforo-api-consumer'); ?></p>
+                        <p class="description"><?php echo sprintf(
+                            __('With new user subscription, new XenForo account will be sync\'d '
+                                . 'immediately to WordPress if <a href="%1$s">Admin Account</a> is available (currently: %2$s) '
+                                . 'and XenForo <a href="%3$s">login credentials</a> are accepted (currently: %4$s).', 'xenforo-api-consumer'),
+                                admin_url('options-general.php?page=xfac&tab=api'),
+                                intval(get_option('xfac_xf_admin_account')) > 0
+                                    ? __('Yes', 'xenforo-api-consumer')
+                                    : __('No', 'xenforo-api-consumer'),
+                                admin_url('options-general.php?page=xfac&tab=user_role'),
+                                !!get_option('xfac_sync_password')
+                                    ? __('Yes', 'xenforo-api-consumer')
+                                    : __('No', 'xenforo-api-consumer')
+                            ); ?></p>
+                    </td>
+                </tr>
+                <?php endif; ?>
             <?php endif; ?>
 
         </table>
