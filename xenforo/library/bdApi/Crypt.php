@@ -17,7 +17,8 @@ class bdApi_Crypt
 
         switch ($algo) {
             case self::AES128:
-                $encrypted = base64_encode(self::_aes128_encrypt($data, $key));
+                $encrypted = base64_encode(bdApi_ShippableHelper_Crypt::encrypt($data,
+                    $key, bdApi_ShippableHelper_Crypt::ALGO_AES_128));
                 break;
             default:
                 $encrypted = $data;
@@ -34,7 +35,8 @@ class bdApi_Crypt
 
         switch ($algo) {
             case self::AES128:
-                $decrypted = self::_aes128_decrypt(base64_decode($data), $key);
+                $decrypted = bdApi_ShippableHelper_Crypt::decrypt(base64_decode($data),
+                    $key, bdApi_ShippableHelper_Crypt::ALGO_AES_128);
                 break;
             default:
                 $decrypted = $data;
@@ -72,21 +74,4 @@ class bdApi_Crypt
 
         return $clientSecret;
     }
-
-    protected static function _aes128_encrypt($data, $key)
-    {
-        $key = md5($key, true);
-        $padding = 16 - (strlen($data) % 16);
-        $data .= str_repeat(chr($padding), $padding);
-        return mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_ECB);
-    }
-
-    protected static function _aes128_decrypt($data, $key)
-    {
-        $key = md5($key, true);
-        $data = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_ECB);
-        $padding = ord($data[strlen($data) - 1]);
-        return substr($data, 0, -$padding);
-    }
-
 }
