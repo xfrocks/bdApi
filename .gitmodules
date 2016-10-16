@@ -1,3 +1,3 @@
 [submodule "xenforo/library/bdApi/Lib/oauth2-server-php"]
 	path = xenforo/library/bdApi/Lib/oauth2-server-php
-	url = https://github.com/bshaffer/oauth2-server-php.git
+	url = https://github.com/xfrocks/oauth2-server-php.git
