@@ -524,19 +524,21 @@
     <template title="bdapi_token_add"><![CDATA[<xen:title>{xen:phrase bdapi_token_add}</xen:title>
 
 <xen:form action="{xen:adminlink 'api-tokens/add'}" class="section AutoValidator" data-redirect="yes">
-	
+
 	<xen:selectunit label="{xen:phrase bdapi_client}:" name="client_id">
 		<xen:options source="{$clients}" />
 	</xen:selectunit>
-	
+
 	<xen:textboxunit label="{xen:phrase user_name}:" name="username" inputclass="AutoComplete AcSingle" />
-	
+
 	<xen:checkboxunit label="{xen:phrase bdapi_scope}:" name="scopes">
-		<xen:options source="{$scopes}" />
+		<xen:foreach loop="$scopes" value="$scope">
+			<xen:option value="{$scope}">{xen:helper api_scopeGetText, $scope}</xen:option>
+		</xen:foreach>
 	</xen:checkboxunit>
-	
+
 	<xen:spinboxunit label="{xen:phrase bdapi_ttl}:" name="ttl" value="3600" />
-	
+
 	<xen:submitunit save="{xen:phrase bdapi_client_add}" />
 
 	<input type="hidden" name="_xfConfirm" value="1" />

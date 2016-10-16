@@ -95,9 +95,7 @@ class bdApi_Listener
         static $initTemplateHelper = false;
         if ($initTemplateHelper === false) {
             $initTemplateHelper = true;
-            if ($template instanceof XenForo_Template_Public) {
-                bdApi_Template_Helper_Core::initTemplateHelpers();
-            }
+            bdApi_Template_Helper_Core::initTemplateHelpers();
         }
 
         if ($templateName == 'account_wrapper') {
