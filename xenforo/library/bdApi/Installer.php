@@ -232,11 +232,7 @@ class bdApi_Installer
             throw new XenForo_Exception('PHP 5.3.9+ is required.');
         }
 
-        if (!function_exists('mcrypt_decrypt')) {
-            throw new XenForo_Exception('PHP Mcrypt extension is required but could not be found.');
-        }
-
-        if (!function_exists('openssl_pkey_new')) {
+        if (!function_exists('openssl_encrypt')) {
             throw new XenForo_Exception('PHP OpenSSL support is required but could not be found.');
         }
 
