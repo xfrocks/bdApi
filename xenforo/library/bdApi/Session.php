@@ -245,7 +245,9 @@ class bdApi_Session extends XenForo_Session
     protected static function _startApiSession_setStyleProperties(XenForo_Visitor $visitor)
     {
         $styles = XenForo_Application::isRegistered('styles') ? XenForo_Application::get('styles') : array();
-        $defaultProperties = XenForo_Application::get('defaultStyleProperties');
+        $defaultProperties = XenForo_Application::isRegistered('defaultStyleProperties')
+            ? XenForo_Application::get('defaultStyleProperties')
+            : array();
 
         $styleId = intval($visitor->get('style_id'));
         $forceStyleId = !!$visitor->get('is_admin');
@@ -257,7 +259,8 @@ class bdApi_Session extends XenForo_Session
         }
 
         if ($style) {
-            $properties = XenForo_Helper_Php::safeUnserialize($style['properties']);
+            // TODO: switch to use XenForo_Helper_Php::safeUnserialize
+            $properties = unserialize($style['properties']);
             $properties = XenForo_Application::mapMerge($defaultProperties, $properties);
             XenForo_Template_Helper_Core::setStyleProperties($properties);
         } else {

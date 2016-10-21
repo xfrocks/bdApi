@@ -63,7 +63,8 @@ class bdApi_Template_Helper_Core
     public static function getInstance()
     {
         if (self::$_instance === null) {
-            $templateHelperClass = XenForo_Application::resolveDynamicClass(__CLASS__);
+            // TODO: $type is required because of XenForo 1.1, drop support for this old version?
+            $templateHelperClass = XenForo_Application::resolveDynamicClass(__CLASS__, __CLASS__);
             self::$_instance = new $templateHelperClass();
         }
 
@@ -72,6 +73,12 @@ class bdApi_Template_Helper_Core
 
     public static function initTemplateHelpers()
     {
+        static $initialized = false;
+        if ($initialized) {
+            return;
+        }
+        $initialized = true;
+
         $templateHelper = bdApi_Template_Helper_Core::getInstance();
 
         // register the helper methods in the format `api_<method_name>`

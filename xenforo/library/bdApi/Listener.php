@@ -92,32 +92,34 @@ class bdApi_Listener
 
     public static function template_create($templateName, array &$params, XenForo_Template_Abstract $template)
     {
-        static $initTemplateHelper = false;
-        if ($initTemplateHelper === false) {
-            $initTemplateHelper = true;
-            bdApi_Template_Helper_Core::initTemplateHelpers();
-        }
+        bdApi_Template_Helper_Core::initTemplateHelpers();
 
-        if ($templateName == 'account_wrapper') {
-            $template->preloadTemplate('bdapi_account_wrapper_sidebar');
-        } elseif ($templateName == 'PAGE_CONTAINER') {
-            $template->preloadTemplate('bdapi_navigation_visitor_tab');
+        if (XenForo_Application::$versionId < 1020000) {
+            // For XenForo 1.2+, we have moved to use template modifications
+            if ($templateName == 'account_wrapper') {
+                $template->preloadTemplate('bdapi_account_wrapper_sidebar');
+            } elseif ($templateName == 'PAGE_CONTAINER') {
+                $template->preloadTemplate('bdapi_navigation_visitor_tab');
+            }
         }
     }
 
     public static function template_hook($hookName, &$contents, array $hookParams, XenForo_Template_Abstract $template)
     {
-        switch ($hookName) {
-            case 'account_wrapper_sidebar_settings':
-                $ourTemplate = $template->create('bdapi_account_wrapper_sidebar', $template->getParams());
-                $ourHtml = $ourTemplate->render();
-                $contents .= $ourHtml;
-                break;
-            case 'navigation_visitor_tab_links1':
-                $ourTemplate = $template->create('bdapi_navigation_visitor_tab', $template->getParams());
-                $ourHtml = $ourTemplate->render();
-                $contents .= $ourHtml;
-                break;
+        if (XenForo_Application::$versionId < 1020000) {
+            // For XenForo 1.2+, we have moved to use template modifications
+            switch ($hookName) {
+                case 'account_wrapper_sidebar_settings':
+                    $ourTemplate = $template->create('bdapi_account_wrapper_sidebar', $template->getParams());
+                    $ourHtml = $ourTemplate->render();
+                    $contents .= $ourHtml;
+                    break;
+                case 'navigation_visitor_tab_links1':
+                    $ourTemplate = $template->create('bdapi_navigation_visitor_tab', $template->getParams());
+                    $ourHtml = $ourTemplate->render();
+                    $contents .= $ourHtml;
+                    break;
+            }
         }
     }
 

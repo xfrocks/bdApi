@@ -1621,7 +1621,24 @@ step=3600</edit_format_params>
 	</div>
 </li>]]></template>
   </templates>
-  <public_template_modifications/>
+  <public_template_modifications>
+    <modification template="account_wrapper" modification_key="bdapi_account_wrapper_sidebar" description="Alter sidebar settings." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#(<xen:hook name="account_wrapper_sidebar_settings".+?)(</xen:hook>)#s]]></find>
+      <replace><![CDATA[$1
+
+<xen:include template="bdapi_account_wrapper_sidebar" />
+
+$2]]></replace>
+    </modification>
+    <modification template="navigation_visitor_tab" modification_key="bdapi_navigation_visitor_tab" description="Alter tab links1." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#(<xen:hook name="navigation_visitor_tab_links1".+?)(</xen:hook>)#s]]></find>
+      <replace><![CDATA[$1
+
+<xen:include template="bdapi_navigation_visitor_tab" />
+
+$2]]></replace>
+    </modification>
+  </public_template_modifications>
   <bb_code_media_sites/>
   <bb_codes/>
 </addon>
