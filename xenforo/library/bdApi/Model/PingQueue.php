@@ -13,10 +13,12 @@ class bdApi_Model_PingQueue extends XenForo_Model
             'expire_date' => $expireDate,
         ));
 
-        if (is_callable(array(
-            'XenForo_Application',
-            'defer'
-        ))) {
+        if (bdApi_Option::getConfig('pingQueueUseDefer')
+            && is_callable(array(
+                'XenForo_Application',
+                'defer'
+            ))
+        ) {
             $triggerDate = null;
             if ($queueDate > 0) {
                 $triggerDate = $queueDate;
