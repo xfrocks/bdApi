@@ -15,6 +15,9 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         }
 
         $userModel = $this->_getUserModel();
+        if (!$userModel->canViewMemberList()) {
+            return $this->responseNoPermission();
+        }
 
         $pageNavParams = array();
         $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
@@ -57,7 +60,11 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
         $users = array($user['user_id'] => $user);
         $usersData = $this->_prepareUsers($users);
+
         $userData = reset($usersData);
+        if (empty($userData)) {
+            return $this->responseNoPermission();
+        }
 
         $data = array('user' => $this->_filterDataSingle($userData));
 
@@ -787,6 +794,9 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
         $userModel = $this->_getUserModel();
 
+        /** @var XenForo_Model_UserProfile $userProfileModel */
+        $userProfileModel = $this->getModelFromCache('XenForo_Model_UserProfile');
+
         $followersTotals = null;
         if ($this->_isFieldIncluded('user_followers_total')) {
             $followersTotals = $userModel->bdApi_countUsersFollowingUserIds(array_keys($users));
@@ -795,6 +805,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $includeFollowingsTotal = $this->_isFieldIncluded('user_followings_total');
 
         foreach ($users as &$userRef) {
+            if (!$userProfileModel->canViewFullUserProfile($userRef)) {
+                continue;
+            }
+
             $userData = $userModel->prepareApiDataForUser($userRef);
 
             if (is_array($followersTotals)) {
