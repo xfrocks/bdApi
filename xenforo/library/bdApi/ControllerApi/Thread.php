@@ -171,7 +171,12 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $threads = array($threadId => $thread);
         $threadsData = $this->_prepareThreads($threads, $forum);
 
-        $data = array('thread' => $this->_filterDataSingle(reset($threadsData)));
+        $threadData = reset($threadsData);
+        if (empty($threadData)) {
+            return $this->responseNoPermission();
+        }
+
+        $data = array('thread' => $this->_filterDataSingle($threadData));
 
         return $this->responseData('bdApi_ViewApi_Thread_Single', $data);
     }
