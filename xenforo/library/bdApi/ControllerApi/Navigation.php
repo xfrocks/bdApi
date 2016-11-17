@@ -9,7 +9,7 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
         $elements = $this->_getElements($parent);
 
         $viewParams = array(
-            'elements' => $elements,
+            'elements' => $this->_filterDataMany($elements),
             'elements_count' => count($elements),
         );
 
