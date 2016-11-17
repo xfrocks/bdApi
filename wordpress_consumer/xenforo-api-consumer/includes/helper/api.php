@@ -225,14 +225,23 @@ function xfac_api_getForums($config, $accessToken = '', $extraParams = '')
     }
 
     $curl = _xfac_api_curl(call_user_func_array('sprintf', array(
-        '%s/index.php?forums/&oauth_token=%s%s',
+        '%s/index.php?navigation/&fields_include=navigation_type,forum_id,forum_title,links.permalink&oauth_token=%s%s',
         rtrim($config['root'], '/'),
         rawurlencode($accessToken),
         !empty($extraParams) ? '&' . $extraParams : '',
     )));
     extract($curl);
 
-    if (isset($parts['forums'])) {
+    if (isset($parts['elements'])) {
+        $parts['forums'] = array();
+        foreach ($parts['elements'] as $element) {
+            if (isset($element['navigation_type'])
+                && $element['navigation_type'] === 'forum'
+            ) {
+                $parts['forums'][] = $element;
+            }
+        }
+
         return $parts;
     } else {
         return _xfac_api_getFailedResponse($curl);
