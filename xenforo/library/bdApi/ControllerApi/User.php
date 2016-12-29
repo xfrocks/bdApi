@@ -16,6 +16,11 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
         $userModel = $this->_getUserModel();
         if (!$userModel->canViewMemberList()) {
+        	if ($this->_input->filterSingle('limit', XenForo_Input::STRING) === '1') {
+		        // special case to support subscription discovery of topic user_0
+		        return $this->responseData('bdApi_ViewApi_User_List', array('users' => array()));
+	        }
+
             return $this->responseNoPermission();
         }
 

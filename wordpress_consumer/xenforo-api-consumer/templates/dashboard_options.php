@@ -751,11 +751,14 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
                     </td>
                 </tr>
 
-                <?php if (!empty($meta['user0Subscription'])): ?>
                 <tr valign="top">
-                    <th scope="row"><label for="xfac_server_ip"><?php _e('New User Subscribed', 'xenforo-api-consumer'); ?></label></th>
+                    <th scope="row"><?php _e('New User Subscribed', 'xenforo-api-consumer'); ?></th>
                     <td>
-                        <p><?php _e('Yes', 'xenforo-api-consumer'); ?></p>
+                        <p>
+                            <?php !empty($meta['user0Subscription'])
+                                ? _e('Yes', 'xenforo-api-consumer')
+                                : _e('No', 'xenforo-api-consumer'); ?>
+                        </p>
                         <p class="description"><?php echo sprintf(
                             __('With new user subscription, new XenForo account will be sync\'d '
                                 . 'immediately to WordPress if <a href="%1$s">Admin Account</a> is available (currently: %2$s) '
@@ -771,7 +774,6 @@ function _xfac_dashboardOptions_renderTagForumMapping($tags, $meta, $i, $tagForu
                             ); ?></p>
                     </td>
                 </tr>
-                <?php endif; ?>
             <?php endif; ?>
 
         </table>

@@ -390,7 +390,7 @@ function xfac_api_getUserGroups($config, $userId = 0, $accessToken = '')
     }
 }
 
-function xfac_api_getUsers($config, $accessToken, $limit = 1, $autoSubscribe = true)
+function xfac_api_getUsers($config, $accessToken, $limit = 0, $autoSubscribe = true)
 {
     $curl = _xfac_api_curl(call_user_func_array('sprintf', array(
         '%s/index.php?users/&limit=%d&oauth_token=%s',

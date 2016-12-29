@@ -156,7 +156,7 @@ function xfac_option_getMeta($config, $forceRebuild = false)
                 }
 
                 if (!empty($meta['modules']['subscriptions?hub_topic=user_0'])) {
-                    $users = xfac_api_getUsers($config, xfac_api_generateOneTimeToken($config));
+		            $users = xfac_api_getUsers($config, xfac_api_generateOneTimeToken($config), 1);
                     if (!empty($users['subscription_callback'])) {
                         $meta['user0Subscription'] = true;
                     }
