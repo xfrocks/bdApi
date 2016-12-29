@@ -170,6 +170,10 @@ function xfac_dashboardOptions_admin_init()
         switch ($_REQUEST['do']) {
             case 'xfac_meta':
                 update_option('xfac_meta', array());
+
+	            $config = xfac_option_getConfig();
+	            xfac_option_getMeta($config, true);
+
                 wp_redirect(admin_url('options-general.php?page=xfac&done=xfac_meta'));
                 break;
             case 'xfac_xf_guest_account_submit':

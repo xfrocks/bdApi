@@ -56,7 +56,7 @@ function xfac_option_getConfig()
     return $config;
 }
 
-function xfac_option_getMeta($config)
+function xfac_option_getMeta($config, $forceRebuild = false)
 {
     static $rebuiltCount = 0;
 
@@ -96,7 +96,7 @@ function xfac_option_getMeta($config)
         }
     }
 
-    if ($rebuild) {
+    if ($rebuild || $forceRebuild) {
         xfac_updateNotice('xf_guest_account');
         xfac_updateNotice('xf_admin_account');
 
