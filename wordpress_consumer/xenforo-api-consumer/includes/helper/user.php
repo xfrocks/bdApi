@@ -163,11 +163,14 @@ function xfac_user_getSystemAccessToken($config, $generateOneTimeToken = false, 
     return $accessToken;
 }
 
-function xfac_user_getAdminAccessToken($config)
+function xfac_user_getAdminAccessToken($config, $xfAdminAccountOption = null)
 {
     $accessToken = null;
 
-    $xfAdminAccountOption = intval(get_option('xfac_xf_admin_account'));
+    if ($xfAdminAccountOption === null) {
+	    $xfAdminAccountOption = intval(get_option('xfac_xf_admin_account'));
+    }
+
     if ($xfAdminAccountOption > 0) {
         $record = xfac_user_getRecordById($xfAdminAccountOption);
         if (!empty($record)) {

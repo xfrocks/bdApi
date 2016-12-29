@@ -136,25 +136,55 @@ function xfac_api_getLogoutLink($config, $accessToken, $redirectUri)
     ));
 }
 
-function xfac_api_getPublicLink($config, $route)
+function xfac_api_getPublicLinks($config, $routes, $accessToken)
 {
-    $url = call_user_func_array('sprintf', array(
-        '%s/index.php?tools/link',
-        rtrim($config['root'], '/')
-    ));
-    $postFields = array(
-        'oauth_token' => xfac_api_generateOneTimeToken($config),
-        'type' => 'public',
-        'route' => $route,
-    );
-    $curl = _xfac_api_curl($url, 'POST', $postFields);
-    extract($curl);
+	$url = call_user_func_array('sprintf', array(
+		'%s/index.php?batch&oauth_token=%s',
+		rtrim($config['root'], '/'),
+		rawurlencode($accessToken)
+	));
 
-    if (!empty($parts['link'])) {
-        return $parts['link'];
-    } else {
-        return _xfac_api_getFailedResponse($parts);
-    }
+	$jobs = array();
+	foreach ($routes as $i => $route) {
+		$job = array(
+			'id' => 'route' . $i,
+			'method' => 'POST',
+			'uri' => 'tools/link',
+			'params' => array(
+				'type' => 'public',
+				'route' => $route,
+			),
+		);
+		$jobs[] = $job;
+	}
+
+	$curl = _xfac_api_curl($url, 'POST', json_encode($jobs));
+	extract($curl);
+
+	if (!empty($parts['jobs'])) {
+		$links = array();
+
+		foreach ($parts['jobs'] as $jobId => $jobOutput) {
+			if (!preg_match('#^route(?<i>\d+)$#', $jobId, $matches)) {
+				continue;
+			}
+			$i = $matches['i'];
+
+			if (!isset($routes[$i])) {
+				continue;
+			}
+			$route = $routes[$i];
+
+			if (empty($jobOutput['link'])) {
+				continue;
+			}
+			$links[$route] = $jobOutput['link'];
+		}
+
+		return $links;
+	} else {
+		return _xfac_api_getFailedResponse($parts);
+	}
 }
 
 function xfac_api_getAccessTokenFromCode($config, $code, $redirectUri)

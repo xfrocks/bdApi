@@ -102,13 +102,23 @@ function xfac_option_getMeta($config, $forceRebuild = false)
 
         $meta = $config;
 
-        $meta['linkIndex'] = xfac_api_getPublicLink($config, 'index');
+        $ott = xfac_api_generateOneTimeToken($config);
+        $publicLinks = xfac_api_getPublicLinks($config, array(
+            'index',
+	        'account/alerts',
+            'conversations',
+            'login',
+	        'login/login',
+            'register',
+        ), $ott);
+
+        $meta['linkIndex'] = isset($publicLinks['index']) ? $publicLinks['index'] : '';
         $meta['modules'] = array();
         $meta['forums'] = array();
 
         if (!empty($meta['linkIndex'])) {
             if ($xfAdminAccountOption) {
-                $adminAccessToken = xfac_user_getAdminAccessToken($config);
+                $adminAccessToken = xfac_user_getAdminAccessToken($config, $xfAdminAccountOption);
                 if (empty($adminAccessToken)) {
                     // unable to obtain admin access token
                     // probably a missing record or expired refresh token
@@ -137,11 +147,11 @@ function xfac_option_getMeta($config, $forceRebuild = false)
             }
 
             $meta['modules'] = xfac_api_getModules($config);
-            $meta['linkAlerts'] = xfac_api_getPublicLink($config, 'account/alerts');
-            $meta['linkConversations'] = xfac_api_getPublicLink($config, 'conversations');
-            $meta['linkLogin'] = xfac_api_getPublicLink($config, 'login');
-            $meta['linkLoginLogin'] = xfac_api_getPublicLink($config, 'login/login');
-            $meta['linkRegister'] = xfac_api_getPublicLink($config, 'register');
+            $meta['linkAlerts'] = isset($publicLinks['account/alerts']) ? $publicLinks['account/alerts'] : '';
+            $meta['linkConversations'] = isset($publicLinks['conversations']) ? $publicLinks['conversations'] : '';
+            $meta['linkLogin'] = isset($publicLinks['login']) ? $publicLinks['login'] : '';
+            $meta['linkLoginLogin'] = isset($publicLinks['login/login']) ? $publicLinks['login/login'] : '';
+            $meta['linkRegister'] = isset($publicLinks['register']) ? $publicLinks['register'] : '';
 
             $forums = xfac_api_getForums($config);
             if (!empty($forums['forums'])) {
@@ -150,17 +160,18 @@ function xfac_option_getMeta($config, $forceRebuild = false)
 
             $meta['xfac_xf_admin_account'] = $xfAdminAccountOption;
             if (!empty($meta['xfac_xf_admin_account'])) {
-                $userGroups = xfac_api_getUserGroups($config, 0, xfac_user_getAdminAccessToken($config));
+                $adminAccessToken = xfac_user_getAdminAccessToken($config, $meta['xfac_xf_admin_account']);
+                $userGroups = xfac_api_getUserGroups($config, 0, $adminAccessToken);
                 if (!empty($userGroups['user_groups'])) {
                     $meta['userGroups'] = $userGroups['user_groups'];
                 }
 
-                if (!empty($meta['modules']['subscriptions?hub_topic=user_0'])) {
-		            $users = xfac_api_getUsers($config, xfac_api_generateOneTimeToken($config), 1);
-                    if (!empty($users['subscription_callback'])) {
-                        $meta['user0Subscription'] = true;
-                    }
-                }
+	            if (!empty($meta['modules']['subscriptions?hub_topic=user_0'])) {
+		            $users = xfac_api_getUsers($config, $ott, 1);
+		            if (!empty($users['subscription_callback'])) {
+			            $meta['user0Subscription'] = true;
+		            }
+	            }
             }
         }
 
