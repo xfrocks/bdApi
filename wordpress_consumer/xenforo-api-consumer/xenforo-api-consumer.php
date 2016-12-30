@@ -58,7 +58,11 @@ function xfac_log($args)
         if (is_array($arg)) {
             $arg = var_export($arg, true);
         } elseif (is_object($arg)) {
-            $arg = strval($arg);
+            if ($arg instanceof WP_Error) {
+                $arg = implode(', ', $arg->get_error_messages());
+            } else {
+                $arg = strval($arg);
+            }
         }
     }
     $message = call_user_func_array('sprintf', $args);
