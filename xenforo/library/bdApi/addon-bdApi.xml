@@ -824,7 +824,8 @@ step=3600</edit_format_params>
     <phrase title="bdapi_slash_oauth_token_admin_requires_user_id" version_id="63" version_string="1.4.3-BETA"><![CDATA[/oauth/token/admin requires `user_id`.]]></phrase>
     <phrase title="bdapi_slash_poll_vote_requires_response_id" version_id="78" version_string="1.4.6"><![CDATA[/poll/vote requires `response_id`]]></phrase>
     <phrase title="bdapi_slash_posts_attachments_requires_ids" version_id="20" version_string="0.9.5"><![CDATA[/posts/attachments requires `thread_id` for new post or `post_id` for existing post.]]></phrase>
-    <phrase title="bdapi_slash_posts_requires_thread_id" version_id="20" version_string="0.9.5"><![CDATA[/posts requires `thread_id`.]]></phrase>
+    <phrase title="bdapi_slash_posts_order_x_no_thread_id" version_id="1050100" version_string="1.5.1"><![CDATA[/posts?order={order} cannot be used with `thread_id`.]]></phrase>
+    <phrase title="bdapi_slash_posts_order_x_requires_thread_id" version_id="1050100" version_string="1.5.1"><![CDATA[/posts?order={order} requires `thread_id`.]]></phrase>
     <phrase title="bdapi_slash_search_requires_q" version_id="20" version_string="0.9.5"><![CDATA[/search requires `q`.]]></phrase>
     <phrase title="bdapi_slash_threads_attachments_requires_forum_id" version_id="20" version_string="0.9.5"><![CDATA[/threads/attachments requires `forum_id`.]]></phrase>
     <phrase title="bdapi_slash_threads_requires_forum_id" version_id="20" version_string="0.9.5"><![CDATA[/threads requires `forum_id`.]]></phrase>

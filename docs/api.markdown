@@ -183,7 +183,7 @@ All API requests accept `locale` parameter to switch user facing messages to spe
 For API method with resource data like a forum or a thread, the data can be filtered to get interested fields only. The general format is "key.sub_key.deep_key" if you want to include/exclude a specific field. The including rules take precedence over excluding ones.
 
  * `fields_include`: coma-separated list of fields of a resource. For additional fields, it is possible to use wildcard (`*`) to include all default fields before specifying addtional ones.
- * `fields_exclude`: coma-separated list of fields of a resource to exclude in the response. Since r2016062001, it is possible to use wildcard as a prefix (e.g. "*.key") to exclude the field everywhere.
+ * `fields_exclude`: coma-separated list of fields of a resource to exclude in the response. Since r2016062001, it is possible to use wildcard as a prefix (e.g. "\*.key") to exclude the field everywhere.
 
 ### Resource ordering
 For API method with list of resources, the resources can be ordered differently with the parameter `order`. List of supported orders will be specified for each method. The default order will always be `natural`. Most of the time, the natural order is the order of which each resource is added to the system (resource id for example).
@@ -904,13 +904,12 @@ List of posts in a thread (with pagination).
 
 Parameters:
 
- * `thread_id` (__required__): id of needed thread.
+ * `thread_id` (_optional_): id of the containing thread. Prior to forum-2017010301, this parameter was required.
+ * `page_of_post_id` (_optional_): id of a post, posts that are in the same page with the specified post will be returned. `thread_id` may be skipped. Since forum-2014092401.
+ * `post_ids` (_optional_): ids of needed posts (separated by comma). If this parameter is set, all other filtering parameters will be ignored. Since forum-2015032403.
  * `page` (_optional_): page number of posts.
- * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.
- * `order` (_optional_, since forum-2013122401): ordering of posts. Support `natural`, `natural_reverse`.
- * `page_of_post_id` (_optional_, since forum-2014092401): id of a post, the page number that contains the specified post will be used.
- * `post_ids` (_optional_): ids of needed posts (separated by comma). If this paramater is set, all other parameters will be ignored. Since forum-2015032403.
-
+ * `limit` (_optional_): number of posts in a page. Default value depends on the system configuration.
+ * `order` (_optional_): ordering of posts. Support `natural`, `natural_reverse` (since forum-2013122401), `post_create_date` (since forum-2017010301), `post_create_date_reverse` (since forum-2017010301).
 
 Required scopes:
 

@@ -6,6 +6,42 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
 
     protected $_bdApi_postsInThread_orderReverse = false;
 
+    public function bdApi_getPosts(array $conditions = array(), array $fetchOptions = array())
+    {
+        $stateLimit = $this->prepareStateLimitFromConditions($fetchOptions, 'post');
+
+        $orderClause = $this->bdApi_preparePostOrderOptions($fetchOptions);
+        $joinOptions = $this->preparePostJoinOptions($fetchOptions);
+        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
+
+        return $this->fetchAllKeyed($this->limitQueryResults("
+			SELECT post.*
+				$joinOptions[selectFields]
+			FROM xf_post AS post
+			    $joinOptions[joinTables]
+			WHERE ($stateLimit)
+                $orderClause
+		", $limitOptions['limit'], $limitOptions['offset']), 'post_id');
+    }
+
+    public function bdApi_countPosts(array $conditions = array(), array $fetchOptions = array())
+    {
+        $stateLimit = $this->prepareStateLimitFromConditions($fetchOptions, 'post');
+
+        return $this->_getDb()->fetchOne("
+			SELECT COUNT(*)
+			FROM xf_post AS post
+			WHERE ($stateLimit)
+		");
+    }
+
+    public function bdApi_preparePostOrderOptions(array $fetchOptions, $defaultOrderSql = '')
+    {
+        $choices = array('post_date' => 'post.post_date');
+
+        return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
+    }
+
     public function getPostsInThread($threadId, array $fetchOptions = array())
     {
         if (!empty($fetchOptions[self::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE])) {
