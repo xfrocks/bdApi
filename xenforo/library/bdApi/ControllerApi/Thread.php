@@ -16,38 +16,27 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
         $forumIdInput = $this->_input->filterSingle('forum_id', XenForo_Input::STRING);
         $sticky = $this->_input->filterSingle('sticky', XenForo_Input::STRING);
+        $stickyBool = intval($sticky) > 0;
+        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
 
-        if (strlen($forumIdInput) === 0) {
-            return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_requires_forum_id'), 400);
-        }
-        $forumIdInput = explode(',', $forumIdInput);
-        $forumIdInput = array_map('intval', $forumIdInput);
-
-        $forumIdArray = array();
+        $forumIdInput = preg_split('#[^0-9]#', $forumIdInput, -1, PREG_SPLIT_NO_EMPTY);
         $viewableNodes = $this->_getNodeModel()->getViewableNodeList();
-        if (in_array(0, $forumIdInput, true)) {
-            // accept 0 as a valid forum id
-            // TODO: support `child_forums` param
-            $forumIdArray[] = 0;
+        $viewableForums = array_filter($viewableNodes, create_function('$f', 'return $f["node_type_id"] === "Forum";'));
+        $forumIdArray = array_intersect($forumIdInput, array_keys($viewableForums));
+        if (count($forumIdArray) !== count($forumIdInput)) {
+            return $this->responseError(new XenForo_Phrase('requested_forum_not_found'), 404);
         }
-        foreach ($viewableNodes as $viewableNode) {
-            $viewableNode['node_id'] = intval($viewableNode['node_id']);
-            if (in_array($viewableNode['node_id'], $forumIdInput, true)) {
-                $forumIdArray[] = $viewableNode['node_id'];
-            }
-        }
-        if (empty($forumIdArray)) {
-            return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_requires_forum_id'), 400);
-        }
-        $forumIdArray = array_unique($forumIdArray);
+        $forumIdArray = array_unique(array_map('intval', $forumIdArray));
         asort($forumIdArray);
 
-        $pageNavParams = array('forum_id' => implode(',', $forumIdArray));
+        $theForumId = count($forumIdArray) === 1 ? reset($forumIdArray) : 0;
+        $theForum = null;
+
+        $pageNavParams = array();
         $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
         $limit = XenForo_Application::get('options')->discussionsPerPage;
 
-        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
         if (!empty($inputLimit)) {
             $limit = $inputLimit;
             $pageNavParams['limit'] = $inputLimit;
@@ -56,7 +45,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $conditions = array(
             'deleted' => false,
             'moderated' => false,
-            'node_id' => $forumIdArray,
             'sticky' => (intval($sticky) > 0),
         );
         $fetchOptions = array(
@@ -64,7 +52,26 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             'page' => $page
         );
 
+        if (!empty($forumIdArray)) {
+            $pageNavParams['forum_id'] = implode(',', $forumIdArray);
+            $conditions['node_id'] = $forumIdArray;
+        }
+
+        if ($theForumId > 0) {
+            // forum threads has sticky-mixed mode (see below)
+            $conditions['sticky'] = $stickyBool;
+        } elseif (is_numeric($sticky)) {
+            // otherwise only set the thread condition if found valid value for `sticky`
+            $conditions['sticky'] = $stickyBool;
+        }
+
         switch ($order) {
+            case 'natural':
+                if ($theForumId > 0) {
+                    $fetchOptions['order'] = 'last_post_date';
+                    $fetchOptions['orderDirection'] = 'desc';
+                }
+                break;
             case 'thread_create_date':
                 $fetchOptions['order'] = 'post_date';
                 $fetchOptions['orderDirection'] = 'asc';
@@ -86,21 +93,45 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                 $pageNavParams['order'] = $order;
                 break;
             case 'thread_view_count':
+                if ($theForumId <= 0) {
+                    return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_order_x_requires_forum_id',
+                        array('order' => $order)
+                    ), 400);
+                }
+
                 $fetchOptions['order'] = 'view_count';
                 $fetchOptions['orderDirection'] = 'asc';
                 $pageNavParams['order'] = $order;
                 break;
             case 'thread_view_count_reverse':
+                if ($theForumId <= 0) {
+                    return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_order_x_requires_forum_id',
+                        array('order' => $order)
+                    ), 400);
+                }
+
                 $fetchOptions['order'] = 'view_count';
                 $fetchOptions['orderDirection'] = 'desc';
                 $pageNavParams['order'] = $order;
                 break;
             case 'thread_post_count':
+                if ($theForumId <= 0) {
+                    return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_order_x_requires_forum_id',
+                        array('order' => $order)
+                    ), 400);
+                }
+
                 $fetchOptions['order'] = 'reply_count';
                 $fetchOptions['orderDirection'] = 'asc';
                 $pageNavParams['order'] = $order;
                 break;
             case 'thread_post_count_reverse':
+                if ($theForumId <= 0) {
+                    return $this->responseError(new XenForo_Phrase('bdapi_slash_threads_order_x_requires_forum_id',
+                        array('order' => $order)
+                    ), 400);
+                }
+
                 $fetchOptions['order'] = 'reply_count';
                 $fetchOptions['orderDirection'] = 'desc';
                 $pageNavParams['order'] = $order;
@@ -110,7 +141,10 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $fetchOptions = $this->_getThreadModel()->getFetchOptionsToPrepareApiData($fetchOptions);
         $threads = $this->_getThreadModel()->getThreads($conditions, $fetchOptions);
 
-        if (!is_numeric($sticky) && intval($page) <= 1) {
+        if ($theForumId > 0
+            && !is_numeric($sticky)
+            && intval($page) <= 1
+        ) {
             // mixed mode, put sticky threads on top of result if this is the first page
             // mixed mode is the active mode by default (no `sticky` param)
             // the two other modes related are: sticky mode (`sticky`=1) and non-sticky mode (`sticky`=0)
@@ -130,12 +164,14 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                     $_threads[$_threadId] = $threads[$_threadId];
                 }
                 $threads = $_threads;
+                unset($_threads);
             }
         }
 
-        $theForum = array();
-        if (!$this->_isFieldExcluded('forum') AND count($forumIdArray) == 1) {
-            $theForum = $this->_getForumModel()->getForumById(reset($forumIdArray),
+        if ($theForumId > 0
+            && !$this->_isFieldExcluded('forum')
+        ) {
+            $theForum = $this->_getForumModel()->getForumById($theForumId,
                 $this->_getForumModel()->getFetchOptionsToPrepareApiData());
         }
 
@@ -153,7 +189,8 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                 ->prepareApiDataForForum($theForum), array('forum'));
         }
 
-        bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'threads', array(), $pageNavParams);
+        bdApi_Data_Helper_Core::addPageLinks($this->getInput(),
+            $data, $limit, $total, $page, 'threads', array(), $pageNavParams);
 
         return $this->responseData('bdApi_ViewApi_Thread_List', $data);
     }

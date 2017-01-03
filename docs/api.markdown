@@ -527,12 +527,12 @@ List of threads in a forum (with pagination).
 
 Parameters:
 
- * `forum_id` (__required__): ids of needed forums (separated by comma). Support for multiple ids were added in forum-2014011801.
+ * `forum_id` (_optional_): ids of the containing forums (separated by comma). Support for multiple ids were added in forum-2014011801. Prior to forum-2017010302, this parameter was required.
+ * `thread_ids` (_optional_): ids of needed threads (separated by comma). If this parameter is set, all other filtering parameters will be ignored. Since forum-2015032401.
  * `sticky` (_optional_): filter to get only sticky (`sticky`=1) or non-sticky (`sticky`=0) threads. By default, all threads will be included and sticky ones will be at the top of the result on the first page. In mixed mode, sticky threads are not counted towards `threads_total` and does not affect pagination.
  * `page` (_optional_): page number of threads.
  * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.
- * `order` (_optional_): ordering of threads. Support `natural`, `thread_create_date`, `thread_create_date_reverse`, `thread_update_date`, `thread_update_date_reverse`.
- * `thread_ids` (_optional_): ids of needed threads (separated by comma). If this paramater is set, all other parameters will be ignored. Since forum-2015032401.
+ * `order` (_optional_): ordering of threads. Support `natural`, `thread_create_date`, `thread_create_date_reverse`, `thread_update_date`, `thread_update_date_reverse`, `thread_view_count` (since forum-2014011801), `thread_view_count_reverse` (since forum-2014011801), `thread_post_count` (since forum-2014011801), `thread_post_count_reverse` (since forum-2014011801).
 
 Required scopes:
 
