@@ -532,13 +532,25 @@ class bdApi_OAuth2_Storage implements
 
     public function checkUserCredentials($nameOrEmail, $password)
     {
+        /** @var XenForo_Model_Login $loginModel */
+        $loginModel = $this->_model->getModelFromCache('XenForo_Model_Login');
+        if ($loginModel->requireLoginCaptcha($nameOrEmail)) {
+            return false;
+        }
+
         $userId = $this->_model->getUserModel()->validateAuthentication($nameOrEmail, $password);
+
+        if (!$userId) {
+            $loginModel->logLoginAttempt($nameOrEmail);
+        }
 
         if (!$this->_checkUserCredentials_runTfaValidation($userId)) {
             return false;
         }
 
         if (!empty($userId)) {
+            $loginModel->clearLoginAttempts($nameOrEmail);
+
             return true;
         } else {
             return false;
