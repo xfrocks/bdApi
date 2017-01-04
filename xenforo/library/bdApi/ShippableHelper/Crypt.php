@@ -1,10 +1,10 @@
 <?php
 
-// updated by DevHelper_Helper_ShippableHelper at 2016-10-16T10:14:53+00:00
+// updated by DevHelper_Helper_ShippableHelper at 2017-01-04T10:20:22+00:00
 
 /**
  * Class bdApi_ShippableHelper_Crypt
- * @version 1
+ * @version 2
  * @see DevHelper_Helper_ShippableHelper_Crypt
  */
 class bdApi_ShippableHelper_Crypt
@@ -12,7 +12,7 @@ class bdApi_ShippableHelper_Crypt
     const ALGO_AES_128 = 'aes128';
     const ALGO_AES_256 = 'aes256';
 
-    const OPENSSL_METHOD_AES128 = 'aes-128-cbc';
+    const OPENSSL_METHOD_AES128 = 'aes-128-ecb';
     const OPENSSL_METHOD_AES256 = 'aes-256-cbc';
 
     public static function encrypt($data, $key = null, $algo = null)
