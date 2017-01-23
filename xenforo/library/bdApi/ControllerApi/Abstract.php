@@ -162,7 +162,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
                 continue;
             }
 
-            if (is_array($resourceData[$field])) {
+            if (is_array($resourceData[$field]) && count($resourceData[$field]) > 0) {
                 $_prefixes = $prefixes;
                 if (!is_int($field)) {
                     $_prefixes[] = $field;
