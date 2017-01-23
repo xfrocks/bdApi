@@ -242,6 +242,13 @@ class bdApi_Model_Log extends XenForo_Model
 
         $i = 0;
         foreach ($data as $key => &$value) {
+            $keyFirstChar = substr($key, 0, 1);
+            if ($keyFirstChar === '.'
+                || $keyFirstChar === '_'
+            ) {
+                continue;
+            }
+
             $i++;
             if ($i === 2) {
                 // only expand the first item in a pure array
