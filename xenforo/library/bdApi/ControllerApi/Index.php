@@ -28,7 +28,8 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
         $data['links'] = array(
             'search' => bdApi_Data_Helper_Core::safeBuildApiLink('search'),
             'navigation' => bdApi_Data_Helper_Core::safeBuildApiLink('navigation', array(), array('parent' => 0)),
-            'threads/recent' => bdApi_Data_Helper_Core::safeBuildApiLink('threads/recent'),
+            'threads/recent' => bdApi_Data_Helper_Core::safeBuildApiLink('threads/recent', array(),
+                array('data_limit' => XenForo_Application::get('options')->discussionsPerPage)),
             'users' => bdApi_Data_Helper_Core::safeBuildApiLink('users'),
         );
 
@@ -37,10 +38,11 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
             $data['links']['forums/followed'] = bdApi_Data_Helper_Core::safeBuildApiLink('forums/followed');
             $data['links']['notifications'] = bdApi_Data_Helper_Core::safeBuildApiLink('notifications');
             $data['links']['threads/followed'] = bdApi_Data_Helper_Core::safeBuildApiLink('threads/followed');
-            $data['links']['threads/new'] = bdApi_Data_Helper_Core::safeBuildApiLink('threads/new');
+            $data['links']['threads/new'] = bdApi_Data_Helper_Core::safeBuildApiLink('threads/new', array(),
+                array('data_limit' => XenForo_Application::get('options')->discussionsPerPage));
             $data['links']['users/ignored'] = bdApi_Data_Helper_Core::safeBuildApiLink('users/ignored');
-            $data['links']['users/me'] = bdApi_Data_Helper_Core::safeBuildApiLink('users', array(
-                'user_id' => XenForo_Visitor::getInstance()->toArray()), array('oauth_token' => ''));
+            $data['links']['users/me'] = bdApi_Data_Helper_Core::safeBuildApiLink('users',
+                XenForo_Visitor::getInstance()->toArray(), array('oauth_token' => ''));
 
             if ($visitor->canUpdateStatus()) {
                 $data['post']['status'] = bdApi_Data_Helper_Core::safeBuildApiLink('users/me/timeline');
