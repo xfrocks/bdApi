@@ -3,8 +3,10 @@
 class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
 {
     const FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE = 'bdApi_postsInThread_orderReverse';
+    const FETCH_OPTIONS_POSTS_IN_THREAD_REPLY_COUNT = 'bdApi_postsInThread_replyCount';
+    const FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE_DEFAULT = -1;
 
-    protected $_bdApi_postsInThread_orderReverse = false;
+    protected $_bdApi_postsInThread_orderReverse = self::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE_DEFAULT;
 
     public function bdApi_getPosts(array $conditions = array(), array $fetchOptions = array())
     {
@@ -44,24 +46,48 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
 
     public function getPostsInThread($threadId, array $fetchOptions = array())
     {
-        if (!empty($fetchOptions[self::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE])) {
-            $this->_bdApi_postsInThread_orderReverse = true;
+        if (!empty($fetchOptions[self::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE])
+            && isset($fetchOptions[self::FETCH_OPTIONS_POSTS_IN_THREAD_REPLY_COUNT])
+        ) {
+            $this->_bdApi_postsInThread_orderReverse = $fetchOptions[self::FETCH_OPTIONS_POSTS_IN_THREAD_REPLY_COUNT];
         }
 
-        return parent::getPostsInThread($threadId, $fetchOptions);
+        $posts = parent::getPostsInThread($threadId, $fetchOptions);
+
+        if (!empty($fetchOptions[self::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE])) {
+            $this->_bdApi_postsInThread_orderReverse = self::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE_DEFAULT;
+        }
+
+        return $posts;
+    }
+
+    public function addPositionLimit($table, $limit, $offset = 0, $column = 'position')
+    {
+        if ($this->_bdApi_postsInThread_orderReverse > self::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE_DEFAULT) {
+            if ($limit > 0) {
+                $columnRef = ($table ? "$table.$column" : $column);
+                $rangeUpper = $this->_bdApi_postsInThread_orderReverse - $offset;
+                $rangeLower = $rangeUpper - $limit;
+
+                return " AND ($columnRef > " . $rangeLower . " AND $columnRef <= " . $rangeUpper . ') ';
+            }
+        }
+
+        return parent::addPositionLimit($table, $limit, $offset, $column);
     }
 
     public function fetchAllKeyed($sql, $key, $bind = array(), $nullPrefix = '')
     {
-        if ($this->_bdApi_postsInThread_orderReverse) {
-            $sql = str_replace('ORDER BY post.position ASC, post.post_date ASC', 'ORDER BY post.position DESC, post.post_date DESC', $sql, $count);
+        if ($this->_bdApi_postsInThread_orderReverse > self::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE_DEFAULT) {
+            $sql = str_replace(
+                'ORDER BY post.position ASC, post.post_date ASC',
+                'ORDER BY post.position DESC, post.post_date DESC',
+                $sql, $count
+            );
 
             if ($count !== 1) {
                 throw new XenForo_Exception('Fatal Conflict: Could not change ORDER BY statement');
             }
-
-            // reset the flag
-            $this->_bdApi_postsInThread_orderReverse = false;
         }
 
         return parent::fetchAllKeyed($sql, $key, $bind, $nullPrefix);

@@ -71,6 +71,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 // load the class to make sure our constant is accessible
                 $this->_getPostModel();
                 $fetchOptions[bdApi_Extend_Model_Post::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE] = true;
+                $fetchOptions[bdApi_Extend_Model_Post::FETCH_OPTIONS_POSTS_IN_THREAD_REPLY_COUNT] = $thread['reply_count'];
                 $pageNavParams['order'] = $order;
                 break;
             case 'post_create_date':
