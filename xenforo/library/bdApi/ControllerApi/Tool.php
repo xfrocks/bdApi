@@ -92,6 +92,37 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $logoutLink);
     }
 
+    public function actionPostOtt()
+    {
+        if (!XenForo_Application::debugMode()) {
+            return $this->responseNoPermission();
+        }
+
+        $userId = 0;
+
+        $ttl = $this->_input->filterSingle('ttl', XenForo_Input::UINT);
+        if (empty($ttl)) {
+            return $this->responseNoPermission();
+        }
+        $timestamp = XenForo_Application::$time + $ttl;
+
+        $session = bdApi_Data_Helper_Core::safeGetSession();
+        if (!$session) {
+            return $this->responseNoPermission();
+        }
+        $clientId = $session->getOAuthClientId();
+        $clientSecret = $session->getOAuthClientSecret();
+        if (empty($clientId) || empty($clientSecret)) {
+            return $this->responseNoPermission();
+        }
+
+        $once = md5($userId . $timestamp . $clientSecret);
+        $ott = sprintf('%d,%d,%s,%s', $userId, $timestamp, $once, $clientId);
+        $data = array('ott' => $ott);
+
+        return $this->responseData('bdApi_ViewApi_Tool_Ott', $data);
+    }
+
     public function actionPostPasswordTest()
     {
         $input = $this->_input->filter(array(
