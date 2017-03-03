@@ -692,6 +692,8 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             }
         }
         if (!empty($forumIds)) {
+            $forumIds = array_map('intval', $forumIds);
+            $forumIds = array_unique($forumIds);
             $forums += $this->_getForumModel()->getForumsByIds($forumIds,
                 $this->_getForumModel()->getFetchOptionsToPrepareApiData());
         }
