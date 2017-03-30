@@ -51,6 +51,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             'limit' => $limit,
             'page' => $page
         );
+        $total = 0;
 
         if (!empty($forumIdArray)) {
             $pageNavParams['forum_id'] = implode(',', $forumIdArray);
@@ -66,31 +67,45 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         switch ($order) {
-            case 'natural':
-                if ($theForumId > 0) {
-                    $fetchOptions['order'] = 'last_post_date';
-                    $fetchOptions['orderDirection'] = 'desc';
-                }
-                break;
             case 'thread_create_date':
                 $fetchOptions['order'] = 'post_date';
                 $fetchOptions['orderDirection'] = 'asc';
                 $pageNavParams['order'] = $order;
+
+                if ($theForumId < 1) {
+                    // disable paging for this order if not in a forum
+                    $fetchOptions['page'] = 0;
+                }
                 break;
             case 'thread_create_date_reverse':
                 $fetchOptions['order'] = 'post_date';
                 $fetchOptions['orderDirection'] = 'desc';
                 $pageNavParams['order'] = $order;
+
+                if ($theForumId < 1) {
+                    // disable paging for this order if not in a forum
+                    $fetchOptions['page'] = 0;
+                }
                 break;
             case 'thread_update_date':
                 $fetchOptions['order'] = 'last_post_date';
                 $fetchOptions['orderDirection'] = 'asc';
                 $pageNavParams['order'] = $order;
+
+                if ($theForumId < 1) {
+                    // disable paging for this order if not in a forum
+                    $fetchOptions['page'] = 0;
+                }
                 break;
             case 'thread_update_date_reverse':
                 $fetchOptions['order'] = 'last_post_date';
                 $fetchOptions['orderDirection'] = 'desc';
                 $pageNavParams['order'] = $order;
+
+                if ($theForumId < 1) {
+                    // disable paging for this order if not in a forum
+                    $fetchOptions['page'] = 0;
+                }
                 break;
             case 'thread_view_count':
                 if ($theForumId <= 0) {
@@ -136,6 +151,24 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                 $fetchOptions['orderDirection'] = 'desc';
                 $pageNavParams['order'] = $order;
                 break;
+            default:
+                if ($theForumId > 0) {
+                    $fetchOptions['order'] = 'last_post_date';
+                    $fetchOptions['orderDirection'] = 'desc';
+                } else {
+                    // manually prepare threads total count for paging
+                    $total = $this->_getThreadModel()->bdApi_getLatestThreadId();
+
+                    $threadIdEnd = max(1, $fetchOptions['page']) * $fetchOptions['limit'];
+                    $threadIdStart = $threadIdEnd - $fetchOptions['limit'] + 1;
+                    $this->_getPostModel();
+                    $conditions[bdApi_Extend_Model_Thread::CONDITIONS_THREAD_ID] =
+                        array('>=<', $threadIdStart, $threadIdEnd);
+
+                    // paging was done by conditions (see above), remove it from fetch options
+                    $fetchOptions['page'] = 0;
+                }
+                break;
         }
 
         $fetchOptions = $this->_getThreadModel()->getFetchOptionsToPrepareApiData($fetchOptions);
@@ -177,11 +210,8 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
         $threadsData = $this->_prepareThreads($threads, $theForum);
 
-        $total = $this->_getThreadModel()->countThreads($conditions);
-
         $data = array(
             'threads' => $this->_filterDataMany($threadsData),
-            'threads_total' => $total,
         );
 
         if (!empty($theForum)) {
@@ -189,8 +219,14 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                 ->prepareApiDataForForum($theForum), array('forum'));
         }
 
-        bdApi_Data_Helper_Core::addPageLinks($this->getInput(),
-            $data, $limit, $total, $page, 'threads', array(), $pageNavParams);
+        if ($theForumId > 0) {
+            $total = $this->_getThreadModel()->countThreads($conditions);
+        }
+        if ($total > 0) {
+            $data['threads_total'] = $total;
+            bdApi_Data_Helper_Core::addPageLinks($this->getInput(),
+                $data, $limit, $total, $page, 'threads', array(), $pageNavParams);
+        }
 
         return $this->responseData('bdApi_ViewApi_Thread_List', $data);
     }

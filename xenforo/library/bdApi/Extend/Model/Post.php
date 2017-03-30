@@ -2,15 +2,31 @@
 
 class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
 {
+    const CONDITIONS_POST_ID = 'bdApi_postId';
     const FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE = 'bdApi_postsInThread_orderReverse';
     const FETCH_OPTIONS_POSTS_IN_THREAD_REPLY_COUNT = 'bdApi_postsInThread_replyCount';
     const FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE_DEFAULT = -1;
 
     protected $_bdApi_postsInThread_orderReverse = self::FETCH_OPTIONS_POSTS_IN_THREAD_ORDER_REVERSE_DEFAULT;
 
+    public function bdApi_getLatestPostId()
+    {
+        return $this->_getDb()->fetchOne('
+            SELECT post_id
+            FROM xf_post
+            ORDER BY post_id DESC
+            LIMIT 1
+        ');
+    }
+
     public function bdApi_getPosts(array $conditions = array(), array $fetchOptions = array())
     {
         $stateLimit = $this->prepareStateLimitFromConditions($fetchOptions, 'post');
+        $postIdCondition = '';
+        if (isset($conditions[self::CONDITIONS_POST_ID])) {
+            $postIdCondition = 'AND ' .
+                $this->getCutOffCondition('post.post_id', $conditions[self::CONDITIONS_POST_ID]);
+        }
 
         $orderClause = $this->bdApi_preparePostOrderOptions($fetchOptions);
         $joinOptions = $this->preparePostJoinOptions($fetchOptions);
@@ -21,20 +37,9 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
 				$joinOptions[selectFields]
 			FROM xf_post AS post
 			    $joinOptions[joinTables]
-			WHERE ($stateLimit)
+			WHERE ($stateLimit $postIdCondition)
                 $orderClause
 		", $limitOptions['limit'], $limitOptions['offset']), 'post_id');
-    }
-
-    public function bdApi_countPosts(array $conditions = array(), array $fetchOptions = array())
-    {
-        $stateLimit = $this->prepareStateLimitFromConditions($fetchOptions, 'post');
-
-        return $this->_getDb()->fetchOne("
-			SELECT COUNT(*)
-			FROM xf_post AS post
-			WHERE ($stateLimit)
-		");
     }
 
     public function bdApi_preparePostOrderOptions(array $fetchOptions, $defaultOrderSql = '')

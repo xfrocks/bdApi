@@ -53,12 +53,14 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             $page = floor($pageOfPost['position'] / $limit) + 1;
         }
 
+        $conditions = array();
         $fetchOptions = array(
             'deleted' => false,
             'moderated' => false,
             'limit' => $limit,
             'page' => $page
         );
+        $total = 0;
 
         switch ($order) {
             case 'natural_reverse':
@@ -81,6 +83,9 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                     ), 400);
                 }
 
+                // disable paging for this order
+                $fetchOptions['page'] = 0;
+
                 $fetchOptions['order'] = 'post_date';
                 $fetchOptions['direction'] = 'asc';
                 $pageNavParams['order'] = $order;
@@ -92,10 +97,26 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                     ), 400);
                 }
 
+                // disable paging for this order
+                $fetchOptions['page'] = 0;
+
                 $fetchOptions['order'] = 'post_date';
                 $fetchOptions['direction'] = 'desc';
                 $pageNavParams['order'] = $order;
                 break;
+            default:
+                if ($threadId < 1) {
+                    // manually prepare posts total count for paging
+                    $total = $this->_getPostModel()->bdApi_getLatestPostId();
+
+                    $postIdEnd = max(1, $fetchOptions['page']) * $fetchOptions['limit'];
+                    $postIdStart = $postIdEnd - $fetchOptions['limit'] + 1;
+                    $conditions[bdApi_Extend_Model_Post::CONDITIONS_POST_ID] =
+                        array('>=<', $postIdStart, $postIdEnd);
+
+                    // paging was done by conditions (see above), remove it from fetch options
+                    $fetchOptions['page'] = 0;
+                }
         }
 
         if (!empty($thread['thread_id'])) {
@@ -104,20 +125,16 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 $this->_getPostModel()->getFetchOptionsToPrepareApiData($fetchOptions));
             $total = $thread['reply_count'] + 1;
         } else {
-            $conditions = array();
             $posts = $this->_getPostModel()->bdApi_getPosts(
                 $conditions,
                 $this->_getPostModel()->getFetchOptionsToPrepareApiData($fetchOptions)
             );
-            $total = $this->_getPostModel()->bdApi_countPosts($conditions, $fetchOptions);
         }
 
         $postsData = $this->_preparePosts($posts, $thread, $forum);
 
         $data = array(
             'posts' => $this->_filterDataMany($postsData),
-            'posts_total' => $total,
-
             '_thread' => $thread,
         );
 
@@ -138,8 +155,11 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             }
         }
 
-        bdApi_Data_Helper_Core::addPageLinks($this->getInput(),
-            $data, $limit, $total, $page, 'posts', array(), $pageNavParams);
+        if ($total > 0) {
+            $data['posts_total'] = $total;
+            bdApi_Data_Helper_Core::addPageLinks($this->getInput(),
+                $data, $limit, $total, $page, 'posts', array(), $pageNavParams);
+        }
 
         return $this->responseData('bdApi_ViewApi_Post_List', $data);
     }

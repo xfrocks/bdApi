@@ -44,17 +44,27 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             'order' => bdApi_Extend_Model_User::ORDER_USER_ID,
         );
 
+        // manually prepare users total count for paging
+        $total = $userModel->bdApi_getLatestUserId();
+
+        $userIdEnd = max(1, $fetchOptions['page']) * $fetchOptions['limit'];
+        $userIdStart = $userIdEnd - $fetchOptions['limit'] + 1;
+        $conditions[bdApi_Extend_Model_User::CONDITIONS_USER_ID] =
+            array('>=<', $userIdStart, $userIdEnd);
+
+        // paging was done by conditions (see above), remove it from fetch options
+        $fetchOptions['page'] = 0;
+
         $users = $userModel->getUsers($conditions, $userModel->getFetchOptionsToPrepareApiData($fetchOptions));
         $usersData = $this->_prepareUsers($users);
-
-        $total = $userModel->countUsers($conditions);
 
         $data = array(
             'users' => $this->_filterDataMany($usersData),
             'users_total' => $total,
         );
 
-        bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'users', array(), $pageNavParams);
+        bdApi_Data_Helper_Core::addPageLinks($this->getInput(),
+            $data, $limit, $total, $page, 'users', array(), $pageNavParams);
 
         return $this->responseData('bdApi_ViewApi_User_List', $data);
     }

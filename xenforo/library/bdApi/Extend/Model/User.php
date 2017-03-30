@@ -2,8 +2,19 @@
 
 class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 {
+    const CONDITIONS_USER_ID = 'bdApi_userId';
     const FETCH_IS_FOLLOWED = 'bdApi_followedUserId';
-    const ORDER_USER_ID = 'bdApi_user_id';
+    const ORDER_USER_ID = 'bdApi_userId';
+
+    public function bdApi_getLatestUserId()
+    {
+        return $this->_getDb()->fetchOne('
+            SELECT user_id
+            FROM xf_user
+            ORDER BY user_id DESC
+            LIMIT 1
+        ');
+    }
 
     public function bdApi_countUsersBeingFollowedByUserId($userId)
     {
@@ -26,6 +37,21 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
             WHERE follow_user_id IN (' . $this->_getDb()->quote($userIds) . ')
             GROUP BY follow_user_id
         ');
+    }
+
+    public function prepareUserConditions(array $conditions, array &$fetchOptions)
+    {
+        $sqlConditions = array(parent::prepareUserConditions($conditions, $fetchOptions));
+
+        if (isset($conditions[self::CONDITIONS_USER_ID])) {
+            $sqlConditions[] = $this->getCutOffCondition('user.user_id', $conditions[self::CONDITIONS_USER_ID]);
+        }
+
+        if (count($sqlConditions) > 1) {
+            return $this->getConditionsForClause($sqlConditions);
+        } else {
+            return $sqlConditions[0];
+        }
     }
 
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())

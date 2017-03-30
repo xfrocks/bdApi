@@ -2,8 +2,20 @@
 
 class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
 {
+    const CONDITIONS_THREAD_ID = 'bdApi_threadId';
+
     protected $_bdApi_polls = array();
     protected $_bdApi_limitQueryResults_nodeId = false;
+
+    public function bdApi_getLatestThreadId()
+    {
+        return $this->_getDb()->fetchOne('
+            SELECT thread_id
+            FROM xf_thread
+            ORDER BY thread_id DESC
+            LIMIT 1
+        ');
+    }
 
     public function bdApi_getLatestPostIds(array $threadIds, $limit = null)
     {
@@ -30,6 +42,21 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
         ');
 
         return $postIds;
+    }
+
+    public function prepareThreadConditions(array $conditions, array &$fetchOptions)
+    {
+        $sqlConditions = array(parent::prepareThreadConditions($conditions, $fetchOptions));
+
+        if (isset($conditions[self::CONDITIONS_THREAD_ID])) {
+            $sqlConditions[] = $this->getCutOffCondition('thread.thread_id', $conditions[self::CONDITIONS_THREAD_ID]);
+        }
+
+        if (count($sqlConditions) > 1) {
+            return $this->getConditionsForClause($sqlConditions);
+        } else {
+            return $sqlConditions[0];
+        }
     }
 
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
