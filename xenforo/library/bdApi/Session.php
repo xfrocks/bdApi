@@ -163,6 +163,10 @@ class bdApi_Session extends XenForo_Session
         $session = new bdApi_Session();
         $session->start();
 
+        // XenForo_ControllerPublic_Abstract::_executeTrophyUpdate
+        // avoid running trophy check
+        $session->set('trophyChecked', true);
+
         // XenForo_ControllerPublic_Abstract::_executePromotionUpdate
         // avoid running promotion check
         $session->set('promotionChecked', true);
