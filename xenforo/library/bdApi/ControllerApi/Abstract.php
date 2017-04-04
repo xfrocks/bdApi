@@ -288,10 +288,12 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
             $this->_fieldsFilterType = self::FIELDS_FILTER_NONE;
 
             // use values from this request specifically
+            $filterPrefix = $this->_input->filterSingle('fields_filter_prefix', XenForo_Input::STRING);
+            $filterPrefixLength = strlen($filterPrefix);
             $include = $this->_input->filterSingle('fields_include', XenForo_Input::STRING);
             $exclude = $this->_input->filterSingle('fields_exclude', XenForo_Input::STRING);
-            if (empty($include) && empty($exclude)) {
-                // use values from $_GET, useful with /search or /batch
+            if ($filterPrefixLength > 0 && empty($include) && empty($exclude)) {
+                // use values from $_GET if a prefix is specified
                 $include = filter_input(INPUT_GET, 'fields_include');
                 $exclude = filter_input(INPUT_GET, 'fields_exclude');
             }
@@ -300,6 +302,14 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
                 $this->_fieldsFilterType |= self::FIELDS_FILTER_INCLUDE;
                 foreach (explode(',', $include) as $field) {
                     $field = trim($field);
+                    if ($filterPrefixLength > 0) {
+                        if (substr($field, 0, $filterPrefixLength) !== $filterPrefix) {
+                            continue;
+                        } else {
+                            $field = substr($field, $filterPrefixLength);
+                        }
+                    }
+
                     $prefixes = explode('.', $field);
                     $_field = array_pop($prefixes);
                     $_prefixes = implode('.', $prefixes);
@@ -322,6 +332,14 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
                 $this->_fieldsFilterType |= self::FIELDS_FILTER_EXCLUDE;
                 foreach (explode(',', $exclude) as $field) {
                     $field = trim($field);
+                    if ($filterPrefixLength > 0) {
+                        if (substr($field, 0, $filterPrefixLength) !== $filterPrefix) {
+                            continue;
+                        } else {
+                            $field = substr($field, $filterPrefixLength);
+                        }
+                    }
+
                     $this->_fieldsFilterExclude[] = $field;
 
                     if (strpos($field, '*') !== false) {

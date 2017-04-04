@@ -54,8 +54,11 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         $search = $this->_getSearchModel()->prepareSearch($search);
         $pageResultIds = $this->_getSearchModel()->sliceSearchResultsToPage($search, $page, $limit);
         $results = $this->_getSearchModel()->prepareApiDataForSearchResults($pageResultIds);
-
-        $contentData = $this->_getSearchModel()->prepareApiContentDataForSearch($results);
+        if (!$this->_isFieldExcluded('content')) {
+            $contentData = $this->_getSearchModel()->prepareApiContentDataForSearch($results);
+        } else {
+            $contentData = $results;
+        }
 
         $data = array(
             '_search' => $search,

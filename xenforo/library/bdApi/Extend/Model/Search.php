@@ -116,6 +116,7 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
 
         $dataJobParams = array();
         $dataJobParams['thread_ids'] = implode(',', array_keys($threadIds));
+        $dataJobParams['fields_filter_prefix'] = 'content.';
         $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'threads', $dataJobParams);
 
         if (isset($dataJob['_job_response'])
@@ -143,6 +144,7 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
 
         $dataJobParams = array();
         $dataJobParams['post_ids'] = implode(',', array_keys($postIds));
+        $dataJobParams['fields_filter_prefix'] = 'content.';
         $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'posts', $dataJobParams);
 
         if (isset($dataJob['_job_response'])
@@ -188,6 +190,7 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
 
         $dataJobParams = array();
         $dataJobParams['profile_post_ids'] = implode(',', array_keys($profilePostIds));
+        $dataJobParams['fields_filter_prefix'] = 'content.';
         $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'profile-posts', $dataJobParams);
 
         if (isset($dataJob['_job_response'])
