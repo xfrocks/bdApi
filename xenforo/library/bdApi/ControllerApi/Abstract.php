@@ -483,7 +483,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
     {
         parent::_assertBoardActive($action);
 
-        if (strpos($action, 'Get') !== 0
+        if (strtoupper($this->_request->getMethod()) !== 'GET'
             && XenForo_Application::isRegistered('_bdCloudServerHelper_readonly')
         ) {
             $response = $this->responseError(new XenForo_Phrase('bdcsh_forum_is_currently_read_only'), 503);
