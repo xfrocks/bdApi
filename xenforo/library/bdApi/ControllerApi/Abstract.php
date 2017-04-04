@@ -530,6 +530,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         }
 
         $params = $this->_request->getUserParams();
+        if (!empty($params['_isApiJob'])) {
+            return;
+        }
+
         $this->_prepareSessionActivityForApi($controllerName, $action, $params);
 
         /** @var XenForo_Model_User $userModel */

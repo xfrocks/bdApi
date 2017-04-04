@@ -35,6 +35,7 @@ class bdApi_Data_Helper_Batch
         $fc = self::getFc();
 
         $request = new bdApi_Zend_Controller_Request_Http(bdApi_Data_Helper_Core::safeConvertApiUriToAbsoluteUri($uri, true));
+        $request->setParam('_isApiJob', true);
         $request->setMethod($method);
         foreach ($params as $key => $value) {
             $request->setParam($key, $value);
