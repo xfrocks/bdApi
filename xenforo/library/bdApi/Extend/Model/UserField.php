@@ -19,55 +19,54 @@ class bdApi_Extend_Model_UserField extends XFCP_bdApi_Extend_Model_UserField
         $data = array();
 
         $publicKeys = array(
+            'field_id' => 'id',
             'title' => 'title',
             'description' => 'description',
             'display_group' => 'display_group',
         );
-        if (!empty($field['isChoice'])) {
-            $publicKeys['fieldChoices'] = 'choices';
-            $data['is_multi_choice'] = !empty($field['isMultiChoice']);
-        }
 
         $data += bdApi_Data_Helper_Core::filter($field, $publicKeys);
-        $data['is_required'] = !empty($field['required']);
 
-        if (!empty($data['choices'])) {
-            $choices = array();
-            foreach ($data['choices'] as $key => $value) {
-                $choices[] = array(
-                    'key' => strval($key),
-                    'value' => strval($value),
-                );
+        $hasChoices = false;
+        if (!empty($field['isChoice'])) {
+            $hasChoices = !empty($field['fieldChoices']);
+        }
+
+        if (true) {
+            // always prepare choices
+            $data['is_required'] = !empty($field['required']);
+            if ($hasChoices) {
+                $data['is_multi_choice'] = !empty($field['isMultiChoice']);
+                $data['choices'] = array();
+                foreach ($field['fieldChoices'] as $key => $value) {
+                    $data['choices'][] = array(
+                        'key' => strval($key),
+                        'value' => strval($value),
+                    );
+                }
             }
-            $data['choices'] = $choices;
         }
 
         if ($fieldValue !== null) {
-            if (!empty($data['choices'])) {
-                // choices
+            if ($hasChoices) {
                 if (is_array($field['field_value'])) {
-                    // array
+                    // multi choices
                     $fieldValueIds = array_keys($field['field_value']);
                 } else {
-                    // single
+                    // single choice
                     $fieldValueIds = array($field['field_value']);
                 }
 
                 $data['values'] = array();
                 foreach ($fieldValueIds as $fieldValueId) {
-                    $choiceValue = null;
-                    foreach ($data['choices'] as $choice) {
-                        if ($choice['key'] == $fieldValueId) {
-                            $choiceValue = $choice['value'];
-                        }
+                    if (!isset($field['fieldChoices'][$fieldValueId])) {
+                        continue;
                     }
 
-                    if ($choiceValue !== null) {
-                        $data['values'][] = array(
-                            'key' => strval($fieldValueId),
-                            'value' => $choiceValue,
-                        );
-                    }
+                    $data['values'][] = array(
+                        'key' => strval($fieldValueId),
+                        'value' => $field['fieldChoices'][$fieldValueId],
+                    );
                 }
             } else {
                 // text

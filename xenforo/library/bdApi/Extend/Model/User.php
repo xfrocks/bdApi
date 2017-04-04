@@ -183,7 +183,7 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
             $auth = $this->getUserAuthenticationObjectByUserId($user['user_id']);
             $data['user_has_password'] = $auth->hasPassword();
 
-            $data['user_fields'] = $this->prepareApiDataForUserFields($user);
+            $data['fields'] = $this->prepareApiDataForUserFields($user);
 
             $thisUserGroups = array();
             $userGroups = $userGroupModel->bdApi_getAllUserGroupsCached();
@@ -220,7 +220,7 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
                 'user_dob_month' => false,
                 'user_dob_year' => false,
 
-                'user_fields' => true,
+                'fields' => true,
             );
 
             if ($isAdminRequest) {
@@ -264,7 +264,8 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
     {
         $data = array();
 
-        foreach (array('about' => 'about',
+        foreach (array(
+                     'about' => 'about',
                      'homepage' => 'home_page',
                      'location' => 'location',
                      'occupation' => 'occupation',
@@ -273,10 +274,11 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
                 continue;
             }
 
-            $data[$systemFieldId] = array(
+            $data[] = array(
+                'id' => $systemFieldId,
                 'title' => new XenForo_Phrase($titlePhraseTitle),
                 'description' => '',
-                'display_group' => 'personal',
+                'position' => 'personal',
                 'is_required' => false,
                 'value' => $user[$systemFieldId],
             );
@@ -291,7 +293,7 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
             foreach ($fields as $fieldId => $field) {
                 $fieldValue = isset($values[$fieldId]) ? $values[$fieldId] : null;
                 $fieldData = $fieldModel->prepareApiDataForField($field, $fieldValue);
-                $data[$fieldId] = $fieldData;
+                $data[] = $fieldData;
             }
         }
 

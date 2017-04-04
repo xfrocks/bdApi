@@ -1308,8 +1308,9 @@ Detail information of a user.
             user_is_verified: (boolean),
             user_is_followed: (boolean), # since forum-2014052902
             user_is_ignored: (boolean), # since forum-2015072303
-            *user_fields: { # since forum-2015100703
-                (field_id): {
+            *fields: [ # since forum-2017040402
+                {
+                    id: (string),
                     title: (string),
                     description: (string),
                     display_group: (string),
@@ -1331,7 +1332,8 @@ Detail information of a user.
                         ...
                     ]
                 },
-            },
+                ...
+            ],
             *user_groups: [ # since forum-2014092301
                 {
                     user_group_id: (int),
@@ -1369,7 +1371,7 @@ Detail information of a user.
                 user_dob_day: (boolean),
                 user_dob_month: (boolean),
                 user_dob_year: (boolean),
-                user_fields: (boolean)
+                fields: (boolean) # since forum-2017040402
             }
         },
         subscription_callback: (uri) # since subscription-2014092301
@@ -1409,7 +1411,7 @@ Parameters:
  * `user_dob_month` (_optional_): new date of birth (month) of the user.
  * `user_dob_year` (_optional_): new date of birth (year) of the user.
 
- * `user_fields` (_optional_): array of values for user fields. If the field is not of choice type, the value should be a string. If the field is single choice, the value should be a key of the choice. If the field is multiple choice, the value should be an array of keys. Since forum-2015100703.
+ * `fields` (_optional_): array of values for user fields. If the field is not of choice type, the value should be a string. If the field is single choice, the value should be a key of the choice. If the field is multiple choice, the value should be an array of keys. Since forum-2017040402.
 
 Required scopes:
 

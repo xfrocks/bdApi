@@ -310,7 +310,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             'user_dob_month' => XenForo_Input::UINT,
             'user_dob_year' => XenForo_Input::UINT,
 
-            'user_fields' => XenForo_Input::ARRAY_SIMPLE,
+            'fields' => XenForo_Input::ARRAY_SIMPLE,
         ));
 
         $user = $this->_getUserOrError();
@@ -440,8 +440,8 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             }
         }
 
-        if (!empty($input['user_fields'])) {
-            $profileFieldsInput = new XenForo_Input($input['user_fields']);
+        if (!empty($input['fields'])) {
+            $profileFieldsInput = new XenForo_Input($input['fields']);
             $profileFields = $profileFieldsInput->filter(array(
                 'about' => XenForo_Input::STRING,
                 'homepage' => XenForo_Input::STRING,
@@ -449,7 +449,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
                 'occupation' => XenForo_Input::STRING,
             ));
             $writer->bulkSet($profileFields);
-            $writer->setCustomFields($input['user_fields']);
+            $writer->setCustomFields($input['fields']);
         }
 
         $writer->preSave();
