@@ -22,7 +22,7 @@ class bdApi_Extend_Model_UserField extends XFCP_bdApi_Extend_Model_UserField
             'field_id' => 'id',
             'title' => 'title',
             'description' => 'description',
-            'display_group' => 'display_group',
+            'display_group' => 'position',
         );
 
         $data += bdApi_Data_Helper_Core::filter($field, $publicKeys);
