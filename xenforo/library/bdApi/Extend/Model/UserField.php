@@ -30,13 +30,13 @@ class bdApi_Extend_Model_UserField extends XFCP_bdApi_Extend_Model_UserField
         $hasChoices = false;
         if (!empty($field['isChoice'])) {
             $hasChoices = !empty($field['fieldChoices']);
+            $data['is_multi_choice'] = !empty($field['isMultiChoice']);
         }
 
         if (true) {
             // always prepare choices
             $data['is_required'] = !empty($field['required']);
             if ($hasChoices) {
-                $data['is_multi_choice'] = !empty($field['isMultiChoice']);
                 $data['choices'] = array();
                 foreach ($field['fieldChoices'] as $key => $value) {
                     $data['choices'][] = array(
