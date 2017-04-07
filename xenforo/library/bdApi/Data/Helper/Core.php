@@ -86,7 +86,7 @@ class bdApi_Data_Helper_Core
         $pageNav['pages'] = ceil($totalItems / $perPage);
         $pageMax = bdApi_Option::get('paramPageMax');
         if ($pageMax > 0) {
-            $pageNav['pages'] = min(bdApi_Option::get('paramPageMax'), $pageNav['pages']);
+            $pageNav['pages'] = min($pageMax, $pageNav['pages']);
         }
         $pageNav['pages'] = intval($pageNav['pages']);
         if ($pageNav['pages'] < 2) {

@@ -119,6 +119,14 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         return parent::responseError(reset($errors), $responseCode, $containerParams);
     }
 
+    /**
+     * Filters param `limit` and `page` from request input.
+     *
+     * @param array $pageNavParams
+     * @param string $limitVarName
+     * @param string $pageVarName
+     * @return array
+     */
     public function filterLimitAndPage(array &$pageNavParams = array(), $limitVarName = 'limit', $pageVarName = 'page')
     {
         $limitDefault = bdApi_Option::get('paramLimitDefault');;
