@@ -328,13 +328,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         }
 
         $pageNavParams = array();
-
-        $limit = XenForo_Application::get('options')->messagesPerPage;
-        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
-        if (!empty($inputLimit)) {
-            $limit = $inputLimit;
-            $pageNavParams['limit'] = $inputLimit;
-        }
+        list($limit,) = $this->filterLimitAndPage($pageNavParams);
 
         if (!empty($pageOfComment)) {
             $beforeDate = $pageOfComment['comment_date'] + 1;

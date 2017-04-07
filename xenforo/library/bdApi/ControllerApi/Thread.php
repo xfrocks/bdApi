@@ -17,7 +17,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $forumIdInput = $this->_input->filterSingle('forum_id', XenForo_Input::STRING);
         $sticky = $this->_input->filterSingle('sticky', XenForo_Input::STRING);
         $stickyBool = intval($sticky) > 0;
-        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
 
         $forumIdInput = preg_split('#[^0-9]#', $forumIdInput, -1, PREG_SPLIT_NO_EMPTY);
@@ -34,13 +33,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $theForum = null;
 
         $pageNavParams = array();
-        $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
-        $limit = XenForo_Application::get('options')->discussionsPerPage;
-
-        if (!empty($inputLimit)) {
-            $limit = $inputLimit;
-            $pageNavParams['limit'] = $inputLimit;
-        }
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
 
         $conditions = array(
             'deleted' => false,
@@ -496,14 +489,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         $pageNavParams = array();
-        $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
-        $limit = XenForo_Application::get('options')->discussionsPerPage;
-
-        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
-        if (!empty($inputLimit)) {
-            $limit = $inputLimit;
-            $pageNavParams['limit'] = $inputLimit;
-        }
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
 
         $fetchOptions = array(
             'limit' => $limit,
@@ -641,7 +627,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     public function actionGetNew()
     {
         $forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
-        $limit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
 
         $this->_assertRegistrationRequired();
 
@@ -649,6 +634,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $threadModel = $this->_getThreadModel();
 
         $maxResults = XenForo_Application::getOptions()->get('maximumSearchResults');
+        list($limit,) = $this->filterLimitAndPage();
         if ($limit > 0) {
             $maxResults = min($maxResults, $limit);
         }
@@ -675,8 +661,8 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             $days = max(7, XenForo_Application::get('options')->readMarkingDataLifetime);
         }
 
-        $limit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
         $maxResults = XenForo_Application::getOptions()->get('maximumSearchResults');
+        list($limit,) = $this->filterLimitAndPage();
         if ($limit > 0) {
             $maxResults = min($maxResults, $limit);
         }
@@ -869,7 +855,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
         $data = array('threads' => $results);
 
-        $dataLimit = $this->_input->filterSingle('data_limit', XenForo_Input::UINT);
+        list($dataLimit,) = $this->filterLimitAndPage($tempArray, 'data_limit');
         if ($dataLimit > 0) {
             $searchResults = array();
             foreach ($results as $result) {

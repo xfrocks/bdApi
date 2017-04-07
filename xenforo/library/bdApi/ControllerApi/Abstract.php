@@ -119,6 +119,34 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         return parent::responseError(reset($errors), $responseCode, $containerParams);
     }
 
+    public function filterLimitAndPage(array &$pageNavParams = array(), $limitVarName = 'limit', $pageVarName = 'page')
+    {
+        $limitDefault = bdApi_Option::get('paramLimitDefault');;
+        $limit = $limitDefault;
+        $limitInput = $this->_input->filterSingle($limitVarName, XenForo_Input::STRING);
+        if (strlen($limitInput) > 0) {
+            $limit = intval($limitInput);
+
+            $limitMax = bdApi_Option::get('paramLimitMax');
+            if ($limitMax > 0) {
+                $limit = min($limitMax, $limit);
+            }
+        }
+        $limit = max(1, $limit);
+        if ($limit - $limitDefault !== 0) {
+            $pageNavParams[$limitVarName] = $limit;
+        }
+
+        $page = $this->_input->filterSingle($pageVarName, XenForo_Input::UINT);
+        $pageMax = bdApi_Option::get('paramPageMax');
+        if ($pageMax > 0) {
+            $page = min(bdApi_Option::get('paramPageMax'), $page);
+        }
+        $page = max(1, $page);
+
+        return array(intval($limit), intval($page));
+    }
+
     /**
      * Filters data for many resources.
      * This method name had been prefixed with "_" before it was updated to public visibility.

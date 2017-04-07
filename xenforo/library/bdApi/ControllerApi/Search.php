@@ -43,13 +43,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         }
 
         $pageNavParams = array();
-        $page = max(1, $this->_input->filterSingle('page', XenForo_Input::UINT));
-        $limit = XenForo_Application::get('options')->searchResultsPerPage;
-        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
-        if ($inputLimit > 0) {
-            $limit = min($limit, $inputLimit);
-            $pageNavParams['limit'] = $limit;
-        }
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
 
         $search = $this->_getSearchModel()->prepareSearch($search);
         $pageResultIds = $this->_getSearchModel()->sliceSearchResultsToPage($search, $page, $limit);
@@ -334,7 +328,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             case 'post':
                 // only these two legacy content types support `limit` param while searching
                 // others use `limit` to control how many pieces of data are returned
-                $limit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
+                list($limit,) = $this->filterLimitAndPage();
                 if ($limit > 0) {
                     $maxResults = min($maxResults, $limit);
                 }
@@ -381,9 +375,13 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     protected function _fetchResultsData(array $results)
     {
+        if (empty($results)) {
+            return $results;
+        }
+
         // WARNING: only two legacy types (thread & post) use `data_limit` param
-        $dataLimit = $this->_input->filterSingle('data_limit', XenForo_Input::UINT);
-        if (empty($dataLimit) || empty($results)) {
+        list($dataLimit,) = $this->filterLimitAndPage($tempArray, 'data_limit');
+        if (empty($dataLimit)) {
             return array();
         }
 

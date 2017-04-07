@@ -20,7 +20,6 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
         $pageOfPostId = $this->_input->filterSingle('page_of_post_id', XenForo_Input::UINT);
-        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
 
         if ($threadId > 0) {
@@ -41,14 +40,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         }
 
         $pageNavParams = array();
-        $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
-        $limit = XenForo_Application::get('options')->messagesPerPage;
-
-        if (!empty($inputLimit)) {
-            $limit = $inputLimit;
-            $pageNavParams['limit'] = $inputLimit;
-        }
-
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
         if (!empty($pageOfPost)) {
             $page = floor($pageOfPost['position'] / $limit) + 1;
         }

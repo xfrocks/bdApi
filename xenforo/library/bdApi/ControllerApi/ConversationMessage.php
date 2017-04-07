@@ -26,14 +26,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $conversation = $this->_getConversationOrError($conversationId);
 
         $pageNavParams = array('conversation_id' => $conversation['conversation_id']);
-        $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
-        $limit = XenForo_Application::get('options')->messagesPerPage;
-
-        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
-        if (!empty($inputLimit)) {
-            $limit = $inputLimit;
-            $pageNavParams['limit'] = $inputLimit;
-        }
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
 
         $fetchOptions = array(
             'limit' => $limit,

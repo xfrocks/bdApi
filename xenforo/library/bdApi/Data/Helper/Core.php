@@ -53,9 +53,21 @@ class bdApi_Data_Helper_Core
      * @param array $linkParams
      * @param array $options
      */
-    public static function addPageLinks(XenForo_Input $input, array &$data, $perPage, $totalItems, $page, $linkType, $linkData = null, array $linkParams = array(), array $options = array())
-    {
-        if (empty($perPage)) {
+    public static function addPageLinks(
+        XenForo_Input $input,
+        array &$data,
+        $perPage,
+        $totalItems,
+        $page,
+        $linkType,
+        $linkData = null,
+        array $linkParams = array(),
+        array $options = array()
+    ) {
+        $perPage = intval($perPage);
+        $totalItems = intval($totalItems);
+        $page = max(1, intval($page));
+        if ($perPage < 1) {
             return;
         }
 
@@ -65,19 +77,19 @@ class bdApi_Data_Helper_Core
             'fields_include' => XenForo_Input::STRING,
             'fields_exclude' => XenForo_Input::STRING,
         ));
-        if (!empty($inputData['fields_include'])) {
+        if (isset($inputData['fields_include'])) {
             $linkParams['fields_include'] = $inputData['fields_include'];
-        } elseif (!empty($inputData['fields_exclude'])) {
+        } elseif (isset($inputData['fields_exclude'])) {
             $linkParams['fields_exclude'] = $inputData['fields_exclude'];
         }
 
-        if (empty($page)) {
-            $page = 1;
-        }
-
         $pageNav['pages'] = ceil($totalItems / $perPage);
-
-        if ($pageNav['pages'] <= 1) {
+        $pageMax = bdApi_Option::get('paramPageMax');
+        if ($pageMax > 0) {
+            $pageNav['pages'] = min(bdApi_Option::get('paramPageMax'), $pageNav['pages']);
+        }
+        $pageNav['pages'] = intval($pageNav['pages']);
+        if ($pageNav['pages'] < 2) {
             // do not do anything if there is only 1 page (or no pages)
             return;
         }
@@ -86,12 +98,17 @@ class bdApi_Data_Helper_Core
 
         if ($page > 1) {
             // a previous link should only be added if we are not at page 1
-            $pageNav['prev'] = bdApi_Data_Helper_Core::safeBuildApiLink($linkType, $linkData, array_merge($linkParams, array('page' => $page - 1)));
+            $prevLinkParams = $linkParams;
+            if ($page > 2) {
+                $prevLinkParams['page'] = $page - 1;
+            }
+            $pageNav['prev'] = bdApi_Data_Helper_Core::safeBuildApiLink($linkType, $linkData, $prevLinkParams);
         }
 
         if ($page < $pageNav['pages']) {
             // a next link should only be added if we are not at the last page
-            $pageNav['next'] = bdApi_Data_Helper_Core::safeBuildApiLink($linkType, $linkData, array_merge($linkParams, array('page' => $page + 1)));
+            $pageNav['next'] = bdApi_Data_Helper_Core::safeBuildApiLink($linkType, $linkData,
+                array_merge($linkParams, array('page' => $page + 1)));
         }
 
         // add the page navigation into `links`

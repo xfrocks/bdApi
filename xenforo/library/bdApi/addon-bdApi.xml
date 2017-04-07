@@ -656,6 +656,26 @@ step=30</edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdApi" display_order="1000"/>
     </option>
+    <option option_id="bdApi_paramLimitDefault" edit_format="spinbox" data_type="positive_integer" can_backup="1">
+      <default_value>20</default_value>
+      <edit_format_params>min=1
+step=10</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApi" display_order="500"/>
+    </option>
+    <option option_id="bdApi_paramLimitMax" edit_format="spinbox" data_type="unsigned_integer" can_backup="1">
+      <default_value>100</default_value>
+      <edit_format_params>min=0
+step=100</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApi" display_order="510"/>
+    </option>
+    <option option_id="bdApi_paramPageMax" edit_format="spinbox" data_type="unsigned_numeric" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params>min=0</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApi" display_order="550"/>
+    </option>
     <option option_id="bdApi_refreshTokenTTLDays" edit_format="spinbox" data_type="positive_integer" can_backup="1">
       <default_value>14</default_value>
       <edit_format_params>min=1
@@ -869,6 +889,12 @@ step=3600</edit_format_params>
     <phrase title="option_bdApi_cors_explain" version_id="60" version_string="1.4.0-BETA"><![CDATA[Cross-Origin Resource Sharing (CORS) is a specification that enables truly open access across domain-boundaries. Enable this option to add the CORS headers to API responses. For more information regarding CORS, <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS" target="_blank" tabindex="-1">see here</a>.]]></phrase>
     <phrase title="option_bdApi_logRetentionDays" version_id="50" version_string="1.2.1b"><![CDATA[Log Retention]]></phrase>
     <phrase title="option_bdApi_logRetentionDays_explain" version_id="50" version_string="1.2.1b"><![CDATA[Enter the number of days to keep API log entries. If you don't want to log anything, enter 0 (zero).]]></phrase>
+    <phrase title="option_bdApi_paramLimitDefault" version_id="1050100" version_string="1.5.1"><![CDATA[Default `limit`]]></phrase>
+    <phrase title="option_bdApi_paramLimitDefault_explain" version_id="1050100" version_string="1.5.1"><![CDATA[Enter the default value for a request `limit` parameter.]]></phrase>
+    <phrase title="option_bdApi_paramLimitMax" version_id="1050100" version_string="1.5.1"><![CDATA[Maximum `limit`]]></phrase>
+    <phrase title="option_bdApi_paramLimitMax_explain" version_id="1050100" version_string="1.5.1"><![CDATA[Enter the maximum value for a request `limit` parameter. Enter 0 to have no limit.]]></phrase>
+    <phrase title="option_bdApi_paramPageMax" version_id="1050100" version_string="1.5.1"><![CDATA[Maximum `page`]]></phrase>
+    <phrase title="option_bdApi_paramPageMax_explain" version_id="1050100" version_string="1.5.1"><![CDATA[Enter the maximum value for a request `page` parameter. Enter 0 to have no limit]]></phrase>
     <phrase title="option_bdApi_refreshTokenTTLDays" version_id="50" version_string="1.2.1b"><![CDATA[Refresh Token TTL]]></phrase>
     <phrase title="option_bdApi_refreshTokenTTLDays_explain" version_id="50" version_string="1.2.1b"><![CDATA[Enter the number of days before refresh token expires itself.]]></phrase>
     <phrase title="option_bdApi_restrictAccess" version_id="53" version_string="1.3.1"><![CDATA[Restrict Access]]></phrase>

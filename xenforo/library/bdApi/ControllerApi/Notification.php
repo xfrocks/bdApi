@@ -10,14 +10,7 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
         $visitor = XenForo_Visitor::getInstance();
 
         $pageNavParams = array();
-        $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
-        $limit = XenForo_Application::get('options')->alertsPerPage;
-
-        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
-        if (!empty($inputLimit)) {
-            $limit = $inputLimit;
-            $pageNavParams['limit'] = $inputLimit;
-        }
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
 
         $alertResults = $alertModel->getAlertsForUser(
             $visitor['user_id'],

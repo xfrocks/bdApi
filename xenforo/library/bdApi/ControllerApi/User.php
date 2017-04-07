@@ -14,24 +14,17 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             return $this->responseReroute(__CLASS__, 'multiple');
         }
 
+        $pageNavParams = array();
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
+
         $userModel = $this->_getUserModel();
         if (!$userModel->canViewMemberList()) {
-        	if ($this->_input->filterSingle('limit', XenForo_Input::STRING) === '1') {
-		        // special case to support subscription discovery of topic user_0
-		        return $this->responseData('bdApi_ViewApi_User_List', array('users' => array()));
-	        }
+            if ($limit === 1) {
+                // special case to support subscription discovery of topic user_0
+                return $this->responseData('bdApi_ViewApi_User_List', array('users' => array()));
+            }
 
             return $this->responseNoPermission();
-        }
-
-        $pageNavParams = array();
-        $page = $this->_input->filterSingle('page', XenForo_Input::UINT);
-        $limit = XenForo_Application::get('options')->membersPerPage;
-
-        $inputLimit = $this->_input->filterSingle('limit', XenForo_Input::UINT);
-        if (!empty($inputLimit)) {
-            $limit = $inputLimit;
-            $pageNavParams['limit'] = $inputLimit;
         }
 
         $conditions = array(
