@@ -24,4 +24,11 @@ class bdApi_ControllerApi_Asset extends bdApi_ControllerApi_Abstract
         return false;
     }
 
+    protected function _assertViewingPermissions($action)
+    {
+    }
+
+    protected function _assertBoardActive($action)
+    {
+    }
 }

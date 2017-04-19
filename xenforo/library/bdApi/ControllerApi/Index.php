@@ -79,6 +79,14 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
         return false;
     }
 
+    protected function _assertViewingPermissions($action)
+    {
+    }
+
+    protected function _assertBoardActive($action)
+    {
+    }
+
     public static function getSessionActivityDetailsForList(array $activities)
     {
         $clientIds = array();

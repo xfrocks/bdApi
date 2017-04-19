@@ -338,6 +338,14 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         return false;
     }
 
+    protected function _assertViewingPermissions($action)
+    {
+    }
+
+    protected function _assertBoardActive($action)
+    {
+    }
+
     /**
      *
      * @return XenForo_Model_Alert
