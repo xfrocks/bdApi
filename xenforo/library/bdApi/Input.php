@@ -17,7 +17,7 @@ eval($xenforoInputContents);
 
 class bdApi_Input extends _XenForo_Input
 {
-    protected static $_bdApi_filters = array();
+    protected static $_bdApi_filters = null;
 
     public static function bdApi_resetFilters()
     {
@@ -34,7 +34,19 @@ class bdApi_Input extends _XenForo_Input
 
     public static function bdApi_getFilters()
     {
-        return self::$_bdApi_filters;
+        $filters = self::$_bdApi_filters;
+        self::$_bdApi_filters = null;
+
+        return $filters;
+    }
+
+    public function inRequest($key)
+    {
+        if (self::$_bdApi_filters === null) {
+            return parent::inRequest($key);
+        }
+
+        return true;
     }
 
     public function filterSingle($variableName, $filterData, array $options = array())

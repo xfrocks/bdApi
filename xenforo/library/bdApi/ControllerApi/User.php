@@ -160,6 +160,16 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             return $this->responseError(new XenForo_Phrase('new_registrations_currently_not_being_accepted'));
         }
 
+        $input = $this->_input->filter(array(
+            'user_email' => XenForo_Input::STRING,
+            'username' => XenForo_Input::STRING,
+            'password' => XenForo_Input::STRING,
+            'password_algo' => XenForo_Input::STRING,
+            'user_dob_day' => XenForo_Input::UINT,
+            'user_dob_month' => XenForo_Input::UINT,
+            'user_dob_year' => XenForo_Input::UINT,
+        ));
+
         /* @var $oauth2Model bdApi_Model_OAuth2 */
         $oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
         /* @var $userConfirmationModel XenForo_Model_UserConfirmation */
@@ -177,16 +187,6 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             }
             $clientSecret = $client['client_secret'];
         }
-
-        $input = $this->_input->filter(array(
-            'user_email' => XenForo_Input::STRING,
-            'username' => XenForo_Input::STRING,
-            'password' => XenForo_Input::STRING,
-            'password_algo' => XenForo_Input::STRING,
-            'user_dob_day' => XenForo_Input::UINT,
-            'user_dob_month' => XenForo_Input::UINT,
-            'user_dob_year' => XenForo_Input::UINT,
-        ));
 
         if (empty($input['user_email'])) {
             // backward compatibility
@@ -887,12 +887,8 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     protected function _getScopeForAction($action)
     {
         if ($action === 'PostIndex') {
-            /* @var $session bdApi_Session */
-
-            $session = XenForo_Application::getSession();
-            $clientId = $session->getOAuthClientId();
-
-            if (empty($clientId)) {
+            $session = bdApi_Data_Helper_Core::safeGetSession();
+            if (!$session || !$session->getOAuthClientId()) {
                 return false;
             }
         }

@@ -43,22 +43,36 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
             if (is_callable(array($this, $controllerMethod))) {
                 $method = utf8_strtoupper($method);
-                $methods[$method] = array();
 
                 bdApi_Input::bdApi_resetFilters();
 
                 $routeMatch = new XenForo_RouteMatch($this->_routeMatch->getControllerName(),
                     sprintf('%s-%s', $method, $action));
 
+                $response = null;
+                $responseIsNoPermission = false;
                 try {
-                    $fc->dispatch($routeMatch);
+                    $response = $fc->dispatch($routeMatch);
+                } catch (XenForo_ControllerResponse_Exception $responseException) {
+                    $response = $responseException->getControllerResponse();
                 } catch (Exception $e) {
                     // ignore
+                }
+
+                /** @noinspection PhpUndefinedMethodInspection */
+                if ($response !== null
+                    && $response instanceof XenForo_ControllerResponse_Error
+                    && is_object($response->errorText)
+                    && $response->errorText instanceof XenForo_Phrase
+                    && $response->errorText->getPhraseName() === 'do_not_have_permission'
+                ) {
+                    $responseIsNoPermission = true;
                 }
 
                 $params = bdApi_Input::bdApi_getFilters();
                 foreach (array_keys($params) as $paramKey) {
                     if (in_array($paramKey, array(
+                        'fields_filter_prefix',
                         'fields_include',
                         'fields_exclude',
                         'limit',
@@ -77,6 +91,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
                         unset($params[$paramKey]);
                         continue;
                     }
+                }
+
+                if (count($params) === 0 && $responseIsNoPermission) {
+                    continue;
                 }
 
                 ksort($params);
@@ -512,6 +530,13 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
         if (!XenForo_Visitor::getInstance()->hasAdminPermission($permissionId)) {
             throw $this->responseException($this->responseNoPermission());
+        }
+    }
+
+    protected function _assertViewingPermissions($action)
+    {
+        if ($action !== 'Options') {
+            parent::_assertViewingPermissions($action);
         }
     }
 

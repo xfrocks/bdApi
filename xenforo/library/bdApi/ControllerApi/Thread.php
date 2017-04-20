@@ -405,11 +405,12 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     {
         $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
         $thread = $this->_getThreadModel()->getThreadById($threadId);
-        if (empty($thread)) {
-            return $this->responseNoPermission();
+        $postId = 0;
+        if (!empty($thread['first_post_id'])) {
+            $postId = $thread['first_post_id'];
         }
 
-        $this->_request->setParam('post_id', $thread['first_post_id']);
+        $this->_request->setParam('post_id', $postId);
         XenForo_Application::set('bdApi_responseReroute', array(__CLASS__, 'single'));
         return $this->responseReroute('bdApi_ControllerApi_Post', 'put-index');
     }
