@@ -156,6 +156,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionPostIndex()
     {
+        if (!XenForo_Application::get('options')->get('registrationSetup', 'enabled')) {
+            return $this->responseError(new XenForo_Phrase('new_registrations_currently_not_being_accepted'));
+        }
+
         /* @var $oauth2Model bdApi_Model_OAuth2 */
         $oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
         /* @var $userConfirmationModel XenForo_Model_UserConfirmation */
@@ -894,6 +898,27 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         }
 
         return parent::_getScopeForAction($action);
+    }
+
+    protected function _assertViewingPermissions($action)
+    {
+        if ($action !== 'PostIndex') {
+            parent::_assertViewingPermissions($action);
+        }
+    }
+
+    protected function _assertBoardActive($action)
+    {
+        if ($action !== 'PostIndex') {
+            parent::_assertBoardActive($action);
+        }
+    }
+
+    protected function _assertTfaRequirement($action)
+    {
+        if ($action !== 'PostIndex') {
+            parent::_assertTfaRequirement($action);
+        }
     }
 
     protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
