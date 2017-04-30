@@ -20,7 +20,7 @@ class bdApi_Data_Helper_Cors
 
         $method = $request->getHeader('Access-Control-Request-Method');
         if (!empty($method)) {
-            $response->setHeader('Access-Control-Allow-Method', $method, true);
+            $response->setHeader('Access-Control-Allow-Methods', $method, true);
         }
 
         $headers = $request->getHeader('Access-Control-Request-Headers');
