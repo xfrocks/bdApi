@@ -33,7 +33,7 @@ class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
         self::addRoute($routes, 'pages', 'bdApi_Route_PrefixApi_Pages', 'data_only');
         self::addRoute($routes, 'posts', 'bdApi_Route_PrefixApi_Posts', 'data_only');
         self::addRoute($routes, 'profile-posts', 'bdApi_Route_PrefixApi_ProfilePosts', 'data_only');
-        self::addRoute($routes, 'tags', 'bdApi_Route_PrefixApi_Tags');
+        self::addRoute($routes, 'tags', 'bdApi_Route_PrefixApi_Tags', 'data_only');
         self::addRoute($routes, 'threads', 'bdApi_Route_PrefixApi_Threads', 'data_only');
         self::addRoute($routes, 'users', 'bdApi_Route_PrefixApi_Users', 'data_only');
 

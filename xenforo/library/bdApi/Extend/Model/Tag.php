@@ -34,4 +34,20 @@ class bdApi_Extend_Model_Tag extends XFCP_bdApi_Extend_Model_Tag
         return $data;
     }
 
+    public function prepareApiDataForTag(array $tag)
+    {
+        $publicKeys = array(
+            // xf_tag
+            'tag_id' => 'tag_id',
+            'tag' => 'tag_text',
+        );
+
+        $data = bdApi_Data_Helper_Core::filter($tag, $publicKeys);
+
+        $data['links'] = array(
+            'permalink' => XenForo_Link::buildPublicLink('tags', $tag),
+        );
+
+        return $data;
+    }
 }

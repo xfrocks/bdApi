@@ -11,9 +11,9 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
     public function actionGetIndex()
     {
         $data = array('links' => array(
-            'posts' => bdApi_Data_Helper_Core::safeBuildApiLink('search/posts'),
-            'threads' => bdApi_Data_Helper_Core::safeBuildApiLink('search/threads'),
-            'profile-posts' => bdApi_Data_Helper_Core::safeBuildApiLink('search/profile-posts'),
+                'posts' => bdApi_Data_Helper_Core::safeBuildApiLink('search/posts'),
+                'threads' => bdApi_Data_Helper_Core::safeBuildApiLink('search/threads'),
+                'profile-posts' => bdApi_Data_Helper_Core::safeBuildApiLink('search/profile-posts'),
         ));
 
         if (XenForo_Application::$versionId > 1050000) {
@@ -60,17 +60,16 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             'data_total' => $search['result_count'],
         );
 
-        if (XenForo_Application::$versionId > 1050000
-            && !empty($search['searchConstraints']['tag'])
-        ) {
-            /** @var bdApi_Extend_Model_Tag $tagModel */
-            $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
-            $tags = $tagModel->bdApi_getTagsByIds(explode(' ', $search['searchConstraints']['tag']));
-
-            $data['search_tags'] = $tagModel->prepareApiDataForTags($tags);
-        }
-
         switch ($search['search_type']) {
+            case self::OPTION_SEARCH_TYPE_TAGGED:
+                if (!empty($search['searchConstraints']['tag'])) {
+                    /** @var bdApi_Extend_Model_Tag $tagModel */
+                    $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
+                    $tags = $tagModel->bdApi_getTagsByIds(explode(' ', $search['searchConstraints']['tag']));
+
+                    $data['search_tags'] = $tagModel->prepareApiDataForTags($tags);
+                }
+                break;
             case self::OPTION_SEARCH_TYPE_USER_TIMELINE:
                 foreach ($data['data'] as &$profilePostDataRef) {
                     if (isset($profilePostDataRef['timeline_user'])) {
@@ -188,21 +187,32 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
         }
 
         $tagText = $this->_input->filterSingle('tag', XenForo_Input::STRING);
-        if (empty($tagText)) {
-            return $this->responseError(new XenForo_Phrase('requested_tag_not_found'), 404);
-        }
+        $tagList = $this->_input->filterSingle('tags',
+            XenForo_Input::STRING, array('array' => true));
 
         /** @var XenForo_Model_Tag $tagModel */
         $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
-        $tag = $tagModel->getTag($tagText);
-        if (empty($tag)) {
-            return $this->responseError(new XenForo_Phrase('requested_tag_not_found'), 404);
+        if (empty($tagList)) {
+            $tagList = $tagModel->splitTags($tagText);
+        }
+        if (empty($tagList)) {
+            throw $this->responseException($this->responseError(
+                new XenForo_Phrase('bdapi_slash_search_tagged_requires_tag'), 400));
         }
 
-        $limit = XenForo_Application::getOptions()->get('maximumSearchResults');
-        $contentTags = $tagModel->getContentIdsByTagId($tag['tag_id'], $limit);
+        $validTags = $tagModel->getTags($tagList, $notFound);
+        if ($notFound) {
+            return $this->responseError(new XenForo_Phrase('following_tags_not_found_x',
+                array('tags' => implode(', ', $notFound))));
+        }
 
-        $search = $this->_getSearchModel()->insertSearch($contentTags, self::OPTION_SEARCH_TYPE_TAGGED, '', array(), 'date', false);
+        $search = $this->_doSearch('', array(
+            'tag' => implode(' ', array_keys($validTags)),
+        ), array(
+            self::OPTION_NO_KEYWORDS => true,
+            self::OPTION_ORDER => 'date',
+            self::OPTION_SEARCH_TYPE => self::OPTION_SEARCH_TYPE_TAGGED,
+        ));
 
         $this->_request->setParam('search_id', $search['search_id']);
         return $this->responseReroute(__CLASS__, 'get-results');
@@ -283,7 +293,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
     public function _doSearch($contentType = '', array $constraints = array(), array $options = array())
     {
-        $tagText = $this->_input->filterSingle('tag', XenForo_Input::STRING);
         $forumId = $this->_input->filterSingle('forum_id', XenForo_Input::UINT);
         $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
 
@@ -308,17 +317,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
         if (!empty($options[self::OPTION_ORDER])) {
             $input['order'] = $options[self::OPTION_ORDER];
-        }
-
-        if (!empty($tagText)) {
-            /** @var XenForo_Model_Tag $tagModel */
-            $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
-            $tag = $tagModel->getTag($tagText);
-            if (empty($tag)) {
-                throw $this->responseException($this->responseError(new XenForo_Phrase('requested_tag_not_found'), 404));
-            }
-
-            $constraints['tag'] = $tag['tag_id'];
         }
 
         $maxResults = XenForo_Application::getOptions()->get('maximumSearchResults');

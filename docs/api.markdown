@@ -1178,7 +1178,7 @@ Required scopes:
 ## Content Tagging
 
 ### GET `/tags`
-List of tags (no pagination). Since forum-2015091002.
+List of popular tags (no pagination). Since forum-2015091002.
 
     {
         tags: {
@@ -1186,6 +1186,38 @@ List of tags (no pagination). Since forum-2015091002.
             ...
         }
     }
+
+Required scopes:
+
+ * `read`
+
+## Get `/tags/:tagId`
+List of tagged contents. Since forum-2017050201.
+
+    {
+        tag: {
+          tag_id: (int),
+          tag_text: (string),
+          links: {
+            permalink: (uri)
+          }
+        },
+        tagged: [
+            (content),
+            ...
+        ],
+        tagged_total: (int),
+        links {
+            pages: (int),
+            next: (uri),
+            prev: (uri)
+        }
+    }
+
+Parameters:
+
+ * `page` (_optional_): page number of tagged contents.
+ * `limit` (_optional_): number of tagged contents in a page. Default value depends on the system configuration.
 
 Required scopes:
 
@@ -2457,6 +2489,10 @@ Search for tagged contents. Since forum-2015091001.
             ...
         ],
         data_total: (int),
+        search_tags: {
+          (tag_id): (tag_text),
+          ...
+        }
         links: {
             pages: (int),
             next: (uri),
@@ -2466,6 +2502,7 @@ Search for tagged contents. Since forum-2015091001.
 Parameters:
 
  * `tag` (__required__): tag to search for tagged contents.
+ * `tags` (_optional_): array of tags to search for tagged contents. Since forum-2017050201.
  * `page` (_optional_): page number of results. Since forum-2015042301.
  * `limit` (_optional_): number of results in a page. Default value depends on the system configuration. Since forum-2015042301.
 
