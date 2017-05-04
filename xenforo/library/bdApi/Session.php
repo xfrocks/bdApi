@@ -16,6 +16,13 @@ class bdApi_Session extends XenForo_Session
      */
     protected $_oauthClient = false;
 
+    /**
+     * The http request triggered this session.
+     *
+     * @var Zend_Controller_Request_Http|null
+     */
+    protected $_request = null;
+
     public function getOAuthClientId()
     {
         if (!empty($this->_oauthToken)) {
@@ -161,6 +168,7 @@ class bdApi_Session extends XenForo_Session
         }
 
         $session = new bdApi_Session();
+        $session->_request = $request;
         $session->start();
 
         // XenForo_ControllerPublic_Abstract::_executeTrophyUpdate
@@ -281,15 +289,15 @@ class bdApi_Session extends XenForo_Session
 
         $helper = bdApi_Template_Helper_Core::getInstance();
 
-        $this->_oauthToken = $oauth2Model->getServer()->getEffectiveToken();
-
-        if (empty($this->_oauthToken) AND isset($_REQUEST['oauth_token'])) {
-            // added support for one time oauth token
+        if (empty($this->_oauthToken)
+            && isset($_REQUEST['oauth_token'])
+        ) {
+            // one time token support
             $parts = explode(',', $_REQUEST['oauth_token']);
             $userId = 0;
             $timestamp = 0;
             $once = '';
-            $client = null;
+            $ottClient = null;
 
             if (count($parts) == 4) {
                 $userId = intval($parts[0]);
@@ -297,18 +305,18 @@ class bdApi_Session extends XenForo_Session
                 $once = $parts[2];
 
                 if ($timestamp >= XenForo_Application::$time) {
-                    $client = $oauth2Model->getClientModel()->getClientById($parts[3]);
+                    $ottClient = $oauth2Model->getClientModel()->getClientById($parts[3]);
                 }
             }
 
-            if (!empty($client)) {
+            if (!empty($ottClient)) {
                 if ($userId == 0) {
                     // guest
-                    if ($once == md5($userId . $timestamp . $client['client_secret'])) {
+                    if ($once == md5($userId . $timestamp . $ottClient['client_secret'])) {
                         // make up fake token with full scopes for guest
                         $this->_oauthToken = array(
                             'token_id' => 0,
-                            'client_id' => $client['client_id'],
+                            'client_id' => $ottClient['client_id'],
                             'token_text' => '',
                             'expire_date' => XenForo_Application::$time,
                             'issue_date' => XenForo_Application::$time,
@@ -318,10 +326,13 @@ class bdApi_Session extends XenForo_Session
                     }
                 } else {
                     // user
-                    $userTokens = $oauth2Model->getTokenModel()->getTokens(array('user_id' => $userId));
+                    $userTokens = $oauth2Model->getTokenModel()->getTokens(array(
+                        'client_id' => $ottClient['client_id'],
+                        'user_id' => $userId,
+                    ));
                     foreach ($userTokens as $userToken) {
                         if ($userToken['expire_date'] >= XenForo_Application::$time) {
-                            if ($once == md5($userId . $timestamp . $userToken['token_text'] . $client['client_secret'])) {
+                            if ($once == md5($userId . $timestamp . $userToken['token_text'] . $ottClient['client_secret'])) {
                                 $this->_oauthToken = $userToken;
                             }
                         }
@@ -332,8 +343,48 @@ class bdApi_Session extends XenForo_Session
                     // oauth token is set using one time token
                     // update the token text to avoid exposing real access token
                     $this->_oauthToken['token_text'] = $_REQUEST['oauth_token'];
+
+                    $this->_oauthClient = $ottClient;
                 }
             }
+        }
+
+        if (empty($this->_oauthToken)
+            && isset($_REQUEST['oauth_token'])
+            && $this->_request !== null
+        ) {
+            // public session support
+            $publicSessionToken = bdApi_Option::getConfig('publicSessionToken');
+            $publicSessionClientId = bdApi_Option::getConfig('publicSessionClientId');
+            $publicSessionScopes = bdApi_Option::getConfig('publicSessionScopes');
+            if (!empty($publicSessionToken)
+                && $publicSessionToken === $_REQUEST['oauth_token']
+                && !empty($publicSessionClientId)
+                && !empty($publicSessionScopes)
+            ) {
+                $publicSessionClient = $oauth2Model->getClientModel()->getClientById($publicSessionClientId);
+                if (!empty($publicSessionClient)) {
+                    $publicSession = XenForo_Session::getPublicSession($this->_request);
+                    $publicSessionUserId = $publicSession->get('user_id');
+
+                    $this->_oauthToken = array(
+                        'token_id' => 0,
+                        'client_id' => $publicSessionClient['client_id'],
+                        'token_text' => $publicSessionToken,
+                        'expire_date' => XenForo_Application::$time,
+                        'issue_date' => XenForo_Application::$time,
+                        'user_id' => $publicSessionUserId,
+                        'scope' => $publicSessionScopes,
+                    );
+
+                    $this->_oauthClient = $publicSessionClient;
+                    $this->_oauthClient['_isPublicSessionClient'] = true;
+                }
+            }
+        }
+
+        if (empty($this->_oauthToken)) {
+            $this->_oauthToken = $oauth2Model->getServer()->getEffectiveToken();
         }
 
         if (!empty($this->_oauthToken)) {

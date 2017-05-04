@@ -25,14 +25,17 @@ class bdApi_Option
         if ($config === null) {
             $config = array(
                 'pingQueueUseDefer' => true,
+                'publicSessionToken' => 'public',
+                'publicSessionClientId' => '',
+                'publicSessionScopes' => 'read post',
             );
 
             $values = XenForo_Application::getConfig()->get('api');
             if ($values !== null && $values instanceof Zend_Config) {
-                foreach (array_keys($config) as $key) {
-                    $value = $values->get($key);
+                foreach (array_keys($config) as $_key) {
+                    $value = $values->get($_key);
                     if ($value !== null) {
-                        $config[$key] = $value;
+                        $config[$_key] = $value;
                     }
                 }
             }

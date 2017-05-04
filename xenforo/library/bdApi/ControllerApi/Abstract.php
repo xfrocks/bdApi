@@ -637,9 +637,17 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
     protected function _checkCsrf($action)
     {
-        // do not check csrf for api requests
+        if (isset(self::$_executed['csrf'])) {
+            return;
+        }
         self::$_executed['csrf'] = true;
-        return;
+
+        $session = bdApi_Data_Helper_Core::safeGetSession();
+        $client = $session->getOAuthClient();
+        if (!empty($client) && !empty($client['_isPublicSessionClient'])) {
+            // only check csrf if public session token is being used
+            $this->_checkCsrfFromToken();
+        }
     }
 
     protected function _postDispatch($controllerResponse, $controllerName, $action)
