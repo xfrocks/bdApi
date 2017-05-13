@@ -13,7 +13,7 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
 
         /* @var $session bdApi_Session */
         $session = XenForo_Application::getSession();
-        $clientId = $session->getOAuthClientId();;
+        $clientId = $session->getOAuthClientId();
         $isSessionClientId = true;
         if (empty($clientId)) {
             $clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
