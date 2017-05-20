@@ -263,6 +263,9 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             'watch_thread_email' => 0,
         ));
 
+        // mark read to thread when user reply to thread
+        $this->_getThreadModel()->markThreadRead($thread, $forum, XenForo_Application::$time);
+
         $this->_request->setParam('post_id', $post['post_id']);
         return $this->responseReroute(__CLASS__, 'single');
     }
