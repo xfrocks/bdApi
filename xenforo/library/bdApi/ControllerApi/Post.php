@@ -97,7 +97,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 $pageNavParams['order'] = $order;
                 break;
             default:
-                if ($threadId < 1) {
+                if (!is_array($thread) || empty($thread['thread_id'])) {
                     // manually prepare posts total count for paging
                     $total = $this->_getPostModel()->bdApi_getLatestPostId();
 
