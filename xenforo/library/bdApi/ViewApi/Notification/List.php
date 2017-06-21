@@ -17,7 +17,7 @@ class bdApi_ViewApi_Notification_List extends bdApi_ViewApi_Base
             bdApi_Model_Subscription::TYPE_NOTIFICATION,
             XenForo_Visitor::getUserId(),
             bdApi_Data_Helper_Core::safeBuildApiLink('notifications', null, array('oauth_token' => '')),
-            XenForo_Visitor::getInstance()->get('bdapi_user_notification')
+            XenForo_Visitor::getInstance()->get(bdApi_Option::getConfig('subscriptionColumnUserNotification'))
         );
 
         parent::prepareParams();

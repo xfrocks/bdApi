@@ -28,6 +28,9 @@ class bdApi_Option
                 'publicSessionToken' => 'public',
                 'publicSessionClientId' => '',
                 'publicSessionScopes' => 'read post',
+                'subscriptionColumnUser' => 'bdapi_user',
+                'subscriptionColumnUserNotification' => 'bdapi_user_notification',
+                'subscriptionColumnThreadPost' => 'bdapi_thread_post',
             );
 
             $values = XenForo_Application::getConfig()->get('api');

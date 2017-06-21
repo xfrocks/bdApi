@@ -55,11 +55,12 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
         }
 
         if (empty($userOptions) OR !isset($userOptions[$userId])) {
+            $subColumn = bdApi_Option::getConfig('subscriptionColumnUserNotification');
             if ($userId == XenForo_Visitor::getUserId()) {
-                $userOptions[$userId] = XenForo_Visitor::getInstance()->get('bdapi_user_notification');
+                $userOptions[$userId] = XenForo_Visitor::getInstance()->get($subColumn);
             } else {
                 $userOptions[$userId] = $this->_getDb()->fetchOne('
-					SELECT `bdapi_user_notification`
+					SELECT `' . $subColumn . '`
 					FROM `xf_user_option`
 					WHERE user_id = ?
 				', $userId);
@@ -83,14 +84,15 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
 
     public function getAlertOptOuts(array $user = null, $useDenormalized = true)
     {
-        if (!empty($user['user_id']) AND isset($user['bdapi_user_notification'])) {
+        $subColumn = bdApi_Option::getConfig('subscriptionColumnUserNotification');
+        if (!empty($user['user_id']) AND isset($user[$subColumn])) {
             if (XenForo_Application::isRegistered('bdapi_user_notification')) {
                 $userOptions = XenForo_Application::get('bdapi_user_notification');
             } else {
                 $userOptions = array();
             }
 
-            $userOptions[$user['user_id']] = $user['bdapi_user_notification'];
+            $userOptions[$user['user_id']] = $user[$subColumn];
 
             XenForo_Application::set('bdapi_user_notification', $userOptions);
         }

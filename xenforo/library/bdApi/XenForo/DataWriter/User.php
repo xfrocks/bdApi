@@ -6,7 +6,7 @@ class bdApi_XenForo_DataWriter_User extends XFCP_bdApi_XenForo_DataWriter_User
     {
         $fields = parent::_getFields();
 
-        $fields['xf_user_option']['bdapi_user'] = array('type' => XenForo_DataWriter::TYPE_SERIALIZED);
+        $fields['xf_user_option'][bdApi_Option::getConfig('subscriptionColumnUser')] = array('type' => XenForo_DataWriter::TYPE_SERIALIZED);
 
         return $fields;
     }
@@ -76,7 +76,7 @@ class bdApi_XenForo_DataWriter_User extends XFCP_bdApi_XenForo_DataWriter_User
             }
         }
 
-        $userOption = $this->get('bdapi_user');
+        $userOption = $this->get(bdApi_Option::getConfig('subscriptionColumnUser'));
         if (!empty($userOption)) {
             $userOption = @unserialize($userOption);
 

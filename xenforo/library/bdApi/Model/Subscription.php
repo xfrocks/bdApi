@@ -50,7 +50,9 @@ class bdApi_Model_Subscription extends XenForo_Model
                     $userOption = array();
                 }
 
-                $this->_getDb()->update('xf_user_option', array('bdapi_user_notification' => serialize($userOption)), array('user_id = ?' => $id));
+                $this->_getDb()->update('xf_user_option',
+                    array(bdApi_Option::getConfig('subscriptionColumnUserNotification') => serialize($userOption)),
+                    array('user_id = ?' => $id));
                 break;
             case self::TYPE_THREAD_POST:
                 if (!empty($subscriptions)) {
@@ -70,7 +72,9 @@ class bdApi_Model_Subscription extends XenForo_Model
                     $threadOption = array();
                 }
 
-                $this->_getDb()->update('xf_thread', array('bdapi_thread_post' => serialize($threadOption)), array('thread_id = ?' => $id));
+                $this->_getDb()->update('xf_thread',
+                    array(bdApi_Option::getConfig('subscriptionColumnThreadPost') => serialize($threadOption)),
+                    array('thread_id = ?' => $id));
                 break;
             case self::TYPE_USER:
                 if (!empty($subscriptions)) {
@@ -89,7 +93,7 @@ class bdApi_Model_Subscription extends XenForo_Model
 
                 if ($id > 0) {
                     $this->_getDb()->update('xf_user_option',
-                        array('bdapi_user' => serialize($userOption)),
+                        array(bdApi_Option::getConfig('subscriptionColumnUser') => serialize($userOption)),
                         array('user_id = ?' => $id));
                 } else {
                     XenForo_Application::setSimpleCacheData(self::TYPE_USER_0_SIMPLE_CACHE, $userOption);

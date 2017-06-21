@@ -232,13 +232,6 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base
         'xf_bdapi_refresh_token' => array(
             'issue_date' => array('name' => 'issue_date', 'type' => 'uint', 'required' => true, 'default' => 0),
         ),
-        'xf_user_option' => array(
-            'bdapi_user_notification' => array('name' => 'bdapi_user_notification', 'type' => 'serialized'),
-            'bdapi_user' => array('name' => 'bdapi_user', 'type' => 'serialized'),
-        ),
-        'xf_thread' => array(
-            'bdapi_thread_post' => array('name' => 'bdapi_thread_post', 'type' => 'serialized'),
-        ),
     );
     protected $_exportPath = '/Users/sondh/XenForo/bdApi';
     protected $_exportIncludes = array('api');

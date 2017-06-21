@@ -301,6 +301,24 @@
 <xen:if is="{$filterMore}">
 	<li class="listNote">{xen:phrase more_records_matching_filter_more_specific}</li>
 </xen:if>]]></template>
+    <template title="bdapi_column_option_onoff"><![CDATA[<xen:checkboxunit hint="{$preparedOption.hint}">
+	<xen:label>{$_preparedOption.title}</xen:label>
+	<xen:option name="{$fieldPrefix}[{$preparedOption.option_id}]" selected="{$preparedOption.option_value}">
+		<xen:label>{$preparedOption.title}</xen:label>
+		<xen:hint>
+			{xen:raw $preparedOption.explain}
+			{xen:phrase bdapi_column_option_onoff_query,
+				'table={$preparedOption._bdApiTable}',
+				'column={$preparedOption._bdApiColumn}'}
+		</xen:hint>
+	</xen:option>
+	<xen:html>
+		<input type="hidden" name="{$listedFieldName}" value="{$preparedOption.option_id}" />
+		{xen:raw $editLink}
+	</xen:html>
+</xen:checkboxunit>
+
+<xen:edithint template="option_list_option_onoff" />]]></template>
     <template title="bdapi_log_detail"><![CDATA[<xen:title>{$log.request_method} {$log.request_uri}</xen:title>
 
 <div class="section">
@@ -689,21 +707,21 @@ step=14</edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdApi" display_order="10"/>
     </option>
-    <option option_id="bdApi_subscriptionThreadPost" edit_format="onoff" data_type="unsigned_integer" can_backup="1">
-      <default_value>1</default_value>
-      <edit_format_params></edit_format_params>
+    <option option_id="bdApi_subscriptionThreadPost" edit_format="callback" data_type="unsigned_integer" can_backup="1" validation_class="bdApi_Data_ColumnOption" validation_method="verifyOnOff">
+      <default_value>0</default_value>
+      <edit_format_params>bdApi_Data_ColumnOption::renderOnOff</edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdApi" display_order="25"/>
     </option>
-    <option option_id="bdApi_subscriptionUser" edit_format="onoff" data_type="unsigned_integer" can_backup="1">
-      <default_value>1</default_value>
-      <edit_format_params></edit_format_params>
+    <option option_id="bdApi_subscriptionUser" edit_format="callback" data_type="unsigned_integer" can_backup="1" validation_class="bdApi_Data_ColumnOption" validation_method="verifyOnOff">
+      <default_value>0</default_value>
+      <edit_format_params>bdApi_Data_ColumnOption::renderOnOff</edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdApi" display_order="20"/>
     </option>
-    <option option_id="bdApi_subscriptionUserNotification" edit_format="onoff" data_type="unsigned_integer" can_backup="1">
-      <default_value>1</default_value>
-      <edit_format_params></edit_format_params>
+    <option option_id="bdApi_subscriptionUserNotification" edit_format="callback" data_type="unsigned_integer" can_backup="1" validation_class="bdApi_Data_ColumnOption" validation_method="verifyOnOff">
+      <default_value>0</default_value>
+      <edit_format_params>bdApi_Data_ColumnOption::renderOnOff</edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdApi" display_order="21"/>
     </option>
@@ -790,6 +808,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_client_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following client]]></phrase>
     <phrase title="bdapi_client_save" version_id="1" version_string="0.1"><![CDATA[Save Client]]></phrase>
     <phrase title="bdapi_client_secret" version_id="4" version_string="0.9-dev"><![CDATA[API Secret]]></phrase>
+    <phrase title="bdapi_column_option_onoff_query" version_id="1060000" version_string="1.6.0"><![CDATA[A query is required: "ALTER TABLE `{table}` ADD COLUMN `{column}` MEDIUMBLOB".]]></phrase>
     <phrase title="bdapi_column_x_table_y_not_found_for_field_z" version_id="1060000" version_string="1.6.0"><![CDATA[Database column `{table}`.`{column}` could not be found for option {field}.]]></phrase>
     <phrase title="bdapi_delete_all_client_content" version_id="77" version_string="1.4.5"><![CDATA[Delete All]]></phrase>
     <phrase title="bdapi_description" version_id="1" version_string="0.1"><![CDATA[Description]]></phrase>
@@ -908,11 +927,11 @@ step=3600</edit_format_params>
     <phrase title="option_bdApi_restrictAccess" version_id="53" version_string="1.3.1"><![CDATA[Restrict Access]]></phrase>
     <phrase title="option_bdApi_restrictAccess_explain" version_id="53" version_string="1.3.1"><![CDATA[Enable this option to deny access to the API if no authentication is provided. Guest access it still possible with <a href="https://github.com/xfrocks/bdApi/blob/master/docs/api.markdown#one-time-token" target="_blank" tabindex="-1">One Time Token</a>.]]></phrase>
     <phrase title="option_bdApi_subscriptionThreadPost" version_id="53" version_string="1.3.1"><![CDATA[Accept Subscription for Thread Post]]></phrase>
-    <phrase title="option_bdApi_subscriptionThreadPost_explain" version_id="53" version_string="1.3.1"><![CDATA[Enable this option to allow clients to <a href="https://github.com/xfrocks/bdApi/blob/master/docs/api.markdown#subscriptions" target="_blank" tabindex="-1">subscribe</a> for thread post changes.]]></phrase>
+    <phrase title="option_bdApi_subscriptionThreadPost_explain" version_id="1060000" version_string="1.6.0"><![CDATA[Enable this option to allow clients to <a href="https://github.com/xfrocks/bdApi/blob/master/docs/api.markdown#subscriptions" target="_blank" tabindex="-1">subscribe</a> for thread post changes.]]></phrase>
     <phrase title="option_bdApi_subscriptionUser" version_id="53" version_string="1.3.1"><![CDATA[Accept Subscription for User]]></phrase>
     <phrase title="option_bdApi_subscriptionUserNotification" version_id="82" version_string="1.4.6e"><![CDATA[Accept Subscription for User Alert]]></phrase>
-    <phrase title="option_bdApi_subscriptionUserNotification_explain" version_id="53" version_string="1.3.1"><![CDATA[Enable this option to allow clients to <a href="https://github.com/xfrocks/bdApi/blob/master/docs/api.markdown#subscriptions" target="_blank" tabindex="-1">subscribe</a> for user alerts.]]></phrase>
-    <phrase title="option_bdApi_subscriptionUser_explain" version_id="53" version_string="1.3.1"><![CDATA[Enable this option to allow clients to <a href="https://github.com/xfrocks/bdApi/blob/master/docs/api.markdown#subscriptions" target="_blank" tabindex="-1">subscribe</a> for user changes.]]></phrase>
+    <phrase title="option_bdApi_subscriptionUserNotification_explain" version_id="1060000" version_string="1.6.0"><![CDATA[Enable this option to allow clients to <a href="https://github.com/xfrocks/bdApi/blob/master/docs/api.markdown#subscriptions" target="_blank" tabindex="-1">subscribe</a> for user alerts.]]></phrase>
+    <phrase title="option_bdApi_subscriptionUser_explain" version_id="1060000" version_string="1.6.0"><![CDATA[Enable this option to allow clients to <a href="https://github.com/xfrocks/bdApi/blob/master/docs/api.markdown#subscriptions" target="_blank" tabindex="-1">subscribe</a> for user changes.]]></phrase>
     <phrase title="option_bdApi_tokenTTL" version_id="50" version_string="1.2.1b"><![CDATA[Token TTL]]></phrase>
     <phrase title="option_bdApi_tokenTTL_explain" version_id="50" version_string="1.2.1b"><![CDATA[Enter the number of seconds before authentication code expires itself.]]></phrase>
     <phrase title="option_bdApi_trackPostOrigin" version_id="1060000" version_string="1.6.0"><![CDATA[Keep Track of Post Origin]]></phrase>

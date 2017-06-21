@@ -65,8 +65,9 @@ class bdApi_XenForo_DataWriter_DiscussionMessage_Post extends XFCP_bdApi_XenForo
         }
 
         $thread = $this->getDiscussionData();
-        if (!empty($thread['bdapi_thread_post'])) {
-            $threadOption = @unserialize($thread['bdapi_thread_post']);
+        $subColumn = bdApi_Option::getConfig('subscriptionColumnThreadPost');
+        if (!empty($thread[$subColumn])) {
+            $threadOption = @unserialize($thread[$subColumn]);
 
             if (!empty($threadOption)) {
                 /* @var $subscriptionModel bdApi_Model_Subscription */

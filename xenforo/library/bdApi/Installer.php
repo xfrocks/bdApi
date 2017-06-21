@@ -147,33 +147,6 @@ class bdApi_Installer
             'modifyQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` MODIFY COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
             'dropQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` DROP COLUMN `issue_date`',
         ),
-        array(
-            'table' => 'xf_user_option',
-            'tableCheckQuery' => 'SHOW TABLES LIKE \'xf_user_option\'',
-            'field' => 'bdapi_user_notification',
-            'checkQuery' => 'SHOW COLUMNS FROM `xf_user_option` LIKE \'bdapi_user_notification\'',
-            'addQuery' => 'ALTER TABLE `xf_user_option` ADD COLUMN `bdapi_user_notification` MEDIUMBLOB',
-            'modifyQuery' => 'ALTER TABLE `xf_user_option` MODIFY COLUMN `bdapi_user_notification` MEDIUMBLOB',
-            'dropQuery' => 'ALTER TABLE `xf_user_option` DROP COLUMN `bdapi_user_notification`',
-        ),
-        array(
-            'table' => 'xf_user_option',
-            'tableCheckQuery' => 'SHOW TABLES LIKE \'xf_user_option\'',
-            'field' => 'bdapi_user',
-            'checkQuery' => 'SHOW COLUMNS FROM `xf_user_option` LIKE \'bdapi_user\'',
-            'addQuery' => 'ALTER TABLE `xf_user_option` ADD COLUMN `bdapi_user` MEDIUMBLOB',
-            'modifyQuery' => 'ALTER TABLE `xf_user_option` MODIFY COLUMN `bdapi_user` MEDIUMBLOB',
-            'dropQuery' => 'ALTER TABLE `xf_user_option` DROP COLUMN `bdapi_user`',
-        ),
-        array(
-            'table' => 'xf_thread',
-            'tableCheckQuery' => 'SHOW TABLES LIKE \'xf_thread\'',
-            'field' => 'bdapi_thread_post',
-            'checkQuery' => 'SHOW COLUMNS FROM `xf_thread` LIKE \'bdapi_thread_post\'',
-            'addQuery' => 'ALTER TABLE `xf_thread` ADD COLUMN `bdapi_thread_post` MEDIUMBLOB',
-            'modifyQuery' => 'ALTER TABLE `xf_thread` MODIFY COLUMN `bdapi_thread_post` MEDIUMBLOB',
-            'dropQuery' => 'ALTER TABLE `xf_thread` DROP COLUMN `bdapi_thread_post`',
-        ),
     );
 
     public static function install($existingAddOn, $addOnData)
