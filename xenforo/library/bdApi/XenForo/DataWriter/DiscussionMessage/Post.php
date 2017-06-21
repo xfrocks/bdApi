@@ -2,15 +2,29 @@
 
 class bdApi_XenForo_DataWriter_DiscussionMessage_Post extends XFCP_bdApi_XenForo_DataWriter_DiscussionMessage_Post
 {
+    protected $_trackPostOrigin = '';
+
+    public function bdApi_setOrigin($clientId)
+    {
+        if (empty($this->_trackPostOrigin)) {
+            return false;
+        }
+
+        return $this->set($this->_trackPostOrigin, $clientId);
+    }
+
     protected function _getFields()
     {
         $fields = parent::_getFields();
 
-        $fields['xf_post']['bdapi_origin'] = array(
-            'type' => XenForo_DataWriter::TYPE_STRING,
-            'maxLength' => 255,
-            'default' => '',
-        );
+        $this->_trackPostOrigin = bdApi_Option::get('trackPostOrigin');
+        if (!empty($this->_trackPostOrigin)) {
+            $fields['xf_post'][$this->_trackPostOrigin] = array(
+                'type' => XenForo_DataWriter::TYPE_STRING,
+                'maxLength' => 255,
+                'default' => '',
+            );
+        }
 
         return $fields;
     }

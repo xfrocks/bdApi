@@ -85,8 +85,8 @@ class bdApi_Installer
                 ,`subscribe_date` INT(10) UNSIGNED NOT NULL
                 ,`expire_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'
                 , PRIMARY KEY (`subscription_id`)
-                , INDEX `client_id` (`client_id`)
-                , INDEX `topic` (`topic`)
+                ,INDEX `client_id` (`client_id`)
+                ,INDEX `topic` (`topic`)
             ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
             'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_subscription`',
         ),
@@ -97,7 +97,7 @@ class bdApi_Installer
                 ,`scope` VARCHAR(255) NOT NULL
                 ,`accept_date` INT(10) UNSIGNED NOT NULL
                 
-                , INDEX `user_id` (`user_id`)
+                ,INDEX `user_id` (`user_id`)
             ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
             'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_user_scope`',
         ),
@@ -114,7 +114,7 @@ class bdApi_Installer
                 ,`user_id` INT(10) UNSIGNED NOT NULL
                 ,`extra_data` MEDIUMBLOB
                 , PRIMARY KEY (`client_content_id`)
-                , INDEX `content_type_content_id` (`content_type`,`content_id`)
+                ,INDEX `content_type_content_id` (`content_type`,`content_id`)
             ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
             'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_client_content`',
         ),
@@ -122,59 +122,57 @@ class bdApi_Installer
     protected static $_patches = array(
         array(
             'table' => 'xf_bdapi_token',
+            'tableCheckQuery' => 'SHOW TABLES LIKE \'xf_bdapi_token\'',
             'field' => 'issue_date',
-            'showTablesQuery' => 'SHOW TABLES LIKE \'xf_bdapi_token\'',
-            'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_bdapi_token` LIKE \'issue_date\'',
-            'alterTableAddColumnQuery' => 'ALTER TABLE `xf_bdapi_token` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
-            'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_token` DROP COLUMN `issue_date`',
+            'checkQuery' => 'SHOW COLUMNS FROM `xf_bdapi_token` LIKE \'issue_date\'',
+            'addQuery' => 'ALTER TABLE `xf_bdapi_token` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
+            'modifyQuery' => 'ALTER TABLE `xf_bdapi_token` MODIFY COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
+            'dropQuery' => 'ALTER TABLE `xf_bdapi_token` DROP COLUMN `issue_date`',
         ),
         array(
             'table' => 'xf_bdapi_auth_code',
+            'tableCheckQuery' => 'SHOW TABLES LIKE \'xf_bdapi_auth_code\'',
             'field' => 'issue_date',
-            'showTablesQuery' => 'SHOW TABLES LIKE \'xf_bdapi_auth_code\'',
-            'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_bdapi_auth_code` LIKE \'issue_date\'',
-            'alterTableAddColumnQuery' => 'ALTER TABLE `xf_bdapi_auth_code` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
-            'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_auth_code` DROP COLUMN `issue_date`',
+            'checkQuery' => 'SHOW COLUMNS FROM `xf_bdapi_auth_code` LIKE \'issue_date\'',
+            'addQuery' => 'ALTER TABLE `xf_bdapi_auth_code` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
+            'modifyQuery' => 'ALTER TABLE `xf_bdapi_auth_code` MODIFY COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
+            'dropQuery' => 'ALTER TABLE `xf_bdapi_auth_code` DROP COLUMN `issue_date`',
         ),
         array(
             'table' => 'xf_bdapi_refresh_token',
+            'tableCheckQuery' => 'SHOW TABLES LIKE \'xf_bdapi_refresh_token\'',
             'field' => 'issue_date',
-            'showTablesQuery' => 'SHOW TABLES LIKE \'xf_bdapi_refresh_token\'',
-            'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_bdapi_refresh_token` LIKE \'issue_date\'',
-            'alterTableAddColumnQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
-            'alterTableDropColumnQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` DROP COLUMN `issue_date`',
-        ),
-        array(
-            'table' => 'xf_post',
-            'field' => 'bdapi_origin',
-            'showTablesQuery' => 'SHOW TABLES LIKE \'xf_post\'',
-            'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_post` LIKE \'bdapi_origin\'',
-            'alterTableAddColumnQuery' => 'ALTER TABLE `xf_post` ADD COLUMN `bdapi_origin` VARCHAR(255) DEFAULT \'\'',
-            'alterTableDropColumnQuery' => 'ALTER TABLE `xf_post` DROP COLUMN `bdapi_origin`',
+            'checkQuery' => 'SHOW COLUMNS FROM `xf_bdapi_refresh_token` LIKE \'issue_date\'',
+            'addQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` ADD COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
+            'modifyQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` MODIFY COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
+            'dropQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` DROP COLUMN `issue_date`',
         ),
         array(
             'table' => 'xf_user_option',
+            'tableCheckQuery' => 'SHOW TABLES LIKE \'xf_user_option\'',
             'field' => 'bdapi_user_notification',
-            'showTablesQuery' => 'SHOW TABLES LIKE \'xf_user_option\'',
-            'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_user_option` LIKE \'bdapi_user_notification\'',
-            'alterTableAddColumnQuery' => 'ALTER TABLE `xf_user_option` ADD COLUMN `bdapi_user_notification` MEDIUMBLOB',
-            'alterTableDropColumnQuery' => 'ALTER TABLE `xf_user_option` DROP COLUMN `bdapi_user_notification`',
+            'checkQuery' => 'SHOW COLUMNS FROM `xf_user_option` LIKE \'bdapi_user_notification\'',
+            'addQuery' => 'ALTER TABLE `xf_user_option` ADD COLUMN `bdapi_user_notification` MEDIUMBLOB',
+            'modifyQuery' => 'ALTER TABLE `xf_user_option` MODIFY COLUMN `bdapi_user_notification` MEDIUMBLOB',
+            'dropQuery' => 'ALTER TABLE `xf_user_option` DROP COLUMN `bdapi_user_notification`',
         ),
         array(
             'table' => 'xf_user_option',
+            'tableCheckQuery' => 'SHOW TABLES LIKE \'xf_user_option\'',
             'field' => 'bdapi_user',
-            'showTablesQuery' => 'SHOW TABLES LIKE \'xf_user_option\'',
-            'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_user_option` LIKE \'bdapi_user\'',
-            'alterTableAddColumnQuery' => 'ALTER TABLE `xf_user_option` ADD COLUMN `bdapi_user` MEDIUMBLOB',
-            'alterTableDropColumnQuery' => 'ALTER TABLE `xf_user_option` DROP COLUMN `bdapi_user`',
+            'checkQuery' => 'SHOW COLUMNS FROM `xf_user_option` LIKE \'bdapi_user\'',
+            'addQuery' => 'ALTER TABLE `xf_user_option` ADD COLUMN `bdapi_user` MEDIUMBLOB',
+            'modifyQuery' => 'ALTER TABLE `xf_user_option` MODIFY COLUMN `bdapi_user` MEDIUMBLOB',
+            'dropQuery' => 'ALTER TABLE `xf_user_option` DROP COLUMN `bdapi_user`',
         ),
         array(
             'table' => 'xf_thread',
+            'tableCheckQuery' => 'SHOW TABLES LIKE \'xf_thread\'',
             'field' => 'bdapi_thread_post',
-            'showTablesQuery' => 'SHOW TABLES LIKE \'xf_thread\'',
-            'showColumnsQuery' => 'SHOW COLUMNS FROM `xf_thread` LIKE \'bdapi_thread_post\'',
-            'alterTableAddColumnQuery' => 'ALTER TABLE `xf_thread` ADD COLUMN `bdapi_thread_post` MEDIUMBLOB',
-            'alterTableDropColumnQuery' => 'ALTER TABLE `xf_thread` DROP COLUMN `bdapi_thread_post`',
+            'checkQuery' => 'SHOW COLUMNS FROM `xf_thread` LIKE \'bdapi_thread_post\'',
+            'addQuery' => 'ALTER TABLE `xf_thread` ADD COLUMN `bdapi_thread_post` MEDIUMBLOB',
+            'modifyQuery' => 'ALTER TABLE `xf_thread` MODIFY COLUMN `bdapi_thread_post` MEDIUMBLOB',
+            'dropQuery' => 'ALTER TABLE `xf_thread` DROP COLUMN `bdapi_thread_post`',
         ),
     );
 
@@ -187,14 +185,16 @@ class bdApi_Installer
         }
 
         foreach (self::$_patches as $patch) {
-            $tableExisted = $db->fetchOne($patch['showTablesQuery']);
+            $tableExisted = $db->fetchOne($patch['tableCheckQuery']);
             if (empty($tableExisted)) {
                 continue;
             }
 
-            $existed = $db->fetchOne($patch['showColumnsQuery']);
+            $existed = $db->fetchOne($patch['checkQuery']);
             if (empty($existed)) {
-                $db->query($patch['alterTableAddColumnQuery']);
+                $db->query($patch['addQuery']);
+            } else {
+                $db->query($patch['modifyQuery']);
             }
         }
 
@@ -206,14 +206,14 @@ class bdApi_Installer
         $db = XenForo_Application::get('db');
 
         foreach (self::$_patches as $patch) {
-            $tableExisted = $db->fetchOne($patch['showTablesQuery']);
+            $tableExisted = $db->fetchOne($patch['tableCheckQuery']);
             if (empty($tableExisted)) {
                 continue;
             }
 
-            $existed = $db->fetchOne($patch['showColumnsQuery']);
+            $existed = $db->fetchOne($patch['checkQuery']);
             if (!empty($existed)) {
-                $db->query($patch['alterTableDropColumnQuery']);
+                $db->query($patch['dropQuery']);
             }
         }
 
@@ -273,6 +273,12 @@ class bdApi_Installer
 			");
 
             self::_installPhpDemoClient();
+        }
+
+        if ($existingVersionId < 1060001) {
+            if (XenForo_Application::$versionId >= 1020000) {
+                XenForo_Application::defer('bdApi_Deferred_Upgrade1060001', array());
+            }
         }
     }
 

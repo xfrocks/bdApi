@@ -218,6 +218,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
         }
 
+        /** @var bdApi_XenForo_DataWriter_DiscussionMessage_Post $writer */
         $writer = XenForo_DataWriter::create('XenForo_DataWriter_DiscussionMessage_Post');
         $writer->set('user_id', $visitor['user_id']);
         $writer->set('username', $visitor['username']);
@@ -231,7 +232,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $session = XenForo_Application::getSession();
         $clientId = $session->getOAuthClientId();
         if (!empty($clientId)) {
-            $writer->set('bdapi_origin', $clientId);
+            $writer->bdApi_setOrigin($clientId);
         }
 
         switch ($this->_spamCheck(array(

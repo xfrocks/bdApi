@@ -714,6 +714,12 @@ step=3600</edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdApi" display_order="110"/>
     </option>
+    <option option_id="bdApi_trackPostOrigin" edit_format="textbox" data_type="string" can_backup="1" validation_class="bdApi_Data_ColumnOption" validation_method="verifyXfPost">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApi" display_order="30"/>
+    </option>
     <option option_id="bdApi_trackSession" edit_format="onoff" data_type="unsigned_integer" can_backup="1">
       <default_value>1</default_value>
       <edit_format_params></edit_format_params>
@@ -784,6 +790,7 @@ step=3600</edit_format_params>
     <phrase title="bdapi_client_please_confirm" version_id="4" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following client]]></phrase>
     <phrase title="bdapi_client_save" version_id="1" version_string="0.1"><![CDATA[Save Client]]></phrase>
     <phrase title="bdapi_client_secret" version_id="4" version_string="0.9-dev"><![CDATA[API Secret]]></phrase>
+    <phrase title="bdapi_column_x_table_y_not_found_for_field_z" version_id="1060000" version_string="1.6.0"><![CDATA[Database column `{table}`.`{column}` could not be found for option {field}.]]></phrase>
     <phrase title="bdapi_delete_all_client_content" version_id="77" version_string="1.4.5"><![CDATA[Delete All]]></phrase>
     <phrase title="bdapi_description" version_id="1" version_string="0.1"><![CDATA[Description]]></phrase>
     <phrase title="bdapi_expire_date" version_id="1" version_string="0.1"><![CDATA[Expire Date]]></phrase>
@@ -908,6 +915,8 @@ step=3600</edit_format_params>
     <phrase title="option_bdApi_subscriptionUser_explain" version_id="53" version_string="1.3.1"><![CDATA[Enable this option to allow clients to <a href="https://github.com/xfrocks/bdApi/blob/master/docs/api.markdown#subscriptions" target="_blank" tabindex="-1">subscribe</a> for user changes.]]></phrase>
     <phrase title="option_bdApi_tokenTTL" version_id="50" version_string="1.2.1b"><![CDATA[Token TTL]]></phrase>
     <phrase title="option_bdApi_tokenTTL_explain" version_id="50" version_string="1.2.1b"><![CDATA[Enter the number of seconds before authentication code expires itself.]]></phrase>
+    <phrase title="option_bdApi_trackPostOrigin" version_id="1060000" version_string="1.6.0"><![CDATA[Keep Track of Post Origin]]></phrase>
+    <phrase title="option_bdApi_trackPostOrigin_explain" version_id="1060000" version_string="1.6.0"><![CDATA[Enter a field in `xf_post` table to store the API Key of the client that created the post. You have to create the field with a query like this: "ALTER TABLE `xf_post` ADD COLUMN `bdapi_origin` VARCHAR(255)".]]></phrase>
     <phrase title="option_bdApi_trackSession" version_id="74" version_string="1.4.4b"><![CDATA[Update User Activity]]></phrase>
     <phrase title="option_bdApi_trackSession_explain" version_id="74" version_string="1.4.4b"><![CDATA[Enable this option to keep track of logged in user session if accessed via api entry points. Disabling this feature may result in improved server performance but will cause missing information for user last activities.]]></phrase>
     <phrase title="option_bdApi_userNotificationConversation" version_id="82" version_string="1.4.6e"><![CDATA[...also notify about conversation]]></phrase>

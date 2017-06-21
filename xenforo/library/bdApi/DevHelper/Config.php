@@ -232,9 +232,6 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base
         'xf_bdapi_refresh_token' => array(
             'issue_date' => array('name' => 'issue_date', 'type' => 'uint', 'required' => true, 'default' => 0),
         ),
-        'xf_post' => array(
-            'bdapi_origin' => array('name' => 'bdapi_origin', 'type' => 'string', 'length' => 255, 'default' => ''),
-        ),
         'xf_user_option' => array(
             'bdapi_user_notification' => array('name' => 'bdapi_user_notification', 'type' => 'serialized'),
             'bdapi_user' => array('name' => 'bdapi_user', 'type' => 'serialized'),

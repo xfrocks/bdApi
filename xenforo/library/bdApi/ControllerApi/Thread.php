@@ -320,6 +320,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         // discussion state changes instead of first message state
         $writer->set('discussion_state', $this->_getPostModel()->getPostInsertMessageState(array(), $forum));
 
+        /** @var bdApi_XenForo_DataWriter_DiscussionMessage_Post $postWriter */
         $postWriter = $writer->getFirstMessageDw();
         $postWriter->set('message', $input['post_body']);
         $postWriter->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($forum));
@@ -329,7 +330,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $session = XenForo_Application::getSession();
         $clientId = $session->getOAuthClientId();
         if (!empty($clientId)) {
-            $postWriter->set('bdapi_origin', $clientId);
+            $postWriter->bdApi_setOrigin($clientId);
         }
 
         $writer->setExtraData(XenForo_DataWriter_Discussion_Thread::DATA_FORUM, $forum);
