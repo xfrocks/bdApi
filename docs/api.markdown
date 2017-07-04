@@ -1374,6 +1374,10 @@ Detail information of a user.
                 },
                 ...
             ],
+            *user_external_auth: [
+                (external_auth_provider_name > external_auth_provider_id),
+                ...
+            ],
             links: {
                 permalink: (uri),
                 detail: (uri),
