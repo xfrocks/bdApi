@@ -202,6 +202,8 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
                 }
             }
 
+            $data['user_external_auth'] = unserialize($user['external_auth']);
+
             $data['self_permissions'] = array(
                 'create_conversation' => $conversationModel->canStartConversations(),
                 'upload_attachment_conversation' => $conversationModel->canUploadAndManageAttachment(),
