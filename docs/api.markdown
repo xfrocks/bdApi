@@ -1374,8 +1374,11 @@ Detail information of a user.
                 },
                 ...
             ],
-            *user_external_auth: [
-                (external_auth_provider_name > external_auth_provider_id),
+            *user_external_authentications: [ # since forum-2017071001
+                {
+                    provider: (string),
+                    provider_key: (string),
+                }
                 ...
             ],
             links: {

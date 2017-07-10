@@ -202,7 +202,18 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
                 }
             }
 
-            $data['user_external_auth'] = unserialize($user['external_auth']);
+            if (isset($user['external_auth'])) {
+                $externalAuths = @unserialize($user['external_auth']);
+                if (is_array($externalAuths)) {
+                    $data['user_external_authentications'] = array();
+                    foreach ($externalAuths as $provider => $providerKey) {
+                        $data['user_external_authentications'][] = array(
+                            'provider' => $provider,
+                            'provider_key' => $providerKey,
+                        );
+                    }
+                }
+            }
 
             $data['self_permissions'] = array(
                 'create_conversation' => $conversationModel->canStartConversations(),
