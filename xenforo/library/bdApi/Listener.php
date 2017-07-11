@@ -128,5 +128,4 @@ class bdApi_Listener
         $ourHashes = bdApi_FileSums::getHashes();
         $hashes += $ourHashes;
     }
-
 }

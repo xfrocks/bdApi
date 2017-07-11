@@ -178,7 +178,9 @@ class bdApi_Link extends _XenForo_Link
                     $locale = $session->get('requestLocale');
                     if (!empty($locale)) {
                         $timestamp = time() + 86400;
-                        $extraParams['_apiLanguageId'] = sprintf('%s %s', $timestamp,
+                        $extraParams['_apiLanguageId'] = sprintf(
+                            '%s %s',
+                            $timestamp,
                             bdApi_Crypt::encryptTypeOne($session->get('languageId'), $timestamp)
                         );
                     }
@@ -188,7 +190,6 @@ class bdApi_Link extends _XenForo_Link
 
         return $built;
     }
-
 }
 
 eval('class XenForo_Link extends bdApi_Link {}');

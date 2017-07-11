@@ -596,7 +596,8 @@ class bdApi_OAuth2_Storage implements
         if ($tfaTrigger) {
             $loginHelper->triggerTfaCheck($user, $tfaProvider, $providers, $userData);
             throw $this->_controller->responseException($this->_controller->responseMessage(
-                new XenForo_Phrase('changes_saved')));
+                new XenForo_Phrase('changes_saved')
+            ));
         }
 
         $loginHelper->assertNotTfaAttemptLimited($user['user_id']);
@@ -605,7 +606,8 @@ class bdApi_OAuth2_Storage implements
         }
 
         throw $this->_controller->responseException($this->_controller->responseError(
-            new XenForo_Phrase('two_step_verification_value_could_not_be_confirmed')));
+            new XenForo_Phrase('two_step_verification_value_could_not_be_confirmed')
+        ));
     }
 
     public function getUserDetails($nameOrEmail)
@@ -639,7 +641,6 @@ class bdApi_OAuth2_GrantType_JwtBearer extends OAuth2\GrantType\JwtBearer
 
         return '';
     }
-
 }
 
 class bdApi_OAuth2_ResponseType_AccessToken extends OAuth2\ResponseType\AccessToken
@@ -657,5 +658,4 @@ class bdApi_OAuth2_ResponseType_AccessToken extends OAuth2\ResponseType\AccessTo
 
         return $token;
     }
-
 }

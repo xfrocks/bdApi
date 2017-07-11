@@ -87,7 +87,6 @@ class bdApi_Input extends _XenForo_Input
 
         return parent::filterSingle($variableName, $filterData, $options);
     }
-
 }
 
 eval('class XenForo_Input extends bdApi_Input {}');

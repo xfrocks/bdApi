@@ -17,8 +17,11 @@ class bdApi_Crypt
 
         switch ($algo) {
             case self::AES128:
-                $encrypted = base64_encode(bdApi_ShippableHelper_Crypt::encrypt($data,
-                    $key, bdApi_ShippableHelper_Crypt::ALGO_AES_128));
+                $encrypted = base64_encode(bdApi_ShippableHelper_Crypt::encrypt(
+                    $data,
+                    $key,
+                    bdApi_ShippableHelper_Crypt::ALGO_AES_128
+                ));
                 break;
             default:
                 $encrypted = $data;
@@ -35,8 +38,11 @@ class bdApi_Crypt
 
         switch ($algo) {
             case self::AES128:
-                $decrypted = bdApi_ShippableHelper_Crypt::decrypt(base64_decode($data),
-                    $key, bdApi_ShippableHelper_Crypt::ALGO_AES_128);
+                $decrypted = bdApi_ShippableHelper_Crypt::decrypt(
+                    base64_decode($data),
+                    $key,
+                    bdApi_ShippableHelper_Crypt::ALGO_AES_128
+                );
                 break;
             default:
                 $decrypted = $data;

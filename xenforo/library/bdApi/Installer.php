@@ -311,5 +311,4 @@ class bdApi_Installer
             // ignore
         }
     }
-
 }

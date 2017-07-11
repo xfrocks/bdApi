@@ -23,7 +23,6 @@ class bdApi_Upload extends _XenForo_Upload
 
         return parent::getUploadedFiles($formField, $source);
     }
-
 }
 
 eval('class XenForo_Upload extends bdApi_Upload {}');

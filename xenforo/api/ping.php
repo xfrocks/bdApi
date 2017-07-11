@@ -1,6 +1,6 @@
 <?php
 
-require ('bootstrap.php');
+require('bootstrap.php');
 
 $dependencies = new XenForo_Dependencies_Public();
 $dependencies->preLoadData();

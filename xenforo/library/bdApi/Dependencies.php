@@ -103,7 +103,6 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
 
         return $routeMatch;
     }
-
 }
 
 if (XenForo_Application::$versionId >= 1020000) {
@@ -131,7 +130,6 @@ if (XenForo_Application::$versionId >= 1020000) {
         {
             return parent::getRouter()->match($request, $routePath);
         }
-
     }
 
 } else {
@@ -155,7 +153,6 @@ if (XenForo_Application::$versionId >= 1020000) {
         {
             return parent::route($request);
         }
-
     }
 
 }

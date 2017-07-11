@@ -52,5 +52,4 @@ class bdApi_Option
         $optionKey = str_replace(' ', '', ucwords(str_replace('_', ' ', $topicType)));
         return self::get('subscription' . $optionKey);
     }
-
 }
