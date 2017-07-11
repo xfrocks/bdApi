@@ -38,7 +38,10 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
             $dw->setExistingData($id);
             $dw->delete();
 
-            return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildAdminLink('api-tokens'));
+            return $this->responseRedirect(
+                XenForo_ControllerResponse_Redirect::SUCCESS,
+                XenForo_Link::buildAdminLink('api-tokens')
+            );
         } else {
             $viewParams = array('token' => $token);
 
@@ -64,9 +67,18 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
             $scopes = bdApi_Template_Helper_Core::getInstance()->scopeJoin($scopes);
 
             $ttl = $this->_input->filterSingle('ttl', XenForo_Input::UINT);
-            $this->_getOAuth2Model()->getServer()->createAccessToken($client['client_id'], $user['user_id'], $scopes, $ttl, false);
+            $this->_getOAuth2Model()->getServer()->createAccessToken(
+                $client['client_id'],
+                $user['user_id'],
+                $scopes,
+                $ttl,
+                false
+            );
 
-            return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildAdminLink('api-tokens'));
+            return $this->responseRedirect(
+                XenForo_ControllerResponse_Redirect::SUCCESS,
+                XenForo_Link::buildAdminLink('api-tokens')
+            );
         } else {
             $viewParams = array(
                 'clients' => $this->_getClientModel()->getList(),
@@ -104,6 +116,7 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
      */
     protected function _getOAuth2Model()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_OAuth2');
     }
 
@@ -112,6 +125,7 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
      */
     protected function _getClientModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_Client');
     }
 
@@ -120,6 +134,7 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
      */
     protected function _getTokenModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_Token');
     }
 
@@ -128,7 +143,7 @@ class bdApi_ControllerAdmin_Token extends XenForo_ControllerAdmin_Abstract
      */
     protected function _getTokenDataWriter()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return XenForo_DataWriter::create('bdApi_DataWriter_Token');
     }
-
 }

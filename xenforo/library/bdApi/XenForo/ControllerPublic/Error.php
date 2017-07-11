@@ -30,14 +30,19 @@ class bdApi_XenForo_ControllerPublic_Error extends XFCP_bdApi_XenForo_Controller
         $clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);
         $client = $clientModel->getClientById($clientId);
         if (empty($client)) {
-            return $this->responseError(new XenForo_Phrase('bdapi_authorize_error_client_x_not_found',
-                array('client' => $clientId)), 404);
+            return $this->responseError(new XenForo_Phrase(
+                'bdapi_authorize_error_client_x_not_found',
+                array('client' => $clientId)
+            ), 404);
         }
 
         $authorizeParams = $this->_input->filter($oauth2Model->getAuthorizeParamsInputFilter());
         $redirectParams = $authorizeParams;
         $redirectParams['timestamp'] = time() + bdApi_Option::get('authorizeBypassSecs');
-        $redirectParams['hash'] = bdApi_Crypt::encryptTypeOne(serialize($authorizeParams), $redirectParams['timestamp']);
+        $redirectParams['hash'] = bdApi_Crypt::encryptTypeOne(
+            serialize($authorizeParams),
+            $redirectParams['timestamp']
+        );
         $redirect = XenForo_Link::buildPublicLink('account/authorize', null, $redirectParams);
 
         $viewParams = array(
@@ -53,5 +58,4 @@ class bdApi_XenForo_ControllerPublic_Error extends XFCP_bdApi_XenForo_Controller
 
         return $view;
     }
-
 }

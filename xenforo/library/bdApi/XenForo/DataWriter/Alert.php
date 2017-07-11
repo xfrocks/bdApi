@@ -20,11 +20,15 @@ class bdApi_XenForo_DataWriter_Alert extends XFCP_bdApi_XenForo_DataWriter_Alert
             }
 
             if (!empty($option)) {
-                $subscriptionModel->ping($option, 'insert', bdApi_Model_Subscription::TYPE_NOTIFICATION, $this->get('alert_id'));
+                $subscriptionModel->ping(
+                    $option,
+                    'insert',
+                    bdApi_Model_Subscription::TYPE_NOTIFICATION,
+                    $this->get('alert_id')
+                );
             }
         }
 
         parent::_postSave();
     }
-
 }

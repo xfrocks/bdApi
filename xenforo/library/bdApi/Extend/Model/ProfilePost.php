@@ -139,7 +139,11 @@ class bdApi_Extend_Model_ProfilePost extends XFCP_bdApi_Extend_Model_ProfilePost
         $data['timeline_user_id'] = $profilePost['profile_user_id'];
 
         $data['links'] = array(
-            'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('profile-posts/comments', $profilePost, array('comment_id' => $comment['profile_post_comment_id'])),
+            'detail' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                'profile-posts/comments',
+                $profilePost,
+                array('comment_id' => $comment['profile_post_comment_id'])
+            ),
             'profile_post' => bdApi_Data_Helper_Core::safeBuildApiLink('profile-posts', $profilePost),
             'timeline' => bdApi_Data_Helper_Core::safeBuildApiLink('users/timeline', $user),
             'timeline_user' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $user),

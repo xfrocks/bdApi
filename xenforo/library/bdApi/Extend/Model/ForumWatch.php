@@ -19,5 +19,4 @@ class bdApi_Extend_Model_ForumWatch extends XFCP_bdApi_Extend_Model_ForumWatch
 
         return $data;
     }
-
 }

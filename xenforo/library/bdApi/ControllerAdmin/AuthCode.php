@@ -38,7 +38,10 @@ class bdApi_ControllerAdmin_AuthCode extends XenForo_ControllerAdmin_Abstract
             $dw->setExistingData($id);
             $dw->delete();
 
-            return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildAdminLink('api-auth-codes'));
+            return $this->responseRedirect(
+                XenForo_ControllerResponse_Redirect::SUCCESS,
+                XenForo_Link::buildAdminLink('api-auth-codes')
+            );
         } else {
             $viewParams = array('authCode' => $authCode);
 
@@ -62,6 +65,7 @@ class bdApi_ControllerAdmin_AuthCode extends XenForo_ControllerAdmin_Abstract
      */
     protected function _getAuthCodeModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_AuthCode');
     }
 
@@ -70,7 +74,7 @@ class bdApi_ControllerAdmin_AuthCode extends XenForo_ControllerAdmin_Abstract
      */
     protected function _getAuthCodeDataWriter()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return XenForo_DataWriter::create('bdApi_DataWriter_AuthCode');
     }
-
 }

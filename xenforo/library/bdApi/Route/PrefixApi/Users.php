@@ -12,5 +12,4 @@ class bdApi_Route_PrefixApi_Users extends bdApi_Route_PrefixApi_Abstract
     {
         return XenForo_Link::buildBasicLinkWithIntegerParam($outputPrefix, $action, $extension, $data, 'user_id');
     }
-
 }

@@ -30,5 +30,4 @@ class bdApi_Extend_Model_Attachment extends XFCP_bdApi_Extend_Model_Attachment
 
         return $data;
     }
-
 }

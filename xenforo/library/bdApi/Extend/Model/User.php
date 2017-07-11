@@ -342,5 +342,4 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 
         return parent::getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
     }
-
 }

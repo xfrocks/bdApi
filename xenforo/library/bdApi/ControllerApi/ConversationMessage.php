@@ -20,7 +20,10 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 
         $conversationId = $this->_input->filterSingle('conversation_id', XenForo_Input::UINT);
         if (empty($conversationId)) {
-            return $this->responseError(new XenForo_Phrase('bdapi_slash_conversation_messages_requires_conversation_id'), 400);
+            return $this->responseError(
+                new XenForo_Phrase('bdapi_slash_conversation_messages_requires_conversation_id'),
+                400
+            );
         }
 
         $conversation = $this->_getConversationOrError($conversationId);
@@ -43,8 +46,10 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
                 break;
         }
 
-        $messages = $this->_getConversationModel()->getConversationMessages($conversation['conversation_id'],
-            $this->_getConversationModel()->getFetchOptionsToPrepareApiDataForMessages($fetchOptions));
+        $messages = $this->_getConversationModel()->getConversationMessages(
+            $conversation['conversation_id'],
+            $this->_getConversationModel()->getFetchOptionsToPrepareApiDataForMessages($fetchOptions)
+        );
         if (!$this->_isFieldExcluded('attachments')) {
             $messages = $this->_getConversationModel()->getAndMergeAttachmentsIntoConversationMessages($messages);
         }
@@ -52,15 +57,30 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $total = $conversation['reply_count'] + 1;
 
         $data = array(
-            'messages' => $this->_filterDataMany($this->_getConversationModel()->prepareApiDataForMessages($messages, $conversation)),
+            'messages' => $this->_filterDataMany($this->_getConversationModel()->prepareApiDataForMessages(
+                $messages,
+                $conversation
+            )),
             'messages_total' => $total
         );
 
         if (!$this->_isFieldExcluded('conversation')) {
-            $data['conversation'] = $this->_filterDataSingle($this->_getConversationModel()->prepareApiDataForConversation($conversation), array('conversation'));
+            $data['conversation'] = $this->_filterDataSingle(
+                $this->_getConversationModel()->prepareApiDataForConversation($conversation),
+                array('conversation')
+            );
         }
 
-        bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'conversation-messages', array(), $pageNavParams);
+        bdApi_Data_Helper_Core::addPageLinks(
+            $this->getInput(),
+            $data,
+            $limit,
+            $total,
+            $page,
+            'conversation-messages',
+            array(),
+            $pageNavParams
+        );
 
         return $this->responseData('bdApi_ViewApi_ConversationMessage_List', $data);
     }
@@ -78,7 +98,12 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
             $message = reset($messages);
         }
 
-        $data = array('message' => $this->_filterDataSingle($this->_getConversationModel()->prepareApiDataForMessage($message, $conversation)));
+        $data = array(
+            'message' => $this->_filterDataSingle($this->_getConversationModel()->prepareApiDataForMessage(
+                $message,
+                $conversation
+            ))
+        );
 
         return $this->responseData('bdApi_ViewApi_ConversationMessage_Single', $data);
     }
@@ -108,14 +133,17 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $messageDw->set('user_id', $visitor['user_id']);
         $messageDw->set('username', $visitor['username']);
         $messageDw->set('message', $input['message_body']);
-        $messageDw->setExtraData(XenForo_DataWriter_ConversationMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($conversation));
+        $messageDw->setExtraData(
+            XenForo_DataWriter_ConversationMessage::DATA_ATTACHMENT_HASH,
+            $this->_getAttachmentHelper()->getAttachmentTempHash($conversation)
+        );
 
         switch ($this->_spamCheck(array(
             'content_type' => 'conversation_message',
             'content' => $input['message_body'],
         ))) {
             case self::SPAM_RESULT_MODERATED:
-            case self::SPAM_RESULT_DENIED;
+            case self::SPAM_RESULT_DENIED:
                 return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
                 break;
         }
@@ -131,7 +159,13 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $messageDw->save();
         $message = $messageDw->getMergedData();
 
-        $this->_getConversationModel()->markConversationAsRead($conversation['conversation_id'], XenForo_Visitor::getUserId(), XenForo_Application::$time, 0, false);
+        $this->_getConversationModel()->markConversationAsRead(
+            $conversation['conversation_id'],
+            XenForo_Visitor::getUserId(),
+            XenForo_Application::$time,
+            0,
+            false
+        );
 
         $this->_request->setParam('message_id', $message['message_id']);
         return $this->responseReroute(__CLASS__, 'single');
@@ -158,7 +192,10 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $messageDw = XenForo_DataWriter::create('XenForo_DataWriter_ConversationMessage');
         $messageDw->setExistingData($message, true);
         $messageDw->set('message', $input['message_body']);
-        $messageDw->setExtraData(XenForo_DataWriter_ConversationMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($message));
+        $messageDw->setExtraData(
+            XenForo_DataWriter_ConversationMessage::DATA_ATTACHMENT_HASH,
+            $this->_getAttachmentHelper()->getAttachmentTempHash($message)
+        );
 
         switch ($this->_spamCheck(array(
             'content_type' => 'conversation_message',
@@ -166,7 +203,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
             'content' => $input['message_body'],
         ))) {
             case self::SPAM_RESULT_MODERATED:
-            case self::SPAM_RESULT_DENIED;
+            case self::SPAM_RESULT_DENIED:
                 return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
                 break;
         }
@@ -194,7 +231,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 
         $attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
         if (!empty($attachmentId)) {
-            return $this->responseReroute('bdApi_ControllerApi_Attachment',  'get-data');
+            return $this->responseReroute('bdApi_ControllerApi_Attachment', 'get-data');
         }
 
         $message = $this->_getMessageOrError($messageId);
@@ -219,7 +256,10 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
             'message_id' => XenForo_Input::UINT,
         ));
         if (empty($contentData['conversation_id']) AND empty($contentData['message_id'])) {
-            return $this->responseError(new XenForo_Phrase('bdapi_slash_conversation_messages_attachments_requires_ids'), 400);
+            return $this->responseError(
+                new XenForo_Phrase('bdapi_slash_conversation_messages_attachments_requires_ids'),
+                400
+            );
         }
 
         $attachmentHelper = $this->_getAttachmentHelper();
@@ -230,9 +270,16 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
             return $response;
         }
 
-        $data = array('attachment' => $this->_filterDataSingle(
-            $this->_getConversationModel()->prepareApiDataForAttachment(
-                $response, $contentData, $contentData, $hash)));
+        $data = array(
+            'attachment' => $this->_filterDataSingle(
+                $this->_getConversationModel()->prepareApiDataForAttachment(
+                    $response,
+                    $contentData,
+                    $contentData,
+                    $hash
+                )
+            )
+        );
 
         return $this->responseData('bdApi_ViewApi_ConversationMessage_Attachments', $data);
     }
@@ -246,7 +293,10 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
 
         if (empty($contentData['conversation_id']) AND empty($contentData['message_id'])) {
-            return $this->responseError(new XenForo_Phrase('bdapi_slash_conversation_messages_attachments_requires_ids'), 400);
+            return $this->responseError(
+                new XenForo_Phrase('bdapi_slash_conversation_messages_attachments_requires_ids'),
+                400
+            );
         }
 
         $attachmentHelper = $this->_getAttachmentHelper();
@@ -267,7 +317,10 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         }
 
         if (!$reportMessage) {
-            return $this->responseError(new XenForo_Phrase('bdapi_slash_x_report_requires_message', array('route' => 'conversation-messages')), 400);
+            return $this->responseError(new XenForo_Phrase(
+                'bdapi_slash_x_report_requires_message',
+                array('route' => 'conversation-messages')
+            ), 400);
         }
 
         $this->assertNotFlooding('report');
@@ -283,10 +336,17 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 
     protected function _getConversationOrError($conversationId, array $fetchOptions = array())
     {
-        $conversation = $this->_getConversationModel()->getConversationForUser($conversationId, XenForo_Visitor::getUserId(), $this->_getConversationModel()->getFetchOptionsToPrepareApiData($fetchOptions));
+        $conversation = $this->_getConversationModel()->getConversationForUser(
+            $conversationId,
+            XenForo_Visitor::getUserId(),
+            $this->_getConversationModel()->getFetchOptionsToPrepareApiData($fetchOptions)
+        );
 
         if (empty($conversation)) {
-            throw $this->responseException($this->responseError(new XenForo_Phrase('requested_conversation_not_found'), 404));
+            throw $this->responseException($this->responseError(
+                new XenForo_Phrase('requested_conversation_not_found'),
+                404
+            ));
         }
 
         return $conversation;
@@ -297,7 +357,10 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $message = $this->_getConversationModel()->getConversationMessageById($messageId, $fetchOptions);
 
         if (empty($message)) {
-            throw $this->responseException($this->responseError(new XenForo_Phrase('requested_message_not_found'), 404));
+            throw $this->responseException($this->responseError(
+                new XenForo_Phrase('requested_message_not_found'),
+                404
+            ));
         }
 
         return $message;
@@ -309,6 +372,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
      */
     protected function _getConversationModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Conversation');
     }
 
@@ -318,6 +382,7 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
      */
     protected function _getAttachmentHelper()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getHelper('bdApi_ControllerHelper_Attachment');
     }
 

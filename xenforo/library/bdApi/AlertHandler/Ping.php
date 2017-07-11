@@ -17,5 +17,4 @@ class bdApi_AlertHandler_Ping extends XenForo_AlertHandler_Abstract
     {
         return 'bdapi_alert_ping_' . $action;
     }
-
 }

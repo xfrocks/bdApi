@@ -164,5 +164,4 @@ class bdApi_Model_AuthCode extends XenForo_Model
 
         return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
     }
-
 }

@@ -35,7 +35,16 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
             '_alertHandlers' => $alertResults['alertHandlers'],
         );
 
-        bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $total, $page, 'notifications', array(), $pageNavParams);
+        bdApi_Data_Helper_Core::addPageLinks(
+            $this->getInput(),
+            $data,
+            $limit,
+            $total,
+            $page,
+            'notifications',
+            array(),
+            $pageNavParams
+        );
 
         return $this->responseData('bdApi_ViewApi_Notification_List', $data);
     }
@@ -143,12 +152,11 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     *
      * @return bdApi_XenForo_Model_Alert
      */
     protected function _getAlertModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Alert');
     }
-
 }

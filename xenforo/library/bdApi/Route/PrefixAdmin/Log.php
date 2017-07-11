@@ -24,5 +24,4 @@ class bdApi_Route_PrefixAdmin_Log implements XenForo_Route_Interface
             return XenForo_Link::buildBasicLink($outputPrefix, $action, $extension);
         }
     }
-
 }

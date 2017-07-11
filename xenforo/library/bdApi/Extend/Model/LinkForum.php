@@ -45,5 +45,4 @@ class bdApi_Extend_Model_LinkForum extends XFCP_bdApi_Extend_Model_LinkForum
 
         return $data;
     }
-
 }

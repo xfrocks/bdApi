@@ -51,5 +51,4 @@ class bdApi_Model_UserScope extends XenForo_Model
             'scope = ?' => $scope,
         ));
     }
-
 }

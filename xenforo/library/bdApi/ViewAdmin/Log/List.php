@@ -10,5 +10,4 @@ class bdApi_ViewAdmin_Log_List extends XenForo_ViewAdmin_Base
 
         return null;
     }
-
 }

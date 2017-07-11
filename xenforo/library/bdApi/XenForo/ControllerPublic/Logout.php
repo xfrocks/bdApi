@@ -52,5 +52,4 @@ class bdApi_XenForo_ControllerPublic_Logout extends XFCP_bdApi_XenForo_Controlle
 
         return parent::getDynamicRedirect($fallbackUrl, $useReferrer);
     }
-
 }

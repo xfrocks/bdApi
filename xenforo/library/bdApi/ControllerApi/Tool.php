@@ -85,7 +85,10 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
             '_xfToken' => XenForo_Visitor::getInstance()->get('csrf_token_page'),
             'timestamp' => XenForo_Application::$time + 10,
         );
-        $logoutLinkData['md5'] = bdApi_Crypt::encryptTypeOne(md5($logoutLinkData['redirect']), $logoutLinkData['timestamp']);
+        $logoutLinkData['md5'] = bdApi_Crypt::encryptTypeOne(
+            md5($logoutLinkData['redirect']),
+            $logoutLinkData['timestamp']
+        );
 
         $logoutLink = XenForo_Link::buildPublicLink('logout', '', $logoutLinkData);
 
@@ -193,8 +196,11 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 
         XenForo_Model_Alert::alert(
             $userId,
-            $visitor['user_id'], $visitor['username'],
-            'api_ping', 0, 'message',
+            $visitor['user_id'],
+            $visitor['username'],
+            'api_ping',
+            0,
+            'message',
             array(
                 'message' => $message,
             )
@@ -248,8 +254,11 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         ));
     }
 
-    protected function _actionGetParseLink_getControllerResponse($link, Zend_Controller_Request_Http $request, XenForo_RouteMatch $routeMatch)
-    {
+    protected function _actionGetParseLink_getControllerResponse(
+        $link,
+        Zend_Controller_Request_Http $request,
+        XenForo_RouteMatch $routeMatch
+    ) {
         switch ($routeMatch->getControllerName()) {
             case 'XenForo_ControllerPublic_Forum':
                 $nodeId = $request->getParam('node_id');
@@ -347,12 +356,11 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
     }
 
     /**
-     *
      * @return XenForo_Model_Alert
      */
     protected function _getAlertModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Alert');
     }
-
 }

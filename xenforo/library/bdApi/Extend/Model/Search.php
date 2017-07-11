@@ -59,8 +59,12 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
                     $this->_prepareApiContentDataForSearch_doProfilePosts($contentIds, $preparedResults, $data);
                     break;
                 default:
-                    $this->_prepareApiContentDataForSearch_doCustomContents($contentType,
-                        $contentIds, $preparedResults, $data);
+                    $this->_prepareApiContentDataForSearch_doCustomContents(
+                        $contentType,
+                        $contentIds,
+                        $preparedResults,
+                        $data
+                    );
             }
         }
 
@@ -93,16 +97,17 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
             }
 
             $key = $clientContentIds[$clientContentId];
-            $data[$key] = array_merge($preparedResults[$key],
-                array_intersect_key($clientContent,
+            $data[$key] = array_merge(
+                $preparedResults[$key],
+                array_intersect_key(
+                    $clientContent,
                     array_flip(array(
-                            'title',
-                            'body',
-                            'date',
-                            'link',
-                            'user_id',
-                        )
-                    )
+                        'title',
+                        'body',
+                        'date',
+                        'link',
+                        'user_id',
+                    ))
                 )
             );
         }
@@ -211,7 +216,6 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
     }
 
     protected function _prepareApiContentDataForSearch_doCustomContents(
-        /** @noinspection PhpUnusedParameterInspection */
         $contentType,
         array $contentIds,
         array $preparedResults,

@@ -18,5 +18,4 @@ class bdApi_Extend_Model_ThreadWatch extends XFCP_bdApi_Extend_Model_ThreadWatch
 
         return parent::getThreadsWatchedByUser($userId, $newOnly, $fetchOptions);
     }
-
 }

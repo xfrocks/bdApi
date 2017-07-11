@@ -65,7 +65,8 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
             $input['hub_mode'],
             $input['hub_topic'],
             $input['hub_lease_seconds'],
-            array('client_id' => $clientId))
+            array('client_id' => $clientId)
+        )
         ) {
             switch ($input['hub_mode']) {
                 case 'unsubscribe':
@@ -116,6 +117,7 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
      */
     protected function _getSubscriptionModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_Subscription');
     }
 
@@ -140,5 +142,4 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
 
         return $this->responseData('bdApi_ViewApi_Subscription_Post', array('httpResponseCode' => 202));
     }
-
 }

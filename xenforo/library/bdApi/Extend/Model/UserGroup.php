@@ -36,5 +36,4 @@ class bdApi_Extend_Model_UserGroup extends XFCP_bdApi_Extend_Model_UserGroup
 
         return $data;
     }
-
 }

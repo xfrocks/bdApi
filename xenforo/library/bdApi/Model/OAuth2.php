@@ -104,6 +104,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
      */
     public function getUserModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_User');
     }
 
@@ -112,6 +113,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
      */
     public function getAuthCodeModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_AuthCode');
     }
 
@@ -120,6 +122,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
      */
     public function getClientModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_Client');
     }
 
@@ -128,6 +131,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
      */
     public function getRefreshTokenModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_RefreshToken');
     }
 
@@ -136,6 +140,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
      */
     public function getTokenModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_Token');
     }
 
@@ -144,6 +149,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
      */
     public function getUserScopeModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_UserScope');
     }
 
@@ -152,6 +158,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
      */
     public function getSubscriptionModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_Subscription');
     }
 
@@ -160,8 +167,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
      */
     public function getLogModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_Log');
     }
-
-
 }

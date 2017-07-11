@@ -57,7 +57,8 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         switch ($order) {
             case 'natural_reverse':
                 if (empty($thread['thread_id'])) {
-                    return $this->responseError(new XenForo_Phrase('bdapi_slash_posts_order_x_requires_thread_id',
+                    return $this->responseError(new XenForo_Phrase(
+                        'bdapi_slash_posts_order_x_requires_thread_id',
                         array('order' => $order)
                     ), 400);
                 }
@@ -70,7 +71,8 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 break;
             case 'post_create_date':
                 if (!empty($thread['thread_id'])) {
-                    return $this->responseError(new XenForo_Phrase('bdapi_slash_posts_order_x_no_thread_id',
+                    return $this->responseError(new XenForo_Phrase(
+                        'bdapi_slash_posts_order_x_no_thread_id',
                         array('order' => $order)
                     ), 400);
                 }
@@ -84,7 +86,8 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 break;
             case 'post_create_date_reverse':
                 if (!empty($thread['thread_id'])) {
-                    return $this->responseError(new XenForo_Phrase('bdapi_slash_posts_order_x_no_thread_id',
+                    return $this->responseError(new XenForo_Phrase(
+                        'bdapi_slash_posts_order_x_no_thread_id',
                         array('order' => $order)
                     ), 400);
                 }
@@ -113,8 +116,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         if (!empty($thread['thread_id'])) {
             $pageNavParams['thread_id'] = $thread['thread_id'];
-            $posts = $this->_getPostModel()->getPostsInThread($thread['thread_id'],
-                $this->_getPostModel()->getFetchOptionsToPrepareApiData($fetchOptions));
+            $posts = $this->_getPostModel()->getPostsInThread(
+                $thread['thread_id'],
+                $this->_getPostModel()->getFetchOptionsToPrepareApiData($fetchOptions)
+            );
             $total = $thread['reply_count'] + 1;
         } else {
             $posts = $this->_getPostModel()->bdApi_getPosts(
@@ -142,15 +147,26 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             $this->_getThreadModel()->logThreadView($thread['thread_id']);
 
             if (!$this->_isFieldExcluded('thread')) {
-                $data['thread'] = $this->_filterDataSingle($this->_getThreadModel()->prepareApiDataForThread($thread,
-                    $forum, array()), array('thread'));
+                $data['thread'] = $this->_filterDataSingle($this->_getThreadModel()->prepareApiDataForThread(
+                    $thread,
+                    $forum,
+                    array()
+                ), array('thread'));
             }
         }
 
         if ($total > 0) {
             $data['posts_total'] = $total;
-            bdApi_Data_Helper_Core::addPageLinks($this->getInput(),
-                $data, $limit, $total, $page, 'posts', array(), $pageNavParams);
+            bdApi_Data_Helper_Core::addPageLinks(
+                $this->getInput(),
+                $data,
+                $limit,
+                $total,
+                $page,
+                'posts',
+                array(),
+                $pageNavParams
+            );
         }
 
         return $this->responseData('bdApi_ViewApi_Post_List', $data);
@@ -159,7 +175,12 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     public function actionSingle()
     {
         $postId = $this->_input->filterSingle('post_id', XenForo_Input::UINT);
-        list($post, $thread, $forum) = $this->_getForumThreadPostHelper()->assertPostValidAndViewable($postId, $this->_getPostModel()->getFetchOptionsToPrepareApiData(), $this->_getThreadModel()->getFetchOptionsToPrepareApiData(), $this->_getForumModel()->getFetchOptionsToPrepareApiData());
+        list($post, $thread, $forum) = $this->_getForumThreadPostHelper()->assertPostValidAndViewable(
+            $postId,
+            $this->_getPostModel()->getFetchOptionsToPrepareApiData(),
+            $this->_getThreadModel()->getFetchOptionsToPrepareApiData(),
+            $this->_getForumModel()->getFetchOptionsToPrepareApiData()
+        );
 
         $posts = array($post['post_id'] => $post);
         $postsData = $this->_preparePosts($posts, $thread, $forum);
@@ -225,7 +246,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $writer->set('message', $input['post_body']);
         $writer->set('message_state', $this->_getPostModel()->getPostInsertMessageState($thread, $forum));
         $writer->set('thread_id', $thread['thread_id']);
-        $writer->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($thread));
+        $writer->setExtraData(
+            XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH,
+            $this->_getAttachmentHelper()->getAttachmentTempHash($thread)
+        );
         $writer->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
 
         /* @var $session bdApi_Session */
@@ -241,7 +265,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             'permalink' => XenForo_Link::buildPublicLink('canonical:threads', $thread),
         ))) {
             case self::SPAM_RESULT_MODERATED:
-            case self::SPAM_RESULT_DENIED;
+            case self::SPAM_RESULT_DENIED:
                 return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
                 break;
         }
@@ -313,7 +337,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 break;
         }
 
-        $dw->setExtraData(XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH, $this->_getAttachmentHelper()->getAttachmentTempHash($post));
+        $dw->setExtraData(
+            XenForo_DataWriter_DiscussionMessage::DATA_ATTACHMENT_HASH,
+            $this->_getAttachmentHelper()->getAttachmentTempHash($post)
+        );
         $dw->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
 
         switch ($this->_spamCheck(array(
@@ -323,7 +350,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             'permalink' => XenForo_Link::buildPublicLink('canonical:threads', $thread),
         ))) {
             case self::SPAM_RESULT_MODERATED:
-            case self::SPAM_RESULT_DENIED;
+            case self::SPAM_RESULT_DENIED:
                 return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
                 break;
         }
@@ -403,8 +430,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         XenForo_Db::commit();
 
         if (XenForo_Application::isRegistered('bdApi_responseReroute')) {
-            return call_user_func_array(array($this, 'responseReroute'),
-                XenForo_Application::get('bdApi_responseReroute'));
+            return call_user_func_array(
+                array($this, 'responseReroute'),
+                XenForo_Application::get('bdApi_responseReroute')
+            );
         }
 
         return $this->responseReroute(__CLASS__, 'single');
@@ -430,11 +459,20 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $this->_getPostModel()->deletePost($postId, $deleteType, $options, $forum);
 
         if ($post['post_id'] == $thread['first_post_id']) {
-            XenForo_Model_Log::logModeratorAction('thread', $thread,
-                'delete_' . $deleteType, array('reason' => $reason));
+            XenForo_Model_Log::logModeratorAction(
+                'thread',
+                $thread,
+                'delete_' . $deleteType,
+                array('reason' => $reason)
+            );
         } else {
-            XenForo_Model_Log::logModeratorAction('post', $post,
-                'delete_' . $deleteType, array('reason' => $reason), $thread);
+            XenForo_Model_Log::logModeratorAction(
+                'post',
+                $post,
+                'delete_' . $deleteType,
+                array('reason' => $reason),
+                $thread
+            );
         }
 
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));
@@ -517,10 +555,13 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         $attachmentId = $this->_input->filterSingle('attachment_id', XenForo_Input::UINT);
         if (!empty($attachmentId)) {
-            return $this->responseReroute('bdApi_ControllerApi_Attachment',  'get-data');
+            return $this->responseReroute('bdApi_ControllerApi_Attachment', 'get-data');
         }
 
-        list($post, $thread, $forum) = $this->_getForumThreadPostHelper()->assertPostValidAndViewable($postId, $this->_getPostModel()->getFetchOptionsToPrepareApiData());
+        list($post, $thread, $forum) = $this->_getForumThreadPostHelper()->assertPostValidAndViewable(
+            $postId,
+            $this->_getPostModel()->getFetchOptionsToPrepareApiData()
+        );
 
         $posts = array($post['post_id'] => $post);
         $posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
@@ -552,9 +593,17 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             return $response;
         }
 
-        $data = array('attachment' => $this->_filterDataSingle(
-            $this->_getPostModel()->prepareApiDataForAttachment(
-                $response, $contentData, $contentData, $contentData, $hash)));
+        $data = array(
+            'attachment' => $this->_filterDataSingle(
+                $this->_getPostModel()->prepareApiDataForAttachment(
+                    $response,
+                    $contentData,
+                    $contentData,
+                    $contentData,
+                    $hash
+                )
+            )
+        );
 
         return $this->responseData('bdApi_ViewApi_Post_Attachments', $data);
     }
@@ -588,7 +637,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         }
 
         if (!$message) {
-            return $this->responseError(new XenForo_Phrase('bdapi_slash_x_report_requires_message', array('route' => 'posts')), 400);
+            return $this->responseError(new XenForo_Phrase(
+                'bdapi_slash_x_report_requires_message',
+                array('route' => 'posts')
+            ), 400);
         }
 
         $this->assertNotFlooding('report');
@@ -683,6 +735,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
      */
     protected function _getPostModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Post');
     }
 
@@ -691,6 +744,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
      */
     protected function _getThreadModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Thread');
     }
 
@@ -699,6 +753,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
      */
     protected function _getForumModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Forum');
     }
 
@@ -707,6 +762,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
      */
     protected function _getNodeModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Node');
     }
 
@@ -715,6 +771,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
      */
     protected function _getThreadWatchModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_ThreadWatch');
     }
 
@@ -723,6 +780,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
      */
     protected function _getLikeModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Like');
     }
 
@@ -731,6 +789,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
      */
     protected function _getForumThreadPostHelper()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getHelper('ForumThreadPost');
     }
 
@@ -739,6 +798,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
      */
     protected function _getAttachmentHelper()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getHelper('bdApi_ControllerHelper_Attachment');
     }
 

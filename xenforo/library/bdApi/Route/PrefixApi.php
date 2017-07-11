@@ -65,5 +65,4 @@ class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
             'build_link' => $buildLink,
         );
     }
-
 }

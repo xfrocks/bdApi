@@ -90,3 +90,9 @@ class bdApi_Input extends _XenForo_Input
 }
 
 eval('class XenForo_Input extends bdApi_Input {}');
+
+if (false) {
+    class _XenForo_Input extends XenForo_Input
+    {
+    }
+}

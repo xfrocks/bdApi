@@ -189,5 +189,4 @@ class bdApi_Model_Token extends XenForo_Model
 
         return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
     }
-
 }

@@ -46,8 +46,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
                 bdApi_Input::bdApi_resetFilters();
 
-                $routeMatch = new XenForo_RouteMatch($this->_routeMatch->getControllerName(),
-                    sprintf('%s-%s', $method, $action));
+                $routeMatch = new XenForo_RouteMatch(
+                    $this->_routeMatch->getControllerName(),
+                    sprintf('%s-%s', $method, $action)
+                );
 
                 $response = null;
                 $responseIsNoPermission = false;
@@ -147,7 +149,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
      */
     public function filterLimitAndPage(&$pageNavParams = array(), $limitVarName = 'limit', $pageVarName = 'page')
     {
-        $limitDefault = bdApi_Option::get('paramLimitDefault');;
+        $limitDefault = bdApi_Option::get('paramLimitDefault');
         $limit = $limitDefault;
         $limitInput = $this->_input->filterSingle($limitVarName, XenForo_Input::STRING);
         if (strlen($limitInput) > 0) {
@@ -439,7 +441,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
             switch ($spamResult) {
                 case self::SPAM_RESULT_MODERATED:
-                case self::SPAM_RESULT_DENIED;
+                case self::SPAM_RESULT_DENIED:
                     if (isset($data['content_type'])) {
                         $contentId = null;
                         if (isset($data['content_id'])) {
@@ -512,12 +514,18 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
                 $controllerResponse = $oauth2Model->getServer()->getErrorControllerResponse($this);
 
                 if (empty($controllerResponse)) {
-                    $controllerResponse = $this->responseError(new XenForo_Phrase('bdapi_authorize_error_invalid_or_expired_access_token'), 403);
+                    $controllerResponse = $this->responseError(
+                        new XenForo_Phrase('bdapi_authorize_error_invalid_or_expired_access_token'),
+                        403
+                    );
                 }
             }
 
             if (empty($controllerResponse)) {
-                $controllerResponse = $this->responseError(new XenForo_Phrase('bdapi_authorize_error_scope_x_not_granted', array('scope' => $scope)), 403);
+                $controllerResponse = $this->responseError(new XenForo_Phrase(
+                    'bdapi_authorize_error_scope_x_not_granted',
+                    array('scope' => $scope)
+                ), 403);
             }
 
             throw $this->responseException($controllerResponse);
@@ -560,7 +568,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
     protected function _assertRegistrationRequired()
     {
         if (!XenForo_Visitor::getUserId()) {
-            throw $this->responseException($this->responseReroute('bdApi_ControllerApi_Error', 'registration-required'));
+            throw $this->responseException($this->responseReroute(
+                'bdApi_ControllerApi_Error',
+                'registration-required'
+            ));
         }
     }
 
@@ -618,8 +629,12 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         /** @var XenForo_Model_User $userModel */
         $userModel = $this->getModelFromCache('XenForo_Model_User');
         $userModel->updateSessionActivity(
-            $visitorUserId, $this->_request->getClientIp(false),
-            $controllerName, $action, 'valid', $params
+            $visitorUserId,
+            $this->_request->getClientIp(false),
+            $controllerName,
+            $action,
+            'valid',
+            $params
         );
     }
 
@@ -719,5 +734,4 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
             $newLink
         ), true);
     }
-
 }

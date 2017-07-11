@@ -27,8 +27,16 @@ class bdApi_Extend_Model_Category extends XFCP_bdApi_Extend_Model_Category
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('categories', $category),
             'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('categories', $category),
-            'sub-categories' => bdApi_Data_Helper_Core::safeBuildApiLink('categories', array(), array('parent_category_id' => $category['node_id'])),
-            'sub-forums' => bdApi_Data_Helper_Core::safeBuildApiLink('forums', array(), array('parent_category_id' => $category['node_id'])),
+            'sub-categories' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                'categories',
+                array(),
+                array('parent_category_id' => $category['node_id'])
+            ),
+            'sub-forums' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                'forums',
+                array(),
+                array('parent_category_id' => $category['node_id'])
+            ),
         );
 
         $data['permissions'] = array(
@@ -39,5 +47,4 @@ class bdApi_Extend_Model_Category extends XFCP_bdApi_Extend_Model_Category
 
         return $data;
     }
-
 }

@@ -25,7 +25,10 @@ class bdApi_Template_Simulation_ViewRenderer extends XenForo_ViewRenderer_HtmlPu
             self::$_bdApi_response = new Zend_Controller_Response_Http();
         }
 
-        return new bdApi_Template_Simulation_ViewRenderer(self::$_bdApi_dependencies, self::$_bdApi_response, self::$_bdApi_request);
+        return new bdApi_Template_Simulation_ViewRenderer(
+            self::$_bdApi_dependencies,
+            self::$_bdApi_response,
+            self::$_bdApi_request
+        );
     }
-
 }

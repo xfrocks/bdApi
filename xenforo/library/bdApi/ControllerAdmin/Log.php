@@ -71,7 +71,7 @@ class bdApi_ControllerAdmin_Log extends XenForo_ControllerAdmin_Abstract
      */
     protected function _getLogModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_Log');
     }
-
 }

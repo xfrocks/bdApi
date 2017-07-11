@@ -457,6 +457,7 @@ class bdApi_Session extends XenForo_Session
      */
     protected static function _bdApi_getClientModel()
     {
+        /** @var bdApi_Model_Client $model */
         static $model = null;
 
         if ($model === null) {

@@ -96,7 +96,10 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
 
         $dw->save();
 
-        return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildAdminLink('api-clients'));
+        return $this->responseRedirect(
+            XenForo_ControllerResponse_Redirect::SUCCESS,
+            XenForo_Link::buildAdminLink('api-clients')
+        );
     }
 
     public function actionDelete()
@@ -109,7 +112,10 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
             $dw->setExistingData($client, true);
             $dw->delete();
 
-            return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildAdminLink('api-clients'));
+            return $this->responseRedirect(
+                XenForo_ControllerResponse_Redirect::SUCCESS,
+                XenForo_Link::buildAdminLink('api-clients')
+            );
         } else {
             $viewParams = array('client' => $client);
 
@@ -133,6 +139,7 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
      */
     protected function _getClientModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_Client');
     }
 
@@ -141,7 +148,7 @@ class bdApi_ControllerAdmin_Client extends XenForo_ControllerAdmin_Abstract
      */
     protected function _getClientDataWriter()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return XenForo_DataWriter::create('bdApi_DataWriter_Client');
     }
-
 }

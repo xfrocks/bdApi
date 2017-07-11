@@ -108,7 +108,10 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             $writer->set('profile_user_id', $user['user_id']);
             $writer->set('message_state', $profilePostModel->getProfilePostInsertMessageState($user));
             $writer->setExtraData(XenForo_DataWriter_DiscussionMessage_ProfilePost::DATA_PROFILE_USER, $user);
-            $writer->setOption(XenForo_DataWriter_DiscussionMessage_ProfilePost::OPTION_MAX_TAGGED_USERS, $visitor->hasPermission('general', 'maxTaggedUsers'));
+            $writer->setOption(
+                XenForo_DataWriter_DiscussionMessage_ProfilePost::OPTION_MAX_TAGGED_USERS,
+                $visitor->hasPermission('general', 'maxTaggedUsers')
+            );
 
             if ($writer->get('message_state') == 'visible') {
                 switch ($this->_spamCheck(array(
@@ -118,8 +121,11 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
                     case XenForo_Model_SpamPrevention::RESULT_MODERATED:
                         $writer->set('message_state', 'moderated');
                         break;
-                    case XenForo_Model_SpamPrevention::RESULT_DENIED;
-                        return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
+                    case XenForo_Model_SpamPrevention::RESULT_DENIED:
+                        return $this->responseError(
+                            new XenForo_Phrase('your_content_cannot_be_submitted_try_later'),
+                            400
+                        );
                         break;
                 }
             }
@@ -164,7 +170,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
                 case XenForo_Model_SpamPrevention::RESULT_MODERATED:
                     $dw->set('message_state', 'moderated');
                     break;
-                case XenForo_Model_SpamPrevention::RESULT_DENIED;
+                case XenForo_Model_SpamPrevention::RESULT_DENIED:
                     return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
                     break;
             }
@@ -247,9 +253,17 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
 
         $likeModel = $this->_getLikeModel();
 
-        $existingLike = $likeModel->getContentLikeByLikeUser('profile_post', $profilePost['profile_post_id'], XenForo_Visitor::getUserId());
+        $existingLike = $likeModel->getContentLikeByLikeUser(
+            'profile_post',
+            $profilePost['profile_post_id'],
+            XenForo_Visitor::getUserId()
+        );
         if (empty($existingLike)) {
-            $latestUsers = $likeModel->likeContent('profile_post', $profilePost['profile_post_id'], $profilePost['user_id']);
+            $latestUsers = $likeModel->likeContent(
+                'profile_post',
+                $profilePost['profile_post_id'],
+                $profilePost['user_id']
+            );
 
             if ($latestUsers === false) {
                 return $this->responseNoPermission();
@@ -270,7 +284,11 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
 
         $likeModel = $this->_getLikeModel();
 
-        $existingLike = $likeModel->getContentLikeByLikeUser('profile_post', $profilePost['profile_post_id'], XenForo_Visitor::getUserId());
+        $existingLike = $likeModel->getContentLikeByLikeUser(
+            'profile_post',
+            $profilePost['profile_post_id'],
+            XenForo_Visitor::getUserId()
+        );
         if (!empty($existingLike)) {
             $latestUsers = $likeModel->unlikeContent($existingLike);
 
@@ -320,7 +338,11 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
                 }
 
                 $data = array(
-                    'comment' => $this->_filterDataSingle($this->_getProfilePostModel()->prepareApiDataForComment($comment, $profilePost, $user)),
+                    'comment' => $this->_filterDataSingle($this->_getProfilePostModel()->prepareApiDataForComment(
+                        $comment,
+                        $profilePost,
+                        $user
+                    )),
                 );
 
                 return $this->responseData('bdApi_ViewApi_ProfilePost_Comments_Single', $data);
@@ -349,7 +371,11 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         $total = $profilePost['comment_count'];
 
         $data = array(
-            'comments' => $this->_filterDataMany($this->_getProfilePostModel()->prepareApiDataForComments($comments, $profilePost, $user)),
+            'comments' => $this->_filterDataMany($this->_getProfilePostModel()->prepareApiDataForComments(
+                $comments,
+                $profilePost,
+                $user
+            )),
             'comments_total' => $total,
 
             '_profilePost' => $profilePost,
@@ -357,11 +383,17 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         );
 
         if (!$this->_isFieldExcluded('profile_post')) {
-            $data['profile_post'] = $this->_filterDataSingle($this->_getProfilePostModel()->prepareApiDataForProfilePost($profilePost, $user), array('profile_post'));
+            $data['profile_post'] = $this->_filterDataSingle($this->_getProfilePostModel()->prepareApiDataForProfilePost(
+                $profilePost,
+                $user
+            ), array('profile_post'));
         }
 
         if (!$this->_isFieldExcluded('timeline_user')) {
-            $data['timeline_user'] = $this->_filterDataSingle($this->_getUserModel()->prepareApiDataForUser($user), array('timeline_user'));
+            $data['timeline_user'] = $this->_filterDataSingle(
+                $this->_getUserModel()->prepareApiDataForUser($user),
+                array('timeline_user')
+            );
         }
 
         $inputData = $this->_input->filter(array(
@@ -374,12 +406,20 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             $pageNavParams['fields_exclude'] = $inputData['fields_exclude'];
         }
         if ($oldestComment['comment_date'] != $profilePost['first_comment_date']) {
-            $data['links']['prev'] = bdApi_Data_Helper_Core::safeBuildApiLink('profile-posts/comments', $profilePost, array_merge($pageNavParams, array(
-                'before' => $oldestComment['comment_date'],
-            )));
+            $data['links']['prev'] = bdApi_Data_Helper_Core::safeBuildApiLink(
+                'profile-posts/comments',
+                $profilePost,
+                array_merge($pageNavParams, array(
+                    'before' => $oldestComment['comment_date'],
+                ))
+            );
         }
         if ($latestComment['comment_date'] != $profilePost['last_comment_date']) {
-            $data['links']['latest'] = bdApi_Data_Helper_Core::safeBuildApiLink('profile-posts/comments', $profilePost, $pageNavParams);
+            $data['links']['latest'] = bdApi_Data_Helper_Core::safeBuildApiLink(
+                'profile-posts/comments',
+                $profilePost,
+                $pageNavParams
+            );
         }
 
         return $this->responseData('bdApi_ViewApi_ProfilePost_Comments', $data);
@@ -404,7 +444,9 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
 
         if (XenForo_Application::$versionId > 1050000) {
             $dw->set('message_state', call_user_func(array(
-                $this->_getProfilePostModel(), 'getProfilePostCommentInsertMessageState'), $profilePost));
+                $this->_getProfilePostModel(),
+                'getProfilePostCommentInsertMessageState'
+            ), $profilePost));
         }
 
         $dw->bulkSet(array(
@@ -413,7 +455,10 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             'username' => $visitor['username'],
             'message' => $commentBody
         ));
-        $dw->setOption(XenForo_DataWriter_ProfilePostComment::OPTION_MAX_TAGGED_USERS, $visitor->hasPermission('general', 'maxTaggedUsers'));
+        $dw->setOption(
+            XenForo_DataWriter_ProfilePostComment::OPTION_MAX_TAGGED_USERS,
+            $visitor->hasPermission('general', 'maxTaggedUsers')
+        );
 
         if ($dw->get('message_state') == 'visible') {
             switch ($this->_spamCheck(array(
@@ -423,7 +468,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
                 case XenForo_Model_SpamPrevention::RESULT_MODERATED:
                     $dw->set('message_state', 'moderated');
                     break;
-                case XenForo_Model_SpamPrevention::RESULT_DENIED;
+                case XenForo_Model_SpamPrevention::RESULT_DENIED:
                     return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
                     break;
             }
@@ -463,13 +508,26 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
 
         $errorPhraseKey = '';
         if (XenForo_Application::$versionId > 1050051) {
-            $canDelete = call_user_func_array(array($this->_getProfilePostModel(), 'canDeleteProfilePostComment'), array(
-                $comment, $profilePost, $user, 'soft', &$errorPhraseKey
-            ));
+            $canDelete = call_user_func_array(
+                array($this->_getProfilePostModel(), 'canDeleteProfilePostComment'),
+                array(
+                    $comment,
+                    $profilePost,
+                    $user,
+                    'soft',
+                    &$errorPhraseKey
+                )
+            );
         } else {
-            $canDelete = call_user_func_array(array($this->_getProfilePostModel(), 'canDeleteProfilePostComment'), array(
-                $comment, $profilePost, $user, &$errorPhraseKey
-            ));
+            $canDelete = call_user_func_array(
+                array($this->_getProfilePostModel(), 'canDeleteProfilePostComment'),
+                array(
+                    $comment,
+                    $profilePost,
+                    $user,
+                    &$errorPhraseKey
+                )
+            );
         }
         if (!$canDelete) {
             throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
@@ -505,7 +563,10 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         }
 
         if (!$message) {
-            return $this->responseError(new XenForo_Phrase('bdapi_slash_x_report_requires_message', array('route' => 'profile-posts')), 400);
+            return $this->responseError(new XenForo_Phrase(
+                'bdapi_slash_x_report_requires_message',
+                array('route' => 'profile-posts')
+            ), 400);
         }
 
         $this->assertNotFlooding('report');
@@ -545,7 +606,9 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         if ($this->_isFieldIncluded('latest_comments')) {
             $prepareLatestComments = true;
             $profilePosts = $this->_getProfilePostModel()->addProfilePostCommentsToProfilePosts(
-                $profilePosts, $this->_getProfilePostModel()->getCommentFetchOptionsToPrepareApiData());
+                $profilePosts,
+                $this->_getProfilePostModel()->getCommentFetchOptionsToPrepareApiData()
+            );
         }
 
         $profilePostsData = array();
@@ -585,6 +648,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
      */
     protected function _getUserProfileHelper()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getHelper('UserProfile');
     }
 
@@ -593,6 +657,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
      */
     protected function _getUserModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_User');
     }
 
@@ -601,6 +666,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
      */
     protected function _getProfilePostModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_ProfilePost');
     }
 
@@ -609,6 +675,7 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
      */
     protected function _getLikeModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Like');
     }
 

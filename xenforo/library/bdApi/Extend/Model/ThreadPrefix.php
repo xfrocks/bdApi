@@ -78,5 +78,4 @@ class bdApi_Extend_Model_ThreadPrefix extends XFCP_bdApi_Extend_Model_ThreadPref
 
         return $data;
     }
-
 }

@@ -13,5 +13,4 @@ class bdApi_CronEntry_CleanUp
 
         $oauth2Model->getLogModel()->pruneExpired();
     }
-
 }

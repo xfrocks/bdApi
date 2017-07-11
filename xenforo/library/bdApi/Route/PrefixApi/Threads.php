@@ -12,5 +12,4 @@ class bdApi_Route_PrefixApi_Threads extends bdApi_Route_PrefixApi_Abstract
     {
         return XenForo_Link::buildBasicLinkWithIntegerParam($outputPrefix, $action, $extension, $data, 'thread_id');
     }
-
 }

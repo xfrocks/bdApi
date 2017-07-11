@@ -8,10 +8,16 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
         $action,
         array $triggerUser = null,
         array $extraData = null,
-        array &$messageInfo = null)
-    {
-        parent::insertConversationAlert($conversation, $alertUser, $action,
-            $triggerUser, $extraData, $messageInfo);
+        array &$messageInfo = null
+    ) {
+        parent::insertConversationAlert(
+            $conversation,
+            $alertUser,
+            $action,
+            $triggerUser,
+            $extraData,
+            $messageInfo
+        );
 
         if (!bdApi_Option::getSubscription(bdApi_Model_Subscription::TYPE_NOTIFICATION)
             || !bdApi_Option::get('userNotificationConversation')
@@ -41,7 +47,9 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
             'conversation_id' => $conversation['conversation_id'],
             'title' => $conversation['title'],
             'message' => XenForo_Template_Helper_Core::callHelper('snippet', array(
-                $messageInfo['message'], 140, array(
+                $messageInfo['message'],
+                140,
+                array(
                     'stripQuote' => true,
                 )
             )),

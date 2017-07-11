@@ -106,7 +106,11 @@ class bdApi_Model_PingQueue extends XenForo_Model
                     $record = $queueRecords[$key];
                     unset($queueRecords[$key]);
 
-                    if (!$this->_getDb()->delete('xf_bdapi_ping_queue', 'ping_queue_id = ' . intval($record['ping_queue_id']))) {
+                    if (!$this->_getDb()->delete(
+                        'xf_bdapi_ping_queue',
+                        'ping_queue_id = ' . intval($record['ping_queue_id'])
+                    )
+                    ) {
                         // already been deleted - run elsewhere
                         continue;
                     }
@@ -148,8 +152,11 @@ class bdApi_Model_PingQueue extends XenForo_Model
 
             if (XenForo_Application::debugMode() || $reInserted) {
                 $logModel->logRequest(
-                    'POST', $records[0]['callback'], $payloads,
-                    $responseCode, array('message' => $responseBody),
+                    'POST',
+                    $records[0]['callback'],
+                    $payloads,
+                    $responseCode,
+                    array('message' => $responseBody),
                     array(
                         'client_id' => '',
                         'user_id' => 0,
@@ -168,7 +175,6 @@ class bdApi_Model_PingQueue extends XenForo_Model
         foreach ($records as $key => $record) {
             if (!isset($dataByTypes[$record['object_type']])) {
                 $dataByTypes[$record['object_type']] = array();
-
             }
             $dataByTypes[$record['object_type']][$key] = $record['data'];
         }
@@ -187,5 +193,4 @@ class bdApi_Model_PingQueue extends XenForo_Model
 
         return $payloads;
     }
-
 }

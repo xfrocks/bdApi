@@ -18,6 +18,7 @@ class bdApi_ControllerApi_Attachment extends bdApi_ControllerApi_Abstract
      */
     protected function _getAttachmentModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Attachment');
     }
 
@@ -26,6 +27,7 @@ class bdApi_ControllerApi_Attachment extends bdApi_ControllerApi_Abstract
      */
     protected function _getAttachmentHelper()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getHelper('bdApi_ControllerHelper_Attachment');
     }
 }

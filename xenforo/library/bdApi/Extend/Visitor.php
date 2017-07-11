@@ -17,5 +17,4 @@ class bdApi_Extend_Visitor extends XFCP_bdApi_Extend_Visitor
 
         return parent::setVisitorLanguage($languageId);
     }
-
 }

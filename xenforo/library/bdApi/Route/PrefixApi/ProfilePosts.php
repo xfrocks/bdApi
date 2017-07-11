@@ -25,7 +25,12 @@ class bdApi_Route_PrefixApi_ProfilePosts extends bdApi_Route_PrefixApi_Abstract
             unset($extraParams[self::PARAM_COMMENT_ID]);
         }
 
-        return XenForo_Link::buildBasicLinkWithIntegerParam($outputPrefix, $action, $extension, $data, 'profile_post_id');
+        return XenForo_Link::buildBasicLinkWithIntegerParam(
+            $outputPrefix,
+            $action,
+            $extension,
+            $data,
+            'profile_post_id'
+        );
     }
-
 }

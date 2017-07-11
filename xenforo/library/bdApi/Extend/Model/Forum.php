@@ -117,9 +117,21 @@ class bdApi_Extend_Model_Forum extends XFCP_bdApi_Extend_Model_Forum
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('forums', $forum),
             'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('forums', $forum),
-            'sub-categories' => bdApi_Data_Helper_Core::safeBuildApiLink('categories', array(), array('parent_forum_id' => $forum['node_id'])),
-            'sub-forums' => bdApi_Data_Helper_Core::safeBuildApiLink('forums', array(), array('parent_forum_id' => $forum['node_id'])),
-            'threads' => bdApi_Data_Helper_Core::safeBuildApiLink('threads', array(), array('forum_id' => $forum['node_id'])),
+            'sub-categories' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                'categories',
+                array(),
+                array('parent_forum_id' => $forum['node_id'])
+            ),
+            'sub-forums' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                'forums',
+                array(),
+                array('parent_forum_id' => $forum['node_id'])
+            ),
+            'threads' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                'threads',
+                array(),
+                array('forum_id' => $forum['node_id'])
+            ),
         );
 
         $data['permissions'] = array(
@@ -144,5 +156,4 @@ class bdApi_Extend_Model_Forum extends XFCP_bdApi_Extend_Model_Forum
 
         return $data;
     }
-
 }

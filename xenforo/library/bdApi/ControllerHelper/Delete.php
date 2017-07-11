@@ -13,7 +13,10 @@ class bdApi_ControllerHelper_Delete extends XenForo_ControllerHelper_Abstract
             $defaultReason = $client['name'];
         }
 
-        return $this->_controller->getInput()->filterSingle('reason',
-            XenForo_Input::STRING, array('default' => $defaultReason));
+        return $this->_controller->getInput()->filterSingle(
+            'reason',
+            XenForo_Input::STRING,
+            array('default' => $defaultReason)
+        );
     }
 }

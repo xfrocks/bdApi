@@ -202,8 +202,9 @@ class bdApi_Model_Client extends XenForo_Model
         $db = $this->_getDb();
 
         foreach (array('client_id', 'user_id') as $columnName) {
-            if (!isset($conditions[$columnName]))
+            if (!isset($conditions[$columnName])) {
                 continue;
+            }
 
             if (is_array($conditions[$columnName])) {
                 if (!empty($conditions[$columnName])) {
@@ -245,5 +246,4 @@ class bdApi_Model_Client extends XenForo_Model
 
         return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
     }
-
 }

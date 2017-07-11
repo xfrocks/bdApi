@@ -105,7 +105,11 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('conversations', $conversation),
             'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('conversations', $conversation),
-            'messages' => bdApi_Data_Helper_Core::safeBuildApiLink('conversation-messages', array(), array('conversation_id' => $conversation['conversation_id']))
+            'messages' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                'conversation-messages',
+                array(),
+                array('conversation_id' => $conversation['conversation_id'])
+            )
         );
 
         $data['permissions'] = array(
@@ -220,15 +224,22 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
             'edit' => $this->canEditMessage($message, $conversation),
             'delete' => false,
             'reply' => $this->canReplyToConversation($conversation),
-            'upload_attachment' => $this->canUploadAndManageAttachment($conversation) AND $this->canEditMessage($message, $conversation),
+            'upload_attachment' => $this->canUploadAndManageAttachment($conversation) AND $this->canEditMessage(
+                $message,
+                $conversation
+            ),
             'report' => $this->canReportMessage($message, $conversation),
         );
 
         return $data;
     }
 
-    public function prepareApiDataForAttachments(array $attachments, array $message, array $conversation, $tempHash = '')
-    {
+    public function prepareApiDataForAttachments(
+        array $attachments,
+        array $message,
+        array $conversation,
+        $tempHash = ''
+    ) {
         $data = array();
 
         foreach ($attachments as $key => $attachment) {
@@ -290,5 +301,4 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
 
         return $prepared;
     }
-
 }

@@ -61,8 +61,10 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         // different from app to app (even with the same user)
         $externalProvider = 'api_' . $client['client_id'];
         $externalProviderKey = sprintf('fb_%s', $facebookUser['id']);
-        $facebookApp = @file_get_contents(sprintf('https://graph.facebook.com/app?access_token=%s',
-            rawurlencode($facebookToken)));
+        $facebookApp = @file_get_contents(sprintf(
+            'https://graph.facebook.com/app?access_token=%s',
+            rawurlencode($facebookToken)
+        ));
         $facebookApp = @json_decode($facebookApp, true);
         if (!empty($facebookApp['id'])
             && $facebookApp['id'] === XenForo_Application::getOptions()->get('facebookAppId')
@@ -289,8 +291,11 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         }
 
         if (!empty($googleUser['birthday'])) {
-            if (preg_match('#^(?<year>\d+)-(?<month>\d+)-(?<day>\d+)$#', $googleUser['birthday'],
-                $birthdayMatches)) {
+            if (preg_match(
+                '#^(?<year>\d+)-(?<month>\d+)-(?<day>\d+)$#',
+                $googleUser['birthday'],
+                $birthdayMatches
+            )) {
                 $userData['user_dob_year'] = $birthdayMatches['year'];
                 $userData['user_dob_month'] = $birthdayMatches['month'];
                 $userData['user_dob_day'] = $birthdayMatches['day'];
@@ -382,8 +387,11 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         ) {
             /* @var $userExternalModel XenForo_Model_UserExternal */
             $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
-            $userExternalModel->updateExternalAuthAssociation($extraData['external_provider'],
-                $extraData['external_provider_key'], $user['user_id']);
+            $userExternalModel->updateExternalAuthAssociation(
+                $extraData['external_provider'],
+                $extraData['external_provider_key'],
+                $user['user_id']
+            );
         }
 
         return $response;
@@ -424,8 +432,13 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         $oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
         $scopes = $oauth2Model->getAutoAndUserScopes($client['client_id'], $userId);
 
-        $token = $oauth2Model->getServer()->createAccessToken($client['client_id'],
-            $userId, $scopes, null, $includeRefreshToken);
+        $token = $oauth2Model->getServer()->createAccessToken(
+            $client['client_id'],
+            $userId,
+            $scopes,
+            null,
+            $includeRefreshToken
+        );
 
         return $this->responseData('bdApi_ViewApi_OAuth_TokenNonStandard', $token);
     }

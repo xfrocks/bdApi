@@ -26,3 +26,9 @@ class bdApi_Upload extends _XenForo_Upload
 }
 
 eval('class XenForo_Upload extends bdApi_Upload {}');
+
+if (false) {
+    class _XenForo_Upload extends XenForo_Upload
+    {
+    }
+}

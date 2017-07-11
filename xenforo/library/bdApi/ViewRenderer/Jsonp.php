@@ -16,8 +16,12 @@ class bdApi_ViewRenderer_Jsonp extends bdApi_ViewRenderer_Json
         return self::jsonpForOutput($json);
     }
 
-    public function renderView($viewName, array $params = array(), $templateName = '', XenForo_ControllerResponse_View $subView = null)
-    {
+    public function renderView(
+        $viewName,
+        array $params = array(),
+        $templateName = '',
+        XenForo_ControllerResponse_View $subView = null
+    ) {
         $json = parent::renderView($viewName, $params, $templateName, $subView);
 
         return self::jsonpForOutput($json);
@@ -32,5 +36,4 @@ class bdApi_ViewRenderer_Jsonp extends bdApi_ViewRenderer_Json
 
         return sprintf('%s(%s);', $callback, $json);
     }
-
 }

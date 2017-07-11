@@ -52,5 +52,4 @@ class bdApi_Data_Helper_Message
             return htmlspecialchars($string);
         }
     }
-
 }

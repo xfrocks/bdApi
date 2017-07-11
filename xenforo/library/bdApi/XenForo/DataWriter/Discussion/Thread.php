@@ -6,9 +6,11 @@ class bdApi_XenForo_DataWriter_Discussion_Thread_Base extends XFCP_bdApi_XenForo
     {
         /* @var $subscriptionModel bdApi_Model_Subscription */
         $subscriptionModel = $this->getModelFromCache('bdApi_Model_Subscription');
-        $subscriptionModel->deleteSubscriptionsForTopic(bdApi_Model_Subscription::TYPE_THREAD_POST, $this->get('thread_id'));
+        $subscriptionModel->deleteSubscriptionsForTopic(
+            bdApi_Model_Subscription::TYPE_THREAD_POST,
+            $this->get('thread_id')
+        );
     }
-
 }
 
 if (XenForo_Application::$versionId >= 1020000) {
@@ -20,7 +22,6 @@ if (XenForo_Application::$versionId >= 1020000) {
 
             parent::_discussionPostDelete();
         }
-
     }
 
 } else {
@@ -33,7 +34,6 @@ if (XenForo_Application::$versionId >= 1020000) {
             /** @noinspection PhpMethodParametersCountMismatchInspection */
             parent::_discussionPostDelete($messages);
         }
-
     }
 
 }

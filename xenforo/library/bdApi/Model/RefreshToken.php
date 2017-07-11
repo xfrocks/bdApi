@@ -164,5 +164,4 @@ class bdApi_Model_RefreshToken extends XenForo_Model
 
         return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
     }
-
 }

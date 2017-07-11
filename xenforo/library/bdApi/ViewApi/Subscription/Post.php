@@ -14,5 +14,4 @@ class bdApi_ViewApi_Subscription_Post extends bdApi_ViewApi_Base
             return '';
         }
     }
-
 }

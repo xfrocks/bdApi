@@ -22,5 +22,4 @@ class bdApi_ViewApi_Post_List extends bdApi_ViewApi_Base
 
         parent::prepareParams();
     }
-
 }

@@ -18,5 +18,4 @@ class bdApi_ViewApi_Page_Single extends bdApi_ViewApi_Base
 
         parent::prepareParams();
     }
-
 }

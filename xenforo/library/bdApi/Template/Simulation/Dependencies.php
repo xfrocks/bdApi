@@ -12,5 +12,4 @@ class bdApi_Template_Simulation_Dependencies extends XenForo_Dependencies_Public
 
         return new bdApi_Template_Simulation_Template($templateName, $params);
     }
-
 }

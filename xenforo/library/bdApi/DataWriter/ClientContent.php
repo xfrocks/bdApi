@@ -8,7 +8,11 @@ class bdApi_DataWriter_ClientContent extends XenForo_DataWriter
             'xf_bdapi_client_content' => array(
                 'client_content_id' => array('type' => XenForo_DataWriter::TYPE_UINT, 'autoIncrement' => true),
                 'client_id' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true, 'maxLength' => 255),
-                'content_type' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true, 'maxLength' => 25),
+                'content_type' => array(
+                    'type' => XenForo_DataWriter::TYPE_STRING,
+                    'required' => true,
+                    'maxLength' => 25
+                ),
                 'content_id' => array('type' => XenForo_DataWriter::TYPE_UINT, 'required' => true),
                 'title' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true, 'maxLength' => 255),
                 'body' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true),
@@ -71,6 +75,7 @@ class bdApi_DataWriter_ClientContent extends XenForo_DataWriter
      */
     protected function _getSearchDataHandler()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return XenForo_Search_DataHandler_Abstract::create('bdApi_Search_DataHandler_ClientContent');
     }
 
@@ -79,6 +84,7 @@ class bdApi_DataWriter_ClientContent extends XenForo_DataWriter
      */
     protected function _getClientContentModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_ClientContent');
     }
 }

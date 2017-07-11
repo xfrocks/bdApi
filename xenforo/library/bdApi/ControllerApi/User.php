@@ -56,8 +56,16 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             'users_total' => $total,
         );
 
-        bdApi_Data_Helper_Core::addPageLinks($this->getInput(),
-            $data, $limit, $total, $page, 'users', array(), $pageNavParams);
+        bdApi_Data_Helper_Core::addPageLinks(
+            $this->getInput(),
+            $data,
+            $limit,
+            $total,
+            $page,
+            'users',
+            array(),
+            $pageNavParams
+        );
 
         return $this->responseData('bdApi_ViewApi_User_List', $data);
     }
@@ -260,7 +268,12 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $user = $writer->getMergedData();
 
         // log the ip of the user registering
-        XenForo_Model_Ip::log(XenForo_Visitor::getUserId() ? XenForo_Visitor::getUserId() : $user['user_id'], 'user', $user['user_id'], 'register');
+        XenForo_Model_Ip::log(
+            XenForo_Visitor::getUserId() ? XenForo_Visitor::getUserId() : $user['user_id'],
+            'user',
+            $user['user_id'],
+            'register'
+        );
 
         if ($user['user_state'] == 'email_confirm') {
             $userConfirmationModel->sendEmailConfirmation($user);
@@ -269,7 +282,11 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         if (!empty($extraData['external_provider']) && !empty($extraData['external_provider_key'])) {
             /* @var $userExternalModel XenForo_Model_UserExternal */
             $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
-            $userExternalModel->updateExternalAuthAssociation($extraData['external_provider'], $extraData['external_provider_key'], $user['user_id']);
+            $userExternalModel->updateExternalAuthAssociation(
+                $extraData['external_provider'],
+                $extraData['external_provider_key'],
+                $user['user_id']
+            );
         }
 
         if (XenForo_Visitor::getUserId() == 0) {
@@ -476,7 +493,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionPostPassword()
     {
-        $link = bdApi_Data_Helper_Core::safeBuildApiLink('users', array('user_id' => $this->_input->filterSingle('user_id', XenForo_Input::UINT)));
+        $link = bdApi_Data_Helper_Core::safeBuildApiLink(
+            'users',
+            array('user_id' => $this->_input->filterSingle('user_id', XenForo_Input::UINT))
+        );
         $this->_setDeprecatedHeaders('PUT', $link);
 
         return $this->responseReroute(__CLASS__, 'put-index');
@@ -687,7 +707,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
     public function actionPostGroups()
     {
-        $link = bdApi_Data_Helper_Core::safeBuildApiLink('users', array('user_id' => $this->_input->filterSingle('user_id', XenForo_Input::UINT)));
+        $link = bdApi_Data_Helper_Core::safeBuildApiLink(
+            'users',
+            array('user_id' => $this->_input->filterSingle('user_id', XenForo_Input::UINT))
+        );
         $this->_setDeprecatedHeaders('PUT', $link);
 
         return $this->responseReroute('bdApi_ControllerApi_User', 'put-index');
@@ -850,6 +873,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
      */
     protected function _getUserModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_User');
     }
 
@@ -858,6 +882,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
      */
     protected function _getUserGroupModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_UserGroup');
     }
 
@@ -866,6 +891,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
      */
     protected function _getIgnoreModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_UserIgnore');
     }
 

@@ -38,11 +38,18 @@ class bdApi_ControllerAdmin_RefreshToken extends XenForo_ControllerAdmin_Abstrac
             $dw->setExistingData($id);
             $dw->delete();
 
-            return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildAdminLink('api-refresh-tokens'));
+            return $this->responseRedirect(
+                XenForo_ControllerResponse_Redirect::SUCCESS,
+                XenForo_Link::buildAdminLink('api-refresh-tokens')
+            );
         } else {
             $viewParams = array('refreshToken' => $refreshToken);
 
-            return $this->responseView('bdApi_ViewAdmin_RefreshToken_Delete', 'bdapi_refresh_token_delete', $viewParams);
+            return $this->responseView(
+                'bdApi_ViewAdmin_RefreshToken_Delete',
+                'bdapi_refresh_token_delete',
+                $viewParams
+            );
         }
     }
 
@@ -51,7 +58,10 @@ class bdApi_ControllerAdmin_RefreshToken extends XenForo_ControllerAdmin_Abstrac
         $info = $this->_getRefreshTokenModel()->getRefreshTokenById($id, $fetchOptions);
 
         if (empty($info)) {
-            throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_refresh_token_not_found'), 404));
+            throw $this->responseException($this->responseError(
+                new XenForo_Phrase('bdapi_refresh_token_not_found'),
+                404
+            ));
         }
 
         return $info;
@@ -62,6 +72,7 @@ class bdApi_ControllerAdmin_RefreshToken extends XenForo_ControllerAdmin_Abstrac
      */
     protected function _getRefreshTokenModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_RefreshToken');
     }
 
@@ -70,7 +81,7 @@ class bdApi_ControllerAdmin_RefreshToken extends XenForo_ControllerAdmin_Abstrac
      */
     protected function _getRefreshTokenDataWriter()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return XenForo_DataWriter::create('bdApi_DataWriter_RefreshToken');
     }
-
 }

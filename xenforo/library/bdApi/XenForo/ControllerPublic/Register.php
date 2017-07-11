@@ -41,33 +41,41 @@ class bdApi_XenForo_ControllerPublic_Register_Base extends XFCP_bdApi_XenForo_Co
                 // but we have an authorize request pending...
                 // redirect to that instead
                 // TODO: drop the usage of Xenforo_Controller::responseRedirect? A bit dangerous
-                return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CREATED, $this->_authorizePending);
+                return $this->responseRedirect(
+                    XenForo_ControllerResponse_Redirect::RESOURCE_CREATED,
+                    $this->_authorizePending
+                );
             }
         }
 
         return parent::responseView($viewName, $templateName, $params, $containerParams);
     }
-
 }
 
 if (XenForo_Application::$versionId >= 1020000) {
     class bdApi_XenForo_ControllerPublic_Register extends bdApi_XenForo_ControllerPublic_Register_Base
     {
-        public function responseView($viewName = '', $templateName = '', array $params = array(), array $containerParams = array())
-        {
+        public function responseView(
+            $viewName = '',
+            $templateName = '',
+            array $params = array(),
+            array $containerParams = array()
+        ) {
             return $this->_bdApi_responseView($viewName, $templateName, $params, $containerParams);
         }
-
     }
 
 } else {
     class bdApi_XenForo_ControllerPublic_Register extends bdApi_XenForo_ControllerPublic_Register_Base
     {
-        public function responseView($viewName, $templateName = 'DEFAULT', array $params = array(), array $containerParams = array())
-        {
+        public function responseView(
+            $viewName,
+            $templateName = 'DEFAULT',
+            array $params = array(),
+            array $containerParams = array()
+        ) {
             return $this->_bdApi_responseView($viewName, $templateName, $params, $containerParams);
         }
-
     }
 
 }

@@ -27,10 +27,12 @@ class bdApi_ControllerHelper_Admin extends XenForo_ControllerHelper_Abstract
         $filter = $this->_controller->getInput()->filterSingle('_filter', XenForo_Input::ARRAY_SIMPLE);
         if ($filter && isset($filter['value'])) {
             if (!$filterView AND !($this->_controller instanceof bdApi_ControllerAdmin_Subscription)) {
-                $users = $userModel->getUsers(array('username' => array(
-                    $filter['value'],
-                    empty($filter['prefix']) ? 'lr' : 'r'
-                )));
+                $users = $userModel->getUsers(array(
+                    'username' => array(
+                        $filter['value'],
+                        empty($filter['prefix']) ? 'lr' : 'r'
+                    )
+                ));
                 if (!empty($users)) {
                     $conditions['user_id'] = array_keys($users);
                     $filterView = true;
@@ -55,5 +57,4 @@ class bdApi_ControllerHelper_Admin extends XenForo_ControllerHelper_Abstract
             'filterView' => $filterView,
         );
     }
-
 }

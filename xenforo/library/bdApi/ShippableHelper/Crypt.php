@@ -1,6 +1,6 @@
 <?php
 
-// updated by DevHelper_Helper_ShippableHelper at 2017-01-31T04:19:42+00:00
+// updated by DevHelper_Helper_ShippableHelper at 2017-07-11T16:09:19+00:00
 
 /**
  * Class bdApi_ShippableHelper_Crypt
@@ -73,6 +73,7 @@ class bdApi_ShippableHelper_Crypt
             $key = md5($key, true);
             $padding = 16 - (strlen($data) % 16);
             $data .= str_repeat(chr($padding), $padding);
+            /** @noinspection PhpDeprecationInspection */
             return mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_ECB);
         }
 
@@ -97,6 +98,7 @@ class bdApi_ShippableHelper_Crypt
 
         if (function_exists('mcrypt_decrypt')) {
             $key = md5($key, true);
+            /** @noinspection PhpDeprecationInspection */
             $data = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_ECB);
             $padding = ord($data[strlen($data) - 1]);
             return substr($data, 0, -$padding);

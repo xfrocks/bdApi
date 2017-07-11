@@ -56,7 +56,10 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
             }
 
             if (!empty($forumIds)) {
-                $forums = $this->_getForumModel()->getForumsByIds($forumIds, $this->_getForumModel()->getFetchOptionsToPrepareApiData());
+                $forums = $this->_getForumModel()->getForumsByIds(
+                    $forumIds,
+                    $this->_getForumModel()->getFetchOptionsToPrepareApiData()
+                );
             }
 
             $arrangeOptions = array(
@@ -74,8 +77,12 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
         return $elements;
     }
 
-    protected function _arrangeElements(array &$elements, array &$nodesGrouped, $parentNodeId, array &$options = array())
-    {
+    protected function _arrangeElements(
+        array &$elements,
+        array &$nodesGrouped,
+        $parentNodeId,
+        array &$options = array()
+    ) {
         foreach ($nodesGrouped as $_parentNodeId => $nodes) {
             if ($parentNodeId != $_parentNodeId) {
                 continue;
@@ -112,7 +119,11 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
                             $element['links'] = array();
                         }
 
-                        $element['links']['sub-elements'] = bdApi_Data_Helper_Core::safeBuildApiLink('navigation', '', array('parent' => $element['navigation_id']));
+                        $element['links']['sub-elements'] = bdApi_Data_Helper_Core::safeBuildApiLink(
+                            'navigation',
+                            '',
+                            array('parent' => $element['navigation_id'])
+                        );
                     }
 
                     $elements[] = $element;
@@ -130,6 +141,7 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
      */
     protected function _getCategoryModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Category');
     }
 
@@ -138,6 +150,7 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
      */
     protected function _getForumModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Forum');
     }
 
@@ -146,6 +159,7 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
      */
     protected function _getLinkForumModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_LinkForum');
     }
 
@@ -154,6 +168,7 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
      */
     protected function _getNodeModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Node');
     }
 
@@ -162,6 +177,7 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
      */
     protected function _getPageModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Page');
     }
 

@@ -41,5 +41,4 @@ class bdApi_XenForo_ControllerPublic_Login extends XFCP_bdApi_XenForo_Controller
         }
         return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, $input['redirect']);
     }
-
 }

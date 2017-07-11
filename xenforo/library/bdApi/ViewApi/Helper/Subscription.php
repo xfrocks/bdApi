@@ -45,5 +45,4 @@ class bdApi_ViewApi_Helper_Subscription
 
         return true;
     }
-
 }

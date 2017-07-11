@@ -30,7 +30,11 @@ class bdApi_Extend_Model_Page extends XFCP_bdApi_Extend_Model_Page
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('pages', $page),
             'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('pages', $page),
-            'sub-pages' => bdApi_Data_Helper_Core::safeBuildApiLink('pages', array(), array('parent_page_id' => $page['node_id'])),
+            'sub-pages' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                'pages',
+                array(),
+                array('parent_page_id' => $page['node_id'])
+            ),
         );
 
         $data['permissions'] = array(
@@ -41,5 +45,4 @@ class bdApi_Extend_Model_Page extends XFCP_bdApi_Extend_Model_Page
 
         return $data;
     }
-
 }

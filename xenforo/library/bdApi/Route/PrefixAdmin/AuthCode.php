@@ -18,10 +18,15 @@ class bdApi_Route_PrefixAdmin_AuthCode implements XenForo_Route_Interface
     public function buildLink($originalPrefix, $outputPrefix, $action, $extension, $data, array &$extraParams)
     {
         if (is_array($data)) {
-            return XenForo_Link::buildBasicLinkWithIntegerParam($outputPrefix, $action, $extension, $data, 'auth_code_id');
+            return XenForo_Link::buildBasicLinkWithIntegerParam(
+                $outputPrefix,
+                $action,
+                $extension,
+                $data,
+                'auth_code_id'
+            );
         } else {
             return XenForo_Link::buildBasicLink($outputPrefix, $action, $extension);
         }
     }
-
 }

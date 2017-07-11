@@ -10,5 +10,4 @@ class bdApi_ViewPublic_Account_Api_Index extends XenForo_ViewPublic_Base
             }
         }
     }
-
 }

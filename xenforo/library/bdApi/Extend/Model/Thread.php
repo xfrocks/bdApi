@@ -156,7 +156,10 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
             $pollModel = $this->getModelFromCache('XenForo_Model_Poll');
             $data['poll'] = $pollModel->prepareApiDataForPoll($poll, $this->canVoteOnPoll($poll, $thread, $forum));
             $data['poll']['links']['vote'] = bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll/votes', $thread);
-            $data['poll']['links']['results'] = bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll/results', $thread);
+            $data['poll']['links']['results'] = bdApi_Data_Helper_Core::safeBuildApiLink(
+                'threads/poll/results',
+                $thread
+            );
         }
 
         if (XenForo_Application::$versionId > 1050000
@@ -176,11 +179,20 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
             'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('threads', $thread),
             'followers' => bdApi_Data_Helper_Core::safeBuildApiLink('threads/followers', $thread),
             'forum' => bdApi_Data_Helper_Core::safeBuildApiLink('forums', $thread),
-            'posts' => bdApi_Data_Helper_Core::safeBuildApiLink('posts', array(), array('thread_id' => $thread['thread_id'])),
+            'posts' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                'posts',
+                array(),
+                array('thread_id' => $thread['thread_id'])
+            ),
             'first_poster' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $thread),
-            'first_poster_avatar' => XenForo_Template_Helper_Core::callHelper('avatar',
-                array($thread, 'm', false, true)),
-            'first_post' => bdApi_Data_Helper_Core::safeBuildApiLink('posts', array('post_id' => $thread['first_post_id'])),
+            'first_poster_avatar' => XenForo_Template_Helper_Core::callHelper(
+                'avatar',
+                array($thread, 'm', false, true)
+            ),
+            'first_post' => bdApi_Data_Helper_Core::safeBuildApiLink(
+                'posts',
+                array('post_id' => $thread['first_post_id'])
+            ),
         );
 
         if ($thread['last_post_user_id'] != $thread['user_id']) {
@@ -191,7 +203,10 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
         }
 
         if ($thread['last_post_id'] != $thread['first_post_id']) {
-            $data['links']['last_post'] = bdApi_Data_Helper_Core::safeBuildApiLink('posts', array('post_id' => $thread['last_post_id']));
+            $data['links']['last_post'] = bdApi_Data_Helper_Core::safeBuildApiLink(
+                'posts',
+                array('post_id' => $thread['last_post_id'])
+            );
         }
 
         $data['permissions'] = array(
@@ -259,5 +274,4 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
 
         return parent::limitQueryResults($query, $limit, $offset);
     }
-
 }

@@ -13,10 +13,14 @@ class bdApi_Search_DataHandler_ClientContent extends XenForo_Search_DataHandler_
         $metadata['client_id'] = $data['client_id'];
 
         $indexer->insertIntoIndex(
-            self::CONTENT_TYPE, $data['client_content_id'],
-            $data['title'], $data['body'],
-            $data['date'], $data['user_id'],
-            0, $metadata
+            self::CONTENT_TYPE,
+            $data['client_content_id'],
+            $data['title'],
+            $data['body'],
+            $data['date'],
+            $data['user_id'],
+            0,
+            $metadata
         );
     }
 

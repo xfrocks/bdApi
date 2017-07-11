@@ -34,7 +34,10 @@ class bdApi_Data_Helper_Batch
 
         $fc = self::getFc();
 
-        $request = new bdApi_Zend_Controller_Request_Http(bdApi_Data_Helper_Core::safeConvertApiUriToAbsoluteUri($uri, true));
+        $request = new bdApi_Zend_Controller_Request_Http(bdApi_Data_Helper_Core::safeConvertApiUriToAbsoluteUri(
+            $uri,
+            true
+        ));
         $request->setParam('_isApiJob', true);
         $request->setMethod($method);
         foreach ($params as $key => $value) {
@@ -113,7 +116,12 @@ class bdApi_Data_Helper_Batch
                         /** @var XenForo_ControllerResponse_View $response */
                         $response = $job['_job_response'];
 
-                        $viewOutput = $viewRenderer->renderViewObject($response->viewName, 'Json', $response->params, $response->templateName);
+                        $viewOutput = $viewRenderer->renderViewObject(
+                            $response->viewName,
+                            'Json',
+                            $response->params,
+                            $response->templateName
+                        );
                         if (!is_array($viewOutput)) {
                             $viewOutput = @json_decode($viewOutput, true);
                         }

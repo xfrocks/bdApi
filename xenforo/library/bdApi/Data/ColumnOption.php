@@ -8,8 +8,12 @@ class bdApi_Data_ColumnOption
         $preparedOption['_bdApiTable'] = $table;
         $preparedOption['_bdApiColumn'] = $column;
 
-        return XenForo_ViewAdmin_Helper_Option::renderOptionTemplateInternal('bdapi_column_option_onoff',
-            $view, $fieldPrefix, $preparedOption, $canEdit
+        return XenForo_ViewAdmin_Helper_Option::renderOptionTemplateInternal(
+            'bdapi_column_option_onoff',
+            $view,
+            $fieldPrefix,
+            $preparedOption,
+            $canEdit
         );
     }
 

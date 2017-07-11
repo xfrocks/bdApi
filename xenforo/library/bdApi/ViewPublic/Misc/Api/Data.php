@@ -14,5 +14,4 @@ class bdApi_ViewPublic_Misc_Api_Data extends XenForo_ViewPublic_Base
             return json_encode($this->_params['data']);
         }
     }
-
 }

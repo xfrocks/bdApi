@@ -50,9 +50,11 @@ class bdApi_Model_Subscription extends XenForo_Model
                     $userOption = array();
                 }
 
-                $this->_getDb()->update('xf_user_option',
+                $this->_getDb()->update(
+                    'xf_user_option',
                     array(bdApi_Option::getConfig('subscriptionColumnUserNotification') => serialize($userOption)),
-                    array('user_id = ?' => $id));
+                    array('user_id = ?' => $id)
+                );
                 break;
             case self::TYPE_THREAD_POST:
                 if (!empty($subscriptions)) {
@@ -72,9 +74,11 @@ class bdApi_Model_Subscription extends XenForo_Model
                     $threadOption = array();
                 }
 
-                $this->_getDb()->update('xf_thread',
+                $this->_getDb()->update(
+                    'xf_thread',
                     array(bdApi_Option::getConfig('subscriptionColumnThreadPost') => serialize($threadOption)),
-                    array('thread_id = ?' => $id));
+                    array('thread_id = ?' => $id)
+                );
                 break;
             case self::TYPE_USER:
                 if (!empty($subscriptions)) {
@@ -92,9 +96,11 @@ class bdApi_Model_Subscription extends XenForo_Model
                 }
 
                 if ($id > 0) {
-                    $this->_getDb()->update('xf_user_option',
+                    $this->_getDb()->update(
+                        'xf_user_option',
                         array(bdApi_Option::getConfig('subscriptionColumnUser') => serialize($userOption)),
-                        array('user_id = ?' => $id));
+                        array('user_id = ?' => $id)
+                    );
                 } else {
                     XenForo_Application::setSimpleCacheData(self::TYPE_USER_0_SIMPLE_CACHE, $userOption);
                 }
@@ -153,7 +159,12 @@ class bdApi_Model_Subscription extends XenForo_Model
                 $pingData['link'] = $option['link'];
             }
 
-            $pingQueueModel->insertQueue($subscription['callback'], $objectType, $pingData, $subscription['expire_date']);
+            $pingQueueModel->insertQueue(
+                $subscription['callback'],
+                $objectType,
+                $pingData,
+                $subscription['expire_date']
+            );
         }
 
         return true;
@@ -231,8 +242,11 @@ class bdApi_Model_Subscription extends XenForo_Model
             $userAlerts = $alertModel->bdApi_prepareContentForAlerts($userAlerts, $viewingUsers[$userId]);
 
             bdApi_Template_Simulation_Template::$bdApi_visitor = $viewingUsers[$userId];
-            $userAlerts = bdApi_ViewApi_Helper_Alert::getTemplates(bdApi_Template_Simulation_View::create(),
-                $userAlerts, $alertModel->bdApi_getAlertHandlers());
+            $userAlerts = bdApi_ViewApi_Helper_Alert::getTemplates(
+                bdApi_Template_Simulation_View::create(),
+                $userAlerts,
+                $alertModel->bdApi_getAlertHandlers()
+            );
 
             foreach (array_keys($userAlerts) as $userAlertId) {
                 $alerts[$userAlertId] = $userAlerts[$userAlertId];
@@ -262,7 +276,10 @@ class bdApi_Model_Subscription extends XenForo_Model
                 && !empty($alertRef['extra']['object_data'])
             ) {
                 // fake alert, use the included object_data
-                $pingDataRef['object_data'] = array_merge($pingDataRef['object_data'], $alertRef['extra']['object_data']);
+                $pingDataRef['object_data'] = array_merge(
+                    $pingDataRef['object_data'],
+                    $alertRef['extra']['object_data']
+                );
             }
 
             $alertedUserId = $alertRef['alerted_user_id'];
@@ -311,11 +328,13 @@ class bdApi_Model_Subscription extends XenForo_Model
         }
 
         if (!empty($dbUserIds)) {
-            $dbUsers = $userModel->getUsersByIds($dbUserIds,
+            $dbUsers = $userModel->getUsersByIds(
+                $dbUserIds,
                 array(
                     'join' => XenForo_Model_User::FETCH_USER_FULL
                         | XenForo_Model_User::FETCH_USER_PERMISSIONS
-                ));
+                )
+            );
 
             foreach ($dbUsers as $user) {
                 $user = $userModel->prepareUser($user);
@@ -401,11 +420,18 @@ class bdApi_Model_Subscription extends XenForo_Model
             /* @var $logModel bdApi_Model_Log */
             $logModel = $this->getModelFromCache('bdApi_Model_Log');
 
-            $logModel->logRequest('GET', $callback, $requestData, $response->getStatus(), array('message' => $response->getBody()), array(
-                'client_id' => '',
-                'user_id' => 0,
-                'ip_address' => '127.0.0.1',
-            ));
+            $logModel->logRequest(
+                'GET',
+                $callback,
+                $requestData,
+                $response->getStatus(),
+                array('message' => $response->getBody()),
+                array(
+                    'client_id' => '',
+                    'user_id' => 0,
+                    'ip_address' => '127.0.0.1',
+                )
+            );
         }
 
         if ($body !== $challenge) {
@@ -566,14 +592,16 @@ class bdApi_Model_Subscription extends XenForo_Model
         }
 
         if (!empty($conditions['filter'])) {
-
             if (is_array($conditions['filter'])) {
                 $filterQuoted = XenForo_Db::quoteLike($conditions['filter'][0], $conditions['filter'][1], $db);
             } else {
                 $filterQuoted = XenForo_Db::quoteLike($conditions['filter'], 'lr', $db);
             }
 
-            $sqlConditions[] = sprintf('(subscription.callback LIKE %1$s OR subscription.topic LIKE %1$s)', $filterQuoted);
+            $sqlConditions[] = sprintf(
+                '(subscription.callback LIKE %1$s OR subscription.topic LIKE %1$s)',
+                $filterQuoted
+            );
         }
 
         return $this->getConditionsForClause($sqlConditions);
@@ -629,5 +657,4 @@ class bdApi_Model_Subscription extends XenForo_Model
             $id
         );
     }
-
 }

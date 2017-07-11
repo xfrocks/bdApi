@@ -15,7 +15,11 @@ class bdApi_ControllerApi_Page extends bdApi_ControllerApi_Node
             $response->params['_pageTemplateTitle'] = $this->_getPageModel()->getTemplateTitle($page);
 
             if (!empty($page['log_visits'])) {
-                $this->_getPageModel()->logVisit($page, XenForo_Visitor::getInstance()->toArray(), XenForo_Application::$time);
+                $this->_getPageModel()->logVisit(
+                    $page,
+                    XenForo_Visitor::getInstance()->toArray(),
+                    XenForo_Application::$time
+                );
                 $response->params['page']['page_view_count']++;
             }
         }
@@ -89,6 +93,7 @@ class bdApi_ControllerApi_Page extends bdApi_ControllerApi_Node
      */
     protected function _getPageModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Page');
     }
 

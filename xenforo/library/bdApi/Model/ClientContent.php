@@ -51,8 +51,7 @@ class bdApi_Model_ClientContent extends XenForo_Model
                 $joinOptions[joinTables]
             WHERE $whereConditions
                 $orderClause
-            ", $limitOptions['limit'], $limitOptions['offset']
-        ), 'client_content_id');
+            ", $limitOptions['limit'], $limitOptions['offset']), 'client_content_id');
 
         foreach ($clientContents as &$clientContentRef) {
             $clientContentRef['extraData'] = unserialize($clientContentRef['extra_data']);
@@ -207,5 +206,4 @@ class bdApi_Model_ClientContent extends XenForo_Model
 
         return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
     }
-
 }

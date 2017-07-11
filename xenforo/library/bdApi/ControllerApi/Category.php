@@ -72,7 +72,7 @@ class bdApi_ControllerApi_Category extends bdApi_ControllerApi_Node
      */
     protected function _getCategoryModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Category');
     }
-
 }

@@ -81,5 +81,4 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
 
         return parent::_logRequest($controllerResponse, $controllerName, $action);
     }
-
 }

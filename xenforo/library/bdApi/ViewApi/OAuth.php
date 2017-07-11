@@ -16,5 +16,4 @@ class bdApi_ViewApi_OAuth extends bdApi_ViewApi_Base
             }
         }
     }
-
 }

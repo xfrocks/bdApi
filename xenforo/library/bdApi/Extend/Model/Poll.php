@@ -48,7 +48,11 @@ class bdApi_Extend_Model_Poll extends XFCP_bdApi_Extend_Model_Poll
             throw $controller->getErrorOrNoPermissionResponseException($errorPhraseKey);
         }
 
-        $responseIds = $controller->getInput()->filterSingle('response_ids', XenForo_Input::UINT, array('array' => true));
+        $responseIds = $controller->getInput()->filterSingle(
+            'response_ids',
+            XenForo_Input::UINT,
+            array('array' => true)
+        );
         $responseId = $controller->getInput()->filterSingle('response_id', XenForo_Input::UINT);
         if ($responseId > 0) {
             $responseIds[] = $responseId;
@@ -64,8 +68,10 @@ class bdApi_Extend_Model_Poll extends XFCP_bdApi_Extend_Model_Poll
         if ($poll['max_votes'] > 0
             && count($responseIds) > $poll['max_votes']
         ) {
-            return $controller->responseError(new XenForo_Phrase('you_may_select_up_to_x_choices',
-                array('max' => $poll['max_votes'])));
+            return $controller->responseError(new XenForo_Phrase(
+                'you_may_select_up_to_x_choices',
+                array('max' => $poll['max_votes'])
+            ));
         }
 
         if ($this->voteOnPoll($poll['poll_id'], $responseIds)) {

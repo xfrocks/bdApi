@@ -16,10 +16,12 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
         foreach ($error as $errorMessage) {
             $errors[] = array(
                 '_key' => 'error',
-                '_children' => array(array(
-                    '_type' => 'cdata',
-                    '_value' => $errorMessage,
-                ))
+                '_children' => array(
+                    array(
+                        '_type' => 'cdata',
+                        '_value' => $errorMessage,
+                    )
+                )
             );
         }
 
@@ -28,24 +30,31 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
 
     public function renderMessage($message)
     {
-        return self::xmlEncodeForOutput(array('response' => array(
-            'status' => 'ok',
-            'message' => $message,
-        )));
+        return self::xmlEncodeForOutput(array(
+            'response' => array(
+                'status' => 'ok',
+                'message' => $message,
+            )
+        ));
     }
 
-    public function renderView($viewName, array $params = array(), $templateName = '', XenForo_ControllerResponse_View $subView = null)
-    {
+    public function renderView(
+        $viewName,
+        array $params = array(),
+        $templateName = '',
+        XenForo_ControllerResponse_View $subView = null
+    ) {
         $viewOutput = $this->renderViewObject($viewName, 'Xml', $params, $templateName);
 
         if (is_array($viewOutput)) {
             return self::xmlEncodeForOutput($viewOutput);
-        } else
+        } else {
             if ($viewOutput === null) {
                 return self::xmlEncodeForOutput($this->getDefaultOutputArray($viewName, $params, $templateName));
             } else {
                 return $viewOutput;
             }
+        }
     }
 
     public function getDefaultOutputArray($viewName, $params, $templateName)
@@ -77,10 +86,12 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
             if (is_object($value)) {
                 // force the object to string
                 // and use it as a value with a type of CData
-                $value = array($key => array(
-                    '_type' => 'cdata',
-                    '_value' => '' . $value,
-                ));
+                $value = array(
+                    $key => array(
+                        '_type' => 'cdata',
+                        '_value' => '' . $value,
+                    )
+                );
             }
 
             if (is_array($value)) {
@@ -89,15 +100,17 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
                 $children = $value;
 
                 // a custom key can be specified with numeric-based array
-                if (!empty($value['_key']))
+                if (!empty($value['_key'])) {
                     $nodeKey = $value['_key'];
+                }
 
                 // normally, children will be detected as all the elements
                 // of a array. However, a specific set of children can be
                 // specified using _children like this. Refer renderError()
                 // to understand how to use this
-                if (!empty($value['_children']))
+                if (!empty($value['_children'])) {
                     $children = $value['_children'];
+                }
 
                 // an array can still be recognized as a single value
                 // if it has _value like below.
@@ -158,5 +171,4 @@ class bdApi_ViewRenderer_Xml extends XenForo_ViewRenderer_Xml
     {
         bdApi_Data_Helper_Core::addDefaultResponse($params);
     }
-
 }

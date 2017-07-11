@@ -12,5 +12,4 @@ class bdApi_Route_PrefixApi_Pages extends bdApi_Route_PrefixApi_Abstract
     {
         return XenForo_Link::buildBasicLinkWithIntegerParam($outputPrefix, $action, $extension, $data, 'node_id');
     }
-
 }

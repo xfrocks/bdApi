@@ -20,7 +20,10 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
         // known to be valid
         $contentId = $attachmentHandler->getContentIdFromContentData($contentData);
 
-        $existingAttachments = ($contentId ? $attachmentModel->getAttachmentsByContentId($contentType, $contentId) : array());
+        $existingAttachments = ($contentId ? $attachmentModel->getAttachmentsByContentId(
+            $contentType,
+            $contentId
+        ) : array());
         $newAttachments = $attachmentModel->getAttachmentsByTempHash($hash);
 
         $attachmentConstraints = $attachmentHandler->getAttachmentConstraints();
@@ -28,13 +31,19 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
         if ($attachmentConstraints['count'] > 0) {
             $remainingUploads = $attachmentConstraints['count'] - (count($existingAttachments) + count($newAttachments));
             if ($remainingUploads <= 0) {
-                return $this->_controller->responseError(new XenForo_Phrase('you_may_not_upload_more_files_with_message_allowed_x', array('total' => $attachmentConstraints['count'])), 403);
+                return $this->_controller->responseError(new XenForo_Phrase(
+                    'you_may_not_upload_more_files_with_message_allowed_x',
+                    array('total' => $attachmentConstraints['count'])
+                ), 403);
             }
         }
 
         $file = XenForo_Upload::getUploadedFile($formField);
         if (!$file) {
-            return $this->_controller->responseError(new XenForo_Phrase('bdapi_requires_upload_x', array('field' => $formField)), 400);
+            return $this->_controller->responseError(new XenForo_Phrase(
+                'bdapi_requires_upload_x',
+                array('field' => $formField)
+            ), 400);
         }
 
         $file->setConstraints($attachmentConstraints);
@@ -127,7 +136,13 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
         $clientId = $session->getOAuthClientId();
         $visitorUserId = XenForo_Visitor::getUserId();
 
-        return md5(sprintf('prefix%s_client%s_visitor%d_salt%s', $prefix, $clientId, $visitorUserId, XenForo_Application::getConfig()->get('globalSalt')));
+        return md5(sprintf(
+            'prefix%s_client%s_visitor%d_salt%s',
+            $prefix,
+            $clientId,
+            $visitorUserId,
+            XenForo_Application::getConfig()->get('globalSalt')
+        ));
     }
 
     protected function _assertCanUploadAndManageAttachments($hash, $contentType, array $contentData)
@@ -146,7 +161,10 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
     {
         $attachment = $this->_getAttachmentModel()->getAttachmentById($attachmentId);
         if (!$attachment) {
-            throw $this->_controller->responseException($this->_controller->responseError(new XenForo_Phrase('requested_attachment_not_found'), 404));
+            throw $this->_controller->responseException($this->_controller->responseError(
+                new XenForo_Phrase('requested_attachment_not_found'),
+                404
+            ));
         }
 
         return $attachment;
@@ -157,7 +175,7 @@ class bdApi_ControllerHelper_Attachment extends XenForo_ControllerHelper_Abstrac
      */
     protected function _getAttachmentModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->_controller->getModelFromCache('XenForo_Model_Attachment');
     }
-
 }

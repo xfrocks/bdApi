@@ -23,8 +23,12 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
         ));
     }
 
-    public function renderRedirect($redirectType, $redirectTarget, $redirectMessage = null, array $redirectParams = array())
-    {
+    public function renderRedirect(
+        $redirectType,
+        $redirectTarget,
+        $redirectMessage = null,
+        array $redirectParams = array()
+    ) {
         bdApi_Data_Helper_Cors::addHeaders($this, $this->_response);
 
         switch ($redirectType) {
@@ -51,19 +55,24 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
         return '';
     }
 
-    public function renderView($viewName, array $params = array(), $templateName = '', XenForo_ControllerResponse_View $subView = null)
-    {
+    public function renderView(
+        $viewName,
+        array $params = array(),
+        $templateName = '',
+        XenForo_ControllerResponse_View $subView = null
+    ) {
         bdApi_Data_Helper_Cors::addHeaders($this, $this->_response);
         $viewOutput = $this->renderViewObject($viewName, 'Json', $params, $templateName);
 
         if (is_array($viewOutput)) {
             return self::jsonEncodeForOutput($viewOutput);
-        } else
+        } else {
             if ($viewOutput === null) {
                 return self::jsonEncodeForOutput($this->getDefaultOutputArray($viewName, $params, $templateName));
             } else {
                 return $viewOutput;
             }
+        }
     }
 
     public function getDefaultOutputArray($viewName, $params, $templateName)
@@ -100,5 +109,4 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
     {
         bdApi_Data_Helper_Core::addDefaultResponse($params);
     }
-
 }

@@ -135,7 +135,12 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
             && !empty($alert['content_id'])
             && !empty($alert['action'])
         ) {
-            $data['notification_type'] = sprintf('%s_%d_%s', $alert['content_type'], $alert['content_id'], $alert['action']);
+            $data['notification_type'] = sprintf(
+                '%s_%d_%s',
+                $alert['content_type'],
+                $alert['content_id'],
+                $alert['action']
+            );
         }
 
         $data['links'] = array(
@@ -147,11 +152,12 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
         );
 
         if (!empty($alert['user'])) {
-            $data['links']['creator_avatar'] = XenForo_Template_Helper_Core::callHelper('avatar',
-                array($alert['user'], 'm', false, true));
+            $data['links']['creator_avatar'] = XenForo_Template_Helper_Core::callHelper(
+                'avatar',
+                array($alert['user'], 'm', false, true)
+            );
         }
 
         return $data;
     }
-
 }

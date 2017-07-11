@@ -95,5 +95,4 @@ class bdApi_ViewApi_Helper_Attachment_Data extends bdApi_ViewApi_Base
             return new XenForo_FileOutput($attachmentFile);
         }
     }
-
 }

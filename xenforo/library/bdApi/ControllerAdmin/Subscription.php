@@ -44,7 +44,10 @@ class bdApi_ControllerAdmin_Subscription extends XenForo_ControllerAdmin_Abstrac
             $dw->setExistingData($id);
             $dw->delete();
 
-            return $this->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, XenForo_Link::buildAdminLink('api-subscriptions'));
+            return $this->responseRedirect(
+                XenForo_ControllerResponse_Redirect::SUCCESS,
+                XenForo_Link::buildAdminLink('api-subscriptions')
+            );
         } else {
             $viewParams = array('subscription' => $subscription);
 
@@ -57,7 +60,10 @@ class bdApi_ControllerAdmin_Subscription extends XenForo_ControllerAdmin_Abstrac
         $subscription = $this->_getSubscriptionModel()->getSubscriptionById($id, $fetchOptions);
 
         if (empty($subscription)) {
-            throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_subscription_not_found'), 404));
+            throw $this->responseException($this->responseError(
+                new XenForo_Phrase('bdapi_subscription_not_found'),
+                404
+            ));
         }
 
         return $subscription;
@@ -68,6 +74,7 @@ class bdApi_ControllerAdmin_Subscription extends XenForo_ControllerAdmin_Abstrac
      */
     protected function _getSubscriptionModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_Subscription');
     }
 
@@ -76,7 +83,7 @@ class bdApi_ControllerAdmin_Subscription extends XenForo_ControllerAdmin_Abstrac
      */
     protected function _getSubscriptionDataWriter()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return XenForo_DataWriter::create('bdApi_DataWriter_Subscription');
     }
-
 }

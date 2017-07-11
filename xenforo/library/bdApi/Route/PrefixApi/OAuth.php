@@ -6,5 +6,4 @@ class bdApi_Route_PrefixApi_OAuth extends bdApi_Route_PrefixApi_Abstract
     {
         return $router->getRouteMatch('bdApi_ControllerApi_OAuth', $routePath);
     }
-
 }

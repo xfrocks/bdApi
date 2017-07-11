@@ -81,5 +81,4 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
             return '';
         }
     }
-
 }

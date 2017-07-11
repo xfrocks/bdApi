@@ -147,7 +147,7 @@ class bdApi_Link extends _XenForo_Link
 
     public static function convertApiUriToAbsoluteUri($uri, $includeHost = false, array $paths = null)
     {
-        return parent::convertUriToAbsoluteUri($uri, true, $paths);
+        return parent::convertUriToAbsoluteUri($uri, $includeHost || true, $paths);
     }
 
     protected static function _checkForFullLink($type, &$fullLink, &$fullLinkPrefix)
@@ -193,3 +193,9 @@ class bdApi_Link extends _XenForo_Link
 }
 
 eval('class XenForo_Link extends bdApi_Link {}');
+
+if (false) {
+    class _XenForo_Link extends XenForo_Link
+    {
+    }
+}

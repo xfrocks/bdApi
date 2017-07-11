@@ -36,5 +36,4 @@ class bdApi_ViewApi_Helper_Alert
 
         return $html;
     }
-
 }

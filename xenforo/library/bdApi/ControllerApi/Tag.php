@@ -78,8 +78,16 @@ class bdApi_ControllerApi_Tag extends bdApi_ControllerApi_Abstract
             'tagged_total' => $totalResults,
         );
 
-        bdApi_Data_Helper_Core::addPageLinks($this->getInput(), $data, $limit, $totalResults, $page,
-            'tags', $tag, $pageNavParams);
+        bdApi_Data_Helper_Core::addPageLinks(
+            $this->getInput(),
+            $data,
+            $limit,
+            $totalResults,
+            $page,
+            'tags',
+            $tag,
+            $pageNavParams
+        );
 
         return $this->responseData('bdApi_ViewApi_Tag_Single', $data);
     }

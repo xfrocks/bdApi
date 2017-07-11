@@ -29,6 +29,7 @@ class bdApi_OAuth2 extends \OAuth2\Server
         }
 
         $request = $this->_generateOAuth2Request();
+        /** @var OAuth2\Response $response */
         $response = $this->handleTokenRequest($request);
 
         if ($response->isClientError()
@@ -145,7 +146,12 @@ class bdApi_OAuth2 extends \OAuth2\Server
      */
     public function createAccessToken($clientId, $userId, $scope = null, $ttl = null, $includeRefreshToken = true)
     {
-        $token = $this->getAccessTokenResponseType()->createAccessToken($clientId, $userId, $scope, $includeRefreshToken);
+        $token = $this->getAccessTokenResponseType()->createAccessToken(
+            $clientId,
+            $userId,
+            $scope,
+            $includeRefreshToken
+        );
 
         if ($ttl !== null) {
             $dbToken = $this->_model->getTokenModel()->getTokenByText($token['access_token']);
@@ -232,10 +238,17 @@ class bdApi_OAuth2 extends \OAuth2\Server
 
     protected function createDefaultAccessTokenResponseType()
     {
-        $config = array_intersect_key($this->config, array_flip(explode(' ', 'access_lifetime refresh_token_lifetime')));
+        $config = array_intersect_key(
+            $this->config,
+            array_flip(explode(' ', 'access_lifetime refresh_token_lifetime'))
+        );
         $config['token_type'] = $this->tokenType ? $this->tokenType->getTokenType() : $this->getDefaultTokenType()->getTokenType();
 
-        return new bdApi_OAuth2_ResponseType_AccessToken($this->storages['access_token'], $this->storages['access_token'], $config);
+        return new bdApi_OAuth2_ResponseType_AccessToken(
+            $this->storages['access_token'],
+            $this->storages['access_token'],
+            $config
+        );
     }
 
     protected function getDefaultGrantTypes()
@@ -265,7 +278,10 @@ class bdApi_OAuth2 extends \OAuth2\Server
     protected function _generateControllerResponse(XenForo_Controller $controller, OAuth2\Response $response)
     {
         if ($response->isRedirection()) {
-            return $controller->responseRedirect(XenForo_ControllerResponse_Redirect::SUCCESS, $response->getHttpHeader('Location'));
+            return $controller->responseRedirect(
+                XenForo_ControllerResponse_Redirect::SUCCESS,
+                $response->getHttpHeader('Location')
+            );
         }
 
         $params = $response->getParameters();
@@ -276,7 +292,10 @@ class bdApi_OAuth2 extends \OAuth2\Server
             return $controller->responseData('bdApi_ViewApi_OAuth', $params);
         } else {
             if ($response->isClientError()) {
-                return $controller->responseError($response->getParameter('error_description'), $response->getStatusCode());
+                return $controller->responseError(
+                    $response->getParameter('error_description'),
+                    $response->getStatusCode()
+                );
             } else {
                 $controller->getRouteMatch()->setResponseType('json');
                 return $controller->responseView('bdApi_ViewPublic_OAuth', '', $params);
@@ -407,7 +426,10 @@ class bdApi_OAuth2_Storage implements
         }
 
         if (!empty($this->_requestRedirectUri)) {
-            $clientRedirectUri = $this->_model->getClientModel()->getWhitelistedRedirectUri($client, $this->_requestRedirectUri);
+            $clientRedirectUri = $this->_model->getClientModel()->getWhitelistedRedirectUri(
+                $client,
+                $this->_requestRedirectUri
+            );
             if (is_string($clientRedirectUri)) {
                 $client['redirect_uri'] .= sprintf(' %s', $clientRedirectUri);
             }

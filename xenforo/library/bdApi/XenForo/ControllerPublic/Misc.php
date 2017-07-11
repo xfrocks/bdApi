@@ -63,8 +63,10 @@ class bdApi_XenForo_ControllerPublic_Misc extends XFCP_bdApi_XenForo_ControllerP
                             $session = new bdApi_Session();
                             $session->fakeStart($client, $visitorObj, $requestedScopesAccepted);
 
-                            $visitorPrepared = bdApi_Data_Helper_Core::filter($visitorArray,
-                                $this->_getFilterPublicKeysForVisitorData());
+                            $visitorPrepared = bdApi_Data_Helper_Core::filter(
+                                $visitorArray,
+                                $this->_getFilterPublicKeysForVisitorData()
+                            );
                             $data = array_merge($visitorPrepared, $data);
                         } else {
                             // just checking for connection status, return user_id only

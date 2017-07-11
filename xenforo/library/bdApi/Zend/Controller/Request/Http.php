@@ -24,5 +24,4 @@ class bdApi_Zend_Controller_Request_Http extends Zend_Controller_Request_Http
     {
         return $this->_method;
     }
-
 }

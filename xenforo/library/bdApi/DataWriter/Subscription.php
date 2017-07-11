@@ -11,35 +11,37 @@ class bdApi_DataWriter_Subscription extends XenForo_DataWriter
 
     protected function _getFields()
     {
-        return array('xf_bdapi_subscription' => array(
-            'subscription_id' => array(
-                'type' => XenForo_DataWriter::TYPE_UINT,
-                'autoIncrement' => true
-            ),
-            'client_id' => array(
-                'type' => XenForo_DataWriter::TYPE_STRING,
-                'required' => true,
-                'maxLength' => 255
-            ),
-            'callback' => array(
-                'type' => XenForo_DataWriter::TYPE_STRING,
-                'required' => true
-            ),
-            'topic' => array(
-                'type' => XenForo_DataWriter::TYPE_STRING,
-                'default' => '',
-                'maxLength' => 255
-            ),
-            'subscribe_date' => array(
-                'type' => XenForo_DataWriter::TYPE_UINT,
-                'required' => true
-            ),
-            'expire_date' => array(
-                'type' => XenForo_DataWriter::TYPE_UINT,
-                'required' => true,
-                'default' => 0
-            ),
-        ));
+        return array(
+            'xf_bdapi_subscription' => array(
+                'subscription_id' => array(
+                    'type' => XenForo_DataWriter::TYPE_UINT,
+                    'autoIncrement' => true
+                ),
+                'client_id' => array(
+                    'type' => XenForo_DataWriter::TYPE_STRING,
+                    'required' => true,
+                    'maxLength' => 255
+                ),
+                'callback' => array(
+                    'type' => XenForo_DataWriter::TYPE_STRING,
+                    'required' => true
+                ),
+                'topic' => array(
+                    'type' => XenForo_DataWriter::TYPE_STRING,
+                    'default' => '',
+                    'maxLength' => 255
+                ),
+                'subscribe_date' => array(
+                    'type' => XenForo_DataWriter::TYPE_UINT,
+                    'required' => true
+                ),
+                'expire_date' => array(
+                    'type' => XenForo_DataWriter::TYPE_UINT,
+                    'required' => true,
+                    'default' => 0
+                ),
+            )
+        );
     }
 
     protected function _getExistingData($data)
@@ -85,7 +87,7 @@ class bdApi_DataWriter_Subscription extends XenForo_DataWriter
      */
     protected function _getSubscriptionModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_Subscription');
     }
-
 }

@@ -2,8 +2,10 @@
 
 class bdApi_Data_Helper_Cors
 {
-    public static function addHeaders(XenForo_ViewRenderer_Abstract $viewRenderer, Zend_Controller_Response_Http $response)
-    {
+    public static function addHeaders(
+        XenForo_ViewRenderer_Abstract $viewRenderer,
+        Zend_Controller_Response_Http $response
+    ) {
         if (!bdApi_Option::get('cors')) {
             return;
         }

@@ -72,11 +72,15 @@ class bdApi_XenForo_DataWriter_DiscussionMessage_Post extends XFCP_bdApi_XenForo
             if (!empty($threadOption)) {
                 /* @var $subscriptionModel bdApi_Model_Subscription */
                 $subscriptionModel = $this->getModelFromCache('bdApi_Model_Subscription');
-                $subscriptionModel->ping($threadOption, $action, bdApi_Model_Subscription::TYPE_THREAD_POST, $this->get('post_id'));
+                $subscriptionModel->ping(
+                    $threadOption,
+                    $action,
+                    bdApi_Model_Subscription::TYPE_THREAD_POST,
+                    $this->get('post_id')
+                );
             }
         }
 
         return true;
     }
-
 }

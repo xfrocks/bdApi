@@ -205,7 +205,6 @@ class bdApi_Model_Log extends XenForo_Model
         }
 
         if (!empty($conditions['filter'])) {
-
             if (is_array($conditions['filter'])) {
                 $filterQuoted = XenForo_Db::quoteLike($conditions['filter'][0], $conditions['filter'][1], $db);
             } else {
@@ -296,5 +295,4 @@ class bdApi_Model_Log extends XenForo_Model
 
         return $filtered;
     }
-
 }

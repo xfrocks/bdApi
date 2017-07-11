@@ -35,7 +35,10 @@ class bdApi_ControllerAdmin_ClientContent extends XenForo_ControllerAdmin_Abstra
         ));
 
         if (empty($clientContent)) {
-            throw $this->responseException($this->responseError(new XenForo_Phrase('bdapi_client_content_not_found'), 404));
+            throw $this->responseException($this->responseError(
+                new XenForo_Phrase('bdapi_client_content_not_found'),
+                404
+            ));
         }
 
         if ($this->isConfirmedPost()) {
@@ -52,7 +55,11 @@ class bdApi_ControllerAdmin_ClientContent extends XenForo_ControllerAdmin_Abstra
                 'clientContent' => $clientContent,
             );
 
-            return $this->responseView('bdApi_ViewAdmin_ClientContent_Delete', 'bdapi_client_content_delete', $viewParams);
+            return $this->responseView(
+                'bdApi_ViewAdmin_ClientContent_Delete',
+                'bdapi_client_content_delete',
+                $viewParams
+            );
         }
     }
 
@@ -78,8 +85,11 @@ class bdApi_ControllerAdmin_ClientContent extends XenForo_ControllerAdmin_Abstra
                 'client' => $client,
             );
 
-            return $this->responseView('bdApi_ViewAdmin_ClientContent_DeleteAll',
-                'bdapi_client_content_delete_all', $viewParams);
+            return $this->responseView(
+                'bdApi_ViewAdmin_ClientContent_DeleteAll',
+                'bdapi_client_content_delete_all',
+                $viewParams
+            );
         }
     }
 
@@ -88,7 +98,7 @@ class bdApi_ControllerAdmin_ClientContent extends XenForo_ControllerAdmin_Abstra
      */
     protected function _getClientContentModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdApi_Model_ClientContent');
     }
-
 }

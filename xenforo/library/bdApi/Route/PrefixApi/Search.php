@@ -12,5 +12,4 @@ class bdApi_Route_PrefixApi_Search extends bdApi_Route_PrefixApi_Abstract
     {
         return XenForo_Link::buildBasicLinkWithIntegerParam($outputPrefix, $action, $extension, $data, 'search_id');
     }
-
 }

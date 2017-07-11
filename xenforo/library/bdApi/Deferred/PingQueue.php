@@ -14,5 +14,4 @@ class bdApi_Deferred_PingQueue extends XenForo_Deferred_Abstract
             return false;
         }
     }
-
 }

@@ -21,7 +21,7 @@ class bdApi_Data_Helper_Core
                 if (!empty($clientId)) {
                     $data['debug']['client_id'] = $clientId;
 
-                    $oauthToken = $session->getOAuthTokenText();;
+                    $oauthToken = $session->getOAuthTokenText();
                     if (!empty($oauthToken)) {
                         $data['debug']['oauth_token'] = $oauthToken;
                     }
@@ -107,8 +107,11 @@ class bdApi_Data_Helper_Core
 
         if ($page < $pageNav['pages']) {
             // a next link should only be added if we are not at the last page
-            $pageNav['next'] = bdApi_Data_Helper_Core::safeBuildApiLink($linkType, $linkData,
-                array_merge($linkParams, array('page' => $page + 1)));
+            $pageNav['next'] = bdApi_Data_Helper_Core::safeBuildApiLink(
+                $linkType,
+                $linkData,
+                array_merge($linkParams, array('page' => $page + 1))
+            );
         }
 
         // add the page navigation into `links`

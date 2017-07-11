@@ -17,7 +17,10 @@ class bdApi_XenForo_DataWriter_User extends XFCP_bdApi_XenForo_DataWriter_User
 
         /* @var $subscriptionModel bdApi_Model_Subscription */
         $subscriptionModel = $this->getModelFromCache('bdApi_Model_Subscription');
-        $subscriptionModel->deleteSubscriptionsForTopic(bdApi_Model_Subscription::TYPE_NOTIFICATION, $this->get('user_id'));
+        $subscriptionModel->deleteSubscriptionsForTopic(
+            bdApi_Model_Subscription::TYPE_NOTIFICATION,
+            $this->get('user_id')
+        );
         $subscriptionModel->deleteSubscriptionsForTopic(bdApi_Model_Subscription::TYPE_USER, $this->get('user_id'));
 
         parent::_postDelete();
@@ -71,8 +74,12 @@ class bdApi_XenForo_DataWriter_User extends XFCP_bdApi_XenForo_DataWriter_User
             if (!empty($user0Option)) {
                 /* @var $subscriptionModel bdApi_Model_Subscription */
                 $subscriptionModel = $this->getModelFromCache('bdApi_Model_Subscription');
-                $subscriptionModel->ping($user0Option, $action,
-                    bdApi_Model_Subscription::TYPE_USER, $this->get('user_id'));
+                $subscriptionModel->ping(
+                    $user0Option,
+                    $action,
+                    bdApi_Model_Subscription::TYPE_USER,
+                    $this->get('user_id')
+                );
             }
         }
 
@@ -83,11 +90,15 @@ class bdApi_XenForo_DataWriter_User extends XFCP_bdApi_XenForo_DataWriter_User
             if (!empty($userOption)) {
                 /* @var $subscriptionModel bdApi_Model_Subscription */
                 $subscriptionModel = $this->getModelFromCache('bdApi_Model_Subscription');
-                $subscriptionModel->ping($userOption, $action, bdApi_Model_Subscription::TYPE_USER, $this->get('user_id'));
+                $subscriptionModel->ping(
+                    $userOption,
+                    $action,
+                    bdApi_Model_Subscription::TYPE_USER,
+                    $this->get('user_id')
+                );
             }
         }
 
         return true;
     }
-
 }

@@ -12,5 +12,4 @@ class bdApi_Route_PrefixApi_ConversationMessages extends bdApi_Route_PrefixApi_A
     {
         return XenForo_Link::buildBasicLinkWithIntegerParam($outputPrefix, $action, $extension, $data, 'message_id');
     }
-
 }

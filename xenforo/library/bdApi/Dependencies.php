@@ -51,8 +51,11 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
         );
     }
 
-    public function getViewRenderer(Zend_Controller_Response_Http $response, $responseType, Zend_Controller_Request_Http $request)
-    {
+    public function getViewRenderer(
+        Zend_Controller_Response_Http $response,
+        $responseType,
+        Zend_Controller_Request_Http $request
+    ) {
         switch ($responseType) {
             case 'jsonp':
                 return new bdApi_ViewRenderer_Jsonp($this, $response, $request);
@@ -136,6 +139,10 @@ if (XenForo_Application::$versionId >= 1020000) {
     class bdApi_Dependencies extends bdApi_Dependencies_Base
     {
 
+        /** @noinspection PhpSignatureMismatchDuringInheritanceInspection
+         * @param Zend_Controller_Request_Http $request
+         * @return bool|XenForo_RouteMatch
+         */
         public function route(Zend_Controller_Request_Http $request)
         {
             $router = new XenForo_Router();

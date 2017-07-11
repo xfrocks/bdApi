@@ -87,7 +87,8 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
             $sql = str_replace(
                 'ORDER BY post.position ASC, post.post_date ASC',
                 'ORDER BY post.position DESC, post.post_date DESC',
-                $sql, $count
+                $sql,
+                $count
             );
 
             if ($count !== 1) {
@@ -240,14 +241,23 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
             'reply' => $this->_getThreadModel()->canReplyToThread($thread, $forum),
             'like' => $this->canLikePost($post, $thread, $forum),
             'report' => $this->canReportPost($post, $thread, $forum),
-            'upload_attachment' => $this->canEditPost($post, $thread, $forum) AND $forumModel->canUploadAndManageAttachment($forum),
+            'upload_attachment' => $this->canEditPost(
+                $post,
+                $thread,
+                $forum
+            ) AND $forumModel->canUploadAndManageAttachment($forum),
         );
 
         return $data;
     }
 
-    public function prepareApiDataForAttachments(array $attachments, array $post, array $thread, array $forum, $tempHash = '')
-    {
+    public function prepareApiDataForAttachments(
+        array $attachments,
+        array $post,
+        array $thread,
+        array $forum,
+        $tempHash = ''
+    ) {
         $data = array();
 
         foreach ($attachments as $key => $attachment) {
@@ -257,8 +267,13 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
         return $data;
     }
 
-    public function prepareApiDataForAttachment(array $attachment, array $post, array $thread, array $forum, $tempHash = '')
-    {
+    public function prepareApiDataForAttachment(
+        array $attachment,
+        array $post,
+        array $thread,
+        array $forum,
+        $tempHash = ''
+    ) {
         /** @var bdApi_Extend_Model_Attachment $attachmentModel */
         $attachmentModel = $this->getModelFromCache('XenForo_Model_Attachment');
         $data = $attachmentModel->prepareApiDataForAttachment($attachment);
@@ -285,5 +300,4 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
 
         return $data;
     }
-
 }
