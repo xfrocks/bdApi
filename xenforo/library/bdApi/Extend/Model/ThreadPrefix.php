@@ -32,19 +32,25 @@ class bdApi_Extend_Model_ThreadPrefix extends XFCP_bdApi_Extend_Model_ThreadPref
         return $prefixesByForum;
     }
 
-    public function prepareApiDataForPrefixes(array $prefixes)
+    public function prepareApiDataForPrefixes(array $prefixes, array $prefixIds = null)
     {
         $data = array();
 
         foreach ($prefixes as $prefixId => $prefix) {
             if (isset($prefix['prefix_id'])) {
                 // this is a prefix
+                if (is_array($prefixIds)
+                    && !in_array($prefixId, $prefixIds)
+                ) {
+                    continue;
+                }
+
                 $data[] = $this->prepareApiDataForPrefix($prefix);
             } elseif (isset($prefix['prefixes'])) {
                 // this is a group
-                $groupPrefixes = array();
-                foreach ($prefix['prefixes'] as $_prefix) {
-                    $groupPrefixes[] = $this->prepareApiDataForPrefix($_prefix);
+                $groupPrefixes = $this->prepareApiDataForPrefixes($prefix['prefixes'], $prefixIds);
+                if (count($groupPrefixes) === 0) {
+                    continue;
                 }
 
                 $data[] = array(

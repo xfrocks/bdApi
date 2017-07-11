@@ -15,6 +15,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         $forumIdInput = $this->_input->filterSingle('forum_id', XenForo_Input::STRING);
+        $threadPrefixId = $this->_input->filterSingle('thread_prefix_id', XenForo_Input::UINT);
         $sticky = $this->_input->filterSingle('sticky', XenForo_Input::STRING);
         $stickyBool = intval($sticky) > 0;
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
@@ -57,6 +58,18 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         } elseif (is_numeric($sticky)) {
             // otherwise only set the thread condition if found valid value for `sticky`
             $conditions['sticky'] = $stickyBool;
+        }
+
+        if ($threadPrefixId > 0) {
+            if ($theForumId <= 0) {
+                return $this->responseError(
+                    new XenForo_Phrase('bdapi_slash_threads_thread_prefix_id_requires_forum_id'),
+                    400
+                );
+            }
+
+            $pageNavParams['thread_prefix_id'] = $threadPrefixId;
+            $conditions['prefix_id'] = $threadPrefixId;
         }
 
         switch ($order) {
@@ -194,9 +207,18 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             }
         }
 
+        $getForumById = false;
         if ($theForumId > 0
             && !$this->_isFieldExcluded('forum')
         ) {
+            $getForumById = true;
+        }
+        if (!empty($pageNavParams['thread_prefix_id'])
+            && !$this->_isFieldExcluded('thread_prefixes')
+        ) {
+            $getForumById = true;
+        }
+        if ($getForumById) {
             $theForum = $this->_getForumModel()->getForumById($theForumId,
                 $this->_getForumModel()->getFetchOptionsToPrepareApiData());
         }
@@ -207,9 +229,20 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             'threads' => $this->_filterDataMany($threadsData),
         );
 
-        if (!empty($theForum)) {
+        if (!empty($theForum)
+            && !$this->_isFieldExcluded('forum')
+        ) {
             $data['forum'] = $this->_filterDataSingle($this->_getForumModel()
                 ->prepareApiDataForForum($theForum), array('forum'));
+        }
+
+        if (!empty($pageNavParams['thread_prefix_id'])
+            && !empty($theForum['prefixes'])
+            && !$this->_isFieldExcluded('thread_prefixes')
+        ) {
+            $data['thread_prefixes'] = $this->_filterDataMany($this->_getThreadPrefixModel()
+                ->prepareApiDataForPrefixes($theForum['prefixes'], array($pageNavParams['thread_prefix_id'])),
+                array('thread_prefixes'));
         }
 
         if ($theForumId > 0) {
@@ -888,6 +921,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
      */
     protected function _getNodeModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Node');
     }
 
@@ -896,6 +930,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
      */
     protected function _getForumModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Forum');
     }
 
@@ -904,6 +939,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
      */
     protected function _getThreadModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Thread');
     }
 
@@ -912,6 +948,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
      */
     protected function _getPostModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Post');
     }
 
@@ -920,7 +957,17 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
      */
     protected function _getPollModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Poll');
+    }
+
+    /**
+     * @return bdApi_Extend_Model_ThreadPrefix
+     */
+    protected function _getThreadPrefixModel()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getModelFromCache('XenForo_Model_ThreadPrefix');
     }
 
     /**
@@ -928,6 +975,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
      */
     protected function _getThreadWatchModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_ThreadWatch');
     }
 
@@ -936,6 +984,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
      */
     protected function _getForumThreadPostHelper()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getHelper('ForumThreadPost');
     }
 
@@ -944,6 +993,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
      */
     protected function _getAttachmentHelper()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getHelper('bdApi_ControllerHelper_Attachment');
     }
 
