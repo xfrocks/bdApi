@@ -15,6 +15,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         $forumIdInput = $this->_input->filterSingle('forum_id', XenForo_Input::STRING);
+        $creatorUserId = $this->_input->filterSingle('creator_user_id', XenForo_Input::UINT);
         $threadPrefixId = $this->_input->filterSingle('thread_prefix_id', XenForo_Input::UINT);
         $sticky = $this->_input->filterSingle('sticky', XenForo_Input::STRING);
         $stickyBool = intval($sticky) > 0;
@@ -58,6 +59,29 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         } elseif (is_numeric($sticky)) {
             // otherwise only set the thread condition if found valid value for `sticky`
             $conditions['sticky'] = $stickyBool;
+        }
+
+        $creatorUser = null;
+        if ($creatorUserId > 0) {
+            if ($theForumId <= 0) {
+                return $this->responseError(
+                    new XenForo_Phrase('bdapi_slash_threads_creator_user_id_requires_forum_id'),
+                    400
+                );
+            }
+
+            $creatorUser = $this->_getUserModel()->getUserById(
+                $creatorUserId,
+                $this->_getUserModel()->getFetchOptionsToPrepareApiData()
+            );
+            if (empty($creatorUser)
+                || !$this->_getUserProfileModel()->canViewFullUserProfile($creatorUser)
+            ) {
+                return $this->responseError(new XenForo_Phrase('requested_user_not_found'), 404);
+            }
+
+            $pageNavParams['creator_user_id'] = $creatorUser['user_id'];
+            $conditions['user_id'] = $creatorUser['user_id'];
         }
 
         if ($threadPrefixId > 0) {
@@ -242,13 +266,20 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                 ->prepareApiDataForForum($theForum), array('forum'));
         }
 
+        if (!empty($creatorUser)
+            && !$this->_isFieldExcluded('creator_user')
+        ) {
+            $data['creator_user'] = $this->_filterDataSingle($this->_getUserModel()
+                ->prepareApiDataForUser($creatorUser), array('creator_user'));
+        }
+
         if (!empty($pageNavParams['thread_prefix_id'])
             && !empty($theForum['prefixes'])
             && !$this->_isFieldExcluded('thread_prefixes')
         ) {
             $data['thread_prefixes'] = $this->_filterDataMany(
                 $this->_getThreadPrefixModel()
-                ->prepareApiDataForPrefixes($theForum['prefixes'], array($pageNavParams['thread_prefix_id'])),
+                    ->prepareApiDataForPrefixes($theForum['prefixes'], array($pageNavParams['thread_prefix_id'])),
                 array('thread_prefixes')
             );
         }
@@ -1038,6 +1069,24 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_ThreadWatch');
+    }
+
+    /**
+     * @return bdApi_Extend_Model_User
+     */
+    protected function _getUserModel()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getModelFromCache('XenForo_Model_User');
+    }
+
+    /**
+     * @return XenForo_Model_UserProfile
+     */
+    protected function _getUserProfileModel()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getModelFromCache('XenForo_Model_UserProfile');
     }
 
     /**
