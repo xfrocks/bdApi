@@ -679,6 +679,15 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
         return $this->getModelFromCache('XenForo_Model_Like');
     }
 
+    public function _isFieldExcluded($field, array $prefixes = array())
+    {
+        if ($field === 'profile_post_id') {
+            return false;
+        }
+
+        return parent::_isFieldExcluded($field, $prefixes);
+    }
+
     protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
     {
         $controllerName = 'XenForo_ControllerPublic_ProfilePost';

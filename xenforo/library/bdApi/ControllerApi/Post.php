@@ -802,6 +802,15 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         return $this->getHelper('bdApi_ControllerHelper_Attachment');
     }
 
+    public function _isFieldExcluded($field, array $prefixes = array())
+    {
+        if ($field === 'post_id') {
+            return false;
+        }
+
+        return parent::_isFieldExcluded($field, $prefixes);
+    }
+
     protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
     {
         if ($action === 'GetIndex') {
