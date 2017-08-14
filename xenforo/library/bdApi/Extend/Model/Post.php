@@ -128,8 +128,13 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
 
     public function prepareApiDataForPost(array $post, array $thread, array $forum)
     {
+        $visitor = XenForo_Visitor::getInstance();
+        $session = bdApi_Data_Helper_Core::safeGetSession();
         /* @var $forumModel XenForo_Model_Forum */
         $forumModel = $this->getModelFromCache('XenForo_Model_Forum');
+
+        $hasAdminScope = (!empty($session) && $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM));
+        $isAdminRequest = ($hasAdminScope && $visitor->hasAdminPermission('thread'));
 
         $post = $this->preparePost($post, $thread, $forum);
 
@@ -210,6 +215,20 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
             $data['post_is_liked'] = !empty($post['like_date']);
         }
 
+        $trackPostOrigin = bdApi_Option::get('trackPostOrigin');
+        if (!empty($trackPostOrigin)
+            && isset($post[$trackPostOrigin])
+            && (
+                (
+                    $session->getOAuthClientId() === $post[$trackPostOrigin]
+                    && $post['user_id'] == $visitor->get('user_id')
+                )
+                || $isAdminRequest
+            )
+        ) {
+            $data['post_origin'] = $post[$trackPostOrigin];
+        }
+
         if (!empty($attachments)) {
             $data['attachments'] = $this->prepareApiDataForAttachments($attachments, $post, $thread, $forum);
         }
@@ -241,11 +260,8 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
             'reply' => $this->_getThreadModel()->canReplyToThread($thread, $forum),
             'like' => $this->canLikePost($post, $thread, $forum),
             'report' => $this->canReportPost($post, $thread, $forum),
-            'upload_attachment' => $this->canEditPost(
-                $post,
-                $thread,
-                $forum
-            ) AND $forumModel->canUploadAndManageAttachment($forum),
+            'upload_attachment' => $this->canEditPost($post, $thread, $forum)
+                && $forumModel->canUploadAndManageAttachment($forum),
         );
 
         return $data;
