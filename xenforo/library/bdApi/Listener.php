@@ -65,7 +65,9 @@ class bdApi_Listener
         XenForo_CacheRebuilder_Abstract::$builders['bdApi_CacheRebuilder_ClientContentDeleteAll']
             = 'bdApi_CacheRebuilder_ClientContentDeleteAll';
 
-        bdApi_ShippableHelper_Updater::onInitDependencies($dependencies);
+        if (isset($data['routesAdmin'])) {
+            bdApi_ShippableHelper_Updater::onInitDependencies($dependencies);
+        }
     }
 
     public static function front_controller_pre_route(XenForo_FrontController $fc)
