@@ -57,7 +57,6 @@
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
-<xen:require js="js/bdApi/filter_list.js" />
 
 <xen:if is="{$client}">
 	<xen:navigation>
@@ -262,7 +261,6 @@
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
-<xen:require js="js/bdApi/filter_list.js" />
 
 <xen:form action="{xen:adminlink 'api-clients'}" class="section">
 	<xen:if is="{$clients}">
@@ -425,7 +423,6 @@
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
-<xen:require js="js/bdApi/filter_list.js" />
 
 <xen:if is="{$client}">
 	<xen:navigation>
@@ -504,7 +501,6 @@
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
-<xen:require js="js/bdApi/filter_list.js" />
 
 <xen:if is="{$client}">
 	<xen:navigation>
@@ -583,7 +579,6 @@
 
 <xen:require css="filter_list.css" />
 <xen:require js="js/xenforo/filter_list.js" />
-<xen:require js="js/bdApi/filter_list.js" />
 
 <xen:if is="{$client}">
 	<xen:navigation>
