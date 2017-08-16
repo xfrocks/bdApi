@@ -12,6 +12,19 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
                     'content_type' => $result[XenForo_Model_Search::CONTENT_TYPE],
                     'content_id' => $result[XenForo_Model_Search::CONTENT_ID],
                 );
+
+                if (count($result) > 2) {
+                    foreach ($result as $_key => $_value) {
+                        if ($_key === XenForo_Model_Search::CONTENT_TYPE) {
+                            continue;
+                        }
+                        if ($_key === XenForo_Model_Search::CONTENT_ID) {
+                            continue;
+                        }
+
+                        $data[$key][$_key] = $_value;
+                    }
+                }
             }
         }
 
