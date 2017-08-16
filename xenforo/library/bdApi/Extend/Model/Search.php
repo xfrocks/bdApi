@@ -38,6 +38,7 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
             case 'thread':
             case 'post':
             case 'profile_post':
+            case 'user':
                 return true;
         }
 
@@ -70,6 +71,9 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
                     break;
                 case 'profile_post':
                     $this->_prepareApiContentDataForSearch_doProfilePosts($contentIds, $preparedResults, $data);
+                    break;
+                case 'user':
+                    $this->_prepareApiContentDataForSearch_doUsers($contentIds, $preparedResults, $data);
                     break;
                 default:
                     $this->_prepareApiContentDataForSearch_doCustomContents(
@@ -224,6 +228,34 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
 
                 $key = $profilePostIds[$profilePost['profile_post_id']];
                 $data[$key] = array_merge($preparedResults[$key], $profilePost);
+            }
+        }
+    }
+
+    protected function _prepareApiContentDataForSearch_doUsers(array $userIds, array $preparedResults, array &$data)
+    {
+        if (empty($userIds)) {
+            return;
+        }
+
+        $dataJobParams = array();
+        $dataJobParams['user_ids'] = implode(',', array_keys($userIds));
+        $dataJobParams['fields_filter_prefix'] = 'content.';
+        $dataJob = bdApi_Data_Helper_Batch::doJob('GET', 'users', $dataJobParams);
+
+        if (isset($dataJob['_job_response'])
+            && !empty($dataJob['_job_response']->params['users'])
+        ) {
+            foreach ($dataJob['_job_response']->params['users'] as $user) {
+                if (empty($user['user_id'])
+                    || !isset($userIds[$user['user_id']])
+                ) {
+                    // key not found?!
+                    continue;
+                }
+
+                $key = $userIds[$user['user_id']];
+                $data[$key] = array_merge($preparedResults[$key], $user);
             }
         }
     }

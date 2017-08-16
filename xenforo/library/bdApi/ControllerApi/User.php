@@ -943,6 +943,15 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         }
     }
 
+    public function _isFieldExcluded($field, array $prefixes = array())
+    {
+        if ($field === 'user_id') {
+            return false;
+        }
+
+        return parent::_isFieldExcluded($field, $prefixes);
+    }
+
     protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
     {
         $params['user_id'] = $this->_request->getParam('user_id');
