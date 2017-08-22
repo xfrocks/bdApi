@@ -32,6 +32,8 @@ class bdApi_Listener
         // these classes are extended only within api context
         // this is done to reduce performance impact for public context
         static $classes = array(
+            'XenForo_BbCode_Formatter_Base',
+
             'XenForo_Model_Attachment',
             'XenForo_Model_Category',
             'XenForo_Model_Conversation',

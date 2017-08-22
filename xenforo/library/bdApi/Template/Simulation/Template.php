@@ -7,6 +7,28 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
         'bb_code_tag_attach' => 'bdapi_bb_code_tag_attach',
     );
 
+    public function clearRequiredExternalsForApi()
+    {
+        $this->_setRequiredExternals(array());
+    }
+
+    public function getRequiredExternalsAsHtmlForApi()
+    {
+        $required = $this->_getRequiredExternals();
+        $html = '';
+        foreach (array_keys($required) as $type) {
+            $html .= $this->getRequiredExternalsAsHtml($type);
+        }
+
+        return $html;
+    }
+
+    public function getRequiredCssUrl(array $requirements)
+    {
+        $cssUrl = parent::getRequiredCssUrl($requirements);
+        return XenForo_Link::convertUriToAbsoluteUri($cssUrl, true);
+    }
+
     public function __construct($templateName, array $params = array())
     {
         if (isset(self::$bdApi_mapping[$templateName])) {
@@ -80,5 +102,16 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
         } else {
             return '';
         }
+    }
+
+    protected function _processJsUrls(array $jsFiles)
+    {
+        $jsUrls = parent::_processJsUrls($jsFiles);
+
+        foreach ($jsUrls as &$jsUrlRef) {
+            $jsUrlRef = XenForo_Link::convertUriToAbsoluteUri($jsUrlRef, true);
+        }
+
+        return $jsUrls;
     }
 }
