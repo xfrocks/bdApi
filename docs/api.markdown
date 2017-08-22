@@ -536,7 +536,8 @@ List of threads in a forum (with pagination).
                 ]
             },
             ...
-        ]
+        ],
+        thread_tag: (tag) # since forum-2017082201
     }
 
 Parameters:
@@ -546,6 +547,7 @@ Parameters:
  * `creator_user_id` (_optional_): filter to get only threads created by the specified user. Since forum-2017071201.
  * `sticky` (_optional_): filter to get only sticky (`sticky`=1) or non-sticky (`sticky`=0) threads. By default, all threads will be included and sticky ones will be at the top of the result on the first page. In mixed mode, sticky threads are not counted towards `threads_total` and does not affect pagination.
  * `thread_prefix_id` (_optional_): filter to get only threads with the specified prefix. Since forum-2017071101.
+ * `thread_tag_id` (_optional_): filter to get only threads with the specified tag. Since forum-2017082201.
  * `page` (_optional_): page number of threads.
  * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.
  * `order` (_optional_): ordering of threads. Support `natural`, `thread_create_date`, `thread_create_date_reverse`, `thread_update_date`, `thread_update_date_reverse`, `thread_view_count` (since forum-2014011801), `thread_view_count_reverse` (since forum-2014011801), `thread_post_count` (since forum-2014011801), `thread_post_count_reverse` (since forum-2014011801).
@@ -1216,7 +1218,8 @@ List of tagged contents. Since forum-2017050201.
           tag_id: (int),
           tag_text: (string),
           links: {
-            permalink: (uri)
+            permalink: (uri),
+            detail: (uri) # since forum-2017082201
           }
         },
         tagged: [

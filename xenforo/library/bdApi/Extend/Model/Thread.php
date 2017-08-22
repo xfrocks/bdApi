@@ -3,6 +3,8 @@
 class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
 {
     const CONDITIONS_THREAD_ID = 'bdApi_threadId';
+    const CONDITIONS_TAG_ID = 'bdApi_tagId';
+    const FETCH_OPTION_JOIN_TAG_CONTENT = 'bdApi_joinTagContent';
 
     protected $_bdApi_polls = array();
     protected $_bdApi_limitQueryResults_nodeId = false;
@@ -52,12 +54,36 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
             $sqlConditions[] = $this->getCutOffCondition('thread.thread_id', $conditions[self::CONDITIONS_THREAD_ID]);
         }
 
+        if (XenForo_Application::$versionId > 1050000
+            && isset($conditions[self::CONDITIONS_TAG_ID])
+        ) {
+            $sqlConditions[] = 'tag_content.tag_id = ' . intval($conditions[self::CONDITIONS_TAG_ID]);
+            $fetchOptions[self::FETCH_OPTION_JOIN_TAG_CONTENT] = true;
+        }
+
         if (count($sqlConditions) > 1) {
             return $this->getConditionsForClause($sqlConditions);
         } else {
             return $sqlConditions[0];
         }
     }
+
+    public function prepareThreadFetchOptions(array $fetchOptions)
+    {
+        $prepared = parent::prepareThreadFetchOptions($fetchOptions);
+
+        if (XenForo_Application::$versionId > 1050000
+            && !empty($fetchOptions[self::FETCH_OPTION_JOIN_TAG_CONTENT])
+        ) {
+            $prepared['joinTables'] .= '
+					LEFT JOIN xf_tag_content AS tag_content
+						ON (tag_content.content_type = "thread"
+						AND tag_content.content_id = thread.thread_id)';
+        }
+
+        return $prepared;
+    }
+
 
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
     {

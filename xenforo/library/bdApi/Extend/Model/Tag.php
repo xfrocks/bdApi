@@ -46,6 +46,7 @@ class bdApi_Extend_Model_Tag extends XFCP_bdApi_Extend_Model_Tag
 
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('tags', $tag),
+            'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('tags', $tag),
         );
 
         return $data;

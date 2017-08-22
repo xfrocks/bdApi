@@ -17,6 +17,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $forumIdInput = $this->_input->filterSingle('forum_id', XenForo_Input::STRING);
         $creatorUserId = $this->_input->filterSingle('creator_user_id', XenForo_Input::UINT);
         $threadPrefixId = $this->_input->filterSingle('thread_prefix_id', XenForo_Input::UINT);
+        $threadTagId = $this->_input->filterSingle('thread_tag_id', XenForo_Input::UINT);
         $sticky = $this->_input->filterSingle('sticky', XenForo_Input::STRING);
         $stickyBool = intval($sticky) > 0;
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
@@ -94,6 +95,26 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
             $pageNavParams['thread_prefix_id'] = $threadPrefixId;
             $conditions['prefix_id'] = $threadPrefixId;
+        }
+
+        $threadTag = null;
+        if (XenForo_Application::$versionId > 1050000
+            && $threadTagId > 0) {
+            if ($theForumId <= 0) {
+                return $this->responseError(
+                    new XenForo_Phrase('bdapi_slash_threads_thread_tag_id_requires_forum_id'),
+                    400
+                );
+            }
+
+            $threadTag = $this->_getTagModel()->getTagById($threadTagId);
+            if (empty($threadTag)) {
+                return $this->responseError(new XenForo_Phrase('requested_tag_not_found'), 404);
+            }
+
+            $pageNavParams['thread_tag_id'] = $threadTag['tag_id'];
+            $this->_getThreadModel();
+            $conditions[bdApi_Extend_Model_Thread::CONDITIONS_TAG_ID] = $threadTag['tag_id'];
         }
 
         switch ($order) {
@@ -284,6 +305,12 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             );
         }
 
+        if (!empty($threadTag)
+            && !$this->_isFieldExcluded('thread_tags')
+        ) {
+            $data['thread_tag'] = $this->_getTagModel()->prepareApiDataForTag($threadTag);
+        }
+
         if ($theForumId > 0) {
             $total = $this->_getThreadModel()->countThreads($conditions);
         }
@@ -423,8 +450,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             && $this->_getThreadModel()->canEditTags(null, $forum)
         ) {
             // thread tagging is available since XenForo 1.5.0
-            /** @var XenForo_Model_Tag $tagModel */
-            $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
+            $tagModel = $this->_getTagModel();
             $tagger = $tagModel->getTagger('thread');
             $tagger->setPermissionsFromContext($forum)
                 ->setTags($tagModel->splitTags($input['thread_tags']));
@@ -1051,6 +1077,15 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Poll');
+    }
+
+    /**
+     * @return bdApi_Extend_Model_Tag
+     */
+    protected function _getTagModel()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getModelFromCache('XenForo_Model_Tag');
     }
 
     /**
