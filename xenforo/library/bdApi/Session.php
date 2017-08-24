@@ -370,7 +370,7 @@ class bdApi_Session extends XenForo_Session
                     $this->_oauthToken = array(
                         'token_id' => 0,
                         'client_id' => $publicSessionClient['client_id'],
-                        'token_text' => $publicSessionToken,
+                        'token_text' => md5($publicSessionToken),
                         'expire_date' => XenForo_Application::$time,
                         'issue_date' => XenForo_Application::$time,
                         'user_id' => $publicSessionUserId,
