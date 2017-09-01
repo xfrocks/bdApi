@@ -64,6 +64,10 @@ class bdApi_Data_Helper_Core
         array $linkParams = array(),
         array $options = array()
     ) {
+        if (!isset($data['_pageNavParams'])) {
+            $data['_pageNavParams'] = $linkParams;
+        }
+
         $perPage = intval($perPage);
         $totalItems = intval($totalItems);
         $page = max(1, intval($page));
