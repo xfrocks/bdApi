@@ -53,7 +53,7 @@ class bdApi_ControllerApi_Tag extends bdApi_ControllerApi_Abstract
             $maximumSearchResults = $xenOptions->get('maximumSearchResults');
             $contentTags = $tagModel->getContentIdsByTagId($tag['tag_id'], $maximumSearchResults);
 
-            $insertCache = (count($contentTags) > $xenOptions->get('searchResultsPerPage'));
+            $insertCache = (count($contentTags) > $limit);
             if ($insertCache) {
                 $tagModel->insertTagResultsCache($tag['tag_id'], $contentTags);
             }
