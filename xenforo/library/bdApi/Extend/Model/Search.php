@@ -193,6 +193,7 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
                     $thread['first_post'] = $post;
 
                     $data[$key] = array_merge(array(
+                        '_originalContentType' => 'post',
                         'content_type' => 'thread',
                         'content_id' => $thread['thread_id'],
                     ), $thread);
