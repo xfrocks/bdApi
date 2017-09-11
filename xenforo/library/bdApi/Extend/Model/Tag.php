@@ -40,6 +40,7 @@ class bdApi_Extend_Model_Tag extends XFCP_bdApi_Extend_Model_Tag
             // xf_tag
             'tag_id' => 'tag_id',
             'tag' => 'tag_text',
+            'use_count' => 'tag_use_count',
         );
 
         $data = bdApi_Data_Helper_Core::filter($tag, $publicKeys);

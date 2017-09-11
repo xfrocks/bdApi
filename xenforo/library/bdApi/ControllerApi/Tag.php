@@ -45,7 +45,7 @@ class bdApi_ControllerApi_Tag extends bdApi_ControllerApi_Abstract
         $pageNavParams = array();
         list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
 
-        $cache = $tagModel->getTagResultsCache($tag['tag_id']);
+        $cache = $tagModel->getTagResultsCache($tag['tag_id'], 0);
         if ($cache) {
             $contentTags = json_decode($cache['results'], true);
         } else {
@@ -55,7 +55,7 @@ class bdApi_ControllerApi_Tag extends bdApi_ControllerApi_Abstract
 
             $insertCache = (count($contentTags) > $limit);
             if ($insertCache) {
-                $tagModel->insertTagResultsCache($tag['tag_id'], $contentTags);
+                $tagModel->insertTagResultsCache($tag['tag_id'], $contentTags, 0);
             }
         }
 

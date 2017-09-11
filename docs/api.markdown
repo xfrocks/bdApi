@@ -1217,6 +1217,7 @@ List of tagged contents. Since forum-2017050201.
         tag: {
           tag_id: (int),
           tag_text: (string),
+          tag_use_count: (int), # since forum-2017091101
           links: {
             permalink: (uri),
             detail: (uri) # since forum-2017082201
