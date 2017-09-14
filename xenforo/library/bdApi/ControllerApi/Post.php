@@ -808,6 +808,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             return false;
         }
 
+        if ($field === 'post_is_first_post') {
+            return false;
+        }
+
         return parent::_isFieldExcluded($field, $prefixes);
     }
 

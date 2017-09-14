@@ -181,8 +181,9 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
                 }
 
                 $key = $postIds[$post['post_id']];
-                if (!empty($post['thread']['first_post'])
+                if (empty($post['post_is_first_post'])
                     || empty($post['thread'])
+                    || empty($post['thread']['thread_id'])
                 ) {
                     // the found post is a reply
                     $data[$key] = array_merge($preparedResults[$key], $post);
@@ -192,11 +193,16 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
                     unset($post['thread']);
                     $thread['first_post'] = $post;
 
-                    $data[$key] = array_merge(array(
-                        '_originalContentType' => 'post',
-                        'content_type' => 'thread',
-                        'content_id' => $thread['thread_id'],
-                    ), $thread);
+                    $data[$key] = array_merge(
+                        $preparedResults[$key],
+                        array(
+                            'content_type' => 'thread',
+                            'content_id' => $thread['thread_id'],
+                            'search_result_content_type' => 'post',
+                            'search_result_content_id' => $post['post_id'],
+                        ),
+                        $thread
+                    );
                 }
             }
         }
