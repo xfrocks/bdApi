@@ -16,6 +16,14 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
     {
         $required = $this->_getRequiredExternals();
         $html = '';
+
+        $extraData = self::getExtraContainerData();
+        if (!empty($extraData['head'])) {
+            foreach ($extraData['head'] as $head) {
+                $html .= utf8_trim($head);
+            }
+        }
+
         foreach (array_keys($required) as $type) {
             $html .= $this->getRequiredExternalsAsHtml($type);
         }
@@ -102,16 +110,5 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
         } else {
             return '';
         }
-    }
-
-    protected function _processJsUrls(array $jsFiles)
-    {
-        $jsUrls = parent::_processJsUrls($jsFiles);
-
-        foreach ($jsUrls as &$jsUrlRef) {
-            $jsUrlRef = XenForo_Link::convertUriToAbsoluteUri($jsUrlRef, true);
-        }
-
-        return $jsUrls;
     }
 }

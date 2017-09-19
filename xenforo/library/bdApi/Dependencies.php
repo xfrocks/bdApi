@@ -2,10 +2,28 @@
 
 class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
 {
+    private $_javascriptUrlCallback = null;
+
+    public function helperJavascriptUrl()
+    {
+        $args = func_get_args();
+        $result = call_user_func_array($this->_javascriptUrlCallback, $args);
+        return XenForo_Link::convertUriToAbsoluteUri($result, true);
+    }
+
     public function preLoadData()
     {
         // trigger auto loading of our classes
         class_exists('bdApi_Link');
+
+        $javascriptUrl = XenForo_Application::$javaScriptUrl;
+        XenForo_Application::$javaScriptUrl = bdApi_Link::convertUriToAbsoluteUri($javascriptUrl, true);
+
+        $this->_javascriptUrlCallback = XenForo_Template_Helper_Core::$helperCallbacks['javascripturl'];
+        if ($this->_javascriptUrlCallback[0] === 'self') {
+            $this->_javascriptUrlCallback[0] = 'XenForo_Template_Helper_Core';
+        }
+        XenForo_Template_Helper_Core::$helperCallbacks['javascripturl'] = array($this, 'helperJavascriptUrl');
 
         if (isset($_SERVER['REQUEST_METHOD'])
             && $_SERVER['REQUEST_METHOD'] === 'OPTIONS'
