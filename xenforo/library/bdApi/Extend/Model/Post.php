@@ -207,8 +207,8 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
             }
         }
 
-        if (isset($post['position'])) {
-            $data['post_is_first_post'] = (intval($post['position']) === 0);
+        if (isset($thread['first_post_id'])) {
+            $data['post_is_first_post'] = $post['post_id'] === $thread['first_post_id'];
         }
 
         if (isset($post['like_date'])) {
