@@ -6,6 +6,12 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
     {
         $parent = $this->_input->filterSingle('parent', XenForo_Input::STRING);
 
+        $visitor = XenForo_Visitor::getInstance();
+        $nodePermissions = $this->_getNodeModel()->getNodePermissionsForPermissionCombination();
+        foreach ($nodePermissions as $nodeId => $permissions) {
+            $visitor->setNodePermissions($nodeId, $permissions);
+        }
+
         $elements = $this->_getElements($parent);
 
         $viewParams = array(

@@ -67,7 +67,6 @@ class bdApi_Extend_Model_Forum extends XFCP_bdApi_Extend_Model_Forum
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
     {
         $fetchOptions['watchUserId'] = XenForo_Visitor::getUserId();
-        $fetchOptions['permissionCombinationId'] = XenForo_Visitor::getInstance()->get('permission_combination_id');
 
         if (!isset($fetchOptions[self::GET_THREAD_PREFIXES])) {
             $fetchOptions[self::GET_THREAD_PREFIXES] = true;
@@ -89,10 +88,6 @@ class bdApi_Extend_Model_Forum extends XFCP_bdApi_Extend_Model_Forum
 
     public function prepareApiDataForForum(array $forum)
     {
-        if (!empty($forum['node_permission_cache'])) {
-            XenForo_Visitor::getInstance()->setNodePermissions($forum['node_id'], $forum['node_permission_cache']);
-        }
-
         $publicKeys = array(
             // xf_node
             'node_id' => 'forum_id',
