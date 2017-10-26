@@ -133,15 +133,36 @@ class bdApi_Link extends _XenForo_Link
 
     protected static function _checkForFullLink($type, &$fullLink, &$fullLinkPrefix)
     {
-        $type = parent::_checkForFullLink($type, $fullLink, $fullLinkPrefix);
+        static $fullBasePath = null;
 
-        if (!empty($fullLinkPrefix)) {
-            // fix issue with HTTPS requests
-            $paths = XenForo_Application::get('requestPaths');
+        if (!$type) {
+            $fullLink = false;
+            $fullLinkPrefix = '';
+            return $type;
+        }
 
-            if ($paths['protocol'] === 'https' AND parse_url($fullLinkPrefix, PHP_URL_SCHEME) === 'http') {
-                $fullLinkPrefix = str_replace('http://', 'https://', $fullLinkPrefix);
+        if ($type[0] == 'c' && substr($type, 0, 10) === 'canonical:') {
+            $type = substr($type, 10);
+            $fullLink = true;
+            $fullLinkPrefix = self::getCanonicalLinkPrefix() . '/';
+        } elseif ($type[0] == 'f' && substr($type, 0, 5) === 'full:') {
+            $type = substr($type, 5);
+            $fullLink = true;
+
+            if ($fullBasePath === null) {
+                $paths = XenForo_Application::get('requestPaths');
+                $fullBasePath = $paths['fullBasePath'];
+
+                // fix issue with HTTPS requests
+                if ($paths['protocol'] === 'https' && substr($fullBasePath, 0, 5) === 'http:') {
+                    $fullBasePath = str_replace('http://', 'https://', $fullBasePath);
+                }
             }
+
+            $fullLinkPrefix = $fullBasePath;
+        } else {
+            $fullLink = false;
+            $fullLinkPrefix = '';
         }
 
         return $type;
