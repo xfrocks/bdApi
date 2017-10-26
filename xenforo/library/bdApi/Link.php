@@ -55,31 +55,6 @@ class bdApi_Link extends _XenForo_Link
             $type = 'full:' . $type;
         }
 
-        $session = bdApi_Data_Helper_Core::safeGetSession();
-        if (!empty($session)) {
-            // auto appends oauth_token param from the session
-            if (!isset($extraParams['oauth_token'])) {
-                $oauthToken = $session->getOAuthTokenText();
-                if (!empty($oauthToken)
-                    && !empty($_REQUEST['oauth_token'])
-                    && $_REQUEST['oauth_token'] === $oauthToken
-                ) {
-                    // only append token to built link if the current request has token in query too
-                    // this will prevent token in links if it's requested with OTT, token in Auth header
-                    // or token in body (PUT/POST requests)
-                    $extraParams['oauth_token'] = $oauthToken;
-                }
-            }
-
-            // auto appends locale param from session
-            if (!isset($extraParams['locale'])) {
-                $locale = $session->get('requestLocale');
-                if (!empty($locale)) {
-                    $extraParams['locale'] = $locale;
-                }
-            }
-        }
-
         $type = XenForo_Link::_checkForFullLink($type, $fullLink, $fullLinkPrefix);
 
         $link = XenForo_Link::_buildLink('api', $type, $data, $extraParams);
@@ -174,24 +149,65 @@ class bdApi_Link extends _XenForo_Link
 
     protected static function _buildLink($group, $type, $data, array &$extraParams, &$prefix = null)
     {
+        static $extraParamsApi = null;
+        static $extraParamsPublic = null;
+
         $built = parent::_buildLink($group, $type, $data, $extraParams, $prefix);
 
-        if ($group === 'public') {
-            $session = bdApi_Data_Helper_Core::safeGetSession();
-            if (!empty($session)) {
-                // auto appends locale param from session
-                if (!isset($extraParams['locale'])) {
-                    $locale = $session->get('requestLocale');
-                    if (!empty($locale)) {
-                        $timestamp = time() + 86400;
-                        $extraParams['_apiLanguageId'] = sprintf(
-                            '%s %s',
-                            $timestamp,
-                            bdApi_Crypt::encryptTypeOne($session->get('languageId'), $timestamp)
-                        );
+        switch ($group) {
+            case 'api':
+                if ($extraParamsApi === null) {
+                    $session = bdApi_Data_Helper_Core::safeGetSession();
+
+                    if (!empty($session)) {
+                        $extraParamsApi = [];
+
+                        // auto appends oauth_token param from session
+                        $oauthToken = $session->getOAuthTokenText();
+                        if (!empty($oauthToken)
+                            && !empty($_REQUEST['oauth_token'])
+                            && $_REQUEST['oauth_token'] === $oauthToken
+                        ) {
+                            // only append token to built link if the current request has token in query too
+                            // this will prevent token in links if it's requested with OTT, token in Auth header
+                            // or token in body (PUT/POST requests)
+                            $extraParamsApi['oauth_token'] = $oauthToken;
+                        }
+
+                        // auto appends locale param from session
+                        $locale = $session->get('requestLocale');
+                        if (!empty($locale)) {
+                            $extraParamsApi['locale'] = $locale;
+                        }
                     }
                 }
-            }
+                if (is_array($extraParamsApi)) {
+                    $extraParams += $extraParamsApi;
+                }
+                break;
+            case 'public':
+                if ($extraParamsPublic === null) {
+                    $session = bdApi_Data_Helper_Core::safeGetSession();
+
+                    if (!empty($session)) {
+                        $extraParamsPublic = [];
+
+                        // auto appends _apiLanguageId param from session
+                        $locale = $session->get('requestLocale');
+                        if (!empty($locale)) {
+                            $timestamp = XenForo_Application::$time + 86400;
+                            $extraParamsPublic['_apiLanguageId'] = sprintf(
+                                '%s %s',
+                                $timestamp,
+                                bdApi_Crypt::encryptTypeOne($session->get('languageId'), $timestamp)
+                            );
+                        }
+                    }
+                }
+                if (is_array($extraParamsPublic)) {
+                    $extraParams += $extraParamsPublic;
+                }
+                break;
         }
 
         return $built;
