@@ -214,11 +214,13 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
         $filtered = array();
         foreach (array_keys($resourceData) as $field) {
-            if (!is_int($field) && $this->_isFieldExcluded($field, $prefixes)) {
+            $hasChild = is_array($resourceData[$field]);
+
+            if (!is_int($field) && $this->_isFieldExcluded($field, $prefixes, $hasChild)) {
                 continue;
             }
 
-            if (is_array($resourceData[$field]) && count($resourceData[$field]) > 0) {
+            if ($hasChild && count($resourceData[$field]) > 0) {
                 $_prefixes = $prefixes;
                 if (!is_int($field)) {
                     $_prefixes[] = $field;
@@ -242,9 +244,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
      *
      * @param $field
      * @param array $prefixes
+     * @param bool $hasChild
      * @return bool
      */
-    public function _isFieldIncluded($field, array $prefixes = array())
+    public function _isFieldIncluded($field, array $prefixes = array(), $hasChild = true)
     {
         $this->_prepareFieldsFilter();
 
@@ -256,12 +259,18 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         if (count($prefixes)) {
             $pattern = sprintf('%s.%s', implode('.', $prefixes), $field);
         }
-        $patternAndDot = $pattern . '.';
-        $patternAndDotLength = strlen($patternAndDot);
+        $patternAndDot = null;
+        $patternAndDotLength = 0;
+        if ($hasChild) {
+            $patternAndDot = $pattern . '.';
+            $patternAndDotLength = strlen($patternAndDot);
+        }
 
         foreach ($this->_fieldsFilterInclude as $_field) {
             if ($_field === $pattern
-                || substr($_field, 0, $patternAndDotLength) === $patternAndDot
+                || ($patternAndDotLength > 0
+                    && substr($_field, 0, $patternAndDotLength) === $patternAndDot
+                )
             ) {
                 return true;
             }
@@ -277,21 +286,28 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
      *
      * @param $field
      * @param array $prefixes
+     * @param bool $hasChild
      * @return bool
      */
-    public function _isFieldExcluded($field, array $prefixes = array())
+    public function _isFieldExcluded($field, array $prefixes = array(), $hasChild = true)
     {
         $this->_prepareFieldsFilter();
 
         if ($this->_fieldsFilterType & self::FIELDS_FILTER_INCLUDE) {
-            if ($this->_isFieldIncluded($field, $prefixes)) {
+            if ($this->_isFieldIncluded($field, $prefixes, $hasChild)) {
                 return false;
             }
 
             $includeDefault = false;
             $_prefixes = $prefixes;
             while (true) {
-                $_prefixesStr = implode('.', $_prefixes);
+                $_prefixesStr = count($_prefixes) === 0
+                    ? ''
+                    : (
+                    count($_prefixes) == 1
+                        ? $_prefixes[0]
+                        : implode('.', $_prefixes)
+                    );
                 if (isset($this->_fieldsFilterDefaults[$_prefixesStr])) {
                     if ($this->_fieldsFilterDefaults[$_prefixesStr]) {
                         $includeDefault = true;

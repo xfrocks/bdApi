@@ -943,7 +943,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         }
     }
 
-    public function _isFieldExcluded($field, array $prefixes = array())
+    public function _isFieldExcluded($field, array $prefixes = array(), $hasChild = true)
     {
         if ($field === 'user_id') {
             return false;
