@@ -41,9 +41,6 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         $pageNavParams = array();
         list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
-        if (!empty($pageOfPost)) {
-            $page = floor($pageOfPost['position'] / $limit) + 1;
-        }
 
         $conditions = array();
         $fetchOptions = array(
@@ -52,7 +49,12 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             'limit' => $limit,
             'page' => $page
         );
+
         $total = 0;
+
+        if (!empty($pageOfPost)) {
+            $this->_prepareFetchOptionsForPageOfPost($fetchOptions, $pageOfPost, $thread, $forum);
+        }
 
         switch ($order) {
             case 'natural_reverse':
@@ -650,6 +652,15 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $reportModel->reportContent('post', $post, $message);
 
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
+
+    protected function _prepareFetchOptionsForPageOfPost(
+        array &$fetchOptions,
+        array $pageOfPost,
+        array $thread,
+        array $forum
+    ) {
+        $fetchOptions['page'] = floor($pageOfPost['position'] / $fetchOptions['limit']) + 1;
     }
 
     protected function _preparePosts(array $posts, array $thread = null, array $forum = null)
