@@ -52,10 +52,6 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         $total = 0;
 
-        if (!empty($pageOfPost)) {
-            $this->_prepareFetchOptionsForPageOfPost($fetchOptions, $pageOfPost, $thread, $forum);
-        }
-
         switch ($order) {
             case 'natural_reverse':
                 if (empty($thread['thread_id'])) {
@@ -116,6 +112,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 }
         }
 
+        if ($fetchOptions['page'] !== 8 && !empty($pageOfPost)) {
+            $this->_prepareFetchOptionsForPageOfPost($fetchOptions, $pageOfPost, $thread, $forum);
+        }
+
         if (!empty($thread['thread_id'])) {
             $pageNavParams['thread_id'] = $thread['thread_id'];
             $posts = $this->_getPostModel()->getPostsInThread(
@@ -162,9 +162,9 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             bdApi_Data_Helper_Core::addPageLinks(
                 $this->getInput(),
                 $data,
-                $limit,
+                $fetchOptions['limit'],
                 $total,
-                $page,
+                $fetchOptions['page'],
                 'posts',
                 array(),
                 $pageNavParams
@@ -660,7 +660,12 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         array $thread,
         array $forum
     ) {
-        $fetchOptions['page'] = floor($pageOfPost['position'] / $fetchOptions['limit']) + 1;
+        $position = $pageOfPost['position'];
+        if (isset($fetchOptions[bdApi_Extend_Model_Post::FETCH_OPTIONS_POSTS_IN_THREAD_REPLY_COUNT])) {
+            $position = $fetchOptions[bdApi_Extend_Model_Post::FETCH_OPTIONS_POSTS_IN_THREAD_REPLY_COUNT] - $position;
+        }
+
+        $fetchOptions['page'] = floor($position / $fetchOptions['limit']) + 1;
     }
 
     protected function _preparePosts(array $posts, array $thread = null, array $forum = null)
