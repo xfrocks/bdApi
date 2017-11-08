@@ -943,6 +943,7 @@ Create a new post.
 Parameters:
 
  * `thread_id` (__required__): id of the target thread.
+ * `quote_post_id` (_optional_): id of the quote post. It's possible to skip `thread_id` if this parameter is provided. An extra check is performed if both parameters exist and does not match. Since forum-2017110801.
  * `post_body` (__required__): content of the new post.
 
 Required scopes:

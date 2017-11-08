@@ -226,14 +226,29 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     {
         $input = $this->_input->filter(array(
             'thread_id' => XenForo_Input::UINT,
+            'quote_post_id' => XenForo_Input::UINT,
         ));
 
         /* @var $editorHelper XenForo_ControllerHelper_Editor */
         $editorHelper = $this->getHelper('Editor');
         $input['post_body'] = $editorHelper->getMessageText('post_body', $this->_input);
         $input['post_body'] = XenForo_Helper_String::autoLinkBbCode($input['post_body']);
+        if (!strlen(trim($input['post_body']))) {
+            return $this->responseError(new XenForo_Phrase('bdapi_slash_post_requires_post_body'), 400);
+        }
 
-        list($thread, $forum) = $this->_getForumThreadPostHelper()->assertThreadValidAndViewable($input['thread_id']);
+        $ftpHelper = $this->_getForumThreadPostHelper();
+        if (!empty($input['quote_post_id'])) {
+            list($quotePost, $thread, $forum) = $ftpHelper->assertPostValidAndViewable($input['quote_post_id']);
+            if ($input['thread_id'] > 0 && $quotePost['thread_id'] !== $input['thread_id']) {
+                return $this->responseNoPermission();
+            }
+
+            $quoteText = $this->_getPostModel()->getQuoteTextForPost($quotePost);
+            $input['post_body'] = $quoteText . $input['post_body'];
+        } else {
+            list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($input['thread_id']);
+        }
 
         $visitor = XenForo_Visitor::getInstance();
 
