@@ -35,8 +35,7 @@ class bdApi_ControllerApi_Tag extends bdApi_ControllerApi_Abstract
     {
         $tagId = $this->_input->filterSingle('tag_id', XenForo_Input::UINT);
 
-        /** @var bdApi_Extend_Model_Tag $tagModel */
-        $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
+        $tagModel = $this->_getTagModel();
         $tag = $tagModel->getTagById($tagId);
         if (empty($tag)) {
             return $this->responseError(new XenForo_Phrase('requested_tag_not_found'), 404);
@@ -102,8 +101,7 @@ class bdApi_ControllerApi_Tag extends bdApi_ControllerApi_Abstract
 
         $this->_assertRequiredScope(bdApi_Model_OAuth2::SCOPE_POST);
 
-        /** @var bdApi_Extend_Model_Tag $tagModel */
-        $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
+        $tagModel = $this->_getTagModel();
         $q = $tagModel->normalizeTag($q);
 
         if (strlen($q) >= 2) {
@@ -117,5 +115,47 @@ class bdApi_ControllerApi_Tag extends bdApi_ControllerApi_Abstract
         );
 
         return $this->responseData('bdApi_ViewData_Tag_Find', $data);
+    }
+
+    public function actionGetList()
+    {
+        $this->_assertValidToken();
+
+        $pageNavParams = array();
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
+
+        $tagModel = $this->_getTagModel();
+        $total = $tagModel->bdApi_getLatestTagId();
+
+        $tagIdEnd = $page * $limit;
+        $tagIdStart = $tagIdEnd - $limit + 1;
+        $tags = $tagModel->bdApi_getTagsByIdRange($tagIdStart, $tagIdEnd);
+
+        $data = array(
+            'tags' => $tagModel->prepareApiDataForTags($tags),
+            'tags_total' => $total,
+        );
+
+        bdApi_Data_Helper_Core::addPageLinks(
+            $this->getInput(),
+            $data,
+            $limit,
+            $total,
+            $page,
+            'tags/list',
+            array(),
+            $pageNavParams
+        );
+
+        return $this->responseData('bdApi_ViewData_Tag_List', $data);
+    }
+
+    /**
+     * @return bdApi_Extend_Model_Tag
+     */
+    protected function _getTagModel()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getModelFromCache('XenForo_Model_Tag');
     }
 }

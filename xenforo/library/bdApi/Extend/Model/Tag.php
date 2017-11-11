@@ -2,6 +2,16 @@
 
 class bdApi_Extend_Model_Tag extends XFCP_bdApi_Extend_Model_Tag
 {
+    public function bdApi_getLatestTagId()
+    {
+        return $this->_getDb()->fetchOne('
+            SELECT tag_id
+            FROM xf_tag
+            ORDER BY tag_id DESC
+            LIMIT 1
+        ');
+    }
+
     public function bdApi_getTagsByIds(array $ids)
     {
         if (count($ids) === 1) {
@@ -19,6 +29,15 @@ class bdApi_Extend_Model_Tag extends XFCP_bdApi_Extend_Model_Tag
         }
 
         return array();
+    }
+
+    public function bdApi_getTagsByIdRange($start, $end)
+    {
+        return $this->fetchAllKeyed('
+            SELECT *
+            FROM xf_tag
+            WHERE tag_id BETWEEN ? AND ?
+        ', 'tag_id', array($start, $end));
     }
 
     public function prepareApiDataForTags(array $tags)

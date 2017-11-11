@@ -1211,6 +1211,28 @@ Required scopes:
 
  * `read`
 
+### GET `/tags/list`
+List of tags. Since forum-2017111101.
+
+    {
+        tags: {
+            (tag id): (tag text),
+            ...
+        },
+        tags_total: (int),
+        links {
+            pages: (int),
+            next: (uri),
+            prev: (uri)
+        }
+    }
+
+Note: A valid token is required.
+
+Required scopes:
+
+ * `read`
+
 ## Get `/tags/:tagId`
 List of tagged contents. Since forum-2017050201.
 

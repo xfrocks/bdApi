@@ -557,6 +557,19 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         }
     }
 
+    protected function _assertValidToken()
+    {
+        $session = bdApi_Data_Helper_Core::safeGetSession();
+        if (empty($session)) {
+            throw $this->responseException($this->responseNoPermission());
+        }
+
+        $clientId = $session->getOAuthClientId();
+        if (empty($clientId)) {
+            throw $this->responseException($this->responseNoPermission());
+        }
+    }
+
     protected function _assertViewingPermissions($action)
     {
         if ($action !== 'Options') {
