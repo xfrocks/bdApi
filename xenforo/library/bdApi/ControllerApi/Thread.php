@@ -211,6 +211,8 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                     $fetchOptions['order'] = 'last_post_date';
                     $fetchOptions['orderDirection'] = 'desc';
                 } else {
+                    $this->_assertValidToken();
+
                     // manually prepare threads total count for paging
                     $total = $this->_getThreadModel()->bdApi_getLatestThreadId();
 

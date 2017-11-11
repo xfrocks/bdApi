@@ -540,6 +540,8 @@ List of threads in a forum (with pagination).
         thread_tag: (tag) # since forum-2017082201
     }
 
+Note: A valid token is required if `forum_id` is not provided. Since forum-2017111102.
+
 Parameters:
 
  * `forum_id` (_optional_): ids of the containing forums (separated by comma). Support for multiple ids were added in forum-2014011801. Prior to forum-2017010302, this parameter was required.
@@ -919,6 +921,8 @@ List of posts in a thread (with pagination).
         thread: (thread), # since forum-2014103001
         subscription_callback: (uri) # since subscription-2014081002
     }
+
+Note: A valid token is required if `thread_id` is not provided. Since forum-2017111102.
 
 Parameters:
 

@@ -99,6 +99,8 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
                 break;
             default:
                 if (!is_array($thread) || empty($thread['thread_id'])) {
+                    $this->_assertValidToken();
+
                     // manually prepare posts total count for paging
                     $total = $this->_getPostModel()->bdApi_getLatestPostId();
 
