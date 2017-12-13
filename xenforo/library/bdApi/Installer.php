@@ -211,22 +211,36 @@ class bdApi_Installer
 
         $db = XenForo_Application::getDb();
 
-        $db->query('CREATE TABLE IF NOT EXISTS `xf_bdapi_ping_queue` (
-			`ping_queue_id` INT(10) UNSIGNED AUTO_INCREMENT,
-			`callback_md5` VARCHAR(32),
-			`callback` TEXT,
-			`object_type` VARBINARY(25) NOT NULL,
-			`data` MEDIUMBLOB,
-			`queue_date` INT(10) UNSIGNED NOT NULL,
-			`expire_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\',
-			PRIMARY KEY (`ping_queue_id`),
-			INDEX `callback_md5` (`callback_md5`)
-		) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;');
+        $db->query('
+            CREATE TABLE IF NOT EXISTS `xf_bdapi_ping_queue` (
+                `ping_queue_id` INT(10) UNSIGNED AUTO_INCREMENT,
+                `callback_md5` VARCHAR(32),
+                `callback` TEXT,
+                `object_type` VARBINARY(25) NOT NULL,
+                `data` MEDIUMBLOB,
+                `queue_date` INT(10) UNSIGNED NOT NULL,
+                `expire_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\',
+                PRIMARY KEY (`ping_queue_id`),
+                INDEX `callback_md5` (`callback_md5`)
+            ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;
+        ');
 
-        $db->query('REPLACE INTO `xf_content_type` (content_type, addon_id, fields) VALUES ("api_ping", "bdApi", "")');
-        $db->query('REPLACE INTO `xf_content_type_field` (content_type, field_name, field_value) VALUES ("api_ping", "alert_handler_class", "bdApi_AlertHandler_Ping")');
-        $db->query('REPLACE INTO `xf_content_type` (content_type, addon_id, fields) VALUES ("api_client_content", "bdApi", "")');
-        $db->query('REPLACE INTO `xf_content_type_field` (content_type, field_name, field_value) VALUES ("api_client_content", "search_handler_class", "bdApi_Search_DataHandler_ClientContent")');
+        $db->query(
+            'REPLACE INTO `xf_content_type` (content_type, addon_id, fields) VALUES (?,?,?)',
+            array('api_ping', 'bdApi', '')
+        );
+        $db->query(
+            'REPLACE INTO `xf_content_type_field` (content_type, field_name, field_value) VALUES (?,?,?)',
+            array('api_ping', 'alert_handler_class', 'bdApi_AlertHandler_Ping')
+        );
+        $db->query(
+            'REPLACE INTO `xf_content_type` (content_type, addon_id, fields) VALUES (?,?,?)',
+            array('api_client_content', 'bdApi', '')
+        );
+        $db->query(
+            'REPLACE INTO `xf_content_type_field` (content_type, field_name, field_value) VALUES (?,?,?)',
+            array('api_client_content', 'search_handler_class', 'bdApi_Search_DataHandler_ClientContent')
+        );
         /** @var XenForo_Model_ContentType $contentTypeModel */
         $contentTypeModel = XenForo_Model::create('XenForo_Model_ContentType');
         $contentTypeModel->rebuildContentTypeCache();
@@ -238,12 +252,12 @@ class bdApi_Installer
 
         if ($existingVersionId < 1) {
             $db->query("
-				INSERT IGNORE INTO xf_permission_entry
-					(user_group_id, user_id, permission_group_id, permission_id, permission_value, permission_value_int)
-				SELECT user_group_id, user_id, 'general', 'bdApi_clientNew', permission_value, 0
-				FROM xf_permission_entry
-				WHERE permission_group_id = 'general' AND permission_id = 'bypassFloodCheck'
-			");
+                INSERT IGNORE INTO xf_permission_entry
+                (user_group_id, user_id, permission_group_id, permission_id, permission_value, permission_value_int)
+                SELECT user_group_id, user_id, 'general', 'bdApi_clientNew', permission_value, 0
+                FROM xf_permission_entry
+                WHERE permission_group_id = 'general' AND permission_id = 'bypassFloodCheck'
+            ");
 
             self::_installPhpDemoClient();
         }

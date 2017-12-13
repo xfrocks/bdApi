@@ -24,7 +24,9 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
         $forumIdInput = preg_split('#[^0-9]#', $forumIdInput, -1, PREG_SPLIT_NO_EMPTY);
         $viewableNodes = $this->_getNodeModel()->getViewableNodeList();
-        $viewableForums = array_filter($viewableNodes, create_function('$f', 'return $f["node_type_id"] === "Forum";'));
+        $viewableForums = array_filter($viewableNodes, function ($f) {
+            return $f['node_type_id'] === 'Forum';
+        });
         $forumIdArray = array_intersect($forumIdInput, array_keys($viewableForums));
         if (count($forumIdArray) !== count($forumIdInput)) {
             return $this->responseError(new XenForo_Phrase('requested_forum_not_found'), 404);

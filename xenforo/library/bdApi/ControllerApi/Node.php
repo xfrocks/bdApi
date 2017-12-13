@@ -27,10 +27,9 @@ abstract class bdApi_ControllerApi_Node extends bdApi_ControllerApi_Abstract
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
         switch ($order) {
             case 'list':
-                usort($nodes, create_function(
-                    '$a, $b',
-                    'return ($a["lft"] == $b["lft"] ? 0 : ($a["lft"] < $b["lft"] ? -1 : 1));'
-                ));
+                usort($nodes, function ($a, $b) {
+                    return ($a['lft'] == $b['lft'] ? 0 : ($a['lft'] < $b['lft'] ? -1 : 1));
+                });
                 break;
         }
 
