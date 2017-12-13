@@ -2,6 +2,30 @@
 
 ## Changelog
 
+### 1.6.1
+
+* PHP 7.2 support
+* Added option to control limit and range of data accessible via API
+* Added GET `/tags/list`
+* Added GET `/tags/:tagId`
+* Added POST `/tools/ott`
+* Added param `creator_user_id` for GET `/threads/
+* Added param `thread_prefix_id` for GET `/threads/
+* Added param `thread_tag_id` for GET `/threads/
+* Added param `quote_post_id` for POST `/posts/
+* Added `first_poster_avatar` into `links` in thread data
+* Added `post_origin` into post data
+* Added `user_external_auth` into user data (contribution from [Oleg Tsvetkov](https://github.com/olegtsvetkov))
+* Added support for subscription topic `user_0`
+* Added support for config.php configurations:
+  - `$config['api']['pingQueueUserDefer']`
+  - `$config['api']['publicSessionToken']`
+  - `$config['api']['publicSessionClientId']`
+  - `$config['api']['publicSessionScopes']`
+* BREAKING CHANGE: `user_fields` to `fields` in user data
+* Changed: mark thread read after replying (contribution from [Luu Truong](https://github.com/luutruong))
+* Other performance improvements and bug fixes
+
 ### 1.5.1
 
 * Added param `reason` for post/thread/profile post deletion
