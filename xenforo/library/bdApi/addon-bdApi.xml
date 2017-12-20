@@ -75,7 +75,9 @@
 			<xen:include template="bdapi_auth_code_list_items" />
 		</ol>
 
-		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $allAuthCode}</span>', 'total={xen:count $allAuthCode}'}</p>
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items,
+			'count=<span class="FilterListCount">{xen:number {xen:count $authCodes}}</span>',
+			'total={xen:number $total}'}</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase bdapi_auth_code_no_results}</div>
 	</xen:if>
@@ -160,7 +162,9 @@
 			<xen:include template="bdapi_client_content_list_items" />
 		</ol>
 
-		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $clientContents}</span>', 'total={xen:count $clientContents}'}</p>
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items,
+			'count=<span class="FilterListCount">{xen:number {xen:count $clientContents}}</span>',
+			'total={xen:number $total}'}</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase bdapi_client_content_no_results}</div>
 	</xen:if>
@@ -273,7 +277,9 @@
 			<xen:include template="bdapi_client_list_items" />
 		</ol>
 	
-		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $allClient}</span>', 'total={xen:count $allClient}'}</p>
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items,
+			'count=<span class="FilterListCount">{xen:number {xen:count $clients}}</span>',
+			'total={xen:number $total}'}</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase bdapi_client_no_results}</div>
 	</xen:if>
@@ -382,7 +388,9 @@
 			<xen:include template="bdapi_log_list_items" />
 		</ol>
 	
-		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:number {xen:count $logs}}</span>', 'total={xen:number $total}'}</p>
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items,
+			'count=<span class="FilterListCount">{xen:number {xen:count $logs}}</span>',
+			'total={xen:number $total}'}</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase bdapi_log_no_results}</div>
 	</xen:if>
@@ -441,7 +449,9 @@
 			<xen:include template="bdapi_refresh_token_list_items" />
 		</ol>
 	
-		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $allRefreshToken}</span>', 'total={xen:count $allRefreshToken}'}</p>
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items,
+			'count=<span class="FilterListCount">{xen:number {xen:count $refreshTokens}}</span>',
+			'total={xen:number $total}'}</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase bdapi_refresh_token_no_results}</div>
 	</xen:if>
@@ -519,7 +529,9 @@
 			<xen:include template="bdapi_subscription_list_items" />
 		</ol>
 
-		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $subscriptions}</span>', 'total={xen:count $subscriptions}'}</p>
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items,
+			'count=<span class="FilterListCount">{xen:number {xen:count $subscriptions}}</span>',
+			'total={xen:number $total}'}</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase bdapi_subscription_no_results}</div>
 	</xen:if>
@@ -601,7 +613,9 @@
 			<xen:include template="bdapi_token_list_items" />
 		</ol>
 	
-		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $allToken}</span>', 'total={xen:count $allToken}'}</p>
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items,
+			'count=<span class="FilterListCount">{xen:number {xen:count $tokens}}</span>',
+			'total={xen:number $total}'}</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase bdapi_token_no_results}</div>
 	</xen:if>
