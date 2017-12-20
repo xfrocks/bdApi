@@ -120,6 +120,10 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
             'user_id' => 'creator_user_id',
             'username' => 'creator_username',
 
+            'content_type' => 'content_type',
+            'content_id' => 'content_id',
+            'action' => 'content_action',
+
             // XenForo_Model_Alert::prepareAlert
             'unviewed' => 'notification_is_unread',
         );

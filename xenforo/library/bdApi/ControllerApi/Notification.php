@@ -61,7 +61,6 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));
     }
 
-
     public function actionGetContent()
     {
         $id = $this->_input->filterSingle('notification_id', XenForo_Input::UINT);
@@ -75,6 +74,10 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
             return $this->responseNoPermission();
         }
 
+        if (!$this->_isFieldExcluded('notification')) {
+            $this->addExtraDataForResponse('notification', $this->_getAlertModel()->prepareApiDataForAlert($alert));
+        }
+
         $controllerResponse = $this->_actionGetContent_getControllerResponse($alert);
         if (!empty($controllerResponse)) {
             return $controllerResponse;
@@ -83,7 +86,6 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
         // alert content type not recognized...
         return $this->_actionGetContent_getControllerResponseNop($alert);
     }
-
 
     protected function _actionGetContent_getControllerResponseNop(array $alert = null)
     {

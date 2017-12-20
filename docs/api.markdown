@@ -2405,6 +2405,9 @@ List of notifications (both read and unread). Since forum-2014022602.
                 notification_is_unread: (boolean), # since forum-2015072301
                 creator_user_id: (int), # since subscription-2014081001
                 creator_username: (string), # since subscription-2014081001
+                content_type: (string), # since forum-2017122001
+                content_id: (int), # since forum-2017122001
+                content_action: (string), # since forum-2017122001
                 notification_type: (string), # since forum-2014080901
                 notification_html: (string),
                 links: {
@@ -2423,6 +2426,11 @@ Required scopes:
 
 ### GET `/notifications/content`
 Get associated content of notification. The response depends on the content type. Since forum-2015041001.
+
+    {
+        ...,
+        notification: (notification) # since forum-2017122001
+    }
 
 Parameters:
 

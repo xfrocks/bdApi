@@ -111,6 +111,17 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         return $this->responseData('bdApi_ViewApi_Helper_Options', $methods);
     }
 
+    public function addExtraDataForResponse($key, $value)
+    {
+        $extraData = $this->_request->getParam(__CLASS__);
+        if (!is_array($extraData)) {
+            $extraData = array();
+        }
+
+        $extraData[$key] = $value;
+        $this->_request->setParam(__CLASS__, $extraData);
+    }
+
     /**
      * Builds are response with specified data. Basically it's the same
      * XenForo_ControllerPublic_Abstract::responseView() but with the
@@ -124,6 +135,11 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
      */
     public function responseData($viewName, array $data = array())
     {
+        $extraData = $this->_request->getParam(__CLASS__);
+        if (is_array($extraData)) {
+            $data += $extraData;
+        }
+
         return parent::responseView($viewName, 'DEFAULT', $data);
     }
 
