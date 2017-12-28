@@ -283,18 +283,19 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
                      'location' => 'location',
                      'occupation' => 'occupation',
                  ) as $systemFieldId => $titlePhraseTitle) {
-            if (!isset($user[$systemFieldId])) {
-                continue;
-            }
-
-            $data[] = array(
+            $systemField = array(
                 'id' => $systemFieldId,
                 'title' => new XenForo_Phrase($titlePhraseTitle),
                 'description' => '',
                 'position' => 'personal',
                 'is_required' => false,
-                'value' => $user[$systemFieldId],
             );
+
+            if (isset($user[$systemFieldId])) {
+                $systemField['value'] = $user[$systemFieldId];
+            }
+
+            $data[] = $systemField;
         }
 
         if (!empty($user['custom_fields'])) {

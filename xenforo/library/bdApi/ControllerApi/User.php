@@ -116,6 +116,23 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_User_List', $data);
     }
 
+    public function actionGetFields()
+    {
+        $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+        if ($userId > 0) {
+            return $this->responseNoPermission();
+        }
+
+        $userModel = $this->_getUserModel();
+
+        $fakeUser = array('custom_fields' => 'a:0:{}');
+        $fields = $userModel->prepareApiDataForUserFields($fakeUser);
+
+        $data = array('fields' => $this->_filterDataMany($fields));
+
+        return $this->responseData('bdApi_ViewApi_User_Fields', $data);
+    }
+
     public function actionGetFind()
     {
         $users = array();

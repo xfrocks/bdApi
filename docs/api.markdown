@@ -1341,6 +1341,42 @@ Required scopes:
 
  * `post`
 
+### GET `/users/fields`
+List of user fields. Since forum-2017122801.
+
+    {
+        fields: [
+           {
+                id: (string),
+                title: (string),
+                description: (string),
+                display_group: (string),
+                choices: [
+                    {
+                        key: (string),
+                        value: (string),
+                    },
+                    ...
+                ],
+                is_multiple_choice: (boolean),
+                is_required: (boolean),
+                value: (string), # single choice field only
+                values: [ # multiple choice field only
+                    {
+                        key: (string),
+                        value: (string),
+                    },
+                    ...
+                ]
+            },
+            ...
+        ]
+    }
+
+Required scopes:
+
+ * `read`
+
 ### GET `/users/find`
 Filtered list of users by username or email. Since forum-2015030901.
 
@@ -1389,29 +1425,7 @@ Detail information of a user.
             user_is_followed: (boolean), # since forum-2014052902
             user_is_ignored: (boolean), # since forum-2015072303
             *fields: [ # since forum-2017040402
-                {
-                    id: (string),
-                    title: (string),
-                    description: (string),
-                    display_group: (string),
-                    choices: [
-                        {
-                            key: (string),
-                            value: (string),
-                        },
-                        ...
-                    ],
-                    is_multiple_choice: (boolean),
-                    is_required: (boolean),
-                    value: (string),
-                    values: [
-                        {
-                            key: (string),
-                            value: (string),
-                        },
-                        ...
-                    ]
-                },
+                (field),
                 ...
             ],
             *user_groups: [ # since forum-2014092301
