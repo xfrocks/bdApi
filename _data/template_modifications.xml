@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<template_modifications>
+  <modification type="public" template="account_wrapper" modification_key="bdapi_account_wrapper" description="Render account/api link." execution_order="10" enabled="1" action="str_replace">
+    <find><![CDATA[<!--[XF:settings_links:bottom]-->]]></find>
+    <replace><![CDATA[$0
+<xf:include template="bdapi_account_wrapper"/>]]></replace>
+  </modification>
+</template_modifications>

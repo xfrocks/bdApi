@@ -1,0 +1,14 @@
+{
+  "legacy_addon_id": "bdApi",
+  "title": "[bd] API",
+  "description": "",
+  "version_id": 2000000,
+  "version_string": "2.0.0",
+  "dev": "",
+  "dev_url": "",
+  "faq_url": "",
+  "support_url": "",
+  "extra_urls": [],
+  "require": [],
+  "icon": ""
+}

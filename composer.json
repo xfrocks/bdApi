@@ -1,0 +1,8 @@
+{
+  "require": {
+    "league/oauth2-server": "4.1.3"
+  },
+  "replace": {
+    "league/event": "*"
+  }
+}
