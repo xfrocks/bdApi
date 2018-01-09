@@ -23,6 +23,7 @@
   <phrase title="bdapi_whitelisted_domains" version_id="2000000" version_string="2.0.0"><![CDATA[Whitelisted Domains]]></phrase>
   <phrase title="bdapi_whitelisted_domains_explain" version_id="2000000" version_string="2.0.0"><![CDATA[In addition to Redirect URI, the system will also allow redirection to these domains. Each domain must be in a new line and may have wildcard, for example: "*.domain.com". To enable redirection to all domains, use "*" although it is not recommended for security reason.]]></phrase>
   <phrase title="bdapi_you_will_be_redirected_x" version_id="2000000" version_string="2.0.0"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
+  <phrase title="cron_entry.bdApiCleanUpHourly" version_id="2000011" version_string="2.0.0 Alpha 1"><![CDATA[[bd] API: Hourly clean up]]></phrase>
   <phrase title="option.bdApi_authCodeTTL" version_id="2000000" version_string="2.0.0"><![CDATA[Authentication Code TTL]]></phrase>
   <phrase title="option.bdApi_refreshTokenTTLDays" version_id="2000000" version_string="2.0.0"><![CDATA[Refresh Token TTL]]></phrase>
   <phrase title="option.bdApi_restrictAccess" version_id="2000000" version_string="2.0.0"><![CDATA[Restrict Access]]></phrase>
