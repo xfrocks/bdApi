@@ -4,7 +4,7 @@ namespace Xfrocks\Api\XF\Session;
 
 use XF\Session\StorageInterface;
 use Xfrocks\Api\Entity\Token;
-use Xfrocks\Api\Session\InMemoryStorage;
+use Xfrocks\Api\Mvc\Session\InMemoryStorage;
 
 class Session extends XFCP_Session
 {

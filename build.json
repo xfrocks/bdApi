@@ -1,0 +1,6 @@
+{
+  "additional_files": [
+    "api/bootstrap.php",
+    "api/index.php"
+  ]
+}

@@ -1,6 +1,6 @@
 <?php
 
-namespace Xfrocks\Api\Session;
+namespace Xfrocks\Api\Mvc\Session;
 
 use XF\Session\StorageInterface;
 
