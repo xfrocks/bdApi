@@ -39,6 +39,16 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         ');
     }
 
+    public function bdApi_getSystemFields()
+    {
+        return array(
+            'about',
+            'homepage',
+            'location',
+            'occupation'
+        );
+    }
+
     public function prepareUserConditions(array $conditions, array &$fetchOptions)
     {
         $sqlConditions = array(parent::prepareUserConditions($conditions, $fetchOptions));
@@ -277,15 +287,10 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
     {
         $data = array();
 
-        foreach (array(
-                     'about' => 'about',
-                     'homepage' => 'home_page',
-                     'location' => 'location',
-                     'occupation' => 'occupation',
-                 ) as $systemFieldId => $titlePhraseTitle) {
+        foreach ($this->bdApi_getSystemFields() as $systemFieldId) {
             $systemField = array(
                 'id' => $systemFieldId,
-                'title' => new XenForo_Phrase($titlePhraseTitle),
+                'title' => new XenForo_Phrase($systemFieldId),
                 'description' => '',
                 'position' => 'personal',
                 'is_required' => false,

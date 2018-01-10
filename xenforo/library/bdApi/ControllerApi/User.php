@@ -269,6 +269,14 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $writer->set('language_id', XenForo_Visitor::getInstance()->get('language_id'));
 
         $fieldValues = $this->_input->filterSingle('fields', XenForo_Input::ARRAY_SIMPLE);
+        foreach ($userModel->bdApi_getSystemFields() as $systemField) {
+            if (empty($fieldValues[$systemField])) {
+                continue;
+            }
+
+            $writer->set($systemField, $fieldValues[$systemField]);
+            unset($fieldValues[$systemField]);
+        }
         $writer->setCustomFields($fieldValues);
 
         $allowEmailConfirm = true;
