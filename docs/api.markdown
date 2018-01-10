@@ -1334,6 +1334,7 @@ Parameters:
  * `user_dob_day` (_optional_): date of birth (day) of the new user.
  * `user_dob_month` (_optional_): date of birth (month) of the new user.
  * `user_dob_year` (_optional_): date of birth (year) of the new user.
+ * `fields` (_optional_): user field values. Since forum-2018011001.
  * `client_id` (_optional_): client ID of the Client. This parameter is required if the request is unauthorized (no `oauth_token`).
  * `extra_data`, `extra_timestamp` (_optional_): encrypted information generated previously for internal tasks.
 

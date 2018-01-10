@@ -268,6 +268,9 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $writer->set('user_group_id', XenForo_Model_User::$defaultRegisteredGroupId);
         $writer->set('language_id', XenForo_Visitor::getInstance()->get('language_id'));
 
+        $fieldValues = $this->_input->filterSingle('fields', XenForo_Input::ARRAY_SIMPLE);
+        $writer->setCustomFields($fieldValues);
+
         $allowEmailConfirm = true;
         if (!empty($extraData['user_email']) && $extraData['user_email'] == $writer->get('email')) {
             // the email address has been validated by some other mean (external provider?)
