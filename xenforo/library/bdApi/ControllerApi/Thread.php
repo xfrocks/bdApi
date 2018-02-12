@@ -66,13 +66,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
         $creatorUser = null;
         if ($creatorUserId > 0) {
-            if ($theForumId <= 0) {
-                return $this->responseError(
-                    new XenForo_Phrase('bdapi_slash_threads_creator_user_id_requires_forum_id'),
-                    400
-                );
-            }
-
             $creatorUser = $this->_getUserModel()->getUserById(
                 $creatorUserId,
                 $this->_getUserModel()->getFetchOptionsToPrepareApiData()
