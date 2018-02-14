@@ -43,7 +43,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
 
         $conditions = array();
-        $fetchOptions = $this->_getPostModel()->getPermissionBasedPostFetchOptions($thread, $forum);
+        $fetchOptions = array();
+        if (is_array($thread) && is_array($forum)) {
+            $fetchOptions += $this->_getPostModel()->getPermissionBasedPostFetchOptions($thread, $forum);
+        }
         $fetchOptions += array(
             'limit' => $limit,
             'page' => $page
