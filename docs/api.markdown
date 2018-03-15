@@ -1278,6 +1278,10 @@ Filtered list of tags. Since forum-2015091002.
         tags: [
             (tag text),
             ...
+        ],
+        ids: [ # since forum-2018031501
+            (int),
+            ...
         ]
     }
 

@@ -110,8 +110,10 @@ class bdApi_ControllerApi_Tag extends bdApi_ControllerApi_Abstract
             $tags = array();
         }
 
+        $tagsPrepared = $tagModel->prepareApiDataForTags($tags);
         $data = array(
-            'tags' => array_values($tagModel->prepareApiDataForTags($tags)),
+            'tags' => array_values($tagsPrepared),
+            'ids' => array_keys($tagsPrepared),
         );
 
         return $this->responseData('bdApi_ViewData_Tag_Find', $data);
