@@ -1,10 +1,10 @@
 <?php
 
-// updated by DevHelper_Helper_ShippableHelper at 2017-12-20T04:36:54+00:00
+// updated by DevHelper_Helper_ShippableHelper at 2018-02-12T15:45:57+00:00
 
 /**
  * Class bdApi_ShippableHelper_TempFile
- * @version 14
+ * @version 16
  * @see DevHelper_Helper_ShippableHelper_TempFile
  */
 class bdApi_ShippableHelper_TempFile
@@ -149,7 +149,7 @@ class bdApi_ShippableHelper_TempFile
 
         if ($error === null
             && isset($curlInfo['size_download'])
-            && $fileSize !== $curlInfo['size_download']
+            && $fileSize !== intval($curlInfo['size_download'])
         ) {
             // file size reported by our system seems to be off, probably a write error
             $error = sprintf('file size %d, size_download %d', $fileSize, $curlInfo['size_download']);
@@ -158,7 +158,7 @@ class bdApi_ShippableHelper_TempFile
         if ($error === null
             && isset($curlInfo['download_content_length'])
             && $curlInfo['download_content_length'] > 0
-            && $fileSize !== $curlInfo['download_content_length']
+            && $fileSize !== intval($curlInfo['download_content_length'])
         ) {
             // file size is different from Content-Length header, probably a cancelled download (or corrupted)
             $error = sprintf('file size %d, Content-Length %d', $fileSize, $curlInfo['download_content_length']);
