@@ -301,4 +301,28 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
 
         return $prepared;
     }
+
+    public function getConversationMessagesByIds(array $messageIds, array $fetchOptions = array())
+    {
+        if (!$messageIds)
+        {
+            return array();
+        }
+
+        $joinOptions = $this->prepareMessageFetchOptions($fetchOptions);
+
+        return $this->fetchAllKeyed('
+			SELECT message.*,
+				user.*, IF(user.username IS NULL, message.username, user.username) AS username,
+				user_profile.*
+				' . $joinOptions['selectFields'] . '
+			FROM xf_conversation_message AS message
+			LEFT JOIN xf_user AS user ON
+				(user.user_id = message.user_id)
+			LEFT JOIN xf_user_profile AS user_profile ON
+				(user_profile.user_id = message.user_id)
+			' . $joinOptions['joinTables'] . '
+			WHERE message.message_id IN (' . $this->_getDb()->quote($messageIds) . ')
+		', 'message_id');
+    }
 }

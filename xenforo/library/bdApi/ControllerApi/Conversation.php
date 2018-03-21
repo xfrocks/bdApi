@@ -11,6 +11,45 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
         parent::_preDispatch($action);
     }
 
+    protected function _prepareConversations(array $conversations)
+    {
+        $getRecipients = !$this->_isFieldExcluded('recipients');
+        $getLastMessage = $this->_isFieldIncluded('last_message');
+        $lastMessageIds = [];
+        $messages = [];
+
+        if ($getLastMessage) {
+            foreach ($conversations as $conversationId => $conversationRef) {
+                $lastMessageIds[$conversationId] = $conversationRef['last_message_id'];
+                $messages = $this->_getConversationModel()->getConversationMessagesByIds(
+                    array_values($lastMessageIds),
+                    $this->_getConversationModel()->getFetchOptionsToPrepareApiDataForMessages()
+                );
+            }
+        }
+
+        $conversationsData = [];
+        foreach ($conversations as &$conversationRef) {
+            $conversationData = $this->_filterDataSingle($this->_getConversationModel()->prepareApiDataForConversation(
+                $conversationRef,
+                $getRecipients
+            ));
+            if ($getLastMessage) {
+                if (!empty($lastMessageIds)
+                    && isset($messages[$conversationRef['last_message_id']])
+                ) {
+                    $conversationData['last_message'] = $this->_getConversationModel()->prepareApiDataForMessage(
+                        $messages[$conversationRef['last_message_id']],
+                        $conversationRef
+                    );
+                }
+            }
+            $conversationsData[] = $conversationData;
+        }
+
+        return $conversationsData;
+    }
+
     public function actionGetIndex()
     {
         $conversationId = $this->_input->filterSingle('conversation_id', XenForo_Input::UINT);
@@ -36,8 +75,6 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
             $fetchOptions['join'] += XenForo_Model_Conversation::FETCH_FIRST_MESSAGE;
         }
 
-        $getRecipients = !$this->_isFieldExcluded('recipients');
-
         $conversations = $this->_getConversationModel()->getConversationsForUser(
             $visitor['user_id'],
             $conditions,
@@ -47,10 +84,7 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
         $total = $this->_getConversationModel()->countConversationsForUser($visitor['user_id'], $conditions);
 
         $data = array(
-            'conversations' => $this->_filterDataMany($this->_getConversationModel()->prepareApiDataForConversations(
-                $conversations,
-                $getRecipients
-            )),
+            'conversations' => $this->_prepareConversations($conversations),
             'conversations_total' => $total
         );
 
