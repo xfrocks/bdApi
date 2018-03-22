@@ -87,9 +87,16 @@ class bdApi_Extend_Model_Search extends XFCP_bdApi_Extend_Model_Search
 
         $logModel->resumeLogging();
 
-        ksort($data);
+        $sortedData = array();
+        foreach (array_keys($preparedResults) as $key) {
+            if (isset($data[$key])) {
+                $sortedData[$key] = $data[$key];
+                unset($data[$key]);
+            }
+        }
+        unset($data);
 
-        return $data;
+        return $sortedData;
     }
 
     protected function _prepareApiContentDataForSearch_doApiClientContents(

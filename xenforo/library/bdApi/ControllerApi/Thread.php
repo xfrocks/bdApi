@@ -1014,7 +1014,8 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
             $dataResults = array_slice($searchResults, 0, $dataLimit);
             $dataResults = $searchModel->prepareApiDataForSearchResults($dataResults);
-            $data['data'] = $searchModel->prepareApiContentDataForSearch($dataResults);
+            $contentData = $searchModel->prepareApiContentDataForSearch($dataResults);
+            $data['data'] = array_values($contentData);
 
             bdApi_Data_Helper_Core::addPageLinks(
                 $this->getInput(),
