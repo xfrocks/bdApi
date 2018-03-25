@@ -238,9 +238,9 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
         $getFirstMessage = !$this->_isFieldExcluded('first_message');
         $getLastMessage = $this->_isFieldIncluded('last_message');
 
-        $firstMessageIds = [];
-        $lastMessageIds = [];
-        $messages = [];
+        $firstMessageIds = array();
+        $lastMessageIds = array();
+        $messages = array();
 
         foreach ($conversations as $conversationId => $conversationRef) {
             if ($getFirstMessage) {
