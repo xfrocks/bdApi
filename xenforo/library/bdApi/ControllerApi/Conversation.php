@@ -11,68 +11,6 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
         parent::_preDispatch($action);
     }
 
-    protected function _prepareConversations(array $conversations)
-    {
-        $getRecipients = !$this->_isFieldExcluded('recipients');
-        $getFirstMessage = !$this->_isFieldExcluded('first_message');
-        $getLastMessage = $this->_isFieldIncluded('last_message');
-
-        $firstMessageIds = [];
-        $lastMessageIds = [];
-        $messages = [];
-
-        foreach ($conversations as $conversationId => $conversationRef) {
-            if ($getFirstMessage) {
-                $firstMessageIds[$conversationId] = $conversationRef['first_message_id'];
-            }
-            if ($getLastMessage) {
-                $lastMessageIds[$conversationId] = $conversationRef['last_message_id'];
-            }
-        }
-        if (!empty($firstMessageIds)
-            || !empty($lastMessageIds)
-        ) {
-            $messages = $this->_getConversationModel()->getConversationMessagesByIds(
-                array_merge(
-                    array_values($lastMessageIds),
-                    array_values($firstMessageIds)
-                ),
-                $this->_getConversationModel()->getFetchOptionsToPrepareApiDataForMessages()
-            );
-        }
-
-        $conversationsData = [];
-        foreach ($conversations as &$conversationRef) {
-            $conversationData = $this->_filterDataSingle($this->_getConversationModel()->prepareApiDataForConversation(
-                $conversationRef,
-                $getRecipients
-            ));
-            if ($getFirstMessage) {
-                if (!empty($firstMessageIds)
-                    && isset($messages[$conversationRef['first_message_id']])
-                ) {
-                    $conversationData['first_message'] = $this->_getConversationModel()->prepareApiDataForMessage(
-                        $messages[$conversationRef['first_message_id']],
-                        $conversationRef
-                    );
-                }
-            }
-            if ($getLastMessage) {
-                if (!empty($lastMessageIds)
-                    && isset($messages[$conversationRef['last_message_id']])
-                ) {
-                    $conversationData['last_message'] = $this->_getConversationModel()->prepareApiDataForMessage(
-                        $messages[$conversationRef['last_message_id']],
-                        $conversationRef
-                    );
-                }
-            }
-            $conversationsData[] = $conversationData;
-        }
-
-        return $conversationsData;
-    }
-
     public function actionGetIndex()
     {
         $conversationId = $this->_input->filterSingle('conversation_id', XenForo_Input::UINT);
@@ -292,6 +230,69 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getHelper('bdApi_ControllerHelper_Attachment');
+    }
+
+    protected function _prepareConversations(array $conversations)
+    {
+        $getRecipients = !$this->_isFieldExcluded('recipients');
+        $getFirstMessage = !$this->_isFieldExcluded('first_message');
+        $getLastMessage = $this->_isFieldIncluded('last_message');
+
+        $firstMessageIds = [];
+        $lastMessageIds = [];
+        $messages = [];
+
+        foreach ($conversations as $conversationId => $conversationRef) {
+            if ($getFirstMessage) {
+                $firstMessageIds[$conversationId] = $conversationRef['first_message_id'];
+            }
+            if ($getLastMessage) {
+                $lastMessageIds[$conversationId] = $conversationRef['last_message_id'];
+            }
+        }
+
+        if (!empty($firstMessageIds)
+            || !empty($lastMessageIds)
+        ) {
+            $messages = $this->_getConversationModel()->getConversationMessagesByIds(
+                array_merge(
+                    array_values($lastMessageIds),
+                    array_values($firstMessageIds)
+                ),
+                $this->_getConversationModel()->getFetchOptionsToPrepareApiDataForMessages()
+            );
+        }
+
+        $conversationsData = [];
+        foreach ($conversations as &$conversationRef) {
+            $conversationData = $this->_filterDataSingle($this->_getConversationModel()->prepareApiDataForConversation(
+                $conversationRef,
+                $getRecipients
+            ));
+            if ($getFirstMessage) {
+                if (!empty($firstMessageIds)
+                    && isset($messages[$conversationRef['first_message_id']])
+                ) {
+                    $conversationData['first_message'] = $this->_getConversationModel()->prepareApiDataForMessage(
+                        $messages[$conversationRef['first_message_id']],
+                        $conversationRef
+                    );
+                }
+            }
+            if ($getLastMessage) {
+                if (!empty($lastMessageIds)
+                    && isset($messages[$conversationRef['last_message_id']])
+                ) {
+                    $conversationData['last_message'] = $this->_getConversationModel()->prepareApiDataForMessage(
+                        $messages[$conversationRef['last_message_id']],
+                        $conversationRef
+                    );
+                }
+            }
+            $conversationsData[] = $conversationData;
+        }
+
+        return $conversationsData;
     }
 
     protected function _prepareSessionActivityForApi(&$controllerName, &$action, array &$params)
