@@ -62,22 +62,19 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
 
     public function actionSingle()
     {
-        $fetchOptions = array('join' => 0);
+        $conversationId = $this->_input->filterSingle('conversation_id', XenForo_Input::UINT);
+        $conversation = $this->_getConversationOrError($conversationId);
 
-        if (!$this->_isFieldExcluded('first_message')) {
-            $fetchOptions['join'] += XenForo_Model_Conversation::FETCH_FIRST_MESSAGE;
+        $conversations = array($conversationId => $conversation);
+        $conversationsData = $this->_prepareConversations($conversations);
+
+        $conversationData = reset($conversationsData);
+        if (empty($conversationData)) {
+            return $this->responseNoPermission();
         }
 
-        $getRecipients = !$this->_isFieldExcluded('recipients');
-
-        $conversationId = $this->_input->filterSingle('conversation_id', XenForo_Input::UINT);
-        $conversation = $this->_getConversationOrError($conversationId, $fetchOptions);
-
         $data = array(
-            'conversation' => $this->_filterDataSingle($this->_getConversationModel()->prepareApiDataForConversation(
-                $conversation,
-                $getRecipients
-            ))
+            'conversation' => $this->_filterDataSingle($conversationData)
         );
 
         return $this->responseData('bdApi_ViewApi_Conversation_Single', $data);
