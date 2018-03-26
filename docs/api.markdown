@@ -2110,7 +2110,8 @@ Detail information of a conversation.
             conversation_has_new_message: (boolean),
             conversation_is_open: (boolean),
             conversation_is_deleted: (boolean),
-            first_message: {conversation-message},
+            first_message: (conversation-message),
+            last_message: (conversation-message), # must be in fields_include to work, since forum-2018032601
             recipients: [
                 {
                     user_id: (int),
