@@ -254,7 +254,7 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
         if (!empty($firstMessageIds)
             || !empty($lastMessageIds)
         ) {
-            $messages = $this->_getConversationModel()->getConversationMessagesByIds(
+            $messages = $this->_getConversationModel()->bdApi_getConversationMessagesByIds(
                 array_merge(
                     array_values($lastMessageIds),
                     array_values($firstMessageIds)

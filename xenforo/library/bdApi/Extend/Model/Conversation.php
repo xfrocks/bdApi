@@ -6,7 +6,15 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
     const FETCH_OPTIONS_JOIN_FETCH_FIRST_MESSAGE_AVATAR = 0x01;
     const FETCH_OPTIONS_MESSAGES_ORDER_REVERSE = 'bdApi_messages_orderReverse';
 
+    protected $_bdApi_convo0_messageIds = null;
     protected $_bdApi_messages_orderReverse = false;
+
+    public function bdApi_getConversationMessagesByIds(array $messageIds, array $fetchOptions = array())
+    {
+        $this->_bdApi_convo0_messageIds = $messageIds;
+
+        return $this->getConversationMessages(0, $fetchOptions);
+    }
 
     public function getConversationMessages($conversationId, array $fetchOptions = array())
     {
@@ -28,6 +36,22 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
 
             // reset the flag
             $this->_bdApi_messages_orderReverse = false;
+        }
+
+        if ($this->_bdApi_convo0_messageIds !== null && $bind === 0) {
+            $messageIds = $this->_bdApi_convo0_messageIds;
+            $this->_bdApi_convo0_messageIds = null;
+            if (!is_array($messageIds) || empty($messageIds)) {
+                return array();
+            }
+
+            $where = 'WHERE message.message_id IN (' . $this->_getDb()->quote($messageIds) . ')';
+            $sql = str_replace('WHERE message.conversation_id = ?', $where, $sql, $count);
+            if ($count !== 1) {
+                throw new XenForo_Exception('Fatal Conflict: Could not change WHERE statement');
+            }
+
+            $bind = array();
         }
 
         return parent::fetchAllKeyed($sql, $key, $bind, $nullPrefix);
@@ -225,9 +249,9 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
             'delete' => false,
             'reply' => $this->canReplyToConversation($conversation),
             'upload_attachment' => $this->canUploadAndManageAttachment($conversation) AND $this->canEditMessage(
-                $message,
-                $conversation
-            ),
+                    $message,
+                    $conversation
+                ),
             'report' => $this->canReportMessage($message, $conversation),
         );
 
@@ -300,29 +324,5 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
         }
 
         return $prepared;
-    }
-
-    public function getConversationMessagesByIds(array $messageIds, array $fetchOptions = array())
-    {
-        if (!$messageIds)
-        {
-            return array();
-        }
-
-        $joinOptions = $this->prepareMessageFetchOptions($fetchOptions);
-
-        return $this->fetchAllKeyed('
-			SELECT message.*,
-				user.*, IF(user.username IS NULL, message.username, user.username) AS username,
-				user_profile.*
-				' . $joinOptions['selectFields'] . '
-			FROM xf_conversation_message AS message
-			LEFT JOIN xf_user AS user ON
-				(user.user_id = message.user_id)
-			LEFT JOIN xf_user_profile AS user_profile ON
-				(user_profile.user_id = message.user_id)
-			' . $joinOptions['joinTables'] . '
-			WHERE message.message_id IN (' . $this->_getDb()->quote($messageIds) . ')
-		', 'message_id');
     }
 }
