@@ -37,11 +37,12 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
             $conditions,
             $this->_getConversationModel()->getFetchOptionsToPrepareApiData($fetchOptions)
         );
+        $conversationsData = $this->_prepareConversations($conversations);
 
         $total = $this->_getConversationModel()->countConversationsForUser($visitor['user_id'], $conditions);
 
         $data = array(
-            'conversations' => $this->_prepareConversations($conversations),
+            'conversations' => $this->_filterDataMany($conversationsData),
             'conversations_total' => $total
         );
 
@@ -265,10 +266,10 @@ class bdApi_ControllerApi_Conversation extends bdApi_ControllerApi_Abstract
 
         $conversationsData = [];
         foreach ($conversations as &$conversationRef) {
-            $conversationData = $this->_filterDataSingle($this->_getConversationModel()->prepareApiDataForConversation(
+            $conversationData = $this->_getConversationModel()->prepareApiDataForConversation(
                 $conversationRef,
                 $getRecipients
-            ));
+            );
             if ($getFirstMessage) {
                 if (!empty($firstMessageIds)
                     && isset($messages[$conversationRef['first_message_id']])
