@@ -2,21 +2,21 @@
 
 class bdApi_Data_Helper_Batch
 {
-    static $controllerStack = array();
+    protected static $_controllerStack = array();
 
     public static function onControllerPreDispatch($controller)
     {
-        self::$controllerStack[] = $controller;
+        self::$_controllerStack[] = $controller;
     }
 
     public static function onControllerPostDispatch($controller)
     {
-        $latest = end(self::$controllerStack);
+        $latest = end(self::$_controllerStack);
         if ($latest !== $controller) {
             throw new XenForo_Exception('$controller not found in stack');
         }
 
-        array_pop(self::$controllerStack);
+        array_pop(self::$_controllerStack);
     }
 
     public static function getFc()
@@ -56,7 +56,7 @@ class bdApi_Data_Helper_Batch
         $request->setMethod($method);
 
         /** @var XenForo_Controller $latestController */
-        $latestController = end(self::$controllerStack);
+        $latestController = end(self::$_controllerStack);
         $latestRequest = $latestController->getRequest();
         $request->setParams($latestRequest->getParams());
         $request->setParams($params);

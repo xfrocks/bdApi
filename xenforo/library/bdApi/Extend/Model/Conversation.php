@@ -248,10 +248,8 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
             'edit' => $this->canEditMessage($message, $conversation),
             'delete' => false,
             'reply' => $this->canReplyToConversation($conversation),
-            'upload_attachment' => $this->canUploadAndManageAttachment($conversation) AND $this->canEditMessage(
-                    $message,
-                    $conversation
-                ),
+            'upload_attachment' => $this->canUploadAndManageAttachment($conversation) &&
+                $this->canEditMessage($message, $conversation),
             'report' => $this->canReportMessage($message, $conversation),
         );
 
