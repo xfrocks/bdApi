@@ -41,6 +41,15 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
         // XenForo 1.2.0+ only
         XenForo_CodeEvent::addListener('load_class', array('bdApi_Listener', 'extend'), 'XenForo_Visitor');
 
+        XenForo_CodeEvent::addListener(
+            'controller_pre_dispatch',
+            array('bdApi_Data_Helper_Batch', 'onControllerPreDispatch')
+        );
+        XenForo_CodeEvent::addListener(
+            'controller_post_dispatch',
+            array('bdApi_Data_Helper_Batch', 'onControllerPostDispatch')
+        );
+
         parent::preLoadData();
     }
 

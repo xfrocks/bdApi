@@ -2,6 +2,23 @@
 
 class bdApi_Data_Helper_Batch
 {
+    static $controllerStack = array();
+
+    public static function onControllerPreDispatch($controller)
+    {
+        self::$controllerStack[] = $controller;
+    }
+
+    public static function onControllerPostDispatch($controller)
+    {
+        $latest = end(self::$controllerStack);
+        if ($latest !== $controller) {
+            throw new XenForo_Exception('$controller not found in stack');
+        }
+
+        array_pop(self::$controllerStack);
+    }
+
     public static function getFc()
     {
         static $fcTemp = null;
@@ -34,15 +51,17 @@ class bdApi_Data_Helper_Batch
 
         $fc = self::getFc();
 
-        $request = new bdApi_Zend_Controller_Request_Http(bdApi_Data_Helper_Core::safeConvertApiUriToAbsoluteUri(
-            $uri,
-            true
-        ));
-        $request->setParam('_isApiJob', true);
+        $requestUri = bdApi_Data_Helper_Core::safeConvertApiUriToAbsoluteUri($uri, true);
+        $request = new bdApi_Zend_Controller_Request_Http($requestUri);
         $request->setMethod($method);
-        foreach ($params as $key => $value) {
-            $request->setParam($key, $value);
-        }
+
+        /** @var XenForo_Controller $latestController */
+        $latestController = end(self::$controllerStack);
+        $latestRequest = $latestController->getRequest();
+        $request->setParams($latestRequest->getParams());
+        $request->setParams($params);
+        $request->setParam('_isApiJob', true);
+
         $fc->setRequest($request);
 
         // routing
