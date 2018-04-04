@@ -12,11 +12,9 @@ class bdApi_Data_Helper_Batch
     public static function onControllerPostDispatch($controller)
     {
         $latest = end(self::$_controllerStack);
-        if ($latest !== $controller) {
-            throw new XenForo_Exception('$controller not found in stack');
+        if ($latest === $controller) {
+            array_pop(self::$_controllerStack);
         }
-
-        array_pop(self::$_controllerStack);
     }
 
     public static function getFc()
