@@ -70,6 +70,10 @@ class bdApi_Listener
         if (isset($data['routesAdmin'])) {
             bdApi_ShippableHelper_Updater::onInitDependencies($dependencies);
         }
+
+        if (!empty($data['displayStyles'])) {
+            bdApi_Template_Helper_Core::getInstance()->setDisplayStyles($data['displayStyles']);
+        }
     }
 
     public static function front_controller_pre_route(XenForo_FrontController $fc)

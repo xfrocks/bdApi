@@ -147,7 +147,11 @@ class bdApi_Data_Helper_Core
             }
 
             if (isset($data[$publicKey])) {
-                $filteredData[$mappedKey] = $data[$publicKey];
+                if ($publicKey === 'username') {
+                    $filteredData[$mappedKey] = bdApi_Template_Helper_Core::getInstance()->richUsername($data);
+                } else {
+                    $filteredData[$mappedKey] = $data[$publicKey];
+                }
             }
         }
 
