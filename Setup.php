@@ -39,7 +39,7 @@ class Setup extends AbstractSetup
         $tables['xf_bdapi_auth_code'] = function (Create $table) {
             $table->addColumn('auth_code_id', 'int')->autoIncrement()->primaryKey();
             $table->addColumn('client_id', 'varchar')->length(255);
-            $table->addColumn('auth_code_text', 'varchar')->length(255);
+            $table->addColumn('auth_code_text', 'varchar')->length(190);
             $table->addColumn('redirect_uri', 'text');
             $table->addColumn('expire_date', 'int');
             $table->addColumn('user_id', 'int');
@@ -49,7 +49,7 @@ class Setup extends AbstractSetup
         };
 
         $tables['xf_bdapi_client'] = function (Create $table) {
-            $table->addColumn('client_id', 'varchar')->length(255)->primaryKey();
+            $table->addColumn('client_id', 'varchar')->length(190)->primaryKey();
             $table->addColumn('client_secret', 'varchar')->length(255);
             $table->addColumn('redirect_uri', 'text');
             $table->addColumn('name', 'varchar')->length(255);
@@ -61,7 +61,7 @@ class Setup extends AbstractSetup
         $tables['xf_bdapi_refresh_token'] = function (Create $table) {
             $table->addColumn('refresh_token_id', 'int')->autoIncrement()->primaryKey();
             $table->addColumn('client_id', 'varchar')->length(255);
-            $table->addColumn('refresh_token_text', 'varchar')->length(255);
+            $table->addColumn('refresh_token_text', 'varchar')->length(190);
             $table->addColumn('expire_date', 'int');
             $table->addColumn('user_id', 'int');
             $table->addColumn('scope', 'text');
@@ -72,7 +72,7 @@ class Setup extends AbstractSetup
         $tables['xf_bdapi_token'] = function (Create $table) {
             $table->addColumn('token_id', 'int')->autoIncrement()->primaryKey();
             $table->addColumn('client_id', 'varchar')->length(255);
-            $table->addColumn('token_text', 'varchar')->length(255);
+            $table->addColumn('token_text', 'varchar')->length(190);
             $table->addColumn('expire_date', 'int');
             $table->addColumn('user_id', 'int');
             $table->addColumn('scope', 'text');
