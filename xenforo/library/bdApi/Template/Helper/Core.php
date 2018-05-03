@@ -54,18 +54,18 @@ class bdApi_Template_Helper_Core
             return '';
         }
 
+        /** @var XenForo_FrontController $fc */
+        $fc = XenForo_Application::get('fc');
+        if (!$fc->getRequest()->getHeader('Api-Username-Inline-Style')) {
+            return $user['username'];
+        }
+        
         $username = htmlspecialchars($user['username']);
-
+        
         if (empty($this->_displayStyles) || !XenForo_Application::isRegistered('fc')) {
             return $username;
         }
 
-        /** @var XenForo_FrontController $fc */
-        $fc = XenForo_Application::get('fc');
-        if (!$fc->getRequest()->getHeader('Api-Username-Inline-Style')) {
-            return $username;
-        }
-        
         $usernameCss = '';
         if (isset($user['display_style_group_id']) && isset($this->_displayStyles[$user['display_style_group_id']])) {
             $style = $this->_displayStyles[$user['display_style_group_id']];
