@@ -193,6 +193,9 @@ For sensitive information like password, encryption can be used to increase data
 
  * `aes128`: AES 128 bit encryption (mode: ECB, padding: PKCS#7). Because of algorithm limitation, the binary md5 hash of key will be used instead of the key itself.
 
+### Headers
+ * `Api-Username-Inline-Style`: For return rich username as possible.
+
 ## Categories
 
 ### GET `/categories`

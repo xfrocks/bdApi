@@ -2,6 +2,13 @@
 
 class bdApi_Template_Helper_Core
 {
+    protected $_displayStyles = array();
+
+    public function setDisplayStyles(array $displayStyles)
+    {
+        $this->_displayStyles = $displayStyles;
+    }
+
     public function buildLink()
     {
         $args = func_get_args();
@@ -39,6 +46,37 @@ class bdApi_Template_Helper_Core
     public function visitorHasPermission($permission, $group = 'general')
     {
         return XenForo_Visitor::getInstance()->hasPermission($group, 'bdApi_' . $permission);
+    }
+
+    public function richUsername(array $user)
+    {
+        if (empty($user['username'])) {
+            return '';
+        }
+
+        /** @var XenForo_FrontController $fc */
+        $fc = XenForo_Application::get('fc');
+        if (!$fc->getRequest()->getHeader('Api-Username-Inline-Style')) {
+            return $user['username'];
+        }
+        
+        $username = htmlspecialchars($user['username']);
+        
+        if (empty($this->_displayStyles)) {
+            return $username;
+        }
+        
+        $usernameCss = '';
+        if (isset($user['display_style_group_id']) && isset($this->_displayStyles[$user['display_style_group_id']])) {
+            $style = $this->_displayStyles[$user['display_style_group_id']];
+            if ($style['username_css']) {
+                $usernameCss = preg_replace("/\n|\r\n/", '', $style['username_css']);
+            }
+        }
+
+        return $usernameCss
+                ? '<span style="'. htmlspecialchars($usernameCss) .'">'. $username .'</span>'
+                : $username;
     }
 
     private function __construct()
