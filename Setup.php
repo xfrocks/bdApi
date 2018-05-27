@@ -6,6 +6,7 @@ use XF\AddOn\AbstractSetup;
 use XF\AddOn\StepRunnerInstallTrait;
 use XF\AddOn\StepRunnerUninstallTrait;
 use XF\AddOn\StepRunnerUpgradeTrait;
+use XF\Db\Schema\Alter;
 use XF\Db\Schema\Create;
 
 class Setup extends AbstractSetup
@@ -32,14 +33,44 @@ class Setup extends AbstractSetup
         }
     }
 
+    public function upgrade2000012Step1()
+    {
+        $sm = $this->schemaManager();
+
+        $sm->alterTable('xf_bdapi_auth_code', function (Alter $table) {
+            $table->changeColumn('client_id', 'varbinary')->length(255);
+            $table->changeColumn('auth_code_text', 'varbinary')->length(255);
+        });
+
+        $sm->alterTable('xf_bdapi_client', function (Alter $table) {
+            $table->changeColumn('client_id', 'varbinary')->length(255);
+            $table->changeColumn('client_secret', 'varbinary')->length(255);
+            $table->changeColumn('name', 'text');
+
+            $table->convertCharset('utf8mb4');
+        });
+
+        $sm->alterTable('xf_bdapi_refresh_token', function (Alter $table) {
+            $table->changeColumn('client_id', 'varbinary')->length(255);
+            $table->changeColumn('refresh_token_text', 'varbinary')->length(255);
+            $table->changeColumn('scope', 'blob');
+        });
+
+        $sm->alterTable('xf_bdapi_token', function (Alter $table) {
+            $table->changeColumn('client_id', 'varbinary')->length(255);
+            $table->changeColumn('token_text', 'varbinary')->length(255);
+            $table->changeColumn('scope', 'blob');
+        });
+    }
+
     private function getTables()
     {
         $tables = [];
 
         $tables['xf_bdapi_auth_code'] = function (Create $table) {
             $table->addColumn('auth_code_id', 'int')->autoIncrement()->primaryKey();
-            $table->addColumn('client_id', 'varchar')->length(255);
-            $table->addColumn('auth_code_text', 'varchar')->length(255);
+            $table->addColumn('client_id', 'varbinary')->length(255);
+            $table->addColumn('auth_code_text', 'varbinary')->length(255);
             $table->addColumn('redirect_uri', 'text');
             $table->addColumn('expire_date', 'int');
             $table->addColumn('user_id', 'int');
@@ -49,10 +80,10 @@ class Setup extends AbstractSetup
         };
 
         $tables['xf_bdapi_client'] = function (Create $table) {
-            $table->addColumn('client_id', 'varchar')->length(255)->primaryKey();
-            $table->addColumn('client_secret', 'varchar')->length(255);
+            $table->addColumn('client_id', 'varbinary')->length(255)->primaryKey();
+            $table->addColumn('client_secret', 'varbinary')->length(255);
             $table->addColumn('redirect_uri', 'text');
-            $table->addColumn('name', 'varchar')->length(255);
+            $table->addColumn('name', 'text');
             $table->addColumn('description', 'text');
             $table->addColumn('user_id', 'int');
             $table->addColumn('options', 'mediumblob')->nullable(true);
@@ -60,22 +91,22 @@ class Setup extends AbstractSetup
 
         $tables['xf_bdapi_refresh_token'] = function (Create $table) {
             $table->addColumn('refresh_token_id', 'int')->autoIncrement()->primaryKey();
-            $table->addColumn('client_id', 'varchar')->length(255);
-            $table->addColumn('refresh_token_text', 'varchar')->length(255);
+            $table->addColumn('client_id', 'varbinary')->length(255);
+            $table->addColumn('refresh_token_text', 'varbinary')->length(255);
             $table->addColumn('expire_date', 'int');
             $table->addColumn('user_id', 'int');
-            $table->addColumn('scope', 'text');
+            $table->addColumn('scope', 'blob');
 
             $table->addUniqueKey('refresh_token_text');
         };
 
         $tables['xf_bdapi_token'] = function (Create $table) {
             $table->addColumn('token_id', 'int')->autoIncrement()->primaryKey();
-            $table->addColumn('client_id', 'varchar')->length(255);
-            $table->addColumn('token_text', 'varchar')->length(255);
+            $table->addColumn('client_id', 'varbinary')->length(255);
+            $table->addColumn('token_text', 'varbinary')->length(255);
             $table->addColumn('expire_date', 'int');
             $table->addColumn('user_id', 'int');
-            $table->addColumn('scope', 'text');
+            $table->addColumn('scope', 'blob');
 
             $table->addUniqueKey('token_text');
         };
