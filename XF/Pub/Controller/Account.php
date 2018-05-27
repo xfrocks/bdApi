@@ -2,6 +2,8 @@
 
 namespace Xfrocks\Api\XF\Pub\Controller;
 
+use XF\Mvc\Entity\Finder;
+use XF\Util\Random;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\OAuth2\Server;
 
@@ -103,6 +105,24 @@ class Account extends XFCP_Account
     {
         /** @var Server $apiServer */
         $apiServer = $this->app->container('api.server');
+
+        $clientId = $this->filter('client_id', 'str');
+        $clientIsAuto = false;
+        if (empty($clientId)) {
+            /** @var Client $visitorClient */
+            $visitorClient = $this->getApiClientRepo()->findUserClients(\XF::visitor()->user_id)
+                ->order(Finder::ORDER_RANDOM)
+                ->fetchOne();
+            if (!empty($visitorClient)) {
+                $clientIsAuto = true;
+                $apiServer->setRequestQuery('client_id', $visitorClient->client_id);
+                $apiServer->setRequestQuery('redirect_uri', $visitorClient->redirect_uri);
+                $apiServer->setRequestQuery('response_type', 'token');
+                $apiServer->setRequestQuery('scope', Server::SCOPE_READ);
+                $apiServer->setRequestQuery('state', Random::getRandomString(32));
+            }
+        }
+
         $linkParams = $authorizeParams = $apiServer->grantAuthCodeCheckParams($this);
 
         /** @var Client $client */
@@ -125,9 +145,11 @@ class Account extends XFCP_Account
         }
 
         $viewParams = [
-            'linkParams' => $linkParams,
             'client' => $client,
-            'needAuthScopes' => $needAuthScopes
+            'needAuthScopes' => $needAuthScopes,
+
+            'clientIsAuto' => $clientIsAuto,
+            'linkParams' => $linkParams,
         ];
 
         $view = $this->view('Xfrocks\Api:Account\Authorize', 'bdapi_account_authorize', $viewParams);

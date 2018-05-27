@@ -13,7 +13,7 @@ step=14</edit_format_params>
     <relation group_id="bdApi" display_order="120"/>
   </option>
   <option option_id="bdApi_restrictAccess" edit_format="onoff" data_type="unsigned_integer">
-    <default_value/>
+    <default_value></default_value>
     <relation group_id="bdApi" display_order="10"/>
   </option>
   <option option_id="bdApi_tokenTTL" edit_format="spinbox" data_type="positive_integer">

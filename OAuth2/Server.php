@@ -5,13 +5,12 @@ namespace Xfrocks\Api\OAuth2;
 use League\OAuth2\Server\AbstractServer;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Entity\ScopeEntity;
-use League\OAuth2\Server\Exception\AccessDeniedException;
-use League\OAuth2\Server\Exception\OAuthException;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 use League\OAuth2\Server\Grant\PasswordGrant;
 use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\ResourceServer;
+use Symfony\Component\HttpFoundation\Request;
 use XF\Container;
 use XF\Mvc\Controller;
 use Xfrocks\Api\App;
@@ -20,6 +19,7 @@ use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Entity\AccessTokenHybrid;
 use Xfrocks\Api\OAuth2\Entity\ClientHybrid;
+use Xfrocks\Api\OAuth2\Grant\ImplicitGrant;
 use Xfrocks\Api\OAuth2\Storage\AccessTokenStorage;
 use Xfrocks\Api\OAuth2\Storage\AuthCodeStorage;
 use Xfrocks\Api\OAuth2\Storage\ClientStorage;
@@ -73,6 +73,10 @@ class Server
             return new ClientCredentialsGrant();
         };
 
+        $this->container['grant.implicit'] = function () {
+            return new ImplicitGrant();
+        };
+
         $this->container['grant.password'] = function () {
             return new PasswordGrant();
         };
@@ -84,19 +88,25 @@ class Server
             return $refreshToken;
         };
 
+        $this->container['request'] = function (Container $c) {
+            return Request::createFromGlobals();
+        };
+
         $this->container['server.auth'] = function (Container $c) {
             $authorizationServer = new AuthorizationServer();
             $authorizationServer->setAccessTokenTTL($this->getOptionAccessTokenTTL())
                 ->setDefaultScope(self::SCOPE_READ)
                 ->setScopeDelimiter(Listener::$scopeDelimiter)
                 ->addGrantType($c['grant.auth_code'])
-                ->addGrantType($c['grant.password'])
-                ->addGrantType($c['grant.refresh_token'])
                 ->addGrantType($c['grant.client_credentials'])
+                ->addGrantType($c['grant.password'])
+                ->addGrantType($c['grant.implicit'])
+                ->addGrantType($c['grant.refresh_token'])
                 ->setAccessTokenStorage($c['storage.access_token'])
                 ->setAuthCodeStorage($c['storage.auth_code'])
                 ->setClientStorage($c['storage.client'])
                 ->setRefreshTokenStorage($c['storage.refresh_token'])
+                ->setRequest($c['request'])
                 ->setScopeStorage($c['storage.scope'])
                 ->setSessionStorage($c['storage.session']);
 
@@ -110,7 +120,8 @@ class Server
                 $c['storage.client'],
                 $c['storage.scope']
             );
-            $resourceServer->setIdKey(Listener::$accessTokenParamKey);
+            $resourceServer->setIdKey(Listener::$accessTokenParamKey)
+                ->setRequest($c['request']);
 
             return $resourceServer;
         };
@@ -238,6 +249,7 @@ class Server
      * @param Account $controller
      * @return array
      * @throws \XF\Mvc\Reply\Exception
+     * @throws \League\OAuth2\Server\Exception\InvalidGrantException
      */
     public function grantAuthCodeCheckParams($controller)
     {
@@ -262,7 +274,7 @@ class Server
             }
 
             return $params;
-        } catch (OAuthException $e) {
+        } catch (\League\OAuth2\Server\Exception\OAuthException $e) {
             throw $this->buildControllerException($controller, $e);
         }
     }
@@ -271,13 +283,13 @@ class Server
      * @param Account $controller
      * @param array $params
      * @return \XF\Mvc\Reply\Redirect
+     * @throws \League\OAuth2\Server\Exception\InvalidGrantException
+     * @throws \League\OAuth2\Server\Exception\UnsupportedResponseTypeException
      */
     public function grantAuthCodeNewAuthRequest($controller, array $params)
     {
         /** @var AuthorizationServer $authorizationServer */
         $authorizationServer = $this->container['server.auth'];
-        /** @var AuthCodeGrant $authCodeGrant */
-        $authCodeGrant = $authorizationServer->getGrantType('authorization_code');
 
         if (isset($params['client'])) {
             /** @var Client $xfClient */
@@ -290,11 +302,26 @@ class Server
             $params['scopes'] = $this->getScopeObjArrayFromStrArray($scopes, $authorizationServer);
         }
 
-        $redirectUri = $authCodeGrant->newAuthorizeRequest(
-            SessionStorage::OWNER_TYPE_USER,
-            $this->app->session()->get(SessionStorage::SESSION_KEY_USER_ID),
-            $params
-        );
+        $type = SessionStorage::OWNER_TYPE_USER;
+        $typeId = $this->app->session()->get(SessionStorage::SESSION_KEY_USER_ID);
+        $responseType = isset($params['response_type']) ? $params['response_type'] : 'code';
+        switch ($responseType) {
+            case 'code':
+                /** @var AuthCodeGrant $authCodeGrant */
+                $authCodeGrant = $authorizationServer->getGrantType('authorization_code');
+                $redirectUri = $authCodeGrant->newAuthorizeRequest($type, $typeId, $params);
+                break;
+            case 'token':
+                /** @var ImplicitGrant $implicitGrant */
+                $implicitGrant = $authorizationServer->getGrantType('implicit');
+                $redirectUri = $implicitGrant->authorize($type, $typeId, $params);
+                break;
+            default:
+                throw new \League\OAuth2\Server\Exception\UnsupportedResponseTypeException(
+                    $responseType,
+                    $params['redirect_uri']
+                );
+        }
 
         return $controller->redirect($redirectUri);
     }
@@ -303,6 +330,7 @@ class Server
      * @param OAuth2 $controller
      * @return array
      * @throws \XF\Mvc\Reply\Exception
+     * @throws \League\OAuth2\Server\Exception\InvalidGrantException
      */
     public function grantFinalize($controller)
     {
@@ -323,7 +351,7 @@ class Server
             $db->commit();
 
             return $data;
-        } catch (OAuthException $e) {
+        } catch (\League\OAuth2\Server\Exception\OAuthException $e) {
             $db->rollback();
 
             throw $this->buildControllerException($controller, $e);
@@ -344,9 +372,9 @@ class Server
         $accessDenied = false;
         try {
             $resourceServer->isValidRequest(false);
-        } catch (AccessDeniedException $ade) {
+        } catch (\League\OAuth2\Server\Exception\AccessDeniedException $ade) {
             $accessDenied = true;
-        } catch (OAuthException $e) {
+        } catch (\League\OAuth2\Server\Exception\OAuthException $e) {
             // ignore other exception
         }
 
@@ -361,20 +389,28 @@ class Server
     }
 
     /**
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setRequestQuery($key, $value)
+    {
+        $this->app->request()->set($key, $value);
+
+        /** @var Request $request */
+        $request = $this->container['request'];
+        $request->query->set($key, $value);
+    }
+
+    /**
      * @param Controller $controller
-     * @param OAuthException $e
+     * @param \League\OAuth2\Server\Exception\OAuthException $e
      * @return \XF\Mvc\Reply\Exception
      */
     protected function buildControllerException($controller, $e)
     {
-        $shouldLog = ($e->httpStatusCode >= 500);
-
         $errors = [$e->getMessage()];
-        if (\XF::$debugMode) {
-            $errors = array_merge($errors, $e->getTrace());
-            $shouldLog = true;
-        }
 
+        $shouldLog = \XF::$debugMode || ($e->httpStatusCode >= 500);
         if ($shouldLog) {
             \XF::logException($e, false, 'API:', true);
         }

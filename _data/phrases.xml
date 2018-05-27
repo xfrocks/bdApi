@@ -13,6 +13,7 @@
   <phrase title="bdapi_home" version_id="2000000" version_string="2.0.0"><![CDATA[API Access]]></phrase>
   <phrase title="bdapi_only_accepts_post_requests" version_id="2000000" version_string="2.0.0"><![CDATA[This entry point only accepts POST requests.]]></phrase>
   <phrase title="bdapi_please_confirm_to_authorize_access" version_id="2000000" version_string="2.0.0"><![CDATA[Please confirm to grant access to the listed client with the following permissions]]></phrase>
+  <phrase title="bdapi_please_confirm_to_authorize_access_auto" version_id="2000011" version_string="2.0.0 Alpha 1"><![CDATA[You are trying to authorize with no `client_id` therefore a random client of yours is being used. For security reason, the implicit grant flow is used and no other flows are available. Please confirm to continue.]]></phrase>
   <phrase title="bdapi_requested_client_not_found" version_id="2000000" version_string="2.0.0"><![CDATA[The requested API client could not be found.]]></phrase>
   <phrase title="bdapi_requested_scopes" version_id="2000000" version_string="2.0.0"><![CDATA[Requested Permissions]]></phrase>
   <phrase title="bdapi_scope_admincp" version_id="2000000" version_string="2.0.0"><![CDATA[Manage system-wide settings]]></phrase>
