@@ -25,6 +25,16 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
                 400
             );
         }
+        
+        $beforeDate = $this->_input->filterSingle('before', XenForo_Input::UINT);
+        $afterDate = $this->_input->filterSingle('after', XenForo_Input::UINT);
+
+        if ($beforeDate && $afterDate && $afterDate < $beforeDate) {
+            return $this->responseError(
+                new XenForo_Phrase('bdapi_slash_conversation_messages_requires_param_after_great_than_before'),
+                400
+            );
+        }
 
         $conversation = $this->_getConversationOrError($conversationId);
 
@@ -33,7 +43,9 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 
         $fetchOptions = array(
             'limit' => $limit,
-            'page' => $page
+            'page' => $page,
+            bdApi_Extend_Model_Conversation::FETCH_OPTIONS_MESSAGES_BEFORE_DATE => $beforeDate,
+            bdApi_Extend_Model_Conversation::FETCH_OPTIONS_MESSAGES_AFTER_DATE => $afterDate
         );
 
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
