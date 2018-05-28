@@ -2,14 +2,12 @@
 <options>
   <option option_id="bdApi_authCodeTTL" edit_format="spinbox" data_type="positive_integer">
     <default_value>30</default_value>
-    <edit_format_params>min=5
-step=30</edit_format_params>
+    <edit_format_params>min=5</edit_format_params>
     <relation group_id="bdApi" display_order="100"/>
   </option>
   <option option_id="bdApi_refreshTokenTTLDays" edit_format="spinbox" data_type="positive_integer">
     <default_value>14</default_value>
-    <edit_format_params>min=1
-step=14</edit_format_params>
+    <edit_format_params>min=1</edit_format_params>
     <relation group_id="bdApi" display_order="120"/>
   </option>
   <option option_id="bdApi_restrictAccess" edit_format="onoff" data_type="unsigned_integer">
@@ -18,8 +16,7 @@ step=14</edit_format_params>
   </option>
   <option option_id="bdApi_tokenTTL" edit_format="spinbox" data_type="positive_integer">
     <default_value>3600</default_value>
-    <edit_format_params>min=600
-step=3600</edit_format_params>
+    <edit_format_params>min=600</edit_format_params>
     <relation group_id="bdApi" display_order="110"/>
   </option>
 </options>
