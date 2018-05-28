@@ -26,17 +26,16 @@ class User extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param int $userId
+     * @param array $extraWith
+     * @return \XF\Entity\User
+     * @throws \XF\Mvc\Reply\Exception
+     */
     protected function assertViewableUser($userId, array $extraWith = [])
     {
-        $shortName = 'XF:User';
-        $with = array_merge($this->getFetchWith($shortName), $extraWith);
-        array_unique($with);
-
         /** @var \XF\Entity\User $user */
-        $user = $this->em()->find($shortName, $userId, $with);
-        if (!$user) {
-            throw $this->exception($this->notFound(\XF::phrase('requested_user_not_found')));
-        }
+        $user = $this->assertViewableEntity('XF:User', $userId, $extraWith);
 
         if (!$user->canViewFullProfile($error)) {
             throw $this->exception($this->noPermission($error));

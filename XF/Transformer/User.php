@@ -1,6 +1,6 @@
 <?php
 
-namespace Xfrocks\Api\Transformer\XF;
+namespace Xfrocks\Api\XF\Transformer;
 
 use XF\Entity\ConversationMaster;
 use XF\Entity\UserProfile;
@@ -41,14 +41,11 @@ class User extends Transformer\AbstractHandler
     const LINK_AVATAR = 'avatar';
     const LINK_AVATAR_BIG = 'avatar_big';
     const LINK_AVATAR_SMALL = 'avatar_small';
-    const LINK_DETAILS = 'details';
     const LINK_FOLLOWERS = 'followers';
     const LINK_FOLLOWINGS = 'followings';
     const LINK_IGNORE = 'ignore';
-    const LINK_PERMALINK = 'permalink';
     const LINK_TIMELINE = 'timeline';
 
-    const PERM_EDIT = 'edit';
     const PERM_IGNORE = 'ignore';
     const PERM_FOLLOW = 'follow';
     const PERM_PROFILE_POST = 'profile_post';
@@ -165,7 +162,7 @@ class User extends Transformer\AbstractHandler
             self::LINK_AVATAR => $user->getAvatarUrl('l'),
             self::LINK_AVATAR_BIG => $user->getAvatarUrl('o'),
             self::LINK_AVATAR_SMALL => $user->getAvatarUrl('s'),
-            self::LINK_DETAILS => $this->buildApiLink('users', $user),
+            self::LINK_DETAIL => $this->buildApiLink('users', $user),
             self::LINK_FOLLOWERS => $this->buildApiLink('users/followers', $user),
             self::LINK_FOLLOWINGS => $this->buildApiLink('users/followings', $user),
             self::LINK_IGNORE => $this->buildApiLink('users/ignore', $user),
@@ -193,14 +190,14 @@ class User extends Transformer\AbstractHandler
         ];
     }
 
-    public function getFetchWith()
+    public function getFetchWith(array $extraWith = [])
     {
-        return [
+        return array_merge([
             'Activity',
             'Auth',
             'Privacy',
             'Profile'
-        ];
+        ], $extraWith);
     }
 
     public function getMappings()
@@ -237,12 +234,9 @@ class User extends Transformer\AbstractHandler
         return $mappings;
     }
 
-    /**
-     * @param \XF\Entity\User $user
-     */
-    public function setEntity($user)
+    public function reset($entity, $parent)
     {
-        parent::setEntity($user);
+        parent::reset($entity, $parent);
 
         $this->flagFullAccess = $this->checkFullAccess();
     }
@@ -257,7 +251,7 @@ class User extends Transformer\AbstractHandler
             return false;
         }
 
-        if ($this->entity->get('user_id') === $visitor->user_id) {
+        if ($this->getEntityValue('user_id') === $visitor->user_id) {
             return true;
         }
 

@@ -26,10 +26,16 @@
   <phrase title="bdapi_you_will_be_redirected_x" version_id="2000000" version_string="2.0.0"><![CDATA[You will be redirected back to <a href="{redirectUri}">{clientName}</a>.]]></phrase>
   <phrase title="cron_entry.bdApiCleanUpHourly" version_id="2000011" version_string="2.0.0 Alpha 1"><![CDATA[[bd] API: Hourly clean up]]></phrase>
   <phrase title="option.bdApi_authCodeTTL" version_id="2000000" version_string="2.0.0"><![CDATA[Authentication Code TTL]]></phrase>
+  <phrase title="option.bdApi_paramLimitDefault" version_id="2000011" version_string="2.0.0 Alpha 1"><![CDATA[Default `limit`]]></phrase>
+  <phrase title="option.bdApi_paramLimitMax" version_id="2000011" version_string="2.0.0 Alpha 1"><![CDATA[Maximum `limit`]]></phrase>
+  <phrase title="option.bdApi_paramPageMax" version_id="2000011" version_string="2.0.0 Alpha 1"><![CDATA[Maximum `page`]]></phrase>
   <phrase title="option.bdApi_refreshTokenTTLDays" version_id="2000000" version_string="2.0.0"><![CDATA[Refresh Token TTL]]></phrase>
   <phrase title="option.bdApi_restrictAccess" version_id="2000000" version_string="2.0.0"><![CDATA[Restrict Access]]></phrase>
   <phrase title="option.bdApi_tokenTTL" version_id="2000000" version_string="2.0.0"><![CDATA[Token TTL]]></phrase>
   <phrase title="option_explain.bdApi_authCodeTTL" version_id="2000000" version_string="2.0.0"><![CDATA[Enter the number of seconds before authentication code expires itself.]]></phrase>
+  <phrase title="option_explain.bdApi_paramLimitDefault" version_id="2000011" version_string="2.0.0 Alpha 1"><![CDATA[Enter the default value for a request `limit` parameter.]]></phrase>
+  <phrase title="option_explain.bdApi_paramLimitMax" version_id="2000011" version_string="2.0.0 Alpha 1"><![CDATA[Enter the maximum value for a request `limit` parameter. Enter 0 to have no limit.]]></phrase>
+  <phrase title="option_explain.bdApi_paramPageMax" version_id="2000011" version_string="2.0.0 Alpha 1"><![CDATA[Enter the maximum value for a request `page` parameter. Enter 0 to have no limit.]]></phrase>
   <phrase title="option_explain.bdApi_refreshTokenTTLDays" version_id="2000000" version_string="2.0.0"><![CDATA[Enter the number of days before refresh token expires itself.]]></phrase>
   <phrase title="option_explain.bdApi_restrictAccess" version_id="2000000" version_string="2.0.0"><![CDATA[Enable this option to deny access to the API if no authentication is provided. Guest access it still possible with <a href="https://github.com/xfrocks/bdApi/blob/master/docs/api.markdown#one-time-token" target="_blank" tabindex="-1">One Time Token</a>.]]></phrase>
   <phrase title="option_explain.bdApi_tokenTTL" version_id="2000000" version_string="2.0.0"><![CDATA[Enter the number of seconds before access token expires itself.]]></phrase>

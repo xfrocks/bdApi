@@ -8,6 +8,7 @@ use XF\Mvc\Reply\AbstractReply;
 use XF\Mvc\Reply\Error;
 use XF\Mvc\Reply\Message;
 use XF\Mvc\Reply\Redirect;
+use XF\Mvc\Reply\View;
 use Xfrocks\Api\Mvc\Reply;
 
 class Dispatcher extends XFCP_Dispatcher
@@ -58,8 +59,9 @@ class Dispatcher extends XFCP_Dispatcher
 
     public function render(AbstractReply $reply, $responseType)
     {
-        // TODO: supports other response type?
-        $responseType = 'json';
+        if (!in_array($responseType, ['json', 'raw'], true)) {
+            $responseType = 'json';
+        }
 
         /** @var Json $renderer */
         $renderer = $this->app->renderer($responseType);
@@ -72,6 +74,8 @@ class Dispatcher extends XFCP_Dispatcher
             $content = $renderer->renderMessage($reply->getMessage());
         } elseif ($reply instanceof Redirect) {
             $content = $renderer->renderRedirect($reply->getUrl(), $reply->getType(), $reply->getMessage());
+        } elseif ($reply instanceof View) {
+            $content = $this->renderView($renderer, $reply);
         } elseif ($reply instanceof Reply) {
             $content = $reply->getData();
         } else {

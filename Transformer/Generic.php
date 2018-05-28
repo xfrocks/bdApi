@@ -4,17 +4,21 @@ namespace Xfrocks\Api\Transformer;
 
 class Generic extends AbstractHandler
 {
-    public function transformEntity()
+    public function getMappings()
     {
-        $data = [];
-        $entity = $this->entity;
-        $structure = $entity->structure();
+        $mappings = [];
 
-        $primaryKey = $structure->primaryKey;
+        $primaryKey = $this->entity->structure()->primaryKey;
         if (is_string($primaryKey)) {
-            $data[$primaryKey] = $entity->get($primaryKey);
+            $mappings[$primaryKey] = $primaryKey;
+        } elseif (is_array($primaryKey)) {
+            foreach ($primaryKey as $column) {
+                if (is_string($column)) {
+                    $mappings[$column] = $column;
+                }
+            }
         }
 
-        return $data;
+        return $mappings;
     }
 }

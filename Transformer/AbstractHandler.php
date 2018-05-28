@@ -13,6 +13,23 @@ abstract class AbstractHandler
     const KEY_LINKS = 'links';
     const KEY_PERMISSIONS = 'permissions';
 
+    const DYNAMIC_KEY_ATTACHMENTS = 'attachments';
+    const DYNAMIC_KEY_FIELDS = 'fields';
+
+    const LINK_ATTACHMENTS = 'attachments';
+    const LINK_DETAIL = 'detail';
+    const LINK_FOLLOWERS = 'followers';
+    const LINK_LIKES = 'likes';
+    const LINK_PERMALINK = 'permalink';
+    const LINK_REPORT = 'report';
+
+    const PERM_DELETE = 'delete';
+    const PERM_EDIT = 'edit';
+    const PERM_FOLLOW = 'follow';
+    const PERM_LIKE = 'like';
+    const PERM_REPORT = 'report';
+    const PERM_VIEW = 'view';
+
     /**
      * @var App
      */
@@ -22,6 +39,11 @@ abstract class AbstractHandler
      * @var Entity
      */
     protected $entity;
+
+    /**
+     * @var AbstractHandler
+     */
+    protected $parent;
 
     /**
      * @var Transformer
@@ -69,15 +91,16 @@ abstract class AbstractHandler
      */
     public function getEntityValue($key)
     {
-        return $this->entity->get($key);
+        return $this->entity !== null ? $this->entity->offsetGet($key) : null;
     }
 
     /**
+     * @param array $extraWith
      * @return array
      */
-    public function getFetchWith()
+    public function getFetchWith(array $extraWith = [])
     {
-        return [];
+        return $extraWith;
     }
 
     /**
@@ -89,32 +112,31 @@ abstract class AbstractHandler
     }
 
     /**
-     * @param Entity $entity
+     * @param array $data
+     * @return bool
      */
-    public function setEntity($entity)
+    public function postTransform(array &$data)
     {
-        $this->entity = $entity;
+        return true;
     }
 
     /**
-     * @return array
+     * @param array $data
+     * @return bool
      */
-    public function transformEntity()
+    public function postTransformAttachment(array &$data)
     {
-        $mappings = $this->getMappings();
-        $data = $this->transformer->transformValues($this, $mappings);
+        return true;
+    }
 
-        $links = $this->collectLinks();
-        if (is_array($links) && count($links) > 0) {
-            $data[self::KEY_LINKS] = $links;
-        }
-
-        $permissions = $this->collectPermissions();
-        if (is_array($permissions) && count($permissions)) {
-            $data[self::KEY_PERMISSIONS] = $permissions;
-        }
-
-        return $data;
+    /**
+     * @param Entity|\XF\CustomField\Definition $entity
+     * @param AbstractHandler $parent
+     */
+    public function reset($entity, $parent)
+    {
+        $this->entity = $entity;
+        $this->parent = $parent;
     }
 
     /**
@@ -163,6 +185,30 @@ abstract class AbstractHandler
         }
 
         return \XF::visitor()->hasAdminPermission($permissionId);
+    }
+
+    /**
+     * @param string $key
+     * @param $string
+     * @param array $options
+     * @return string
+     */
+    protected function renderBbCodeHtml($key, $string, array $options = [])
+    {
+        $context = 'api:' . $key;
+        $entity = $this->entity;
+        return $this->app->bbCode()->render($string, 'html', $context, $entity, $options);
+    }
+
+    /**
+     * @param string $string
+     * @param array $options
+     * @return string
+     */
+    protected function renderBbCodePlainText($string, array $options = [])
+    {
+        $formatter = $this->app->stringFormatter();
+        return $formatter->stripBbCode($string, $options);
     }
 
     /**

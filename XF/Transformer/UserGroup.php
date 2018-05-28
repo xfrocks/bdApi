@@ -1,6 +1,6 @@
 <?php
 
-namespace Xfrocks\Api\Transformer\XF;
+namespace Xfrocks\Api\XF\Transformer;
 
 use Xfrocks\Api\Transformer\AbstractHandler;
 

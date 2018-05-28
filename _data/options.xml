@@ -5,6 +5,18 @@
     <edit_format_params>min=5</edit_format_params>
     <relation group_id="bdApi" display_order="100"/>
   </option>
+  <option option_id="bdApi_paramLimitDefault" edit_format="spinbox" data_type="positive_integer">
+    <default_value>20</default_value>
+    <relation group_id="bdApi" display_order="500"/>
+  </option>
+  <option option_id="bdApi_paramLimitMax" edit_format="spinbox" data_type="unsigned_integer">
+    <default_value>100</default_value>
+    <relation group_id="bdApi" display_order="510"/>
+  </option>
+  <option option_id="bdApi_paramPageMax" edit_format="spinbox" data_type="unsigned_integer">
+    <default_value>0</default_value>
+    <relation group_id="bdApi" display_order="550"/>
+  </option>
   <option option_id="bdApi_refreshTokenTTLDays" edit_format="spinbox" data_type="positive_integer">
     <default_value>14</default_value>
     <edit_format_params>min=1</edit_format_params>

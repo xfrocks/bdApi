@@ -29,5 +29,11 @@ class Listener
             $class = $app->extendClass('Xfrocks\Api\Mvc\Router');
             return new $class($app);
         };
+
+        $addOnCache = $container['addon.cache'];
+        $extension = $app->extension();
+        if (!empty($addOnCache['XFRM'])) {
+            $extension->addClassExtension('Xfrocks\Api\Data\Modules', 'Xfrocks\Api\XFRM\Data\Modules');
+        }
     }
 }
