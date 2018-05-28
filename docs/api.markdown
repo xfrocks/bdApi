@@ -2221,9 +2221,9 @@ Parameters:
  * `conversation_id` (__required__): id of needed conversation.
  * `page` (_optional_): page number of messages.
  * `limit` (_optional_): number of messages in a page. Default value depends on the system configuration.
- * `order` (_optional_, since forum-2015102101): ordering of messages. Support `natural`, `natural_reverse`.
- * `before` (_optional_): Value must be timestamps. Fetch messages before date.
- * `after` (_optional_): Value must be timestamps. Fetch messages after date.
+ * `order` (_optional_): ordering of messages. Support `natural`, `natural_reverse`. Since forum-2015102101
+ * `before` (_optional_): date to get older messages. Since forum-2018052801.
+ * `after` (_optional_): date to get newer messages. Since forum-2018052801.
 
 Required scopes:
 

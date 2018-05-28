@@ -29,13 +29,6 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $beforeDate = $this->_input->filterSingle('before', XenForo_Input::UINT);
         $afterDate = $this->_input->filterSingle('after', XenForo_Input::UINT);
 
-        if ($beforeDate && $afterDate && $afterDate < $beforeDate) {
-            return $this->responseError(
-                new XenForo_Phrase('bdapi_slash_conversation_messages_requires_param_after_great_than_before'),
-                400
-            );
-        }
-
         $conversation = $this->_getConversationOrError($conversationId);
 
         $pageNavParams = array('conversation_id' => $conversation['conversation_id']);
