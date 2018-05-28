@@ -6,8 +6,12 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
     const FETCH_OPTIONS_JOIN_FETCH_FIRST_MESSAGE_AVATAR = 0x01;
     const FETCH_OPTIONS_MESSAGES_ORDER_REVERSE = 'bdApi_messages_orderReverse';
 
+    const FETCH_OPTIONS_MESSAGES_AFTER_DATE = 'bdApi_messages_afterDate';
+    const FETCH_OPTIONS_MESSAGES_BEFORE_DATE = 'bdApi_messages_beforeDate';
+
     protected $_bdApi_convo0_messageIds = null;
     protected $_bdApi_messages_orderReverse = false;
+    protected $_bdApi_getConvoMessages_extraWhere = null;
 
     public function bdApi_getConversationMessagesByIds(array $messageIds, array $fetchOptions = array())
     {
@@ -20,6 +24,12 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
     {
         if (!empty($fetchOptions[self::FETCH_OPTIONS_MESSAGES_ORDER_REVERSE])) {
             $this->_bdApi_messages_orderReverse = true;
+        }
+
+        if (!empty($fetchOptions[self::FETCH_OPTIONS_MESSAGES_AFTER_DATE])
+            || !empty($fetchOptions[self::FETCH_OPTIONS_MESSAGES_BEFORE_DATE])
+        ) {
+            $this->_bdApi_getConvoMessages_extraWhere = $fetchOptions;
         }
 
         return parent::getConversationMessages($conversationId, $fetchOptions);
@@ -52,6 +62,34 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
             }
 
             $bind = array();
+        }
+
+        if ($this->_bdApi_getConvoMessages_extraWhere) {
+            $options = $this->_bdApi_getConvoMessages_extraWhere;
+
+            $where = '';
+            $db = $this->_getDb();
+
+            if (!empty($options[self::FETCH_OPTIONS_MESSAGES_BEFORE_DATE])) {
+                $where .= ' AND message.message_date <= ' . $db->quote($options[self::FETCH_OPTIONS_MESSAGES_BEFORE_DATE]);
+            }
+
+            if (!empty($options[self::FETCH_OPTIONS_MESSAGES_AFTER_DATE])) {
+                $where .= ' AND message.message_date >= ' . $db->quote($options[self::FETCH_OPTIONS_MESSAGES_AFTER_DATE]);
+            }
+
+            $sql = str_replace(
+                'ORDER BY message.message_date',
+                $where . "\n" . 'ORDER BY message.message_date',
+                $sql,
+                $count
+            );
+
+            if ($count !== 1) {
+                throw new XenForo_Exception('Fatal Conflict: Could not change WHERE statement.');
+            }
+
+            $this->_bdApi_getConvoMessages_extraWhere = null;
         }
 
         return parent::fetchAllKeyed($sql, $key, $bind, $nullPrefix);
