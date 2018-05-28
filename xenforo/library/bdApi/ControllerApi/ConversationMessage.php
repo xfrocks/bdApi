@@ -25,11 +25,9 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
                 400
             );
         }
-
-        $beforeDate = $this->_input->filterSingle('before', XenForo_Input::DATE_TIME);
-        $afterDate = $this->_input->filterSingle('after', XenForo_Input::DATE_TIME, array(
-            'dayEnd' => true
-        ));
+        
+        $beforeDate = $this->_input->filterSingle('before', XenForo_Input::UINT);
+        $afterDate = $this->_input->filterSingle('after', XenForo_Input::UINT);
 
         if ($beforeDate && $afterDate && $afterDate < $beforeDate) {
             return $this->responseError(
