@@ -55,11 +55,11 @@ class bdApi_Template_Helper_Core
         }
 
         /** @var XenForo_FrontController $fc */
-        $fc = XenForo_Application::get('fc');
-        if (!$fc->getRequest()->getHeader('Api-Username-Inline-Style')) {
+        $fc = XenForo_Application::isRegistered('fc') ? XenForo_Application::get('fc') : null;
+        if ($fc && !$fc->getRequest()->getHeader('Api-Username-Inline-Style')) {
             return $user['username'];
         }
-        
+
         $username = htmlspecialchars($user['username']);
         
         if (empty($this->_displayStyles)) {
