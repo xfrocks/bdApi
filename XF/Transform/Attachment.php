@@ -1,8 +1,9 @@
 <?php
 
-namespace Xfrocks\Api\XF\Transformer;
+namespace Xfrocks\Api\XF\Transform;
 
-use Xfrocks\Api\Transformer\AbstractHandler;
+use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Transform\AttachmentParent;
 
 class Attachment extends AbstractHandler
 {
@@ -12,6 +13,15 @@ class Attachment extends AbstractHandler
 
     const LINK_DATA = 'data';
     const LINK_THUMBNAIL = 'thumbnail';
+
+    public function calculateDynamicValue($key)
+    {
+        if ($this->parent instanceof AttachmentParent) {
+            return $this->parent->attachmentCalculateDynamicValue($this, $key);
+        }
+
+        return null;
+    }
 
     public function collectLinks()
     {
@@ -28,6 +38,10 @@ class Attachment extends AbstractHandler
             $links[self::LINK_THUMBNAIL] = $thumbnailUrl;
         }
 
+        if ($this->parent instanceof AttachmentParent) {
+            $this->parent->attachmentCollectLinks($this, $links);
+        }
+
         return $links;
     }
 
@@ -36,29 +50,30 @@ class Attachment extends AbstractHandler
         /** @var \XF\Entity\Attachment $attachment */
         $attachment = $this->entity;
 
-        return [
+        $permissions = [
             self::PERM_DELETE => false,
             self::PERM_VIEW => $attachment->canView(),
         ];
+
+        if ($this->parent instanceof AttachmentParent) {
+            $this->parent->attachmentCollectPermissions($this, $permissions);
+        }
+
+        return $permissions;
     }
 
     public function getMappings()
     {
-        return [
+        $mappings = [
             'attachment_id' => self::KEY_ID,
             'filename' => self::KEY_FILENAME,
             'view_count' => self::KEY_DOWNLOAD_COUNT,
         ];
-    }
 
-    public function postTransform(array &$data)
-    {
-        if ($this->parent) {
-            if (!$this->parent->postTransformAttachment($data)) {
-                return false;
-            }
+        if ($this->parent instanceof AttachmentParent) {
+            $this->parent->attachmentGetMappings($this, $mappings);
         }
 
-        return true;
+        return $mappings;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Xfrocks\Api\Transformer;
+namespace Xfrocks\Api\Transform;
 
 use XF\App;
 use XF\Mvc\Entity\Entity;
@@ -44,6 +44,11 @@ abstract class AbstractHandler
      * @var AbstractHandler
      */
     protected $parent;
+
+    /**
+     * @var Selector
+     */
+    protected $selector;
 
     /**
      * @var Transformer
@@ -112,31 +117,41 @@ abstract class AbstractHandler
     }
 
     /**
-     * @param array $data
-     * @return bool
+     * @param string $key
+     * @return Selector|null
      */
-    public function postTransform(array &$data)
+    public function getSubSelector($key)
     {
-        return true;
-    }
+        if ($this->selector === null) {
+            return null;
+        }
 
-    /**
-     * @param array $data
-     * @return bool
-     */
-    public function postTransformAttachment(array &$data)
-    {
-        return true;
+        return $this->selector->getSubSelector($key);
     }
 
     /**
      * @param Entity|\XF\CustomField\Definition $entity
      * @param AbstractHandler $parent
+     * @param Selector $selector
      */
-    public function reset($entity, $parent)
+    public function reset($entity, $parent, $selector)
     {
         $this->entity = $entity;
         $this->parent = $parent;
+        $this->selector = $selector;
+    }
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function shouldExcludeField($key)
+    {
+        if ($this->selector === null) {
+            return false;
+        }
+
+        return $this->selector->shouldExcludeField($key);
     }
 
     /**

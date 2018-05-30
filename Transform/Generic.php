@@ -1,6 +1,6 @@
 <?php
 
-namespace Xfrocks\Api\Transformer;
+namespace Xfrocks\Api\Transform;
 
 class Generic extends AbstractHandler
 {

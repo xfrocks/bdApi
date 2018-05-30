@@ -20,7 +20,7 @@ class User extends AbstractController
         $user = $this->assertViewableUser($userId);
 
         $data = [
-            'user' => $this->transformEntity($user)
+            'user' => $this->transformEntityLazily($user)
         ];
 
         return $this->api($data);

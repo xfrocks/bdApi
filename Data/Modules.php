@@ -75,7 +75,7 @@ class Modules
      */
     public function getTransformerClass($shortName)
     {
-        return \XF::stringToClass($shortName, 'Xfrocks\Api\%s\Transformer\%s');
+        return \XF::stringToClass($shortName, 'Xfrocks\Api\%s\Transform\%s');
     }
 
     /**

@@ -1,14 +1,14 @@
 <?php
 
-namespace Xfrocks\Api\XF\Transformer;
+namespace Xfrocks\Api\XF\Transform;
 
 use XF\Entity\ConversationMaster;
 use XF\Entity\UserProfile;
 use XF\Repository\UserGroup;
 use Xfrocks\Api\OAuth2\Server;
-use Xfrocks\Api\Transformer;
+use Xfrocks\Api\Transform\AbstractHandler;
 
-class User extends Transformer\AbstractHandler
+class User extends AbstractHandler
 {
     const KEY_ID = 'user_id';
     const KEY_LIKE_COUNT = 'user_like_count';
@@ -98,7 +98,7 @@ class User extends Transformer\AbstractHandler
             case self::DYNAMIC_KEY_FIELDS:
                 return $this->collectFields();
             case self::DYNAMIC_KEY_GROUPS:
-                return $this->collectGroups();
+                return $this->collectGroups($key);
             case self::DYNAMIC_KEY_HAS_PASSWORD:
                 if (!$this->flagFullAccess) {
                     return null;
@@ -234,9 +234,9 @@ class User extends Transformer\AbstractHandler
         return $mappings;
     }
 
-    public function reset($entity, $parent)
+    public function reset($entity, $parent, $selector)
     {
-        parent::reset($entity, $parent);
+        parent::reset($entity, $parent, $selector);
 
         $this->flagFullAccess = $this->checkFullAccess();
     }
@@ -294,9 +294,10 @@ class User extends Transformer\AbstractHandler
     }
 
     /**
+     * @param string $key
      * @return array|null
      */
-    protected function collectGroups()
+    protected function collectGroups($key)
     {
         if (!$this->flagFullAccess) {
             return null;
@@ -322,7 +323,7 @@ class User extends Transformer\AbstractHandler
         $data = [];
         /** @var \XF\Entity\UserGroup $group */
         foreach ($userGroups as $group) {
-            $groupData = $this->transformer->transformSubEntity($this, $group);
+            $groupData = $this->transformer->transformSubEntity($this, $key, $group);
             if ($group->user_group_id === $user->user_group_id) {
                 $groupData[self::DYNAMIC_KEY_GROUPS__IS_PRIMARY] = true;
             } else {

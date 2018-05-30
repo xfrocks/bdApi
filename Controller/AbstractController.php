@@ -13,9 +13,15 @@ use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Mvc\Reply;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
+use Xfrocks\Api\Util\LazyTransformer;
 
 class AbstractController extends \XF\Pub\Controller\AbstractController
 {
+    /**
+     * @var Params|null
+     */
+    protected $apiParams = null;
+
     /**
      * @param ParameterBag $params
      * @return Reply
@@ -140,12 +146,18 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      */
     public function params()
     {
-        return new Params($this);
+        if ($this->apiParams === null) {
+            $this->apiParams = new Params($this);
+        }
+
+        return $this->apiParams;
     }
 
     public function preDispatch($action, ParameterBag $params)
     {
         parent::preDispatch($action, $params);
+
+        $this->apiParams = null;
 
         $scope = $this->getDefaultApiScopeForAction($action);
         $this->assertApiScope($scope);
@@ -161,34 +173,37 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     }
 
     /**
-     * @param ArrayCollection|Entity[] $entities
-     * @return array
+     * @param array $data
+     * @param string $key
+     * @param Entity $entity
      */
-    public function transformEntities($entities)
+    public function transformEntityIfNeeded(array &$data, $key, $entity)
     {
-        $data = [];
+        $lazyTransformer = $this->transformEntityLazily($entity);
+        $lazyTransformer->setKey($key);
+        $data[$key] = $lazyTransformer;
+    }
 
-        foreach ($entities as $entity) {
-            $entityData = $this->transformEntity($entity);
-            if (!is_array($entityData)) {
-                continue;
-            }
-
-            $data[] = $entityData;
-        }
-
-        return $data;
+    /**
+     * @param ArrayCollection|Entity[] $entities
+     * @return LazyTransformer
+     */
+    public function transformEntitiesLazily($entities)
+    {
+        $lazyTransformer = new LazyTransformer($this);
+        $lazyTransformer->setEntities($entities);
+        return $lazyTransformer;
     }
 
     /**
      * @param Entity $entity
-     * @return array|null
+     * @return LazyTransformer
      */
-    public function transformEntity($entity)
+    public function transformEntityLazily($entity)
     {
-        /** @var Transformer $transformer */
-        $transformer = $this->app->container('api.transformer');
-        return $transformer->transformEntity($this, $entity);
+        $lazyTransformer = new LazyTransformer($this);
+        $lazyTransformer->setEntity($entity);
+        return $lazyTransformer;
     }
 
     public function view($viewClass = '', $templateName = '', array $params = [])

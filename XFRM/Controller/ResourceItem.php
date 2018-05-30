@@ -32,7 +32,7 @@ class ResourceItem extends AbstractController
             ->define('in_sub', 'bool', 'flag to include sub categories in filtering')
             ->defineOrder($this->orderChoices)
             ->definePageNav()
-            ->define(\Xfrocks\Api\XFRM\Transformer\ResourceItem::KEY_UPDATE_DATE, 'uint', 'timestamp to filter')
+            ->define(\Xfrocks\Api\XFRM\Transform\ResourceItem::KEY_UPDATE_DATE, 'uint', 'timestamp to filter')
             ->define('resource_ids', 'str', 'resource ids to fetch (ignoring all filters, separated by comma)');
 
         if (!empty($params['resource_ids'])) {
@@ -84,7 +84,7 @@ class ResourceItem extends AbstractController
 
             switch ($orderChoice[0]) {
                 case 'last_update':
-                    $keyUpdateDate = \Xfrocks\Api\XFRM\Transformer\ResourceItem::KEY_UPDATE_DATE;
+                    $keyUpdateDate = \Xfrocks\Api\XFRM\Transform\ResourceItem::KEY_UPDATE_DATE;
                     if ($params[$keyUpdateDate] > 0) {
                         $finder->where($orderChoice[0], $orderChoice['_whereOp'], $params[$keyUpdateDate]);
                         $pageNavParams[$keyUpdateDate] = $params[$keyUpdateDate];
@@ -97,7 +97,7 @@ class ResourceItem extends AbstractController
         $resources = $total > 0 ? $finder->fetch() : [];
 
         $data = [
-            'resources' => $this->transformEntities($resources),
+            'resources' => $this->transformEntitiesLazily($resources),
             'resources_total' => $total,
         ];
 
@@ -109,12 +109,12 @@ class ResourceItem extends AbstractController
                 $params['resource_category_id'],
                 $this->getFetchWith('XFRM:Category')
             );
-            if (!$theCategory->canView()) {
+            if (empty($theCategory) || !$theCategory->canView()) {
                 return $this->noPermission();
             }
         }
         if ($theCategory !== null) {
-            $data['category'] = $this->transformEntity($theCategory);
+            $this->transformEntityIfNeeded($data, 'category', $theCategory);
         }
 
         PageNav::addLinksToData($data, $params, $total, 'resources');
@@ -127,7 +127,7 @@ class ResourceItem extends AbstractController
         $resource = $this->assertViewableResource($resourceId);
 
         $data = [
-            'resource' => $this->transformEntity($resource)
+            'resource' => $this->transformEntityLazily($resource)
         ];
 
         return $this->api($data);
@@ -145,7 +145,7 @@ class ResourceItem extends AbstractController
         }
 
         $data = [
-            'resources' => $this->transformEntities($resources)
+            'resources' => $this->transformEntitiesLazily($resources)
         ];
 
         return $this->api($data);

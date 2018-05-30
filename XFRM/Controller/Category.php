@@ -23,7 +23,7 @@ class Category extends AbstractController
             ->filterViewable();
 
         $data = [
-            'categories' => $this->transformEntities($categories)
+            'categories' => $this->transformEntitiesLazily($categories)
         ];
 
         return $this->api($data);
@@ -34,7 +34,7 @@ class Category extends AbstractController
         $category = $this->assertViewableCategory($resourceCategoryId);
 
         $data = [
-            'category' => $this->transformEntity($category)
+            'category' => $this->transformEntityLazily($category)
         ];
 
         return $this->api($data);

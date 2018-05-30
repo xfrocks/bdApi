@@ -1,6 +1,6 @@
 <?php
 
-namespace Xfrocks\Api\Transformer;
+namespace Xfrocks\Api\Transform;
 
 use XF\CustomField\Definition;
 

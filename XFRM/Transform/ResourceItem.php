@@ -1,11 +1,13 @@
 <?php
 
-namespace Xfrocks\Api\XFRM\Transformer;
+namespace Xfrocks\Api\XFRM\Transform;
 
-use Xfrocks\Api\Transformer\AbstractHandler;
+use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Transform\AttachmentParent;
 
-class ResourceItem extends AbstractHandler
+class ResourceItem extends AbstractHandler implements AttachmentParent
 {
+    const ATTACHMENT__DYNAMIC_KEY_ID = 'resource_id';
     const ATTACHMENT__LINK_RESOURCE = 'resource';
 
     const KEY_CATEGORY_ID = 'resource_category_id';
@@ -51,6 +53,42 @@ class ResourceItem extends AbstractHandler
     const PERM_RATE = 'rate';
 
     protected $attachmentData = null;
+
+    public function attachmentCalculateDynamicValue($attachmentHandler, $key)
+    {
+        switch ($key) {
+            case self::ATTACHMENT__DYNAMIC_KEY_ID:
+                return $this->entity['resource_id'];
+        }
+
+        return null;
+    }
+
+    public function attachmentCollectLinks($attachmentHandler, array &$links)
+    {
+        $links[self::ATTACHMENT__LINK_RESOURCE] = $this->buildApiLink('resources', $this->entity);
+    }
+
+    public function attachmentCollectPermissions($attachmentHandler, array &$permissions)
+    {
+        /** @var \XFRM\Entity\ResourceItem $resourceItem */
+        $resourceItem = $this->entity;
+        $canDelete = false;
+
+        if ($resourceItem->canEdit() && $resourceItem->Category->canUploadAndManageUpdateImages()) {
+            $attachmentData = $this->getAttachmentData();
+            /** @var \XF\Attachment\AbstractHandler $attachmentHandler */
+            $attachmentHandler = $attachmentData['handler'];
+            $canDelete = $attachmentHandler->canManageAttachments($attachmentData['context']);
+        }
+
+        $permissions[self::PERM_DELETE] = $canDelete;
+    }
+
+    public function attachmentGetMappings($attachmentHandler, array &$mappings)
+    {
+        $mappings[] = self::ATTACHMENT__DYNAMIC_KEY_ID;
+    }
 
     public function calculateDynamicValue($key)
     {
@@ -253,26 +291,6 @@ class ResourceItem extends AbstractHandler
             self::DYNAMIC_KEY_TEXT_PLAIN,
             self::DYNAMIC_KEY_VERSION,
         ];
-    }
-
-    public function postTransformAttachment(array &$data)
-    {
-        /** @var \XFRM\Entity\ResourceItem $resourceItem */
-        $resourceItem = $this->entity;
-
-        $data[self::KEY_ID] = $resourceItem->resource_id;
-        $data[self::KEY_LINKS][self::ATTACHMENT__LINK_RESOURCE] = $this->buildApiLink('resources', $resourceItem);
-
-        $canDelete = false;
-        if ($resourceItem->canEdit() && $resourceItem->Category->canUploadAndManageUpdateImages()) {
-            $attachmentData = $this->getAttachmentData();
-            /** @var \XF\Attachment\AbstractHandler $attachmentHandler */
-            $attachmentHandler = $attachmentData['handler'];
-            $canDelete = $attachmentHandler->canManageAttachments($attachmentData['context']);
-        }
-        $data[self::KEY_PERMISSIONS][self::PERM_DELETE] = $canDelete;
-
-        return true;
     }
 
     protected function getAttachmentData()

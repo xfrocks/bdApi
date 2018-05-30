@@ -32,6 +32,16 @@ class Params implements \ArrayAccess
     protected $paramKeyPage;
 
     /**
+     * @var string
+     */
+    protected $paramKeyTransformSelectorExclude;
+
+    /**
+     * @var string
+     */
+    protected $paramKeyTransformSelectorInclude;
+
+    /**
      * @var Param[]
      */
     protected $params = [];
@@ -42,6 +52,8 @@ class Params implements \ArrayAccess
     public function __construct($controller)
     {
         $this->controller = $controller;
+
+        $this->defineFieldsFiltering();
     }
 
     /**
@@ -91,13 +103,27 @@ class Params implements \ArrayAccess
     }
 
     /**
+     * @param string $paramKeyExclude
+     * @param string $paramKeyInclude
+     * @return $this
+     */
+    public function defineFieldsFiltering($paramKeyExclude = 'fields_exclude', $paramKeyInclude = 'fields_include')
+    {
+        $this->paramKeyTransformSelectorExclude = $paramKeyExclude;
+        $this->paramKeyTransformSelectorInclude = $paramKeyInclude;
+
+        return $this->define($paramKeyExclude, 'str', 'coma-separated list of fields to exclude from the response')
+            ->define($paramKeyInclude, 'str', 'coma-separated list of fields to include in the response');
+    }
+
+    /**
      * @param string $key
      * @return mixed|null
      */
     public function filter($key)
     {
         if (!isset($this->params[$key])) {
-            return null;
+            throw new \LogicException('Unrecognized parameter: ' . $key);
         }
 
         if ($key === $this->paramKeyLimit) {
@@ -177,6 +203,22 @@ class Params implements \ArrayAccess
         ];
 
         return [$limit, $page];
+    }
+
+    /**
+     * @return array
+     */
+    public function filterTransformSelector()
+    {
+        if (empty($this->paramKeyTransformSelectorExclude) ||
+            empty($this->paramKeyTransformSelectorInclude)) {
+            throw new \LogicException('Params::defineFieldsFiltering() must be called before calling filterTransformSelector().');
+        }
+
+        return [
+            $this->filter($this->paramKeyTransformSelectorExclude),
+            $this->filter($this->paramKeyTransformSelectorInclude),
+        ];
     }
 
     /**

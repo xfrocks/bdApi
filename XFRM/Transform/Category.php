@@ -1,8 +1,8 @@
 <?php
 
-namespace Xfrocks\Api\XFRM\Transformer;
+namespace Xfrocks\Api\XFRM\Transform;
 
-use Xfrocks\Api\Transformer\AbstractHandler;
+use Xfrocks\Api\Transform\AbstractHandler;
 
 class Category extends AbstractHandler
 {

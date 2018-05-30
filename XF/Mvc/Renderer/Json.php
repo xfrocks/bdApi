@@ -4,9 +4,39 @@ namespace Xfrocks\Api\XF\Mvc\Renderer;
 
 use XF\Db\AbstractAdapter;
 use XF\Mvc\Renderer\Html;
+use XF\Mvc\Reply\AbstractReply;
+use Xfrocks\Api\XF\Session\Session;
 
 class Json extends XFCP_Json
 {
+    public function postFilter($content, AbstractReply $reply)
+    {
+        $json = parent::postFilter($content, $reply);
+
+        if (\XF::$debugMode) {
+            $app = \XF::app();
+            $container = $app->container();
+            $language = $app->language();
+
+            if ($container->isCached('db')) {
+                /** @var AbstractAdapter $db */
+                $db = $container['db'];
+                $dbQueries = $db->getQueryCount();
+            } else {
+                $dbQueries = 'N/A';
+            }
+
+            $pageTime = microtime(true) - $container['time.granular'];
+
+            $this->response->header('Api-Debug-Db-Queries', $language->numberFormat($dbQueries));
+            $this->response->header('Api-Debug-Memory-Usage', $language->fileSizeFormat(memory_get_usage()));
+            $this->response->header('Api-Debug-Memory-Peak', $language->fileSizeFormat(memory_get_peak_usage()));
+            $this->response->header('Api-Debug-Page-Time', $language->numberFormat($pageTime, 6));
+        }
+
+        return $json;
+    }
+
     public function renderErrors(array $errors)
     {
         return [
@@ -36,27 +66,39 @@ class Json extends XFCP_Json
             $app = \XF::app();
             $container = $app->container();
 
-            if ($container->isCached('db')) {
-                /** @var AbstractAdapter $db */
-                $db = $container['db'];
-                $dbQueries = $db->getQueryCount();
-            } else {
-                $dbQueries = null;
-            }
-
             $pageUrl = $app->request()->getFullRequestUri();
             $debugUrl = $pageUrl . (strpos($pageUrl, '?') !== false ? '&' : '?') . '_debug=1';
+            $content['system_info']['debug_url'] = $debugUrl;
 
-            $content['debug'] = [
-                'db_queries' => $dbQueries,
-                'debug_url' => $debugUrl,
-                'memory_usage' => memory_get_usage(),
-                'memory_peak' => memory_get_peak_usage(),
-                'page_time' => microtime(true) - $container['time.granular']
-            ];
+            if ($container->isCached('session')) {
+                /** @var Session $session */
+                $session = $container['session'];
+                $token = $session->getToken();
+                if (!empty($token)) {
+                    $content['system_info']['client_id'] = $token->client_id;
+                    $content['system_info']['token_text'] = $token->token_text;
+                    $content['system_info']['expire_date'] = $token->expire_date;
+                    $content['system_info']['scope'] = $token->scope;
+                }
+            }
         }
 
         return $content;
+    }
+
+    protected function prepareJsonEncode($value)
+    {
+        $value = parent::prepareJsonEncode($value);
+
+        if (is_array($value)) {
+            foreach (array_keys($value) as $key) {
+                if ($value[$key] === null) {
+                    unset($value[$key]);
+                }
+            }
+        }
+
+        return $value;
     }
 }
 

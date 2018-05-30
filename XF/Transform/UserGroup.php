@@ -1,8 +1,8 @@
 <?php
 
-namespace Xfrocks\Api\XF\Transformer;
+namespace Xfrocks\Api\XF\Transform;
 
-use Xfrocks\Api\Transformer\AbstractHandler;
+use Xfrocks\Api\Transform\AbstractHandler;
 
 class UserGroup extends AbstractHandler
 {
