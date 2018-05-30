@@ -59,11 +59,6 @@ class Dispatcher extends XFCP_Dispatcher
 
     public function render(AbstractReply $reply, $responseType)
     {
-        if (!in_array($responseType, ['json', 'raw'], true)) {
-            $responseType = 'json';
-        }
-
-        /** @var Json $renderer */
         $renderer = $this->app->renderer($responseType);
         $renderer->getResponse()->header('Last-Modified', gmdate('D, d M Y H:i:s', \XF::$time) . ' GMT', true);
         $renderer->setResponseCode($reply->getResponseCode());
@@ -95,6 +90,15 @@ class Dispatcher extends XFCP_Dispatcher
         $response->body($content);
 
         return $response;
+    }
+
+    public function route($routePath)
+    {
+        $match = parent::route($routePath);
+
+        $match->setResponseType('json');
+
+        return $match;
     }
 
     /**
