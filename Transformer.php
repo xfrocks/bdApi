@@ -30,14 +30,14 @@ class Transformer
         $this->app = $app;
         $this->container = new Container();
 
-        $this->container->factory('handler', function ($shortName) {
-            $class = \XF::stringToClass($shortName, '%s\Api\Transform\%s');
+        $this->container->factory('handler', function ($type) {
+            $class = \XF::stringToClass($type, '%s\Api\Transform\%s');
             $class = $this->app->extendClass($class);
 
             if (!class_exists($class)) {
                 /** @var Modules $modules */
                 $modules = $this->app->data('Xfrocks\Api:Modules');
-                $class = $modules->getTransformerClass($shortName);
+                $class = $modules->getTransformerClass($type);
                 $class = $this->app->extendClass($class);
             }
 
@@ -47,11 +47,6 @@ class Transformer
 
             return new $class($this->app, $this);
         });
-
-        $this->container['custom_field_handler'] = function () {
-            $class = $this->app->extendClass('Xfrocks\Api\Transform\CustomField');
-            return new $class($this->app, $this);
-        };
     }
 
     /**
@@ -63,8 +58,31 @@ class Transformer
     public function getFetchWith($controller, $shortName, array $extraWith = [])
     {
         /** @var AbstractHandler $handler */
-        $handler = $this->container->create('handler', $shortName);
+        $handler = $this->handler($shortName);
         return $handler->getFetchWith($extraWith);
+    }
+
+    /**
+     * @param string $type
+     * @return AbstractHandler
+     */
+    public function handler($type = '')
+    {
+        return $this->container->create('handler', $type);
+    }
+
+    /**
+     * @param AbstractHandler $handler
+     * @param string $key
+     * @param array $values
+     * @return array
+     */
+    public function transformArray($handler, $key, array $values)
+    {
+        $subHandler = $this->handler();
+        $subSelector = $handler->getSubSelector($key);
+        $subHandler->reset($values, $handler, $subSelector);
+        return $this->transform($subHandler);
     }
 
     /**
@@ -76,6 +94,18 @@ class Transformer
     public function transformAttachments($handler, $attachments, $key = AbstractHandler::DYNAMIC_KEY_ATTACHMENTS)
     {
         return $this->transformSubEntities($handler, $key, $attachments);
+    }
+
+    /**
+     * @param \XF\Mvc\Reply\AbstractReply $reply
+     * @return array
+     */
+    public function transformBatchJobReply($reply)
+    {
+        /** @var \Xfrocks\Api\Transform\BatchJobReply $handler */
+        $handler = $this->handler('Xfrocks:BatchJobReply');
+        $handler->reset($reply, null, null);
+        return $this->transform($handler);
     }
 
     /**
@@ -92,7 +122,7 @@ class Transformer
         $key = AbstractHandler::DYNAMIC_KEY_FIELDS
     ) {
         /** @var \Xfrocks\Api\Transform\CustomField $subHandler */
-        $subHandler = $this->container['custom_field_handler'];
+        $subHandler = $this->handler('Xfrocks:CustomField');
         $subHandler->reset($definition, $handler, $handler->getSubSelector($key));
         $subHandler->setValue($value);
 
@@ -106,7 +136,8 @@ class Transformer
      */
     public function transformEntity($selector, $entity)
     {
-        $handler = $this->getHandler($entity, null, $selector);
+        $handler = $this->handler($entity->structure()->shortName);
+        $handler->reset($entity, null, $selector);
         return $this->transform($handler);
     }
 
@@ -133,8 +164,10 @@ class Transformer
      */
     public function transformSubEntity($handler, $key, $subEntity)
     {
-        $handler = $this->getHandler($subEntity, $handler, $handler->getSubSelector($key));
-        return $this->transform($handler);
+        $subHandler = $this->handler($subEntity->structure()->shortName);
+        $subSelector = $handler->getSubSelector($key);
+        $subHandler->reset($subEntity, $handler, $subSelector);
+        return $this->transform($subHandler);
     }
 
     /**
@@ -158,26 +191,28 @@ class Transformer
     }
 
     /**
-     * @param Entity|string $entity
-     * @param AbstractHandler|null $parentHandler
-     * @param Selector|null $selector
-     * @return AbstractHandler
+     * @param AbstractHandler $handler
+     * @param string $key
+     * @param array $values
+     * @param array $data
      */
-    protected function getHandler($entity, $parentHandler, $selector)
+    protected function addArrayToData($handler, $key, $values, array &$data)
     {
-        $shortName = is_string($entity) ? $entity : $entity->structure()->shortName;
+        if (!is_array($values) || count($values) === 0) {
+            return;
+        }
 
-        /** @var AbstractHandler $handler */
-        $handler = $this->container->create('handler', $shortName);
+        $transformed = $this->transformArray($handler, $key, $values);
+        if (count($transformed) === 0) {
+            return;
+        }
 
-        $handler->reset(is_object($entity) ? $entity : null, $parentHandler, $selector);
-
-        return $handler;
+        $data[$key] = $transformed;
     }
 
     /**
      * @param AbstractHandler $handler
-     * @return array|null
+     * @return array
      */
     protected function transform($handler)
     {
@@ -191,7 +226,7 @@ class Transformer
 
             $value = null;
             if (is_string($key)) {
-                $value = $handler->getEntityValue($key);
+                $value = $handler->getSourceValue($key);
             } else {
                 $value = $handler->calculateDynamicValue($mapping);
             }
@@ -202,43 +237,14 @@ class Transformer
 
         if (!$handler->shouldExcludeField(AbstractHandler::KEY_LINKS)) {
             $links = $handler->collectLinks();
-            $this->transformValues($handler, $data, AbstractHandler::KEY_LINKS, $links);
+            $this->addArrayToData($handler, AbstractHandler::KEY_LINKS, $links, $data);
         }
 
         if (!$handler->shouldExcludeField(AbstractHandler::KEY_PERMISSIONS)) {
             $permissions = $handler->collectPermissions();
-            $this->transformValues($handler, $data, AbstractHandler::KEY_PERMISSIONS, $permissions);
+            $this->addArrayToData($handler, AbstractHandler::KEY_PERMISSIONS, $permissions, $data);
         }
 
         return $data;
-    }
-
-    /**
-     * @param AbstractHandler $handler
-     * @param array $data
-     * @param string $key
-     * @param array $values
-     */
-    protected function transformValues($handler, array &$data, $key, $values)
-    {
-        if (!is_array($values) || count($values) === 0) {
-            return;
-        }
-
-        $data[$key] = [];
-        $selector = $handler->getSubSelector($key);
-
-        foreach ($values as $subKey => $value) {
-            if ($selector->shouldExcludeField($subKey)) {
-                continue;
-            }
-            if (is_array($value)) {
-                $value = call_user_func($value, $handler, $subKey);
-            }
-            if ($value === null) {
-                continue;
-            }
-            $data[$key][$subKey] = $value;
-        }
     }
 }

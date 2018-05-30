@@ -57,7 +57,7 @@ class User extends AbstractHandler
     public function calculateDynamicValue($key)
     {
         /** @var \XF\Entity\User $user */
-        $user = $this->entity;
+        $user = $this->source;
         $visitor = \XF::visitor();
 
         switch ($key) {
@@ -156,7 +156,7 @@ class User extends AbstractHandler
     public function collectLinks()
     {
         /** @var \XF\Entity\User $user */
-        $user = $this->entity;
+        $user = $this->source;
 
         $links = [
             self::LINK_AVATAR => $user->getAvatarUrl('l'),
@@ -179,7 +179,7 @@ class User extends AbstractHandler
     public function collectPermissions()
     {
         /** @var \XF\Entity\User $user */
-        $user = $this->entity;
+        $user = $this->source;
         $visitor = \XF::visitor();
 
         return [
@@ -234,9 +234,9 @@ class User extends AbstractHandler
         return $mappings;
     }
 
-    public function reset($entity, $parent, $selector)
+    public function reset($source, $parent, $selector)
     {
-        parent::reset($entity, $parent, $selector);
+        parent::reset($source, $parent, $selector);
 
         $this->flagFullAccess = $this->checkFullAccess();
     }
@@ -251,7 +251,7 @@ class User extends AbstractHandler
             return false;
         }
 
-        if ($this->getEntityValue('user_id') === $visitor->user_id) {
+        if ($this->source['user_id'] === $visitor->user_id) {
             return true;
         }
 
@@ -268,7 +268,7 @@ class User extends AbstractHandler
         }
 
         /** @var UserProfile $userProfile */
-        $userProfile = $this->entity->Profile;
+        $userProfile = $this->source->Profile;
         if (empty($userProfile)) {
             return null;
         }
@@ -311,7 +311,7 @@ class User extends AbstractHandler
         }
 
         /** @var \XF\Entity\User $user */
-        $user = $this->entity;
+        $user = $this->source;
         $userGroups = [];
         foreach ($allGroups as $group) {
             if (!$user->isMemberOf($group)) {

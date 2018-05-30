@@ -25,7 +25,7 @@ class CustomField extends AbstractHandler
     public function calculateDynamicValue($key)
     {
         /** @var Definition $definition */
-        $definition = $this->entity;
+        $definition = $this->source;
 
         switch ($key) {
             case self::DYNAMIC_KEY_CHOICES:
@@ -111,7 +111,7 @@ class CustomField extends AbstractHandler
      */
     protected function hasChoices()
     {
-        return in_array($this->entity['type_group'], ['single', 'multiple'], true);
+        return in_array($this->source['type_group'], ['single', 'multiple'], true);
     }
 
     /**

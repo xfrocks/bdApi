@@ -58,7 +58,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
     {
         switch ($key) {
             case self::ATTACHMENT__DYNAMIC_KEY_ID:
-                return $this->entity['resource_id'];
+                return $this->source['resource_id'];
         }
 
         return null;
@@ -66,13 +66,13 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
 
     public function attachmentCollectLinks($attachmentHandler, array &$links)
     {
-        $links[self::ATTACHMENT__LINK_RESOURCE] = $this->buildApiLink('resources', $this->entity);
+        $links[self::ATTACHMENT__LINK_RESOURCE] = $this->buildApiLink('resources', $this->source);
     }
 
     public function attachmentCollectPermissions($attachmentHandler, array &$permissions)
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
-        $resourceItem = $this->entity;
+        $resourceItem = $this->source;
         $canDelete = false;
 
         if ($resourceItem->canEdit() && $resourceItem->Category->canUploadAndManageUpdateImages()) {
@@ -93,7 +93,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
     public function calculateDynamicValue($key)
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
-        $resourceItem = $this->entity;
+        $resourceItem = $this->source;
 
         switch ($key) {
             case self::DYNAMIC_KEY_ATTACHMENT_COUNT:
@@ -173,7 +173,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
     public function collectLinks()
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
-        $resourceItem = $this->entity;
+        $resourceItem = $this->source;
 
         $links = [
             self::LINK_CATEGORY => $this->buildApiLink('resource-categories', $resourceItem->Category),
@@ -218,7 +218,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
     public function collectPermissions()
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
-        $resourceItem = $this->entity;
+        $resourceItem = $this->source;
 
         $permissions = [
             self::PERM_ADD_ICON => $resourceItem->canEdit(),
@@ -298,7 +298,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         static $contentType = 'resource_update';
 
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
-        $resourceItem = $this->entity;
+        $resourceItem = $this->source;
 
         if (!isset($this->attachmentData[$resourceItem->resource_id])) {
             /** @var \XF\Repository\Attachment $attachmentRepo */

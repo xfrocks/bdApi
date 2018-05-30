@@ -23,7 +23,7 @@ class Dispatcher extends XFCP_Dispatcher
         AbstractReply $previousReply = null
     ) {
         if ($controllerClass !== 'Xfrocks:Error') {
-            $method = strtolower($this->request->getServer('REQUEST_METHOD'));
+            $method = $this->getApiMethod();
             switch ($method) {
                 case 'head':
                     $method = 'get';
@@ -95,6 +95,23 @@ class Dispatcher extends XFCP_Dispatcher
         $response->body($content);
 
         return $response;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getApiMethod()
+    {
+        $requestMethod = strtolower($this->request->getServer('REQUEST_METHOD'));
+
+        if ($requestMethod === 'get' && \XF::$debugMode) {
+            $paramMethod = $this->request->filter('_xfApiMethod', 'str');
+            if (!empty($paramMethod)) {
+                return strtolower($paramMethod);
+            }
+        }
+
+        return $requestMethod;
     }
 }
 

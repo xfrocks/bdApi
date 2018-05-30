@@ -26,7 +26,7 @@ class Attachment extends AbstractHandler
     public function collectLinks()
     {
         /** @var \XF\Entity\Attachment $attachment */
-        $attachment = $this->entity;
+        $attachment = $this->source;
 
         $links = [
             self::LINK_DATA => $this->buildApiLink('attachments', $attachment, ['hash' => $attachment->temp_hash]),
@@ -48,7 +48,7 @@ class Attachment extends AbstractHandler
     public function collectPermissions()
     {
         /** @var \XF\Entity\Attachment $attachment */
-        $attachment = $this->entity;
+        $attachment = $this->source;
 
         $permissions = [
             self::PERM_DELETE => false,

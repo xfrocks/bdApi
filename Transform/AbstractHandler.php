@@ -3,7 +3,6 @@
 namespace Xfrocks\Api\Transform;
 
 use XF\App;
-use XF\Mvc\Entity\Entity;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\XF\Session\Session;
@@ -36,11 +35,6 @@ abstract class AbstractHandler
     protected $app;
 
     /**
-     * @var Entity
-     */
-    protected $entity;
-
-    /**
      * @var AbstractHandler
      */
     protected $parent;
@@ -49,6 +43,11 @@ abstract class AbstractHandler
      * @var Selector
      */
     protected $selector;
+
+    /**
+     * @var mixed
+     */
+    protected $source;
 
     /**
      * @var Transformer
@@ -94,9 +93,9 @@ abstract class AbstractHandler
      * @param string $key
      * @return mixed
      */
-    public function getEntityValue($key)
+    public function getSourceValue($key)
     {
-        return $this->entity !== null ? $this->entity->offsetGet($key) : null;
+        return $this->source !== null ? $this->source[$key] : null;
     }
 
     /**
@@ -130,13 +129,13 @@ abstract class AbstractHandler
     }
 
     /**
-     * @param Entity|\XF\CustomField\Definition $entity
+     * @param mixed $source
      * @param AbstractHandler $parent
      * @param Selector $selector
      */
-    public function reset($entity, $parent, $selector)
+    public function reset($source, $parent, $selector)
     {
-        $this->entity = $entity;
+        $this->source = $source;
         $this->parent = $parent;
         $this->selector = $selector;
     }
@@ -211,7 +210,7 @@ abstract class AbstractHandler
     protected function renderBbCodeHtml($key, $string, array $options = [])
     {
         $context = 'api:' . $key;
-        $entity = $this->entity;
+        $entity = $this->source;
         return $this->app->bbCode()->render($string, 'html', $context, $entity, $options);
     }
 
