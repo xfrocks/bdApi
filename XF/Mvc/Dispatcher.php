@@ -3,7 +3,6 @@
 namespace Xfrocks\Api\XF\Mvc;
 
 use XF\Mvc\ParameterBag;
-use XF\Mvc\Renderer\Json;
 use XF\Mvc\Reply\AbstractReply;
 use XF\Mvc\Reply\Error;
 use XF\Mvc\Reply\Message;

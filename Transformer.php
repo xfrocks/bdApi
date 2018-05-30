@@ -110,23 +110,54 @@ class Transformer
 
     /**
      * @param AbstractHandler $handler
-     * @param \XF\CustomField\Definition $definition
-     * @param mixed $value
+     * @param \XF\CustomField\DefinitionSet $set
      * @param string $key
      * @return array
      */
-    public function transformCustomField(
-        $handler,
-        $definition,
-        $value = null,
-        $key = AbstractHandler::DYNAMIC_KEY_FIELDS
-    ) {
+    public function transformCustomFieldDefinitionSet($handler, $set, $key = AbstractHandler::DYNAMIC_KEY_FIELDS)
+    {
         /** @var \Xfrocks\Api\Transform\CustomField $subHandler */
         $subHandler = $this->handler('Xfrocks:CustomField');
-        $subHandler->reset($definition, $handler, $handler->getSubSelector($key));
-        $subHandler->setValue($value);
+        $subSelector = $handler->getSubSelector($key);
 
-        return $this->transform($subHandler);
+        $data = [];
+        foreach ($set->getIterator() as $definition) {
+            $subHandler->reset($definition, $handler, $subSelector);
+            $subHandler->setValue(null);
+
+            $data[] = $this->transform($subHandler);
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param AbstractHandler $handler
+     * @param \XF\CustomField\Set $set
+     * @param string $key
+     * @return array
+     */
+    public function transformCustomFieldSet($handler, $set, $key = AbstractHandler::DYNAMIC_KEY_FIELDS)
+    {
+        $definitionSet = $set->getDefinitionSet();
+        /** @var \Xfrocks\Api\Transform\CustomField $subHandler */
+        $subHandler = $this->handler('Xfrocks:CustomField');
+        $subSelector = $handler->getSubSelector($key);
+
+        $data = [];
+        foreach ($set->getIterator() as $field => $value) {
+            if (!isset($definitionSet[$field])) {
+                continue;
+            }
+            $definition = $definitionSet[$field];
+
+            $subHandler->reset($definition, $handler, $subSelector);
+            $subHandler->setValue($value);
+
+            $data[] = $this->transform($subHandler);
+        }
+
+        return $data;
     }
 
     /**

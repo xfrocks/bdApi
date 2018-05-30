@@ -110,12 +110,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
                 return $resourceItem->external_purchase_url ? $resourceItem->currency : null;
             case self::DYNAMIC_KEY_FIELDS:
                 $resourceFields = $resourceItem->custom_fields;
-                $fields = [];
-                foreach ($resourceFields->getIterator() as $field => $value) {
-                    $definition = $resourceFields->getDefinition($field);
-                    $fields[] = $this->transformer->transformCustomField($this, $definition, $value);
-                }
-                return $fields;
+                return $this->transformer->transformCustomFieldSet($this, $resourceFields);
             case self::DYNAMIC_KEY_HAS_FILE:
                 return $resourceItem->getResourceTypeDetailed() === 'download_local';
             case self::DYNAMIC_KEY_HAS_URL:

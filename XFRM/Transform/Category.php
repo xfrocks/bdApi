@@ -31,11 +31,7 @@ class Category extends AbstractHandler
                 /** @var \XF\CustomField\DefinitionSet $allDefinitions */
                 $allDefinitions = $this->app->container('customFields.resources');
                 $categoryDefinitions = $allDefinitions->filterOnly($category->field_cache);
-                $fields = [];
-                foreach ($categoryDefinitions->getIterator() as $definition) {
-                    $fields[] = $this->transformer->transformCustomField($this, $definition);
-                }
-                return $fields;
+                return $this->transformer->transformCustomFieldDefinitionSet($this, $categoryDefinitions);
         }
 
         return null;
