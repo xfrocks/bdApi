@@ -28,6 +28,7 @@ class bdApi_Route_PrefixApi extends XenForo_Route_Prefix
         self::addRoute($routes, 'conversations', 'bdApi_Route_PrefixApi_Conversations', 'data_only');
         self::addRoute($routes, 'conversation-messages', 'bdApi_Route_PrefixApi_ConversationMessages', 'data_only');
         self::addRoute($routes, 'forums', 'bdApi_Route_PrefixApi_Forums', 'data_only');
+        self::addRoute($routes, 'lost-password', 'bdApi_Route_PrefixApi_LostPassword');
         self::addRoute($routes, 'navigation', 'bdApi_Route_PrefixApi_Navigation');
         self::addRoute($routes, 'notifications', 'bdApi_Route_PrefixApi_Notifications');
         self::addRoute($routes, 'pages', 'bdApi_Route_PrefixApi_Pages', 'data_only');

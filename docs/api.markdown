@@ -1527,6 +1527,27 @@ Required scopes:
  * `post`
  * `admincp`
 
+### POST `/lost-password`
+Request a password reset via email. Since forum-2018060601.
+
+    {
+        status: "ok",
+        message: "A password reset request has been emailed to you. Please follow the instructions in that email."
+    }
+
+Parameters:
+
+ * `username` (_optional_)
+ * `email` (_optional_)
+ * `oauth_token` (__required__): a valid one time token
+
+Note: Either `username` or `email` parameter must be provided.
+If both are provided, `username` will be used.
+
+Required scopes:
+
+ * N/A
+
 ### POST `/users/:userId/avatar`
 Upload avatar for a user.
 

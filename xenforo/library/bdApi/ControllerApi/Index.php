@@ -64,6 +64,8 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
             if ($visitor->canUpdateStatus()) {
                 $data['post']['status'] = bdApi_Data_Helper_Core::safeBuildApiLink('users/me/timeline');
             }
+        } else {
+            $data['links']['lost-password'] = bdApi_Data_Helper_Core::safeBuildApiLink('lost-password');
         }
 
         $data['system_info'] = $systemInfo;
@@ -74,7 +76,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
     protected function _getModules()
     {
         $modules = array(
-            'forum' => 2018052801,
+            'forum' => 2018060601,
             'oauth2' => 2016030902,
             'subscription' => 2014092301,
         );
