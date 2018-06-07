@@ -43,5 +43,4 @@ class bdApiConsumer_Helper_Template
 
         return $output;
     }
-
 }

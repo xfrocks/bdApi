@@ -47,5 +47,4 @@ class bdApiConsumer_XenForo_Model_UserConfirmation extends XFCP_bdApiConsumer_Xe
 
         return true;
     }
-
 }

@@ -15,5 +15,4 @@ class bdApiConsumer_XenForo_ControllerPublic_Logout extends XFCP_bdApiConsumer_X
 
         parent::_preDispatch($action);
     }
-
 }

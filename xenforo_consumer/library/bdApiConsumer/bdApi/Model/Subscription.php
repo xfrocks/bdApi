@@ -18,5 +18,4 @@ class bdApiConsumer_bdApi_Model_Subscription extends XFCP_bdApiConsumer_bdApi_Mo
 
         return $pingDataMany;
     }
-
 }

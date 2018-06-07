@@ -66,5 +66,4 @@ class bdApiConsumer_Helper_AutoLogin
             }
         }
     }
-
 }

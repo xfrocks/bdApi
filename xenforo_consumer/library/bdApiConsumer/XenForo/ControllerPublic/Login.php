@@ -45,7 +45,9 @@ class bdApiConsumer_XenForo_ControllerPublic_Login extends XFCP_bdApiConsumer_Xe
         $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
 
         $existingAssoc = $userExternalModel->getExternalAuthAssociation(
-            $userExternalModel->bdApiConsumer_getProviderCode($provider), $externalUserId);
+            $userExternalModel->bdApiConsumer_getProviderCode($provider),
+            $externalUserId
+        );
 
         if (!empty($existingAssoc)) {
             $accessToken = $userExternalModel->bdApiConsumer_getAccessTokenFromAuth($provider, $existingAssoc);
@@ -67,15 +69,19 @@ class bdApiConsumer_XenForo_ControllerPublic_Login extends XFCP_bdApiConsumer_Xe
                         'reg' => 1,
                         'redirect' => $this->getDynamicRedirect(),
                     )),
-                    new XenForo_Phrase('bdapi_consumer_being_auto_login_auto_register_x',
-                        array('provider' => $provider['name']))
+                    new XenForo_Phrase(
+                        'bdapi_consumer_being_auto_login_auto_register_x',
+                        array('provider' => $provider['name'])
+                    )
                 );
             }
         }
 
         if (!$existingAssoc) {
-            return $this->responseError(new XenForo_Phrase('bdapi_consumer_auto_login_with_x_failed',
-                array('provider' => $provider['name'])));
+            return $this->responseError(new XenForo_Phrase(
+                'bdapi_consumer_auto_login_with_x_failed',
+                array('provider' => $provider['name'])
+            ));
         }
         $user = $userModel->getFullUserById($existingAssoc['user_id']);
         if (empty($user)) {

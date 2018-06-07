@@ -141,8 +141,12 @@ class bdApiConsumer_ControllerPublic_Callback extends XenForo_ControllerPublic_A
                 continue;
             }
 
-            $userExternalModel->bdApiConsumer_updateExternalAuthAssociation($provider,
-                $auth['provider_key'], $auth['user_id'], array_merge($auth['extra_data'], $externalVisitor));
+            $userExternalModel->bdApiConsumer_updateExternalAuthAssociation(
+                $provider,
+                $auth['provider_key'],
+                $auth['user_id'],
+                array_merge($auth['extra_data'], $externalVisitor)
+            );
 
             foreach ($pings as &$ping) {
                 if ($ping['object_data'] == $auth['provider_key']) {
@@ -222,5 +226,4 @@ class bdApiConsumer_ControllerPublic_Callback extends XenForo_ControllerPublic_A
         // no csrf check for this
         return;
     }
-
 }

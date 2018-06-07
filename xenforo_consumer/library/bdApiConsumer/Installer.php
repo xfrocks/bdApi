@@ -66,7 +66,6 @@ class bdApiConsumer_Installer
     /* End auto-generated lines of code. Feel free to make changes below */
 
     private static function installCustomized(
-        /** @noinspection PhpUnusedParameterInspection */
         $existingAddOn,
         $addOnData
     ) {
@@ -77,7 +76,11 @@ class bdApiConsumer_Installer
         $db = XenForo_Application::getDb();
 
         $db->query("REPLACE INTO `xf_content_type` (content_type, addon_id, fields) VALUES ('bdapi_consumer', 'bdApiConsumer', '')");
-        $db->query("REPLACE INTO `xf_content_type_field` (content_type, field_name, field_value) VALUES ('bdapi_consumer', 'alert_handler_class', 'bdApiConsumer_AlertHandler_Provider')");
+        $db->query("
+            REPLACE INTO `xf_content_type_field` 
+                (content_type, field_name, field_value) 
+            VALUES 
+                ('bdapi_consumer', 'alert_handler_class', 'bdApiConsumer_AlertHandler_Provider')");
         /** @var XenForo_Model_ContentType $contentTypeModel */
         $contentTypeModel = XenForo_Model::create('XenForo_Model_ContentType');
         $contentTypeModel->rebuildContentTypeCache();
@@ -97,5 +100,4 @@ class bdApiConsumer_Installer
 
         bdApiConsumer_ShippableHelper_Updater::onUninstall();
     }
-
 }

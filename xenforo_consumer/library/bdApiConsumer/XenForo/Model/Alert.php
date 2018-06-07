@@ -12,8 +12,10 @@ class bdApiConsumer_XenForo_Model_Alert extends XFCP_bdApiConsumer_XenForo_Model
             $viewingUser = null;
             $this->standardizeViewingUserReference($viewingUser);
 
-            $this->_bdApiConsumer_markExternalAlertsRead($viewingUser,
-                array_keys($this->_bdApiConsumer_unreadAlertProviders[$userId]));
+            $this->_bdApiConsumer_markExternalAlertsRead(
+                $viewingUser,
+                array_keys($this->_bdApiConsumer_unreadAlertProviders[$userId])
+            );
         }
 
         parent::resetUnreadAlertsCounter($userId);
@@ -138,12 +140,19 @@ class bdApiConsumer_XenForo_Model_Alert extends XFCP_bdApiConsumer_XenForo_Model
             if (!empty($notifications['_headerLinkHub'])) {
                 if (empty($notifications['subscription_callback'])) {
                     // subscribe to future notifications
-                    if (bdApiConsumer_Helper_Api::postSubscription($provider,
-                        $accessToken, $notifications['_headerLinkHub'])
+                    if (bdApiConsumer_Helper_Api::postSubscription(
+                        $provider,
+                        $accessToken,
+                        $notifications['_headerLinkHub']
+                    )
                     ) {
                         $authRef['extra_data']['notification_subscription_callback'] = 1;
-                        $userExternalModel->bdApiConsumer_updateExternalAuthAssociation($provider,
-                            $authRef['provider_key'], $authRef['user_id'], $authRef['extra_data']);
+                        $userExternalModel->bdApiConsumer_updateExternalAuthAssociation(
+                            $provider,
+                            $authRef['provider_key'],
+                            $authRef['user_id'],
+                            $authRef['extra_data']
+                        );
                     }
                 } else {
                     // subscribed, do not alert user to avoid duplicates
@@ -187,5 +196,4 @@ class bdApiConsumer_XenForo_Model_Alert extends XFCP_bdApiConsumer_XenForo_Model
             bdApiConsumer_Helper_Api::postNotificationsRead($provider, $accessToken);
         }
     }
-
 }

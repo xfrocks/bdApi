@@ -25,13 +25,17 @@ class bdApiConsumer_XenForo_Model_User extends XFCP_bdApiConsumer_XenForo_Model_
                 $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
                 $existingAssoc = $userExternalModel->getExternalAuthAssociation(
                     $userExternalModel->bdApiConsumer_getProviderCode($provider),
-                    $externalVisitor['user_id']);
+                    $externalVisitor['user_id']
+                );
                 if (!empty($existingAssoc)) {
                     // yay, found an associated user!
                     $error = '';
                     $userExternalModel->bdApiConsumer_updateExternalAuthAssociation(
-                        $provider, $externalVisitor['user_id'],
-                        $existingAssoc['user_id'], $externalVisitor + array('token' => $externalToken));
+                        $provider,
+                        $externalVisitor['user_id'],
+                        $existingAssoc['user_id'],
+                        $externalVisitor + array('token' => $externalToken)
+                    );
                     return $existingAssoc['user_id'];
                 }
 
@@ -60,8 +64,13 @@ class bdApiConsumer_XenForo_Model_User extends XFCP_bdApiConsumer_XenForo_Model_
                     $data['user_id'] = $externalVisitor['user_id'];
                 }
 
-                $user = bdApiConsumer_Helper_AutoRegister::createUser($data, $provider,
-                    $externalToken, $externalVisitor, $userExternalModel);
+                $user = bdApiConsumer_Helper_AutoRegister::createUser(
+                    $data,
+                    $provider,
+                    $externalToken,
+                    $externalVisitor,
+                    $userExternalModel
+                );
 
                 if (!empty($user)) {
                     $error = '';
@@ -72,5 +81,4 @@ class bdApiConsumer_XenForo_Model_User extends XFCP_bdApiConsumer_XenForo_Model_
 
         return $userId;
     }
-
 }

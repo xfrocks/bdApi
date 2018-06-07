@@ -29,7 +29,8 @@
 
                     // try to auto login this user
                     XenForo.ajax(
-                        loginLink, loginData,
+                        loginLink,
+                        loginData,
                         function (ajaxData) {
                             if (ajaxData['_redirectTarget']) {
                                 if (ajaxData['_redirectMessage']) {

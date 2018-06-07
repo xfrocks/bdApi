@@ -30,5 +30,4 @@ class bdApiConsumer_AlertHandler_Provider extends XenForo_AlertHandler_Abstract
 
         return $item;
     }
-
 }

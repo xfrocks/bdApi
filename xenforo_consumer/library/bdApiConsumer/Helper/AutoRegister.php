@@ -24,8 +24,8 @@ class bdApiConsumer_Helper_AutoRegister
         array $provider,
         array $externalToken,
         array $externalVisitor,
-        XenForo_Model_UserExternal $userExternalModel)
-    {
+        XenForo_Model_UserExternal $userExternalModel
+    ) {
         $user = null;
 
         /** @var bdApiConsumer_XenForo_Model_UserExternal $userExternalModel */
@@ -94,8 +94,12 @@ class bdApiConsumer_Helper_AutoRegister
             $writer->save();
             $user = $writer->getMergedData();
 
-            $userExternalModel->bdApiConsumer_updateExternalAuthAssociation($provider, $externalVisitor['user_id'],
-                $user['user_id'], array_merge($externalVisitor, array('token' => $externalToken)));
+            $userExternalModel->bdApiConsumer_updateExternalAuthAssociation(
+                $provider,
+                $externalVisitor['user_id'],
+                $user['user_id'],
+                array_merge($externalVisitor, array('token' => $externalToken))
+            );
 
             XenForo_Model_Ip::log($user['user_id'], 'user', $user['user_id'], 'register_api_consumer');
         } catch (XenForo_Exception $e) {
@@ -106,5 +110,4 @@ class bdApiConsumer_Helper_AutoRegister
 
         return $user;
     }
-
 }
