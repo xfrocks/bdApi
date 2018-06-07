@@ -47,5 +47,4 @@ class bdApiConsumer_Helper_Provider
 
         return true;
     }
-
 }

@@ -11,7 +11,8 @@ class bdApiConsumer_XenForo_ControllerPublic_Member extends XFCP_bdApiConsumer_X
                 /** @var bdApiConsumer_XenForo_Model_UserExternal $userExternalModel */
                 $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
                 $auths = $userExternalModel->bdApiConsumer_getExternalAuthAssociations(
-                    $response->params['user']['user_id']);
+                    $response->params['user']['user_id']
+                );
 
                 foreach ($auths as $auth) {
                     if (!empty($auth['extra_data']['links']['permalink'])) {
@@ -43,5 +44,4 @@ class bdApiConsumer_XenForo_ControllerPublic_Member extends XFCP_bdApiConsumer_X
 
         return $this->responseNoPermission();
     }
-
 }

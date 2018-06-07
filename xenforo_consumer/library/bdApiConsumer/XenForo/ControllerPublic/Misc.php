@@ -6,5 +6,4 @@ class bdApiConsumer_XenForo_ControllerPublic_Misc extends XFCP_bdApiConsumer_Xen
     {
         return $this->responseReroute('bdApiConsumer_ControllerPublic_Callback', 'index');
     }
-
 }

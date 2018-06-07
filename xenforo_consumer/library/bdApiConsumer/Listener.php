@@ -60,7 +60,6 @@ class bdApiConsumer_Listener
 
 
     public static function controller_post_dispatch(
-        /** @noinspection PhpUnusedParameterInspection */
         XenForo_Controller $controller,
         $controllerResponse,
         $controllerName,
@@ -72,11 +71,9 @@ class bdApiConsumer_Listener
     }
 
     public static function file_health_check(
-        /** @noinspection PhpUnusedParameterInspection */
         XenForo_ControllerAdmin_Abstract $controller,
         array &$hashes
     ) {
         $hashes += bdApiConsumer_FileSums::getHashes();
     }
-
 }

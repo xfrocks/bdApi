@@ -118,5 +118,4 @@ class bdApiConsumer_Helper_Avatar
 
         return false;
     }
-
 }

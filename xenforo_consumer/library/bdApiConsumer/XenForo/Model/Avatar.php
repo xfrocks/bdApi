@@ -17,5 +17,4 @@ class bdApiConsumer_XenForo_Model_Avatar extends XFCP_bdApiConsumer_XenForo_Mode
 
         return $dw->save();
     }
-
 }

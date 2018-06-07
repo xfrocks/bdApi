@@ -15,8 +15,8 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
     public function bdApiConsumer_syncUpOnRegistration(
         XenForo_DataWriter_User $userDw,
         $externalToken,
-        array $externalVisitor)
-    {
+        array $externalVisitor
+    ) {
         // TODO
     }
 
@@ -39,16 +39,22 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
         if ($auth['extra_data']['token']['expire_date'] < time()) {
             // expired
             // note: we are checking against time() here, not XenForo_Application::$time
-            $externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromRefreshToken($provider,
-                $auth['extra_data']['token']['refresh_token']);
+            $externalToken = bdApiConsumer_Helper_Api::getAccessTokenFromRefreshToken(
+                $provider,
+                $auth['extra_data']['token']['refresh_token']
+            );
             if (empty($externalToken)) {
                 $auth['extra_data']['token'] = false;
             } else {
                 $auth['extra_data']['token'] = $externalToken;
             }
 
-            $this->bdApiConsumer_updateExternalAuthAssociation($provider,
-                $auth['provider_key'], $auth['user_id'], $auth['extra_data']);
+            $this->bdApiConsumer_updateExternalAuthAssociation(
+                $provider,
+                $auth['provider_key'],
+                $auth['user_id'],
+                $auth['extra_data']
+            );
         }
 
         return $auth['extra_data']['token']['access_token'];
@@ -86,8 +92,13 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
             $this->updateExternalAuthAssociation($providerCode, $providerKey, $userId, $extra);
         } else {
             /** @noinspection PhpMethodParametersCountMismatchInspection */
-            $this->updateExternalAuthAssociation($providerCode, $providerKey, $userId,
-                $this->bdApiConsumer_getUserProfileField(), $extra);
+            $this->updateExternalAuthAssociation(
+                $providerCode,
+                $providerKey,
+                $userId,
+                $this->bdApiConsumer_getUserProfileField(),
+                $extra
+            );
         }
     }
 
@@ -97,8 +108,12 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
             $this->deleteExternalAuthAssociation($provider, $providerKey, $userId);
         } else {
             /** @noinspection PhpMethodParametersCountMismatchInspection */
-            $this->deleteExternalAuthAssociation($provider, $providerKey, $userId,
-                $this->bdApiConsumer_getUserProfileField());
+            $this->deleteExternalAuthAssociation(
+                $provider,
+                $providerKey,
+                $userId,
+                $this->bdApiConsumer_getUserProfileField()
+            );
         }
     }
 
@@ -136,5 +151,4 @@ class bdApiConsumer_XenForo_Model_UserExternal extends XFCP_bdApiConsumer_XenFor
 
         return $externalAuths;
     }
-
 }

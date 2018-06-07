@@ -241,8 +241,13 @@ class bdApiConsumer_Helper_Api
             if ($expectedKey !== false) {
                 if (!isset($json[$expectedKey])) {
                     if (XenForo_Application::debugMode()) {
-                        XenForo_Error::logError(sprintf('Key "%s" not found in %s `%s`: %s',
-                            $expectedKey, $method, $path, $body));
+                        XenForo_Error::logError(sprintf(
+                            'Key "%s" not found in %s `%s`: %s',
+                            $expectedKey,
+                            $method,
+                            $path,
+                            $body
+                        ));
                     }
                     return false;
                 }
@@ -274,5 +279,4 @@ class bdApiConsumer_Helper_Api
 
         return null;
     }
-
 }

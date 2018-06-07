@@ -176,8 +176,12 @@ class bdApiConsumer_Option
         }
         $preparedOption['formatParams'] = $choices;
 
-        return XenForo_ViewAdmin_Helper_Option::renderOptionTemplateInternal('option_list_option_select', $view,
-            $fieldPrefix, $preparedOption, $canEdit);
+        return XenForo_ViewAdmin_Helper_Option::renderOptionTemplateInternal(
+            'option_list_option_select',
+            $view,
+            $fieldPrefix,
+            $preparedOption,
+            $canEdit
+        );
     }
-
 }
