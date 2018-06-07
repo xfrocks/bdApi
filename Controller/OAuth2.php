@@ -39,7 +39,7 @@ class OAuth2 extends AbstractController
 
         $user = $loginService->validate($password, $error);
         if (!$user) {
-            return 0;
+            return false;
         }
 
         /** @var \XF\ControllerPlugin\Login $loginPlugin */
