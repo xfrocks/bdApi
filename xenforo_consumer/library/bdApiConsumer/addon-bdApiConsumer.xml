@@ -147,6 +147,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <phrase title="bdapi_consumer_login_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Login with {provider}]]></phrase>
     <phrase title="bdapi_consumer_matches_email_address_associated_with_your_x_account" version_id="1" version_string="0.9-dev"><![CDATA[This member matches the email address associated with your {provider} account.]]></phrase>
     <phrase title="bdapi_consumer_name" version_id="1" version_string="0.9-dev"><![CDATA[Provider Name]]></phrase>
+    <phrase title="bdapi_consumer_or_reset_password_via_x" version_id="1010100" version_string="1.1.0"><![CDATA[Or reset password via <a href="{link}" target="_blank">{name}</a>]]></phrase>
     <phrase title="bdapi_consumer_root" version_id="1" version_string="0.9-dev"><![CDATA[http://domain.com/xenforo/api]]></phrase>
     <phrase title="bdapi_consumer_sign_up_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Sign Up with {provider}]]></phrase>
     <phrase title="bdapi_consumer_take_over_avatar" version_id="19" version_string="0.9.8-dev"><![CDATA[Avatar]]></phrase>
@@ -278,6 +279,13 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 		</li>
 	</ul></dd>
 </dl>]]></template>
+    <template title="bdapi_consumer_account_security" version_id="1010100" version_string="1.1.0"><![CDATA[<xen:if is="{$bdApiConsumer_providers}">
+	<ul>
+		<xen:foreach loop="$bdApiConsumer_providers" value="$provider">
+			<li>{xen:phrase bdapi_consumer_or_reset_password_via_x, 'link={$provider.baseUrl}', 'name={$provider.name}'}</li>
+		</xen:foreach>
+	</ul>
+</xen:if>]]></template>
     <template title="bdapi_consumer_alert_provider" version_id="24" version_string="0.9.8-dev"><![CDATA[{xen:raw $notificationHtml}
 <span class="faint">{xen:phrase bdapi_consumer_alert_via_provider,
 	'link={$provider.root}',
@@ -503,6 +511,10 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 </form>]]></template>
   </templates>
   <public_template_modifications>
+    <modification template="account_security" modification_key="bdApiConsumer_resetPassProvider" description="Reset password throught provider." execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[{xen:phrase request_password_be_emailed_to_you}</a>]]></find>
+      <replace><![CDATA[$0 <xen:include template="bdapi_consumer_account_security" />]]></replace>
+    </modification>
     <modification template="account_wrapper" modification_key="bdapi_consumer_account_wrapper" description="Enable account/externalAccounts link" execution_order="10" enabled="1" action="str_replace">
       <find><![CDATA[{$xenOptions.facebookAppId} OR]]></find>
       <replace><![CDATA[$0 {xen:helper bdApiConsumer_getOption, _activated} OR]]></replace>

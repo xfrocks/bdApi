@@ -28,6 +28,40 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
             }
         }
 
+        if ($response instanceof XenForo_ControllerResponse_View
+            && !empty($response->subView)
+        ) {
+            $visitor = XenForo_Visitor::getInstance();
+            if (empty($response->subView->params['hasPassword'])
+                && !empty($visitor['externalAuth'])
+            ) {
+                $providers = array();
+                foreach ($visitor['externalAuth'] as $providerCode => $externalAuthId) {
+                    $provider = bdApiConsumer_Option::getProviderByCode($providerCode);
+                    if ($provider) {
+                        $parsed = @parse_url($provider['root']);
+                        $baseUrl = null;
+
+                        if (!empty($parsed['host'])) {
+                            $baseUrl = sprintf(
+                                '%s://%s%s',
+                                isset($parsed['schema']) ? $parsed['schema'] : 'http',
+                                $parsed['host'],
+                                isset($parsed['port']) ? (':' . $parsed['port']) : ''
+                            );
+                        }
+
+                        if ($baseUrl) {
+                            $provider['baseUrl'] = $baseUrl;
+                            $providers[$providerCode] = $provider;
+                        }
+                    }
+                }
+
+                $response->subView->params['bdApiConsumer_providers'] = $providers;
+            }
+        }
+
         return $response;
     }
 
@@ -82,5 +116,4 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
             XenForo_Link::buildPublicLink('account/external-accounts')
         );
     }
-
 }
