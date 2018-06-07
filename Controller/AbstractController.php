@@ -161,6 +161,18 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
         $this->apiParams = null;
 
+        $addOnId = 'Xfrocks/Api';
+        $addOnCache = $this->app->container('addon.cache');
+        if (empty($addOnCache[$addOnId])) {
+            throw $this->errorException('The API is currently disabled.', 500);
+        }
+        if (\XF::$debugMode) {
+            $addOn = $this->app->addOnManager()->getById($addOnId);
+            if ($addOn->isJsonVersionNewer()) {
+                throw $this->errorException('Please update the API add-on.', 500);
+            }
+        }
+
         $scope = $this->getDefaultApiScopeForAction($action);
         $this->assertApiScope($scope);
     }
