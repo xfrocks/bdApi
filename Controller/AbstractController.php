@@ -6,7 +6,6 @@ use XF\Mvc\Entity\ArrayCollection;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\ParameterBag;
 use XF\Mvc\Reply\AbstractReply;
-use XF\Mvc\Reply\Exception;
 use XF\Mvc\Reply\Redirect;
 use Xfrocks\Api\Data\Param;
 use Xfrocks\Api\Data\Params;
@@ -47,7 +46,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
     /**
      * @param string $scope
-     * @throws Exception
+     * @throws \XF\Mvc\Reply\Exception
      */
     public function assertApiScope($scope)
     {
@@ -63,10 +62,14 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
     public function assertCanonicalUrl($linkUrl)
     {
+        $responseType = $this->responseType;
+        $this->responseType = 'html';
+        $exception = null;
+
         try {
             parent::assertCanonicalUrl($linkUrl);
-        } catch (Exception $e) {
-            $reply = $e->getReply();
+        } catch (\XF\Mvc\Reply\Exception $exceptionReply) {
+            $reply = $exceptionReply->getReply();
             if ($reply instanceof Redirect) {
                 /** @var Redirect $redirect */
                 $redirect = $reply;
@@ -80,14 +83,21 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
                     if ($alteredUrl === $this->request->getRequestUri()) {
                         // skip redirecting, if it happens to be the current request URI
-                        return;
+                        $exceptionReply = null;
+                    } else {
+                        $redirect->setUrl($alteredUrl);
                     }
-
-                    $redirect->setUrl($alteredUrl);
                 }
             }
 
-            throw $e;
+            $exception = $exceptionReply;
+        } catch (\Exception $e) {
+            $exception = $e;
+        }
+
+        $this->responseType = $responseType;
+        if ($exception !== null) {
+            throw $exception;
         }
     }
 
@@ -220,7 +230,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      * @param mixed $id
      * @param array $extraWith
      * @return Entity
-     * @throws Exception
+     * @throws \XF\Mvc\Reply\Exception
      */
     protected function assertViewableEntity($shortName, $id, array $extraWith = [])
     {
