@@ -16,8 +16,6 @@ class BatchJobReply extends AbstractHandler
     const RESULT_MESSAGE = 'message';
     const RESULT_OK = 'ok';
 
-    protected $reply;
-
     public function calculateDynamicValue($key)
     {
         /** @var AbstractReply $reply */
@@ -37,12 +35,25 @@ class BatchJobReply extends AbstractHandler
                 case self::DYNAMIC_KEY_RESULT:
                     return self::RESULT_MESSAGE;
             }
-        } elseif ($reply instanceof \Xfrocks\Api\Mvc\Reply) {
+        } elseif ($reply instanceof \Xfrocks\Api\Mvc\Reply\Api) {
             switch ($key) {
                 case self::DYNAMIC_KEY_RESPONSE:
                     return $reply->getData();
                 case self::DYNAMIC_KEY_RESULT:
                     return self::RESULT_OK;
+            }
+        } else {
+            switch ($key) {
+                case self::DYNAMIC_KEY_RESPONSE:
+                    // TODO
+                    return null;
+                case self::DYNAMIC_KEY_RESULT:
+                    $responseCode = $reply->getResponseCode();
+                    if ($responseCode >= 200 && $responseCode < 300) {
+                        return self::RESULT_OK;
+                    }
+
+                    return self::RESULT_ERROR;
             }
         }
 

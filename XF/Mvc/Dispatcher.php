@@ -2,24 +2,16 @@
 
 namespace Xfrocks\Api\XF\Mvc;
 
-use XF\Mvc\ParameterBag;
-use XF\Mvc\Reply\AbstractReply;
-use XF\Mvc\Reply\Error;
-use XF\Mvc\Reply\Message;
-use XF\Mvc\Reply\Redirect;
-use XF\Mvc\Reply\View;
-use Xfrocks\Api\Mvc\Reply;
-
 class Dispatcher extends XFCP_Dispatcher
 {
     public function dispatchClass(
         $controllerClass,
         $action,
         $responseType,
-        ParameterBag $params = null,
+        \XF\Mvc\ParameterBag $params = null,
         $sectionContext = null,
         &$controller = null,
-        AbstractReply $previousReply = null
+        \XF\Mvc\Reply\AbstractReply $previousReply = null
     ) {
         if ($controllerClass !== 'Xfrocks:Error') {
             $method = $this->getApiMethod();
@@ -28,7 +20,7 @@ class Dispatcher extends XFCP_Dispatcher
                     $method = 'get';
                     break;
                 case 'options':
-                    $params = new ParameterBag(['action' => $action]);
+                    $params = new \XF\Mvc\ParameterBag(['action' => $action]);
                     $action = 'generic';
                     break;
             }
@@ -56,39 +48,13 @@ class Dispatcher extends XFCP_Dispatcher
         return $this->router;
     }
 
-    public function render(AbstractReply $reply, $responseType)
+    public function renderView(\XF\Mvc\Renderer\AbstractRenderer $renderer, \XF\Mvc\Reply\View $reply)
     {
-        $renderer = $this->app->renderer($responseType);
-        $renderer->getResponse()->header('Last-Modified', gmdate('D, d M Y H:i:s', \XF::$time) . ' GMT', true);
-        $renderer->setResponseCode($reply->getResponseCode());
-
-        if ($reply instanceof Error) {
-            $content = $renderer->renderErrors($reply->getErrors());
-        } elseif ($reply instanceof Message) {
-            $content = $renderer->renderMessage($reply->getMessage());
-        } elseif ($reply instanceof Redirect) {
-            $content = $renderer->renderRedirect($reply->getUrl(), $reply->getType(), $reply->getMessage());
-        } elseif ($reply instanceof View) {
-            $content = $this->renderView($renderer, $reply);
-        } elseif ($reply instanceof Reply) {
-            $content = $reply->getData();
-        } else {
-            if (\XF::$debugMode) {
-                \XF::dump($reply);
-                exit;
-            }
-
-            throw new \InvalidArgumentException('Unsupported reply type: ' . get_class($reply));
+        if ($reply instanceof \Xfrocks\Api\Mvc\Reply\Api) {
+            return $reply->getData();
         }
 
-        $content = $this->app->renderPage($content, $reply, $renderer);
-        $content = $renderer->postFilter($content, $reply);
-
-        $response = $renderer->getResponse();
-
-        $response->body($content);
-
-        return $response;
+        return parent::renderView($renderer, $reply);
     }
 
     public function route($routePath)

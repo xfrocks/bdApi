@@ -23,6 +23,7 @@ class App extends \XF\Pub\App
 
         $container->extend('extension.classExtensions', function (array $classExtensions) {
             $classes = [
+                'XF\ControllerPlugin\Error',
                 'XF\Mvc\Dispatcher',
                 'XF\Mvc\Renderer\Json',
                 'XF\Session\Session'

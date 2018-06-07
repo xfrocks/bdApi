@@ -149,12 +149,23 @@ class Transformer
     /**
      * @param Selector $selector
      * @param Entity $entity
-     * @return array|null
+     * @return array
      */
     public function transformEntity($selector, $entity)
     {
         $handler = $this->handler($entity->structure()->shortName);
         $handler->reset($entity, null, $selector);
+        return $this->transform($handler);
+    }
+
+    /**
+     * @param \Exception $exception
+     * @return array
+     */
+    public function transformException($exception)
+    {
+        $handler = $this->handler('Xfrocks:Exception');
+        $handler->reset($exception, null, null);
         return $this->transform($handler);
     }
 

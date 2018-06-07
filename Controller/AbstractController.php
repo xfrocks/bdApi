@@ -9,7 +9,6 @@ use XF\Mvc\Reply\AbstractReply;
 use XF\Mvc\Reply\Redirect;
 use Xfrocks\Api\Data\Param;
 use Xfrocks\Api\Data\Params;
-use Xfrocks\Api\Mvc\Reply;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\Util\LazyTransformer;
@@ -23,7 +22,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
     /**
      * @param ParameterBag $params
-     * @return Reply
+     * @return \Xfrocks\Api\Mvc\Reply\Api
      */
     public function actionOptionsGeneric(ParameterBag $params)
     {
@@ -37,11 +36,11 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
     /**
      * @param array $data
-     * @return Reply
+     * @return \Xfrocks\Api\Mvc\Reply\Api
      */
     public function api(array $data)
     {
-        return new Reply($data);
+        return new \Xfrocks\Api\Mvc\Reply\Api($data);
     }
 
     /**
