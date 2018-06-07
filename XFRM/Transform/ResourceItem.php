@@ -288,6 +288,11 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         ];
     }
 
+    public function getNotFoundMessage()
+    {
+        return \XF::phrase('xfrm_requested_resource_not_found');
+    }
+
     protected function getAttachmentData()
     {
         static $contentType = 'resource_update';

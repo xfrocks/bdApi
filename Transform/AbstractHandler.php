@@ -116,6 +116,14 @@ abstract class AbstractHandler
     }
 
     /**
+     * @return \XF\Phrase|string|null
+     */
+    public function getNotFoundMessage()
+    {
+        return null;
+    }
+
+    /**
      * @param string $key
      * @return Selector|null
      */

@@ -124,20 +124,12 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
     public function finder($type)
     {
-        return parent::finder($type)
-            ->with($this->getFetchWith($type));
-    }
-
-    /**
-     * @param string $shortName
-     * @param array $extraWith
-     * @return array
-     */
-    public function getFetchWith($shortName, array $extraWith = [])
-    {
         /** @var Transformer $transformer */
         $transformer = $this->app->container('api.transformer');
-        return $transformer->getFetchWith($this, $shortName, $extraWith);
+        $handler = $transformer->handler($type);
+        $with = $handler->getFetchWith();
+
+        return parent::finder($type)->with($with);
     }
 
     /**
@@ -234,10 +226,14 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      */
     protected function assertViewableEntity($shortName, $id, array $extraWith = [])
     {
-        $with = $this->getFetchWith($shortName, $extraWith);
+        /** @var Transformer $transformer */
+        $transformer = $this->app->container('api.transformer');
+        $handler = $transformer->handler($shortName);
+        $with = $handler->getFetchWith($extraWith);
+
         $entity = $this->em()->find($shortName, $id, $with);
         if (!$entity) {
-            throw $this->exception($this->notFound());
+            throw $this->exception($this->notFound($handler->getNotFoundMessage()));
         }
 
         $canView = [$entity, 'canView'];

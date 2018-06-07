@@ -104,14 +104,7 @@ class ResourceItem extends AbstractController
         $theCategory = null;
         if ($params['resource_category_id'] > 0) {
             /** @var \XFRM\Entity\Category $theCategory */
-            $theCategory = $this->em()->find(
-                'XFRM:Category',
-                $params['resource_category_id'],
-                $this->getFetchWith('XFRM:Category')
-            );
-            if (empty($theCategory) || !$theCategory->canView()) {
-                return $this->noPermission();
-            }
+            $theCategory = $this->assertViewableEntity('XFRM:Category', $params['resource_category_id']);
         }
         if ($theCategory !== null) {
             $this->transformEntityIfNeeded($data, 'category', $theCategory);

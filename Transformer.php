@@ -5,7 +5,6 @@ namespace Xfrocks\Api;
 use XF\Container;
 use XF\Mvc\Entity\ArrayCollection;
 use XF\Mvc\Entity\Entity;
-use Xfrocks\Api\Controller\AbstractController;
 use Xfrocks\Api\Data\Modules;
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\Selector;
@@ -47,19 +46,6 @@ class Transformer
 
             return new $class($this->app, $this);
         });
-    }
-
-    /**
-     * @param AbstractController $controller
-     * @param string $shortName
-     * @param array $extraWith
-     * @return array
-     */
-    public function getFetchWith($controller, $shortName, array $extraWith = [])
-    {
-        /** @var AbstractHandler $handler */
-        $handler = $this->handler($shortName);
-        return $handler->getFetchWith($extraWith);
     }
 
     /**

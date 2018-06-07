@@ -234,6 +234,11 @@ class User extends AbstractHandler
         return $mappings;
     }
 
+    public function getNotFoundMessage()
+    {
+        return \XF::phrase('requested_user_not_found');
+    }
+
     public function reset($source, $parent, $selector)
     {
         parent::reset($source, $parent, $selector);
