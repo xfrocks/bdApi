@@ -15,6 +15,11 @@ class User extends AbstractController
         return $this->notFound();
     }
 
+    public function actionGetMe()
+    {
+        return $this->actionGetIndex($this->buildParamsForVisitor());
+    }
+
     protected function actionSingle($userId)
     {
         $user = $this->assertViewableUser($userId);
@@ -42,5 +47,16 @@ class User extends AbstractController
         }
 
         return $user;
+    }
+
+    /**
+     * @return ParameterBag
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    protected function buildParamsForVisitor()
+    {
+        $this->assertRegistrationRequired();
+
+        return new ParameterBag(['user_id' => \XF::visitor()->user_id]);
     }
 }
