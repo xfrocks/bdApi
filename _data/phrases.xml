@@ -11,6 +11,13 @@
   <phrase title="bdapi_client_secret" version_id="2000000" version_string="2.0.0"><![CDATA[API Secret]]></phrase>
   <phrase title="bdapi_clients" version_id="2000000" version_string="2.0.0"><![CDATA[API Clients]]></phrase>
   <phrase title="bdapi_home" version_id="2000000" version_string="2.0.0"><![CDATA[API Access]]></phrase>
+  <phrase title="bdapi_oauth2_error_access_denied" version_id="2000012" version_string="2.0.0 Alpha 2"><![CDATA[Access denied.]]></phrase>
+  <phrase title="bdapi_oauth2_error_invalid_client" version_id="2000012" version_string="2.0.0 Alpha 2"><![CDATA[Invalid client.]]></phrase>
+  <phrase title="bdapi_oauth2_error_invalid_grant" version_id="2000012" version_string="2.0.0 Alpha 2"><![CDATA[Invalid OAuth2 grant.]]></phrase>
+  <phrase title="bdapi_oauth2_error_invalid_scope" version_id="2000012" version_string="2.0.0 Alpha 2"><![CDATA[Invalid OAuth2 scope.]]></phrase>
+  <phrase title="bdapi_oauth2_error_unauthorized_client" version_id="2000012" version_string="2.0.0 Alpha 2"><![CDATA[Access denied.]]></phrase>
+  <phrase title="bdapi_oauth2_error_unsupported_grant_type" version_id="2000012" version_string="2.0.0 Alpha 2"><![CDATA[Unsupported OAuth2 grant type.]]></phrase>
+  <phrase title="bdapi_oauth2_error_unsupported_response_type" version_id="2000012" version_string="2.0.0 Alpha 2"><![CDATA[Unsupported OAuth2 response type.]]></phrase>
   <phrase title="bdapi_only_accepts_post_requests" version_id="2000000" version_string="2.0.0"><![CDATA[This entry point only accepts POST requests.]]></phrase>
   <phrase title="bdapi_please_confirm_to_authorize_access" version_id="2000000" version_string="2.0.0"><![CDATA[Please confirm to grant access to the listed client with the following permissions]]></phrase>
   <phrase title="bdapi_please_confirm_to_authorize_access_auto" version_id="2000011" version_string="2.0.0 Alpha 1"><![CDATA[You are trying to authorize with no `client_id` therefore a random client of yours is being used. For security reason, the implicit grant flow is used and no other flows are available. Please confirm to continue.]]></phrase>

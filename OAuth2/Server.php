@@ -408,10 +408,31 @@ class Server
      */
     protected function buildControllerException($controller, $e)
     {
-        $errors = [$e->getMessage()];
+        $errors = [];
+        if (!empty($e->errorType)) {
+            switch ($e->errorType) {
+                case 'access_denied':
+                case 'invalid_client':
+                case 'invalid_grant':
+                case 'invalid_scope':
+                case 'unauthorized_client':
+                case 'unsupported_grant_type':
+                case 'unsupported_response_type':
+                    $errors[] = \XF::phrase('bdapi_oauth2_error_' . $e->errorType);
+                    break;
+                case 'invalid_credentials':
+                    $errors[] = \XF::phrase('incorrect_password');
+                    break;
+                case 'server_error':
+                    $errors[] = \XF::phrase('server_error_occurred');
+                    break;
+            }
+        }
+        if (count($errors) === 0) {
+            $errors[] = $e->getMessage();
+        }
 
-        $shouldLog = \XF::$debugMode || ($e->httpStatusCode >= 500);
-        if ($shouldLog) {
+        if ($e->httpStatusCode >= 500) {
             \XF::logException($e, false, 'API:', true);
         }
 
