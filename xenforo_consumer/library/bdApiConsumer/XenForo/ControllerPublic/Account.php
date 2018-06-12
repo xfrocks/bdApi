@@ -45,52 +45,6 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
         return $response;
     }
 
-    public function actionNewPassword()
-    {
-        $session = XenForo_Application::getSession();
-        $verified = $session->isRegistered('bdApiConsumer_verified') ? $session->get('bdApiConsumer_verified'): null;
-        // 5 minutes
-        $verifiedTtl = 5 * 60;
-
-        if (!$verified || ($verified + $verifiedTtl) <= XenForo_Application::$time) {
-            return $this->responseNoPermission();
-        }
-
-        $userId = XenForo_Visitor::getUserId();
-
-        if ($this->isConfirmedPost()) {
-            $input = $this->_input->filter(array(
-                'password' => XenForo_Input::STRING,
-                'password_confirm' => XenForo_Input::STRING
-            ));
-
-            $writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
-            $writer->setExistingData($userId);
-            $writer->setPassword($input['password'], $input['password_confirm'], null, true);
-            $writer->save();
-
-            $session = XenForo_Application::getSession();
-            if ($session->get('password_date')) {
-                $session->set('password_date', $writer->get('password_date'));
-            }
-
-            $session->remove('bdApiConsumer_verified');
-            $session->save();
-
-            return $this->responseRedirect(
-                XenForo_ControllerResponse_Redirect::SUCCESS,
-                $this->_buildLink('account/security')
-            );
-        }
-
-        $view = $this->responseView(
-            'bdApiConsumer_ViewPublic_Account_SecurityUpdate',
-            'bdapi_consumer_account_security_update'
-        );
-
-        return $this->_getWrapper('account', 'security', $view);
-    }
-
     public function actionExternalAccounts()
     {
         $response = parent::actionExternalAccounts();
@@ -143,7 +97,53 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
         );
     }
 
-    public function actionConsumerSecurity()
+    public function actionExternalNewPassword()
+    {
+        $session = XenForo_Application::getSession();
+        $verified = $session->isRegistered('bdApiConsumer_verified') ? $session->get('bdApiConsumer_verified'): null;
+        // 5 minutes
+        $verifiedTtl = 5 * 60;
+
+        if (!$verified || ($verified + $verifiedTtl) <= XenForo_Application::$time) {
+            return $this->responseNoPermission();
+        }
+
+        $userId = XenForo_Visitor::getUserId();
+
+        if ($this->isConfirmedPost()) {
+            $input = $this->_input->filter(array(
+                'password' => XenForo_Input::STRING,
+                'password_confirm' => XenForo_Input::STRING
+            ));
+
+            $writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
+            $writer->setExistingData($userId);
+            $writer->setPassword($input['password'], $input['password_confirm'], null, true);
+            $writer->save();
+
+            $session = XenForo_Application::getSession();
+            if ($session->get('password_date')) {
+                $session->set('password_date', $writer->get('password_date'));
+            }
+
+            $session->remove('bdApiConsumer_verified');
+            $session->save();
+
+            return $this->responseRedirect(
+                XenForo_ControllerResponse_Redirect::SUCCESS,
+                $this->_buildLink('account/security')
+            );
+        }
+
+        $view = $this->responseView(
+            'bdApiConsumer_ViewPublic_Account_SecurityUpdate',
+            'bdapi_consumer_account_security_update'
+        );
+
+        return $this->_getWrapper('account', 'security', $view);
+    }
+
+    public function actionExternalVerify()
     {
         $code = $this->_input->filterSingle('code', XenForo_Input::STRING);
         $provider = bdApiConsumer_Option::getProviderByCode($code);
@@ -186,11 +186,11 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
 
             return $this->responseRedirect(
                 XenForo_ControllerResponse_Redirect::SUCCESS,
-                $this->_buildLink('account/new-password'),
+                $this->_buildLink('account/external/new-password'),
                 new XenForo_Phrase('bdapi_consumer_your_identity_was_verified')
             );
         }
-
+        
         $viewParams = [
             'provider' => $provider,
             'extraData' => $extraData

@@ -287,7 +287,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <template title="bdapi_consumer_account_security" version_id="1010100" version_string="1.1.0"><![CDATA[<xen:if is="{$bdApiConsumer_providers}">
 	<ul>
 		<xen:foreach loop="$bdApiConsumer_providers" value="$provider">
-			<li>{xen:phrase bdapi_consumer_or_reset_password_via} <a href="{xen:link 'account/consumer/security', false, 'code={$provider.code}'}"
+			<li>{xen:phrase bdapi_consumer_or_reset_password_via} <a href="{xen:link 'account/external/verify', false, 'code={$provider.code}'}"
 																	 class="OverlayTrigger" data-cacheoverlay="0">{$provider.name}</a></li>
 		</xen:foreach>
 	</ul>
@@ -297,7 +297,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 <xen:require css="account.css" />
 
 <form method="post" class="xenForm AutoValidator ContactDetailsForm"
-	action="{xen:link 'account/new-password'}"
+	action="{xen:link 'account/external/new-password'}"
 	data-redirect="yes">
 	
 	<fieldset>
@@ -322,7 +322,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 </form>]]></template>
     <template title="bdapi_consumer_account_security_verify" version_id="1010100" version_string="1.1.0"><![CDATA[<xen:title>{xen:phrase bdapi_consumer_verify_your_identity}</xen:title>
 
-<form action="{xen:link 'account/consumer/security'}" method="post" 
+<form action="{xen:link 'account/external/verify'}" method="post" 
 	  class="xenForm formOverlay AutoValidator" data-redirect="on">
 	<p>{xen:phrase bdapi_consumer_verify_your_identity_explain, 'boardTitle={$xenOptions.boardTitle}', 'provider={$provider.name}'}</p>
 	<dl class="ctrlUnit">
