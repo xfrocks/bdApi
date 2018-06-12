@@ -203,6 +203,18 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
                 return $this->responseError(new XenForo_Phrase('your_existing_password_is_not_correct'));
             }
 
+            if ($providerUser['user_id'] != $extraData['user_id']) {
+                XenForo_Error::logError(sprintf(
+                    'Invalid user id response from api $responseUserId=%d, $savedUserId=%d',
+                    $providerUser['user_id'],
+                    $extraData['user_id']
+                ));
+
+                return $this->responseError(
+                    new XenForo_Phrase('bdapi_consumer_cannot_verify_your_account_contact_to_admin')
+                );
+            }
+
             $session = XenForo_Application::getSession();
             $session->set('bdApiConsumer_verified', XenForo_Application::$time);
             $session->save();
@@ -210,7 +222,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
             return $this->responseRedirect(
                 XenForo_ControllerResponse_Redirect::SUCCESS,
                 $this->_buildLink('account/external/new-password'),
-                new XenForo_Phrase('bdapi_consumer_your_identity_was_verified')
+                new XenForo_Phrase('bdapi_consumer_your_identity_has_been_verified')
             );
         }
 

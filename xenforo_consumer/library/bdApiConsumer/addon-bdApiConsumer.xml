@@ -149,7 +149,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <phrase title="bdapi_consumer_login_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Login with {provider}]]></phrase>
     <phrase title="bdapi_consumer_matches_email_address_associated_with_your_x_account" version_id="1" version_string="0.9-dev"><![CDATA[This member matches the email address associated with your {provider} account.]]></phrase>
     <phrase title="bdapi_consumer_name" version_id="1" version_string="0.9-dev"><![CDATA[Provider Name]]></phrase>
-    <phrase title="bdapi_consumer_or_reset_password_via" version_id="1010100" version_string="1.1.0"><![CDATA[Or reset password via]]></phrase>
+    <phrase title="bdapi_consumer_or_reset_password_via_x" version_id="1010100" version_string="1.1.0"><![CDATA[Or reset password via <a href="{link}" class="OverlayTrigger" data-cacheoverlay="0">{name}</a>]]></phrase>
     <phrase title="bdapi_consumer_root" version_id="1" version_string="0.9-dev"><![CDATA[http://domain.com/xenforo/api]]></phrase>
     <phrase title="bdapi_consumer_sign_up_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Sign Up with {provider}]]></phrase>
     <phrase title="bdapi_consumer_take_over_avatar" version_id="19" version_string="0.9.8-dev"><![CDATA[Avatar]]></phrase>
@@ -163,7 +163,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <phrase title="bdapi_consumer_x_account_not_good_standing" version_id="10" version_string="0.9.4"><![CDATA[The connected {provider}'s account status is not in good standing. You may need to complete verification steps at {provider} before trying again.]]></phrase>
     <phrase title="bdapi_consumer_x_integration" version_id="15" version_string="0.9.6b"><![CDATA[{provider} Integration]]></phrase>
     <phrase title="bdapi_consumer_x_returned_unknown_error" version_id="1" version_string="0.9-dev"><![CDATA[{provider} returned an unknown error. Please try again later.]]></phrase>
-    <phrase title="bdapi_consumer_your_identity_was_verified" version_id="1010100" version_string="1.1.0"><![CDATA[You identity was verified]]></phrase>
+    <phrase title="bdapi_consumer_your_identity_has_been_verified" version_id="1010100" version_string="1.1.0"><![CDATA[You identity has been verified]]></phrase>
     <phrase title="bdapi_consumer_you_not_associated_with_x_account" version_id="8" version_string="0.9.2"><![CDATA[Your account is not currently associated with a {provider} account.]]></phrase>
     <phrase title="option_bdapi_consumer_autoLogin" version_id="16" version_string="0.9.7"><![CDATA[Sync logged-in cookie]]></phrase>
     <phrase title="option_bdapi_consumer_autoLogin_explain" version_id="16" version_string="0.9.7"><![CDATA[Use JavaScript to detect external logged-in status and let user login automatically.]]></phrase>
@@ -289,8 +289,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <template title="bdapi_consumer_account_security" version_id="1010100" version_string="1.1.0"><![CDATA[<xen:if is="{$bdApiConsumer_providers}">
 	<ul>
 		<xen:foreach loop="$bdApiConsumer_providers" value="$provider">
-			<li>{xen:phrase bdapi_consumer_or_reset_password_via} <a href="{xen:link 'account/external/verify', false, 'code={$provider.code}'}"
-																	 class="OverlayTrigger" data-cacheoverlay="0">{$provider.name}</a></li>
+			<li>{xen:phrase bdapi_consumer_or_reset_password_via_x, 'link={xen:link 'account/external/verify', false, 'code={$provider.code}'}', 'name={$provider.name}'}</li>
 		</xen:foreach>
 	</ul>
 </xen:if>]]></template>
