@@ -155,6 +155,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <phrase title="bdapi_consumer_take_over_login" version_id="16" version_string="0.9.7"><![CDATA[Login]]></phrase>
     <phrase title="bdapi_consumer_take_over_profile" version_id="16" version_string="0.9.7"><![CDATA[User Profile]]></phrase>
     <phrase title="bdapi_consumer_take_over_register" version_id="16" version_string="0.9.7"><![CDATA[Register]]></phrase>
+    <phrase title="bdapi_consumer_too_many_login_attempts_to_verify_account" version_id="1010100" version_string="1.1.0"><![CDATA[Too many login attempts to verify your identity.]]></phrase>
     <phrase title="bdapi_consumer_verify" version_id="1010100" version_string="1.1.0"><![CDATA[Verify]]></phrase>
     <phrase title="bdapi_consumer_verify_your_identity" version_id="1010100" version_string="1.1.0"><![CDATA[Verify your identity]]></phrase>
     <phrase title="bdapi_consumer_verify_your_identity_explain" version_id="1010100" version_string="1.1.0"><![CDATA[You haven't had a password at {boardTitle} so we will use your {provider} credentials to verify your identity.]]></phrase>

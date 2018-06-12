@@ -169,6 +169,18 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
         if ($this->isConfirmedPost()) {
             $password = $this->_input->filterSingle('password', XenForo_Input::STRING);
 
+            /** @var XenForo_Model_Login $loginModel */
+            $loginModel = $this->getModelFromCache('XenForo_Model_Login');
+            $tooManyAttempts = $loginModel->requireLoginCaptcha('bdapi_consumer_' . $extraData['username']);
+
+            if ($tooManyAttempts) {
+                return $this->responseError(
+                    new XenForo_Phrase('bdapi_consumer_too_many_login_attempts_to_verify_account')
+                );
+            }
+            
+            $loginModel->logLoginAttempt('bdapi_consumer_' . $extraData['username']);
+
             $token = bdApiConsumer_Helper_Api::getAccessTokenFromUsernamePassword($provider, $extraData['username'], $password);
             if (!$token) {
                 return $this->responseError(new XenForo_Phrase('your_existing_password_is_not_correct'));
@@ -190,7 +202,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
                 new XenForo_Phrase('bdapi_consumer_your_identity_was_verified')
             );
         }
-        
+
         $viewParams = [
             'provider' => $provider,
             'extraData' => $extraData
