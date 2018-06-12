@@ -6,14 +6,16 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
     {
         $response = parent::actionSecurity();
 
-        if (bdApiConsumer_Option::get('takeOver', 'login')) {
-            if ($response instanceof XenForo_ControllerResponse_View
-                && !empty($response->subView)
-                && empty($response->subView->params['hasPassword'])
-            ) {
+        if ($response instanceof XenForo_ControllerResponse_View
+            && !empty($response->subView)
+            && empty($response->subView->params['hasPassword'])
+        ) {
+            $visitor = XenForo_Visitor::getInstance();
+
+            if (bdApiConsumer_Option::get('takeOver', 'login')) {
                 /** @var bdApiConsumer_XenForo_Model_UserExternal $userExternalModel */
                 $userExternalModel = $this->getModelFromCache('XenForo_Model_UserExternal');
-                $auths = $userExternalModel->bdApiConsumer_getExternalAuthAssociations(XenForo_Visitor::getUserId());
+                $auths = $userExternalModel->bdApiConsumer_getExternalAuthAssociations($visitor['user_id']);
 
                 if (!empty($auths)) {
                     foreach ($auths as $auth) {
@@ -26,15 +28,8 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
                     }
                 }
             }
-        }
 
-        if ($response instanceof XenForo_ControllerResponse_View
-            && !empty($response->subView)
-        ) {
-            $visitor = XenForo_Visitor::getInstance();
-            if (empty($response->subView->params['hasPassword'])
-                && !empty($visitor['externalAuth'])
-            ) {
+            if (!empty($visitor['externalAuth'])) {
                 $providers = array();
                 foreach ($visitor['externalAuth'] as $providerCode => $externalAuthId) {
                     $provider = bdApiConsumer_Option::getProviderByCode($providerCode);
@@ -73,7 +68,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
             $writer->setExistingData($userId);
             $writer->setPassword($input['password'], $input['password_confirm'], null, true);
             $writer->save();
-            
+
             $session = XenForo_Application::getSession();
             if ($session->get('password_date')) {
                 $session->set('password_date', $writer->get('password_date'));
