@@ -165,6 +165,17 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
         }
 
         $extraData = XenForo_Helper_Php::safeUnserialize($externalData['extra_data']);
+        if (empty($extraData['username'])) {
+            XenForo_Error::logError(sprintf(
+                'Empty username in external auth data. $userId=%d, $extraData=%s',
+                $visitor['user_id'],
+                json_encode($extraData)
+            ));
+
+            return $this->responseError(
+                new XenForo_Phrase('bdapi_consumer_cannot_verify_your_account_contact_to_admin')
+            );
+        }
 
         if ($this->isConfirmedPost()) {
             $password = $this->_input->filterSingle('password', XenForo_Input::STRING);
@@ -178,7 +189,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
                     new XenForo_Phrase('bdapi_consumer_too_many_login_attempts_to_verify_account')
                 );
             }
-            
+
             $loginModel->logLoginAttempt('bdapi_consumer_' . $extraData['username']);
 
             $token = bdApiConsumer_Helper_Api::getAccessTokenFromUsernamePassword($provider, $extraData['username'], $password);

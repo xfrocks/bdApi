@@ -139,6 +139,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <phrase title="bdapi_consumer_auto_register_off" version_id="7" version_string="0.9.1"><![CDATA[Disabled]]></phrase>
     <phrase title="bdapi_consumer_auto_register_on" version_id="7" version_string="0.9.1"><![CDATA[Enabled]]></phrase>
     <phrase title="bdapi_consumer_being_auto_login_auto_register_x" version_id="21" version_string="0.9.8-dev"><![CDATA[Please wait while you are being logged in via {provider}.]]></phrase>
+    <phrase title="bdapi_consumer_cannot_verify_your_account_contact_to_admin" version_id="1010100" version_string="1.1.0"><![CDATA[Cannot verify your account. Please contact to Staff to resolve it.]]></phrase>
     <phrase title="bdapi_consumer_client_id" version_id="1" version_string="0.9-dev"><![CDATA[Client ID]]></phrase>
     <phrase title="bdapi_consumer_client_secret" version_id="1" version_string="0.9-dev"><![CDATA[Client Secret]]></phrase>
     <phrase title="bdapi_consumer_disassociate_x_account" version_id="8" version_string="0.9.2"><![CDATA[Disassociate {provider} Account]]></phrase>
