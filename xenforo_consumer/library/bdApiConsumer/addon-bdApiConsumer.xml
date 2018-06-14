@@ -352,12 +352,12 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 <span class="faint">{xen:phrase bdapi_consumer_alert_via_provider,
 	'link={$provider.root}',
 	'provider={$notificationProvider.name}'}</span>]]></template>
-    <template title="bdapi_consumer_auto_login_js" version_id="1000101" version_string="1.0.1"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} != '0'
+    <template title="bdapi_consumer_auto_login_js" version_id="1020000" version_string="1.2.0"><![CDATA[<xen:if is="{xen:helper bdApiConsumer_getOption, autoLogin} != '0'
 	AND {$visitor.user_id} == 0
 	AND {$controllerName} != 'XenForo_ControllerPublic_Login'
 	AND {$controllerName} != 'XenForo_ControllerPublic_Register'">
 	<xen:if hascontent="true">
-		<xen:require js="js/bdApiConsumer/login.js" />
+		<xen:require js="js/bdApiConsumer/login.min.js" />
 		<xen:contentcheck>
 			<xen:callback class="bdApiConsumer_Helper_Template" method="renderProviderInLoop">
 				<script src="{provider.root}/index.php?assets/sdk.js&prefix={provider.code}"
