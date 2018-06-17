@@ -16,9 +16,6 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
         // trigger auto loading of our classes
         class_exists('bdApi_Link');
 
-        $javascriptUrl = XenForo_Application::$javaScriptUrl;
-        XenForo_Application::$javaScriptUrl = bdApi_Link::convertUriToAbsoluteUri($javascriptUrl, true);
-
         $this->_javascriptUrlCallback = XenForo_Template_Helper_Core::$helperCallbacks['javascripturl'];
         if ($this->_javascriptUrlCallback[0] === 'self') {
             $this->_javascriptUrlCallback[0] = 'XenForo_Template_Helper_Core';
@@ -51,6 +48,9 @@ class bdApi_Dependencies_Base extends XenForo_Dependencies_Public
         );
 
         parent::preLoadData();
+
+        $javascriptUrl = XenForo_Application::$javaScriptUrl;
+        XenForo_Application::$javaScriptUrl = bdApi_Link::convertUriToAbsoluteUri($javascriptUrl, true);
     }
 
     protected function _handleCustomPreloadedData(array &$data)
