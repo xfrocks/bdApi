@@ -2,6 +2,19 @@
 
 class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_XenForo_ControllerPublic_Account
 {
+    public function actionContactDetails()
+    {
+        $response = parent::actionContactDetails();
+        if ($response instanceof XenForo_ControllerResponse_View
+            && !empty($response->subView)
+            && empty($response->subView->params['hasPassword'])
+        ) {
+            $response->subView->params['bdApiConsumer_providers'] = $this->_bdApiConsumer_getAuthProviders();
+        }
+
+        return $response;
+    }
+
     public function actionSecurity()
     {
         $response = parent::actionSecurity();
@@ -29,17 +42,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
                 }
             }
 
-            if (!empty($visitor['externalAuth'])) {
-                $providers = array();
-                foreach ($visitor['externalAuth'] as $providerCode => $externalAuthId) {
-                    $provider = bdApiConsumer_Option::getProviderByCode($providerCode);
-                    if ($provider) {
-                        $providers[$providerCode] = $provider;
-                    }
-                }
-
-                $response->subView->params['bdApiConsumer_providers'] = $providers;
-            }
+            $response->subView->params['bdApiConsumer_providers'] = $this->_bdApiConsumer_getAuthProviders();
         }
 
         return $response;
@@ -108,36 +111,68 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
             return $this->responseNoPermission();
         }
 
-        $userId = XenForo_Visitor::getUserId();
+        $visitor = XenForo_Visitor::getInstance();
+        $userId = $visitor['user_id'];
+        $changeType = $this->_input->filterSingle('type', XenForo_Input::STRING);
 
         if ($this->isConfirmedPost()) {
-            $input = $this->_input->filter(array(
-                'password' => XenForo_Input::STRING,
-                'password_confirm' => XenForo_Input::STRING
-            ));
-
+            /** @var XenForo_DataWriter_User $writer */
             $writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
             $writer->setExistingData($userId);
-            $writer->setPassword($input['password'], $input['password_confirm'], null, true);
+
+            if ($changeType === 'email') {
+                $newEmail = $this->_input->filterSingle('email', XenForo_Input::STRING);
+
+                /** @var XenForo_Model_UserChangeLog $changeLogModel */
+                $changeLogModel = $this->getModelFromCache('XenForo_Model_UserChangeLog');
+                $emailChanges = $changeLogModel->countChangeLogsSince(
+                    $userId,
+                    'email',
+                    XenForo_Application::$time - 3600
+                );
+
+                if ($emailChanges >= 3) {
+                    // only allow 3 email changes within an hour
+                    return $this->responseError(new XenForo_Phrase('your_email_may_not_be_changed_at_this_time'));
+                }
+
+                $writer->set('email', $newEmail);
+            } else {
+                $input = $this->_input->filter(array(
+                    'password' => XenForo_Input::STRING,
+                    'password_confirm' => XenForo_Input::STRING
+                ));
+
+                $writer->setPassword($input['password'], $input['password_confirm'], null, true);
+            }
+
             $writer->save();
 
-            $session = XenForo_Application::getSession();
-            if ($session->get('password_date')) {
+            if ($session->get('password_date') && $changeType !== 'email') {
                 $session->set('password_date', $writer->get('password_date'));
             }
 
             $session->remove('bdApiConsumer_verified');
             $session->save();
 
+            $redirectTarget = ($changeType === 'email')
+                ? $this->_buildLink('account/contact-details')
+                : $this->_buildLink('account/security');
+
             return $this->responseRedirect(
                 XenForo_ControllerResponse_Redirect::SUCCESS,
-                $this->_buildLink('account/security')
+                $redirectTarget
             );
         }
 
+        $viewParams = [
+            'changeType' => $changeType
+        ];
+
         $view = $this->responseView(
             'bdApiConsumer_ViewPublic_Account_SecurityUpdate',
-            'bdapi_consumer_account_security_update'
+            'bdapi_consumer_account_security_update',
+            $viewParams
         );
 
         return $this->_getWrapper('account', 'security', $view);
@@ -175,6 +210,11 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
             return $this->responseError(
                 new XenForo_Phrase('bdapi_consumer_cannot_verify_your_account_contact_to_admin')
             );
+        }
+
+        $changeType = $this->_input->filterSingle('type', XenForo_Input::STRING);
+        if ($changeType !== 'email') {
+            $changeType = 'password';
         }
 
         if ($this->isConfirmedPost()) {
@@ -221,14 +261,15 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
 
             return $this->responseRedirect(
                 XenForo_ControllerResponse_Redirect::SUCCESS,
-                $this->_buildLink('account/external/new-password'),
+                $this->_buildLink('account/external/new-password', null, ['type' => $changeType]),
                 new XenForo_Phrase('bdapi_consumer_your_identity_has_been_verified')
             );
         }
 
         $viewParams = [
             'provider' => $provider,
-            'extraData' => $extraData
+            'extraData' => $extraData,
+            'changeType' => $changeType
         ];
 
         return $this->responseView(
@@ -236,5 +277,22 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
             'bdapi_consumer_account_security_verify',
             $viewParams
         );
+    }
+
+    protected function _bdApiConsumer_getAuthProviders()
+    {
+        $visitor = XenForo_Visitor::getInstance();
+        $providers = array();
+
+        if (!empty($visitor['externalAuth'])) {
+            foreach ($visitor['externalAuth'] as $providerCode => $externalAuthId) {
+                $provider = bdApiConsumer_Option::getProviderByCode($providerCode);
+                if ($provider) {
+                    $providers[$providerCode] = $provider;
+                }
+            }
+        }
+
+        return $providers;
     }
 }
