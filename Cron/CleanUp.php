@@ -27,7 +27,10 @@ class CleanUp
         $cleanedUp['tokens'] = $tokenRepo->deleteExpiredTokens();
 
         if (\XF::$debugMode) {
-            File::log(__CLASS__, json_encode($cleanedUp));
+            $json = json_encode($cleanedUp);
+            if (is_string($json)) {
+                File::log(__CLASS__, $json);
+            }
         }
     }
 }

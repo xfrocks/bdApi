@@ -4,25 +4,28 @@ namespace Xfrocks\Api\Mvc\Reply;
 
 class Api extends \XF\Mvc\Reply\View
 {
-    protected $data = [];
-
     /**
-     * @noinspection PhpMissingParentConstructorInspection
-     *
      * @param array $data
      */
     public function __construct(array $data)
     {
-        $this->data = $data;
+        parent::__construct('', '', $data);
     }
 
+    /**
+     * @return array
+     */
     public function getData()
     {
-        return $this->data;
+        return $this->params;
     }
 
-    public function setData(array $params)
+    /**
+     * @param array $data
+     * @param bool $merge
+     */
+    public function setData(array $data, $merge = true)
     {
-        $this->data = \XF\Util\Arr::mapMerge($this->data, $params);
+        $this->setParams($data, $merge);
     }
 }

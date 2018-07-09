@@ -1,0 +1,1 @@
+Enter the maximum value for a request `limit` parameter. Enter 0 to have no limit.

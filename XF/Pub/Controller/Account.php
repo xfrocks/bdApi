@@ -89,8 +89,9 @@ class Account extends XFCP_Account
             'redirect_uri' => 'str'
         ]));
 
-        $client->setClientOptions($this->filter(
-            'options',
+        $options = $this->filter('options', 'array');
+        $client->setClientOptions($this->filterArray(
+            $options,
             [
                 'whitelisted_domains' => 'str'
             ]
@@ -173,7 +174,8 @@ class Account extends XFCP_Account
      */
     protected function getApiClientRepo()
     {
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return $this->repository('Xfrocks\Api:Client');
+        /** @var \Xfrocks\Api\Repository\Client $clientRepo */
+        $clientRepo = $this->repository('Xfrocks\Api:Client');
+        return $clientRepo;
     }
 }

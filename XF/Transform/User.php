@@ -107,7 +107,13 @@ class User extends AbstractHandler
                 if (empty($userAuth)) {
                     return false;
                 }
-                return $userAuth->getAuthenticationHandler()->hasPassword();
+
+                $handler = $userAuth->getAuthenticationHandler();
+                if (empty($handler)) {
+                    return false;
+                }
+
+                return $handler->hasPassword();
             case self::DYNAMIC_KEY_IS_FOLLOWED:
                 if (!$this->flagFullAccess) {
                     return null;

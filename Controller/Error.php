@@ -84,7 +84,8 @@ class Error extends AbstractController
      */
     protected function pluginError()
     {
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return $this->plugin('XF:Error');
+        /** @var \XF\ControllerPlugin\Error $errorPlugin */
+        $errorPlugin = $this->plugin('XF:Error');
+        return $errorPlugin;
     }
 }

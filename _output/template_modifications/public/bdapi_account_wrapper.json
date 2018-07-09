@@ -1,0 +1,9 @@
+{
+    "template": "account_wrapper",
+    "description": "Render account/api link.",
+    "execution_order": 10,
+    "enabled": true,
+    "action": "str_replace",
+    "find": "<!--[XF:settings_links:bottom]-->",
+    "replace": "$0\n<xf:include template=\"bdapi_account_wrapper\"/>"
+}

@@ -10,9 +10,16 @@ class Session extends XFCP_Session
 {
     const KEY_TOKEN = 'apiToken';
 
+    /**
+     * @var StorageInterface
+     */
+    private $_unusedStorage;
+
     public function __construct(StorageInterface $storage, array $config = [])
     {
         parent::__construct(new InMemoryStorage(), $config);
+
+        $this->_unusedStorage = $storage;
     }
 
     /**
@@ -51,13 +58,13 @@ class Session extends XFCP_Session
     }
 
     /**
-     * @param Token $token
+     * @param Token|null $token
      */
     public function setToken($token)
     {
         $this->__set(self::KEY_TOKEN, $token);
 
-        if ($token && $token->User) {
+        if ($token && $token->user_id > 0) {
             $this->changeUser($token->User);
         }
     }

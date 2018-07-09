@@ -1,0 +1,23 @@
+{
+    "bdApi_authCodeTTL.json": {
+        "hash": "b4e446ab89f79780d5feebc30db4b1cd"
+    },
+    "bdApi_paramLimitDefault.json": {
+        "hash": "3c27531eabd7183a898bd70cfc3f1779"
+    },
+    "bdApi_paramLimitMax.json": {
+        "hash": "a1f7f555f66b5b2bd764580571050448"
+    },
+    "bdApi_paramPageMax.json": {
+        "hash": "f105958153411491e0ac4fa2e7c81c2b"
+    },
+    "bdApi_refreshTokenTTLDays.json": {
+        "hash": "0e0669e64483b08378cb183ce1c7fe09"
+    },
+    "bdApi_restrictAccess.json": {
+        "hash": "ff2162ef2e2a81673654bd0df46f6021"
+    },
+    "bdApi_tokenTTL.json": {
+        "hash": "5717f8abd434e3672265f1d6672f7668"
+    }
+}

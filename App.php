@@ -64,11 +64,13 @@ class App extends \XF\Pub\App
 
     protected function onSessionCreation(Session $session)
     {
-        /** @var \Xfrocks\Api\XF\Session\Session $session */
         /** @var Server $apiServer */
         $apiServer = $this->container('api.server');
         $accessToken = $apiServer->parseRequest();
-        $session->setToken($accessToken ? $accessToken->getXfToken() : null);
+
+        /** @var \Xfrocks\Api\XF\Session\Session $apiSession */
+        $apiSession = $session;
+        $apiSession->setToken($accessToken ? $accessToken->getXfToken() : null);
     }
 
     protected function updateModeratorCaches()

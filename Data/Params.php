@@ -105,7 +105,7 @@ class Params implements \ArrayAccess
     /**
      * @param string $paramKeyExclude
      * @param string $paramKeyInclude
-     * @return $this
+     * @return Params
      */
     public function defineFieldsFiltering($paramKeyExclude = 'fields_exclude', $paramKeyInclude = 'fields_include')
     {
@@ -150,7 +150,16 @@ class Params implements \ArrayAccess
     public function filterCommaSeparatedIds($key)
     {
         $str = $this->filter($key);
-        return array_map('intval', preg_split('/[^0-9]/', $str, -1, PREG_SPLIT_NO_EMPTY));
+        if (!is_string($str)) {
+            return [];
+        }
+
+        $ids = preg_split('/[^0-9]/', $str, -1, PREG_SPLIT_NO_EMPTY);
+        if (!is_array($ids)) {
+            return [];
+        }
+
+        return array_map('intval', $ids);
     }
 
     /**

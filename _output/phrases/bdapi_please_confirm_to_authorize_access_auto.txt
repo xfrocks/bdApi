@@ -1,0 +1,1 @@
+You are trying to authorize with no `client_id` therefore a random client of yours is being used. For security reason, the implicit grant flow is used and no other flows are available. Please confirm to continue.

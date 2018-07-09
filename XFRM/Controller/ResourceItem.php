@@ -94,6 +94,7 @@ class ResourceItem extends AbstractController
         }
 
         $total = $finder->total();
+        /** @var \XFRM\Entity\ResourceItem[] $resources */
         $resources = $total > 0 ? $finder->fetch() : [];
 
         $data = [
@@ -152,7 +153,8 @@ class ResourceItem extends AbstractController
      */
     protected function assertViewableResource($resourceId, array $extraWith = [])
     {
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return $this->assertViewableEntity('XFRM:ResourceItem', $resourceId, $extraWith);
+        /** @var \XFRM\Entity\ResourceItem $resourceItem */
+        $resourceItem = $this->assertViewableEntity('XFRM:ResourceItem', $resourceId, $extraWith);
+        return $resourceItem;
     }
 }

@@ -12,7 +12,7 @@ class Param
     protected $default = null;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $description;
 
@@ -22,7 +22,7 @@ class Param
     protected $key;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $type;
 

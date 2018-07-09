@@ -2,7 +2,6 @@
 
 namespace Xfrocks\Api\Controller;
 
-use XF\Mvc\Entity\ArrayCollection;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\ParameterBag;
 use XF\Mvc\Reply\AbstractReply;
@@ -44,7 +43,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     }
 
     /**
-     * @param string $scope
+     * @param string|null $scope
      * @throws \XF\Mvc\Reply\Exception
      */
     public function assertApiScope($scope)
@@ -181,8 +180,9 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      */
     public function session()
     {
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return parent::session();
+        /** @var \Xfrocks\Api\XF\Session\Session $session */
+        $session = parent::session();
+        return $session;
     }
 
     /**
@@ -198,7 +198,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     }
 
     /**
-     * @param ArrayCollection|Entity[] $entities
+     * @param Entity[] $entities
      * @return LazyTransformer
      */
     public function transformEntitiesLazily($entities)

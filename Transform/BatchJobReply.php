@@ -77,10 +77,8 @@ class BatchJobReply extends AbstractHandler
 
     public function reset($source, $parent, $selector)
     {
-        /** @var AbstractReply $reply */
-        $reply = $source;
-        if ($reply instanceof \XF\Mvc\Reply\Exception) {
-            $this->reset($reply->getReply(), $parent, $selector);
+        if ($source instanceof \XF\Mvc\Reply\Exception) {
+            $this->reset($source->getReply(), $parent, $selector);
             return;
         }
 

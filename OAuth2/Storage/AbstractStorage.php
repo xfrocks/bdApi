@@ -68,7 +68,7 @@ abstract class AbstractStorage implements StorageInterface
      * @param string $shortName
      * @param string $textColumn
      * @param string $text
-     * @return TokenWithScope
+     * @return TokenWithScope|null
      */
     protected function doXfEntityFind($shortName, $textColumn, $text)
     {
@@ -76,14 +76,15 @@ abstract class AbstractStorage implements StorageInterface
             return $this->xfEntities[$text];
         }
 
-        $with = $this->getXfEntityWidth();
+        $with = $this->getXfEntityWith();
+
+        /** @var TokenWithScope|null $xfEntity */
         $xfEntity = $this->app->em()->findOne($shortName, [$textColumn => $text], $with);
 
         if (!empty($xfEntity)) {
             $this->xfEntities[$text] = $xfEntity;
         }
 
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $xfEntity;
     }
 
@@ -129,7 +130,7 @@ abstract class AbstractStorage implements StorageInterface
         return $apiServer->getScopeObjArrayFromStrArray($scopes, $this->server);
     }
 
-    protected function getXfEntityWidth()
+    protected function getXfEntityWith()
     {
         return [];
     }

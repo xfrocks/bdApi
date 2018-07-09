@@ -1,0 +1,12 @@
+{
+    "edit_format": "spinbox",
+    "edit_format_params": "min=5",
+    "data_type": "positive_integer",
+    "sub_options": [],
+    "validation_class": "",
+    "validation_method": "",
+    "default_value": "30",
+    "relations": {
+        "bdApi": 100
+    }
+}

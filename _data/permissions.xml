@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<permissions>
-  <permission permission_group_id="general" permission_id="bdApi_clientNew" permission_type="flag" interface_group_id="generalPermissions" display_order="9999"/>
-</permissions>

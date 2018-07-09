@@ -43,8 +43,9 @@ class SessionStorage extends AbstractStorage implements SessionInterface
 
     public function getByAccessToken(AccessTokenEntity $accessToken)
     {
-        /** @var AccessTokenHybrid $accessToken */
-        $xfToken = $accessToken->getXfToken();
+        /** @var AccessTokenHybrid $accessTokenHybrid */
+        $accessTokenHybrid = $accessToken;
+        $xfToken = $accessTokenHybrid->getXfToken();
 
         $result = new SessionEntity($this->server);
 
@@ -52,7 +53,7 @@ class SessionStorage extends AbstractStorage implements SessionInterface
         $result->setId($sessionId);
 
         $userId = $xfToken->user_id;
-        $result->setOwner(self::OWNER_TYPE_USER, $userId);
+        $result->setOwner(self::OWNER_TYPE_USER, strval($userId));
 
         $this->sessions[$sessionId] = [
             self::SESSION_KEY_CLIENT_ID => $xfToken->client_id,
@@ -65,8 +66,9 @@ class SessionStorage extends AbstractStorage implements SessionInterface
 
     public function getByAuthCode(AuthCodeEntity $authCode)
     {
-        /** @var AuthCodeHybrid $authCode */
-        $xfAuthCode = $authCode->getXfAuthCode();
+        /** @var AuthCodeHybrid $authCodeHybrid */
+        $authCodeHybrid = $authCode;
+        $xfAuthCode = $authCodeHybrid->getXfAuthCode();
 
         $session = new SessionEntity($this->server);
 
@@ -74,7 +76,7 @@ class SessionStorage extends AbstractStorage implements SessionInterface
         $session->setId($sessionId);
 
         $userId = $xfAuthCode->user_id;
-        $session->setOwner(self::OWNER_TYPE_USER, $userId);
+        $session->setOwner(self::OWNER_TYPE_USER, strval($userId));
 
         $this->sessions[$sessionId] = [
             self::SESSION_KEY_CLIENT_ID => $xfAuthCode->client_id,
@@ -102,7 +104,7 @@ class SessionStorage extends AbstractStorage implements SessionInterface
 
     public function create($ownerType, $ownerId, $clientId, $clientRedirectUri = null)
     {
-        $sessionId = md5(count($this->sessions));
+        $sessionId = md5(strval(count($this->sessions)));
 
         $cache = [
             self::SESSION_KEY_CLIENT_ID => $clientId,

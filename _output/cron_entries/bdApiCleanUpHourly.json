@@ -1,0 +1,17 @@
+{
+    "cron_class": "Xfrocks\\Api\\Cron\\CleanUp",
+    "cron_method": "runHourlyCleanUp",
+    "run_rules": {
+        "day_type": "dom",
+        "dom": [
+            -1
+        ],
+        "hours": [
+            -1
+        ],
+        "minutes": [
+            29
+        ]
+    },
+    "active": true
+}

@@ -3,9 +3,14 @@
 namespace Xfrocks\Api\Entity;
 
 use XF\Mvc\Entity\Entity;
+use XF\Mvc\Entity\Structure;
 use Xfrocks\Api\Listener;
 
 /**
+ * COLUMNS
+ * @property string scope
+ *
+ * GETTERS
  * @property array scopes
  */
 abstract class TokenWithScope extends Entity
@@ -34,11 +39,16 @@ abstract class TokenWithScope extends Entity
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getScopes()
     {
-        return array_map('trim', preg_split('#\s#', $this->scope, -1, PREG_SPLIT_NO_EMPTY));
+        $scopes = preg_split('#\s#', $this->scope, -1, PREG_SPLIT_NO_EMPTY);
+        if (!is_array($scopes)) {
+            return [];
+        }
+
+        return array_map('trim', $scopes);
     }
 
     /**
@@ -63,5 +73,13 @@ abstract class TokenWithScope extends Entity
         $this->set('scope', implode(' ', $scopes));
 
         unset($this->_getterCache['scopes']);
+    }
+
+    public static function getStructure(Structure $structure)
+    {
+        $structure->columns = ['scope' => ['type' => self::STR]];
+        $structure->getters = ['scopes' => true];
+
+        return $structure;
     }
 }

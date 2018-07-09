@@ -1,0 +1,72 @@
+<xf:macro name="list_item" arg-client="!">
+    <div class="contentRow">
+        <div class="contentRow-main">
+            <h3 class="contentRow-header">
+                <a href="{$client.redirect_uri}" target="_blank">{$client.name}</a>
+            </h3>
+
+            <div class="contentRow-lesser" dir="auto">
+                {$client.description}
+            </div>
+
+            <div class="contentRow-minor">
+                <ul class="listInline listInline--bullet">
+                    <li>
+                        <dl class="pairs pairs--inline">
+                            <dt>{{ phrase('bdapi_client_id') }}</dt>
+                            <dd>{$client.client_id}</dd>
+                        </dl>
+                    </li>
+                    <li>
+                        <dl class="pairs pairs--inline">
+                            <dt>{{ phrase('bdapi_client_secret') }}</dt>
+                            <dd>{$client.client_secret}</dd>
+                        </dl>
+                    </li>
+                    <li>
+                        <a href="{{ link('account/api/client-edit', null, {'client_id': {$client.client_id}}) }}"
+                           data-xf-click="overlay">
+                            {{ phrase('edit') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ link('account/api/client-delete', null, {'client_id': {$client.client_id}}) }}"
+                           data-xf-click="overlay">
+                            {{ phrase('delete') }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</xf:macro>
+
+<xf:macro name="form" arg-client="">
+    <xf:form action="{{ link('account/api/client-save') }}" class="block" ajax="true">
+        <div class="block-container">
+            <div class="block-body">
+                <xf:textboxrow label="{{ phrase('bdapi_client_name') }}" name="name" value="{$client.name}"/>
+
+                <xf:textarearow label="{{ phrase('bdapi_client_description') }}" name="description"
+                                value="{$client.description}"/>
+
+                <xf:textboxrow label="{{ phrase('bdapi_client_redirect_uri') }}"
+                               name="redirect_uri"
+                               type="url"
+                               value="{$client.redirect_uri}"/>
+
+                <xf:textarearow explain="{{ phrase('bdapi_whitelisted_domains_explain') }}"
+                                hint="{{ phrase('optional') }}"
+                                label="{{ phrase('bdapi_whitelisted_domains') }}"
+                                name="options[whitelisted_domains]"
+                                value="{$client.options.whitelisted_domains}"/>
+            </div>
+
+            <xf:if is="{$client}">
+                <xf:hiddenval name="client_id" value="{$client.client_id}"/>
+            </xf:if>
+
+            <xf:submitrow icon="save" sticky="true"/>
+        </div>
+    </xf:form>
+</xf:macro>

@@ -24,7 +24,7 @@ class OAuth2 extends AbstractController
     /**
      * @param string $username
      * @param string $password
-     * @return int
+     * @return int|false
      * @throws \XF\Mvc\Reply\Exception
      */
     public function verifyCredentials($username, $password)

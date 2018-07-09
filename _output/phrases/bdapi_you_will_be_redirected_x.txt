@@ -1,0 +1,1 @@
+You will be redirected back to <a href="{redirectUri}">{clientName}</a>.

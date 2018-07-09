@@ -1,0 +1,1 @@
+This entry point only accepts POST requests.

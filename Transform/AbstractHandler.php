@@ -35,12 +35,12 @@ abstract class AbstractHandler
     protected $app;
 
     /**
-     * @var AbstractHandler
+     * @var AbstractHandler|null
      */
     protected $parent;
 
     /**
-     * @var Selector
+     * @var Selector|null
      */
     protected $selector;
 
@@ -138,8 +138,8 @@ abstract class AbstractHandler
 
     /**
      * @param mixed $source
-     * @param AbstractHandler $parent
-     * @param Selector $selector
+     * @param AbstractHandler|null $parent
+     * @param Selector|null $selector
      */
     public function reset($source, $parent, $selector)
     {
@@ -211,7 +211,7 @@ abstract class AbstractHandler
 
     /**
      * @param string $key
-     * @param $string
+     * @param string $string
      * @param array $options
      * @return string
      */

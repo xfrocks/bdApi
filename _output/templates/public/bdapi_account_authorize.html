@@ -1,0 +1,42 @@
+<xf:title>{{ phrase('bdapi_authorize_access') }}</xf:title>
+
+<xf:wrap template="account_wrapper"/>
+
+<xf:form action="{{ link('account/authorize', null, $linkParams) }}" class="block">
+    <div class="block-container">
+        <div class="block-body">
+            <xf:formrow label="">
+                <xf:if is="$clientIsAuto">
+                    {{ phrase('bdapi_please_confirm_to_authorize_access_auto') }}
+
+                    <xf:else/>
+                    {{ phrase('bdapi_please_confirm_to_authorize_access:') }}
+                </xf:if>
+            </xf:formrow>
+
+            <xf:formrow label="{{ phrase('bdapi_client') }}"
+                        explain="{$client.description}">
+                {$client.name}
+            </xf:formrow>
+
+            <xf:checkboxrow label="{{ phrase('bdapi_requested_scopes') }}">
+                <xf:foreach loop="$needAuthScopes" key="$scopeId" value="$scopeDescription">
+                    <xf:option name="scopes[]" value="{$scopeId}" checked="1">
+                        {$scopeDescription}
+                    </xf:option>
+                </xf:foreach>
+            </xf:checkboxrow>
+
+            <xf:formrow label="">
+                {{ phrase('bdapi_you_will_be_redirected_x', {
+                'redirectUri': {$linkParams.redirect_uri},
+                'clientName': {$client.name}
+                }) }}
+            </xf:formrow>
+        </div>
+
+        <xf:hiddenval name="client_id" value="{$client.client_id}"/>
+
+        <xf:submitrow icon="lock" sticky="true" submit="{{ phrase('bdapi_authorize_access') }}"/>
+    </div>
+</xf:form>

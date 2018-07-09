@@ -1,0 +1,1 @@
+Enable this option to deny access to the API if no authentication is provided. Guest access it still possible with <a href="https://github.com/xfrocks/bdApi/blob/master/docs/api.markdown#one-time-token" target="_blank" tabindex="-1">One Time Token</a>.

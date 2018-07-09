@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<cron>
-  <entry entry_id="bdApiCleanUpHourly" cron_class="Xfrocks\Api\Cron\CleanUp" cron_method="runHourlyCleanUp" active="1"><![CDATA[{"day_type":"dom","dom":[-1],"hours":[-1],"minutes":[29]}]]></entry>
-</cron>

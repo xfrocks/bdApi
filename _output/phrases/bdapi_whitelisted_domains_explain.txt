@@ -1,0 +1,1 @@
+In addition to Redirect URI, the system will also allow redirection to these domains. Each domain must be in a new line and may have wildcard, for example: "*.domain.com". To enable redirection to all domains, use "*" although it is not recommended for security reason.

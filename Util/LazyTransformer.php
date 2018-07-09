@@ -2,7 +2,6 @@
 
 namespace Xfrocks\Api\Util;
 
-use XF\Mvc\Entity\ArrayCollection;
 use XF\Mvc\Entity\Entity;
 use Xfrocks\Api\Controller\AbstractController;
 use Xfrocks\Api\Transform\Selector;
@@ -16,7 +15,7 @@ class LazyTransformer
     protected $entity = null;
 
     /**
-     * @var ArrayCollection|Entity[]|null
+     * @var Entity[]|null
      */
     protected $entities = null;
 
@@ -57,7 +56,7 @@ class LazyTransformer
     }
 
     /**
-     * @param ArrayCollection|Entity[] $entities
+     * @param Entity[] $entities
      */
     public function setEntities($entities)
     {

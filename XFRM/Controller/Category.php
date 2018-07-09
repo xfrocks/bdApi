@@ -17,6 +17,7 @@ class Category extends AbstractController
         $user = \XF::visitor();
         $user->cacheResourceCategoryPermissions();
 
+        /** @var \XFRM\Entity\Category[] $categories */
         $categories = $this->finder('XFRM:Category')
             ->order('lft')
             ->fetch()
@@ -48,7 +49,8 @@ class Category extends AbstractController
      */
     protected function assertViewableCategory($resourceCategoryId, array $extraWith = [])
     {
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return $this->assertViewableEntity('XFRM:Category', $resourceCategoryId, $extraWith);
+        /** @var \XFRM\Entity\Category $category */
+        $category = $this->assertViewableEntity('XFRM:Category', $resourceCategoryId, $extraWith);
+        return $category;
     }
 }

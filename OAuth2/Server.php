@@ -384,8 +384,10 @@ class Server
             return null;
         }
 
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return $resourceServer->getAccessToken();
+        /** @var AccessTokenHybrid|null $accessTokenHybrid */
+        $accessTokenHybrid = $resourceServer->getAccessToken();
+
+        return $accessTokenHybrid;
     }
 
     /**

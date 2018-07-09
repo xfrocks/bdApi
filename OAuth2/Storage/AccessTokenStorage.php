@@ -82,8 +82,9 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
 
     public function getScopes(AccessTokenEntity $token)
     {
-        /** @var AccessTokenHybrid $token */
-        return $this->scopeBuildObjArrayFromStrArray($token->getXfToken()->scopes);
+        /** @var AccessTokenHybrid $accessTokenHybrid */
+        $accessTokenHybrid = $token;
+        return $this->scopeBuildObjArrayFromStrArray($accessTokenHybrid->getXfToken()->scopes);
     }
 
     /**
@@ -99,7 +100,7 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
         return $this->get($token->getId());
     }
 
-    protected function getXfEntityWidth()
+    protected function getXfEntityWith()
     {
         /** @var User $userRepo */
         $userRepo = $this->app->repository('XF:User');

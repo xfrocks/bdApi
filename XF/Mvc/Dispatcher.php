@@ -41,11 +41,15 @@ class Dispatcher extends XFCP_Dispatcher
 
     public function getRouter()
     {
-        if (!$this->router) {
-            $this->router = $this->app->router('api');
+        /** @var Router|null $router */
+        $router = $this->router;
+
+        if (!$router) {
+            $router = $this->app->router('api');
+            $this->router = $router;
         }
 
-        return $this->router;
+        return $router;
     }
 
     public function renderView(\XF\Mvc\Renderer\AbstractRenderer $renderer, \XF\Mvc\Reply\View $reply)

@@ -1,0 +1,20 @@
+<xf:title>{{ phrase('confirm_action') }}</xf:title>
+
+<xf:wrap template="account_wrapper"/>
+
+<xf:form action="{{ link('account/api/client-delete') }}" ajax="true" class="block">
+    <div class="block-container">
+        <div class="block-body">
+            <xf:inforow rowtype="confirm">
+                {{ phrase('please_confirm_that_you_want_to_delete_following:') }}
+                <strong>
+                    <a href="{$client.redirect_uri}" target="_blank">{$client.name}</a>
+                    ({{ phrase('bdapi_client_id:') }} {$client.client_id})
+                </strong>
+            </xf:inforow>
+        </div>
+
+        <xf:hiddenval name="client_id" value="{$client.client_id}"/>
+        <xf:submitrow rowtype="simple" icon="delete"/>
+    </div>
+</xf:form>

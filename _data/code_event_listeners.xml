@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<code_event_listeners>
-  <listener event_id="app_pub_setup" execute_order="10" callback_class="Xfrocks\Api\Listener" callback_method="appPubSetup" active="1"/>
-</code_event_listeners>

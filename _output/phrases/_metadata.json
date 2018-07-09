@@ -1,0 +1,302 @@
+{
+    "bdapi_authorize_access.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "256fa54aaaade8674e5034bffa6e3b0b"
+    },
+    "bdapi_client.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "577d7068826de925ea2aec01dbadf5e4"
+    },
+    "bdapi_client_add.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "a3401a36929da1f4e0ee28f9d5d52ba7"
+    },
+    "bdapi_client_description.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "b5a7adde1af5c87d7fd797b6245c2a39"
+    },
+    "bdapi_client_edit.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "49c18084f9912495404084a74b517761"
+    },
+    "bdapi_client_id.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "d876ff8da67c3731ae25d8335a4168b4"
+    },
+    "bdapi_client_name.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "d1ab8bc9b4ddc9a0e4369f860f7b2ccf"
+    },
+    "bdapi_client_redirect_uri.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "27499763cc523271e74f32ff4f740a7f"
+    },
+    "bdapi_client_secret.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "1ddec0f92f297e937bdf409977df0c02"
+    },
+    "bdapi_clients.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "3f362d88e7d47807cec60a6529cda796"
+    },
+    "bdapi_home.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "bbe1851a4bf6476f10ba4c77ec78d11d"
+    },
+    "bdapi_oauth2_error_access_denied.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "652122103181aa2752efaecab300edf0"
+    },
+    "bdapi_oauth2_error_invalid_client.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "7eb05314a948c1be042a9af76065fb0b"
+    },
+    "bdapi_oauth2_error_invalid_grant.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "7f874c8865e3eb49e02dc61bb38b0631"
+    },
+    "bdapi_oauth2_error_invalid_scope.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "870330b19733ae8a8d77c0420237ea43"
+    },
+    "bdapi_oauth2_error_unauthorized_client.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "652122103181aa2752efaecab300edf0"
+    },
+    "bdapi_oauth2_error_unsupported_grant_type.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "746020de8d7ed6467d307c063e15362e"
+    },
+    "bdapi_oauth2_error_unsupported_response_type.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "cb7c0e685ae4f06a7d59dba8b9526dc0"
+    },
+    "bdapi_only_accepts_post_requests.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "a830766e0d0c74739f421176ffc5a189"
+    },
+    "bdapi_please_confirm_to_authorize_access.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "c2c231c0b6e1a403cbb68f90360f132c"
+    },
+    "bdapi_please_confirm_to_authorize_access_auto.txt": {
+        "global_cache": false,
+        "version_id": 2000011,
+        "version_string": "2.0.0 Alpha 1",
+        "hash": "7da2f3cf0c8413bc87aa5bf34b78bdaa"
+    },
+    "bdapi_requested_client_not_found.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "bfbf83bdff82a69c2b80b4c90303ec84"
+    },
+    "bdapi_requested_scopes.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "4fe90555d2b744eb298b1a50278fb07e"
+    },
+    "bdapi_scope_admincp.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "504b4b5a7ef4daf18a2fd726015b28a4"
+    },
+    "bdapi_scope_conversate.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "01f32e12ad16daf7446ef2934f2b1a13"
+    },
+    "bdapi_scope_post.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "938ee37831193f5ba2e4aef21bc9dc92"
+    },
+    "bdapi_scope_read.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "8e232569dc4d66a9342f2274b1f41fe8"
+    },
+    "bdapi_scope_usercp.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "b6f477420ad193e4e57618952e8570e9"
+    },
+    "bdapi_slash_batch_requires_json.txt": {
+        "global_cache": false,
+        "version_id": 2000011,
+        "version_string": "2.0.0 Alpha 1",
+        "hash": "fb0d1eb2316a30f4aef20628b3f650b9"
+    },
+    "bdapi_whitelisted_domains.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "42efd94115055ed0bdae97a299375d87"
+    },
+    "bdapi_whitelisted_domains_explain.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "c2dec20d1853caee52c94e0ef0132e9e"
+    },
+    "bdapi_you_will_be_redirected_x.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "cedda3e52b20658c4d4e15780b44105c"
+    },
+    "cron_entry.bdApiCleanUpHourly.txt": {
+        "global_cache": false,
+        "version_id": 2000011,
+        "version_string": "2.0.0 Alpha 1",
+        "hash": "42e7eafeb3c952760353720fcef891c0"
+    },
+    "option.bdApi_authCodeTTL.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "b6625714888627165777b2080daa5269"
+    },
+    "option.bdApi_paramLimitDefault.txt": {
+        "global_cache": false,
+        "version_id": 2000011,
+        "version_string": "2.0.0 Alpha 1",
+        "hash": "3a036587014068642e9d40fca05b0c22"
+    },
+    "option.bdApi_paramLimitMax.txt": {
+        "global_cache": false,
+        "version_id": 2000011,
+        "version_string": "2.0.0 Alpha 1",
+        "hash": "bb359a5b51ddfa790521e8346dd306b3"
+    },
+    "option.bdApi_paramPageMax.txt": {
+        "global_cache": false,
+        "version_id": 2000011,
+        "version_string": "2.0.0 Alpha 1",
+        "hash": "adaf87680c83c38ec9d56867abb630f4"
+    },
+    "option.bdApi_refreshTokenTTLDays.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "767beea1c2eb64b1d650159a2794b16c"
+    },
+    "option.bdApi_restrictAccess.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "34faac305878c1caba32fa0e4ced9e23"
+    },
+    "option.bdApi_tokenTTL.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "41f6cd1daf504b93ffde06aa9e45ef4b"
+    },
+    "option_explain.bdApi_authCodeTTL.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "ba56fdafd8809f135ed9aabc6599fd56"
+    },
+    "option_explain.bdApi_paramLimitDefault.txt": {
+        "global_cache": false,
+        "version_id": 2000011,
+        "version_string": "2.0.0 Alpha 1",
+        "hash": "ba8cea81b0d1512f58c7725e3528bae7"
+    },
+    "option_explain.bdApi_paramLimitMax.txt": {
+        "global_cache": false,
+        "version_id": 2000011,
+        "version_string": "2.0.0 Alpha 1",
+        "hash": "cb1485735ed198f46df25ab731b115a5"
+    },
+    "option_explain.bdApi_paramPageMax.txt": {
+        "global_cache": false,
+        "version_id": 2000011,
+        "version_string": "2.0.0 Alpha 1",
+        "hash": "06ed2a9928d193e8d79efb8875e1ea20"
+    },
+    "option_explain.bdApi_refreshTokenTTLDays.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "95fd017260d08b3bf38f271c7b9876b0"
+    },
+    "option_explain.bdApi_restrictAccess.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "b616b9028b34d09facb37b7aefd8429c"
+    },
+    "option_explain.bdApi_tokenTTL.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "5ce5b570bba867e981e38d8d284ecc18"
+    },
+    "option_group.bdApi.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "caa09fcc5fecfa1a8a0af20151f7d195"
+    },
+    "option_group_description.bdApi.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "permission.general_bdApi_clientNew.txt": {
+        "global_cache": false,
+        "version_id": 2000000,
+        "version_string": "2.0.0",
+        "hash": "4d347f22959e9fb406f375d0744e9db5"
+    }
+}

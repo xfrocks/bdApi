@@ -17,7 +17,7 @@ class Attachment extends AbstractController
 
     protected function actionSingle($attachmentId)
     {
-        /** @var \XF\Entity\Attachment $attachment */
+        /** @var \XF\Entity\Attachment|null $attachment */
         $attachment = $this->em()->find('XF:Attachment', $attachmentId);
         if (!$attachment) {
             throw $this->exception($this->notFound());
