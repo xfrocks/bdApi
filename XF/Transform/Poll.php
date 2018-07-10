@@ -2,6 +2,7 @@
 
 namespace Xfrocks\Api\XF\Transform;
 
+use XF\Mvc\Entity\ArrayCollection;
 use Xfrocks\Api\Transform\AbstractHandler;
 
 class Poll extends AbstractHandler
@@ -40,7 +41,10 @@ class Poll extends AbstractHandler
             case self::DYNAMIC_KEY_IS_VOTED:
                 return $poll->hasVoted();
             case self::DYNAMIC_KEY_RESPONSES:
-                return $this->transformer->transformSubEntities($this, $key, $poll->Responses);
+                /** @var \XF\Entity\PollResponse[]|ArrayCollection $responses */
+                $responses = $poll->Responses;
+
+                return $this->transformer->transformSubEntities($this, $key, $responses);
         }
 
         return null;

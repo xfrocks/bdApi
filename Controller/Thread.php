@@ -46,6 +46,7 @@ class Thread extends AbstractController
         $this->applyFilters($finder, $params);
 
         $total = $finder->total();
+        /** @var \XF\Entity\Thread[] $threads */
         $threads = $total > 0 ? $finder->fetch() : [];
 
         $data = [
@@ -127,7 +128,7 @@ class Thread extends AbstractController
         $params->limitFinderByPage($finder);
 
         if ($params['forum_id'] > 0) {
-            /** @var Forum|null $forum */
+            /** @var Forum $forum */
             $forum = $this->assertViewableEntity('XF:Forum', $params['forum_id']);
             $finder->applyVisibilityChecksInForum($forum);
         }
@@ -163,13 +164,14 @@ class Thread extends AbstractController
     }
 
     /**
-     * @param $threadId
+     * @param int $threadId
      * @param array $extraWith
      * @return \XF\Entity\Thread
      * @throws \XF\Mvc\Reply\Exception
      */
     protected function assertViewableThread($threadId, array $extraWith = [])
     {
+        /** @var \XF\Entity\Thread $thread */
         $thread = $this->assertViewableEntity('XF:Thread', $threadId, $extraWith);
 
         return $thread;

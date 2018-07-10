@@ -2,6 +2,7 @@
 
 namespace Xfrocks\Api\XF\Transform;
 
+use XF\Entity\Forum;
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\AttachmentParent;
 
@@ -190,10 +191,12 @@ class Post extends AbstractHandler implements AttachmentParent
         $post = $this->source;
         $canDelete = false;
 
-        if ($post->Thread
-            && $post->Thread->Forum
-            && $post->Thread->Forum->canUploadAndManageAttachments()
-        ) {
+        /** @var \XF\Entity\Thread|null $thread */
+        $thread = $post->Thread;
+        /** @var Forum|null $forum */
+        $forum = $thread ? $thread->Forum : null;
+
+        if ($forum && $forum->canUploadAndManageAttachments()) {
             $attachmentData = $this->getAttachmentData();
             /** @var \XF\Attachment\AbstractHandler $attachmentHandler */
             $attachmentHandler = $attachmentData['handler'];

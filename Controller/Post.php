@@ -41,6 +41,7 @@ class Post extends AbstractController
         $this->applyFilters($finder, $params);
 
         $total = $finder->total();
+        /** @var \XF\Entity\Post[] $posts */
         $posts = $total > 0 ? $finder->fetch() : [];
 
         $data = [
@@ -93,13 +94,14 @@ class Post extends AbstractController
     }
 
     /**
-     * @param $postId
+     * @param int $postId
      * @param array $extraWith
      * @return \XF\Entity\Post
      * @throws \XF\Mvc\Reply\Exception
      */
     protected function assertViewablePost($postId, array $extraWith = [])
     {
+        /** @var \XF\Entity\Post $post */
         $post = $this->assertViewableEntity('XF:Post', $postId, $extraWith);
 
         return $post;

@@ -92,15 +92,23 @@ class Thread extends AbstractHandler
                     return null;
                 }
 
-                if (!$thread->Prefix) {
+                /** @var \XF\Entity\ThreadPrefix|null $prefix */
+                $prefix = $thread->Prefix;
+                if (!$prefix) {
                     return null;
                 }
 
-                return [$this->transformer->transformSubEntity($this, $key, $thread->Prefix)];
+                return [$this->transformer->transformSubEntity($this, $key, $prefix)];
             case self::DYNAMIC_KEY_TAGS:
                 return $this->transformer->transformTags($this, $thread->tags);
             case self::DYNAMIC_KEY_POLL:
-                if (!$thread->Poll) {
+                if ($thread->discussion_type !== 'poll') {
+                    return null;
+                }
+
+                /** @var \XF\Entity\Poll|null $poll */
+                $poll = $thread->Poll;
+                if (!$poll) {
                     return null;
                 }
 

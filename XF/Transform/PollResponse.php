@@ -32,12 +32,14 @@ class PollResponse extends AbstractHandler
         $response = $this->source;
 
         if ($this->poll === null) {
-            $this->poll = $this->app->em()->find('XF:Poll', $response->poll_id);
+            /** @var \XF\Entity\Poll|null $poll */
+            $poll = $this->app->em()->find('XF:Poll', $response->poll_id);
+            $this->poll = $poll;
         }
 
         switch ($key) {
             case self::DYNAMIC_KEY_IS_VOTED:
-                return $this->poll->hasVoted($response->poll_response_id);
+                return $this->poll && $this->poll->hasVoted($response->poll_response_id);
         }
 
         return null;
