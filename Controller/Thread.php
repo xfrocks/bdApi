@@ -64,6 +64,36 @@ class Thread extends AbstractController
         return $this->api($data);
     }
 
+    public function actionPostIndex()
+    {
+        throw new \LogicException('Not implemented!');
+    }
+
+    public function actionPostAttachments()
+    {
+        throw new \LogicException('Not implemented!');
+    }
+
+    public function actionDeleteAttachments()
+    {
+        throw new \LogicException('Not implemented!');
+    }
+
+    public function actionGetFollowers(ParameterBag $params)
+    {
+        throw new \LogicException('Not implemented!');
+    }
+
+    public function actionPostFollowers(ParameterBag $params)
+    {
+        throw new \LogicException('Not implemented!');
+    }
+
+    public function actionDeleteFollowers(ParameterBag $params)
+    {
+        throw new \LogicException('Not implemented!');
+    }
+
     public function actionMultiple(array $ids)
     {
         $threads = [];
@@ -133,7 +163,7 @@ class Thread extends AbstractController
 
             $pageNavParams['sticky'] = $params['sticky'];
         }
-        
+
         if ($params['thread_prefix_id'] > 0) {
             $finder->where('prefix_id', $params['thread_prefix_id']);
             $pageNavParams['thread_prefix_id'] = $params['thread_prefix_id'];
