@@ -11,26 +11,27 @@ class Post extends AbstractHandler implements AttachmentParent
     const ATTACHMENT__DYNAMIC_KEY_ID = 'post_id';
     const ATTACHMENT__LINK_POST = 'post';
 
+    const KEY_ATTACHMENT_COUNT = 'post_attachment_count';
+    const KEY_CREATE_DATE = 'post_create_date';
     const KEY_ID = 'post_id';
-    const KEY_THREAD_ID = 'thread_id';
+    const KEY_LIKE_COUNT = 'post_like_count';
+    const KEY_UPDATE_DATE = 'post_update_date';
     const KEY_POSTER_USER_ID = 'poster_user_id';
     const KEY_POSTER_USERNAME = 'poster_username';
-    const KEY_CREATE_DATE = 'post_create_date';
-    const KEY_UPDATE_DATE = 'post_update_date';
-    const KEY_LIKE_COUNT = 'post_like_count';
-    const KEY_ATTACHMENT_COUNT = 'post_attachment_count';
+    const KEY_THREAD_ID = 'thread_id';
 
-    const DYNAMIC_KEY_IS_IGNORED = 'user_is_ignored';
+    const DYNAMIC_KEY_IS_LIKED = 'post_is_liked';
     const DYNAMIC_KEY_BODY = 'post_body';
     const DYNAMIC_KEY_BODY_HTML = 'post_body_html';
     const DYNAMIC_KEY_BODY_PLAIN = 'post_body_plain_text';
-    const DYNAMIC_KEY_SIGNATURE = 'signature';
-    const DYNAMIC_KEY_SIGNATURE_HTML = 'signature_html';
-    const DYNAMIC_KEY_SIGNATURE_PLAIN = 'signature_plain_text';
     const DYNAMIC_KEY_IS_PUBLISHED = 'post_is_published';
     const DYNAMIC_KEY_IS_DELETED = 'post_is_deleted';
     const DYNAMIC_KEY_IS_FIRST_POST = 'post_is_first_post';
-    const DYNAMIC_KEY_IS_LIKED = 'post_is_liked';
+    const DYNAMIC_KEY_SIGNATURE = 'signature';
+    const DYNAMIC_KEY_SIGNATURE_HTML = 'signature_html';
+    const DYNAMIC_KEY_SIGNATURE_PLAIN = 'signature_plain_text';
+    const DYNAMIC_KEY_IS_IGNORED = 'user_is_ignored';
+
 
     const LINK_THREAD = 'thread';
     const LINK_POSTER = 'poster';
@@ -74,32 +75,6 @@ class Post extends AbstractHandler implements AttachmentParent
         $post = $this->source;
 
         switch ($key) {
-            case self::DYNAMIC_KEY_IS_IGNORED:
-                if (!\XF::visitor()->user_id) {
-                    return false;
-                }
-
-                return $post->isIgnored();
-            case self::DYNAMIC_KEY_BODY:
-                return $post->message;
-            case self::DYNAMIC_KEY_BODY_HTML:
-                return $this->renderBbCodeHtml($key, $post->message);
-            case self::DYNAMIC_KEY_BODY_PLAIN:
-                return $this->renderBbCodePlainText($post->message);
-            case self::DYNAMIC_KEY_SIGNATURE:
-                return $post->User->Profile->signature;
-            case self::DYNAMIC_KEY_SIGNATURE_HTML:
-                return $this->renderBbCodeHtml($key, $post->User->Profile->signature);
-            case self::DYNAMIC_KEY_SIGNATURE_PLAIN:
-                return $this->renderBbCodePlainText($post->User->Profile->signature);
-            case self::DYNAMIC_KEY_IS_PUBLISHED:
-                return $post->message_state === 'visible';
-            case self::DYNAMIC_KEY_IS_DELETED:
-                return $post->message_state === 'deleted';
-            case self::DYNAMIC_KEY_IS_FIRST_POST:
-                return $post->isFirstPost();
-            case self::DYNAMIC_KEY_IS_LIKED:
-                return $post->isLiked();
             case self::DYNAMIC_KEY_ATTACHMENTS:
                 if (!$post->attach_count) {
                     return null;
@@ -111,6 +86,32 @@ class Post extends AbstractHandler implements AttachmentParent
                 }
 
                 return $this->transformer->transformAttachments($this, $attachments['attachments']);
+            case self::DYNAMIC_KEY_IS_LIKED:
+                return $post->isLiked();
+            case self::DYNAMIC_KEY_BODY:
+                return $post->message;
+            case self::DYNAMIC_KEY_BODY_HTML:
+                return $this->renderBbCodeHtml($key, $post->message);
+            case self::DYNAMIC_KEY_BODY_PLAIN:
+                return $this->renderBbCodePlainText($post->message);
+            case self::DYNAMIC_KEY_IS_PUBLISHED:
+                return $post->message_state === 'visible';
+            case self::DYNAMIC_KEY_IS_DELETED:
+                return $post->message_state === 'deleted';
+            case self::DYNAMIC_KEY_IS_FIRST_POST:
+                return $post->isFirstPost();
+            case self::DYNAMIC_KEY_SIGNATURE:
+                return $post->User->Profile->signature;
+            case self::DYNAMIC_KEY_SIGNATURE_HTML:
+                return $this->renderBbCodeHtml($key, $post->User->Profile->signature);
+            case self::DYNAMIC_KEY_SIGNATURE_PLAIN:
+                return $this->renderBbCodePlainText($post->User->Profile->signature);
+            case self::DYNAMIC_KEY_IS_IGNORED:
+                if (!\XF::visitor()->user_id) {
+                    return false;
+                }
+
+                return $post->isIgnored();
         }
 
         return null;

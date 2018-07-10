@@ -8,9 +8,9 @@ use Xfrocks\Api\Transform\AbstractHandler;
 class Poll extends AbstractHandler
 {
     const KEY_ID = 'poll_id';
+    const KEY_MAX_VOTES = 'poll_max_votes';
     const KEY_QUESTION = 'poll_question';
     const KEY_VOTE_COUNT = 'poll_vote_count';
-    const KEY_MAX_VOTES = 'poll_max_votes';
 
     const DYNAMIC_KEY_IS_OPEN = 'poll_is_open';
     const DYNAMIC_KEY_IS_VOTED = 'poll_is_voted';

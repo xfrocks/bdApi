@@ -6,39 +6,39 @@ use Xfrocks\Api\Transform\AbstractHandler;
 
 class Thread extends AbstractHandler
 {
-    const KEY_ID = 'thread_id';
-    const KEY_TITLE = 'thread_title';
     const KEY_CREATOR_USER_ID = 'creator_user_id';
     const KEY_CREATOR_USERNAME = 'creator_username';
-    const KEY_POST_COUNT = 'thread_post_count';
-    const KEY_VIEW_COUNT = 'thread_view_count';
     const KEY_CREATE_DATE = 'thread_create_date';
+    const KEY_POST_COUNT = 'thread_post_count';
+    const KEY_ID = 'thread_id';
+    const KEY_TITLE = 'thread_title';
+    const KEY_VIEW_COUNT = 'thread_view_count';
+
     const KEY_FORUM_ID = 'forum_id';
     const KEY_UPDATE_DATE  = 'thread_update_date';
 
-    const DYNAMIC_KEY_USER_IS_IGNORED = 'user_is_ignored';
-    const DYNAMIC_KEY_IS_PUBLISHED = 'thread_is_published';
-    const DYNAMIC_KEY_IS_DELETED = 'thread_is_deleted';
-    const DYNAMIC_KEY_IS_STICKY = 'thread_is_sticky';
-    const DYNAMIC_KEY_IS_FOLLOWED = 'thread_is_followed';
     const DYNAMIC_KEY_FIRST_POST = 'first_post';
-//    const DYNAMIC_KEY_LAST_POST = 'last_post';
+    const DYNAMIC_KEY_IS_DELETED = 'thread_is_deleted';
+    const DYNAMIC_KEY_IS_FOLLOWED = 'thread_is_followed';
+    const DYNAMIC_KEY_IS_PUBLISHED = 'thread_is_published';
+    const DYNAMIC_KEY_IS_STICKY = 'thread_is_sticky';
     const DYNAMIC_KEY_PREFIXES = 'thread_prefixes';
-    const DYNAMIC_KEY_TAGS = 'thread_tags';
+    const DYNAMIC_KEY_USER_IS_IGNORED = 'user_is_ignored';
     const DYNAMIC_KEY_POLL = 'poll';
+    const DYNAMIC_KEY_TAGS = 'thread_tags';
 
-    const LINK_FORUM = 'forum';
-    const LINK_POSTS = 'posts';
+    const LINK_FIRST_POST = 'first_post';
     const LINK_FIRST_POSTER = 'first_poster';
     const LINK_FIRST_POSTER_AVATAR = 'first_poster_avatar';
-    const LINK_FIRST_POST = 'first_post';
-    const LINK_LAST_POSTER = 'last_poster';
+    const LINK_FORUM = 'forum';
     const LINK_LAST_POST = 'last_post';
+    const LINK_LAST_POSTER = 'last_poster';
+    const LINK_POSTS = 'posts';
 
-    const PERM_UPLOAD_ATTACHMENT = 'upload_attachment';
     const PERM_EDIT_TITLE = 'edit_title';
     const PERM_EDIT_TAGS = 'edit_tags';
     const PERM_POST = 'post';
+    const PERM_UPLOAD_ATTACHMENT = 'upload_attachment';
 
     public function getMappings()
     {
@@ -72,12 +72,10 @@ class Thread extends AbstractHandler
         $thread = $this->source;
 
         switch ($key) {
-            case self::DYNAMIC_KEY_IS_PUBLISHED:
-                return $thread->discussion_state === 'visible';
+            case self::DYNAMIC_KEY_FIRST_POST:
+                return $this->transformer->transformSubEntity($this, $key, $thread->FirstPost);
             case self::DYNAMIC_KEY_IS_DELETED:
                 return $thread->discussion_state === 'deleted';
-            case self::DYNAMIC_KEY_IS_STICKY:
-                return $thread->sticky;
             case self::DYNAMIC_KEY_IS_FOLLOWED:
                 $userId = \XF::visitor()->user_id;
                 if ($userId < 1) {
@@ -85,8 +83,10 @@ class Thread extends AbstractHandler
                 }
 
                 return !empty($thread->Watch[$userId]);
-            case self::DYNAMIC_KEY_FIRST_POST:
-                return $this->transformer->transformSubEntity($this, $key, $thread->FirstPost);
+            case self::DYNAMIC_KEY_IS_PUBLISHED:
+                return $thread->discussion_state === 'visible';
+            case self::DYNAMIC_KEY_IS_STICKY:
+                return $thread->sticky;
             case self::DYNAMIC_KEY_PREFIXES:
                 if (!$thread->prefix_id) {
                     return null;
@@ -99,8 +99,8 @@ class Thread extends AbstractHandler
                 }
 
                 return [$this->transformer->transformSubEntity($this, $key, $prefix)];
-            case self::DYNAMIC_KEY_TAGS:
-                return $this->transformer->transformTags($this, $thread->tags);
+            case self::DYNAMIC_KEY_USER_IS_IGNORED:
+                return $thread->isIgnored();
             case self::DYNAMIC_KEY_POLL:
                 if ($thread->discussion_type !== 'poll') {
                     return null;
@@ -113,8 +113,8 @@ class Thread extends AbstractHandler
                 }
 
                 return $this->transformer->transformSubEntity($this, $key, $thread->Poll);
-            case self::DYNAMIC_KEY_USER_IS_IGNORED:
-                return $thread->isIgnored();
+            case self::DYNAMIC_KEY_TAGS:
+                return $this->transformer->transformTags($this, $thread->tags);
         }
 
         return null;
