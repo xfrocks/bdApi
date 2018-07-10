@@ -42,9 +42,8 @@ class Thread extends AbstractController
 
         /** @var \XF\Finder\Thread $finder */
         $finder = $this->finder('XF:Thread');
-        $pageNavParams = [];
 
-        $this->applyFilters($finder, $params, $pageNavParams);
+        $this->applyFilters($finder, $params);
 
         $total = $finder->total();
         $threads = $total > 0 ? $finder->fetch() : [];
@@ -123,7 +122,7 @@ class Thread extends AbstractController
         return $this->api($data);
     }
 
-    protected function applyFilters(\XF\Finder\Thread $finder, Params $params, array &$pageNavParams)
+    protected function applyFilters(\XF\Finder\Thread $finder, Params $params)
     {
         $params->limitFinderByPage($finder);
 
@@ -131,21 +130,17 @@ class Thread extends AbstractController
             /** @var Forum|null $forum */
             $forum = $this->assertViewableEntity('XF:Forum', $params['forum_id']);
             $finder->applyVisibilityChecksInForum($forum);
-
-            $pageNavParams['forum_id'] = $params['forum_id'];
         }
 
         if (isset($this->orderChoices[$params['order']])) {
             $orderChoice = $this->orderChoices[$params['order']];
             $finder->order($orderChoice[0], $orderChoice[1]);
-            $pageNavParams['order'] = $params['order'];
 
             switch ($orderChoice[0]) {
                 case \Xfrocks\Api\XF\Transform\Thread::KEY_UPDATE_DATE:
                     $keyUpdateDate = \Xfrocks\Api\XF\Transform\Thread::KEY_UPDATE_DATE;
                     if ($params[$keyUpdateDate] > 0) {
                         $finder->where($orderChoice[0], $orderChoice['_whereOp'], $params[$keyUpdateDate]);
-                        $pageNavParams[$keyUpdateDate] = $params[$keyUpdateDate];
                     }
 
                     break;
@@ -154,19 +149,14 @@ class Thread extends AbstractController
 
         if ($params['creator_user_id'] > 0) {
             $finder->where('user_id', $params['creator_user_id']);
-
-            $pageNavParams['creator_user_id'] = $params['creator_user_id'];
         }
 
         if ($this->request()->exists('sticky')) {
             $finder->where('sticky', $params['sticky']);
-
-            $pageNavParams['sticky'] = $params['sticky'];
         }
 
         if ($params['thread_prefix_id'] > 0) {
             $finder->where('prefix_id', $params['thread_prefix_id']);
-            $pageNavParams['thread_prefix_id'] = $params['thread_prefix_id'];
         }
 
         // TODO: Add more filters?

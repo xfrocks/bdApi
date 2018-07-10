@@ -31,7 +31,17 @@ class Thread extends AbstractHandler implements AttachmentParent
     const DYNAMIC_KEY_POLL = 'poll';
 
     const LINK_FORUM = 'forum';
-    const LINK_CREATOR_AVATAR = 'creator_avatar';
+    const LINK_POSTS = 'posts';
+    const LINK_FIRST_POSTER = 'first_poster';
+    const LINK_FIRST_POSTER_AVATAR = 'first_poster_avatar';
+    const LINK_FIRST_POST = 'first_post';
+    const LINK_LAST_POSTER = 'last_poster';
+    const LINK_LAST_POST = 'last_post';
+
+    const PERM_UPLOAD_ATTACHMENT = 'upload_attachment';
+    const PERM_EDIT_TITLE = 'edit_title';
+    const PERM_EDIT_TAGS = 'edit_tags';
+    const PERM_POST = 'post';
 
     protected $attachmentData = null;
 
@@ -103,7 +113,7 @@ class Thread extends AbstractHandler implements AttachmentParent
 
         return null;
     }
-
+    
     public function collectPermissions()
     {
         /** @var \XF\Entity\Thread $thread */
@@ -111,9 +121,13 @@ class Thread extends AbstractHandler implements AttachmentParent
 
         $permissions = [
             self::PERM_EDIT => $thread->canEdit(),
-            self::PERM_LIKE => $thread->FirstPost->canLike(),
-            self::PERM_REPORT => $thread->FirstPost->canReport(),
+            self::PERM_EDIT_TITLE => $thread->canEdit(),
             self::PERM_DELETE => $thread->canDelete(),
+
+            self::PERM_POST => $thread->canReply(),
+            self::PERM_EDIT_TAGS => $thread->canEditTags(),
+            self::PERM_UPLOAD_ATTACHMENT => $thread->Forum->canUploadAndManageAttachments(),
+
             self::PERM_FOLLOW => $thread->canWatch()
         ];
 
@@ -127,20 +141,18 @@ class Thread extends AbstractHandler implements AttachmentParent
 
         $links = [
             self::LINK_FORUM => $this->buildApiLink('forums', $thread->Forum),
-            self::LINK_CREATOR_AVATAR => $thread->User->getAvatarUrl('l'),
-
             self::LINK_DETAIL => $this->buildApiLink('threads', $thread),
             self::LINK_PERMALINK => $this->buildApiLink('threads', $thread),
 
-            self::LINK_REPORT => $this->buildApiLink('posts/report', $thread->FirstPost),
-            self::LINK_LIKES => $this->buildApiLink('posts/likes', $thread->FirstPost),
+            self::LINK_POSTS => $this->buildApiLink('posts', null, ['thread_id' => $thread->thread_id]),
 
-            self::LINK_FOLLOWERS => $this->buildApiLink('threads/followers', $thread)
+            self::LINK_FIRST_POSTER => $this->buildApiLink('users', $thread->FirstPost->User),
+            self::LINK_FIRST_POSTER_AVATAR => $thread->FirstPost->User->getAvatarUrl('l'),
+            self::LINK_FIRST_POST => $this->buildApiLink('posts', $thread->FirstPost),
+
+            self::LINK_LAST_POSTER  => $this->buildApiLink('users', $thread->LastPoster),
+            self::LINK_LAST_POST => $this->buildApiLink('posts', ['post_id' => $thread->last_post_id])
         ];
-
-        if ($thread->FirstPost->attach_count > 0) {
-            $links[self::LINK_ATTACHMENTS] = $this->buildApiLink('threads/attachments', $thread);
-        }
 
         return $links;
     }

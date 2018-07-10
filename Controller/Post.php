@@ -31,7 +31,7 @@ class Post extends AbstractController
         if (!empty($params['post_ids'])) {
             $postIds = explode(',', $params['post_ids']);
             $postIds = array_map('intval', $postIds);
-            
+
             return $this->actionMultiple($postIds);
         }
 
