@@ -62,7 +62,8 @@ class Post extends AbstractHandler implements AttachmentParent
             self::DYNAMIC_KEY_IS_PUBLISHED,
             self::DYNAMIC_KEY_IS_DELETED,
             self::DYNAMIC_KEY_IS_FIRST_POST,
-            self::DYNAMIC_KEY_IS_LIKED
+            self::DYNAMIC_KEY_IS_LIKED,
+            self::DYNAMIC_KEY_ATTACHMENTS
         ];
     }
 
@@ -98,6 +99,17 @@ class Post extends AbstractHandler implements AttachmentParent
                 return $post->isFirstPost();
             case self::DYNAMIC_KEY_IS_LIKED:
                 return $post->isLiked();
+            case self::DYNAMIC_KEY_ATTACHMENTS:
+                if (!$post->attach_count) {
+                    return null;
+                }
+
+                $attachments = $this->getAttachmentData();
+                if (!$attachments) {
+                    return null;
+                }
+
+                return $this->transformer->transformAttachments($this, $attachments['attachments']);
         }
 
         return null;
