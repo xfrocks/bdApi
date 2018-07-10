@@ -9,12 +9,6 @@ use Xfrocks\Api\Util\PageNav;
 
 class Thread extends AbstractController
 {
-    protected $orderChoices = [
-        \Xfrocks\Api\XF\Transform\Thread::KEY_CREATE_DATE => ['post_date', 'asc'],
-        \Xfrocks\Api\XF\Transform\Thread::KEY_UPDATE_DATE => ['last_post_date', 'asc', '_whereOp'],
-        \Xfrocks\Api\XF\Transform\Thread::KEY_VIEW_COUNT => ['view_count', 'asc']
-    ];
-
     public function actionGetIndex(ParameterBag $params)
     {
         if ($params->thread_id) {
@@ -24,14 +18,21 @@ class Thread extends AbstractController
         $params = $this
             ->params()
             ->define('forum_id', 'uint', 'forum id to filter')
-            ->define('thread_ids', 'str', 'thread ids to filter (separated by comma)')
             ->define('creator_user_id', 'uint', 'creator user id to filter')
             ->define('sticky', 'bool', 'sticky to filter')
             ->define('thread_prefix_id', 'uint', 'thread prefix id to filter')
 //            ->define('thread_tag_id', 'uint', 'thread tag id to filter')
+            ->defineOrder([
+                'thread_create_date' => ['post_date', 'asc'],
+                'thread_create_date_reverse' => ['post_date', 'desc'],
+                'thread_update_date' => ['last_post_date', 'asc', '_whereOp' => '>'],
+                'thread_update_date_reverse' => ['last_post_date', 'desc', '_whereOp' => '<'],
+                'thread_view_count' => ['view_count', 'asc'],
+                'thread_view_count_reverse' => ['view_count', 'asc'],
+            ])
+            ->definePageNav()
             ->define(\Xfrocks\Api\XF\Transform\Thread::KEY_UPDATE_DATE, 'uint', 'timestamp to filter')
-            ->defineOrder($this->orderChoices)
-            ->definePageNav();
+            ->define('thread_ids', 'str', 'thread ids to fetch (ignoring all filters, separated by comma)');
 
         if (!empty($params['thread_ids'])) {
             $threadIds = $params->filterCommaSeparatedIds('thread_ids');
@@ -41,8 +42,21 @@ class Thread extends AbstractController
 
         /** @var \XF\Finder\Thread $finder */
         $finder = $this->finder('XF:Thread');
-
         $this->applyFilters($finder, $params);
+
+        $orderChoice = $params->sortFinder($finder);
+        if (is_array($orderChoice)) {
+            switch ($orderChoice[0]) {
+                case 'last_post_date':
+                    $keyUpdateDate = \Xfrocks\Api\XF\Transform\Thread::KEY_UPDATE_DATE;
+                    if ($params[$keyUpdateDate] > 0) {
+                        $finder->where($orderChoice[0], $orderChoice['_whereOp'], $params[$keyUpdateDate]);
+                    }
+                    break;
+            }
+        }
+
+        $params->limitFinderByPage($finder);
 
         $total = $finder->total();
         /** @var \XF\Entity\Thread[] $threads */
@@ -61,36 +75,6 @@ class Thread extends AbstractController
         PageNav::addLinksToData($data, $params, $total, 'threads');
 
         return $this->api($data);
-    }
-
-    public function actionPostIndex()
-    {
-        throw new \LogicException('Not implemented!');
-    }
-
-    public function actionPostAttachments()
-    {
-        throw new \LogicException('Not implemented!');
-    }
-
-    public function actionDeleteAttachments()
-    {
-        throw new \LogicException('Not implemented!');
-    }
-
-    public function actionGetFollowers(ParameterBag $params)
-    {
-        throw new \LogicException('Not implemented!');
-    }
-
-    public function actionPostFollowers(ParameterBag $params)
-    {
-        throw new \LogicException('Not implemented!');
-    }
-
-    public function actionDeleteFollowers(ParameterBag $params)
-    {
-        throw new \LogicException('Not implemented!');
     }
 
     public function actionMultiple(array $ids)
@@ -124,27 +108,11 @@ class Thread extends AbstractController
 
     protected function applyFilters(\XF\Finder\Thread $finder, Params $params)
     {
-        $params->limitFinderByPage($finder);
 
         if ($params['forum_id'] > 0) {
             /** @var Forum $forum */
             $forum = $this->assertViewableEntity('XF:Forum', $params['forum_id']);
             $finder->applyVisibilityChecksInForum($forum);
-        }
-
-        if (isset($this->orderChoices[$params['order']])) {
-            $orderChoice = $this->orderChoices[$params['order']];
-            $finder->order($orderChoice[0], $orderChoice[1]);
-
-            switch ($orderChoice[0]) {
-                case \Xfrocks\Api\XF\Transform\Thread::KEY_UPDATE_DATE:
-                    $keyUpdateDate = \Xfrocks\Api\XF\Transform\Thread::KEY_UPDATE_DATE;
-                    if ($params[$keyUpdateDate] > 0) {
-                        $finder->where($orderChoice[0], $orderChoice['_whereOp'], $params[$keyUpdateDate]);
-                    }
-
-                    break;
-            }
         }
 
         if ($params['creator_user_id'] > 0) {
