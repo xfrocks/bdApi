@@ -105,6 +105,7 @@ class Post extends AbstractController
         if ($params['thread_id'] > 0) {
             /** @var \XF\Entity\Thread $thread */
             $thread = $this->assertViewableEntity('XF:Thread', $params['thread_id']);
+            $finder->where('thread_id', $thread->thread_id);
             $finder->applyVisibilityChecksInThread($thread);
         }
     }
