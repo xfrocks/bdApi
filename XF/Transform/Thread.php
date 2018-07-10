@@ -16,6 +16,7 @@ class Thread extends AbstractHandler
     const KEY_FORUM_ID = 'forum_id';
     const KEY_UPDATE_DATE  = 'thread_update_date';
 
+    const DYNAMIC_KEY_USER_IS_IGNORED = 'user_is_ignored';
     const DYNAMIC_KEY_IS_PUBLISHED = 'thread_is_published';
     const DYNAMIC_KEY_IS_DELETED = 'thread_is_deleted';
     const DYNAMIC_KEY_IS_STICKY = 'thread_is_sticky';
@@ -60,7 +61,8 @@ class Thread extends AbstractHandler
             self::DYNAMIC_KEY_FIRST_POST,
             self::DYNAMIC_KEY_PREFIXES,
             self::DYNAMIC_KEY_TAGS,
-            self::DYNAMIC_KEY_POLL
+            self::DYNAMIC_KEY_POLL,
+            self::DYNAMIC_KEY_USER_IS_IGNORED
         ];
     }
 
@@ -103,6 +105,8 @@ class Thread extends AbstractHandler
                 }
 
                 return $this->transformer->transformEntity($this->selector, $thread->Poll);
+            case self::DYNAMIC_KEY_USER_IS_IGNORED:
+                return $thread->isIgnored();
         }
 
         return null;
