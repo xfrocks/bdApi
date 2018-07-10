@@ -2,66 +2,35 @@
 
 namespace Xfrocks\Api\Data;
 
-use Xfrocks\Api\Controller\AbstractController;
-
 class Param
 {
     /**
      * @var mixed
      */
-    protected $default = null;
+    public $default = '';
 
     /**
      * @var string|null
      */
-    protected $description;
+    public $description;
 
     /**
-     * @var string
+     * @var array
      */
-    protected $key;
+    public $options = [];
 
     /**
      * @var string|null
      */
-    protected $type;
+    public $type;
 
     /**
-     * @param string $key
-     * @param string $type
-     * @param string $description
+     * @param string|null $type
+     * @param string|null $description
      */
-    public function __construct($key, $type = null, $description = null)
+    public function __construct($type = null, $description = null)
     {
-        $this->key = $key;
         $this->type = $type;
         $this->description = $description;
-    }
-
-    /**
-     * @param AbstractController $controller
-     * @return mixed
-     */
-    public function filter($controller)
-    {
-        return $controller->request()->filter($this->key, $this->type, $this->default);
-    }
-
-    /**
-     * @return string
-     */
-    public function getKey()
-    {
-        return $this->key;
-    }
-
-    /**
-     * @param mixed $default
-     * @return $this
-     */
-    public function withDefault($default)
-    {
-        $this->default = $default;
-        return $this;
     }
 }

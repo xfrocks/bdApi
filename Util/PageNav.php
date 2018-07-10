@@ -56,10 +56,19 @@ class PageNav
         $keyPage = $filteredPage['key'];
         $pageNav[$keyPage] = max(1, min($page, $pageNav[$keyPages]));
 
-        $linkParams = $params->getFilteredValues();
-        if ($filteredLimit['value'] - $filteredLimit['default'] === 0) {
-            unset($linkParams[$filteredLimit['key']]);
+        $linkParams = [];
+        foreach ($params->getFilteredValues() as $linkParamKey => $linkParamValue) {
+            $paramFiltered = $params->getFiltered($linkParamKey);
+            if ($paramFiltered['valueRaw'] === $paramFiltered['default']) {
+                continue;
+            }
+            if ($linkParamValue === $paramFiltered['default']) {
+                continue;
+            }
+
+            $linkParams[$linkParamKey] = $linkParamValue;
         }
+        ksort($linkParams);
 
         if ($pageNav[$keyPage] > 1) {
             $prevLinkParams = array_merge($linkParams, [$keyPage => $pageNav[$keyPage] - 1]);

@@ -22,9 +22,19 @@ class Params implements \ArrayAccess
     protected $filtered = [];
 
     /**
+     * @var array[]
+     */
+    protected $orderChoices = [];
+
+    /**
      * @var string
      */
     protected $paramKeyLimit;
+
+    /**
+     * @var string
+     */
+    protected $paramKeyOrder;
 
     /**
      * @var string
@@ -57,8 +67,8 @@ class Params implements \ArrayAccess
     }
 
     /**
-     * @param string|Param $key
-     * @param string $type
+     * @param string $key
+     * @param string|Param $type
      * @param string $description
      * @return Params
      */
@@ -68,24 +78,33 @@ class Params implements \ArrayAccess
             throw new \LogicException('All params must be defined together and before the first param parsing.');
         }
 
-        if (is_string($key)) {
-            $param = new Param($key, $type, $description);
+        if ($type === null || is_string($type)) {
+            $param = new Param($type, $description);
         } else {
-            $param = $key;
+            $param = $type;
         }
 
-        $this->params[$param->getKey()] = $param;
+        $this->params[$key] = $param;
         return $this;
     }
 
     /**
-     * @param array $choices
+     * @param array[] $choices
+     * @param string $paramKeyOrder
+     * @param string $defaultOrder
      * @return Params
      */
-    public function defineOrder(array $choices)
+    public function defineOrder(array $choices, $paramKeyOrder = 'order', $defaultOrder = 'natural')
     {
-        $orderParam = new Param('order', 'str', implode(', ', array_keys($choices)));
-        return $this->define($orderParam->withDefault('natural'));
+        $this->orderChoices = $choices;
+        $this->paramKeyOrder = $paramKeyOrder;
+
+        $param = new Param('str', implode(', ', array_keys($choices)));
+        if (is_string($defaultOrder) && strlen($defaultOrder) > 0) {
+            $param->default = $defaultOrder;
+        }
+
+        return $this->define($paramKeyOrder, $param);
     }
 
     /**
@@ -122,9 +141,14 @@ class Params implements \ArrayAccess
      */
     public function filter($key)
     {
+        if (!$this->defineCompleted) {
+            $this->setDefineCompleted();
+        }
+
         if (!isset($this->params[$key])) {
             throw new \LogicException('Unrecognized parameter: ' . $key);
         }
+        $param = $this->params[$key];
 
         if ($key === $this->paramKeyLimit) {
             list($limit,) = $this->filterLimitAndPage();
@@ -136,8 +160,16 @@ class Params implements \ArrayAccess
         }
 
         if (!isset($this->filtered[$key])) {
-            $value = $this->params[$key]->filter($this->controller);
-            $this->filtered[$key] = ['value' => $value];
+            $request = $this->controller->request();
+            $valueRaw = $request->get($key, $param->default);
+            $filterer = $this->controller->app()->inputFilterer();
+            $value = $filterer->filter($valueRaw, $param->type, $param->options);
+
+            $this->filtered[$key] = [
+                'default' => $param->default,
+                'value' => $value,
+                'valueRaw' => $valueRaw
+            ];
         }
 
         return $this->filtered[$key]['value'];
@@ -181,34 +213,38 @@ class Params implements \ArrayAccess
         $controller = $this->controller;
         $options = $controller->options();
         $request = $controller->request();
-        $limitDefault = $options->bdApi_paramLimitDefault;
-        $limit = $limitDefault;
-        $limitInput = $request->filter($this->paramKeyLimit, 'str');
-        if (strlen($limitInput) > 0) {
-            $limit = intval($limitInput);
+        $limit = $limitDefault = intval($options->bdApi_paramLimitDefault);
+        $limitRaw = $request->get($this->paramKeyLimit, '');
+        if (strlen($limitRaw) > 0) {
+            $limit = intval($limitRaw);
 
-            $limitMax = $options->bdApi_paramLimitMax;
+            $limitMax = intval($options->bdApi_paramLimitMax);
             if ($limitMax > 0) {
                 $limit = min($limitMax, $limit);
             }
         }
         $limit = max(1, $limit);
         $this->filtered[$this->paramKeyLimit] = [
-            'key' => $this->paramKeyLimit,
             'default' => $limitDefault,
+            'key' => $this->paramKeyLimit,
             'value' => $limit,
+            'valueRaw' => $limitRaw
         ];
 
-        $page = $request->filter($this->paramKeyPage, 'posint');
-        $pageMax = $options->bdApi_paramPageMax;
+        $pageDefault = '1';
+        $pageRaw = $request->get($this->paramKeyPage, $pageDefault);
+        $page = intval($pageRaw);
+        $pageMax = intval($options->bdApi_paramPageMax);
         if ($pageMax > 0) {
             $page = min($pageMax, $page);
         }
         $page = max(1, $page);
         $this->filtered[$this->paramKeyPage] = [
+            'default' => $pageDefault,
             'key' => $this->paramKeyPage,
             'max' => $pageMax,
-            'value' => $page
+            'value' => $page,
+            'valueRaw' => $pageRaw
         ];
 
         return [$limit, $page];
@@ -303,11 +339,7 @@ class Params implements \ArrayAccess
 
     public function offsetGet($offset)
     {
-        if (!$this->defineCompleted) {
-            $this->setDefineCompleted();
-        }
-
-        return $this->params[$offset]->filter($this->controller);
+        return $this->filter($offset);
     }
 
     public function offsetSet($offset, $value)
@@ -318,6 +350,34 @@ class Params implements \ArrayAccess
     public function offsetUnset($offset)
     {
         throw new \LogicException('Params::define() must be used to define new param.');
+    }
+
+    /**
+     * @param \XF\Mvc\Entity\Finder $finder
+     * @return array|false
+     */
+    public function sortFinder($finder)
+    {
+        if (empty($this->paramKeyOrder)) {
+            throw new \LogicException('Params::defineOrder() must be called before calling sortFinder().');
+        }
+
+        $order = $this->offsetGet($this->paramKeyOrder);
+        if (empty($order) || !isset($this->orderChoices[$order])) {
+            return false;
+        }
+
+        $orderChoice = $this->orderChoices[$order];
+        if (!is_array($orderChoice)) {
+            return false;
+        }
+
+        if (count($orderChoice) < 2) {
+            return $orderChoice;
+        }
+        $finder->order($orderChoice[0], $orderChoice[1]);
+
+        return $orderChoice;
     }
 
     protected function setDefineCompleted()
