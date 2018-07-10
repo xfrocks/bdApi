@@ -121,11 +121,13 @@ class Thread extends AbstractHandler implements AttachmentParent
             self::LINK_PERMALINK => $this->buildApiLink('threads', $thread),
 
             self::LINK_REPORT => $this->buildApiLink('posts/report', $thread->FirstPost),
-            self::LINK_LIKES => $this->buildApiLink('posts/likes', $thread->FirstPost)
+            self::LINK_LIKES => $this->buildApiLink('posts/likes', $thread->FirstPost),
+
+            self::LINK_FOLLOWERS => $this->buildApiLink('threads/followers', $thread)
         ];
 
         if ($thread->FirstPost->attach_count > 0) {
-            $links[self::LINK_ATTACHMENTS] = $this->buildApiLink('posts/attachments', $thread);
+            $links[self::LINK_ATTACHMENTS] = $this->buildApiLink('threads/attachments', $thread);
         }
 
         return $links;
