@@ -34,8 +34,7 @@ class Thread extends AbstractController
             ->definePageNav();
 
         if (!empty($params['thread_ids'])) {
-            $threadIds = explode(',', $params['thread_ids']);
-            $threadIds = array_map('intval', $threadIds);
+            $threadIds = $params->filterCommaSeparatedIds('thread_ids');
 
             return $this->actionMultiple($threadIds);
         }

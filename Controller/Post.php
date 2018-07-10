@@ -29,8 +29,7 @@ class Post extends AbstractController
             ->defineOrder($this->orderChoices);
 
         if (!empty($params['post_ids'])) {
-            $postIds = explode(',', $params['post_ids']);
-            $postIds = array_map('intval', $postIds);
+            $postIds = $params->filterCommaSeparatedIds('post_ids');
 
             return $this->actionMultiple($postIds);
         }
