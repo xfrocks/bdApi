@@ -82,13 +82,25 @@ class Thread extends AbstractHandler implements AttachmentParent
             case self::DYNAMIC_KEY_FIRST_POST:
                 return $this->transformer->transformEntity($this->selector, $thread->FirstPost);
             case self::DYNAMIC_KEY_PREFIXES:
+                if (!$thread->prefix_id) {
+                    return null;
+                }
+
+                if (!$thread->Prefix) {
+                    return null;
+                }
+
                 return [$this->transformer->transformEntity($this->selector, $thread->Prefix)];
             case self::DYNAMIC_KEY_TAGS:
                 return $this->transformer->transformTags($this, $thread->tags);
             case self::DYNAMIC_KEY_POLL:
+                if (!$thread->Poll) {
+                    return null;
+                }
+
                 return $this->transformer->transformEntity($this->selector, $thread->Poll);
         }
-        
+
         return null;
     }
 
