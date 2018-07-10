@@ -6,7 +6,6 @@ use XF\Mvc\Entity\Entity;
 use XF\Mvc\ParameterBag;
 use XF\Mvc\Reply\AbstractReply;
 use XF\Mvc\Reply\Redirect;
-use Xfrocks\Api\Data\Param;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
@@ -128,17 +127,6 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         $with = $handler->getFetchWith();
 
         return parent::finder($type)->with($with);
-    }
-
-    /**
-     * @param string $key
-     * @param string|null $type
-     * @param string|null $description
-     * @return Param
-     */
-    public function param($key, $type = null, $description = null)
-    {
-        return new Param($key, $type, $description);
     }
 
     /**
