@@ -3,13 +3,9 @@
 namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
-use Xfrocks\Api\Transform\AttachmentParent;
 
-class Thread extends AbstractHandler implements AttachmentParent
+class Thread extends AbstractHandler
 {
-    const ATTACHMENT__DYNAMIC_KEY_ID = 'thread_id';
-    const ATTACHMENT__LINK_THREAD = 'thread';
-
     const KEY_ID = 'thread_id';
     const KEY_TITLE = 'thread_title';
     const KEY_CREATOR_USER_ID = 'creator_user_id';
@@ -42,8 +38,6 @@ class Thread extends AbstractHandler implements AttachmentParent
     const PERM_EDIT_TITLE = 'edit_title';
     const PERM_EDIT_TAGS = 'edit_tags';
     const PERM_POST = 'post';
-
-    protected $attachmentData = null;
 
     public function getMappings()
     {
@@ -175,61 +169,5 @@ class Thread extends AbstractHandler implements AttachmentParent
         }
 
         return $with;
-    }
-
-    public function attachmentCalculateDynamicValue($attachmentHandler, $key)
-    {
-        switch ($key) {
-            case self::ATTACHMENT__DYNAMIC_KEY_ID:
-                return $this->source['thread_id'];
-        }
-
-        return null;
-    }
-
-    public function attachmentCollectPermissions($attachmentHandler, array &$permissions)
-    {
-        /** @var \XF\Entity\Thread $thread */
-        $thread = $this->source;
-        $canDelete = false;
-
-        if ($thread->canEdit() && $thread->Forum->canUploadAndManageAttachments()) {
-            $attachmentData = $this->getAttachmentData();
-            /** @var \XF\Attachment\AbstractHandler $attachmentHandler */
-            $attachmentHandler = $attachmentData['handler'];
-            $canDelete = $attachmentHandler->canManageAttachments($attachmentData['context']);
-        }
-
-        $permissions[self::PERM_DELETE] = $canDelete;
-    }
-
-    public function attachmentCollectLinks($attachmentHandler, array &$links)
-    {
-        $links[self::ATTACHMENT__LINK_THREAD] = $this->buildApiLink('threads', $this->source);
-    }
-
-    public function attachmentGetMappings($attachmentHandler, array &$mappings)
-    {
-        $mappings[] = self::ATTACHMENT__DYNAMIC_KEY_ID;
-    }
-
-    protected function getAttachmentData()
-    {
-        static $contentType = 'post';
-
-        /** @var \XF\Entity\Thread $thread */
-        $thread = $this->source;
-
-        if (!isset($this->attachmentData[$thread->thread_id])) {
-            /** @var \XF\Repository\Attachment $attachmentRepo */
-            $attachmentRepo = $this->app->repository('XF:Attachment');
-            $this->attachmentData[$thread->thread_id] = $attachmentRepo->getEditorData(
-                $contentType,
-                $thread->FirstPost
-            );
-            $this->attachmentData[$thread->thread_id]['handler'] = $attachmentRepo->getAttachmentHandler($contentType);
-        }
-
-        return $this->attachmentData[$thread->thread_id];
     }
 }
