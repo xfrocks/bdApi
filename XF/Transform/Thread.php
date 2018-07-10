@@ -27,7 +27,7 @@ class Thread extends AbstractHandler implements AttachmentParent
     const DYNAMIC_KEY_FIRST_POST = 'first_post';
 //    const DYNAMIC_KEY_LAST_POST = 'last_post';
     const DYNAMIC_KEY_PREFIXES = 'thread_prefixes';
-    const DYNAMIC_KEY_TAGS = 'tgread_tags';
+    const DYNAMIC_KEY_TAGS = 'thread_tags';
     const DYNAMIC_KEY_POLL = 'poll';
 
     const LINK_FORUM = 'forum';
@@ -82,13 +82,13 @@ class Thread extends AbstractHandler implements AttachmentParent
             case self::DYNAMIC_KEY_FIRST_POST:
                 return $this->transformer->transformEntity($this->selector, $thread->FirstPost);
             case self::DYNAMIC_KEY_PREFIXES:
-                return $this->transformer->transformEntity($this->selector, $thread->Prefix);
+                return [$this->transformer->transformEntity($this->selector, $thread->Prefix)];
             case self::DYNAMIC_KEY_TAGS:
                 return $this->transformer->transformTags($this, $thread->tags);
             case self::DYNAMIC_KEY_POLL:
                 return $this->transformer->transformEntity($this->selector, $thread->Poll);
         }
-
+        
         return null;
     }
 
