@@ -54,6 +54,7 @@ class Thread extends AbstractHandler
             'node_id' => self::KEY_FORUM_ID,
             'last_post_date' => self::KEY_UPDATE_DATE,
 
+            self::DYNAMIC_KEY_USER_IS_IGNORED,
             self::DYNAMIC_KEY_IS_PUBLISHED,
             self::DYNAMIC_KEY_IS_DELETED,
             self::DYNAMIC_KEY_IS_STICKY,
@@ -61,8 +62,7 @@ class Thread extends AbstractHandler
             self::DYNAMIC_KEY_FIRST_POST,
             self::DYNAMIC_KEY_PREFIXES,
             self::DYNAMIC_KEY_TAGS,
-            self::DYNAMIC_KEY_POLL,
-            self::DYNAMIC_KEY_USER_IS_IGNORED
+            self::DYNAMIC_KEY_POLL
         ];
     }
 
@@ -86,7 +86,7 @@ class Thread extends AbstractHandler
 
                 return !empty($thread->Watch[$userId]);
             case self::DYNAMIC_KEY_FIRST_POST:
-                return $this->transformer->transformEntity($this->selector, $thread->FirstPost);
+                return $this->transformer->transformSubEntity($this, $key, $thread->FirstPost);
             case self::DYNAMIC_KEY_PREFIXES:
                 if (!$thread->prefix_id) {
                     return null;
@@ -96,7 +96,7 @@ class Thread extends AbstractHandler
                     return null;
                 }
 
-                return [$this->transformer->transformEntity($this->selector, $thread->Prefix)];
+                return [$this->transformer->transformSubEntity($this, $key, $thread->Prefix)];
             case self::DYNAMIC_KEY_TAGS:
                 return $this->transformer->transformTags($this, $thread->tags);
             case self::DYNAMIC_KEY_POLL:
@@ -104,7 +104,7 @@ class Thread extends AbstractHandler
                     return null;
                 }
 
-                return $this->transformer->transformEntity($this->selector, $thread->Poll);
+                return $this->transformer->transformSubEntity($this, $key, $thread->Poll);
             case self::DYNAMIC_KEY_USER_IS_IGNORED:
                 return $thread->isIgnored();
         }
