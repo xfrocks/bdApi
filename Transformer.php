@@ -3,7 +3,6 @@
 namespace Xfrocks\Api;
 
 use XF\Container;
-use XF\Mvc\Entity\ArrayCollection;
 use XF\Mvc\Entity\Entity;
 use Xfrocks\Api\Data\Modules;
 use Xfrocks\Api\Transform\AbstractHandler;
@@ -69,17 +68,6 @@ class Transformer
         $subSelector = $handler->getSubSelector($key);
         $subHandler->reset($values, $handler, $subSelector);
         return $this->transform($subHandler);
-    }
-
-    /**
-     * @param AbstractHandler $handler
-     * @param ArrayCollection|\XF\Entity\Attachment[] $attachments
-     * @param string $key
-     * @return array
-     */
-    public function transformAttachments($handler, $attachments, $key = AbstractHandler::DYNAMIC_KEY_ATTACHMENTS)
-    {
-        return $this->transformSubEntities($handler, $key, $attachments);
     }
 
     /**
@@ -172,7 +160,7 @@ class Transformer
     /**
      * @param AbstractHandler $handler
      * @param string $key
-     * @param ArrayCollection|Entity[] $subEntities
+     * @param Entity[] $subEntities
      * @return array
      */
     public function transformSubEntities($handler, $key, $subEntities)

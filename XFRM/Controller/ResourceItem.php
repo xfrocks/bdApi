@@ -4,6 +4,7 @@ namespace Xfrocks\Api\XFRM\Controller;
 
 use XF\Mvc\ParameterBag;
 use Xfrocks\Api\Controller\AbstractController;
+use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
 use Xfrocks\Api\Util\Tree;
 
@@ -39,8 +40,77 @@ class ResourceItem extends AbstractController
 
         /** @var \XFRM\Finder\ResourceItem $finder */
         $finder = $this->finder('XFRM:ResourceItem');
-        $finder->applyGlobalVisibilityChecks();
+        $this->applyFilters($finder, $params);
+
+        $orderChoice = $params->sortFinder($finder);
+        if (is_array($orderChoice)) {
+            switch ($orderChoice[0]) {
+                case 'last_update':
+                    $keyUpdateDate = \Xfrocks\Api\XFRM\Transform\ResourceItem::KEY_UPDATE_DATE;
+                    if ($params[$keyUpdateDate] > 0) {
+                        $finder->where($orderChoice[0], $orderChoice['_whereOp'], $params[$keyUpdateDate]);
+                    }
+                    break;
+            }
+        }
+
         $params->limitFinderByPage($finder);
+
+        $total = $finder->total();
+        /** @var \XFRM\Entity\ResourceItem[] $resources */
+        $resources = $total > 0 ? $finder->fetch() : [];
+
+        $data = [
+            'resources' => $this->transformEntitiesLazily($resources),
+            'resources_total' => $total,
+        ];
+
+        $theCategory = null;
+        if ($params['resource_category_id'] > 0) {
+            /** @var \XFRM\Entity\Category $theCategory */
+            $theCategory = $this->assertViewableEntity('XFRM:Category', $params['resource_category_id']);
+        }
+        if ($theCategory !== null) {
+            $this->transformEntityIfNeeded($data, 'category', $theCategory);
+        }
+
+        PageNav::addLinksToData($data, $params, $total, 'resources');
+
+        return $this->api($data);
+    }
+
+    public function actionMultiple(array $ids)
+    {
+        $resources = [];
+        if (count($ids) > 0) {
+            $resources = $this->finder('XFRM:ResourceItem')
+                ->whereIds($ids)
+                ->fetch()
+                ->filterViewable()
+                ->sortByList($ids);
+        }
+
+        $data = [
+            'resources' => $this->transformEntitiesLazily($resources)
+        ];
+
+        return $this->api($data);
+    }
+
+    public function actionSingle($resourceId)
+    {
+        $resource = $this->assertViewableResource($resourceId);
+
+        $data = [
+            'resource' => $this->transformEntityLazily($resource)
+        ];
+
+        return $this->api($data);
+    }
+
+    protected function applyFilters(\XFRM\Finder\ResourceItem $finder, Params $params)
+    {
+        $finder->applyGlobalVisibilityChecks();
 
         $categoryIds = [];
         if ($params['resource_category_id'] > 0) {
@@ -66,69 +136,6 @@ class ResourceItem extends AbstractController
             $user = \XF::visitor();
             $user->cacheResourceCategoryPermissions($categoryIds);
         }
-
-        $orderChoice = $params->sortFinder($finder);
-        if (is_array($orderChoice)) {
-            switch ($orderChoice[0]) {
-                case 'last_update':
-                    $keyUpdateDate = \Xfrocks\Api\XFRM\Transform\ResourceItem::KEY_UPDATE_DATE;
-                    if ($params[$keyUpdateDate] > 0) {
-                        $finder->where($orderChoice[0], $orderChoice['_whereOp'], $params[$keyUpdateDate]);
-                    }
-                    break;
-            }
-        }
-
-        $total = $finder->total();
-        /** @var \XFRM\Entity\ResourceItem[] $resources */
-        $resources = $total > 0 ? $finder->fetch() : [];
-
-        $data = [
-            'resources' => $this->transformEntitiesLazily($resources),
-            'resources_total' => $total,
-        ];
-
-        $theCategory = null;
-        if ($params['resource_category_id'] > 0) {
-            /** @var \XFRM\Entity\Category $theCategory */
-            $theCategory = $this->assertViewableEntity('XFRM:Category', $params['resource_category_id']);
-        }
-        if ($theCategory !== null) {
-            $this->transformEntityIfNeeded($data, 'category', $theCategory);
-        }
-
-        PageNav::addLinksToData($data, $params, $total, 'resources');
-
-        return $this->api($data);
-    }
-
-    protected function actionSingle($resourceId)
-    {
-        $resource = $this->assertViewableResource($resourceId);
-
-        $data = [
-            'resource' => $this->transformEntityLazily($resource)
-        ];
-
-        return $this->api($data);
-    }
-
-    protected function actionMultiple(array $ids)
-    {
-        $resources = [];
-        if (count($ids) > 0) {
-            $resources = $this->finder('XFRM:ResourceItem')
-                ->whereIds($ids)
-                ->fetch()
-                ->filterViewable()
-                ->sortByList($ids);
-        }
-
-        $data = [
-            'resources' => $this->transformEntitiesLazily($resources)
-        ];
-
-        return $this->api($data);
     }
 
     /**

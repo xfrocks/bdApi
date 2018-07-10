@@ -8,13 +8,6 @@ use Xfrocks\Api\Util\PageNav;
 
 class Post extends AbstractController
 {
-    protected $orderChoices = [
-        'natural' => ['post_date', 'asc'],
-        'natural_reverse' => ['post_date', 'desc'],
-        'post_create_date' => ['post_date', 'asc'],
-        'post_create_date_reverse' => ['post_date', 'desc']
-    ];
-
     public function actionGetIndex(ParameterBag $params)
     {
         if ($params->post_id) {
@@ -24,9 +17,14 @@ class Post extends AbstractController
         $params = $this
             ->params()
             ->define('thread_id', 'uint', 'thread id to filter')
-            ->define('post_ids', 'str')
+            ->defineOrder([
+                'natural' => ['post_date', 'asc'],
+                'natural_reverse' => ['post_date', 'desc'],
+                'post_create_date' => ['post_date', 'asc'],
+                'post_create_date_reverse' => ['post_date', 'desc']
+            ])
             ->definePageNav()
-            ->defineOrder($this->orderChoices);
+            ->define('post_ids', 'str', 'post ids to fetch (ignoring all filters, separated by comma)');
 
         if (!empty($params['post_ids'])) {
             $postIds = $params->filterCommaSeparatedIds('post_ids');
@@ -36,8 +34,9 @@ class Post extends AbstractController
 
         /** @var \XF\Finder\Post $finder */
         $finder = $this->finder('XF:Post');
-
         $this->applyFilters($finder, $params);
+        $params->sortFinder($finder);
+        $params->limitFinderByPage($finder);
 
         $total = $finder->total();
         /** @var \XF\Entity\Post[] $posts */
@@ -87,11 +86,6 @@ class Post extends AbstractController
         return $this->api($data);
     }
 
-    public function actionPostAttachments()
-    {
-        throw new \LogicException('Not implemented!');
-    }
-
     /**
      * @param int $postId
      * @param array $extraWith
@@ -108,18 +102,11 @@ class Post extends AbstractController
 
     protected function applyFilters(\XF\Finder\Post $finder, Params $params)
     {
-        $params->limitFinderByPage($finder);
-
         if ($params['thread_id'] > 0) {
             /** @var \XF\Entity\Thread $thread */
             $thread = $this->assertViewableEntity('XF:Thread', $params['thread_id']);
+            $finder->where('thread_id', $thread->thread_id);
             $finder->applyVisibilityChecksInThread($thread);
-        }
-
-        if (isset($this->orderChoices[$params['order']])) {
-            $orderChoice = $this->orderChoices[$params['order']];
-
-            $finder->order($orderChoice[0], $orderChoice[1]);
         }
     }
 }

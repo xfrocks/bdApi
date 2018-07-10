@@ -26,9 +26,9 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
 
     const DYNAMIC_KEY_ATTACHMENT_COUNT = 'resource_attachment_count';
     const DYNAMIC_KEY_CURRENCY = 'resource_currency';
-    const DYNAMIC_KEY_IS_DELETED = 'resource_is_deleted';
     const DYNAMIC_KEY_HAS_FILE = 'resource_has_file';
     const DYNAMIC_KEY_HAS_URL = 'resource_has_url';
+    const DYNAMIC_KEY_IS_DELETED = 'resource_is_deleted';
     const DYNAMIC_KEY_IS_FOLLOWED = 'resource_is_followed';
     const DYNAMIC_KEY_IS_LIKED = 'resource_is_liked';
     const DYNAMIC_KEY_IS_PUBLISHED = 'resource_is_published';
@@ -102,10 +102,8 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
                 if ($resourceItem->Description->attach_count === 0) {
                     return [];
                 }
-
                 $attachmentData = $this->getAttachmentData();
-
-                return $this->transformer->transformAttachments($this, $attachmentData['attachments']);
+                return $this->transformer->transformSubEntities($this, $key, $attachmentData['attachments']);
             case self::DYNAMIC_KEY_CURRENCY:
                 return $resourceItem->external_purchase_url ? $resourceItem->currency : null;
             case self::DYNAMIC_KEY_FIELDS:
@@ -171,6 +169,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         $resourceItem = $this->source;
 
         $links = [
+            self::LINK_ATTACHMENTS => $this->buildApiLink('resources/attachments', $resourceItem),
             self::LINK_CATEGORY => $this->buildApiLink('resource-categories', $resourceItem->Category),
             self::LINK_CREATOR_AVATAR => $resourceItem->User->getAvatarUrl('l'),
             self::LINK_DETAIL => $this->buildApiLink('resources', $resourceItem),
@@ -181,10 +180,6 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
             self::LINK_RATINGS => $this->buildApiLink('resources/ratings', $resourceItem),
             self::LINK_REPORT => $this->buildApiLink('resources/report', $resourceItem),
         ];
-
-        if ($resourceItem->Description->attach_count > 0) {
-            $links[self::LINK_ATTACHMENTS] = $this->buildApiLink('resources/attachments', $resourceItem);
-        }
 
         if ($resourceItem->external_purchase_url) {
             $links[self::LINK_CONTENT] = $resourceItem->external_purchase_url;
@@ -293,6 +288,9 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return \XF::phrase('xfrm_requested_resource_not_found');
     }
 
+    /**
+     * @return array
+     */
     protected function getAttachmentData()
     {
         static $contentType = 'resource_update';
