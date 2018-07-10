@@ -113,7 +113,7 @@ class Thread extends AbstractHandler implements AttachmentParent
 
         return null;
     }
-    
+
     public function collectPermissions()
     {
         /** @var \XF\Entity\Thread $thread */
