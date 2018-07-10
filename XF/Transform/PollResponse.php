@@ -11,11 +11,6 @@ class PollResponse extends AbstractHandler
 
     const DYNAMIC_KEY_IS_VOTED = 'response_is_voted';
 
-    /**
-     * @var \XF\Entity\Poll|null
-     */
-    protected $poll;
-
     public function getMappings()
     {
         return [
@@ -31,15 +26,12 @@ class PollResponse extends AbstractHandler
         /** @var \XF\Entity\PollResponse $response */
         $response = $this->source;
 
-        if ($this->poll === null) {
-            /** @var \XF\Entity\Poll|null $poll */
-            $poll = $this->app->em()->find('XF:Poll', $response->poll_id);
-            $this->poll = $poll;
-        }
+        /** @var Poll $transformPoll */
+        $transformPoll = $this->parent;
 
         switch ($key) {
             case self::DYNAMIC_KEY_IS_VOTED:
-                return $this->poll && $this->poll->hasVoted($response->poll_response_id);
+                return $transformPoll->source->hasVoted($response->poll_response_id);
         }
 
         return null;
