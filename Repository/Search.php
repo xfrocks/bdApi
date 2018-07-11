@@ -60,6 +60,11 @@ class Search extends Repository
             $query->withMetadata('node', $nodeIds ?: $input['forum_id']);
         }
 
+        if (!empty($input['thread_id'])) {
+            $query->withMetadata('thread', $input['thread_id'])
+                  ->inTitleOnly(false);
+        }
+
         if ($query->getErrors()) {
             $errors = $query->getErrors();
 
