@@ -53,7 +53,7 @@ class Search extends AbstractController
             'data' => $results
         ];
 
-        PageNav::addLinksToData($data, $params, $data['data_total'], 'search/results');
+        PageNav::addLinksToData($data, $params, $data['data_total'], 'search/results', $search);
 
         return $this->api($data);
     }
