@@ -45,7 +45,7 @@ class Search extends Repository
         if (!empty($input['forum_id'])) {
             /** @var Node $nodeRepo */
             $nodeRepo = $this->repository('XF:Node');
-            /** @var Forum $forum */
+            /** @var Forum|null $forum */
             $forum = $this->em->find('XF:Forum', $input['forum_id']);
             $nodeIds = [];
 
@@ -131,7 +131,7 @@ class Search extends Repository
 
     /**
      * @param Api $api
-     * @param string $contentType
+     * @param mixed $contentType
      * @param string $contentKey
      * @return LazyTransformer|null
      */
