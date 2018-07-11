@@ -55,6 +55,11 @@ class LazyTransformer implements \JsonSerializable
         return $this->transform($this->transformer, $this->selector);
     }
 
+    public function toArray()
+    {
+        return $this->jsonSerialize();
+    }
+
     /**
      * @param Entity[] $entities
      */
