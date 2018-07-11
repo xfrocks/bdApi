@@ -7,7 +7,7 @@ use Xfrocks\Api\Controller\AbstractController;
 use Xfrocks\Api\Transform\Selector;
 use Xfrocks\Api\Transformer;
 
-class LazyTransformer
+class LazyTransformer implements \JsonSerializable
 {
     /**
      * @var Entity|null
