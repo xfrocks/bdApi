@@ -87,6 +87,36 @@ class Search extends AbstractController
         return $this->rerouteController(__CLASS__, 'getResults', $paramBag);
     }
 
+    public function actionPostPosts()
+    {
+        if (!\XF::visitor()->canSearch($error)) {
+            return $this->noPermission($error);
+        }
+
+        $params = $this
+            ->params()
+            ->define('q', 'str', 'query to search for')
+            ->definePageNav()
+            ->define('forum_id', 'uint', 'id of the container forum to search for contents')
+            ->define('thread_id', 'uint', 'id of the container thread to search for posts')
+            ->define('user_id', 'uint', 'id of the creator to search for contents');
+
+        if (empty($params['q'])) {
+            return $this->error(\XF::phrase('bdapi_slash_search_requires_q'), 400);
+        }
+
+        $search = $this->searchRepo()->search($params, 'post');
+        if (!$search) {
+            // no results.
+            return $this->error(\XF::phrase('no_results_found'), 400);
+        }
+        
+        $paramBag = new ParameterBag();
+        $paramBag->offsetSet('search_id', $search->search_id);
+
+        return $this->rerouteController(__CLASS__, 'getResults', $paramBag);
+    }
+
     /**
      * @return \Xfrocks\Api\Repository\Search
      */
