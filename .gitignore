@@ -5,3 +5,4 @@
 /_data/
 /_releases/
 /vendor/
+composer.lock
