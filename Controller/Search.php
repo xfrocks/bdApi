@@ -110,7 +110,7 @@ class Search extends AbstractController
             // no results.
             return $this->error(\XF::phrase('no_results_found'), 400);
         }
-        
+
         $paramBag = new ParameterBag();
         $paramBag->offsetSet('search_id', $search->search_id);
 

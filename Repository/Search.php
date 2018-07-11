@@ -2,9 +2,11 @@
 
 namespace Xfrocks\Api\Repository;
 
+use XF\Entity\Forum;
 use XF\Http\Request;
 use XF\Mvc\Entity\Repository;
 use XF\PrintableException;
+use XF\Repository\Node;
 use Xfrocks\Api\Data\BatchJob;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Mvc\Reply\Api;
@@ -38,6 +40,24 @@ class Search extends Repository
 
         if (!empty($options[self::OPTION_SEARCH_TYPE])) {
             $query->inType($options[self::OPTION_SEARCH_TYPE]);
+        }
+
+        if (!empty($input['forum_id'])) {
+            /** @var Node $nodeRepo */
+            $nodeRepo = $this->repository('XF:Node');
+            /** @var Forum $forum */
+            $forum = $this->em->find('XF:Forum', $input['forum_id']);
+            $nodeIds = [];
+
+            if ($forum) {
+                $children = $nodeRepo->findChildren($forum->Node, false)->fetch();
+
+                $nodeIds = $children->keys();
+                $nodeIds[] = $forum->node_id;
+            }
+
+
+            $query->withMetadata('node', $nodeIds ?: $input['forum_id']);
         }
 
         if ($query->getErrors()) {
