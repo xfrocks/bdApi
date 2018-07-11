@@ -3,9 +3,6 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Mvc\ParameterBag;
-use Xfrocks\Api\Data\BatchJob;
-use Xfrocks\Api\Mvc\Reply\Api;
-use Xfrocks\Api\Util\LazyTransformer;
 use Xfrocks\Api\Util\PageNav;
 
 class Search extends AbstractController
