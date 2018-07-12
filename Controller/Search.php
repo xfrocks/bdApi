@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Mvc\ParameterBag;
+use XF\Mvc\Entity\Entity;
 use Xfrocks\Api\Util\PageNav;
 
 class Search extends AbstractController
@@ -42,11 +43,34 @@ class Search extends AbstractController
             return $this->error(\XF::phrase('no_results_found'), 400);
         }
 
-        $results = $this->searchRepo()->prepareResultsForApi($resultSet->getResults());
+        $grouped = [];
+        $results = $resultSet->getResults();
+
+        foreach ($results as $id => $result) {
+            $grouped[$result[0]][$id] = $result[1];
+        }
+
+        $data = [];
+        $searcher = $this->app()->search();
+
+        foreach ($grouped as $contentType => $contents) {
+            $typeHandler = $searcher->handler($contentType);
+            $entities = $typeHandler->getContent(array_values($contents), true);
+
+            /** @var Entity $entity */
+            foreach ($entities as $entity) {
+                $dataKey = $contentType . '-' . $entity->getEntityId();
+                if (!isset($results[$dataKey])) {
+                    continue;
+                }
+
+                $data[] = $this->transformEntityLazily($entity);
+            }
+        }
 
         $data = [
             'data_total' => $search->result_count,
-            'data' => $results
+            'data' => $data
         ];
 
         PageNav::addLinksToData($data, $params, $data['data_total'], 'search/results', $search);

@@ -7,10 +7,7 @@ use XF\Http\Request;
 use XF\Mvc\Entity\Repository;
 use XF\PrintableException;
 use XF\Repository\Node;
-use Xfrocks\Api\Data\BatchJob;
 use Xfrocks\Api\Data\Params;
-use Xfrocks\Api\Mvc\Reply\Api;
-use Xfrocks\Api\Util\LazyTransformer;
 
 class Search extends Repository
 {
@@ -76,104 +73,5 @@ class Search extends Repository
         $search = $xfSearchRepo->runSearch($query, $constraints);
 
         return $search;
-    }
-
-    public function prepareResultsForApi(array $results)
-    {
-        $grouped = [];
-
-        foreach ($results as $id => $result) {
-            $grouped[$result[0]][$id] = $result[1];
-        }
-
-        $items = [];
-
-        foreach ($grouped as $contentType => $contents) {
-            $config = $this->getBatchJobConfig($contentType, array_values($contents));
-            if (!$config) {
-                continue;
-            }
-
-            $job = new BatchJob($this->app(), $config['method'], $config['params'], $config['uri']);
-            $jobResult = null;
-
-            try {
-                $jobResult = $job->execute();
-            } catch (\Exception $e) {
-                if (\XF::$debugMode) {
-                    \XF::logException($e);
-                }
-            }
-
-            if (!($jobResult instanceof Api)) {
-                continue;
-            }
-
-            $dataResults = $this->getDataResults($jobResult, $contentType, $contentKey);
-            if (!$dataResults || !$contentKey) {
-                continue;
-            }
-
-            foreach ($dataResults->toArray() as $item) {
-                $items[$contentType . '-' . $item[$contentKey]] = $item;
-            }
-        }
-
-        $data = [];
-        foreach ($results as $resultKey => $result) {
-            if (isset($items[$resultKey])) {
-                $data[] = $items[$resultKey];
-            }
-        }
-
-        return $data;
-    }
-
-    /**
-     * @param Api $api
-     * @param mixed $contentType
-     * @param string $contentKey
-     * @return LazyTransformer|null
-     */
-    public function getDataResults(Api $api, $contentType, &$contentKey = null)
-    {
-        switch ($contentType) {
-            case 'thread':
-                $contentKey = 'thread_id';
-
-                return $api->getParam('threads');
-            case 'post':
-                $contentKey = 'post_id';
-
-                return $api->getParam('posts');
-            default:
-                return null;
-        }
-    }
-
-    public function getBatchJobConfig($contentType, array $ids)
-    {
-        $router = \XF::app()->router('api');
-
-        switch ($contentType) {
-            case 'thread':
-                return [
-                    'params' => [
-                        'thread_ids' => implode(',', $ids)
-                    ],
-                    'uri' => $router->buildLink('threads'),
-                    'method' => 'GET'
-                ];
-            case 'post':
-                return [
-                    'params' => [
-                        'post_ids' => implode(',', $ids)
-                    ],
-                    'uri' => $router->buildLink('posts'),
-                    'method' => 'GET'
-                ];
-            default:
-                return null;
-        }
     }
 }
