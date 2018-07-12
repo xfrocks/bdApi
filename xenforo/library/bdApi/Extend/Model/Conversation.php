@@ -200,7 +200,10 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
             foreach ($recipients as $recipient) {
                 $data['recipients'][] = array(
                     'user_id' => $recipient['user_id'],
-                    'username' => $recipient['username']
+                    'username' => $recipient['username'],
+                    'avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array($recipient, 'm', false, true)),
+                    'avatar_big' => XenForo_Template_Helper_Core::callHelper('avatar', array($recipient, 'l', false, true)),
+                    'avatar_small' => XenForo_Template_Helper_Core::callHelper('avatar', array($recipient, 's', false, true)),
                 );
             }
         }
