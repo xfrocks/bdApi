@@ -54,7 +54,7 @@ class Search extends AbstractController
         $searcher = $this->app()->search();
 
         foreach ($grouped as $contentType => $contents) {
-            $typeHandler = $searcher->handler($contentType);
+            $typeHandler = $searcher->handler(strval($contentType));
             $entities = $typeHandler->getContent(array_values($contents), true);
 
             /** @var Entity $entity */
