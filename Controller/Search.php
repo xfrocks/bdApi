@@ -32,7 +32,7 @@ class Search extends AbstractController
             ->definePageNav();
 
         list($perPage, $page) = $params->filterLimitAndPage();
-        
+
         $searcher = $this->app()->search();
         $resultSet = $searcher->getResultSet($search->search_results);
 
@@ -77,10 +77,7 @@ class Search extends AbstractController
             return $this->error(\XF::phrase('no_results_found'), 400);
         }
 
-        $paramBag = new ParameterBag();
-        $paramBag->offsetSet('search_id', $search->search_id);
-
-        return $this->rerouteController(__CLASS__, 'getResults', $paramBag);
+        return $this->rerouteController(__CLASS__, 'getResults', ['search_id' => $search->search_id]);
     }
 
     public function actionPostPosts()
@@ -107,10 +104,7 @@ class Search extends AbstractController
             return $this->error(\XF::phrase('no_results_found'), 400);
         }
 
-        $paramBag = new ParameterBag();
-        $paramBag->offsetSet('search_id', $search->search_id);
-
-        return $this->rerouteController(__CLASS__, 'getResults', $paramBag);
+        return $this->rerouteController(__CLASS__, 'getResults', ['search_id' => $search->search_id]);
     }
 
     /**
