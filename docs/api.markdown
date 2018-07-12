@@ -2143,14 +2143,7 @@ Detail information of a conversation.
                     avatar: (uri), # since forum-2018071201
                     avatar_big: (uri), # since forum-2018071201
                     avatar_small: (uri) # since forum-2018071201
-                },
-                {
-                    user_id: (int),
-                    username: (string),
-                    avatar: (uri), # since forum-2018071201
-                    avatar_big: (uri), # since forum-2018071201
-                    avatar_small: (uri) # since forum-2018071201
-                },
+                }
                 ...
             ]
             links: {
