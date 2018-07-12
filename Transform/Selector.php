@@ -8,9 +8,37 @@ class Selector
     const ACTION_INCLUDE = 'include';
     const ACTION_NONE = 'none';
 
+    /**
+     * @var string
+     */
     protected $defaultAction = self::ACTION_NONE;
 
-    protected $rules = [];
+    /**
+     * @var string
+     */
+    protected $name;
+
+    /**
+     * @var array
+     */
+    protected $namedSelectors = [];
+
+    /**
+     * @var array|null
+     */
+    protected $rules = null;
+
+    /**
+     * @param string $name
+     */
+    public function __construct($name)
+    {
+        $this->name = $name;
+
+        if (strlen($name) > 0) {
+            $this->namedSelectors[$name] = $this;
+        }
+    }
 
     /**
      * @param string $key
@@ -24,7 +52,7 @@ class Selector
                 return $rulesRef['selector'];
             }
 
-            $selector = new Selector();
+            $selector = $this->getSubSelectorNew();
             $selector->parseRules($rulesRef['excludes'], $rulesRef['includes']);
             $rulesRef['selector'] = $selector;
 
@@ -32,9 +60,52 @@ class Selector
         }
 
         $this->makeSureRuleExists($key);
-        $selector = new Selector();
+        $selector = $this->getSubSelectorNew();
         $this->rules[$key]['selector'] = $selector;
         return $selector;
+    }
+
+    /**
+     * @return Selector
+     */
+    public function getSubSelectorNew()
+    {
+        $selector = new Selector('');
+
+        foreach ($this->namedSelectors as $key => $namedSelector) {
+            $selector->namedSelectors[$key] = $namedSelector;
+        }
+
+        return $selector;
+    }
+
+    /**
+     * @param string $key
+     * @param string $name
+     * @return Selector
+     */
+    public function getSubSelectorNamed($key, $name)
+    {
+        if (isset($this->rules[$key])) {
+            $selector = $this->getSubSelector($key);
+            if ($selector !== null) {
+                return $selector;
+            }
+        }
+
+        if (isset($this->namedSelectors[$name])) {
+            return $this->namedSelectors[$name];
+        }
+
+        return $this->getSubSelector($key);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasParsedRules()
+    {
+        return is_array($this->rules);
     }
 
     /**

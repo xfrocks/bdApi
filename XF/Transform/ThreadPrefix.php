@@ -9,7 +9,7 @@ class ThreadPrefix extends AbstractHandler
     const KEY_ID = 'prefix_id';
     const KEY_TITLE = 'prefix_title';
 
-    public function getMappings()
+    public function getMappings($context)
     {
         return [
             'prefix_id' => self::KEY_ID,

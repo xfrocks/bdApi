@@ -3,6 +3,9 @@
 namespace Xfrocks\Api\Transform;
 
 use XF\App;
+use XF\Mvc\Entity\Entity;
+use XF\Mvc\Entity\Finder;
+use Xfrocks\Api\Data\TransformContext;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\XF\Session\Session;
@@ -35,21 +38,6 @@ abstract class AbstractHandler
     protected $app;
 
     /**
-     * @var AbstractHandler|null
-     */
-    protected $parent;
-
-    /**
-     * @var Selector|null
-     */
-    protected $selector;
-
-    /**
-     * @var mixed
-     */
-    protected $source;
-
-    /**
      * @var Transformer
      */
     protected $transformer;
@@ -65,37 +53,31 @@ abstract class AbstractHandler
     }
 
     /**
+     * @param TransformContext $context
      * @param string $key
      * @return mixed
      */
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
         return null;
     }
 
     /**
-     * @return mixed
+     * @param TransformContext $context
+     * @return array|null
      */
-    public function collectLinks()
+    public function collectLinks($context)
     {
         return null;
     }
 
     /**
-     * @return mixed
+     * @param TransformContext $context
+     * @return array|null
      */
-    public function collectPermissions()
+    public function collectPermissions($context)
     {
         return null;
-    }
-
-    /**
-     * @param string $key
-     * @return mixed
-     */
-    public function getSourceValue($key)
-    {
-        return $this->source !== null ? $this->source[$key] : null;
     }
 
     /**
@@ -108,9 +90,10 @@ abstract class AbstractHandler
     }
 
     /**
+     * @param TransformContext $context
      * @return array
      */
-    public function getMappings()
+    public function getMappings($context)
     {
         return [];
     }
@@ -124,41 +107,74 @@ abstract class AbstractHandler
     }
 
     /**
+     * @param Selector|null $selector
      * @param string $key
      * @return Selector|null
      */
-    public function getSubSelector($key)
+    public function getSubSelector($selector, $key)
     {
-        if ($this->selector === null) {
+        if ($selector === null) {
             return null;
         }
 
-        return $this->selector->getSubSelector($key);
+        return $selector->getSubSelector($key);
     }
 
     /**
-     * @param mixed $source
-     * @param AbstractHandler|null $parent
-     * @param Selector|null $selector
+     * @param Finder $finder
+     * @param Selector $selector
+     * @return Finder
      */
-    public function reset($source, $parent, $selector)
+    public function onLazyTransformBeforeFetching($finder, $selector)
     {
-        $this->source = $source;
-        $this->parent = $parent;
-        $this->selector = $selector;
+        return $finder;
     }
 
     /**
+     * @param Entity[] $entities
+     * @param Selector $selector
+     * @return Entity[]
+     */
+    public function onLazyTransformEntities($entities, $selector)
+    {
+        return $entities;
+    }
+
+    /**
+     * @param TransformContext $context
+     * @return array
+     */
+    public function onNewContext($context)
+    {
+        return [];
+    }
+
+    /**
+     * @param TransformContext $context
      * @param string $key
      * @return bool
      */
-    public function shouldExcludeField($key)
+    public function shouldExcludeField($context, $key)
     {
-        if ($this->selector === null) {
+        if ($context->selector === null) {
             return false;
         }
 
-        return $this->selector->shouldExcludeField($key);
+        return $context->selector->shouldExcludeField($key);
+    }
+
+    /**
+     * @param TransformContext $context
+     * @param string $key
+     * @return bool
+     */
+    public function shouldIncludeField($context, $key)
+    {
+        if ($context->selector === null) {
+            return false;
+        }
+
+        return $context->selector->shouldIncludeField($key);
     }
 
     /**
@@ -210,16 +226,39 @@ abstract class AbstractHandler
     }
 
     /**
+     * @param string $contentType
+     * @param Entity $entity
+     * @return bool
+     */
+    protected function checkAttachmentCanManage($contentType, $entity)
+    {
+        /** @var \XF\Repository\Attachment $attachmentRepo */
+        $attachmentRepo = $this->app->repository('XF:Attachment');
+        $attachmentHandler = $attachmentRepo->getAttachmentHandler($contentType);
+        if ($attachmentHandler === null) {
+            return false;
+        }
+
+        $attachmentContext = $attachmentHandler->getContext($entity);
+        return $attachmentHandler->canManageAttachments($attachmentContext);
+    }
+
+    /**
      * @param string $key
      * @param string $string
+     * @param mixed $content
      * @param array $options
      * @return string
      */
-    protected function renderBbCodeHtml($key, $string, array $options = [])
+    protected function renderBbCodeHtml($key, $string, $content, array $options = [])
     {
+        $string = utf8_trim($string);
+        if (strlen($string) === 0) {
+            return '';
+        }
+
         $context = 'api:' . $key;
-        $entity = $this->source;
-        return $this->app->bbCode()->render($string, 'html', $context, $entity, $options);
+        return $this->app->bbCode()->render($string, 'html', $context, $content, $options);
     }
 
     /**
@@ -229,6 +268,11 @@ abstract class AbstractHandler
      */
     protected function renderBbCodePlainText($string, array $options = [])
     {
+        $string = utf8_trim($string);
+        if (strlen($string) === 0) {
+            return '';
+        }
+
         $formatter = $this->app->stringFormatter();
         return $formatter->stripBbCode($string, $options);
     }

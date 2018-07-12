@@ -3,21 +3,21 @@
 namespace Xfrocks\Api\Util;
 
 use XF\Mvc\Entity\Entity;
+use XF\Mvc\Entity\Finder;
 use Xfrocks\Api\Controller\AbstractController;
 use Xfrocks\Api\Transform\Selector;
 use Xfrocks\Api\Transformer;
 
 class LazyTransformer
 {
-    /**
-     * @var Entity|null
-     */
-    protected $entity = null;
+    const SOURCE_TYPE_ENTITIES = 'entities';
+    const SOURCE_TYPE_ENTITY = 'entity';
+    const SOURCE_TYPE_FINDER = 'finder';
 
     /**
-     * @var Entity[]|null
+     * @var array|null
      */
-    protected $entities = null;
+    protected $finderSortByList = null;
 
     /**
      * @var string|null
@@ -29,7 +29,19 @@ class LazyTransformer
      */
     protected $selector;
 
-    /** @var Transformer */
+    /**
+     * @var mixed
+     */
+    protected $source = null;
+
+    /**
+     * @var string
+     */
+    protected $sourceType = '';
+
+    /**
+     * @var Transformer
+     */
     protected $transformer;
 
     /**
@@ -37,14 +49,8 @@ class LazyTransformer
      */
     public function __construct($controller)
     {
-        /** @var Transformer $transformer */
         $this->transformer = $controller->app()->container('api.transformer');
-
-        $params = $controller->params();
-        list($exclude, $include) = $params->filterTransformSelector();
-        $selector = new Selector();
-        $selector->parseRules($exclude, $include);
-        $this->selector = $selector;
+        $this->selector = $controller->params()->parseSelectorRules();
     }
 
     /**
@@ -60,23 +66,38 @@ class LazyTransformer
      */
     public function setEntities($entities)
     {
-        if ($this->entity !== null) {
-            throw new \LogicException('LazyTransformer::$entity has already been set');
+        if ($this->source !== null) {
+            throw new \LogicException('Source has already been set: ' . $this->sourceType);
         }
 
-        $this->entities = $entities;
+        $this->source = $entities;
+        $this->sourceType = self::SOURCE_TYPE_ENTITIES;
     }
 
     /**
      * @param Entity $entity
      */
-    public function setEntity($entity)
+    public function setEntity(Entity $entity)
     {
-        if ($this->entities !== null) {
-            throw new \LogicException('LazyTransformer::$entities has already been set');
+        if ($this->source !== null) {
+            throw new \LogicException('Source has already been set: ' . $this->sourceType);
         }
 
-        $this->entity = $entity;
+        $this->source = $entity;
+        $this->sourceType = self::SOURCE_TYPE_ENTITY;
+    }
+
+    /**
+     * @param Finder $finder
+     */
+    public function setFinder(Finder $finder)
+    {
+        if ($this->source !== null) {
+            throw new \LogicException('Source has already been set: ' . $this->sourceType);
+        }
+
+        $this->source = $finder;
+        $this->sourceType = self::SOURCE_TYPE_FINDER;
     }
 
     /**
@@ -85,6 +106,20 @@ class LazyTransformer
     public function setKey($key)
     {
         $this->key = $key;
+    }
+
+    /**
+     * @param array $keys
+     * @return LazyTransformer
+     */
+    public function sortByList(array $keys)
+    {
+        if ($this->sourceType !== self::SOURCE_TYPE_FINDER) {
+            throw new \LogicException('Source is not a Finder: ' . $this->sourceType);
+        }
+
+        $this->finderSortByList = $keys;
+        return $this;
     }
 
     /**
@@ -102,25 +137,72 @@ class LazyTransformer
             $selector = $selector->getSubSelector($this->key);
         }
 
-        if ($this->entities !== null) {
-            $data = [];
+        switch ($this->sourceType) {
+            case self::SOURCE_TYPE_ENTITIES:
+                /** @var Entity[] $entities */
+                $entities = $this->source;
 
-            foreach ($this->entities as $entity) {
-                $entityData = $transformer->transformEntity($selector, $entity);
-                if (!is_array($entityData)) {
-                    continue;
+                $shortName = null;
+                foreach ($entities as $entity) {
+                    $shortName = $entity->structure()->shortName;
+                    break;
+                }
+                if ($shortName === null) {
+                    return [];
                 }
 
-                $data[] = $entityData;
-            }
+                return $this->transformEntities($transformer, $entities, $selector);
+            case self::SOURCE_TYPE_ENTITY:
+                /** @var Entity $entity */
+                $entity = $this->source;
+                return $transformer->transformEntity($entity, $selector);
+            case self::SOURCE_TYPE_FINDER:
+                /** @var Finder $finder */
+                $finder = $this->source;
+                $handler = $transformer->handler($finder->getStructure()->shortName);
+                $finder = $handler->onLazyTransformBeforeFetching($finder, $selector);
 
+                $result = $finder->fetch();
+                if ($this->finderSortByList !== null) {
+                    $result = $result->sortByList($this->finderSortByList);
+                }
+
+                return $this->transformEntities($transformer, $result->toArray(), $selector);
+        }
+
+        throw new \LogicException('Unrecognized source type ' . $this->sourceType);
+    }
+
+    /**
+     * @param Transformer $transformer
+     * @param Entity[] $entities
+     * @param Selector $selector
+     * @return array
+     */
+    protected function transformEntities($transformer, $entities, $selector)
+    {
+        $data = [];
+
+        $handler = null;
+        foreach ($entities as $entity) {
+            $handler = $transformer->handler($entity->structure()->shortName);
+            break;
+        }
+        if ($handler === null) {
             return $data;
         }
 
-        if ($this->entity !== null) {
-            return $transformer->transformEntity($selector, $this->entity);
+        $handler->onLazyTransformEntities($entities, $selector);
+
+        foreach ($entities as $entity) {
+            $entityData = $transformer->transformEntity($entity, $selector);
+            if (!is_array($entityData)) {
+                continue;
+            }
+
+            $data[] = $entityData;
         }
 
-        return null;
+        return $data;
     }
 }

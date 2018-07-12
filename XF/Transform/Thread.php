@@ -39,14 +39,14 @@ class Thread extends AbstractHandler
     const PERM_POST = 'post';
     const PERM_UPLOAD_ATTACHMENT = 'upload_attachment';
 
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
         /** @var \XF\Entity\Thread $thread */
-        $thread = $this->source;
+        $thread = $context->source;
 
         switch ($key) {
             case self::DYNAMIC_KEY_FIRST_POST:
-                return $this->transformer->transformSubEntity($this, $key, $thread->FirstPost);
+                return $this->transformer->transformSubEntity($context, $key, $thread->FirstPost);
             case self::DYNAMIC_KEY_IS_DELETED:
                 return $thread->discussion_state === 'deleted';
             case self::DYNAMIC_KEY_IS_FOLLOWED:
@@ -71,7 +71,7 @@ class Thread extends AbstractHandler
                     return null;
                 }
 
-                return $this->transformer->transformSubEntity($this, $key, $thread->Poll);
+                return $this->transformer->transformSubEntity($context, $key, $thread->Poll);
             case self::DYNAMIC_KEY_PREFIXES:
                 if (!$thread->prefix_id) {
                     return null;
@@ -83,9 +83,9 @@ class Thread extends AbstractHandler
                     return null;
                 }
 
-                return $this->transformer->transformSubEntities($this, $key, [$prefix]);
+                return $this->transformer->transformSubEntities($context, $key, [$prefix]);
             case self::DYNAMIC_KEY_TAGS:
-                return $this->transformer->transformTags($this, $thread->tags);
+                return $this->transformer->transformTags($context, $thread->tags);
             case self::DYNAMIC_KEY_USER_IS_IGNORED:
                 return $thread->isIgnored();
         }
@@ -93,10 +93,10 @@ class Thread extends AbstractHandler
         return null;
     }
 
-    public function collectPermissions()
+    public function collectPermissions($context)
     {
         /** @var \XF\Entity\Thread $thread */
-        $thread = $this->source;
+        $thread = $context->source;
 
         $permissions = [
             self::PERM_DELETE => $thread->canDelete(),
@@ -111,15 +111,13 @@ class Thread extends AbstractHandler
         return $permissions;
     }
 
-    public function collectLinks()
+    public function collectLinks($context)
     {
         /** @var \XF\Entity\Thread $thread */
-        $thread = $this->source;
+        $thread = $context->source;
 
         $links = [
             self::LINK_DETAIL => $this->buildApiLink('threads', $thread),
-            self::LINK_FIRST_POSTER => $this->buildApiLink('users', $thread->FirstPost->User),
-            self::LINK_FIRST_POSTER_AVATAR => $thread->FirstPost->User->getAvatarUrl('l'),
             self::LINK_FIRST_POST => $this->buildApiLink('posts', $thread->FirstPost),
             self::LINK_FORUM => $this->buildApiLink('forums', $thread->Forum),
             self::LINK_LAST_POSTER => $this->buildApiLink('users', $thread->LastPoster),
@@ -127,6 +125,15 @@ class Thread extends AbstractHandler
             self::LINK_PERMALINK => $this->buildApiLink('threads', $thread),
             self::LINK_POSTS => $this->buildApiLink('posts', null, ['thread_id' => $thread->thread_id]),
         ];
+
+        $firstPost = $thread->FirstPost;
+        if ($firstPost->user_id > 0) {
+            $firstPostUser = $firstPost->User;
+            if (!empty($firstPostUser)) {
+                $links[self::LINK_FIRST_POSTER] = $this->buildApiLink('users', $firstPostUser);
+                $links[self::LINK_FIRST_POSTER_AVATAR] = $firstPostUser->getAvatarUrl('l');
+            }
+        }
 
         return $links;
     }
@@ -151,7 +158,7 @@ class Thread extends AbstractHandler
         return $with;
     }
 
-    public function getMappings()
+    public function getMappings($context)
     {
         return [
             // xf_thread
@@ -175,5 +182,35 @@ class Thread extends AbstractHandler
             self::DYNAMIC_KEY_TAGS,
             self::DYNAMIC_KEY_USER_IS_IGNORED,
         ];
+    }
+
+    public function getSubSelector($selector, $key)
+    {
+        if ($selector !== null) {
+            switch ($key) {
+                case self::DYNAMIC_KEY_FIRST_POST:
+                    return $selector->getSubSelectorNamed($key, 'post');
+            }
+        }
+
+        return parent::getSubSelector($selector, $key);
+    }
+
+    public function onLazyTransformEntities($entities, $selector)
+    {
+        if (!$selector->shouldExcludeField(self::DYNAMIC_KEY_FIRST_POST)) {
+            $postTransformer = $this->transformer->handler('XF:Post');
+
+            $firstPosts = [];
+            /** @var \XF\Entity\Thread $thread */
+            foreach ($entities as $thread) {
+                $firstPosts[] = $thread->FirstPost;
+            }
+
+            $subSelector = $this->getSubSelector($selector, self::DYNAMIC_KEY_FIRST_POST);
+            $postTransformer->onLazyTransformEntities($firstPosts, $subSelector);
+        }
+
+        return $entities;
     }
 }

@@ -11,24 +11,14 @@ class PollResponse extends AbstractHandler
 
     const DYNAMIC_KEY_IS_VOTED = 'response_is_voted';
 
-    public function getMappings()
-    {
-        return [
-            'poll_response_id' => self::KEY_ID,
-            'response' => self::KEY_ANSWER,
-
-            self::DYNAMIC_KEY_IS_VOTED
-        ];
-    }
-
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
         /** @var \XF\Entity\PollResponse $response */
-        $response = $this->source;
+        $response = $context->source;
 
         switch ($key) {
             case self::DYNAMIC_KEY_IS_VOTED:
-                $parent = $this->parent;
+                $parent = $context->parent;
                 if (empty($parent)) {
                     return null;
                 }
@@ -43,5 +33,15 @@ class PollResponse extends AbstractHandler
         }
 
         return null;
+    }
+
+    public function getMappings($context)
+    {
+        return [
+            'poll_response_id' => self::KEY_ID,
+            'response' => self::KEY_ANSWER,
+
+            self::DYNAMIC_KEY_IS_VOTED
+        ];
     }
 }

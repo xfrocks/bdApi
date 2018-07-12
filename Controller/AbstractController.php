@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Mvc\Entity\Entity;
+use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
 use XF\Mvc\Reply\AbstractReply;
 use XF\Mvc\Reply\Redirect;
@@ -177,12 +178,15 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      * @param array $data
      * @param string $key
      * @param Entity $entity
+     * @return LazyTransformer
      */
     public function transformEntityIfNeeded(array &$data, $key, $entity)
     {
         $lazyTransformer = $this->transformEntityLazily($entity);
         $lazyTransformer->setKey($key);
         $data[$key] = $lazyTransformer;
+
+        return $lazyTransformer;
     }
 
     /**
@@ -204,6 +208,17 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     {
         $lazyTransformer = new LazyTransformer($this);
         $lazyTransformer->setEntity($entity);
+        return $lazyTransformer;
+    }
+
+    /**
+     * @param Finder $finder
+     * @return LazyTransformer
+     */
+    public function transformFinderLazily($finder)
+    {
+        $lazyTransformer = new LazyTransformer($this);
+        $lazyTransformer->setFinder($finder);
         return $lazyTransformer;
     }
 

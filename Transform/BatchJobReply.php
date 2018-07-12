@@ -16,10 +16,14 @@ class BatchJobReply extends AbstractHandler
     const RESULT_MESSAGE = 'message';
     const RESULT_OK = 'ok';
 
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
+        if (empty($context->contextData['reply'])) {
+            return null;
+        }
+
         /** @var AbstractReply $reply */
-        $reply = $this->source;
+        $reply = $context->contextData['reply'];
 
         if ($reply instanceof \XF\Mvc\Reply\Error) {
             switch ($key) {
@@ -65,7 +69,7 @@ class BatchJobReply extends AbstractHandler
         return null;
     }
 
-    public function getMappings()
+    public function getMappings($context)
     {
         return [
             self::DYNAMIC_KEY_ERROR,
@@ -75,13 +79,14 @@ class BatchJobReply extends AbstractHandler
         ];
     }
 
-    public function reset($source, $parent, $selector)
+    public function onNewContext($context)
     {
-        if ($source instanceof \XF\Mvc\Reply\Exception) {
-            $this->reset($source->getReply(), $parent, $selector);
-            return;
+        $reply = null;
+
+        if ($context->source instanceof \XF\Mvc\Reply\Exception) {
+            $reply = $context->source->getReply();
         }
 
-        parent::reset($source, $parent, $selector);
+        return ['reply' => $reply];
     }
 }

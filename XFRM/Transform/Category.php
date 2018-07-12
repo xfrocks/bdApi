@@ -21,26 +21,26 @@ class Category extends AbstractHandler
     const PERM_ADD_PRICE = 'add_price';
     const PERM_ADD_FILE_LESS = 'add_no_file_or_url';
 
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
         /** @var \XFRM\Entity\Category $category */
-        $category = $this->source;
+        $category = $context->source;
 
         switch ($key) {
             case self::DYNAMIC_KEY_FIELDS:
                 /** @var \XF\CustomField\DefinitionSet $allDefinitions */
                 $allDefinitions = $this->app->container('customFields.resources');
                 $categoryDefinitions = $allDefinitions->filterOnly($category->field_cache);
-                return $this->transformer->transformCustomFieldDefinitionSet($this, $categoryDefinitions);
+                return $this->transformer->transformCustomFieldDefinitionSet($context, $categoryDefinitions);
         }
 
         return null;
     }
 
-    public function collectLinks()
+    public function collectLinks($context)
     {
         /** @var \XFRM\Entity\Category $category */
-        $category = $this->source;
+        $category = $context->source;
 
         $links = [
             self::LINK_DETAIL => $this->buildApiLink('resource-categories', $category),
@@ -60,10 +60,10 @@ class Category extends AbstractHandler
         return $links;
     }
 
-    public function collectPermissions()
+    public function collectPermissions($context)
     {
         /** @var \XFRM\Entity\Category $category */
-        $category = $this->source;
+        $category = $context->source;
 
         $permissions = [
             self::PERM_ADD => $category->canAddResource(),
@@ -79,7 +79,7 @@ class Category extends AbstractHandler
         return $permissions;
     }
 
-    public function getMappings()
+    public function getMappings($context)
     {
         return [
             'description' => self::KEY_DESCRIPTION,

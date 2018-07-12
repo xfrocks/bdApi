@@ -14,19 +14,17 @@ class Attachment extends AbstractHandler
     const LINK_DATA = 'data';
     const LINK_THUMBNAIL = 'thumbnail';
 
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
-        if ($this->parent instanceof AttachmentParent) {
-            return $this->parent->attachmentCalculateDynamicValue($this, $key);
-        }
-
-        return null;
+        /** @var AttachmentParent $parentHandler */
+        $parentHandler = $context->parentContext->handler;
+        return $parentHandler->attachmentCalculateDynamicValue($context, $key);
     }
 
-    public function collectLinks()
+    public function collectLinks($context)
     {
         /** @var \XF\Entity\Attachment $attachment */
-        $attachment = $this->source;
+        $attachment = $context->source;
 
         $links = [
             self::LINK_DATA => $this->buildApiLink('attachments', $attachment, ['hash' => $attachment->temp_hash]),
@@ -38,31 +36,31 @@ class Attachment extends AbstractHandler
             $links[self::LINK_THUMBNAIL] = $thumbnailUrl;
         }
 
-        if ($this->parent instanceof AttachmentParent) {
-            $this->parent->attachmentCollectLinks($this, $links);
-        }
+        /** @var AttachmentParent $parentHandler */
+        $parentHandler = $context->parentContext->handler;
+        $parentHandler->attachmentCollectLinks($context, $links);
 
         return $links;
     }
 
-    public function collectPermissions()
+    public function collectPermissions($context)
     {
         /** @var \XF\Entity\Attachment $attachment */
-        $attachment = $this->source;
+        $attachment = $context->source;
 
         $permissions = [
             self::PERM_DELETE => false,
             self::PERM_VIEW => $attachment->canView(),
         ];
 
-        if ($this->parent instanceof AttachmentParent) {
-            $this->parent->attachmentCollectPermissions($this, $permissions);
-        }
+        /** @var AttachmentParent $parentHandler */
+        $parentHandler = $context->parentContext->handler;
+        $parentHandler->attachmentCollectPermissions($context, $permissions);
 
         return $permissions;
     }
 
-    public function getMappings()
+    public function getMappings($context)
     {
         $mappings = [
             'attachment_id' => self::KEY_ID,
@@ -70,9 +68,9 @@ class Attachment extends AbstractHandler
             'view_count' => self::KEY_DOWNLOAD_COUNT,
         ];
 
-        if ($this->parent instanceof AttachmentParent) {
-            $this->parent->attachmentGetMappings($this, $mappings);
-        }
+        /** @var AttachmentParent $parentHandler */
+        $parentHandler = $context->parentContext->handler;
+        $parentHandler->attachmentGetMappings($context, $mappings);
 
         return $mappings;
     }
