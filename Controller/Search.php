@@ -31,9 +31,8 @@ class Search extends AbstractController
             ->params()
             ->definePageNav();
 
-        $page = $params['page'];
-        $perPage = min($this->options()->searchResultsPerPage, $params['limit']);
-
+        list($perPage, $page) = $params->filterLimitAndPage();
+        
         $searcher = $this->app()->search();
         $resultSet = $searcher->getResultSet($search->search_results);
 
