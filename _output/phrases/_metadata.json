@@ -173,6 +173,12 @@
         "version_string": "2.0.0 Alpha 1",
         "hash": "fb0d1eb2316a30f4aef20628b3f650b9"
     },
+    "bdapi_slash_search_requires_q.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "6bd7463cea5befd13d46ff23867efb1b"
+    },
     "bdapi_whitelisted_domains.txt": {
         "global_cache": false,
         "version_id": 2000000,
