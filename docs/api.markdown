@@ -2139,12 +2139,11 @@ Detail information of a conversation.
             recipients: [
                 {
                     user_id: (int),
-                    username: (string)
-                },
-                {
-                    user_id: (int),
-                    username: (string)
-                },
+                    username: (string),
+                    avatar: (uri), # since forum-2018071201
+                    avatar_big: (uri), # since forum-2018071201
+                    avatar_small: (uri) # since forum-2018071201
+                }
                 ...
             ]
             links: {

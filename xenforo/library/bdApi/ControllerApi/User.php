@@ -857,9 +857,6 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
         $userModel = $this->_getUserModel();
 
-        /** @var XenForo_Model_UserProfile $userProfileModel */
-        $userProfileModel = $this->getModelFromCache('XenForo_Model_UserProfile');
-
         $followersTotals = null;
         if ($this->_isFieldIncluded('user_followers_total')) {
             $followersTotals = $userModel->bdApi_countUsersFollowingUserIds(array_keys($users));
@@ -868,10 +865,6 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $includeFollowingsTotal = $this->_isFieldIncluded('user_followings_total');
 
         foreach ($users as &$userRef) {
-            if (!$userProfileModel->canViewFullUserProfile($userRef)) {
-                continue;
-            }
-
             $userData = $userModel->prepareApiDataForUser($userRef);
 
             if (is_array($followersTotals)) {
