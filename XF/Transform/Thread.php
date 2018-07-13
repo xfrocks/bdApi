@@ -83,7 +83,12 @@ class Thread extends AbstractHandler
                     return null;
                 }
 
-                return $this->transformer->transformSubEntities($context, $key, [$prefix]);
+                $prefixData = $this->transformer->transformSubEntity($context, $key, $prefix);
+                if (count($prefixData) === 0) {
+                    return null;
+                }
+
+                return [$prefixData];
             case self::DYNAMIC_KEY_TAGS:
                 return $this->transformer->transformTags($context, $thread->tags);
             case self::DYNAMIC_KEY_USER_IS_IGNORED:
@@ -196,7 +201,7 @@ class Thread extends AbstractHandler
         return parent::getSubSelector($selector, $key);
     }
 
-    public function onLazyTransformEntities($entities, $selector)
+    public function onTransformEntities($entities, $selector)
     {
         if (!$selector->shouldExcludeField(self::DYNAMIC_KEY_FIRST_POST)) {
             $postTransformer = $this->transformer->handler('XF:Post');
@@ -208,7 +213,7 @@ class Thread extends AbstractHandler
             }
 
             $subSelector = $this->getSubSelector($selector, self::DYNAMIC_KEY_FIRST_POST);
-            $postTransformer->onLazyTransformEntities($firstPosts, $subSelector);
+            $postTransformer->onTransformEntities($firstPosts, $subSelector);
         }
 
         return $entities;

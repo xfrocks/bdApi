@@ -107,12 +107,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
                     return [];
                 }
 
-                $attachments = $description->Attachments;
-                if (count($attachments) === 0) {
-                    return [];
-                }
-
-                return $this->transformer->transformSubEntities($context, $key, $attachments);
+                return $this->transformer->transformEntityRelation($context, $key, $description, 'Attachments');
             case self::DYNAMIC_KEY_CURRENCY:
                 return $resourceItem->external_purchase_url ? $resourceItem->currency : null;
             case self::DYNAMIC_KEY_FIELDS:
@@ -298,7 +293,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return \XF::phrase('xfrm_requested_resource_not_found');
     }
 
-    public function onLazyTransformEntities($entities, $selector)
+    public function onTransformEntities($entities, $selector)
     {
         $needAttachments = false;
         if (!$selector->shouldExcludeField(self::DYNAMIC_KEY_ATTACHMENTS)) {

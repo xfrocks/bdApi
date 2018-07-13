@@ -26,7 +26,7 @@ class Poll extends AbstractHandler
             case self::DYNAMIC_KEY_IS_VOTED:
                 return $poll->hasVoted();
             case self::DYNAMIC_KEY_RESPONSES:
-                return $this->transformer->transformSubEntities($context, $key, $poll->Responses);
+                return $this->transformer->transformEntityRelation($context, $key, $poll, 'Responses');
         }
 
         return null;

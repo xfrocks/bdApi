@@ -93,12 +93,7 @@ class Post extends AbstractHandler implements AttachmentParent
                     return null;
                 }
 
-                $attachments = $post->Attachments;
-                if (count($attachments) === 0) {
-                    return [];
-                }
-
-                return $this->transformer->transformSubEntities($context, $key, $attachments);
+                return $this->transformer->transformEntityRelation($context, $key, $post, 'Attachments');
             case self::DYNAMIC_KEY_BODY_HTML:
                 return $this->renderBbCodeHtml($key, $post->message, $post);
             case self::DYNAMIC_KEY_BODY_PLAIN:
@@ -243,7 +238,7 @@ class Post extends AbstractHandler implements AttachmentParent
         ];
     }
 
-    public function onLazyTransformEntities($entities, $selector)
+    public function onTransformEntities($entities, $selector)
     {
         $needAttachments = false;
         if (!$selector->shouldExcludeField(self::DYNAMIC_KEY_ATTACHMENTS)) {

@@ -125,7 +125,7 @@ abstract class AbstractHandler
      * @param Selector $selector
      * @return Finder
      */
-    public function onLazyTransformBeforeFetching($finder, $selector)
+    public function onTransformFinder($finder, $selector)
     {
         return $finder;
     }
@@ -135,7 +135,7 @@ abstract class AbstractHandler
      * @param Selector $selector
      * @return Entity[]
      */
-    public function onLazyTransformEntities($entities, $selector)
+    public function onTransformEntities($entities, $selector)
     {
         return $entities;
     }

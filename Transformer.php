@@ -146,6 +146,54 @@ class Transformer
     }
 
     /**
+     * @param TransformContext $context
+     * @param string $key
+     * @param Entity $entity
+     * @param string $relationKey
+     * @return array
+     */
+    public function transformEntityRelation($context, $key, $entity, $relationKey)
+    {
+        $entityStructure = $entity->structure();
+        if (!isset($entityStructure->relations[$relationKey])) {
+            return [];
+        }
+
+        $relationConfig = $entityStructure->relations[$relationKey];
+        if (!is_array($relationConfig) ||
+            !isset($relationConfig['type']) ||
+            !isset($relationConfig['entity'])
+        ) {
+            return [];
+        }
+
+        $relationData = $entity->getRelation($relationKey);
+        if ($relationConfig['type'] === Entity::TO_ONE) {
+            /** @var Entity $subEntity */
+            $subEntity = $relationData;
+            return $this->transformSubEntity($context, $key, $subEntity);
+        }
+
+        $subHandler = $this->handler($relationConfig['entity']);
+
+        $data = [];
+        /** @var Entity[] $subEntities */
+        $subEntities = $relationData;
+        $subSelector = $context->handler->getSubSelector($context->selector, $key);
+        $subEntities = $subHandler->onTransformEntities($subEntities, $subSelector);
+
+        foreach ($subEntities as $subEntity) {
+            $subContext = $context->getSubContext($key, $subHandler, $subEntity);
+            $subEntityData = $this->transform($subContext);
+            if (count($subEntityData) > 0) {
+                $data[] = $subEntityData;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
      * @param \Exception $exception
      * @return array
      */
@@ -159,32 +207,11 @@ class Transformer
     /**
      * @param TransformContext $context
      * @param string $key
-     * @param Entity[] $subEntities
-     * @return array
-     */
-    public function transformSubEntities($context, $key, $subEntities)
-    {
-        $data = [];
-        foreach ($subEntities as $subEntity) {
-            $data[] = $this->transformSubEntity($context, $key, $subEntity);
-        }
-        return $data;
-    }
-
-    /**
-     * @param TransformContext $context
-     * @param string $key
      * @param Entity $subEntity
      * @return array
      */
     public function transformSubEntity($context, $key, $subEntity)
     {
-        $canView = [$subEntity, 'canView'];
-        if (is_callable($canView) && call_user_func($canView) !== true) {
-            // make sure to never accidentally transform protected entity data
-            return [];
-        }
-
         $subHandler = $this->handler($subEntity->structure()->shortName);
         $subContext = $context->getSubContext($key, $subHandler, $subEntity);
         return $this->transform($subContext);

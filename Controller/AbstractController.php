@@ -190,17 +190,6 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     }
 
     /**
-     * @param Entity[] $entities
-     * @return LazyTransformer
-     */
-    public function transformEntitiesLazily($entities)
-    {
-        $lazyTransformer = new LazyTransformer($this);
-        $lazyTransformer->setEntities($entities);
-        return $lazyTransformer;
-    }
-
-    /**
      * @param Entity $entity
      * @return LazyTransformer
      */
