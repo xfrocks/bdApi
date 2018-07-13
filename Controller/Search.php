@@ -43,34 +43,12 @@ class Search extends AbstractController
             return $this->error(\XF::phrase('no_results_found'), 400);
         }
 
-        $grouped = [];
-        $results = $resultSet->getResults();
-
-        foreach ($results as $id => $result) {
-            $grouped[$result[0]][$id] = $result[1];
-        }
-
-        $data = [];
-        $searcher = $this->app()->search();
-
-        foreach ($grouped as $contentType => $contents) {
-            $typeHandler = $searcher->handler(strval($contentType));
-            $entities = $typeHandler->getContent(array_values($contents), true);
-
-            /** @var Entity $entity */
-            foreach ($entities as $entity) {
-                $dataKey = $contentType . '-' . $entity->getEntityId();
-                if (!isset($results[$dataKey])) {
-                    continue;
-                }
-
-                $data[] = $this->transformEntityLazily($entity);
-            }
-        }
+        /** @var \Xfrocks\Api\ControllerPlugin\Search $searchPlugin */
+        $searchPlugin = $this->plugin('Xfrocks\Api:Search');
 
         $data = [
             'data_total' => $search->result_count,
-            'data' => $data
+            'data' => $searchPlugin->prepareSearchResults($resultSet->getResults())
         ];
 
         PageNav::addLinksToData($data, $params, $data['data_total'], 'search/results', $search);
