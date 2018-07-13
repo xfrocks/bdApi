@@ -2,13 +2,8 @@
 
 namespace Xfrocks\Api\XF\Transform;
 
-use Xfrocks\Api\Transform\AbstractHandler;
-
-class Forum extends AbstractHandler
+class Forum extends AbstractNode
 {
-    const KEY_DESCRIPTION = 'forum_description';
-    const KEY_ID = 'forum_id';
-    const KEY_TITLE = 'forum_title';
     const KEY_POST_COUNT = 'forum_post_count';
     const KEY_THREAD_COUNT = 'forum_thread_count';
     const KEY_DEFAULT_THREAD_PREFIX_ID = 'thread_default_prefix_id';
@@ -17,8 +12,6 @@ class Forum extends AbstractHandler
     const DYNAMIC_KEY_IS_FOLLOW = 'forum_is_follow';
     const DYNAMIC_KEY_PREFIXES = 'forum_prefixes';
 
-    const LINK_SUB_CATEGORIES = 'sub-categories';
-    const LINK_SUB_FORUMS = 'sub-forums';
     const LINK_THREADS = 'threads';
 
     const PERM_CREATE_THREAD = 'create_thread';
@@ -26,10 +19,9 @@ class Forum extends AbstractHandler
 
     public function getMappings()
     {
-        return [
-            'node_id' => self::KEY_ID,
-            'title' => self::KEY_TITLE,
-            'description' => self::KEY_DESCRIPTION,
+        $mappings = parent::getMappings();
+
+        $mappings += [
             'discussion_count' => self::KEY_THREAD_COUNT,
             'message_count' => self::KEY_POST_COUNT,
             'default_prefix_id' => self::KEY_DEFAULT_THREAD_PREFIX_ID,
@@ -38,21 +30,19 @@ class Forum extends AbstractHandler
             self::DYNAMIC_KEY_IS_FOLLOW,
             self::DYNAMIC_KEY_PREFIXES
         ];
+
+        return $mappings;
     }
 
     public function collectLinks()
     {
+        $links = parent::collectLinks();
+
         /** @var \XF\Entity\Forum $forum */
         $forum = $this->source;
 
-        $links = [
-            self::LINK_PERMALINK => $this->buildApiLink('forums', $forum),
-            self::LINK_DETAIL => $this->buildApiLink('forums', $forum),
-
+        $links += [
             self::LINK_FOLLOWERS => $this->buildApiLink('forums/followers', $forum),
-            self::LINK_SUB_CATEGORIES => $this->buildApiLink('forums', null, ['parent_category_id' => $forum->node_id]),
-            self::LINK_SUB_FORUMS => $this->buildApiLink('forums', null, ['parent_forum_id' => $forum->node_id]),
-
             self::LINK_THREADS => $this->buildApiLink('threads', null, ['forum_id' => $forum->node_id])
         ];
 
@@ -61,10 +51,12 @@ class Forum extends AbstractHandler
 
     public function collectPermissions()
     {
+        $perms = parent::collectPermissions();
+
         /** @var \XF\Entity\Forum $forum */
         $forum = $this->source;
 
-        $perms = [
+        $perms += [
             self::PERM_FOLLOW => $forum->canWatch(),
             self::PERM_CREATE_THREAD => $forum->canCreateThread(),
             self::PERM_UPLOAD_ATTACHMENT => $forum->canUploadAndManageAttachments()
@@ -98,5 +90,15 @@ class Forum extends AbstractHandler
         }
 
         return null;
+    }
+
+    protected function getNameSingular()
+    {
+        return 'forum';
+    }
+
+    protected function getRoutePrefix()
+    {
+        return 'forums';
     }
 }
