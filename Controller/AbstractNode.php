@@ -2,6 +2,7 @@
 
 namespace Xfrocks\Api\Controller;
 
+use XF\Mvc\Entity\Entity;
 use XF\Mvc\ParameterBag;
 use XF\Repository\Node;
 
@@ -54,6 +55,7 @@ abstract class AbstractNode extends AbstractController
 
         if ($nodeIds && isset($nodeTypes[$this->getNodeTypeId()])) {
             $entityIdentifier = $nodeTypes[$this->getNodeTypeId()]['entity_identifier'];
+            /** @var \XF\Entity\Node[] $nodes */
             $nodes = $this->em()->findByIds($entityIdentifier, $nodeIds);
         }
 

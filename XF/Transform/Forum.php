@@ -79,12 +79,11 @@ class Forum extends AbstractNode
 
                 return !empty($forum->Watch[$visitor->user_id]);
             case self::DYNAMIC_KEY_PREFIXES:
-                if (!$forum->prefixes) {
+                /** @var \XF\Entity\ThreadPrefix[]|null $prefixes */
+                $prefixes = $forum->prefixes;
+                if (!$prefixes) {
                     return null;
                 }
-
-                /** @var \XF\Entity\ThreadPrefix[] $prefixes */
-                $prefixes = $forum->prefixes;
 
                 return $this->transformer->transformSubEntities($this, $key, $prefixes);
         }

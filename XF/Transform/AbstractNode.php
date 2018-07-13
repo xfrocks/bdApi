@@ -40,7 +40,7 @@ abstract class AbstractNode extends AbstractHandler
         $perms = [];
 
         if (is_callable([$this->source, 'canView'])) {
-            $perms[self::PERM_VIEW] = call_user_func([$this->source, 'canView']);
+            $perms[self::PERM_VIEW] = $this->source->canView();
         }
 
         $visitor = \XF::visitor();
