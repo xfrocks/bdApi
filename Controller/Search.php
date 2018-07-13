@@ -65,8 +65,8 @@ class Search extends AbstractController
         $params = $this
             ->params()
             ->define('q', 'str', 'query to search for')
-            ->define('forum_id', 'uint', 'id of the container forum to search for contents')
-            ->define('user_id', 'uint', 'id of the creator to search for contents');
+            ->define('forum_id', 'uint', 'forum id to filter')
+            ->define('user_id', 'uint', 'creator user id to filter');
 
         if (empty($params['q'])) {
             return $this->error(\XF::phrase('bdapi_slash_search_requires_q'), 400);
@@ -74,7 +74,6 @@ class Search extends AbstractController
 
         $search = $this->searchRepo()->search($params, 'thread');
         if (!$search) {
-            // no results.
             return $this->error(\XF::phrase('no_results_found'), 400);
         }
 
