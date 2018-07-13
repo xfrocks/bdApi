@@ -17,7 +17,9 @@ class Modules
     {
         $this->addController('Xfrocks:Attachment', 'attachments', ':int<attachment_id>/');
         $this->addController('Xfrocks:Batch', 'batch');
+        $this->addController('Xfrocks:Category', 'categories', ':int<node_id>/');
         $this->addController('Xfrocks:Index', 'index');
+        $this->addController('Xfrocks:Forum', 'forums', ':int<node_id>/');
         $this->addController('Xfrocks:OAuth2', 'oauth');
         $this->addController('Xfrocks:Post', 'posts', ':int<post_id>/');
         $this->addController('Xfrocks:Search', 'search', ':int<search_id>/');
