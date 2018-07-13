@@ -47,7 +47,7 @@ class Post extends AbstractHandler implements AttachmentParent
     {
         switch ($key) {
             case self::ATTACHMENT__DYNAMIC_KEY_ID:
-                return $context->parentContext->source['post_id'];
+                return $context->getParentSourceValue('post_id');
         }
 
         return null;
@@ -55,14 +55,14 @@ class Post extends AbstractHandler implements AttachmentParent
 
     public function attachmentCollectLinks($context, array &$links)
     {
-        $post = $context->parentContext->source;
+        $post = $context->getParentSource();
         $links[self::ATTACHMENT__LINK_POST] = $this->buildApiLink('posts', $post);
     }
 
     public function attachmentCollectPermissions($context, array &$permissions)
     {
         /** @var \XF\Entity\Post $post */
-        $post = $context->parentContext->source;
+        $post = $context->getParentSource();
         $canDelete = false;
 
         /** @var \XF\Entity\Thread|null $thread */
@@ -85,7 +85,7 @@ class Post extends AbstractHandler implements AttachmentParent
     public function calculateDynamicValue($context, $key)
     {
         /** @var \XF\Entity\Post $post */
-        $post = $context->source;
+        $post = $context->getSource();
 
         switch ($key) {
             case self::DYNAMIC_KEY_ATTACHMENTS:
@@ -153,7 +153,7 @@ class Post extends AbstractHandler implements AttachmentParent
     public function collectPermissions($context)
     {
         /** @var \XF\Entity\Post $post */
-        $post = $context->source;
+        $post = $context->getSource();
 
         $permissions = [
             self::PERM_DELETE => $post->canDelete(),
@@ -170,7 +170,7 @@ class Post extends AbstractHandler implements AttachmentParent
     public function collectLinks($context)
     {
         /** @var \XF\Entity\Post $post */
-        $post = $context->source;
+        $post = $context->getSource();
 
         $links = [
             self::LINK_ATTACHMENTS => $this->buildApiLink('posts/attachments', $post),
@@ -238,13 +238,13 @@ class Post extends AbstractHandler implements AttachmentParent
         ];
     }
 
-    public function onTransformEntities($entities, $selector)
+    public function onTransformEntities($context, $entities)
     {
         $needAttachments = false;
-        if (!$selector->shouldExcludeField(self::DYNAMIC_KEY_ATTACHMENTS)) {
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_ATTACHMENTS)) {
             $needAttachments = true;
         }
-        if (!$selector->shouldExcludeField(self::DYNAMIC_KEY_BODY_HTML)) {
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_BODY_HTML)) {
             $needAttachments = true;
         }
         if ($needAttachments) {

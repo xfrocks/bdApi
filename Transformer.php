@@ -5,9 +5,8 @@ namespace Xfrocks\Api;
 use XF\Container;
 use XF\Mvc\Entity\Entity;
 use Xfrocks\Api\Data\Modules;
-use Xfrocks\Api\Data\TransformContext;
 use Xfrocks\Api\Transform\AbstractHandler;
-use Xfrocks\Api\Transform\Selector;
+use Xfrocks\Api\Transform\TransformContext;
 
 class Transformer
 {
@@ -44,7 +43,7 @@ class Transformer
                 $class = 'Xfrocks\Api\Transform\Generic';
             }
 
-            return new $class($this->app, $this);
+            return new $class($this->app, $this, $type);
         });
     }
 
@@ -67,6 +66,15 @@ class Transformer
     {
         $subContext = $context->getSubContext($key, $this->handler(), $values);
         return $this->transform($subContext);
+    }
+
+    /**
+     * @param TransformContext $context
+     * @return array
+     */
+    public function transformContext($context)
+    {
+        return $this->transform($context);
     }
 
     /**
@@ -128,24 +136,6 @@ class Transformer
     }
 
     /**
-     * @param Entity $entity
-     * @param Selector|null $selector
-     * @return array
-     */
-    public function transformEntity($entity, $selector = null)
-    {
-        $canView = [$entity, 'canView'];
-        if (is_callable($canView) && call_user_func($canView) !== true) {
-            // make sure to never accidentally transform protected entity data
-            return [];
-        }
-
-        $handler = $this->handler($entity->structure()->shortName);
-        $context = new TransformContext($handler, $entity, $selector);
-        return $this->transform($context);
-    }
-
-    /**
      * @param TransformContext $context
      * @param string $key
      * @param Entity $entity
@@ -179,8 +169,8 @@ class Transformer
         $data = [];
         /** @var Entity[] $subEntities */
         $subEntities = $relationData;
-        $subSelector = $context->handler->getSubSelector($context->selector, $key);
-        $subEntities = $subHandler->onTransformEntities($subEntities, $subSelector);
+        $subContextTemp = $context->getSubContext($key, null, null);
+        $subEntities = $subHandler->onTransformEntities($subContextTemp, $subEntities);
 
         foreach ($subEntities as $subEntity) {
             $subContext = $context->getSubContext($key, $subHandler, $subEntity);
@@ -264,12 +254,17 @@ class Transformer
     protected function transform($context)
     {
         $data = [];
-        $handler = $context->handler;
-        $context->contextData = $handler->onNewContext($context);
+        $handler = $context->getHandler();
+        if ($handler === null) {
+            return $data;
+        }
+
+        $contextData = $handler->onNewContext($context);
+        $context->setData($contextData);
 
         $mappings = $handler->getMappings($context);
         foreach ($mappings as $key => $mapping) {
-            if ($handler->shouldExcludeField($context, $mapping)) {
+            if ($context->selectorShouldExcludeField($mapping)) {
                 continue;
             }
 
@@ -284,12 +279,12 @@ class Transformer
             }
         }
 
-        if (!$handler->shouldExcludeField($context, AbstractHandler::KEY_LINKS)) {
+        if (!$context->selectorShouldExcludeField(AbstractHandler::KEY_LINKS)) {
             $links = $handler->collectLinks($context);
             $this->addArrayToData($context, AbstractHandler::KEY_LINKS, $links, $data);
         }
 
-        if (!$handler->shouldExcludeField($context, AbstractHandler::KEY_PERMISSIONS)) {
+        if (!$context->selectorShouldExcludeField(AbstractHandler::KEY_PERMISSIONS)) {
             $permissions = $handler->collectPermissions($context);
             $this->addArrayToData($context, AbstractHandler::KEY_PERMISSIONS, $permissions, $data);
         }

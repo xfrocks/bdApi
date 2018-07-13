@@ -11,7 +11,7 @@ class Exception extends AbstractHandler
     public function calculateDynamicValue($context, $key)
     {
         /** @var \Exception $exception */
-        $exception = $context->source;
+        $exception = $context->getSource();
 
         switch ($key) {
             case self::DYNAMIC_KEY_CODE:
@@ -36,5 +36,10 @@ class Exception extends AbstractHandler
             self::DYNAMIC_KEY_MESSAGE,
             self::DYNAMIC_KEY_TRACE,
         ];
+    }
+
+    protected function prepareContextSelector($context)
+    {
+        // intentionally left blank
     }
 }

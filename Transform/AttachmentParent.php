@@ -2,8 +2,6 @@
 
 namespace Xfrocks\Api\Transform;
 
-use Xfrocks\Api\Data\TransformContext;
-
 interface AttachmentParent
 {
     /**

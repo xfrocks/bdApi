@@ -8,11 +8,12 @@ class Generic extends AbstractHandler
 {
     public function calculateDynamicValue($context, $key)
     {
-        if (!isset($context->source[$key])) {
+        $source = $context->getSource();
+        if (!isset($source[$key])) {
             return null;
         }
 
-        $value = $context->source[$key];
+        $value = $source[$key];
         if (!is_array($value) || !is_callable($value)) {
             return $value;
         }
@@ -24,7 +25,7 @@ class Generic extends AbstractHandler
     {
         $mappings = [];
 
-        $source = $context->source;
+        $source = $context->getSource();
         if ($source instanceof Entity) {
             $primaryKey = $source->structure()->primaryKey;
             if (is_string($primaryKey)) {
@@ -47,5 +48,10 @@ class Generic extends AbstractHandler
         }
 
         return $mappings;
+    }
+
+    protected function prepareContextSelector($context)
+    {
+        // intentionally left blank
     }
 }

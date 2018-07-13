@@ -42,7 +42,7 @@ class Thread extends AbstractHandler
     public function calculateDynamicValue($context, $key)
     {
         /** @var \XF\Entity\Thread $thread */
-        $thread = $context->source;
+        $thread = $context->getSource();
 
         switch ($key) {
             case self::DYNAMIC_KEY_FIRST_POST:
@@ -101,7 +101,7 @@ class Thread extends AbstractHandler
     public function collectPermissions($context)
     {
         /** @var \XF\Entity\Thread $thread */
-        $thread = $context->source;
+        $thread = $context->getSource();
 
         $permissions = [
             self::PERM_DELETE => $thread->canDelete(),
@@ -119,7 +119,7 @@ class Thread extends AbstractHandler
     public function collectLinks($context)
     {
         /** @var \XF\Entity\Thread $thread */
-        $thread = $context->source;
+        $thread = $context->getSource();
 
         $links = [
             self::LINK_DETAIL => $this->buildApiLink('threads', $thread),
@@ -189,21 +189,9 @@ class Thread extends AbstractHandler
         ];
     }
 
-    public function getSubSelector($selector, $key)
+    public function onTransformEntities($context, $entities)
     {
-        if ($selector !== null) {
-            switch ($key) {
-                case self::DYNAMIC_KEY_FIRST_POST:
-                    return $selector->getSubSelectorNamed($key, 'post');
-            }
-        }
-
-        return parent::getSubSelector($selector, $key);
-    }
-
-    public function onTransformEntities($entities, $selector)
-    {
-        if (!$selector->shouldExcludeField(self::DYNAMIC_KEY_FIRST_POST)) {
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_FIRST_POST)) {
             $postTransformer = $this->transformer->handler('XF:Post');
 
             $firstPosts = [];
@@ -212,8 +200,8 @@ class Thread extends AbstractHandler
                 $firstPosts[] = $thread->FirstPost;
             }
 
-            $subSelector = $this->getSubSelector($selector, self::DYNAMIC_KEY_FIRST_POST);
-            $postTransformer->onTransformEntities($firstPosts, $subSelector);
+            $subContext = $context->getSubContext(self::DYNAMIC_KEY_FIRST_POST, null, null);
+            $postTransformer->onTransformEntities($subContext, $firstPosts);
         }
 
         return $entities;

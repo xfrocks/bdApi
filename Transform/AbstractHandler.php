@@ -5,7 +5,6 @@ namespace Xfrocks\Api\Transform;
 use XF\App;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
-use Xfrocks\Api\Data\TransformContext;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\XF\Session\Session;
@@ -43,13 +42,20 @@ abstract class AbstractHandler
     protected $transformer;
 
     /**
+     * @var string
+     */
+    protected $type;
+
+    /**
      * @param App $app
      * @param Transformer $transformer
+     * @param string $type
      */
-    public function __construct($app, $transformer)
+    public function __construct($app, $transformer, $type)
     {
         $this->app = $app;
         $this->transformer = $transformer;
+        $this->type = $type;
     }
 
     /**
@@ -107,35 +113,21 @@ abstract class AbstractHandler
     }
 
     /**
-     * @param Selector|null $selector
-     * @param string $key
-     * @return Selector|null
-     */
-    public function getSubSelector($selector, $key)
-    {
-        if ($selector === null) {
-            return null;
-        }
-
-        return $selector->getSubSelector($key);
-    }
-
-    /**
+     * @param TransformContext $context
      * @param Finder $finder
-     * @param Selector $selector
      * @return Finder
      */
-    public function onTransformFinder($finder, $selector)
+    public function onTransformFinder($context, $finder)
     {
         return $finder;
     }
 
     /**
+     * @param TransformContext $context
      * @param Entity[] $entities
-     * @param Selector $selector
      * @return Entity[]
      */
-    public function onTransformEntities($entities, $selector)
+    public function onTransformEntities($context, $entities)
     {
         return $entities;
     }
@@ -146,35 +138,9 @@ abstract class AbstractHandler
      */
     public function onNewContext($context)
     {
+        $context->makeSureSelectorIsNotNull($this->type);
+
         return [];
-    }
-
-    /**
-     * @param TransformContext $context
-     * @param string $key
-     * @return bool
-     */
-    public function shouldExcludeField($context, $key)
-    {
-        if ($context->selector === null) {
-            return false;
-        }
-
-        return $context->selector->shouldExcludeField($key);
-    }
-
-    /**
-     * @param TransformContext $context
-     * @param string $key
-     * @return bool
-     */
-    public function shouldIncludeField($context, $key)
-    {
-        if ($context->selector === null) {
-            return false;
-        }
-
-        return $context->selector->shouldIncludeField($key);
     }
 
     /**

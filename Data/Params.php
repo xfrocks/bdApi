@@ -4,6 +4,7 @@ namespace Xfrocks\Api\Data;
 
 use Xfrocks\Api\Controller\AbstractController;
 use Xfrocks\Api\Transform\Selector;
+use Xfrocks\Api\Transform\TransformContext;
 
 class Params implements \ArrayAccess
 {
@@ -58,9 +59,9 @@ class Params implements \ArrayAccess
     protected $params = [];
 
     /**
-     * @var Selector|null
+     * @var TransformContext|null
      */
-    protected $selector = null;
+    protected $transformContext = null;
 
     /**
      * @param AbstractController $controller
@@ -68,6 +69,8 @@ class Params implements \ArrayAccess
     public function __construct($controller)
     {
         $this->controller = $controller;
+
+        $this->defineFieldsFiltering();
     }
 
     /**
@@ -126,19 +129,16 @@ class Params implements \ArrayAccess
     }
 
     /**
-     * @param string $selectorName
      * @param string $paramKeyExclude
      * @param string $paramKeyInclude
      * @return Params
      */
     public function defineFieldsFiltering(
-        $selectorName,
         $paramKeyExclude = 'fields_exclude',
         $paramKeyInclude = 'fields_include'
     ) {
         $this->paramKeyTransformSelectorExclude = $paramKeyExclude;
         $this->paramKeyTransformSelectorInclude = $paramKeyInclude;
-        $this->selector = new Selector($selectorName);
 
         return $this->define($paramKeyExclude, 'str', 'coma-separated list of fields to exclude from the response')
             ->define($paramKeyInclude, 'str', 'coma-separated list of fields to include in the response');
@@ -330,6 +330,22 @@ class Params implements \ArrayAccess
     }
 
     /**
+     * @return TransformContext
+     */
+    public function getTransformContext()
+    {
+        if ($this->transformContext === null) {
+            $selector = new Selector();
+            list($exclude, $include) = $this->filterTransformSelector();
+            $selector->parseRules($exclude, $include);
+
+            $this->transformContext = new TransformContext(null, null, $selector);
+        }
+
+        return $this->transformContext;
+    }
+
+    /**
      * @param \XF\Mvc\Entity\Finder $finder
      * @return int
      */
@@ -359,23 +375,6 @@ class Params implements \ArrayAccess
     public function offsetUnset($offset)
     {
         throw new \LogicException('Params::define() must be used to define new param.');
-    }
-
-    /**
-     * @return Selector
-     */
-    public function parseSelectorRules()
-    {
-        if ($this->selector === null) {
-            throw new \LogicException('Params::defineFieldsFiltering() must be called before calling parseSelectorRules().');
-        }
-
-        if (!$this->selector->hasParsedRules()) {
-            list($exclude, $include) = $this->filterTransformSelector();
-            $this->selector->parseRules($exclude, $include);
-        }
-
-        return $this->selector;
     }
 
     /**

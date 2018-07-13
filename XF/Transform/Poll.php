@@ -18,7 +18,7 @@ class Poll extends AbstractHandler
     public function calculateDynamicValue($context, $key)
     {
         /** @var \XF\Entity\Poll $poll */
-        $poll = $context->source;
+        $poll = $context->getSource();
 
         switch ($key) {
             case self::DYNAMIC_KEY_IS_OPEN:

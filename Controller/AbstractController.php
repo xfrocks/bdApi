@@ -10,7 +10,7 @@ use XF\Mvc\Reply\Redirect;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
-use Xfrocks\Api\Util\LazyTransformer;
+use Xfrocks\Api\Transform\LazyTransformer;
 
 class AbstractController extends \XF\Pub\Controller\AbstractController
 {

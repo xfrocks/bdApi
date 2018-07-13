@@ -8,8 +8,6 @@ class User extends AbstractController
 {
     public function actionGetIndex(ParameterBag $params)
     {
-        $this->params()->defineFieldsFiltering('user');
-
         if ($params->user_id) {
             return $this->actionSingle($params->user_id);
         }

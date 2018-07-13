@@ -10,8 +10,6 @@ class Post extends AbstractController
 {
     public function actionGetIndex(ParameterBag $params)
     {
-        $this->params()->defineFieldsFiltering('post');
-
         if ($params->post_id) {
             return $this->actionSingle($params->post_id);
         }

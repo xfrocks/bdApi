@@ -24,7 +24,7 @@ class Category extends AbstractHandler
     public function calculateDynamicValue($context, $key)
     {
         /** @var \XFRM\Entity\Category $category */
-        $category = $context->source;
+        $category = $context->getSource();
 
         switch ($key) {
             case self::DYNAMIC_KEY_FIELDS:
@@ -40,7 +40,7 @@ class Category extends AbstractHandler
     public function collectLinks($context)
     {
         /** @var \XFRM\Entity\Category $category */
-        $category = $context->source;
+        $category = $context->getSource();
 
         $links = [
             self::LINK_DETAIL => $this->buildApiLink('resource-categories', $category),
@@ -63,7 +63,7 @@ class Category extends AbstractHandler
     public function collectPermissions($context)
     {
         /** @var \XFRM\Entity\Category $category */
-        $category = $context->source;
+        $category = $context->getSource();
 
         $permissions = [
             self::PERM_ADD => $category->canAddResource(),

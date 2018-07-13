@@ -1,17 +1,21 @@
 <?php
 
-namespace Xfrocks\Api\Util;
+namespace Xfrocks\Api\Transform;
 
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
 use Xfrocks\Api\Controller\AbstractController;
-use Xfrocks\Api\Transform\Selector;
 use Xfrocks\Api\Transformer;
 
 class LazyTransformer
 {
     const SOURCE_TYPE_ENTITY = 'entity';
     const SOURCE_TYPE_FINDER = 'finder';
+
+    /**
+     * @var AbstractController
+     */
+    protected $controller;
 
     /**
      * @var array|null
@@ -24,12 +28,7 @@ class LazyTransformer
     protected $key = null;
 
     /**
-     * @var Selector
-     */
-    protected $selector;
-
-    /**
-     * @var mixed
+     * @var mixed|null
      */
     protected $source = null;
 
@@ -39,17 +38,11 @@ class LazyTransformer
     protected $sourceType = '';
 
     /**
-     * @var Transformer
-     */
-    protected $transformer;
-
-    /**
      * @param AbstractController $controller
      */
     public function __construct($controller)
     {
-        $this->transformer = $controller->app()->container('api.transformer');
-        $this->selector = $controller->params()->parseSelectorRules();
+        $this->controller = $controller;
     }
 
     /**
@@ -57,7 +50,7 @@ class LazyTransformer
      */
     public function jsonSerialize()
     {
-        return $this->transform($this->transformer, $this->selector);
+        return $this->transform();
     }
 
     /**
@@ -109,30 +102,35 @@ class LazyTransformer
     }
 
     /**
-     * @param Transformer $transformer
-     * @param Selector $selector
      * @return array|null
      */
-    public function transform($transformer, $selector)
+    public function transform()
     {
+        $controller = $this->controller;
+        /** @var Transformer $transformer */
+        $transformer = $controller->app()->container('api.transformer');
+        $context = $controller->params()->getTransformContext();
+
         if ($this->key !== null) {
-            if ($selector->shouldExcludeField($this->key)) {
+            if ($context->selectorShouldExcludeField($this->key)) {
                 return null;
             }
 
-            $selector = $selector->getSubSelector($this->key);
+            $context = $context->getSubContext($this->key, null, null);
         }
 
         switch ($this->sourceType) {
             case self::SOURCE_TYPE_ENTITY:
                 /** @var Entity $entity */
                 $entity = $this->source;
-                return $transformer->transformEntity($entity, $selector);
+                $handler = $transformer->handler($entity->structure()->shortName);
+                $context = $context->getSubContext(null, $handler, $entity);
+                return $transformer->transformContext($context);
             case self::SOURCE_TYPE_FINDER:
                 /** @var Finder $finder */
                 $finder = $this->source;
                 $handler = $transformer->handler($finder->getStructure()->shortName);
-                $finder = $handler->onTransformFinder($finder, $selector);
+                $finder = $handler->onTransformFinder($context, $finder);
 
                 $result = $finder->fetch();
                 if ($this->finderSortByList !== null) {
@@ -141,10 +139,11 @@ class LazyTransformer
 
                 $data = [];
                 $entities = $result->toArray();
-                $handler->onTransformEntities($entities, $selector);
+                $entities = $handler->onTransformEntities($context, $entities);
 
                 foreach ($entities as $entity) {
-                    $entityData = $transformer->transformEntity($entity, $selector);
+                    $entityContext = $context->getSubContext(null, $handler, $entity);
+                    $entityData = $transformer->transformContext($entityContext);
                     if (!is_array($entityData)) {
                         continue;
                     }

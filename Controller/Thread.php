@@ -11,8 +11,6 @@ class Thread extends AbstractController
 {
     public function actionGetIndex(ParameterBag $params)
     {
-        $this->params()->defineFieldsFiltering('thread');
-
         if ($params->thread_id) {
             return $this->actionSingle($params->thread_id);
         }

@@ -14,18 +14,13 @@ class PollResponse extends AbstractHandler
     public function calculateDynamicValue($context, $key)
     {
         /** @var \XF\Entity\PollResponse $response */
-        $response = $context->source;
+        $response = $context->getSource();
 
         switch ($key) {
             case self::DYNAMIC_KEY_IS_VOTED:
-                $parent = $context->parent;
-                if (empty($parent)) {
-                    return null;
-                }
-
                 /** @var \XF\Entity\Poll|null $poll */
-                $poll = $parent->source;
-                if (empty($poll)) {
+                $poll = $context->getParentSource();
+                if ($poll === null) {
                     return null;
                 }
 

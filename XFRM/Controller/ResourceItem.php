@@ -12,8 +12,6 @@ class ResourceItem extends AbstractController
 {
     public function actionGetIndex(ParameterBag $params)
     {
-        $this->params()->defineFieldsFiltering('resource');
-
         if ($params->resource_id) {
             return $this->actionSingle($params->resource_id);
         }
@@ -22,7 +20,6 @@ class ResourceItem extends AbstractController
             ->define('resource_category_id', 'uint', 'category id to filter')
             ->define('resource_category_ids', 'str', 'category ids to filter (separated by comma)')
             ->define('in_sub', 'bool', 'flag to include sub categories in filtering')
-            ->defineFieldsFiltering('resource')
             ->defineOrder([
                 'resource_create_date' => ['resource_date', 'asc'],
                 'resource_create_date_reverse' => ['resource_date', 'desc'],

@@ -9,8 +9,6 @@ class Category extends AbstractController
 {
     public function actionGetIndex(ParameterBag $params)
     {
-        $this->params()->defineFieldsFiltering('resource_category');
-
         if ($params->resource_category_id) {
             return $this->actionSingle($params->resource_category_id);
         }

@@ -17,14 +17,14 @@ class Attachment extends AbstractHandler
     public function calculateDynamicValue($context, $key)
     {
         /** @var AttachmentParent $parentHandler */
-        $parentHandler = $context->parentContext->handler;
+        $parentHandler = $context->getParentHandler();
         return $parentHandler->attachmentCalculateDynamicValue($context, $key);
     }
 
     public function collectLinks($context)
     {
         /** @var \XF\Entity\Attachment $attachment */
-        $attachment = $context->source;
+        $attachment = $context->getSource();
 
         $links = [
             self::LINK_DATA => $this->buildApiLink('attachments', $attachment, ['hash' => $attachment->temp_hash]),
@@ -37,7 +37,7 @@ class Attachment extends AbstractHandler
         }
 
         /** @var AttachmentParent $parentHandler */
-        $parentHandler = $context->parentContext->handler;
+        $parentHandler = $context->getParentHandler();
         $parentHandler->attachmentCollectLinks($context, $links);
 
         return $links;
@@ -46,7 +46,7 @@ class Attachment extends AbstractHandler
     public function collectPermissions($context)
     {
         /** @var \XF\Entity\Attachment $attachment */
-        $attachment = $context->source;
+        $attachment = $context->getSource();
 
         $permissions = [
             self::PERM_DELETE => false,
@@ -54,7 +54,7 @@ class Attachment extends AbstractHandler
         ];
 
         /** @var AttachmentParent $parentHandler */
-        $parentHandler = $context->parentContext->handler;
+        $parentHandler = $context->getParentHandler();
         $parentHandler->attachmentCollectPermissions($context, $permissions);
 
         return $permissions;
@@ -69,7 +69,7 @@ class Attachment extends AbstractHandler
         ];
 
         /** @var AttachmentParent $parentHandler */
-        $parentHandler = $context->parentContext->handler;
+        $parentHandler = $context->getParentHandler();
         $parentHandler->attachmentGetMappings($context, $mappings);
 
         return $mappings;

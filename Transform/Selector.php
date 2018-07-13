@@ -14,98 +14,46 @@ class Selector
     protected $defaultAction = self::ACTION_NONE;
 
     /**
-     * @var string
-     */
-    protected $name;
-
-    /**
      * @var array
      */
-    protected $namedSelectors = [];
-
-    /**
-     * @var array|null
-     */
-    protected $rules = null;
-
-    /**
-     * @param string $name
-     */
-    public function __construct($name)
-    {
-        $this->name = $name;
-
-        if (strlen($name) > 0) {
-            $this->namedSelectors[$name] = $this;
-        }
-    }
-
-    /**
-     * @param string $key
-     * @return Selector
-     */
-    public function getSubSelector($key)
-    {
-        if (isset($this->rules[$key])) {
-            $rulesRef =& $this->rules[$key];
-            if (isset($rulesRef['selector'])) {
-                return $rulesRef['selector'];
-            }
-
-            $selector = $this->getSubSelectorNew();
-            $selector->parseRules($rulesRef['excludes'], $rulesRef['includes']);
-            $rulesRef['selector'] = $selector;
-
-            return $selector;
-        }
-
-        $this->makeSureRuleExists($key);
-        $selector = $this->getSubSelectorNew();
-        $this->rules[$key]['selector'] = $selector;
-        return $selector;
-    }
-
-    /**
-     * @return Selector
-     */
-    public function getSubSelectorNew()
-    {
-        $selector = new Selector('');
-
-        foreach ($this->namedSelectors as $key => $namedSelector) {
-            $selector->namedSelectors[$key] = $namedSelector;
-        }
-
-        return $selector;
-    }
-
-    /**
-     * @param string $key
-     * @param string $name
-     * @return Selector
-     */
-    public function getSubSelectorNamed($key, $name)
-    {
-        if (isset($this->rules[$key])) {
-            $selector = $this->getSubSelector($key);
-            if ($selector !== null) {
-                return $selector;
-            }
-        }
-
-        if (isset($this->namedSelectors[$name])) {
-            return $this->namedSelectors[$name];
-        }
-
-        return $this->getSubSelector($key);
-    }
+    protected $rules = [];
 
     /**
      * @return bool
      */
-    public function hasParsedRules()
+    public function hasRules()
     {
-        return is_array($this->rules);
+        if ($this->defaultAction !== self::ACTION_NONE) {
+            return true;
+        }
+
+        if (count($this->rules) > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $key
+     * @return Selector|null
+     */
+    public function getSubSelector($key)
+    {
+        if (!isset($this->rules[$key])) {
+            return null;
+        }
+
+        $rulesRef =& $this->rules[$key];
+        if (isset($rulesRef['selector'])) {
+            return $rulesRef['selector'];
+        }
+
+        $selector = new self();
+        $selector->parseRules($rulesRef['excludes'], $rulesRef['includes']);
+        $rulesRef['selector'] = $selector;
+
+        return $selector;
     }
 
     /**
