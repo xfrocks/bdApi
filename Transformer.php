@@ -6,7 +6,7 @@ use XF\Container;
 use XF\Mvc\Entity\Entity;
 use Xfrocks\Api\Data\Modules;
 use Xfrocks\Api\Transform\AbstractHandler;
-use Xfrocks\Api\Transform\Selector;
+use Xfrocks\Api\Transform\TransformContext;
 
 class Transformer
 {
@@ -43,7 +43,7 @@ class Transformer
                 $class = 'Xfrocks\Api\Transform\Generic';
             }
 
-            return new $class($this->app, $this);
+            return new $class($this->app, $this, $type);
         });
     }
 
@@ -57,17 +57,24 @@ class Transformer
     }
 
     /**
-     * @param AbstractHandler $handler
+     * @param TransformContext $context
      * @param string $key
      * @param array $values
      * @return array
      */
-    public function transformArray($handler, $key, array $values)
+    public function transformArray($context, $key, array $values)
     {
-        $subHandler = $this->handler();
-        $subSelector = $handler->getSubSelector($key);
-        $subHandler->reset($values, $handler, $subSelector);
-        return $this->transform($subHandler);
+        $subContext = $context->getSubContext($key, $this->handler(), $values);
+        return $this->transform($subContext);
+    }
+
+    /**
+     * @param TransformContext $context
+     * @return array
+     */
+    public function transformContext($context)
+    {
+        return $this->transform($context);
     }
 
     /**
@@ -78,45 +85,41 @@ class Transformer
     {
         /** @var \Xfrocks\Api\Transform\BatchJobReply $handler */
         $handler = $this->handler('Xfrocks:BatchJobReply');
-        $handler->reset($reply, null, null);
-        return $this->transform($handler);
+        $context = new TransformContext($handler, $reply);
+        return $this->transform($context);
     }
 
     /**
-     * @param AbstractHandler $handler
+     * @param TransformContext $context
      * @param \XF\CustomField\DefinitionSet $set
      * @param string $key
      * @return array
      */
-    public function transformCustomFieldDefinitionSet($handler, $set, $key = AbstractHandler::DYNAMIC_KEY_FIELDS)
+    public function transformCustomFieldDefinitionSet($context, $set, $key = AbstractHandler::DYNAMIC_KEY_FIELDS)
     {
         /** @var \Xfrocks\Api\Transform\CustomField $subHandler */
         $subHandler = $this->handler('Xfrocks:CustomField');
-        $subSelector = $handler->getSubSelector($key);
 
         $data = [];
         foreach ($set->getIterator() as $definition) {
-            $subHandler->reset($definition, $handler, $subSelector);
-            $subHandler->setValue(null);
-
-            $data[] = $this->transform($subHandler);
+            $subContext = $context->getSubContext($key, $subHandler, [$definition]);
+            $data[] = $this->transform($subContext);
         }
 
         return $data;
     }
 
     /**
-     * @param AbstractHandler $handler
+     * @param TransformContext $context
      * @param \XF\CustomField\Set $set
      * @param string $key
      * @return array
      */
-    public function transformCustomFieldSet($handler, $set, $key = AbstractHandler::DYNAMIC_KEY_FIELDS)
+    public function transformCustomFieldSet($context, $set, $key = AbstractHandler::DYNAMIC_KEY_FIELDS)
     {
         $definitionSet = $set->getDefinitionSet();
         /** @var \Xfrocks\Api\Transform\CustomField $subHandler */
         $subHandler = $this->handler('Xfrocks:CustomField');
-        $subSelector = $handler->getSubSelector($key);
 
         $data = [];
         foreach ($set->getIterator() as $field => $value) {
@@ -125,25 +128,59 @@ class Transformer
             }
             $definition = $definitionSet[$field];
 
-            $subHandler->reset($definition, $handler, $subSelector);
-            $subHandler->setValue($value);
-
-            $data[] = $this->transform($subHandler);
+            $subContext = $context->getSubContext($key, $subHandler, [$definition, $value]);
+            $data[] = $this->transform($subContext);
         }
 
         return $data;
     }
 
     /**
-     * @param Selector $selector
+     * @param TransformContext $context
+     * @param string $key
      * @param Entity $entity
+     * @param string $relationKey
      * @return array
      */
-    public function transformEntity($selector, $entity)
+    public function transformEntityRelation($context, $key, $entity, $relationKey)
     {
-        $handler = $this->handler($entity->structure()->shortName);
-        $handler->reset($entity, null, $selector);
-        return $this->transform($handler);
+        $entityStructure = $entity->structure();
+        if (!isset($entityStructure->relations[$relationKey])) {
+            return [];
+        }
+
+        $relationConfig = $entityStructure->relations[$relationKey];
+        if (!is_array($relationConfig) ||
+            !isset($relationConfig['type']) ||
+            !isset($relationConfig['entity'])
+        ) {
+            return [];
+        }
+
+        $relationData = $entity->getRelation($relationKey);
+        if ($relationConfig['type'] === Entity::TO_ONE) {
+            /** @var Entity $subEntity */
+            $subEntity = $relationData;
+            return $this->transformSubEntity($context, $key, $subEntity);
+        }
+
+        $subHandler = $this->handler($relationConfig['entity']);
+
+        $data = [];
+        /** @var Entity[] $subEntities */
+        $subEntities = $relationData;
+        $subContextTemp = $context->getSubContext($key, null, null);
+        $subEntities = $subHandler->onTransformEntities($subContextTemp, $subEntities);
+
+        foreach ($subEntities as $subEntity) {
+            $subContext = $context->getSubContext($key, $subHandler, $subEntity);
+            $subEntityData = $this->transform($subContext);
+            if (count($subEntityData) > 0) {
+                $data[] = $subEntityData;
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -153,45 +190,29 @@ class Transformer
     public function transformException($exception)
     {
         $handler = $this->handler('Xfrocks:Exception');
-        $handler->reset($exception, null, null);
-        return $this->transform($handler);
+        $context = new TransformContext($handler, $exception);
+        return $this->transform($context);
     }
 
     /**
-     * @param AbstractHandler $handler
-     * @param string $key
-     * @param Entity[] $subEntities
-     * @return array
-     */
-    public function transformSubEntities($handler, $key, $subEntities)
-    {
-        $data = [];
-        foreach ($subEntities as $subEntity) {
-            $data[] = $this->transformSubEntity($handler, $key, $subEntity);
-        }
-        return $data;
-    }
-
-    /**
-     * @param AbstractHandler $handler
+     * @param TransformContext $context
      * @param string $key
      * @param Entity $subEntity
      * @return array
      */
-    public function transformSubEntity($handler, $key, $subEntity)
+    public function transformSubEntity($context, $key, $subEntity)
     {
         $subHandler = $this->handler($subEntity->structure()->shortName);
-        $subSelector = $handler->getSubSelector($key);
-        $subHandler->reset($subEntity, $handler, $subSelector);
-        return $this->transform($subHandler);
+        $subContext = $context->getSubContext($key, $subHandler, $subEntity);
+        return $this->transform($subContext);
     }
 
     /**
-     * @param AbstractHandler $handler
+     * @param TransformContext $context
      * @param array $tags
      * @return array
      */
-    public function transformTags($handler, $tags)
+    public function transformTags($context, $tags)
     {
         if (!is_array($tags) || count($tags) === 0) {
             return [];
@@ -207,18 +228,18 @@ class Transformer
     }
 
     /**
-     * @param AbstractHandler $handler
+     * @param TransformContext $context
      * @param string $key
-     * @param array $values
+     * @param array|null $values
      * @param array $data
      */
-    protected function addArrayToData($handler, $key, $values, array &$data)
+    protected function addArrayToData($context, $key, $values, array &$data)
     {
         if (!is_array($values) || count($values) === 0) {
             return;
         }
 
-        $transformed = $this->transformArray($handler, $key, $values);
+        $transformed = $this->transformArray($context, $key, $values);
         if (count($transformed) === 0) {
             return;
         }
@@ -227,38 +248,45 @@ class Transformer
     }
 
     /**
-     * @param AbstractHandler $handler
+     * @param TransformContext $context
      * @return array
      */
-    protected function transform($handler)
+    protected function transform($context)
     {
         $data = [];
+        $handler = $context->getHandler();
+        if ($handler === null) {
+            return $data;
+        }
 
-        $mappings = $handler->getMappings();
+        $contextData = $handler->onNewContext($context);
+        $context->setData($contextData);
+
+        $mappings = $handler->getMappings($context);
         foreach ($mappings as $key => $mapping) {
-            if ($handler->shouldExcludeField($mapping)) {
+            if ($context->selectorShouldExcludeField($mapping)) {
                 continue;
             }
 
             $value = null;
             if (is_string($key)) {
-                $value = $handler->getSourceValue($key);
+                $value = $context->getSourceValue($key);
             } else {
-                $value = $handler->calculateDynamicValue($mapping);
+                $value = $handler->calculateDynamicValue($context, $mapping);
             }
             if ($value !== null) {
                 $data[$mapping] = $value;
             }
         }
 
-        if (!$handler->shouldExcludeField(AbstractHandler::KEY_LINKS)) {
-            $links = $handler->collectLinks();
-            $this->addArrayToData($handler, AbstractHandler::KEY_LINKS, $links, $data);
+        if (!$context->selectorShouldExcludeField(AbstractHandler::KEY_LINKS)) {
+            $links = $handler->collectLinks($context);
+            $this->addArrayToData($context, AbstractHandler::KEY_LINKS, $links, $data);
         }
 
-        if (!$handler->shouldExcludeField(AbstractHandler::KEY_PERMISSIONS)) {
-            $permissions = $handler->collectPermissions();
-            $this->addArrayToData($handler, AbstractHandler::KEY_PERMISSIONS, $permissions, $data);
+        if (!$context->selectorShouldExcludeField(AbstractHandler::KEY_PERMISSIONS)) {
+            $permissions = $handler->collectPermissions($context);
+            $this->addArrayToData($context, AbstractHandler::KEY_PERMISSIONS, $permissions, $data);
         }
 
         return $data;

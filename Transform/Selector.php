@@ -8,32 +8,51 @@ class Selector
     const ACTION_INCLUDE = 'include';
     const ACTION_NONE = 'none';
 
+    /**
+     * @var string
+     */
     protected $defaultAction = self::ACTION_NONE;
 
+    /**
+     * @var array
+     */
     protected $rules = [];
 
     /**
+     * @return bool
+     */
+    public function hasRules()
+    {
+        if ($this->defaultAction !== self::ACTION_NONE) {
+            return true;
+        }
+
+        if (count($this->rules) > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * @param string $key
-     * @return Selector
+     * @return Selector|null
      */
     public function getSubSelector($key)
     {
-        if (isset($this->rules[$key])) {
-            $rulesRef =& $this->rules[$key];
-            if (isset($rulesRef['selector'])) {
-                return $rulesRef['selector'];
-            }
-
-            $selector = new Selector();
-            $selector->parseRules($rulesRef['excludes'], $rulesRef['includes']);
-            $rulesRef['selector'] = $selector;
-
-            return $selector;
+        if (!isset($this->rules[$key])) {
+            return null;
         }
 
-        $this->makeSureRuleExists($key);
-        $selector = new Selector();
-        $this->rules[$key]['selector'] = $selector;
+        $rulesRef =& $this->rules[$key];
+        if (isset($rulesRef['selector'])) {
+            return $rulesRef['selector'];
+        }
+
+        $selector = new self();
+        $selector->parseRules($rulesRef['excludes'], $rulesRef['includes']);
+        $rulesRef['selector'] = $selector;
+
         return $selector;
     }
 

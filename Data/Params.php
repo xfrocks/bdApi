@@ -3,6 +3,8 @@
 namespace Xfrocks\Api\Data;
 
 use Xfrocks\Api\Controller\AbstractController;
+use Xfrocks\Api\Transform\Selector;
+use Xfrocks\Api\Transform\TransformContext;
 
 class Params implements \ArrayAccess
 {
@@ -55,6 +57,11 @@ class Params implements \ArrayAccess
      * @var Param[]
      */
     protected $params = [];
+
+    /**
+     * @var TransformContext|null
+     */
+    protected $transformContext = null;
 
     /**
      * @param AbstractController $controller
@@ -126,8 +133,10 @@ class Params implements \ArrayAccess
      * @param string $paramKeyInclude
      * @return Params
      */
-    public function defineFieldsFiltering($paramKeyExclude = 'fields_exclude', $paramKeyInclude = 'fields_include')
-    {
+    public function defineFieldsFiltering(
+        $paramKeyExclude = 'fields_exclude',
+        $paramKeyInclude = 'fields_include'
+    ) {
         $this->paramKeyTransformSelectorExclude = $paramKeyExclude;
         $this->paramKeyTransformSelectorInclude = $paramKeyInclude;
 
@@ -318,6 +327,22 @@ class Params implements \ArrayAccess
             $values[$key] = $filtered['value'];
         }
         return $values;
+    }
+
+    /**
+     * @return TransformContext
+     */
+    public function getTransformContext()
+    {
+        if ($this->transformContext === null) {
+            $selector = new Selector();
+            list($exclude, $include) = $this->filterTransformSelector();
+            $selector->parseRules($exclude, $include);
+
+            $this->transformContext = new TransformContext(null, null, $selector);
+        }
+
+        return $this->transformContext;
     }
 
     /**

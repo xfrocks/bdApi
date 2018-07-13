@@ -3,13 +3,14 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Mvc\Entity\Entity;
+use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
 use XF\Mvc\Reply\AbstractReply;
 use XF\Mvc\Reply\Redirect;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
-use Xfrocks\Api\Util\LazyTransformer;
+use Xfrocks\Api\Transform\LazyTransformer;
 
 class AbstractController extends \XF\Pub\Controller\AbstractController
 {
@@ -177,22 +178,14 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      * @param array $data
      * @param string $key
      * @param Entity $entity
+     * @return LazyTransformer
      */
     public function transformEntityIfNeeded(array &$data, $key, $entity)
     {
         $lazyTransformer = $this->transformEntityLazily($entity);
         $lazyTransformer->setKey($key);
         $data[$key] = $lazyTransformer;
-    }
 
-    /**
-     * @param Entity[] $entities
-     * @return LazyTransformer
-     */
-    public function transformEntitiesLazily($entities)
-    {
-        $lazyTransformer = new LazyTransformer($this);
-        $lazyTransformer->setEntities($entities);
         return $lazyTransformer;
     }
 
@@ -204,6 +197,17 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     {
         $lazyTransformer = new LazyTransformer($this);
         $lazyTransformer->setEntity($entity);
+        return $lazyTransformer;
+    }
+
+    /**
+     * @param Finder $finder
+     * @return LazyTransformer
+     */
+    public function transformFinderLazily($finder)
+    {
+        $lazyTransformer = new LazyTransformer($this);
+        $lazyTransformer->setFinder($finder);
         return $lazyTransformer;
     }
 

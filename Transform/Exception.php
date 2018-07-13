@@ -8,10 +8,10 @@ class Exception extends AbstractHandler
     const DYNAMIC_KEY_MESSAGE = 'message';
     const DYNAMIC_KEY_TRACE = 'trace';
 
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
         /** @var \Exception $exception */
-        $exception = $this->source;
+        $exception = $context->getSource();
 
         switch ($key) {
             case self::DYNAMIC_KEY_CODE:
@@ -29,12 +29,17 @@ class Exception extends AbstractHandler
         return null;
     }
 
-    public function getMappings()
+    public function getMappings($context)
     {
         return [
             self::DYNAMIC_KEY_CODE,
             self::DYNAMIC_KEY_MESSAGE,
             self::DYNAMIC_KEY_TRACE,
         ];
+    }
+
+    protected function prepareContextSelector($context)
+    {
+        // intentionally left blank
     }
 }

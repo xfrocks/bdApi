@@ -8,6 +8,8 @@ use Xfrocks\Api\Transform\AttachmentParent;
 
 class Post extends AbstractHandler implements AttachmentParent
 {
+    const CONTENT_TYPE_POST = 'post';
+
     const ATTACHMENT__DYNAMIC_KEY_ID = 'post_id';
     const ATTACHMENT__LINK_POST = 'post';
 
@@ -41,25 +43,26 @@ class Post extends AbstractHandler implements AttachmentParent
 
     protected $attachmentData = null;
 
-    public function attachmentCalculateDynamicValue($attachmentHandler, $key)
+    public function attachmentCalculateDynamicValue($context, $key)
     {
         switch ($key) {
             case self::ATTACHMENT__DYNAMIC_KEY_ID:
-                return $this->source['post_id'];
+                return $context->getParentSourceValue('post_id');
         }
 
         return null;
     }
 
-    public function attachmentCollectLinks($attachmentHandler, array &$links)
+    public function attachmentCollectLinks($context, array &$links)
     {
-        $links[self::ATTACHMENT__LINK_POST] = $this->buildApiLink('posts', $this->source);
+        $post = $context->getParentSource();
+        $links[self::ATTACHMENT__LINK_POST] = $this->buildApiLink('posts', $post);
     }
 
-    public function attachmentCollectPermissions($attachmentHandler, array &$permissions)
+    public function attachmentCollectPermissions($context, array &$permissions)
     {
         /** @var \XF\Entity\Post $post */
-        $post = $this->source;
+        $post = $context->getParentSource();
         $canDelete = false;
 
         /** @var \XF\Entity\Thread|null $thread */
@@ -68,34 +71,31 @@ class Post extends AbstractHandler implements AttachmentParent
         $forum = $thread ? $thread->Forum : null;
 
         if ($forum && $forum->canUploadAndManageAttachments()) {
-            $attachmentData = $this->getAttachmentData();
-            /** @var \XF\Attachment\AbstractHandler $attachmentHandler */
-            $attachmentHandler = $attachmentData['handler'];
-            $canDelete = $attachmentHandler->canManageAttachments($attachmentData['context']);
+            $canDelete = $this->checkAttachmentCanManage(self::CONTENT_TYPE_POST, $post);
         }
 
         $permissions[self::PERM_DELETE] = $canDelete;
     }
 
-    public function attachmentGetMappings($attachmentHandler, array &$mappings)
+    public function attachmentGetMappings($context, array &$mappings)
     {
         $mappings[] = self::ATTACHMENT__DYNAMIC_KEY_ID;
     }
 
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
         /** @var \XF\Entity\Post $post */
-        $post = $this->source;
+        $post = $context->getSource();
 
         switch ($key) {
             case self::DYNAMIC_KEY_ATTACHMENTS:
-                if (!$post->attach_count) {
+                if ($post->attach_count < 1) {
                     return null;
                 }
-                $attachments = $this->getAttachmentData();
-                return $this->transformer->transformSubEntities($this, $key, $attachments['attachments']);
+
+                return $this->transformer->transformEntityRelation($context, $key, $post, 'Attachments');
             case self::DYNAMIC_KEY_BODY_HTML:
-                return $this->renderBbCodeHtml($key, $post->message);
+                return $this->renderBbCodeHtml($key, $post->message, $post);
             case self::DYNAMIC_KEY_BODY_PLAIN:
                 return $this->renderBbCodePlainText($post->message);
             case self::DYNAMIC_KEY_IS_DELETED:
@@ -113,20 +113,47 @@ class Post extends AbstractHandler implements AttachmentParent
             case self::DYNAMIC_KEY_IS_PUBLISHED:
                 return $post->message_state === 'visible';
             case self::DYNAMIC_KEY_SIGNATURE:
-                return $post->User->Profile->signature;
+                if ($post->user_id < 1) {
+                    return null;
+                }
+
+                $user = $post->User;
+                if (empty($user)) {
+                    return null;
+                }
+
+                return $user->Profile->signature;
             case self::DYNAMIC_KEY_SIGNATURE_HTML:
-                return $this->renderBbCodeHtml($key, $post->User->Profile->signature);
+                if ($post->user_id < 1) {
+                    return null;
+                }
+
+                $user = $post->User;
+                if (empty($user)) {
+                    return null;
+                }
+
+                return $this->renderBbCodeHtml($key, $user->Profile->signature, $user);
             case self::DYNAMIC_KEY_SIGNATURE_PLAIN:
-                return $this->renderBbCodePlainText($post->User->Profile->signature);
+                if ($post->user_id < 1) {
+                    return null;
+                }
+
+                $user = $post->User;
+                if (empty($user)) {
+                    return null;
+                }
+
+                return $this->renderBbCodePlainText($user->Profile->signature);
         }
 
         return null;
     }
 
-    public function collectPermissions()
+    public function collectPermissions($context)
     {
         /** @var \XF\Entity\Post $post */
-        $post = $this->source;
+        $post = $context->getSource();
 
         $permissions = [
             self::PERM_DELETE => $post->canDelete(),
@@ -140,21 +167,27 @@ class Post extends AbstractHandler implements AttachmentParent
         return $permissions;
     }
 
-    public function collectLinks()
+    public function collectLinks($context)
     {
         /** @var \XF\Entity\Post $post */
-        $post = $this->source;
+        $post = $context->getSource();
 
         $links = [
             self::LINK_ATTACHMENTS => $this->buildApiLink('posts/attachments', $post),
             self::LINK_DETAIL => $this->buildApiLink('posts', $post),
             self::LINK_LIKES => $this->buildApiLink('posts/likes', $post),
             self::LINK_PERMALINK => $this->buildApiLink('posts', $post),
-            self::LINK_POSTER => $this->buildApiLink('users', $post->User),
-            self::LINK_POSTER_AVATAR => $post->User->getAvatarUrl('l'),
             self::LINK_REPORT => $this->buildApiLink('posts/report', $post),
             self::LINK_THREAD => $this->buildApiLink('threads', $post->Thread),
         ];
+
+        if ($post->user_id > 0) {
+            $user = $post->User;
+            if (!empty($user)) {
+                $links[self::LINK_POSTER] = $this->buildApiLink('users', $post->User);
+                $links[self::LINK_POSTER_AVATAR] = $user->getAvatarUrl('l');
+            }
+        }
 
         return $links;
     }
@@ -178,7 +211,7 @@ class Post extends AbstractHandler implements AttachmentParent
         return $with;
     }
 
-    public function getMappings()
+    public function getMappings($context)
     {
         return [
             'attach_count' => self::KEY_ATTACHMENT_COUNT,
@@ -205,23 +238,21 @@ class Post extends AbstractHandler implements AttachmentParent
         ];
     }
 
-    /**
-     * @return array
-     */
-    protected function getAttachmentData()
+    public function onTransformEntities($context, $entities)
     {
-        static $contentType = 'post';
-
-        /** @var \XF\Entity\Post $post */
-        $post = $this->source;
-
-        if (!isset($this->attachmentData[$post->post_id])) {
+        $needAttachments = false;
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_ATTACHMENTS)) {
+            $needAttachments = true;
+        }
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_BODY_HTML)) {
+            $needAttachments = true;
+        }
+        if ($needAttachments) {
             /** @var \XF\Repository\Attachment $attachmentRepo */
             $attachmentRepo = $this->app->repository('XF:Attachment');
-            $this->attachmentData[$post->post_id] = $attachmentRepo->getEditorData($contentType, $post);
-            $this->attachmentData[$post->post_id]['handler'] = $attachmentRepo->getAttachmentHandler($contentType);
+            $entities = $attachmentRepo->addAttachmentsToContent($entities, self::CONTENT_TYPE_POST);
         }
 
-        return $this->attachmentData[$post->post_id];
+        return $entities;
     }
 }

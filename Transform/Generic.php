@@ -6,13 +6,14 @@ use XF\Mvc\Entity\Entity;
 
 class Generic extends AbstractHandler
 {
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
-        if (!isset($this->source[$key])) {
+        $source = $context->getSource();
+        if (!isset($source[$key])) {
             return null;
         }
 
-        $value = $this->source[$key];
+        $value = $source[$key];
         if (!is_array($value) || !is_callable($value)) {
             return $value;
         }
@@ -20,11 +21,11 @@ class Generic extends AbstractHandler
         return call_user_func($value, $this, $key);
     }
 
-    public function getMappings()
+    public function getMappings($context)
     {
         $mappings = [];
 
-        $source = $this->source;
+        $source = $context->getSource();
         if ($source instanceof Entity) {
             $primaryKey = $source->structure()->primaryKey;
             if (is_string($primaryKey)) {
@@ -47,5 +48,10 @@ class Generic extends AbstractHandler
         }
 
         return $mappings;
+    }
+
+    protected function prepareContextSelector($context)
+    {
+        // intentionally left blank
     }
 }

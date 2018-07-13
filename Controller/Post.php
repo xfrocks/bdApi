@@ -14,8 +14,7 @@ class Post extends AbstractController
             return $this->actionSingle($params->post_id);
         }
 
-        $params = $this
-            ->params()
+        $params = $this->params()
             ->define('thread_id', 'uint', 'thread id to filter')
             ->defineOrder([
                 'natural' => ['post_date', 'asc'],
@@ -39,11 +38,10 @@ class Post extends AbstractController
         $params->limitFinderByPage($finder);
 
         $total = $finder->total();
-        /** @var \XF\Entity\Post[] $posts */
-        $posts = $total > 0 ? $finder->fetch() : [];
+        $posts = $total > 0 ? $this->transformFinderLazily($finder) : [];
 
         $data = [
-            'posts' => $this->transformEntitiesLazily($posts),
+            'posts' => $posts,
             'posts_total' => $total
         ];
 
@@ -61,18 +59,11 @@ class Post extends AbstractController
     {
         $posts = [];
         if (count($ids) > 0) {
-            $posts = $this->finder('XF:Post')
-                ->whereIds($ids)
-                ->fetch()
-                ->filterViewable()
-                ->sortByList($ids);
+            $finder = $this->finder('XF:Post')->whereIds($ids);
+            $posts = $this->transformFinderLazily($finder)->sortByList($ids);
         }
 
-        $data = [
-            'posts' => $this->transformEntitiesLazily($posts)
-        ];
-
-        return $this->api($data);
+        return $this->api(['posts' => $posts]);
     }
 
     public function actionSingle($postId)

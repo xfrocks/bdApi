@@ -15,8 +15,7 @@ class Thread extends AbstractController
             return $this->actionSingle($params->thread_id);
         }
 
-        $params = $this
-            ->params()
+        $params = $this->params()
             ->define('forum_id', 'uint', 'forum id to filter')
             ->define('creator_user_id', 'uint', 'creator user id to filter')
             ->define('sticky', 'bool', 'sticky to filter')
@@ -59,11 +58,10 @@ class Thread extends AbstractController
         $params->limitFinderByPage($finder);
 
         $total = $finder->total();
-        /** @var \XF\Entity\Thread[] $threads */
-        $threads = $total > 0 ? $finder->fetch() : [];
+        $threads = $total > 0 ? $this->transformFinderLazily($finder) : [];
 
         $data = [
-            'threads' => $this->transformEntitiesLazily($threads),
+            'threads' => $threads,
             'threads_total' => $total
         ];
 
@@ -81,18 +79,11 @@ class Thread extends AbstractController
     {
         $threads = [];
         if (count($ids) > 0) {
-            $threads = $this->finder('XF:Thread')
-                ->whereIds($ids)
-                ->fetch()
-                ->filterViewable()
-                ->sortByList($ids);
+            $finder = $this->finder('XF:Thread')->whereIds($ids);
+            $threads = $this->transformFinderLazily($finder)->sortByList($ids);
         }
 
-        $data = [
-            'threads' => $this->transformEntitiesLazily($threads)
-        ];
-
-        return $this->api($data);
+        return $this->api(['threads' => $threads]);
     }
 
     public function actionSingle($threadId)

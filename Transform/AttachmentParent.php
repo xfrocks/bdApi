@@ -4,11 +4,30 @@ namespace Xfrocks\Api\Transform;
 
 interface AttachmentParent
 {
-    public function attachmentCalculateDynamicValue($attachmentHandler, $key);
+    /**
+     * @param TransformContext $context
+     * @param string $key
+     * @return mixed
+     */
+    public function attachmentCalculateDynamicValue($context, $key);
 
-    public function attachmentCollectLinks($attachmentHandler, array &$links);
+    /**
+     * @param TransformContext $context
+     * @param array $links
+     * @return array|null
+     */
+    public function attachmentCollectLinks($context, array &$links);
 
-    public function attachmentCollectPermissions($attachmentHandler, array &$permissions);
+    /**
+     * @param TransformContext $context
+     * @param array $permissions
+     * @return array|null
+     */
+    public function attachmentCollectPermissions($context, array &$permissions);
 
-    public function attachmentGetMappings($attachmentHandler, array &$mappings);
+    /**
+     * @param TransformContext $context
+     * @param array $mappings
+     */
+    public function attachmentGetMappings($context, array &$mappings);
 }

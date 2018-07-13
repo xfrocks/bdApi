@@ -7,6 +7,7 @@ use XF\Entity\UserProfile;
 use XF\Repository\UserGroup;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Transform\TransformContext;
 
 class User extends AbstractHandler
 {
@@ -52,17 +53,15 @@ class User extends AbstractHandler
     const PERM_SELF_CREATE_CONVO = 'create_conversation';
     const PERM_SELF_ATTACH_CONVO = 'upload_attachment_conversation';
 
-    protected $flagFullAccess = false;
-
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
         /** @var \XF\Entity\User $user */
-        $user = $this->source;
+        $user = $context->getSource();
         $visitor = \XF::visitor();
 
         switch ($key) {
             case self::DYNAMIC_KEY_DOB_DAY:
-                if (!$this->flagFullAccess) {
+                if ($context->data('flagFullAccess') !== true) {
                     return null;
                 }
                 $userProfile = $user->Profile;
@@ -71,7 +70,7 @@ class User extends AbstractHandler
                 }
                 return $userProfile->dob_day;
             case self::DYNAMIC_KEY_DOB_MONTH:
-                if (!$this->flagFullAccess) {
+                if ($context->data('flagFullAccess') !== true) {
                     return null;
                 }
                 $userProfile = $user->Profile;
@@ -80,7 +79,7 @@ class User extends AbstractHandler
                 }
                 return $userProfile->dob_month;
             case self::DYNAMIC_KEY_DOB_YEAR:
-                if (!$this->flagFullAccess) {
+                if ($context->data('flagFullAccess') !== true) {
                     return null;
                 }
                 $userProfile = $user->Profile;
@@ -89,18 +88,18 @@ class User extends AbstractHandler
                 }
                 return $userProfile->dob_year;
             case self::DYNAMIC_KEY_EMAIL:
-                if (!$this->flagFullAccess) {
+                if ($context->data('flagFullAccess') !== true) {
                     return null;
                 }
                 return $user->email;
             case self::DYNAMIC_KEY_EXTERNAL_AUTHS:
-                return $this->collectExternalAuths();
+                return $this->collectExternalAuths($context);
             case self::DYNAMIC_KEY_FIELDS:
                 return $this->collectFields();
             case self::DYNAMIC_KEY_GROUPS:
-                return $this->collectGroups($key);
+                return $this->collectGroups($context, $key);
             case self::DYNAMIC_KEY_HAS_PASSWORD:
-                if (!$this->flagFullAccess) {
+                if ($context->data('flagFullAccess') !== true) {
                     return null;
                 }
                 $userAuth = $user->Auth;
@@ -115,7 +114,7 @@ class User extends AbstractHandler
 
                 return $handler->hasPassword();
             case self::DYNAMIC_KEY_IS_FOLLOWED:
-                if (!$this->flagFullAccess) {
+                if ($context->data('flagFullAccess') !== true) {
                     return null;
                 }
                 return $visitor->isFollowing($user);
@@ -133,9 +132,9 @@ class User extends AbstractHandler
             case self::DYNAMIC_KEY_PERMISSIONS_EDIT:
                 return $this->collectPermissionsEdit();
             case self::DYNAMIC_KEY_PERMISSIONS_SELF:
-                return $this->collectPermissionsSelf();
+                return $this->collectPermissionsSelf($context);
             case self::DYNAMIC_KEY_TIMEZONE_OFFSET:
-                if (!$this->flagFullAccess) {
+                if ($context->data('flagFullAccess') !== true) {
                     return null;
                 }
                 $dtz = new \DateTimeZone($user->timezone);
@@ -144,13 +143,13 @@ class User extends AbstractHandler
             case self::DYNAMIC_KEY_TITLE:
                 return strip_tags($this->getTemplater()->fn('user_title', [$user]));
             case self::DYNAMIC_KEY_UNREAD_CONVO_COUNT:
-                if (!$this->flagFullAccess ||
+                if ($context->data('flagFullAccess') !== true ||
                     !$this->checkSessionScope(Server::SCOPE_PARTICIPATE_IN_CONVERSATIONS)) {
                     return null;
                 }
                 return $user->conversations_unread;
             case self::DYNAMIC_KEY_UNREAD_NOTIF_COUNT:
-                if (!$this->flagFullAccess) {
+                if ($context->data('flagFullAccess') !== true) {
                     return null;
                 }
                 return $user->alerts_unread;
@@ -159,10 +158,10 @@ class User extends AbstractHandler
         return null;
     }
 
-    public function collectLinks()
+    public function collectLinks($context)
     {
         /** @var \XF\Entity\User $user */
-        $user = $this->source;
+        $user = $context->getSource();
 
         $links = [
             self::LINK_AVATAR => $user->getAvatarUrl('l'),
@@ -182,14 +181,14 @@ class User extends AbstractHandler
         return $links;
     }
 
-    public function collectPermissions()
+    public function collectPermissions($context)
     {
         /** @var \XF\Entity\User $user */
-        $user = $this->source;
+        $user = $context->getSource();
         $visitor = \XF::visitor();
 
         return [
-            self::PERM_EDIT => $this->flagFullAccess,
+            self::PERM_EDIT => $context->data('flagFullAccess') !== true,
             self::PERM_IGNORE => $visitor->canIgnoreUser($user),
             self::PERM_FOLLOW => $visitor->canFollowUser($user),
             self::PERM_PROFILE_POST => $user->canPostOnProfile()
@@ -206,7 +205,7 @@ class User extends AbstractHandler
         ], $extraWith);
     }
 
-    public function getMappings()
+    public function getMappings($context)
     {
         $mappings = [
             'like_count' => self::KEY_LIKE_COUNT,
@@ -245,41 +244,43 @@ class User extends AbstractHandler
         return \XF::phrase('requested_user_not_found');
     }
 
-    public function reset($source, $parent, $selector)
-    {
-        parent::reset($source, $parent, $selector);
-
-        $this->flagFullAccess = $this->checkFullAccess();
-    }
-
     /**
-     * @return bool
+     * @param TransformContext $context
+     * @return array
      */
-    protected function checkFullAccess()
+    public function onNewContext($context)
     {
+        $data = parent::onNewContext($context);
+        $data['flagFullAccess'] = false;
+
         $visitor = \XF::visitor();
-        if ($visitor->user_id < 1) {
-            return false;
+        if ($visitor->user_id > 0) {
+            /** @var \XF\Entity\User $user */
+            $user = $context->getSource();
+            if ($user->user_id === $visitor->user_id) {
+                $data['flagFullAccess'] = true;
+            } else {
+                $data['flagFullAccess'] = $this->checkAdminPermission('user');
+            }
         }
 
-        if ($this->source['user_id'] === $visitor->user_id) {
-            return true;
-        }
-
-        return $this->checkAdminPermission('user');
+        return $data;
     }
 
     /**
+     * @param TransformContext $context
      * @return array|null
      */
-    protected function collectExternalAuths()
+    protected function collectExternalAuths($context)
     {
-        if (!$this->flagFullAccess) {
+        if ($context->data('flagFullAccess') !== true) {
             return null;
         }
 
-        /** @var UserProfile $userProfile */
-        $userProfile = $this->source->Profile;
+        /** @var \XF\Entity\User $user */
+        $user = $context->getSource();
+        /** @var UserProfile|null $userProfile */
+        $userProfile = $user->Profile;
         if (empty($userProfile)) {
             return null;
         }
@@ -305,12 +306,13 @@ class User extends AbstractHandler
     }
 
     /**
+     * @param TransformContext $context
      * @param string $key
      * @return array|null
      */
-    protected function collectGroups($key)
+    protected function collectGroups($context, $key)
     {
-        if (!$this->flagFullAccess) {
+        if ($context->data('flagFullAccess') !== true) {
             return null;
         }
 
@@ -322,7 +324,7 @@ class User extends AbstractHandler
         }
 
         /** @var \XF\Entity\User $user */
-        $user = $this->source;
+        $user = $context->getSource();
         $userGroups = [];
         foreach ($allGroups as $group) {
             if (!$user->isMemberOf($group)) {
@@ -334,7 +336,7 @@ class User extends AbstractHandler
         $data = [];
         /** @var \XF\Entity\UserGroup $group */
         foreach ($userGroups as $group) {
-            $groupData = $this->transformer->transformSubEntity($this, $key, $group);
+            $groupData = $this->transformer->transformSubEntity($context, $key, $group);
             if ($group->user_group_id === $user->user_group_id) {
                 $groupData[self::DYNAMIC_KEY_GROUPS__IS_PRIMARY] = true;
             } else {
@@ -357,11 +359,12 @@ class User extends AbstractHandler
     }
 
     /**
+     * @param TransformContext $context
      * @return array|null
      */
-    protected function collectPermissionsSelf()
+    protected function collectPermissionsSelf($context)
     {
-        if (!$this->flagFullAccess) {
+        if ($context->data('flagFullAccess') !== true) {
             return null;
         }
 

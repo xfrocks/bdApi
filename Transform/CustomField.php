@@ -6,34 +6,34 @@ use XF\CustomField\Definition;
 
 class CustomField extends AbstractHandler
 {
-    const KEY_ID = 'id';
-    const KEY_TITLE = 'title';
-    const KEY_DESCRIPTION = 'description';
-    const KEY_POSITION = 'position';
-
     const DYNAMIC_KEY_CHOICES = 'choices';
+    const DYNAMIC_KEY_DESCRIPTION = 'description';
+    const DYNAMIC_KEY_ID = 'id';
     const DYNAMIC_KEY_IS_MULTI_CHOICE = 'is_multi_choice';
     const DYNAMIC_KEY_IS_REQUIRED = 'is_required';
+    const DYNAMIC_KEY_POSITION = 'position';
+    const DYNAMIC_KEY_TITLE = 'title';
     const DYNAMIC_KEY_VALUE = 'value';
     const DYNAMIC_KEY_VALUES = 'values';
 
-    /**
-     * @var mixed
-     */
-    protected $value = null;
-
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
-        /** @var Definition $definition */
-        $definition = $this->source;
+        /** @var Definition|null $definition */
+        $definition = $context->data('definition');
+        if ($definition === null) {
+            return null;
+        }
+
+        /** @var array|string|null $valueData */
+        $valueData = $context->data('value');
 
         switch ($key) {
             case self::DYNAMIC_KEY_CHOICES:
-                if ($this->hasValue()) {
+                if ($valueData !== null) {
                     return null;
                 }
 
-                if (!$this->hasChoices()) {
+                if (!$this->hasChoices($definition)) {
                     return null;
                 }
 
@@ -43,27 +43,35 @@ class CustomField extends AbstractHandler
                 }
 
                 return $choices;
+            case self::DYNAMIC_KEY_DESCRIPTION:
+                return $definition['description'];
+            case self::DYNAMIC_KEY_ID:
+                return $definition['field_id'];
             case self::DYNAMIC_KEY_IS_MULTI_CHOICE:
                 return $definition['type_group'] === 'multiple';
             case self::DYNAMIC_KEY_IS_REQUIRED:
-                if ($this->hasValue()) {
+                if ($valueData !== null) {
                     return null;
                 }
 
                 return $definition->isRequired();
+            case self::DYNAMIC_KEY_POSITION:
+                return $definition['display_group'];
+            case self::DYNAMIC_KEY_TITLE:
+                return $definition['title'];
             case self::DYNAMIC_KEY_VALUE:
-                if (!$this->hasValue() || $this->hasChoices()) {
+                if ($valueData === null || $this->hasChoices($definition)) {
                     return null;
                 }
 
-                return utf8_trim($this->value);
+                return utf8_trim(strval($valueData));
             case self::DYNAMIC_KEY_VALUES:
-                if (!$this->hasValue() || !$this->hasChoices()) {
+                if ($valueData === null || !$this->hasChoices($definition)) {
                     return null;
                 }
 
                 $choices = $definition['field_choices'];
-                $choiceKeys = is_array($this->value) ? $this->value : [strval($this->value)];
+                $choiceKeys = is_array($valueData) ? $valueData : [strval($valueData)];
                 $values = [];
                 foreach ($choiceKeys as $choiceKey) {
                     if (empty($choices[$choiceKey])) {
@@ -82,43 +90,45 @@ class CustomField extends AbstractHandler
         return null;
     }
 
-    public function getMappings()
+    public function getMappings($context)
     {
         return [
-            'description' => self::KEY_DESCRIPTION,
-            'field_id' => self::KEY_ID,
-            'display_group' => self::KEY_POSITION,
-            'title' => self::KEY_TITLE,
-
             self::DYNAMIC_KEY_CHOICES,
+            self::DYNAMIC_KEY_DESCRIPTION,
+            self::DYNAMIC_KEY_ID,
             self::DYNAMIC_KEY_IS_MULTI_CHOICE,
             self::DYNAMIC_KEY_IS_REQUIRED,
+            self::DYNAMIC_KEY_POSITION,
+            self::DYNAMIC_KEY_TITLE,
             self::DYNAMIC_KEY_VALUE,
             self::DYNAMIC_KEY_VALUES,
         ];
     }
 
-    /**
-     * @param mixed $value
-     */
-    public function setValue($value)
+    public function onNewContext($context)
     {
-        $this->value = $value;
+        $data = parent::onNewContext($context);
+        $data['definition'] = null;
+        $data['value'] = null;
+
+        $source = $context->getSource();
+        if (is_array($source) && count($source) > 0) {
+            $data['definition'] = $source[0];
+
+            if (count($source) > 1) {
+                $data['value'] = $source[1];
+            }
+        }
+
+        return $data;
     }
 
     /**
+     * @param Definition $definition
      * @return bool
      */
-    protected function hasChoices()
+    protected function hasChoices($definition)
     {
-        return in_array($this->source['type_group'], ['single', 'multiple'], true);
-    }
-
-    /**
-     * @return bool
-     */
-    protected function hasValue()
-    {
-        return $this->value !== null;
+        return in_array($definition['type_group'], ['single', 'multiple'], true);
     }
 }

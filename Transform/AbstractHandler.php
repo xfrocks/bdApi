@@ -3,6 +3,8 @@
 namespace Xfrocks\Api\Transform;
 
 use XF\App;
+use XF\Mvc\Entity\Entity;
+use XF\Mvc\Entity\Finder;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\XF\Session\Session;
@@ -35,67 +37,53 @@ abstract class AbstractHandler
     protected $app;
 
     /**
-     * @var AbstractHandler|null
-     */
-    protected $parent;
-
-    /**
-     * @var Selector|null
-     */
-    protected $selector;
-
-    /**
-     * @var mixed
-     */
-    protected $source;
-
-    /**
      * @var Transformer
      */
     protected $transformer;
 
     /**
+     * @var string
+     */
+    protected $type;
+
+    /**
      * @param App $app
      * @param Transformer $transformer
+     * @param string $type
      */
-    public function __construct($app, $transformer)
+    public function __construct($app, $transformer, $type)
     {
         $this->app = $app;
         $this->transformer = $transformer;
+        $this->type = $type;
     }
 
     /**
+     * @param TransformContext $context
      * @param string $key
      * @return mixed
      */
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
         return null;
     }
 
     /**
-     * @return mixed
+     * @param TransformContext $context
+     * @return array|null
      */
-    public function collectLinks()
+    public function collectLinks($context)
     {
         return null;
     }
 
     /**
-     * @return mixed
+     * @param TransformContext $context
+     * @return array|null
      */
-    public function collectPermissions()
+    public function collectPermissions($context)
     {
         return null;
-    }
-
-    /**
-     * @param string $key
-     * @return mixed
-     */
-    public function getSourceValue($key)
-    {
-        return $this->source !== null ? $this->source[$key] : null;
     }
 
     /**
@@ -108,9 +96,10 @@ abstract class AbstractHandler
     }
 
     /**
+     * @param TransformContext $context
      * @return array
      */
-    public function getMappings()
+    public function getMappings($context)
     {
         return [];
     }
@@ -124,41 +113,34 @@ abstract class AbstractHandler
     }
 
     /**
-     * @param string $key
-     * @return Selector|null
+     * @param TransformContext $context
+     * @param Finder $finder
+     * @return Finder
      */
-    public function getSubSelector($key)
+    public function onTransformFinder($context, $finder)
     {
-        if ($this->selector === null) {
-            return null;
-        }
-
-        return $this->selector->getSubSelector($key);
+        return $finder;
     }
 
     /**
-     * @param mixed $source
-     * @param AbstractHandler|null $parent
-     * @param Selector|null $selector
+     * @param TransformContext $context
+     * @param Entity[] $entities
+     * @return Entity[]
      */
-    public function reset($source, $parent, $selector)
+    public function onTransformEntities($context, $entities)
     {
-        $this->source = $source;
-        $this->parent = $parent;
-        $this->selector = $selector;
+        return $entities;
     }
 
     /**
-     * @param string $key
-     * @return bool
+     * @param TransformContext $context
+     * @return array
      */
-    public function shouldExcludeField($key)
+    public function onNewContext($context)
     {
-        if ($this->selector === null) {
-            return false;
-        }
+        $context->makeSureSelectorIsNotNull($this->type);
 
-        return $this->selector->shouldExcludeField($key);
+        return [];
     }
 
     /**
@@ -210,16 +192,39 @@ abstract class AbstractHandler
     }
 
     /**
+     * @param string $contentType
+     * @param Entity $entity
+     * @return bool
+     */
+    protected function checkAttachmentCanManage($contentType, $entity)
+    {
+        /** @var \XF\Repository\Attachment $attachmentRepo */
+        $attachmentRepo = $this->app->repository('XF:Attachment');
+        $attachmentHandler = $attachmentRepo->getAttachmentHandler($contentType);
+        if ($attachmentHandler === null) {
+            return false;
+        }
+
+        $attachmentContext = $attachmentHandler->getContext($entity);
+        return $attachmentHandler->canManageAttachments($attachmentContext);
+    }
+
+    /**
      * @param string $key
      * @param string $string
+     * @param mixed $content
      * @param array $options
      * @return string
      */
-    protected function renderBbCodeHtml($key, $string, array $options = [])
+    protected function renderBbCodeHtml($key, $string, $content, array $options = [])
     {
+        $string = utf8_trim($string);
+        if (strlen($string) === 0) {
+            return '';
+        }
+
         $context = 'api:' . $key;
-        $entity = $this->source;
-        return $this->app->bbCode()->render($string, 'html', $context, $entity, $options);
+        return $this->app->bbCode()->render($string, 'html', $context, $content, $options);
     }
 
     /**
@@ -229,6 +234,11 @@ abstract class AbstractHandler
      */
     protected function renderBbCodePlainText($string, array $options = [])
     {
+        $string = utf8_trim($string);
+        if (strlen($string) === 0) {
+            return '';
+        }
+
         $formatter = $this->app->stringFormatter();
         return $formatter->stripBbCode($string, $options);
     }

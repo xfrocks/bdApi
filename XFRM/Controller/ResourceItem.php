@@ -57,11 +57,10 @@ class ResourceItem extends AbstractController
         $params->limitFinderByPage($finder);
 
         $total = $finder->total();
-        /** @var \XFRM\Entity\ResourceItem[] $resources */
-        $resources = $total > 0 ? $finder->fetch() : [];
+        $resources = $total > 0 ? $this->transformFinderLazily($finder) : [];
 
         $data = [
-            'resources' => $this->transformEntitiesLazily($resources),
+            'resources' => $resources,
             'resources_total' => $total,
         ];
 
@@ -83,18 +82,11 @@ class ResourceItem extends AbstractController
     {
         $resources = [];
         if (count($ids) > 0) {
-            $resources = $this->finder('XFRM:ResourceItem')
-                ->whereIds($ids)
-                ->fetch()
-                ->filterViewable()
-                ->sortByList($ids);
+            $finder = $this->finder('XFRM:ResourceItem')->whereIds($ids);
+            $resources = $this->transformFinderLazily($finder)->sortByList($ids);
         }
 
-        $data = [
-            'resources' => $this->transformEntitiesLazily($resources)
-        ];
-
-        return $this->api($data);
+        return $this->api(['resources' => $resources]);
     }
 
     public function actionSingle($resourceId)

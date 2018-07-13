@@ -15,7 +15,24 @@ class Poll extends AbstractHandler
     const DYNAMIC_KEY_IS_VOTED = 'poll_is_voted';
     const DYNAMIC_KEY_RESPONSES = 'responses';
 
-    public function getMappings()
+    public function calculateDynamicValue($context, $key)
+    {
+        /** @var \XF\Entity\Poll $poll */
+        $poll = $context->getSource();
+
+        switch ($key) {
+            case self::DYNAMIC_KEY_IS_OPEN:
+                return !$poll->isClosed();
+            case self::DYNAMIC_KEY_IS_VOTED:
+                return $poll->hasVoted();
+            case self::DYNAMIC_KEY_RESPONSES:
+                return $this->transformer->transformEntityRelation($context, $key, $poll, 'Responses');
+        }
+
+        return null;
+    }
+
+    public function getMappings($context)
     {
         return [
             'poll_id' => self::KEY_ID,
@@ -27,22 +44,5 @@ class Poll extends AbstractHandler
             self::DYNAMIC_KEY_IS_VOTED,
             self::DYNAMIC_KEY_RESPONSES
         ];
-    }
-
-    public function calculateDynamicValue($key)
-    {
-        /** @var \XF\Entity\Poll $poll */
-        $poll = $this->source;
-
-        switch ($key) {
-            case self::DYNAMIC_KEY_IS_OPEN:
-                return !$poll->isClosed();
-            case self::DYNAMIC_KEY_IS_VOTED:
-                return $poll->hasVoted();
-            case self::DYNAMIC_KEY_RESPONSES:
-                return $this->transformer->transformSubEntities($this, $key, $poll->Responses);
-        }
-
-        return null;
     }
 }

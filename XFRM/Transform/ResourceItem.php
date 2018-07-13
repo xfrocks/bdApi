@@ -7,6 +7,8 @@ use Xfrocks\Api\Transform\AttachmentParent;
 
 class ResourceItem extends AbstractHandler implements AttachmentParent
 {
+    const CONTENT_TYPE_RESOURCE_UPDATE = 'resource_update';
+
     const ATTACHMENT__DYNAMIC_KEY_ID = 'resource_id';
     const ATTACHMENT__LINK_RESOURCE = 'resource';
 
@@ -54,61 +56,63 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
 
     protected $attachmentData = null;
 
-    public function attachmentCalculateDynamicValue($attachmentHandler, $key)
+    public function attachmentCalculateDynamicValue($context, $key)
     {
         switch ($key) {
             case self::ATTACHMENT__DYNAMIC_KEY_ID:
-                return $this->source['resource_id'];
+                return $context->getParentSourceValue('resource_id');
         }
 
         return null;
     }
 
-    public function attachmentCollectLinks($attachmentHandler, array &$links)
+    public function attachmentCollectLinks($context, array &$links)
     {
-        $links[self::ATTACHMENT__LINK_RESOURCE] = $this->buildApiLink('resources', $this->source);
+        $resourceItem = $context->getParentSource();
+        $links[self::ATTACHMENT__LINK_RESOURCE] = $this->buildApiLink('resources', $resourceItem);
     }
 
-    public function attachmentCollectPermissions($attachmentHandler, array &$permissions)
+    public function attachmentCollectPermissions($context, array &$permissions)
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
-        $resourceItem = $this->source;
+        $resourceItem = $context->getParentSource();
         $canDelete = false;
 
         if ($resourceItem->canEdit() && $resourceItem->Category->canUploadAndManageUpdateImages()) {
-            $attachmentData = $this->getAttachmentData();
-            /** @var \XF\Attachment\AbstractHandler $attachmentHandler */
-            $attachmentHandler = $attachmentData['handler'];
-            $canDelete = $attachmentHandler->canManageAttachments($attachmentData['context']);
+            $canDelete = $this->checkAttachmentCanManage(
+                self::CONTENT_TYPE_RESOURCE_UPDATE,
+                $resourceItem->Description
+            );
         }
 
         $permissions[self::PERM_DELETE] = $canDelete;
     }
 
-    public function attachmentGetMappings($attachmentHandler, array &$mappings)
+    public function attachmentGetMappings($context, array &$mappings)
     {
         $mappings[] = self::ATTACHMENT__DYNAMIC_KEY_ID;
     }
 
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
-        $resourceItem = $this->source;
+        $resourceItem = $context->getSource();
 
         switch ($key) {
             case self::DYNAMIC_KEY_ATTACHMENT_COUNT:
                 return $resourceItem->Description->attach_count;
             case self::DYNAMIC_KEY_ATTACHMENTS:
-                if ($resourceItem->Description->attach_count === 0) {
+                $description = $resourceItem->Description;
+                if ($description->attach_count < 1) {
                     return [];
                 }
-                $attachmentData = $this->getAttachmentData();
-                return $this->transformer->transformSubEntities($this, $key, $attachmentData['attachments']);
+
+                return $this->transformer->transformEntityRelation($context, $key, $description, 'Attachments');
             case self::DYNAMIC_KEY_CURRENCY:
                 return $resourceItem->external_purchase_url ? $resourceItem->currency : null;
             case self::DYNAMIC_KEY_FIELDS:
                 $resourceFields = $resourceItem->custom_fields;
-                return $this->transformer->transformCustomFieldSet($this, $resourceFields);
+                return $this->transformer->transformCustomFieldSet($context, $resourceFields);
             case self::DYNAMIC_KEY_HAS_FILE:
                 return $resourceItem->getResourceTypeDetailed() === 'download_local';
             case self::DYNAMIC_KEY_HAS_URL:
@@ -149,11 +153,12 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
 
                 return $average;
             case self::DYNAMIC_KEY_TAGS:
-                return $this->transformer->transformTags($this, $resourceItem->tags);
+                return $this->transformer->transformTags($context, $resourceItem->tags);
             case self::DYNAMIC_KEY_TEXT:
                 return $resourceItem->Description->message;
             case self::DYNAMIC_KEY_TEXT_HTML:
-                return $this->renderBbCodeHtml($key, $resourceItem->Description->message);
+                $description = $resourceItem->Description;
+                return $this->renderBbCodeHtml($key, $description->message, $description);
             case self::DYNAMIC_KEY_TEXT_PLAIN:
                 return $this->renderBbCodePlainText($resourceItem->Description->message);
             case self::DYNAMIC_KEY_VERSION:
@@ -163,10 +168,10 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return null;
     }
 
-    public function collectLinks()
+    public function collectLinks($context)
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
-        $resourceItem = $this->source;
+        $resourceItem = $context->getSource();
 
         $links = [
             self::LINK_ATTACHMENTS => $this->buildApiLink('resources/attachments', $resourceItem),
@@ -205,10 +210,10 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return $links;
     }
 
-    public function collectPermissions()
+    public function collectPermissions($context)
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
-        $resourceItem = $this->source;
+        $resourceItem = $context->getSource();
 
         $permissions = [
             self::PERM_ADD_ICON => $resourceItem->canEdit(),
@@ -244,7 +249,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return $with;
     }
 
-    public function getMappings()
+    public function getMappings($context)
     {
         return [
             // xf_rm_resource
@@ -288,26 +293,28 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return \XF::phrase('xfrm_requested_resource_not_found');
     }
 
-    /**
-     * @return array
-     */
-    protected function getAttachmentData()
+    public function onTransformEntities($context, $entities)
     {
-        static $contentType = 'resource_update';
+        $needAttachments = false;
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_ATTACHMENTS)) {
+            $needAttachments = true;
+        }
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_TEXT_HTML)) {
+            $needAttachments = true;
+        }
+        if ($needAttachments) {
+            $descriptions = [];
+            /** @var \XFRM\Entity\ResourceItem $resourceItem */
+            foreach ($entities as $resourceItem) {
+                $description = $resourceItem->Description;
+                $descriptions[$description->resource_update_id] = $description;
+            }
 
-        /** @var \XFRM\Entity\ResourceItem $resourceItem */
-        $resourceItem = $this->source;
-
-        if (!isset($this->attachmentData[$resourceItem->resource_id])) {
             /** @var \XF\Repository\Attachment $attachmentRepo */
             $attachmentRepo = $this->app->repository('XF:Attachment');
-            $this->attachmentData[$resourceItem->resource_id] = $attachmentRepo->getEditorData(
-                $contentType,
-                $resourceItem->Description
-            );
-            $this->attachmentData[$resourceItem->resource_id]['handler'] = $attachmentRepo->getAttachmentHandler($contentType);
+            $attachmentRepo->addAttachmentsToContent($descriptions, self::CONTENT_TYPE_RESOURCE_UPDATE);
         }
 
-        return $this->attachmentData[$resourceItem->resource_id];
+        return $entities;
     }
 }

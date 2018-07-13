@@ -17,17 +17,10 @@ class Category extends AbstractController
         $user = \XF::visitor();
         $user->cacheResourceCategoryPermissions();
 
-        /** @var \XFRM\Entity\Category[] $categories */
-        $categories = $this->finder('XFRM:Category')
-            ->order('lft')
-            ->fetch()
-            ->filterViewable();
+        $finder = $this->finder('XFRM:Category')->order('lft');
+        $categories = $this->transformFinderLazily($finder);
 
-        $data = [
-            'categories' => $this->transformEntitiesLazily($categories)
-        ];
-
-        return $this->api($data);
+        return $this->api(['categories' => $categories]);
     }
 
     protected function actionSingle($resourceCategoryId)
