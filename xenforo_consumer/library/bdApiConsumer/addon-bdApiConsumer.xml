@@ -140,15 +140,19 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <phrase title="bdapi_consumer_auto_register_on" version_id="7" version_string="0.9.1"><![CDATA[Enabled]]></phrase>
     <phrase title="bdapi_consumer_being_auto_login_auto_register_x" version_id="21" version_string="0.9.8-dev"><![CDATA[Please wait while you are being logged in via {provider}.]]></phrase>
     <phrase title="bdapi_consumer_cannot_verify_your_account_contact_to_admin" version_id="1010100" version_string="1.1.0"><![CDATA[Cannot verify your account. Please contact to Staff to resolve it.]]></phrase>
+    <phrase title="bdapi_consumer_change_your_email_by" version_id="1020000" version_string="1.2.0"><![CDATA[Change your email by]]></phrase>
     <phrase title="bdapi_consumer_client_id" version_id="1" version_string="0.9-dev"><![CDATA[Client ID]]></phrase>
     <phrase title="bdapi_consumer_client_secret" version_id="1" version_string="0.9-dev"><![CDATA[Client Secret]]></phrase>
+    <phrase title="bdapi_consumer_confirm_new_email" version_id="1020000" version_string="1.2.0"><![CDATA[Confirm new email]]></phrase>
     <phrase title="bdapi_consumer_disassociate_x_account" version_id="8" version_string="0.9.2"><![CDATA[Disassociate {provider} Account]]></phrase>
     <phrase title="bdapi_consumer_disassociating_with_x_reset_password_email_y" version_id="8" version_string="0.9.2"><![CDATA[Disassociating with {provider} will cause a password to be generated for your account and emailed to {email}.]]></phrase>
+    <phrase title="bdapi_consumer_emails_did_not_match" version_id="1020000" version_string="1.2.0"><![CDATA[Emails did not match. Please enter the same email in both fields.]]></phrase>
     <phrase title="bdapi_consumer_error_occurred_while_connecting_with_x" version_id="1" version_string="0.9-dev"><![CDATA[An error occurred while connecting with {provider}. Please try again later.]]></phrase>
     <phrase title="bdapi_consumer_external" version_id="8" version_string="0.9.2"><![CDATA[External Associations]]></phrase>
     <phrase title="bdapi_consumer_login_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Login with {provider}]]></phrase>
     <phrase title="bdapi_consumer_matches_email_address_associated_with_your_x_account" version_id="1" version_string="0.9-dev"><![CDATA[This member matches the email address associated with your {provider} account.]]></phrase>
     <phrase title="bdapi_consumer_name" version_id="1" version_string="0.9-dev"><![CDATA[Provider Name]]></phrase>
+    <phrase title="bdapi_consumer_new_email" version_id="1020000" version_string="1.2.0"><![CDATA[New Email]]></phrase>
     <phrase title="bdapi_consumer_or_reset_password_via_x" version_id="1010100" version_string="1.1.0"><![CDATA[Or reset password via <a href="{link}" class="OverlayTrigger" data-cacheoverlay="0">{name}</a>]]></phrase>
     <phrase title="bdapi_consumer_root" version_id="1" version_string="0.9-dev"><![CDATA[http://domain.com/xenforo/api]]></phrase>
     <phrase title="bdapi_consumer_sign_up_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Sign Up with {provider}]]></phrase>
@@ -158,6 +162,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <phrase title="bdapi_consumer_take_over_register" version_id="16" version_string="0.9.7"><![CDATA[Register]]></phrase>
     <phrase title="bdapi_consumer_too_many_login_attempts_to_verify_account" version_id="1010100" version_string="1.1.0"><![CDATA[Too many login attempts to verify your identity.]]></phrase>
     <phrase title="bdapi_consumer_verify" version_id="1010100" version_string="1.1.0"><![CDATA[Verify]]></phrase>
+    <phrase title="bdapi_consumer_verifying_via_x" version_id="1020000" version_string="1.2.0"><![CDATA[Verifying via <a href="{link}" class="OverlayTrigger" data-cacheoverlay="0">{name}</a>]]></phrase>
     <phrase title="bdapi_consumer_verify_your_identity" version_id="1010100" version_string="1.1.0"><![CDATA[Verify your identity]]></phrase>
     <phrase title="bdapi_consumer_verify_your_identity_explain" version_id="1010100" version_string="1.1.0"><![CDATA[You haven't had a password at {boardTitle} so we will use your {provider} credentials to verify your identity.]]></phrase>
     <phrase title="bdapi_consumer_x_account_not_good_standing" version_id="10" version_string="0.9.4"><![CDATA[The connected {provider}'s account status is not in good standing. You may need to complete verification steps at {provider} before trying again.]]></phrase>
@@ -293,24 +298,36 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 		</xen:foreach>
 	</ul>
 </xen:if>]]></template>
-    <template title="bdapi_consumer_account_security_update" version_id="1010100" version_string="1.1.0"><![CDATA[<xen:title>{xen:phrase password}</xen:title>
+    <template title="bdapi_consumer_account_security_update" version_id="1020000" version_string="1.2.0"><![CDATA[<xen:title>{xen:phrase password}</xen:title>
 
 <xen:require css="account.css" />
 
 <form method="post" class="xenForm AutoValidator ContactDetailsForm"
-	action="{xen:link 'account/external/new-password'}"
+	action="{$formAction}"
 	data-redirect="yes">
 	
 	<fieldset>
-		<dl class="ctrlUnit">
-			<dt><label for="ctrl_password">{xen:phrase new_password}:</label></dt>
-			<dd><input type="password" name="password" value="" dir="ltr" class="textCtrl" id="ctrl_password" /></dd>
-		</dl>
+		<xen:if is="{$changeType}=='email'">
+			<dl class="ctrlUnit">
+				<dt><label for="ctrl_new_email">{xen:phrase bdapi_consumer_new_email}:</label></dt>
+				<dd><input type="email" name="email" value="" dir="ltr" class="textCtrl" id="ctrl_new_email" /></dd>
+			</dl>
+			
+			<dl class="ctrlUnit">
+				<dt><label for="ctrl_new_email_confirm">{xen:phrase bdapi_consumer_confirm_new_email}:</label></dt>
+				<dd><input type="email" name="email_confirm" value="" dir="ltr" class="textCtrl" id="ctrl_new_email_confirm" /></dd>
+			</dl>
+		<xen:else />
+			<dl class="ctrlUnit">
+				<dt><label for="ctrl_password">{xen:phrase new_password}:</label></dt>
+				<dd><input type="password" name="password" value="" dir="ltr" class="textCtrl" id="ctrl_password" /></dd>
+			</dl>
 
-		<dl class="ctrlUnit">
-			<dt><label for="ctrl_password_confirm">{xen:phrase confirm_new_password}:</label></dt>
-			<dd><input type="password" name="password_confirm" value="" class="textCtrl" dir="ltr" id="ctrl_password_confirm" /></dd>
-		</dl>
+			<dl class="ctrlUnit">
+				<dt><label for="ctrl_password_confirm">{xen:phrase confirm_new_password}:</label></dt>
+				<dd><input type="password" name="password_confirm" value="" class="textCtrl" dir="ltr" id="ctrl_password_confirm" /></dd>
+			</dl>
+		</xen:if>
 	</fieldset>
 
 	<dl class="ctrlUnit submitUnit">
@@ -321,7 +338,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
 	<input type="hidden" name="_xfConfirm" value="1" />
 </form>]]></template>
-    <template title="bdapi_consumer_account_security_verify" version_id="1010100" version_string="1.1.0"><![CDATA[<xen:title>{xen:phrase bdapi_consumer_verify_your_identity}</xen:title>
+    <template title="bdapi_consumer_account_security_verify" version_id="1020000" version_string="1.2.0"><![CDATA[<xen:title>{xen:phrase bdapi_consumer_verify_your_identity}</xen:title>
 
 <form action="{xen:link 'account/external/verify'}" method="post" 
 	  class="xenForm formOverlay AutoValidator" data-redirect="on">
@@ -347,6 +364,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 	<input type="hidden" name="code" value="{$provider.code}" />
 	<input type="hidden" name="_xfConfirm" value="1" />
 	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+	<input type="hidden" name="type" value="{$changeType}" />
 </form>]]></template>
     <template title="bdapi_consumer_alert_provider" version_id="24" version_string="0.9.8-dev"><![CDATA[{xen:raw $notificationHtml}
 <span class="faint">{xen:phrase bdapi_consumer_alert_via_provider,
@@ -573,6 +591,19 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 </form>]]></template>
   </templates>
   <public_template_modifications>
+    <modification template="account_contact_details" modification_key="bdApiConsumer_changeEmailFlow" description="Change email flow" execution_order="10" enabled="1" action="str_replace">
+      <find><![CDATA[<p class="explain">{xen:phrase your_email_cannot_be_changed_while_your_account_does_not_have_password} <a href="{xen:link account/request-password}" class="OverlayTrigger">{xen:phrase request_password_be_emailed_to_you}</a></p>]]></find>
+      <replace><![CDATA[<xen:if is="{$bdApiConsumer_providers}">
+	<div>{xen:phrase bdapi_consumer_change_your_email_by}:</div>
+	<ul>
+		<xen:foreach loop="$bdApiConsumer_providers" value="$provider">
+			<li>{xen:phrase bdapi_consumer_verifying_via_x, 'link={xen:link 'account/external/verify', false, 'code={$provider.code}','type=email'}', 'name={$provider.name}'}</li>
+		</xen:foreach>
+	</ul>
+<xen:else />
+	$0
+</xen:if>]]></replace>
+    </modification>
     <modification template="account_security" modification_key="bdApiConsumer_resetPassProvider" description="Reset password throught provider." execution_order="10" enabled="1" action="str_replace">
       <find><![CDATA[{xen:phrase request_password_be_emailed_to_you}</a>]]></find>
       <replace><![CDATA[$0 <xen:include template="bdapi_consumer_account_security" />]]></replace>
