@@ -25,7 +25,9 @@ class Dispatcher extends XFCP_Dispatcher
                     break;
             }
 
-            $action = sprintf('%s/%s', $method, $action);
+            if (!$params || !$params->offsetExists('_isApiReroute')) {
+                $action = sprintf('%s/%s', $method, $action);
+            }
         }
 
         return parent::dispatchClass(

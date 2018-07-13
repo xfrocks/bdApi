@@ -7,6 +7,7 @@ use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
 use XF\Mvc\Reply\AbstractReply;
 use XF\Mvc\Reply\Redirect;
+use XF\Mvc\RouteMatch;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
@@ -162,6 +163,12 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
         $scope = $this->getDefaultApiScopeForAction($action);
         $this->assertApiScope($scope);
+    }
+
+    public function reroute(RouteMatch $match)
+    {
+        $match->setParam('_isApiReroute', true);
+        return parent::reroute($match);
     }
 
     /**

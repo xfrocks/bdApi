@@ -7,7 +7,7 @@ use XF\Mvc\Entity\Finder;
 use Xfrocks\Api\Controller\AbstractController;
 use Xfrocks\Api\Transformer;
 
-class LazyTransformer
+class LazyTransformer implements \JsonSerializable
 {
     const SOURCE_TYPE_ENTITY = 'entity';
     const SOURCE_TYPE_FINDER = 'finder';
