@@ -99,12 +99,6 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         }
     }
 
-    public function reroute(RouteMatch $match)
-    {
-        $match->setParam('_isApiReroute', true);
-        return parent::reroute($match);
-    }
-
     /**
      * @param string $link
      * @param mixed $data
@@ -168,6 +162,12 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
         $scope = $this->getDefaultApiScopeForAction($action);
         $this->assertApiScope($scope);
+    }
+
+    public function reroute(RouteMatch $match)
+    {
+        $match->setParam('_isApiReroute', true);
+        return parent::reroute($match);
     }
 
     /**
