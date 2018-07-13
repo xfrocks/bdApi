@@ -143,8 +143,10 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
     <phrase title="bdapi_consumer_change_your_email_by" version_id="1020000" version_string="1.2.0"><![CDATA[Change your email by]]></phrase>
     <phrase title="bdapi_consumer_client_id" version_id="1" version_string="0.9-dev"><![CDATA[Client ID]]></phrase>
     <phrase title="bdapi_consumer_client_secret" version_id="1" version_string="0.9-dev"><![CDATA[Client Secret]]></phrase>
+    <phrase title="bdapi_consumer_confirm_new_email" version_id="1020000" version_string="1.2.0"><![CDATA[Confirm new email]]></phrase>
     <phrase title="bdapi_consumer_disassociate_x_account" version_id="8" version_string="0.9.2"><![CDATA[Disassociate {provider} Account]]></phrase>
     <phrase title="bdapi_consumer_disassociating_with_x_reset_password_email_y" version_id="8" version_string="0.9.2"><![CDATA[Disassociating with {provider} will cause a password to be generated for your account and emailed to {email}.]]></phrase>
+    <phrase title="bdapi_consumer_emails_did_not_match" version_id="1020000" version_string="1.2.0"><![CDATA[Emails did not match. Please enter the same email in both fields.]]></phrase>
     <phrase title="bdapi_consumer_error_occurred_while_connecting_with_x" version_id="1" version_string="0.9-dev"><![CDATA[An error occurred while connecting with {provider}. Please try again later.]]></phrase>
     <phrase title="bdapi_consumer_external" version_id="8" version_string="0.9.2"><![CDATA[External Associations]]></phrase>
     <phrase title="bdapi_consumer_login_with_x" version_id="1" version_string="0.9-dev"><![CDATA[Login with {provider}]]></phrase>
@@ -309,6 +311,11 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 			<dl class="ctrlUnit">
 				<dt><label for="ctrl_new_email">{xen:phrase bdapi_consumer_new_email}:</label></dt>
 				<dd><input type="email" name="email" value="" dir="ltr" class="textCtrl" id="ctrl_new_email" /></dd>
+			</dl>
+			
+			<dl class="ctrlUnit">
+				<dt><label for="ctrl_new_email_confirm">{xen:phrase bdapi_consumer_confirm_new_email}:</label></dt>
+				<dd><input type="email" name="email_confirm" value="" dir="ltr" class="textCtrl" id="ctrl_new_email_confirm" /></dd>
 			</dl>
 		<xen:else />
 			<dl class="ctrlUnit">

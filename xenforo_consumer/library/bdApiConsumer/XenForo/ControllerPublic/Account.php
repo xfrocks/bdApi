@@ -132,9 +132,16 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
             $writer->setExistingData($userId);
 
             if ($type === 'email') {
-                $newEmail = $this->_input->filterSingle('email', XenForo_Input::STRING);
-                
-                $writer->set('email', $newEmail);
+                $input = $this->_input->filter(array(
+                    'email' => XenForo_Input::STRING,
+                    'email_confirm' => XenForo_Input::STRING
+                ));
+
+                if ($input['email'] !== $input['email_confirm']) {
+                    return $this->responseError(new XenForo_Phrase('bdapi_consumer_emails_did_not_match'));
+                }
+
+                $writer->set('email', $input['email']);
             } else {
                 $input = $this->_input->filter(array(
                     'password' => XenForo_Input::STRING,
