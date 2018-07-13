@@ -13,4 +13,9 @@ class Forum extends AbstractNode
     {
         return 'forums';
     }
+
+    protected function getNameSingular()
+    {
+        return 'forum';
+    }
 }

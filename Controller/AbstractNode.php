@@ -2,12 +2,17 @@
 
 namespace Xfrocks\Api\Controller;
 
+use XF\Mvc\ParameterBag;
 use XF\Repository\Node;
 
 abstract class AbstractNode extends AbstractController
 {
-    public function actionGetIndex()
+    public function actionGetIndex(ParameterBag $params)
     {
+        if ($params->node_id) {
+            return $this->actionSingle($params->node_id);
+        }
+
         $params = $this
             ->params()
             ->define('parent_category_id', 'str', 'id of parent category')
@@ -69,6 +74,28 @@ abstract class AbstractNode extends AbstractController
         return $this->api($data);
     }
 
+    public function actionSingle($nodeId)
+    {
+        $nodeTypes = $this->app()->container('nodeTypes');
+        $nodeTypeId = $this->getNodeTypeId();
+
+        if (!isset($nodeTypes[$nodeTypeId])) {
+            return $this->noPermission();
+        }
+
+        $node = $this->assertViewableEntity(
+            $nodeTypes[$nodeTypeId]['entity_identifier'],
+            $nodeId
+        );
+
+        $data = [
+            $this->getNameSingular() => $this->transformEntityLazily($node)
+        ];
+
+        return $this->api($data);
+    }
+
     abstract protected function getNodeTypeId();
     abstract protected function getNamePlural();
+    abstract protected function getNameSingular();
 }
