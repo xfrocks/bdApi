@@ -100,10 +100,22 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
         );
     }
 
+    public function actionExternalNewEmail()
+    {
+        return $this->_bdApiConsumer_securityUpdate('email');
+    }
+
     public function actionExternalNewPassword()
     {
+        return $this->_bdApiConsumer_securityUpdate('password');
+    }
+
+    protected function _bdApiConsumer_securityUpdate($type)
+    {
         $session = XenForo_Application::getSession();
-        $verified = $session->isRegistered('bdApiConsumer_verified') ? $session->get('bdApiConsumer_verified'): null;
+        $verified = $session->isRegistered('bdApiConsumer_verified_' . $type)
+            ? $session->get('bdApiConsumer_verified_' . $type)
+            : null;
         // 5 minutes
         $verifiedTtl = 5 * 60;
 
@@ -113,14 +125,13 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
 
         $visitor = XenForo_Visitor::getInstance();
         $userId = $visitor['user_id'];
-        $changeType = $this->_input->filterSingle('type', XenForo_Input::STRING);
 
         if ($this->isConfirmedPost()) {
             /** @var XenForo_DataWriter_User $writer */
             $writer = XenForo_DataWriter::create('XenForo_DataWriter_User');
             $writer->setExistingData($userId);
 
-            if ($changeType === 'email') {
+            if ($type === 'email') {
                 $newEmail = $this->_input->filterSingle('email', XenForo_Input::STRING);
 
                 /** @var XenForo_Model_UserChangeLog $changeLogModel */
@@ -148,14 +159,14 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
 
             $writer->save();
 
-            if ($session->get('password_date') && $changeType !== 'email') {
+            if ($session->get('password_date') && $type !== 'email') {
                 $session->set('password_date', $writer->get('password_date'));
             }
 
             $session->remove('bdApiConsumer_verified');
             $session->save();
 
-            $redirectTarget = ($changeType === 'email')
+            $redirectTarget = ($type === 'email')
                 ? $this->_buildLink('account/contact-details')
                 : $this->_buildLink('account/security');
 
@@ -165,8 +176,13 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
             );
         }
 
+        $formAction = ($type === 'email')
+            ? $this->_buildLink('account/external/new-email')
+            : $this->_buildLink('account/external/new-password');
+
         $viewParams = [
-            'changeType' => $changeType
+            'changeType' => $type,
+            'formAction' => $formAction
         ];
 
         $view = $this->responseView(
@@ -212,9 +228,9 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
             );
         }
 
-        $changeType = $this->_input->filterSingle('type', XenForo_Input::STRING);
-        if ($changeType !== 'email') {
-            $changeType = 'password';
+        $type = $this->_input->filterSingle('type', XenForo_Input::STRING);
+        if ($type !== 'email') {
+            $type = 'password';
         }
 
         if ($this->isConfirmedPost()) {
@@ -256,12 +272,18 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
             }
 
             $session = XenForo_Application::getSession();
-            $session->set('bdApiConsumer_verified', XenForo_Application::$time);
+            $session->set('bdApiConsumer_verified_' .$type, XenForo_Application::$time);
             $session->save();
+
+            if ($type === 'email') {
+                $redirectTarget = $this->_buildLink('account/external/new-email');
+            } else {
+                $redirectTarget = $this->_buildLink('account/external/new-password');
+            }
 
             return $this->responseRedirect(
                 XenForo_ControllerResponse_Redirect::SUCCESS,
-                $this->_buildLink('account/external/new-password', null, ['type' => $changeType]),
+                $redirectTarget,
                 new XenForo_Phrase('bdapi_consumer_your_identity_has_been_verified')
             );
         }
@@ -269,7 +291,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
         $viewParams = [
             'provider' => $provider,
             'extraData' => $extraData,
-            'changeType' => $changeType
+            'changeType' => $type
         ];
 
         return $this->responseView(

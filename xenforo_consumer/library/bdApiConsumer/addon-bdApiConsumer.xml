@@ -301,7 +301,7 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 <xen:require css="account.css" />
 
 <form method="post" class="xenForm AutoValidator ContactDetailsForm"
-	action="{xen:link 'account/external/new-password'}"
+	action="{$formAction}"
 	data-redirect="yes">
 	
 	<fieldset>
@@ -330,7 +330,6 @@ avatar = {xen:phrase bdapi_consumer_take_over_avatar}</edit_format_params>
 
 	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
 	<input type="hidden" name="_xfConfirm" value="1" />
-	<input type="hidden" name="type" value="{$changeType}" />
 </form>]]></template>
     <template title="bdapi_consumer_account_security_verify" version_id="1020000" version_string="1.2.0"><![CDATA[<xen:title>{xen:phrase bdapi_consumer_verify_your_identity}</xen:title>
 
