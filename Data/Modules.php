@@ -18,6 +18,7 @@ class Modules
         $this->addController('Xfrocks:Attachment', 'attachments', ':int<attachment_id>/');
         $this->addController('Xfrocks:Batch', 'batch');
         $this->addController('Xfrocks:Index', 'index');
+        $this->addController('Xfrocks:Forum', 'forums', ':int<forum_id>/');
         $this->addController('Xfrocks:OAuth2', 'oauth');
         $this->addController('Xfrocks:Post', 'posts', ':int<post_id>/');
         $this->addController('Xfrocks:Thread', 'threads', ':int<thread_id>/');
