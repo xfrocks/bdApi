@@ -133,20 +133,7 @@ class bdApiConsumer_XenForo_ControllerPublic_Account extends XFCP_bdApiConsumer_
 
             if ($type === 'email') {
                 $newEmail = $this->_input->filterSingle('email', XenForo_Input::STRING);
-
-                /** @var XenForo_Model_UserChangeLog $changeLogModel */
-                $changeLogModel = $this->getModelFromCache('XenForo_Model_UserChangeLog');
-                $emailChanges = $changeLogModel->countChangeLogsSince(
-                    $userId,
-                    'email',
-                    XenForo_Application::$time - 3600
-                );
-
-                if ($emailChanges >= 3) {
-                    // only allow 3 email changes within an hour
-                    return $this->responseError(new XenForo_Phrase('your_email_may_not_be_changed_at_this_time'));
-                }
-
+                
                 $writer->set('email', $newEmail);
             } else {
                 $input = $this->_input->filter(array(
