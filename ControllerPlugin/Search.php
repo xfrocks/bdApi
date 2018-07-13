@@ -11,8 +11,13 @@ class Search extends AbstractPlugin
     public function prepareSearchResults(array $results)
     {
         $grouped = [];
-        foreach ($results as $id => $result) {
-            $grouped[$result[0]][$id] = $result[1];
+        $resultKeyMap = [];
+
+        foreach ($results as $resultKey => $result) {
+            $grouped[$result[0]][] = $result[1];
+
+            $dataKey = $result[0] . '-' . $result[1];
+            $resultKeyMap[$dataKey] = $resultKey;
         }
 
         $searcher = $this->app->search();
@@ -34,11 +39,11 @@ class Search extends AbstractPlugin
             /** @var Entity $entity */
             foreach ($entities as $entity) {
                 $dataKey = $contentType . '-' . $entity->getEntityId();
-                if (!isset($results[$dataKey])) {
+                if (!isset($resultKeyMap[$dataKey])) {
                     continue;
                 }
 
-                $values[$dataKey] = $controller->transformEntityLazily($entity);
+                $values[$resultKeyMap[$dataKey]] = $controller->transformEntityLazily($entity);
             }
         }
 
