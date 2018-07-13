@@ -87,7 +87,6 @@ class Search extends AbstractController
         $params = $this
             ->params()
             ->define('q', 'str', 'query to search for')
-            ->definePageNav()
             ->define('forum_id', 'uint', 'id of the container forum to search for contents')
             ->define('user_id', 'uint', 'id of the creator to search for contents');
 
@@ -113,7 +112,6 @@ class Search extends AbstractController
         $params = $this
             ->params()
             ->define('q', 'str', 'query to search for')
-            ->definePageNav()
             ->define('forum_id', 'uint', 'id of the container forum to search for contents')
             ->define('thread_id', 'uint', 'id of the container thread to search for posts')
             ->define('user_id', 'uint', 'id of the creator to search for contents');
