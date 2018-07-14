@@ -2,6 +2,7 @@
 
 namespace Xfrocks\Api\Transform;
 
+use XF\Mvc\Entity\ArrayCollection;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
 use Xfrocks\Api\Controller\AbstractController;
@@ -123,35 +124,20 @@ class LazyTransformer implements \JsonSerializable
             case self::SOURCE_TYPE_ENTITY:
                 /** @var Entity $entity */
                 $entity = $this->source;
-                $handler = $transformer->handler($entity->structure()->shortName);
-                $context = $context->getSubContext(null, $handler, $entity);
-                return $transformer->transformContext($context);
+                return $transformer->transformEntity($context, null, $entity);
             case self::SOURCE_TYPE_FINDER:
                 /** @var Finder $finder */
                 $finder = $this->source;
-                $handler = $transformer->handler($finder->getStructure()->shortName);
-                $finder = $handler->onTransformFinder($context, $finder);
+                return $transformer->transformFinder($context, null, $finder, function ($result) {
+                    /** @var ArrayCollection $entities */
+                    $entities = $result;
 
-                $result = $finder->fetch();
-                if ($this->finderSortByList !== null) {
-                    $result = $result->sortByList($this->finderSortByList);
-                }
-
-                $data = [];
-                $entities = $result->toArray();
-                $entities = $handler->onTransformEntities($context, $entities);
-
-                foreach ($entities as $entity) {
-                    $entityContext = $context->getSubContext(null, $handler, $entity);
-                    $entityData = $transformer->transformContext($entityContext);
-                    if (!is_array($entityData)) {
-                        continue;
+                    if ($this->finderSortByList !== null) {
+                        $entities = $entities->sortByList($this->finderSortByList);
                     }
 
-                    $data[] = $entityData;
-                }
-
-                return $data;
+                    return $entities;
+                });
         }
 
         throw new \LogicException('Unrecognized source type ' . $this->sourceType);

@@ -2,7 +2,6 @@
 
 namespace Xfrocks\Api\Controller;
 
-use XF\Mvc\Entity\Entity;
 use XF\Mvc\ParameterBag;
 use XF\Repository\Node;
 
@@ -18,16 +17,18 @@ abstract class AbstractNode extends AbstractController
             ->params()
             ->define('parent_category_id', 'str', 'id of parent category')
             ->define('parent_forum_id', 'str', 'id of parent forum')
+            ->define('parent_node_id', 'str', 'id of parent node')
             ->defineOrder([
-                'natural' => [],
-                'list' => []
+                'list' => ['lft', 'asc']
             ]);
 
         $parentId = $params['parent_category_id'];
         if ($parentId === '') {
             $parentId = $params['parent_forum_id'];
         }
-
+        if ($parentId === '') {
+            $parentId = $params['parent_node_id'];
+        }
         if ($parentId === '') {
             $parentId = false;
         } else {
@@ -51,27 +52,21 @@ abstract class AbstractNode extends AbstractController
         }
 
         $nodeTypes = $this->app()->container('nodeTypes');
-        $nodes = [];
+        $keyNodes = $this->getNamePlural();
+        $keyTotal = $this->getNamePlural() . '_total';
+        $data = [$keyNodes => [], $keyTotal => 0];
 
         if ($nodeIds && isset($nodeTypes[$this->getNodeTypeId()])) {
             $entityIdentifier = $nodeTypes[$this->getNodeTypeId()]['entity_identifier'];
-            /** @var \XF\Entity\Node[] $nodes */
-            $nodes = $this->em()->findByIds($entityIdentifier, $nodeIds);
+
+            $finder = $this->finder($entityIdentifier)
+                ->where('node_id', $nodeIds);
+
+            $params->sortFinder($finder);
+
+            $data[$keyTotal] = $finder->total();
+            $data[$keyNodes] = $this->transformFinderLazily($finder);
         }
-
-        switch ($params['order']) {
-            case 'list':
-                usort($nodes, function ($a, $b) {
-                    return (($a->lft == $b->lft) ? 0 : ($a->lft < $b->lft ? -1 : 1));
-                });
-
-                break;
-        }
-
-        $data = [
-            $this->getNamePlural() => $this->transformEntitiesLazily($nodes),
-            $this->getNamePlural() . '_total' => count($nodes)
-        ];
 
         return $this->api($data);
     }
@@ -85,10 +80,7 @@ abstract class AbstractNode extends AbstractController
             return $this->noPermission();
         }
 
-        $node = $this->assertViewableEntity(
-            $nodeTypes[$nodeTypeId]['entity_identifier'],
-            $nodeId
-        );
+        $node = $this->assertRecordExists($nodeTypes[$nodeTypeId]['entity_identifier'], $nodeId);
 
         $data = [
             $this->getNameSingular() => $this->transformEntityLazily($node)
@@ -98,6 +90,8 @@ abstract class AbstractNode extends AbstractController
     }
 
     abstract protected function getNodeTypeId();
+
     abstract protected function getNamePlural();
+
     abstract protected function getNameSingular();
 }

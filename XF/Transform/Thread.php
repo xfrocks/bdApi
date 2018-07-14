@@ -46,7 +46,7 @@ class Thread extends AbstractHandler
 
         switch ($key) {
             case self::DYNAMIC_KEY_FIRST_POST:
-                return $this->transformer->transformSubEntity($context, $key, $thread->FirstPost);
+                return $this->transformer->transformEntity($context, $key, $thread->FirstPost);
             case self::DYNAMIC_KEY_IS_DELETED:
                 return $thread->discussion_state === 'deleted';
             case self::DYNAMIC_KEY_IS_FOLLOWED:
@@ -71,7 +71,7 @@ class Thread extends AbstractHandler
                     return null;
                 }
 
-                return $this->transformer->transformSubEntity($context, $key, $thread->Poll);
+                return $this->transformer->transformEntity($context, $key, $thread->Poll);
             case self::DYNAMIC_KEY_PREFIXES:
                 if (!$thread->prefix_id) {
                     return null;
@@ -83,7 +83,7 @@ class Thread extends AbstractHandler
                     return null;
                 }
 
-                $prefixData = $this->transformer->transformSubEntity($context, $key, $prefix);
+                $prefixData = $this->transformer->transformEntity($context, $key, $prefix);
                 if (count($prefixData) === 0) {
                     return null;
                 }

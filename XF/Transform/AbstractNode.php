@@ -10,7 +10,7 @@ abstract class AbstractNode extends AbstractHandler
     const LINK_SUB_CATEGORIES = 'sub-categories';
     const LINK_SUB_FORUMS = 'sub-forums';
 
-    public function getMappings()
+    public function getMappings($context)
     {
         return [
             'node_id' => $this->getNameSingular() . '_id',
@@ -19,28 +19,36 @@ abstract class AbstractNode extends AbstractHandler
         ];
     }
 
-    public function collectLinks()
+    public function collectLinks($context)
     {
-        /** @var Node $node  */
-        $node = $this->source;
+        /** @var \XF\Entity\AbstractNode $node */
+        $node = $context->getSource();
 
         $links = [
-            self::LINK_PERMALINK => $this->buildApiLink($this->getRoutePrefix(), $this->source),
-            self::LINK_DETAIL => $this->buildApiLink($this->getRoutePrefix(), $this->source),
-
-            self::LINK_SUB_CATEGORIES => $this->buildApiLink('categories', [], ['parent_category_id' => $node->node_id]),
-            self::LINK_SUB_FORUMS => $this->buildApiLink('forums', [], ['parent_forum_id' => $node->node_id])
+            self::LINK_PERMALINK => $this->buildApiLink($this->getRoutePrefix(), $node),
+            self::LINK_DETAIL => $this->buildApiLink($this->getRoutePrefix(), $node),
         ];
+
+        $nodeNode = $node->Node;
+        if ($nodeNode->rgt - $nodeNode->lft > 1) {
+            $linkParams = ['parent_node_id' => $node->node_id];
+            $links += [
+                self::LINK_SUB_CATEGORIES => $this->buildApiLink('categories', null, $linkParams),
+                self::LINK_SUB_FORUMS => $this->buildApiLink('forums', null, $linkParams)
+            ];
+        }
 
         return $links;
     }
 
-    public function collectPermissions()
+    public function collectPermissions($context)
     {
         $perms = [];
 
-        if (is_callable([$this->source, 'canView'])) {
-            $perms[self::PERM_VIEW] = $this->source->canView();
+        $node = $context->getSource();
+        $canView = [$node, 'canView'];
+        if (is_callable($canView)) {
+            $perms[self::PERM_VIEW] = call_user_func($canView);
         }
 
         $visitor = \XF::visitor();
@@ -51,5 +59,6 @@ abstract class AbstractNode extends AbstractHandler
     }
 
     abstract protected function getNameSingular();
+
     abstract protected function getRoutePrefix();
 }

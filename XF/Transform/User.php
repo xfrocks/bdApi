@@ -333,7 +333,7 @@ class User extends AbstractHandler
         $data = [];
         /** @var \XF\Entity\UserGroup $group */
         foreach ($userGroups as $group) {
-            $groupData = $this->transformer->transformSubEntity($context, $key, $group);
+            $groupData = $this->transformer->transformEntity($context, $key, $group);
             if ($group->user_group_id === $user->user_group_id) {
                 $groupData[self::DYNAMIC_KEY_GROUPS__IS_PRIMARY] = true;
             } else {

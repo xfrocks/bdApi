@@ -59,7 +59,7 @@ class Search extends Repository
 
         if (!empty($input['thread_id'])) {
             $query->withMetadata('thread', $input['thread_id'])
-                  ->inTitleOnly(false);
+                ->inTitleOnly(false);
         }
 
         if ($query->getErrors()) {

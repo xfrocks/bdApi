@@ -69,15 +69,6 @@ class Transformer
     }
 
     /**
-     * @param TransformContext $context
-     * @return array
-     */
-    public function transformContext($context)
-    {
-        return $this->transform($context);
-    }
-
-    /**
      * @param \XF\Mvc\Reply\AbstractReply $reply
      * @return array
      */
@@ -137,6 +128,19 @@ class Transformer
 
     /**
      * @param TransformContext $context
+     * @param string|null $key
+     * @param Entity $subEntity
+     * @return array
+     */
+    public function transformEntity($context, $key, $subEntity)
+    {
+        $subHandler = $this->handler($subEntity->structure()->shortName);
+        $subContext = $context->getSubContext($key, $subHandler, $subEntity);
+        return $this->transform($subContext);
+    }
+
+    /**
+     * @param TransformContext $context
      * @param string $key
      * @param Entity $entity
      * @param string $relationKey
@@ -161,7 +165,7 @@ class Transformer
         if ($relationConfig['type'] === Entity::TO_ONE) {
             /** @var Entity $subEntity */
             $subEntity = $relationData;
-            return $this->transformSubEntity($context, $key, $subEntity);
+            return $this->transformEntity($context, $key, $subEntity);
         }
 
         $subHandler = $this->handler($relationConfig['entity']);
@@ -196,15 +200,36 @@ class Transformer
 
     /**
      * @param TransformContext $context
-     * @param string $key
-     * @param Entity $subEntity
+     * @param string|null $key
+     * @param \XF\Mvc\Entity\Finder $finder
+     * @param callable|null $postFetchCallback
      * @return array
      */
-    public function transformSubEntity($context, $key, $subEntity)
+    public function transformFinder($context, $key, $finder, $postFetchCallback = null)
     {
-        $subHandler = $this->handler($subEntity->structure()->shortName);
-        $subContext = $context->getSubContext($key, $subHandler, $subEntity);
-        return $this->transform($subContext);
+        $handler = $this->handler($finder->getStructure()->shortName);
+        $finder = $handler->onTransformFinder($context, $finder);
+
+        $result = $finder->fetch();
+        if ($postFetchCallback !== null) {
+            $result = call_user_func($postFetchCallback, $result);
+        }
+
+        $data = [];
+        $entities = $result->toArray();
+        $entities = $handler->onTransformEntities($context, $entities);
+
+        foreach ($entities as $entity) {
+            $entityContext = $context->getSubContext(null, $handler, $entity);
+            $entityData = $this->transform($entityContext);
+            if (count($entityData) === 0) {
+                continue;
+            }
+
+            $data[] = $entityData;
+        }
+
+        return $data;
     }
 
     /**

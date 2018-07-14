@@ -17,9 +17,9 @@ class Forum extends AbstractNode
     const PERM_CREATE_THREAD = 'create_thread';
     const PERM_UPLOAD_ATTACHMENT = 'upload_attachment';
 
-    public function getMappings()
+    public function getMappings($context)
     {
-        $mappings = parent::getMappings();
+        $mappings = parent::getMappings($context);
 
         $mappings += [
             'discussion_count' => self::KEY_THREAD_COUNT,
@@ -34,12 +34,12 @@ class Forum extends AbstractNode
         return $mappings;
     }
 
-    public function collectLinks()
+    public function collectLinks($context)
     {
-        $links = parent::collectLinks();
+        $links = parent::collectLinks($context);
 
         /** @var \XF\Entity\Forum $forum */
-        $forum = $this->source;
+        $forum = $context->getSource();
 
         $links += [
             self::LINK_FOLLOWERS => $this->buildApiLink('forums/followers', $forum),
@@ -49,12 +49,12 @@ class Forum extends AbstractNode
         return $links;
     }
 
-    public function collectPermissions()
+    public function collectPermissions($context)
     {
-        $perms = parent::collectPermissions();
+        $perms = parent::collectPermissions($context);
 
         /** @var \XF\Entity\Forum $forum */
-        $forum = $this->source;
+        $forum = $context->getSource();
 
         $perms += [
             self::PERM_FOLLOW => $forum->canWatch(),
@@ -65,10 +65,10 @@ class Forum extends AbstractNode
         return $perms;
     }
 
-    public function calculateDynamicValue($key)
+    public function calculateDynamicValue($context, $key)
     {
         /** @var \XF\Entity\Forum $forum */
-        $forum = $this->source;
+        $forum = $context->getSource();
 
         switch ($key) {
             case self::DYNAMIC_KEY_IS_FOLLOW:
@@ -79,13 +79,15 @@ class Forum extends AbstractNode
 
                 return !empty($forum->Watch[$visitor->user_id]);
             case self::DYNAMIC_KEY_PREFIXES:
-                /** @var \XF\Entity\ThreadPrefix[]|null $prefixes */
-                $prefixes = $forum->prefixes;
-                if (!$prefixes) {
+                if (!$forum->prefix_cache) {
                     return null;
                 }
 
-                return $this->transformer->transformSubEntities($this, $key, $prefixes);
+                $finder = $forum->finder('XF:ThreadPrefix')
+                    ->where('prefix_id', $forum->prefix_cache)
+                    ->order('materialized_order');
+
+                return $this->transformer->transformFinder($context, $key, $finder);
         }
 
         return null;
