@@ -143,21 +143,24 @@ class Thread extends AbstractHandler
         return $links;
     }
 
-    public function getFetchWith(array $extraWith = [])
+    public function getExtraWith()
     {
-        $with = array_merge([
+        $with = [
             'Forum',
             'Forum.Node',
             'User',
-            'FirstPost'
-        ], $extraWith);
+            'FirstPost',
+        ];
 
         $userId = \XF::visitor()->user_id;
         if ($userId > 0) {
-            $with[] = 'Read|' . $userId;
-            $with[] = 'Watch|' . $userId;
-            $with[] = 'FirstPost.Likes|' . $userId;
-            $with[] = 'Forum.Node.Permissions|' . $userId;
+            $with = array_merge($with, [
+                'FirstPost.Likes|' . $userId,
+                'Forum.Node.Permissions|' . $userId,
+                'Read|' . $userId,
+                'ReplyBans|' . $userId,
+                'Watch|' . $userId,
+            ]);
         }
 
         return $with;

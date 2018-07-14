@@ -91,9 +91,4 @@ class Category extends AbstractHandler
             self::DYNAMIC_KEY_FIELDS,
         ];
     }
-
-    public function getNotFoundMessage()
-    {
-        return \XF::phrase('xfmg_requested_category_not_found');
-    }
 }

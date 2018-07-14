@@ -66,7 +66,7 @@ class Thread extends AbstractController
         ];
 
         if ($params['forum_id'] > 0) {
-            $forum = $this->assertViewableEntity('XF:Forum', $params['forum_id']);
+            $forum = $this->assertViewableForum($params['forum_id']);
             $this->transformEntityIfNeeded($data, 'forum', $forum);
         }
 
@@ -102,7 +102,7 @@ class Thread extends AbstractController
 
         if ($params['forum_id'] > 0) {
             /** @var Forum $forum */
-            $forum = $this->assertViewableEntity('XF:Forum', $params['forum_id']);
+            $forum = $this->assertViewableForum($params['forum_id']);
             $finder->applyVisibilityChecksInForum($forum);
         }
 
@@ -122,6 +122,24 @@ class Thread extends AbstractController
     }
 
     /**
+     * @param int $forumId
+     * @param array $extraWith
+     * @return Forum
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    protected function assertViewableForum($forumId, array $extraWith = [])
+    {
+        /** @var \XF\Entity\Forum $forum */
+        $forum = $this->assertRecordExists('XF:Forum', $forumId, $extraWith, 'requested_forum_not_found');
+
+        if (!$forum->canView($error)) {
+            throw $this->exception($this->noPermission($error));
+        }
+
+        return $forum;
+    }
+
+    /**
      * @param int $threadId
      * @param array $extraWith
      * @return \XF\Entity\Thread
@@ -130,7 +148,11 @@ class Thread extends AbstractController
     protected function assertViewableThread($threadId, array $extraWith = [])
     {
         /** @var \XF\Entity\Thread $thread */
-        $thread = $this->assertViewableEntity('XF:Thread', $threadId, $extraWith);
+        $thread = $this->assertRecordExists('XF:Thread', $threadId, $extraWith, 'requested_thread_not_found');
+
+        if (!$thread->canView($error)) {
+            throw $this->exception($this->noPermission($error));
+        }
 
         return $thread;
     }

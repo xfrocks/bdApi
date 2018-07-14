@@ -10,7 +10,6 @@ use XF\Mvc\Reply\Redirect;
 use XF\Mvc\RouteMatch;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\OAuth2\Server;
-use Xfrocks\Api\Transformer;
 use Xfrocks\Api\Transform\LazyTransformer;
 
 class AbstractController extends \XF\Pub\Controller\AbstractController
@@ -121,16 +120,6 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         throw new \InvalidArgumentException('AbstractController::params() must be used to parse params.');
     }
 
-    public function finder($type)
-    {
-        /** @var Transformer $transformer */
-        $transformer = $this->app->container('api.transformer');
-        $handler = $transformer->handler($type);
-        $with = $handler->getFetchWith();
-
-        return parent::finder($type)->with($with);
-    }
-
     /**
      * @return Params
      */
@@ -225,37 +214,6 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         }
 
         return parent::view($viewClass, $templateName, $params);
-    }
-
-    /**
-     * @param string $shortName
-     * @param mixed $id
-     * @param array $extraWith
-     * @return Entity
-     * @throws \XF\Mvc\Reply\Exception
-     */
-    protected function assertViewableEntity($shortName, $id, array $extraWith = [])
-    {
-        /** @var Transformer $transformer */
-        $transformer = $this->app->container('api.transformer');
-        $handler = $transformer->handler($shortName);
-        $with = $handler->getFetchWith($extraWith);
-
-        $entity = $this->em()->find($shortName, $id, $with);
-        if (!$entity) {
-            throw $this->exception($this->notFound($handler->getNotFoundMessage()));
-        }
-
-        $canView = [$entity, 'canView'];
-        $error = '';
-        if (is_callable($canView)) {
-            $canViewArgs = [&$error];
-            if (!call_user_func_array($canView, $canViewArgs)) {
-                throw $this->exception($this->noPermission($error));
-            }
-        }
-
-        return $entity;
     }
 
     protected function canUpdateSessionActivity($action, ParameterBag $params, AbstractReply &$reply, &$viewState)

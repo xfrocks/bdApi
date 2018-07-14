@@ -229,21 +229,23 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return $permissions;
     }
 
-    public function getFetchWith(array $extraWith = [])
+    public function getExtraWith()
     {
-        $with = array_merge([
+        $with = [
             'Category',
             'CurrentVersion',
             'Description',
             'User',
-        ], $extraWith);
+        ];
 
         $visitor = \XF::visitor();
         $userId = $visitor->user_id;
         if ($userId > 0) {
-            $with[] = 'Category.Permissions|' . $visitor->permission_combination_id;
-            $with[] = 'Description.Likes|' . $userId;
-            $with[] = 'Watch|' . $userId;
+            $with = array_merge($with, [
+                'Category.Permissions|' . $visitor->permission_combination_id,
+                'Description.Likes|' . $userId,
+                'Watch|' . $userId,
+            ]);
         }
 
         return $with;
@@ -286,11 +288,6 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
             self::DYNAMIC_KEY_TEXT_PLAIN,
             self::DYNAMIC_KEY_VERSION,
         ];
-    }
-
-    public function getNotFoundMessage()
-    {
-        return \XF::phrase('xfrm_requested_resource_not_found');
     }
 
     public function onTransformEntities($context, $entities)

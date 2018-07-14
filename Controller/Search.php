@@ -3,7 +3,6 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Mvc\ParameterBag;
-use XF\Mvc\Entity\Entity;
 use Xfrocks\Api\Util\PageNav;
 
 class Search extends AbstractController
@@ -22,11 +21,7 @@ class Search extends AbstractController
 
     public function actionGetResults(ParameterBag $params)
     {
-        /** @var \XF\Entity\Search $search */
-        $search = $this->assertViewableEntity('XF:Search', $params->search_id);
-        if ($search->user_id !== \XF::visitor()->user_id) {
-            return $this->notFound();
-        }
+        $search = $this->assertViewableSearch($params->search_id);
 
         $params = $this
             ->params()
@@ -37,7 +32,7 @@ class Search extends AbstractController
         $searcher = $this->app()->search();
         $resultSet = $searcher->getResultSet($search->search_results);
 
-        $resultSet->sliceResultsToPage($page, $perPage);
+        $resultSet->sliceResultsToPage($page, $perPage, false);
 
         if (!$resultSet->countResults()) {
             return $this->error(\XF::phrase('no_results_found'), 400);
@@ -104,6 +99,24 @@ class Search extends AbstractController
         }
 
         return $this->rerouteController(__CLASS__, 'getResults', ['search_id' => $search->search_id]);
+    }
+
+    /**
+     * @param int $searchId
+     * @param array $extraWith
+     * @return \XF\Entity\Search
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    protected function assertViewableSearch($searchId, array $extraWith = [])
+    {
+        /** @var \XF\Entity\Search $search */
+        $search = $this->assertRecordExists('XF:Search', $searchId, $extraWith, 'no_results_found');
+
+        if ($search->user_id !== \XF::visitor()->user_id) {
+            throw $this->exception($this->notFound(\XF::phrase('no_results_found')));
+        }
+
+        return $search;
     }
 
     /**

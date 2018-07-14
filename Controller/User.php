@@ -40,11 +40,7 @@ class User extends AbstractController
     protected function assertViewableUser($userId, array $extraWith = [])
     {
         /** @var \XF\Entity\User $user */
-        $user = $this->assertViewableEntity('XF:User', $userId, $extraWith);
-
-        if (!$user->canViewFullProfile($error)) {
-            throw $this->exception($this->noPermission($error));
-        }
+        $user = $this->assertRecordExists('XF:User', $userId, $extraWith, 'requested_user_not_found');
 
         return $user;
     }

@@ -192,20 +192,22 @@ class Post extends AbstractHandler implements AttachmentParent
         return $links;
     }
 
-    public function getFetchWith(array $extraWith = [])
+    public function getExtraWith()
     {
-        $with = array_merge([
+        $with = [
             'User',
             'User.Profile',
             'User.Privacy',
             'Thread',
-            'Thread.Forum.Node'
-        ], $extraWith);
+            'Thread.Forum.Node',
+        ];
 
         $userId = \XF::visitor()->user_id;
         if ($userId > 0) {
-            $with[] = 'Thread.Forum.Node.Permissions|' . $userId;
-            $with[] = 'Likes|' . $userId;
+            $with = array_merge($with, [
+                'Thread.Forum.Node.Permissions|' . $userId,
+                'Likes|' . $userId,
+            ]);
         }
 
         return $with;

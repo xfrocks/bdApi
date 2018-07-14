@@ -87,12 +87,11 @@ abstract class AbstractHandler
     }
 
     /**
-     * @param array $extraWith
      * @return array
      */
-    public function getFetchWith(array $extraWith = [])
+    public function getExtraWith()
     {
-        return $extraWith;
+        return [];
     }
 
     /**
@@ -102,14 +101,6 @@ abstract class AbstractHandler
     public function getMappings($context)
     {
         return [];
-    }
-
-    /**
-     * @return \XF\Phrase|string|null
-     */
-    public function getNotFoundMessage()
-    {
-        return null;
     }
 
     /**

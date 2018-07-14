@@ -46,7 +46,7 @@ class Post extends AbstractController
         ];
 
         if ($params['thread_id'] > 0) {
-            $thread = $this->assertViewableEntity('XF:Thread', $params['thread_id']);
+            $thread = $this->assertViewableThread($params['thread_id']);
             $this->transformEntityIfNeeded($data, 'thread', $thread);
         }
 
@@ -86,16 +86,38 @@ class Post extends AbstractController
     protected function assertViewablePost($postId, array $extraWith = [])
     {
         /** @var \XF\Entity\Post $post */
-        $post = $this->assertViewableEntity('XF:Post', $postId, $extraWith);
+        $post = $this->assertRecordExists('XF:Post', $postId, $extraWith, 'requested_post_not_found');
+
+        if (!$post->canView($error)) {
+            throw $this->exception($this->noPermission($error));
+        }
 
         return $post;
+    }
+
+    /**
+     * @param int $threadId
+     * @param array $extraWith
+     * @return \XF\Entity\Thread
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    protected function assertViewableThread($threadId, array $extraWith = [])
+    {
+        /** @var \XF\Entity\Thread $thread */
+        $thread = $this->assertRecordExists('XF:Thread', $threadId, $extraWith, 'requested_thread_not_found');
+
+        if (!$thread->canView($error)) {
+            throw $this->exception($this->noPermission($error));
+        }
+
+        return $thread;
     }
 
     protected function applyFilters(\XF\Finder\Post $finder, Params $params)
     {
         if ($params['thread_id'] > 0) {
             /** @var \XF\Entity\Thread $thread */
-            $thread = $this->assertViewableEntity('XF:Thread', $params['thread_id']);
+            $thread = $this->assertViewableThread($params['thread_id']);
             $finder->inThread($thread);
         }
     }

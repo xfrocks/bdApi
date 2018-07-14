@@ -43,7 +43,17 @@ class Category extends AbstractController
     protected function assertViewableCategory($resourceCategoryId, array $extraWith = [])
     {
         /** @var \XFRM\Entity\Category $category */
-        $category = $this->assertViewableEntity('XFRM:Category', $resourceCategoryId, $extraWith);
+        $category = $this->assertRecordExists(
+            'XFRM:Category',
+            $resourceCategoryId,
+            $extraWith,
+            'xfmg_requested_category_not_found'
+        );
+
+        if (!$category->canView($error)) {
+            throw $this->exception($this->noPermission($error));
+        }
+
         return $category;
     }
 }

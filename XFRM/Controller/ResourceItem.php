@@ -67,7 +67,7 @@ class ResourceItem extends AbstractController
         $theCategory = null;
         if ($params['resource_category_id'] > 0) {
             /** @var \XFRM\Entity\Category $theCategory */
-            $theCategory = $this->assertViewableEntity('XFRM:Category', $params['resource_category_id']);
+            $theCategory = $this->assertRecordExists('XFRM:Category', $params['resource_category_id']);
         }
         if ($theCategory !== null) {
             $this->transformEntityIfNeeded($data, 'category', $theCategory);
@@ -139,7 +139,17 @@ class ResourceItem extends AbstractController
     protected function assertViewableResource($resourceId, array $extraWith = [])
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
-        $resourceItem = $this->assertViewableEntity('XFRM:ResourceItem', $resourceId, $extraWith);
+        $resourceItem = $this->assertRecordExists(
+            'XFRM:ResourceItem',
+            $resourceId,
+            $extraWith,
+            'xfrm_requested_resource_not_found'
+        );
+
+        if ($resourceItem->canView($error)) {
+            throw $this->exception($this->noPermission($error));
+        }
+
         return $resourceItem;
     }
 }

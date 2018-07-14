@@ -2,15 +2,13 @@
 
 namespace Xfrocks\Api;
 
-use XF\Mvc\RouteMatch;
-use XF\Session\Session;
 use Xfrocks\Api\OAuth2\Server;
 
 class App extends \XF\Pub\App
 {
     public function getErrorRoute($action, array $params = [], $responseType = 'html')
     {
-        return new RouteMatch('Xfrocks:Error', $action, $params, $responseType);
+        return new \XF\Mvc\RouteMatch('Xfrocks:Error', $action, $params, $responseType);
     }
 
     public function initializeExtra()
@@ -20,6 +18,11 @@ class App extends \XF\Pub\App
         $container = $this->container;
 
         $container['app.classType'] = 'Api';
+
+        $container['em'] = function (\XF\Container $c) {
+            // TODO: find a better way to extend entity manager
+            return new \Xfrocks\Api\Mvc\Entity\Manager($c['db'], $c['em.valueFormatter'], $c['extension']);
+        };
 
         $container->extend('extension.classExtensions', function (array $classExtensions) {
             $classes = [
@@ -62,7 +65,7 @@ class App extends \XF\Pub\App
         });
     }
 
-    protected function onSessionCreation(Session $session)
+    protected function onSessionCreation(\XF\Session\Session $session)
     {
         /** @var Server $apiServer */
         $apiServer = $this->container('api.server');

@@ -195,14 +195,16 @@ class User extends AbstractHandler
         ];
     }
 
-    public function getFetchWith(array $extraWith = [])
+    public function getExtraWith()
     {
-        return array_merge([
+        $with = [
             'Activity',
             'Auth',
             'Privacy',
-            'Profile'
-        ], $extraWith);
+            'Profile',
+        ];
+
+        return $with;
     }
 
     public function getMappings($context)
@@ -237,11 +239,6 @@ class User extends AbstractHandler
         ];
 
         return $mappings;
-    }
-
-    public function getNotFoundMessage()
-    {
-        return \XF::phrase('requested_user_not_found');
     }
 
     /**
