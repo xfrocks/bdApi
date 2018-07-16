@@ -6,14 +6,20 @@ use XF\Entity\User;
 use XF\Mvc\Entity\Structure;
 
 /**
- * @property int auth_code_id
+ * COLUMNS
+ * @property int|null auth_code_id
  * @property string client_id
  * @property string auth_code_text
  * @property string redirect_uri
  * @property int expire_date
  * @property int user_id
  * @property string scope
- * @property User User
+ *
+ * GETTERS
+ * @property string[] scopes
+ *
+ * RELATIONS
+ * @property \XF\Entity\User User
  */
 class AuthCode extends TokenWithScope
 {
@@ -34,9 +40,7 @@ class AuthCode extends TokenWithScope
             'redirect_uri' => ['type' => self::STR, 'required' => true],
             'expire_date' => ['type' => self::UINT, 'required' => true],
             'user_id' => ['type' => self::UINT, 'required' => true],
-            'scope' => ['type' => self::STR, 'required' => true]
         ];
-        $structure->getters = ['scopes' => true];
         $structure->relations = [
             'User' => [
                 'entity' => 'XF:User',
@@ -45,6 +49,8 @@ class AuthCode extends TokenWithScope
                 'primary' => true
             ]
         ];
+
+        self::addDefaultTokenElements($structure);
 
         return $structure;
     }

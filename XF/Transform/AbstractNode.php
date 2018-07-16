@@ -2,7 +2,6 @@
 
 namespace Xfrocks\Api\XF\Transform;
 
-use XF\Entity\Node;
 use Xfrocks\Api\Transform\AbstractHandler;
 
 abstract class AbstractNode extends AbstractHandler

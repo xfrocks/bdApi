@@ -1,18 +1,16 @@
 {
     ".gitignore": [
-        "/DevHelper/*",
-        "!/DevHelper/autogen.json",
         "/_build/",
         "/_data/",
         "/_releases/",
         "/vendor/"
     ],
-    "DevHelper\\Cli\\Command\\AutoGen": {
-        "time": 1531127818,
-        "version_id": 2000000
-    },
     "phpstan": {
         "appClass": "Xfrocks\\Api\\App",
         "autoload": "/var/www/html/src/addons/Xfrocks/Api/vendor/autoload.php"
+    },
+    "DevHelper\\Cli\\Command\\AutoGen": {
+        "time": 1531739380,
+        "version_id": 2000000
     }
 }

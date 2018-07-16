@@ -75,10 +75,10 @@ abstract class TokenWithScope extends Entity
         unset($this->_getterCache['scopes']);
     }
 
-    public static function getStructure(Structure $structure)
+    protected static function addDefaultTokenElements(Structure $structure)
     {
-        $structure->columns = ['scope' => ['type' => self::STR]];
-        $structure->getters = ['scopes' => true];
+        $structure->columns['scope'] = ['type' => self::STR];
+        $structure->getters['scopes'] = true;
 
         return $structure;
     }

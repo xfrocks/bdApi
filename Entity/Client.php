@@ -8,6 +8,7 @@ use XF\Mvc\Entity\Structure;
 use XF\Util\Arr;
 
 /**
+ * COLUMNS
  * @property string client_id
  * @property string client_secret
  * @property string redirect_uri
@@ -15,7 +16,9 @@ use XF\Util\Arr;
  * @property string description
  * @property int user_id
  * @property array options
- * @property User User
+ *
+ * RELATIONS
+ * @property \XF\Entity\User User
  */
 class Client extends Entity
 {
