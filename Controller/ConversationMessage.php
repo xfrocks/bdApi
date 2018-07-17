@@ -16,13 +16,13 @@ class ConversationMessage extends AbstractController
         }
 
         $orderChoices = [
-            'natural',
-            'natural_reverse'
+            'natural' => ['message_date', 'ASC'],
+            'natural_reverse' => ['message_date', 'DESC']
         ];
 
         $params = $this
             ->params()
-            ->define('conversation_id', 'uint','conversation id to filter')
+            ->define('conversation_id', 'uint', 'conversation id to filter')
             ->define('before', 'uint', 'date to get older messages')
             ->define('after', 'uint', 'date to get newer messages')
             ->definePageNav()
@@ -86,7 +86,7 @@ class ConversationMessage extends AbstractController
         }
 
         if ($params['before'] > 0) {
-            $finder->where('message_date', '<' , $params['before']);
+            $finder->where('message_date', '<', $params['before']);
         }
 
         if ($params['after'] > 0) {

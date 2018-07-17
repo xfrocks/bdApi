@@ -67,9 +67,9 @@ class ConversationMaster extends AbstractHandler
                     case 'deleted':
                     case 'deleted_ignored':
                         return true;
-                    default:
-                        return null;
                 }
+
+                return null;
             case self::DYNAMIC_KEY_IS_IGNORED:
                 return \XF::visitor()->isIgnoring($conversation->user_id);
             case self::DYNAMIC_KEY_IS_OPEN:
@@ -85,9 +85,9 @@ class ConversationMaster extends AbstractHandler
                     case 'deleted':
                     case 'deleted_ignored':
                         return false;
-                    default:
-                        return null;
                 }
+
+                return null;
             case self::DYNAMIC_KEY_FIRST_MESSAGE:
                 return $this->transformer->transformEntity($context, $key, $conversation->FirstMessage);
             case self::DYNAMIC_KEY_HAS_NEW_MESSAGE:
