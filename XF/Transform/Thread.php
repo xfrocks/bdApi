@@ -47,6 +47,10 @@ class Thread extends AbstractHandler
         switch ($key) {
             case self::DYNAMIC_KEY_FIRST_POST:
                 return $this->transformer->transformEntity($context, $key, $thread->FirstPost);
+            case self::DYNAMIC_KEY_FIELDS:
+                $customFieldSet = $thread->custom_fields;
+
+                return $this->transformer->transformCustomFieldSet($context, $customFieldSet);
             case self::DYNAMIC_KEY_IS_DELETED:
                 return $thread->discussion_state === 'deleted';
             case self::DYNAMIC_KEY_IS_FOLLOWED:
@@ -180,6 +184,7 @@ class Thread extends AbstractHandler
             'username' => self::KEY_CREATOR_USERNAME,
             'view_count' => self::KEY_VIEW_COUNT,
 
+            self::DYNAMIC_KEY_FIELDS,
             self::DYNAMIC_KEY_IS_PUBLISHED,
             self::DYNAMIC_KEY_IS_DELETED,
             self::DYNAMIC_KEY_IS_STICKY,
