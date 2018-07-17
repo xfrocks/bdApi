@@ -19,6 +19,7 @@ class Modules
         $this->addController('Xfrocks:Batch', 'batch');
         $this->addController('Xfrocks:Category', 'categories', ':int<node_id>/');
         $this->addController('Xfrocks:Conversation', 'conversations', ':int<conversation_id>/');
+        $this->addController('Xfrocks:ConversationMessage', 'conversation-messages', ':int<message_id>/');
         $this->addController('Xfrocks:Index', 'index');
         $this->addController('Xfrocks:Forum', 'forums', ':int<node_id>/');
         $this->addController('Xfrocks:OAuth2', 'oauth');
