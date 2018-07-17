@@ -2,6 +2,7 @@
 
 namespace Xfrocks\Api\Controller;
 
+use XF\Entity\ConversationMaster;
 use XF\Mvc\ParameterBag;
 use Xfrocks\Api\Util\PageNav;
 
@@ -41,6 +42,23 @@ class Conversation extends AbstractController
 
     public function actionSingle($conversationId)
     {
+        $conversation = $this->assertViewableConversation($conversationId);
 
+        $data = [
+            'conversation' => $this->transformEntityLazily($conversation)
+        ];
+        
+        return $this->api($data);
+    }
+
+    protected function assertViewableConversation($conversationId, array $extraWith = [])
+    {
+        /** @var ConversationMaster $conversation */
+        $conversation = $this->assertRecordExists('XF:ConversationMaster', $conversationId, $extraWith);
+        if ($conversation->canView($error)) {
+            throw $this->exception($this->noPermission($error));
+        }
+
+        return $conversation;
     }
 }
