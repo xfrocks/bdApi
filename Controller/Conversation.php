@@ -47,7 +47,7 @@ class Conversation extends AbstractController
         $data = [
             'conversation' => $this->transformEntityLazily($conversation)
         ];
-        
+
         return $this->api($data);
     }
 

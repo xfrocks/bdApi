@@ -22,6 +22,11 @@ class ConversationMaster extends AbstractHandler
     const DYNAMIC_KEY_LAST_MESSAGE = 'last_message';
     const DYNAMIC_KEY_RECIPIENTS = 'recipients';
 
+    const LINK_MESSAGES = 'messages';
+
+    const PERM_REPLY = 'reply';
+    const PERM_UPLOAD_ACTTACHMENT = 'upload_attachment';
+
     public function getMappings($context)
     {
         return [
@@ -101,5 +106,35 @@ class ConversationMaster extends AbstractHandler
         }
 
         return null;
+    }
+
+    public function collectLinks($context)
+    {
+        /** @var \XF\Entity\ConversationMaster $conversation */
+        $conversation = $context->getSource();
+        $links = [
+            self::LINK_PERMALINK => $this->buildApiLink('conversations', $conversation),
+            self::LINK_DETAIL => $this->buildApiLink('conversations', $conversation),
+            self::LINK_MESSAGES => $this->buildApiLink(
+                'conversation-messages',
+                null,
+                ['conversation_id' => $conversation->conversation_id]
+            )
+        ];
+
+        return $links;
+    }
+
+    public function collectPermissions($context)
+    {
+        /** @var \XF\Entity\ConversationMaster $conversation */
+        $conversation = $context->getSource();
+        $perms = [
+            self::PERM_REPLY => $conversation->canReply(),
+            self::PERM_DELETE => true,
+            self::PERM_UPLOAD_ACTTACHMENT => $conversation->canUploadAndManageAttachments()
+        ];
+
+        return $perms;
     }
 }
