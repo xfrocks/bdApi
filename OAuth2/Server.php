@@ -89,7 +89,18 @@ class Server
         };
 
         $this->container['request'] = function (Container $c) {
-            return Request::createFromGlobals();
+            $request = Request::createFromGlobals();
+
+            // TODO: verify whether using token from query for all requests violates OAuth2 spec
+            $queryAccessToken = $request->query->get(Listener::$accessTokenParamKey);
+            if (!empty($queryAccessToken)) {
+                $bodyAccessToken = $request->request->get(Listener::$accessTokenParamKey);
+                if (empty($bodyAccessToken)) {
+                    $request->request->set(Listener::$accessTokenParamKey, $queryAccessToken);
+                }
+            }
+
+            return $request;
         };
 
         $this->container['server.auth'] = function (Container $c) {
