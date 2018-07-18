@@ -3,9 +3,15 @@
 namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Transform\AttachmentParent;
 
-class ConversationMessage extends AbstractHandler
+class ConversationMessage extends AbstractHandler implements AttachmentParent
 {
+    const ATTACHMENT__DYNAMIC_KEY_ID = 'message_id';
+    const ATTACHMENT__LINK_MESSAGE = 'conversation-messages';
+
+    const CONTENT_TYPE_CONVO_MESSAGE = 'conversation_message';
+
     const KEY_ID = 'message_id';
     const KEY_CREATOR_USER_ID = 'creator_user_id';
     const KEY_CREATOR_USERNAME = 'creator_username';
@@ -27,6 +33,45 @@ class ConversationMessage extends AbstractHandler
     const LINK_CONVERSATION = 'conversation';
     const LINK_CREATOR = 'creator';
     const LINK_CREATOR_AVATAR = 'creator_avatar';
+
+    public function attachmentCalculateDynamicValue($context, $key)
+    {
+        switch ($key) {
+            case self::ATTACHMENT__DYNAMIC_KEY_ID:
+                return $context->getParentSourceValue('message_id');
+        }
+
+        return null;
+    }
+
+    public function attachmentCollectPermissions($context, array &$permissions)
+    {
+        /** @var \XF\Entity\ConversationMessage $message */
+        $message = $context->getParentSource();
+
+        $canDelete = false;
+        /** @var \XF\Entity\ConversationMaster|null $conversation */
+        $conversation = $message->Conversation;
+
+        if ($conversation && $conversation->canUploadAndManageAttachments()) {
+            $canDelete = $this->checkAttachmentCanManage(self::CONTENT_TYPE_CONVO_MESSAGE, $message);
+        }
+
+        $permissions[self::PERM_DELETE] = $canDelete;
+    }
+
+    public function attachmentCollectLinks($context, array &$links)
+    {
+        /** @var \XF\Entity\ConversationMessage $message */
+        $message = $context->getParentSource();
+
+        $links[self::ATTACHMENT__LINK_MESSAGE] = $this->buildApiLink('conversation-messages', $message);
+    }
+
+    public function attachmentGetMappings($context, array &$mappings)
+    {
+        $mappings[] = self::ATTACHMENT__DYNAMIC_KEY_ID;
+    }
 
     public function getMappings($context)
     {
@@ -142,5 +187,24 @@ class ConversationMessage extends AbstractHandler
         ];
 
         return $perms;
+    }
+
+    public function onTransformEntities($context, $entities)
+    {
+        $needAttachments = false;
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_ATTACHMENTS)) {
+            $needAttachments = true;
+        }
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_BODY_HTML)) {
+            $needAttachments = true;
+        }
+
+        if ($needAttachments) {
+            /** @var \XF\Repository\Attachment $attachmentRepo */
+            $attachmentRepo = $this->app->repository('XF:Attachment');
+            $entities = $attachmentRepo->addAttachmentsToContent($entities, self::CONTENT_TYPE_CONVO_MESSAGE);
+        }
+
+        return $entities;
     }
 }
