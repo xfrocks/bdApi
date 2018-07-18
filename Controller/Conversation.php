@@ -10,11 +10,12 @@ class Conversation extends AbstractController
 {
     public function actionGetIndex(ParameterBag $params)
     {
+        $this->assertApiScope('conversate');
+        $this->assertRegistrationRequired();
+
         if ($params->conversation_id) {
             return $this->actionSingle($params->conversation_id);
         }
-
-        $this->assertRegistrationRequired();
 
         $params = $this
             ->params()
@@ -42,6 +43,7 @@ class Conversation extends AbstractController
 
     public function actionSingle($conversationId)
     {
+        $this->assertApiScope('conversate');
         $conversation = $this->assertViewableConversation($conversationId);
 
         $data = [
