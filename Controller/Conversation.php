@@ -8,11 +8,16 @@ use Xfrocks\Api\Util\PageNav;
 
 class Conversation extends AbstractController
 {
-    public function actionGetIndex(ParameterBag $params)
+    public function preDispatch($action, ParameterBag $params)
     {
+        parent::preDispatch($action, $params);
+
         $this->assertApiScope('conversate');
         $this->assertRegistrationRequired();
+    }
 
+    public function actionGetIndex(ParameterBag $params)
+    {
         if ($params->conversation_id) {
             return $this->actionSingle($params->conversation_id);
         }
@@ -43,7 +48,6 @@ class Conversation extends AbstractController
 
     public function actionSingle($conversationId)
     {
-        $this->assertApiScope('conversate');
         $conversation = $this->assertViewableConversation($conversationId);
 
         $data = [

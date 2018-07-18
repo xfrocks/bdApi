@@ -9,6 +9,14 @@ use Xfrocks\Api\Util\PageNav;
 
 class ConversationMessage extends AbstractController
 {
+    public function preDispatch($action, ParameterBag $params)
+    {
+        parent::preDispatch($action, $params);
+
+        $this->assertApiScope('conversate');
+        $this->assertRegistrationRequired();
+    }
+
     public function actionGetIndex(ParameterBag $params)
     {
         if ($params->message_id) {
