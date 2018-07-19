@@ -61,7 +61,7 @@ class Conversation extends AbstractController
     {
         /** @var ConversationMaster $conversation */
         $conversation = $this->assertRecordExists('XF:ConversationMaster', $conversationId, $extraWith);
-        if ($conversation->canView($error)) {
+        if (!$conversation->canView($error)) {
             throw $this->exception($this->noPermission($error));
         }
 
