@@ -43,6 +43,22 @@ class App extends \XF\Pub\App
             return $classExtensions;
         });
 
+        $container['request'] = function (\XF\Container $c) {
+            /** @var \Xfrocks\Api\OAuth2\Server $apiServer */
+            $apiServer = $this->container('api.server');
+            /** @var \Symfony\Component\HttpFoundation\Request $apiRequest */
+            $apiRequest = $apiServer->container('request');
+
+            $request = new \XF\Http\Request(
+                $c['inputFilterer'],
+                $apiRequest->request->all() + $apiRequest->query->all(),
+                $apiRequest->files->all(),
+                []
+            );
+
+            return $request;
+        };
+
         $container->extend('request.paths', function (array $paths) {
             // move base directory up one level for URL building
             // TODO: make the change directly at XF\Http\Request::getBaseUrl

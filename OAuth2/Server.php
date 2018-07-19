@@ -163,6 +163,15 @@ class Server
     }
 
     /**
+     * @param string|null $key
+     * @return Container|mixed
+     */
+    public function container($key = null)
+    {
+        return $key === null ? $this->container : $this->container[$key];
+    }
+
+    /**
      * @return int
      */
     public function getOptionAccessTokenTTL()
