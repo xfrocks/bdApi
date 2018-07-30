@@ -284,8 +284,8 @@ class Transformer
             return $data;
         }
 
-        $contextData = $handler->onNewContext($context);
-        $context->setData($contextData);
+//        $handler->onTransformed($context,$data);
+        $context->setData($data);
 
         $mappings = $handler->getMappings($context);
         foreach ($mappings as $key => $mapping) {
@@ -313,6 +313,8 @@ class Transformer
             $permissions = $handler->collectPermissions($context);
             $this->addArrayToData($context, AbstractHandler::KEY_PERMISSIONS, $permissions, $data);
         }
+
+        $handler->onTransformed($context, $data);
 
         return $data;
     }
