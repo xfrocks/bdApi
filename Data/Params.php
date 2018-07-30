@@ -183,7 +183,7 @@ class Params implements \ArrayAccess
             
             if ($param->type === 'files' || $param->type === 'file') {
                 $valueRaw = null;
-                $value = $request->getFile($key, $param->type === 'files');
+                $value = $request->getFile($key, $param->type === 'files', false);
             } else {
                 $valueRaw = $request->get($key, $param->default);
                 $filterer = $this->controller->app()->inputFilterer();
