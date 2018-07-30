@@ -149,7 +149,7 @@ class Thread extends AbstractController
         /** @var Deleter $deleter */
         $deleter = $this->service('XF:Thread\Deleter', $thread);
         $deleter->delete('soft', $params['reason']);
-        
+
         return $this->message(\XF::phrase('changes_saved'));
     }
 
@@ -195,6 +195,37 @@ class Thread extends AbstractController
         return $attachmentPlugin->doDelete($tempHash, 'post', $context);
     }
 
+    public function actionGetFollowers(ParameterBag $params)
+    {
+        $extraWith = [];
+        if (\XF::visitor()->user_id) {
+            $extraWith[] = 'Watch|' . \XF::visitor()->user_id;
+        }
+
+        $thread = $this->assertViewableThread($params->thread_id, $extraWith);
+
+        $users = [];
+        if ($thread->canWatch()) {
+            $visitor = \XF::visitor();
+            if ($thread->Watch[$visitor->user_id]) {
+                $users[] = [
+                    'user_id' => $visitor->user_id,
+                    'username' => $visitor->username,
+                    'follow' => [
+                        'alert' => true,
+                        'email' => $thread->Watch[$visitor->user_id]->email_subscribe
+                    ]
+                ];
+            }
+        }
+
+        $data = [
+            'users' => $users
+        ];
+
+        return $this->api($data);
+    }
+    
     public function actionMultiple(array $ids)
     {
         $threads = [];
