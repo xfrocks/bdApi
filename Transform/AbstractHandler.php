@@ -105,6 +105,17 @@ abstract class AbstractHandler
 
     /**
      * @param TransformContext $context
+     * @return array
+     */
+    public function onNewContext($context)
+    {
+        $context->makeSureSelectorIsNotNull($this->type);
+
+        return [];
+    }
+
+    /**
+     * @param TransformContext $context
      * @param Finder $finder
      * @return Finder
      */

@@ -284,8 +284,8 @@ class Transformer
             return $data;
         }
 
-//        $handler->onTransformed($context,$data);
-        $context->setData($data);
+        $contextData = $handler->onNewContext($context);
+        $context->setData($contextData);
 
         $mappings = $handler->getMappings($context);
         foreach ($mappings as $key => $mapping) {
