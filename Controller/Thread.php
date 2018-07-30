@@ -5,6 +5,7 @@ namespace Xfrocks\Api\Controller;
 use XF\Entity\Forum;
 use XF\Mvc\ParameterBag;
 use XF\Service\Thread\Creator;
+use XF\Service\Thread\Deleter;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
 
@@ -124,6 +125,34 @@ class Thread extends AbstractController
         return $this->actionSingle($thread->thread_id);
     }
 
+    public function actionPutIndex(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        return $this->rerouteController('Xfrocks\Api\Controller\Post', 'put-index', [
+            'post_id' => $thread->first_post_id
+        ]);
+    }
+
+    public function actionDeleteIndex(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        $params = $this
+            ->params()
+            ->define('reason', 'str', 'reason of the thread removal');
+
+        if (!$thread->canDelete('soft', $error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var Deleter $deleter */
+        $deleter = $this->service('XF:Thread\Deleter', $thread);
+        $deleter->delete('soft', $params['reason']);
+        
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
     public function actionPostAttachments()
     {
         $params = $this
@@ -165,7 +194,7 @@ class Thread extends AbstractController
 
         return $attachmentPlugin->doDelete($tempHash, 'post', $context);
     }
-    
+
     public function actionMultiple(array $ids)
     {
         $threads = [];

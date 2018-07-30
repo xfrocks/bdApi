@@ -27,7 +27,7 @@ class Attachment extends AbstractPlugin
         $manipulator = new Manipulator($handler, $attachRepo, $context, $hash);
         $manipulator->deleteAttachment($params['attachment_id']);
 
-        return $controller->message(\XF::phrase('ok'));
+        return $controller->message(\XF::phrase('changes_saved'));
     }
 
     public function doUpload($hash, $contentType, $context, $formField = 'file')
