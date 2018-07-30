@@ -108,12 +108,18 @@ class Thread extends AbstractController
             $creator->setCustomFields($params['fields']);
         }
 
+        $creator->checkForSpam();
+
         if (!$creator->validate($errors)) {
             return $this->error($errors);
         }
 
         $this->assertNotFlooding('post');
         $thread = $creator->save();
+        
+        /** @var \XF\Repository\Thread $threadRepo */
+        $threadRepo = $this->repository('XF:Thread');
+        $threadRepo->markThreadReadByVisitor($thread, $thread->post_date);
 
         return $this->actionSingle($thread->thread_id);
     }
