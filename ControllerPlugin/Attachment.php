@@ -10,11 +10,35 @@ use Xfrocks\Api\XF\Session\Session;
 
 class Attachment extends AbstractPlugin
 {
+    public function doDelete($hash, $contentType, $context)
+    {
+        /** @var \XF\Repository\Attachment $attachRepo */
+        $attachRepo = $this->repository('XF:Attachment');
+        $handler = $attachRepo->getAttachmentHandler($contentType);
+
+        if (!$handler->canManageAttachments($context, $error)) {
+            throw $this->controller->errorException($error);
+        }
+
+        /** @var AbstractController $controller */
+        $controller = $this->controller;
+        $params = $controller->params();
+
+        $manipulator = new Manipulator($handler, $attachRepo, $context, $hash);
+        $manipulator->deleteAttachment($params['attachment_id']);
+
+        return $controller->message(\XF::phrase('ok'));
+    }
+
     public function doUpload($hash, $contentType, $context, $formField = 'file')
     {
         /** @var \XF\Repository\Attachment $attachRepo */
         $attachRepo = $this->repository('XF:Attachment');
         $handler = $attachRepo->getAttachmentHandler($contentType);
+
+        if (!$handler->canManageAttachments($context, $error)) {
+            throw $this->controller->errorException($error);
+        }
 
         $manipulator = new Manipulator($handler, $attachRepo, $context, $hash);
         if (!$manipulator->canUpload($uploadErrors)) {
@@ -34,7 +58,7 @@ class Attachment extends AbstractPlugin
         if (!$attachment) {
             throw $this->controller->errorException($error);
         }
-        
+
         $data = [
             'attachment' => $controller->transformEntityLazily($attachment)
         ];

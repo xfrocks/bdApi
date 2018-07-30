@@ -155,10 +155,17 @@ class Thread extends AbstractController
 
         $forum = $this->assertViewableForum($params['forum_id']);
 
-        /** @var \XF\Entity\Attachment|null $attachment */
-        $attachment = $this->assertRecordExists('XF:Attachment', $params['attachment_id']);
-    }
+        $context = [
+            'forum_id' => $forum->node_id
+        ];
 
+        /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+        $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+        $tempHash = $attachmentPlugin->getAttachmentTempHash($context);
+
+        return $attachmentPlugin->doDelete($tempHash, 'post', $context);
+    }
+    
     public function actionMultiple(array $ids)
     {
         $threads = [];
