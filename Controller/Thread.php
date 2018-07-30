@@ -261,6 +261,55 @@ class Thread extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    public function actionGetFollowed()
+    {
+        $this->assertRegistrationRequired();
+
+        $params = $this
+            ->params()
+            ->define('total', 'uint')
+            ->definePageNav();
+
+        /** @var \XF\Repository\Thread $threadRepo */
+        $threadRepo = $this->repository('XF:Thread');
+        $threadFinder = $threadRepo->findThreadsForWatchedList();
+
+        if ($this->request()->exists('total')) {
+            $data = [
+                'threads_total' => $threadFinder->total()
+            ];
+
+            return $this->api($data);
+        }
+
+        $params->limitFinderByPage($threadFinder);
+
+        $context = $this->params()->getTransformContext();
+        $context->onTransformedCallbacks[] = function ($context, &$data) {
+            $source = $context->getSource();
+            if (!($source instanceof \XF\Entity\Thread)) {
+                return;
+            }
+
+            $data['follow'] = [
+                'alert' => true,
+                'email' => $source->Watch[\XF::visitor()->user_id]->email_subscribe
+            ];
+        };
+        
+        $total = $threadFinder->total();
+        $threads = $total > 0 ? $this->transformFinderLazily($threadFinder) : [];
+
+        $data = [
+            'threads' => $threads,
+            'threads_total' => $total
+        ];
+
+        PageNav::addLinksToData($data, $params, $total, 'threads/followed');
+
+        return $this->api($data);
+    }
+
     public function actionMultiple(array $ids)
     {
         $threads = [];
