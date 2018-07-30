@@ -4,6 +4,7 @@ namespace Xfrocks\Api\Controller;
 
 use XF\Entity\Forum;
 use XF\Mvc\ParameterBag;
+use XF\Repository\ThreadWatch;
 use XF\Service\Thread\Creator;
 use XF\Service\Thread\Deleter;
 use Xfrocks\Api\Data\Params;
@@ -225,7 +226,30 @@ class Thread extends AbstractController
 
         return $this->api($data);
     }
-    
+
+    public function actionPostFollowers(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        $params = $this
+            ->params()
+            ->define('email', 'bool', 'whether to receive notification as email');
+
+        if (!$thread->canWatch($error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var ThreadWatch $threadWatchRepo */
+        $threadWatchRepo = $this->repository('XF:ThreadWatch');
+        $threadWatchRepo->setWatchState(
+            $thread,
+            \XF::visitor(),
+            $params['email'] ? 'watch_email' : 'watch_no_email'
+        );
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
     public function actionMultiple(array $ids)
     {
         $threads = [];
