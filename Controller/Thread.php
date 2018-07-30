@@ -250,6 +250,17 @@ class Thread extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    public function actionDeleteFollowers(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        /** @var ThreadWatch $threadWatchRepo */
+        $threadWatchRepo = $this->repository('XF:ThreadWatch');
+        $threadWatchRepo->setWatchState($thread, \XF::visitor(), '');
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
     public function actionMultiple(array $ids)
     {
         $threads = [];
