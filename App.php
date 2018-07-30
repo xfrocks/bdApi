@@ -52,7 +52,7 @@ class App extends \XF\Pub\App
             $request = new \XF\Http\Request(
                 $c['inputFilterer'],
                 $apiRequest->request->all() + $apiRequest->query->all(),
-                $apiRequest->files->all(),
+                $_FILES,
                 []
             );
 
