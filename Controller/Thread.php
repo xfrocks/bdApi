@@ -4,6 +4,7 @@ namespace Xfrocks\Api\Controller;
 
 use XF\Entity\Forum;
 use XF\Mvc\ParameterBag;
+use XF\Service\Thread\Creator;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
 
@@ -73,6 +74,48 @@ class Thread extends AbstractController
         PageNav::addLinksToData($data, $params, $total, 'threads');
 
         return $this->api($data);
+    }
+
+    public function actionPostIndex()
+    {
+        $params = $this
+            ->params()
+            ->define('forum_id', 'uint', 'id of the target forum')
+            ->define('thread_title', 'str', 'title of the new thread')
+            ->define('post_body', 'str', 'contnet of the new thread')
+            ->define('thread_prefix_id', 'uint', 'id of a prefix for the new thread')
+            ->define('thread_tags', 'str', 'thread tags for the new thread')
+            ->define('fields', 'array', 'thread fields for the new thread');
+
+        $forum = $this->assertViewableForum($params['forum_id']);
+        if (!$forum->canCreateThread($error)) {
+            return $this->error($error);
+        }
+
+        /** @var Creator $creator */
+        $creator = $this->service('XF:Thread\Creator', $forum);
+
+        $creator->setContent($params['thread_title'], $params['post_body']);
+        if ($params['thread_prefix_id']) {
+            $creator->setPrefix($params['thread_prefix_id']);
+        }
+
+        if ($params['thread_tags']) {
+            $creator->setTags($params['thread_tags']);
+        }
+
+        if ($params['fields']) {
+            $creator->setCustomFields($params['fields']);
+        }
+
+        if (!$creator->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $this->assertNotFlooding('post');
+        $thread = $creator->save();
+
+        return $this->actionSingle($thread->thread_id);
     }
 
     public function actionMultiple(array $ids)
