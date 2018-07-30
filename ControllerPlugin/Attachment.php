@@ -47,7 +47,7 @@ class Attachment extends AbstractPlugin
                 throw $this->controller->errorException($error);
             }
 
-            $attachments = $attachment;
+            $attachments[$attachment->attachment_id] = $attachment;
         }
 
         /** @var AbstractController $controller */
@@ -62,7 +62,7 @@ class Attachment extends AbstractPlugin
             ];
         } else {
             $data = [
-                'attachment' => $controller->transformEntityLazily($attachments)
+                'attachment' => $controller->transformEntityLazily(reset($attachments))
             ];
         }
 
