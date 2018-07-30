@@ -116,12 +116,33 @@ class Thread extends AbstractController
 
         $this->assertNotFlooding('post');
         $thread = $creator->save();
-        
+
         /** @var \XF\Repository\Thread $threadRepo */
         $threadRepo = $this->repository('XF:Thread');
         $threadRepo->markThreadReadByVisitor($thread, $thread->post_date);
 
         return $this->actionSingle($thread->thread_id);
+    }
+
+    public function actionPostAttachments()
+    {
+        $params = $this
+            ->params()
+            ->define('forum_id', 'uint', 'id of the container forum of the target thread')
+            ->define('attachment_hash', 'str', 'a unique hash value')
+            ->defineFile('file', 'binary data of the attachment');
+
+        $forum = $this->assertViewableForum($params['forum_id']);
+
+        $context = [
+            'forum_id' => $forum->node_id
+        ];
+
+        /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+        $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+        $tempHash = $attachmentPlugin->getAttachmentTempHash($params, $context);
+
+        return $attachmentPlugin->doUpload($params, 'file', $tempHash, 'post', $context);
     }
 
     public function actionMultiple(array $ids)

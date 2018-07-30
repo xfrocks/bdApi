@@ -180,7 +180,7 @@ class Params implements \ArrayAccess
 
         if (!isset($this->filtered[$key])) {
             $request = $this->controller->request();
-            
+
             if ($param->type === 'files' || $param->type === 'file') {
                 $valueRaw = null;
                 $value = $request->getFile($key, $param->type === 'files', false);
