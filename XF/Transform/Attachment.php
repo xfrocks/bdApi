@@ -16,9 +16,13 @@ class Attachment extends AbstractHandler
 
     public function calculateDynamicValue($context, $key)
     {
-        /** @var AttachmentParent $parentHandler */
+        /** @var AttachmentParent|null $parentHandler */
         $parentHandler = $context->getParentHandler();
-        return $parentHandler->attachmentCalculateDynamicValue($context, $key);
+        if ($parentHandler) {
+            return $parentHandler->attachmentCalculateDynamicValue($context, $key);
+        }
+
+        return parent::calculateDynamicValue($context, $key);
     }
 
     public function collectLinks($context)
@@ -36,9 +40,11 @@ class Attachment extends AbstractHandler
             $links[self::LINK_THUMBNAIL] = $thumbnailUrl;
         }
 
-        /** @var AttachmentParent $parentHandler */
+        /** @var AttachmentParent|null $parentHandler */
         $parentHandler = $context->getParentHandler();
-        $parentHandler->attachmentCollectLinks($context, $links);
+        if ($parentHandler) {
+            $parentHandler->attachmentCollectLinks($context, $links);
+        }
 
         return $links;
     }
@@ -53,9 +59,11 @@ class Attachment extends AbstractHandler
             self::PERM_VIEW => $attachment->canView(),
         ];
 
-        /** @var AttachmentParent $parentHandler */
+        /** @var AttachmentParent|null $parentHandler */
         $parentHandler = $context->getParentHandler();
-        $parentHandler->attachmentCollectPermissions($context, $permissions);
+        if ($parentHandler) {
+            $parentHandler->attachmentCollectPermissions($context, $permissions);
+        }
 
         return $permissions;
     }
@@ -68,9 +76,11 @@ class Attachment extends AbstractHandler
             'view_count' => self::KEY_DOWNLOAD_COUNT,
         ];
 
-        /** @var AttachmentParent $parentHandler */
+        /** @var AttachmentParent|null $parentHandler */
         $parentHandler = $context->getParentHandler();
-        $parentHandler->attachmentGetMappings($context, $mappings);
+        if ($parentHandler) {
+            $parentHandler->attachmentGetMappings($context, $mappings);
+        }
 
         return $mappings;
     }
