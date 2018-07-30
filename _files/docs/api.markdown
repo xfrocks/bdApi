@@ -572,6 +572,7 @@ Parameters:
  * `post_body` (__required__): content of the new thread.
  * `thread_prefix_id` (_optional_): id of a prefix for the new thread. Since forum-2016031001.
  * `thread_tags` (_optional_): thread tags for the new thread. Since forum-2015091002.
+ * `fields` (_optional_): thread fields for the new thread. Since forum-2018073000
 
 Required scopes:
 
