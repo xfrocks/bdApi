@@ -5,13 +5,12 @@ namespace Xfrocks\Api\ControllerPlugin;
 use XF\Attachment\Manipulator;
 use XF\ControllerPlugin\AbstractPlugin;
 use Xfrocks\Api\Controller\AbstractController;
-use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Entity\Token;
 use Xfrocks\Api\XF\Session\Session;
 
 class Attachment extends AbstractPlugin
 {
-    public function doUpload(Params $params, $formField, $hash, $contentType, $context)
+    public function doUpload($hash, $contentType, $context, $formField = 'file')
     {
         /** @var \XF\Repository\Attachment $attachRepo */
         $attachRepo = $this->repository('XF:Attachment');
@@ -22,55 +21,33 @@ class Attachment extends AbstractPlugin
             throw $this->controller->exception($this->controller->error($uploadErrors));
         }
 
+        /** @var AbstractController $controller */
+        $controller = $this->controller;
+        $params = $controller->params();
+
         $file = $params[$formField];
         if (!$file) {
             throw $this->controller->errorException(\XF::phrase('uploaded_file_failed_not_found'));
         }
 
-        $attachments = [];
-        $multiple = false;
-
-        if (is_array($file)) {
-            $multiple = true;
-
-            foreach ($file as $fileUploaded) {
-                $attachment = $manipulator->insertAttachmentFromUpload($fileUploaded, $error);
-                if (!$attachment) {
-                    throw $this->controller->errorException($error);
-                }
-
-                $attachments[$attachment->attachment_id] = $attachment;
-            }
-        } else {
-            $attachment = $manipulator->insertAttachmentFromUpload($file, $error);
-            if (!$attachment) {
-                throw $this->controller->errorException($error);
-            }
-
-            $attachments[$attachment->attachment_id] = $attachment;
+        $attachment = $manipulator->insertAttachmentFromUpload($file, $error);
+        if (!$attachment) {
+            throw $this->controller->errorException($error);
         }
-
-        /** @var AbstractController $controller */
-        $controller = $this->controller;
-
-        if ($multiple) {
-            $finder = $this->finder('XF:Attachment');
-            $finder->whereIds(array_keys($attachments));
-
-            $data = [
-                'attachments' => $controller->transformFinderLazily($finder)
-            ];
-        } else {
-            $data = [
-                'attachment' => $controller->transformEntityLazily(reset($attachments))
-            ];
-        }
+        
+        $data = [
+            'attachment' => $controller->transformEntityLazily($attachment)
+        ];
 
         return $controller->api($data);
     }
 
-    public function getAttachmentTempHash(Params $params, array $contentData = [])
+    public function getAttachmentTempHash(array $contentData = [])
     {
+        /** @var AbstractController $controller */
+        $controller = $this->controller;
+        $params = $controller->params();
+
         $prefix = '';
         $inputHash = $params['attachment_hash'];
 
