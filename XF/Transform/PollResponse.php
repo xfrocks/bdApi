@@ -20,7 +20,7 @@ class PollResponse extends AbstractHandler
         switch ($key) {
             case self::DYNAMIC_KEY_IS_VOTED:
                 /** @var \XF\Entity\Poll|null $poll */
-                $poll = $context->getParentSource();
+                $poll = \XF::em()->find('XF:Poll', $response->poll_id);
                 if ($poll === null) {
                     return null;
                 }

@@ -376,7 +376,6 @@ class Thread extends AbstractController
                 return;
             }
 
-            $data[\Xfrocks\Api\XF\Transform\PollResponse::DYNAMIC_KEY_IS_VOTED] = $poll->hasVoted($source->poll_response_id);
             $data['voters'] = [];
 
             foreach (array_keys($source->voters) as $userId) {
