@@ -4,6 +4,7 @@ namespace Xfrocks\Api\Controller;
 
 use XF\Entity\Forum;
 use XF\Entity\Poll;
+use XF\Entity\PollResponse;
 use XF\Mvc\ParameterBag;
 use XF\Repository\ThreadWatch;
 use XF\Service\Thread\Creator;
@@ -345,6 +346,55 @@ class Thread extends AbstractController
 
         $voter->save();
         return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionGetPollResults(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        /** @var Poll|null $poll */
+        $poll = $thread->Poll;
+        if (!$poll) {
+            return $this->noPermission();
+        }
+
+        if (!$poll->canViewResults($error)) {
+            return $this->noPermission($error);
+        }
+
+        $userIds = [];
+        foreach ($poll->Responses as $pollResponse) {
+            $userIds = array_merge($userIds, array_keys($pollResponse->voters));
+        }
+
+        $users = $this->em()->findByIds('XF:User', $userIds);
+
+        $transformContext = $this->params()->getTransformContext();
+        $transformContext->onTransformedCallbacks[] = function ($context, &$data) use($users, $poll) {
+            $source = $context->getSource();
+            if (!($source instanceof PollResponse)) {
+                return;
+            }
+
+            $data[\Xfrocks\Api\XF\Transform\PollResponse::DYNAMIC_KEY_IS_VOTED] = $poll->hasVoted($source->poll_response_id);
+            $data['voters'] = [];
+
+            foreach (array_keys($source->voters) as $userId) {
+                if (isset($users[$userId])) {
+                    $data['voters'][] = [
+                        'user_id' => $users[$userId]->user_id,
+                        'username' => $users[$userId]->username
+                    ];
+                }
+            }
+        };
+
+        $finder = $poll->getRelationFinder('Responses');
+        $data = [
+            'results' => $this->transformFinderLazily($finder)
+        ];
+
+        return $this->api($data);
     }
 
     public function actionMultiple(array $ids)
