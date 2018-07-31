@@ -415,6 +415,21 @@ class Thread extends AbstractController
         return $this->getNewOrRecentResponse('threads_new', $finder);
     }
 
+    public function actionGetRecent()
+    {
+        $this
+            ->params()
+            ->define('forum_id', 'uint')
+            ->define('data_limit', 'uint')
+            ->definePageNav();
+
+        /** @var \XF\Repository\Thread $threadRepo */
+        $threadRepo = $this->repository('XF:Thread');
+        $finder = $threadRepo->findThreadsWithUnreadPosts();
+
+        return $this->getNewOrRecentResponse('threads_recent', $finder);
+    }
+
     public function actionMultiple(array $ids)
     {
         $threads = [];
@@ -478,34 +493,49 @@ class Thread extends AbstractController
             $finder->where('node_id', $nodeIds);
         }
 
-        list($limit,) = $params->filterLimitAndPage();
+        list($limit, $page) = $params->filterLimitAndPage();
 
         $finder->limit($limit);
         $threads = $finder->fetch();
 
-        $results = [];
+        $searchResults = [];
         /** @var \XF\Entity\Thread $thread */
         foreach ($threads as $thread) {
             if ($thread->canView() && !$thread->isIgnored()) {
-                $results[] = ['thread_id' => $thread->thread_id];
+                $searchResults[] = ['thread', $thread->thread_id];
             }
         }
 
-        $totalResults = count($results);
+        $totalResults = count($searchResults);
+        $search = null;
+        $results = [];
 
-        /** @var \XF\Entity\Search $search */
-        $search = $this->em()->create('XF:Search');
+        if ($totalResults > 0) {
+            /** @var \XF\Entity\Search $search */
+            $search = $this->em()->create('XF:Search');
 
-        $search->search_type = $searchType;
-        $search->search_results = $results;
-        $search->result_count = $totalResults;
-        $search->search_order = 'date';
-        $search->user_id = 0;
+            $search->search_type = $searchType;
+            $search->search_results = $searchResults;
+            $search->result_count = $totalResults;
+            $search->search_order = 'date';
+            $search->user_id = 0;
 
-        $search->query_hash = md5(serialize($search->getNewValues()));
+            $search->query_hash = md5(serialize($search->getNewValues()));
+
+            $search->save();
+
+            $searcher = $this->app()->search();
+            $resultSet = $searcher->getResultSet($search->search_results);
+
+            $resultSet->sliceResultsToPage(1, $limit, false);
+
+            foreach ($resultSet->getResults() as $result) {
+                $results[] = $this->transformEntityLazily($threads[$result[1]]);
+            }
+        }
 
         $data = [
-            'threads' => $results
+            'results' => $results
         ];
 
         PageNav::addLinksToData($data, $params, $totalResults, 'search/results', $search);
