@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Entity\Forum;
+use XF\Entity\Poll;
 use XF\Mvc\ParameterBag;
 use XF\Repository\ThreadWatch;
 use XF\Service\Thread\Creator;
@@ -296,7 +297,7 @@ class Thread extends AbstractController
                 'email' => $source->Watch[\XF::visitor()->user_id]->email_subscribe
             ];
         };
-        
+
         $total = $threadFinder->total();
         $threads = $total > 0 ? $this->transformFinderLazily($threadFinder) : [];
 
@@ -308,6 +309,42 @@ class Thread extends AbstractController
         PageNav::addLinksToData($data, $params, $total, 'threads/followed');
 
         return $this->api($data);
+    }
+
+    public function actionPostPollVotes(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        /** @var Poll|null $poll */
+        $poll = $thread->Poll;
+        if (!$poll) {
+            return $this->noPermission();
+        }
+
+        if (!$poll->canVote($error)) {
+            return $this->noPermission();
+        }
+
+        $params = $this
+            ->params()
+            ->define('response_id', 'uint', 'the id of the response to vote for')
+            ->define('response_ids', 'array-uint', 'an array of ids of responses');
+
+        /** @var \XF\Service\Poll\Voter $voter */
+        $voter = $this->service('XF:Poll\Voter', $poll);
+
+        $responseIds = $params['response_ids'];
+        if ($params['response_id'] > 0) {
+            $responseIds[] = $params['response_id'];
+        }
+
+        $voter->setVotes($responseIds);
+        if (!$voter->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $voter->save();
+        return $this->message(\XF::phrase('changes_saved'));
     }
 
     public function actionMultiple(array $ids)
