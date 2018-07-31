@@ -16,7 +16,7 @@ class Attachment extends AbstractPlugin
         $attachRepo = $this->repository('XF:Attachment');
         $handler = $attachRepo->getAttachmentHandler($contentType);
 
-        if (!$handler->canManageAttachments($context, $error)) {
+        if (!$handler || !$handler->canManageAttachments($context, $error)) {
             throw $this->controller->errorException($error);
         }
 
@@ -36,7 +36,7 @@ class Attachment extends AbstractPlugin
         $attachRepo = $this->repository('XF:Attachment');
         $handler = $attachRepo->getAttachmentHandler($contentType);
 
-        if (!$handler->canManageAttachments($context, $error)) {
+        if (!$handler || !$handler->canManageAttachments($context, $error)) {
             throw $this->controller->errorException($error);
         }
 

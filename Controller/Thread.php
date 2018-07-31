@@ -212,7 +212,9 @@ class Thread extends AbstractController
         $users = [];
         if ($thread->canWatch()) {
             $visitor = \XF::visitor();
-            if ($thread->Watch[$visitor->user_id]) {
+            /** @var \XF\Entity\ThreadWatch|null $watch */
+            $watch = $thread->Watch[$visitor->user_id];
+            if ($watch) {
                 $users[] = [
                     'user_id' => $visitor->user_id,
                     'username' => $visitor->username,
@@ -372,7 +374,7 @@ class Thread extends AbstractController
         $users = $this->em()->findByIds('XF:User', $userIds);
 
         $transformContext = $this->params()->getTransformContext();
-        $transformContext->onTransformedCallbacks[] = function ($context, &$data) use($users, $poll) {
+        $transformContext->onTransformedCallbacks[] = function ($context, &$data) use ($users) {
             $source = $context->getSource();
             if (!($source instanceof PollResponse)) {
                 return;
@@ -382,9 +384,11 @@ class Thread extends AbstractController
 
             foreach (array_keys($source->voters) as $userId) {
                 if (isset($users[$userId])) {
+                    /** @var \XF\Entity\User $user */
+                    $user = $users[$userId];
                     $data['voters'][] = [
-                        'user_id' => $users[$userId]->user_id,
-                        'username' => $users[$userId]->username
+                        'user_id' => $user->user_id,
+                        'username' => $user->username
                     ];
                 }
             }
@@ -530,7 +534,9 @@ class Thread extends AbstractController
             $resultSet->sliceResultsToPage(1, $limit, false);
 
             foreach ($resultSet->getResults() as $result) {
-                $results[] = $this->transformEntityLazily($threads[$result[1]]);
+                /** @var \XF\Entity\Thread $thread */
+                $thread = $threads[$result[1]];
+                $results[] = $this->transformEntityLazily($thread);
             }
         }
 

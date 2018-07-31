@@ -152,7 +152,8 @@ abstract class AbstractHandler
     {
         $rootContext = $context->getRootContext();
         foreach ($rootContext->onTransformedCallbacks as $callback) {
-            call_user_func_array($callback, [$context, &$data]);
+            $params = [$context, &$data];
+            call_user_func_array($callback, $params);
         }
     }
 
