@@ -5,7 +5,9 @@ namespace Xfrocks\Api\Controller;
 use XF\Entity\Forum;
 use XF\Entity\Poll;
 use XF\Entity\PollResponse;
+use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
+use XF\Repository\Node;
 use XF\Repository\ThreadWatch;
 use XF\Service\Thread\Creator;
 use XF\Service\Thread\Deleter;
@@ -396,6 +398,23 @@ class Thread extends AbstractController
         return $this->api($data);
     }
 
+    public function actionGetNew()
+    {
+        $this->assertRegistrationRequired();
+
+        $this
+            ->params()
+            ->define('forum_id', 'uint')
+            ->define('data_limit', 'uint')
+            ->definePageNav();
+
+        /** @var \XF\Repository\Thread $threadRepo */
+        $threadRepo = $this->repository('XF:Thread');
+        $finder = $threadRepo->findThreadsWithUnreadPosts();
+
+        return $this->getNewOrRecentResponse('threads_new', $finder);
+    }
+
     public function actionMultiple(array $ids)
     {
         $threads = [];
@@ -440,6 +459,58 @@ class Thread extends AbstractController
         }
 
         // TODO: Add more filters?
+    }
+
+    protected function getNewOrRecentResponse($searchType, Finder $finder)
+    {
+        $params = $this->params();
+
+        if ($params['forum_id'] > 0) {
+            $forum = $this->assertViewableForum($params['forum_id']);
+
+            /** @var Node $nodeRepo */
+            $nodeRepo = $this->repository('XF:Node');
+            $childNodes = $nodeRepo->findChildren($forum->Node, false)->fetch();
+
+            $nodeIds = $childNodes->keys();
+            $nodeIds[] = $forum->node_id;
+
+            $finder->where('node_id', $nodeIds);
+        }
+
+        list($limit,) = $params->filterLimitAndPage();
+
+        $finder->limit($limit);
+        $threads = $finder->fetch();
+
+        $results = [];
+        /** @var \XF\Entity\Thread $thread */
+        foreach ($threads as $thread) {
+            if ($thread->canView() && !$thread->isIgnored()) {
+                $results[] = ['thread_id' => $thread->thread_id];
+            }
+        }
+
+        $totalResults = count($results);
+
+        /** @var \XF\Entity\Search $search */
+        $search = $this->em()->create('XF:Search');
+
+        $search->search_type = $searchType;
+        $search->search_results = $results;
+        $search->result_count = $totalResults;
+        $search->search_order = 'date';
+        $search->user_id = 0;
+
+        $search->query_hash = md5(serialize($search->getNewValues()));
+
+        $data = [
+            'threads' => $results
+        ];
+
+        PageNav::addLinksToData($data, $params, $totalResults, 'search/results', $search);
+
+        return $this->api($data);
     }
 
     /**
