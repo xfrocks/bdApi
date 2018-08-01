@@ -86,6 +86,8 @@ class BatchJobReply extends AbstractHandler
         $contextSource = $context->getSource();
         if ($contextSource instanceof \XF\Mvc\Reply\Exception) {
             $data['reply'] = $contextSource->getReply();
+        } elseif ($contextSource instanceof \XF\Mvc\Reply\AbstractReply) {
+            $data['reply'] = $contextSource;
         }
 
         return $data;
