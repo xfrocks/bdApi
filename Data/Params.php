@@ -95,6 +95,23 @@ class Params implements \ArrayAccess
         return $this;
     }
 
+    public function defineAttachmentHash()
+    {
+        $this->define('attachment_hash', 'str', 'a unique hash value');
+
+        return $this;
+    }
+
+    public function defineFile($key, $description = null)
+    {
+        return $this->define($key, 'file', $description);
+    }
+
+    public function defineFiles($key, $description = null)
+    {
+        return $this->define($key, 'files', $description);
+    }
+
     /**
      * @param array[] $choices
      * @param string $paramKeyOrder
@@ -170,9 +187,15 @@ class Params implements \ArrayAccess
 
         if (!isset($this->filtered[$key])) {
             $request = $this->controller->request();
-            $valueRaw = $request->get($key, $param->default);
-            $filterer = $this->controller->app()->inputFilterer();
-            $value = $filterer->filter($valueRaw, $param->type, $param->options);
+
+            if ($param->type === 'files' || $param->type === 'file') {
+                $valueRaw = null;
+                $value = $request->getFile($key, $param->type === 'files', false);
+            } else {
+                $valueRaw = $request->get($key, $param->default);
+                $filterer = $this->controller->app()->inputFilterer();
+                $value = $filterer->filter($valueRaw, $param->type, $param->options);
+            }
 
             $this->filtered[$key] = [
                 'default' => $param->default,

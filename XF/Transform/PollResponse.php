@@ -8,6 +8,7 @@ class PollResponse extends AbstractHandler
 {
     const KEY_ID = 'response_id';
     const KEY_ANSWER = 'response_answer';
+    const KEY_VOTE_COUNT = 'response_vote_count';
 
     const DYNAMIC_KEY_IS_VOTED = 'response_is_voted';
 
@@ -19,7 +20,7 @@ class PollResponse extends AbstractHandler
         switch ($key) {
             case self::DYNAMIC_KEY_IS_VOTED:
                 /** @var \XF\Entity\Poll|null $poll */
-                $poll = $context->getParentSource();
+                $poll = \XF::em()->find('XF:Poll', $response->poll_id);
                 if ($poll === null) {
                     return null;
                 }
@@ -35,6 +36,7 @@ class PollResponse extends AbstractHandler
         return [
             'poll_response_id' => self::KEY_ID,
             'response' => self::KEY_ANSWER,
+            'response_vote_count' => self::KEY_VOTE_COUNT,
 
             self::DYNAMIC_KEY_IS_VOTED
         ];

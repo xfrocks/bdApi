@@ -7,6 +7,21 @@ use Xfrocks\Api\Transformer;
 class TransformContext
 {
     /**
+     * @var array
+     */
+    public $onTransformFinderCallbacks = [];
+
+    /**
+     * @var array
+     */
+    public $onTransformEntitiesCallbacks = [];
+
+    /**
+     * @var array
+     */
+    public $onTransformedCallbacks = [];
+
+    /**
      * @var array|null
      *
      * @see AbstractHandler::onNewContext()
@@ -82,6 +97,30 @@ class TransformContext
     public function getHandler()
     {
         return $this->handler;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOnTransformedCallbacks()
+    {
+        return $this->rootContext->onTransformedCallbacks;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOnTransformEntitiesCallbacks()
+    {
+        return $this->rootContext->onTransformEntitiesCallbacks;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOnTransformFinderCallbacks()
+    {
+        return $this->rootContext->onTransformFinderCallbacks;
     }
 
     /**

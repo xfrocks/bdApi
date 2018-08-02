@@ -3,7 +3,14 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Entity\Forum;
+use XF\Entity\Poll;
+use XF\Entity\PollResponse;
+use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
+use XF\Repository\Node;
+use XF\Repository\ThreadWatch;
+use XF\Service\Thread\Creator;
+use XF\Service\Thread\Deleter;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
 
@@ -75,6 +82,330 @@ class Thread extends AbstractController
         return $this->api($data);
     }
 
+    public function actionPostIndex()
+    {
+        $params = $this
+            ->params()
+            ->define('forum_id', 'uint', 'id of the target forum')
+            ->define('thread_title', 'str', 'title of the new thread')
+            ->define('post_body', 'str', 'content of the new thread')
+            ->define('thread_prefix_id', 'uint', 'id of a prefix for the new thread')
+            ->define('thread_tags', 'str', 'thread tags for the new thread')
+            ->define('fields', 'array', 'thread fields for the new thread');
+
+        $forum = $this->assertViewableForum($params['forum_id']);
+        if (!$forum->canCreateThread($error)) {
+            return $this->error($error);
+        }
+
+        /** @var Creator $creator */
+        $creator = $this->service('XF:Thread\Creator', $forum);
+
+        $creator->setContent($params['thread_title'], $params['post_body']);
+        if ($params['thread_prefix_id']) {
+            $creator->setPrefix($params['thread_prefix_id']);
+        }
+
+        if ($params['thread_tags']) {
+            $creator->setTags($params['thread_tags']);
+        }
+
+        if ($params['fields']) {
+            $creator->setCustomFields($params['fields']);
+        }
+
+        $creator->checkForSpam();
+
+        if (!$creator->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $this->assertNotFlooding('post');
+        $thread = $creator->save();
+
+        /** @var \XF\Repository\Thread $threadRepo */
+        $threadRepo = $this->repository('XF:Thread');
+        $threadRepo->markThreadReadByVisitor($thread, $thread->post_date);
+
+        return $this->actionSingle($thread->thread_id);
+    }
+
+    public function actionPutIndex(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        return $this->rerouteController('Xfrocks\Api\Controller\Post', 'put-index', [
+            'post_id' => $thread->first_post_id
+        ]);
+    }
+
+    public function actionDeleteIndex(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        $params = $this
+            ->params()
+            ->define('reason', 'str', 'reason of the thread removal');
+
+        if (!$thread->canDelete('soft', $error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var Deleter $deleter */
+        $deleter = $this->service('XF:Thread\Deleter', $thread);
+        $deleter->delete('soft', $params['reason']);
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionPostAttachments()
+    {
+        $params = $this
+            ->params()
+            ->define('forum_id', 'uint', 'id of the container forum of the target thread')
+            ->defineAttachmentHash()
+            ->defineFile('file', 'binary data of the attachment');
+
+        $forum = $this->assertViewableForum($params['forum_id']);
+
+        $context = [
+            'forum_id' => $forum->node_id
+        ];
+
+        /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+        $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+        $tempHash = $attachmentPlugin->getAttachmentTempHash($context);
+
+        return $attachmentPlugin->doUpload($tempHash, 'post', $context);
+    }
+
+    public function actionGetFollowers(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        $users = [];
+        if ($thread->canWatch()) {
+            $visitor = \XF::visitor();
+            /** @var \XF\Entity\ThreadWatch|null $watch */
+            $watch = $thread->Watch[$visitor->user_id];
+            if ($watch) {
+                $users[] = [
+                    'user_id' => $visitor->user_id,
+                    'username' => $visitor->username,
+                    'follow' => [
+                        'alert' => true,
+                        'email' => $watch->email_subscribe
+                    ]
+                ];
+            }
+        }
+
+        $data = [
+            'users' => $users
+        ];
+
+        return $this->api($data);
+    }
+
+    public function actionPostFollowers(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        $params = $this
+            ->params()
+            ->define('email', 'bool', 'whether to receive notification as email');
+
+        if (!$thread->canWatch($error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var ThreadWatch $threadWatchRepo */
+        $threadWatchRepo = $this->repository('XF:ThreadWatch');
+        $threadWatchRepo->setWatchState(
+            $thread,
+            \XF::visitor(),
+            $params['email'] ? 'watch_email' : 'watch_no_email'
+        );
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionDeleteFollowers(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        /** @var ThreadWatch $threadWatchRepo */
+        $threadWatchRepo = $this->repository('XF:ThreadWatch');
+        $threadWatchRepo->setWatchState($thread, \XF::visitor(), '');
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionGetFollowed()
+    {
+        $params = $this
+            ->params()
+            ->define('total', 'uint')
+            ->definePageNav();
+
+        $this->assertRegistrationRequired();
+
+        /** @var \XF\Repository\Thread $threadRepo */
+        $threadRepo = $this->repository('XF:Thread');
+        $threadFinder = $threadRepo->findThreadsForWatchedList();
+
+        if ($params['total'] > 0) {
+            $data = [
+                'threads_total' => $threadFinder->total()
+            ];
+
+            return $this->api($data);
+        }
+
+        $params->limitFinderByPage($threadFinder);
+
+        $context = $this->params()->getTransformContext();
+        $context->onTransformedCallbacks[] = function ($context, &$data) {
+            $source = $context->getSource();
+            if (!($source instanceof \XF\Entity\Thread)) {
+                return;
+            }
+
+            $data['follow'] = [
+                'alert' => true,
+                'email' => $source->Watch[\XF::visitor()->user_id]->email_subscribe
+            ];
+        };
+
+        $total = $threadFinder->total();
+        $threads = $total > 0 ? $this->transformFinderLazily($threadFinder) : [];
+
+        $data = [
+            'threads' => $threads,
+            'threads_total' => $total
+        ];
+
+        PageNav::addLinksToData($data, $params, $total, 'threads/followed');
+
+        return $this->api($data);
+    }
+
+    public function actionPostPollVotes(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        $params = $this
+            ->params()
+            ->define('response_id', 'uint', 'the id of the response to vote for')
+            ->define('response_ids', 'array-uint', 'an array of ids of responses');
+
+        /** @var Poll|null $poll */
+        $poll = $thread->Poll;
+        if (!$poll) {
+            return $this->noPermission();
+        }
+
+        if (!$poll->canVote($error)) {
+            return $this->noPermission();
+        }
+
+        /** @var \XF\Service\Poll\Voter $voter */
+        $voter = $this->service('XF:Poll\Voter', $poll);
+
+        $responseIds = $params['response_ids'];
+        if ($params['response_id'] > 0) {
+            $responseIds[] = $params['response_id'];
+        }
+
+        $voter->setVotes($responseIds);
+        if (!$voter->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $voter->save();
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionGetPollResults(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+
+        /** @var Poll|null $poll */
+        $poll = $thread->Poll;
+        if (!$poll) {
+            return $this->noPermission();
+        }
+
+        if (!$poll->canViewResults($error)) {
+            return $this->noPermission($error);
+        }
+
+        $userIds = [];
+        foreach ($poll->Responses as $pollResponse) {
+            $userIds = array_merge($userIds, array_keys($pollResponse->voters));
+        }
+
+        $users = $this->em()->findByIds('XF:User', $userIds);
+
+        $transformContext = $this->params()->getTransformContext();
+        $transformContext->onTransformedCallbacks[] = function ($context, &$data) use ($users) {
+            $source = $context->getSource();
+            if (!($source instanceof PollResponse)) {
+                return;
+            }
+
+            $data['voters'] = [];
+
+            foreach (array_keys($source->voters) as $userId) {
+                if (isset($users[$userId])) {
+                    /** @var \XF\Entity\User $user */
+                    $user = $users[$userId];
+                    $data['voters'][] = [
+                        'user_id' => $user->user_id,
+                        'username' => $user->username
+                    ];
+                }
+            }
+        };
+
+        $finder = $poll->getRelationFinder('Responses');
+        $data = [
+            'results' => $this->transformFinderLazily($finder)
+        ];
+
+        return $this->api($data);
+    }
+
+    public function actionGetNew()
+    {
+        $this
+            ->params()
+            ->define('forum_id', 'uint')
+            ->definePageNav();
+
+        $this->assertRegistrationRequired();
+
+        /** @var \XF\Repository\Thread $threadRepo */
+        $threadRepo = $this->repository('XF:Thread');
+        $finder = $threadRepo->findThreadsWithUnreadPosts();
+
+        return $this->getNewOrRecentResponse('threads_new', $finder);
+    }
+
+    public function actionGetRecent()
+    {
+        $this
+            ->params()
+            ->define('forum_id', 'uint')
+            ->definePageNav();
+
+        /** @var \XF\Repository\Thread $threadRepo */
+        $threadRepo = $this->repository('XF:Thread');
+        $finder = $threadRepo->findThreadsWithUnreadPosts();
+
+        return $this->getNewOrRecentResponse('threads_recent', $finder);
+    }
+
     public function actionMultiple(array $ids)
     {
         $threads = [];
@@ -119,6 +450,74 @@ class Thread extends AbstractController
         }
 
         // TODO: Add more filters?
+    }
+
+    protected function getNewOrRecentResponse($searchType, Finder $finder)
+    {
+        $params = $this->params();
+
+        if ($params['forum_id'] > 0) {
+            $forum = $this->assertViewableForum($params['forum_id']);
+
+            /** @var Node $nodeRepo */
+            $nodeRepo = $this->repository('XF:Node');
+            $childNodes = $nodeRepo->findChildren($forum->Node, false)->fetch();
+
+            $nodeIds = $childNodes->keys();
+            $nodeIds[] = $forum->node_id;
+
+            $finder->where('node_id', $nodeIds);
+        }
+
+        $finder->limit($this->options()->maximumSearchResults);
+        $threads = $finder->fetch();
+
+        $searchResults = [];
+        /** @var \XF\Entity\Thread $thread */
+        foreach ($threads as $thread) {
+            if ($thread->canView() && !$thread->isIgnored()) {
+                $searchResults[] = ['thread', $thread->thread_id];
+            }
+        }
+
+        $totalResults = count($searchResults);
+        $search = null;
+        $results = [];
+
+        if ($totalResults > 0) {
+            /** @var \XF\Entity\Search $search */
+            $search = $this->em()->create('XF:Search');
+
+            $search->search_type = $searchType;
+            $search->search_results = $searchResults;
+            $search->result_count = $totalResults;
+            $search->search_order = 'date';
+            $search->user_id = 0;
+
+            $search->query_hash = md5(serialize($search->getNewValues()));
+
+            $search->save();
+
+            $searcher = $this->app()->search();
+            $resultSet = $searcher->getResultSet($search->search_results);
+
+            list($limit,) = $params->filterLimitAndPage();
+            $resultSet->sliceResultsToPage(1, $limit, false);
+
+            foreach ($resultSet->getResults() as $result) {
+                /** @var \XF\Entity\Thread $thread */
+                $thread = $threads[$result[1]];
+                $results[] = $this->transformEntityLazily($thread);
+            }
+        }
+
+        $data = [
+            'results' => $results
+        ];
+
+        PageNav::addLinksToData($data, $params, $totalResults, 'search/results', $search);
+
+        return $this->api($data);
     }
 
     /**
