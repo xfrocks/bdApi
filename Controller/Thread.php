@@ -178,7 +178,7 @@ class Thread extends AbstractController
 
         return $attachmentPlugin->doUpload($tempHash, 'post', $context);
     }
-    
+
     public function actionGetFollowers(ParameterBag $params)
     {
         $extraWith = [];
@@ -199,7 +199,7 @@ class Thread extends AbstractController
                     'username' => $visitor->username,
                     'follow' => [
                         'alert' => true,
-                        'email' => $thread->Watch[$visitor->user_id]->email_subscribe
+                        'email' => $watch->email_subscribe
                     ]
                 ];
             }
