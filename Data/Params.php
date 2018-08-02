@@ -95,6 +95,13 @@ class Params implements \ArrayAccess
         return $this;
     }
 
+    public function defineAttachmentHash()
+    {
+        $this->define('attachment_hash', 'str', 'a unique hash value');
+
+        return $this;
+    }
+
     public function defineFile($key, $description = null)
     {
         return $this->define($key, 'file', $description);

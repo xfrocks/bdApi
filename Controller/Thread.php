@@ -163,7 +163,7 @@ class Thread extends AbstractController
         $params = $this
             ->params()
             ->define('forum_id', 'uint', 'id of the container forum of the target thread')
-            ->define('attachment_hash', 'str', 'a unique hash value')
+            ->defineAttachmentHash()
             ->defineFile('file', 'binary data of the attachment');
 
         $forum = $this->assertViewableForum($params['forum_id']);
@@ -185,7 +185,7 @@ class Thread extends AbstractController
             ->params()
             ->define('forum_id', 'uint', 'id of the container forum of the target thread')
             ->define('attachment_id', 'uint', 'id of the attachment')
-            ->define('attachment_hash', 'str', 'the hash that was used when the attachment was uploaded ');
+            ->defineAttachmentHash();
 
         $forum = $this->assertViewableForum($params['forum_id']);
 
