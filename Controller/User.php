@@ -34,10 +34,29 @@ class User extends AbstractController
             'users' => $users,
             'users_total' => $total
         ];
-        
+
         PageNav::addLinksToData($data, $params, $total, 'users');
 
         return $this->api($data);
+    }
+
+    public function actionPostIndex()
+    {
+        $params = $this
+            ->params()
+            ->define('user_email','str', 'email of the new user')
+            ->define('username', 'str', 'username of the new user')
+            ->define('password', 'str', 'password of the new user')
+            ->define('password_algo', 'str', 'algorithm used to encrypt the password parameter')
+            ->define('user_dob_day', 'uint', 'date of birth (day) of the new user')
+            ->define('user_dob_month', 'uint', 'date of birth (month) of the new user')
+            ->define('user_dob_year', 'uint', 'date of birth (year) of the new user')
+            ->define('fields', 'array', 'user field values')
+            ->define('client_id', 'str', 'client ID of the Client')
+            ->define('extra_data', 'str')
+            ->define('extra_timestamp', 'uint');
+
+
     }
 
     public function actionGetMe()
