@@ -381,7 +381,6 @@ class Thread extends AbstractController
         $this
             ->params()
             ->define('forum_id', 'uint')
-            ->define('data_limit', 'uint')
             ->definePageNav();
 
         $this->assertRegistrationRequired();
@@ -398,7 +397,6 @@ class Thread extends AbstractController
         $this
             ->params()
             ->define('forum_id', 'uint')
-            ->define('data_limit', 'uint')
             ->definePageNav();
 
         /** @var \XF\Repository\Thread $threadRepo */
