@@ -181,12 +181,7 @@ class Thread extends AbstractController
 
     public function actionGetFollowers(ParameterBag $params)
     {
-        $extraWith = [];
-        if (\XF::visitor()->user_id) {
-            $extraWith[] = 'Watch|' . \XF::visitor()->user_id;
-        }
-
-        $thread = $this->assertViewableThread($params->thread_id, $extraWith);
+        $thread = $this->assertViewableThread($params->thread_id);
 
         $users = [];
         if ($thread->canWatch()) {
