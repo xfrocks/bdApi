@@ -88,7 +88,7 @@ class Thread extends AbstractController
             ->params()
             ->define('forum_id', 'uint', 'id of the target forum')
             ->define('thread_title', 'str', 'title of the new thread')
-            ->define('post_body', 'str', 'contnet of the new thread')
+            ->define('post_body', 'str', 'content of the new thread')
             ->define('thread_prefix_id', 'uint', 'id of a prefix for the new thread')
             ->define('thread_tags', 'str', 'thread tags for the new thread')
             ->define('fields', 'array', 'thread fields for the new thread');
