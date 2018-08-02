@@ -178,28 +178,7 @@ class Thread extends AbstractController
 
         return $attachmentPlugin->doUpload($tempHash, 'post', $context);
     }
-
-    public function actionDeleteAttachments()
-    {
-        $params = $this
-            ->params()
-            ->define('forum_id', 'uint', 'id of the container forum of the target thread')
-            ->define('attachment_id', 'uint', 'id of the attachment')
-            ->defineAttachmentHash();
-
-        $forum = $this->assertViewableForum($params['forum_id']);
-
-        $context = [
-            'forum_id' => $forum->node_id
-        ];
-
-        /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
-        $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
-        $tempHash = $attachmentPlugin->getAttachmentTempHash($context);
-
-        return $attachmentPlugin->doDelete($tempHash, 'post', $context);
-    }
-
+    
     public function actionGetFollowers(ParameterBag $params)
     {
         $extraWith = [];
