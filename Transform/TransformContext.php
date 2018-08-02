@@ -100,6 +100,30 @@ class TransformContext
     }
 
     /**
+     * @return array
+     */
+    public function getOnTransformedCallbacks()
+    {
+        return $this->rootContext->onTransformedCallbacks;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOnTransformEntitiesCallbacks()
+    {
+        return $this->rootContext->onTransformEntitiesCallbacks;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOnTransformFinderCallbacks()
+    {
+        return $this->rootContext->onTransformFinderCallbacks;
+    }
+
+    /**
      * @return AbstractHandler|null
      */
     public function getParentHandler()
@@ -134,14 +158,6 @@ class TransformContext
         }
 
         return $this->parentContext->getSourceValue($key);
-    }
-
-    /**
-     * @return TransformContext
-     */
-    public function getRootContext()
-    {
-        return $this->rootContext;
     }
 
     /**

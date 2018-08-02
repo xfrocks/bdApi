@@ -121,8 +121,7 @@ abstract class AbstractHandler
      */
     public function onTransformFinder($context, $finder)
     {
-        $rootContext = $context->getRootContext();
-        foreach ($rootContext->onTransformFinderCallbacks as $callback) {
+        foreach ($context->getOnTransformFinderCallbacks() as $callback) {
             call_user_func_array($callback, [$context, $finder]);
         }
 
@@ -136,8 +135,7 @@ abstract class AbstractHandler
      */
     public function onTransformEntities($context, $entities)
     {
-        $rootContext = $context->getRootContext();
-        foreach ($rootContext->onTransformEntitiesCallbacks as $callback) {
+        foreach ($context->getOnTransformEntitiesCallbacks() as $callback) {
             call_user_func_array($callback, [$context, $entities]);
         }
 
@@ -150,8 +148,7 @@ abstract class AbstractHandler
      */
     public function onTransformed($context, array &$data)
     {
-        $rootContext = $context->getRootContext();
-        foreach ($rootContext->onTransformedCallbacks as $callback) {
+        foreach ($context->getOnTransformedCallbacks() as $callback) {
             $params = [$context, &$data];
             call_user_func_array($callback, $params);
         }
