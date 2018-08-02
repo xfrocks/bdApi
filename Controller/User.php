@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Mvc\ParameterBag;
+use Xfrocks\Api\Util\PageNav;
 
 class User extends AbstractController
 {
@@ -12,7 +13,31 @@ class User extends AbstractController
             return $this->actionSingle($params->user_id);
         }
 
-        return $this->notFound();
+        $params = $this
+            ->params()
+            ->definePageNav();
+
+        /** @var \XF\Finder\User $finder */
+        $finder = $this->finder('XF:User');
+        $finder->with('Option', true);
+        $finder->with('Profile', true);
+
+        $finder->isValidUser();
+        $finder->order('user_id');
+
+        $params->limitFinderByPage($finder);
+
+        $total = $finder->total();
+        $users = $total > 0 ? $this->transformFinderLazily($finder) : [];
+
+        $data = [
+            'users' => $users,
+            'users_total' => $total
+        ];
+        
+        PageNav::addLinksToData($data, $params, $total, 'users');
+
+        return $this->api($data);
     }
 
     public function actionGetMe()
