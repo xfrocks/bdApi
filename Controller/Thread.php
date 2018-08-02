@@ -469,9 +469,7 @@ class Thread extends AbstractController
             $finder->where('node_id', $nodeIds);
         }
 
-        list($limit, $page) = $params->filterLimitAndPage();
-
-        $finder->limit($limit);
+        $finder->limit($this->options()->maximumSearchResults);
         $threads = $finder->fetch();
 
         $searchResults = [];
@@ -503,6 +501,7 @@ class Thread extends AbstractController
             $searcher = $this->app()->search();
             $resultSet = $searcher->getResultSet($search->search_results);
 
+            list($limit,) = $params->filterLimitAndPage();
             $resultSet->sliceResultsToPage(1, $limit, false);
 
             foreach ($resultSet->getResults() as $result) {
