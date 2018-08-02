@@ -254,7 +254,7 @@ class Thread extends AbstractController
         $threadRepo = $this->repository('XF:Thread');
         $threadFinder = $threadRepo->findThreadsForWatchedList();
 
-        if ($this->request()->exists('total')) {
+        if ($params['total'] > 0) {
             $data = [
                 'threads_total' => $threadFinder->total()
             ];
