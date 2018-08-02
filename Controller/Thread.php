@@ -243,12 +243,12 @@ class Thread extends AbstractController
 
     public function actionGetFollowed()
     {
-        $this->assertRegistrationRequired();
-
         $params = $this
             ->params()
             ->define('total', 'uint')
             ->definePageNav();
+
+        $this->assertRegistrationRequired();
 
         /** @var \XF\Repository\Thread $threadRepo */
         $threadRepo = $this->repository('XF:Thread');
@@ -294,6 +294,11 @@ class Thread extends AbstractController
     {
         $thread = $this->assertViewableThread($params->thread_id);
 
+        $params = $this
+            ->params()
+            ->define('response_id', 'uint', 'the id of the response to vote for')
+            ->define('response_ids', 'array-uint', 'an array of ids of responses');
+
         /** @var Poll|null $poll */
         $poll = $thread->Poll;
         if (!$poll) {
@@ -303,11 +308,6 @@ class Thread extends AbstractController
         if (!$poll->canVote($error)) {
             return $this->noPermission();
         }
-
-        $params = $this
-            ->params()
-            ->define('response_id', 'uint', 'the id of the response to vote for')
-            ->define('response_ids', 'array-uint', 'an array of ids of responses');
 
         /** @var \XF\Service\Poll\Voter $voter */
         $voter = $this->service('XF:Poll\Voter', $poll);
@@ -378,13 +378,13 @@ class Thread extends AbstractController
 
     public function actionGetNew()
     {
-        $this->assertRegistrationRequired();
-
         $this
             ->params()
             ->define('forum_id', 'uint')
             ->define('data_limit', 'uint')
             ->definePageNav();
+
+        $this->assertRegistrationRequired();
 
         /** @var \XF\Repository\Thread $threadRepo */
         $threadRepo = $this->repository('XF:Thread');
