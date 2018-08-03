@@ -4,6 +4,7 @@ namespace Xfrocks\Api\Controller;
 
 use XF\Mvc\ParameterBag;
 use XF\Util\Php;
+use XF\Validator\Email;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\Entity\Token;
 use Xfrocks\Api\OAuth2\Server;
@@ -169,6 +170,46 @@ class User extends AbstractController
 
         $data = [
             'fields' => $userFields
+        ];
+
+        return $this->api($data);
+    }
+
+    public function actionGetFind()
+    {
+        $params = $this
+            ->params()
+            ->define('username', 'str', 'username to filter')
+            ->define('user_email', 'str', 'email to filter');
+
+        /** @var \XF\Finder\User $userFinder */
+        $userFinder = $this->finder('XF:User');
+
+        $users = [];
+
+        if (!empty($params['user_email'])) {
+            /** @var Email $emailValidator */
+            $emailValidator = \XF::app()->validator('XF:Email');
+            if ($emailValidator->isValid($params['user_email'])
+                && \XF::visitor()->hasAdminPermission('user')
+                && $this->session()->hasScope(Server::SCOPE_MANAGE_SYSTEM)
+            ) {
+                $userFinder->where('email', $params['user_email']);
+
+                $total = $userFinder->total();
+                $users = $total > 0 ? $this->transformFinderLazily($userFinder) : [];
+            }
+        }
+
+        if (empty($users) && utf8_strlen($params['username']) >= 0) {
+            $userFinder->where('username', 'like', $userFinder->escapeLike($params['username'], '?%'));
+
+            $total = $userFinder->total();
+            $users = $total > 0 ? $this->transformFinderLazily($userFinder->limit(10)) : [];
+        }
+
+        $data = [
+            'users' => $users
         ];
 
         return $this->api($data);
