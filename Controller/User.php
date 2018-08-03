@@ -161,6 +161,19 @@ class User extends AbstractController
         return $this->api($data);
     }
 
+    public function actionGetFields()
+    {
+        $finder = $this->finder('XF:UserField');
+
+        $userFields = $this->transformFinderLazily($finder);
+
+        $data = [
+            'fields' => $userFields
+        ];
+
+        return $this->api($data);
+    }
+
     public function actionGetMe()
     {
         return $this->actionGetIndex($this->buildParamsForVisitor());
