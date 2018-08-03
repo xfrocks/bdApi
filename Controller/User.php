@@ -3,6 +3,11 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Mvc\ParameterBag;
+use XF\Util\Php;
+use Xfrocks\Api\Entity\Client;
+use Xfrocks\Api\Entity\Token;
+use Xfrocks\Api\OAuth2\Server;
+use Xfrocks\Api\Util\Crypt;
 use Xfrocks\Api\Util\PageNav;
 
 class User extends AbstractController
@@ -56,7 +61,104 @@ class User extends AbstractController
             ->define('extra_data', 'str')
             ->define('extra_timestamp', 'uint');
 
+        if (!$this->options()->registrationSetup['enabled'])
+        {
+            throw $this->exception(
+                $this->error(\XF::phrase('new_registrations_currently_not_being_accepted'))
+            );
+        }
 
+        // prevent discouraged IP addresses from registering
+        if ($this->options()->preventDiscouragedRegistration && $this->isDiscouraged())
+        {
+            throw $this->exception(
+                $this->error(\XF::phrase('new_registrations_currently_not_being_accepted'))
+            );
+        }
+
+        $session = $this->session();
+        /** @var Token|null $token */
+        $token = $this->session()->getToken();
+        /** @var Client|null $client */
+        $client = $token ? $token->Client : null;
+
+        if (!$client) {
+            /** @var Client $client */
+            $client = $this->assertRecordExists(
+                'Xfrocks\Api:Client',
+                $params['client_id'],
+                [],
+                'bdapi_requested_client_not_found'
+            );
+
+            $clientSecret = $client->client_secret;
+        } else {
+            $clientSecret = $client->client_secret;
+        }
+
+        $extraData = [];
+        if (!empty($params['extra_data'])) {
+            $extraData = Crypt::decryptTypeOne($params['extra_data'], $params['extra_timestamp']);
+            if (!empty($extraData)) {
+                $extraData = Php::safeUnserialize($extraData);
+            }
+
+            if (empty($extraData)) {
+                $extraData = [];
+            }
+        }
+
+        /** @var \XF\Service\User\Registration $registration */
+        $registration = $this->service('XF:User\Registration');
+
+        $input = [
+            'email' => $params['user_email'],
+            'username' => $params['username'],
+            'dob_day' => $params['user_dob_day'],
+            'dob_month' => $params['user_dob_month'],
+            'dob_year' => $params['user_dob_year'],
+            'custom_fields' => $params['fields']
+        ];
+
+        $password = Crypt::decrypt($params['password'], $params['password_algo'], $clientSecret);
+        if (!empty($password)) {
+            $input['password'] = $password;
+        } else {
+            // TODO: Process for no password?
+        }
+
+        $visitor = \XF::visitor();
+        if ($visitor->hasAdminPermission('user')
+            && $session->hasScope(Server::SCOPE_MANAGE_SYSTEM)
+        ) {
+            $input['user_state'] = 'valid';
+        }
+
+        $registration->setFromInput($input);
+
+        $registration->checkForSpam();
+
+        if (!$registration->validate($errors))
+        {
+            return $this->error($errors);
+        }
+
+        $user = $registration->save();
+
+        if ($visitor->user_id == 0) {
+            $session->changeUser($user);
+            \XF::setVisitor($user);
+        }
+
+        // TODO: Generate new token for user
+
+        $data = [
+            'user' => $user,
+            '_user' => $user->toArray(),
+            'token' => ''
+        ];
+
+        return $this->api($data);
     }
 
     public function actionGetMe()
