@@ -62,16 +62,14 @@ class User extends AbstractController
             ->define('extra_data', 'str')
             ->define('extra_timestamp', 'uint');
 
-        if (!$this->options()->registrationSetup['enabled'])
-        {
+        if (!$this->options()->registrationSetup['enabled']) {
             throw $this->exception(
                 $this->error(\XF::phrase('new_registrations_currently_not_being_accepted'))
             );
         }
-
+        
         // prevent discouraged IP addresses from registering
-        if ($this->options()->preventDiscouragedRegistration && $this->isDiscouraged())
-        {
+        if ($this->options()->preventDiscouragedRegistration && $this->isDiscouraged()) {
             throw $this->exception(
                 $this->error(\XF::phrase('new_registrations_currently_not_being_accepted'))
             );
@@ -125,8 +123,17 @@ class User extends AbstractController
         if (!empty($password)) {
             $input['password'] = $password;
         } else {
-            // TODO: Process for no password?
+            $registration->setNoPassword();
         }
+
+        $allowEmailConfirm = true;
+        if (!empty($extraData['user_email'])
+            && $extraData['user_email'] == $input['email']
+        ) {
+            $allowEmailConfirm = false;
+        }
+
+        $registration->skipEmailConfirmation(!$allowEmailConfirm);
 
         $visitor = \XF::visitor();
         if ($visitor->hasAdminPermission('user')
@@ -136,7 +143,6 @@ class User extends AbstractController
         }
 
         $registration->setFromInput($input);
-
         $registration->checkForSpam();
 
         if (!$registration->validate($errors))
@@ -144,6 +150,7 @@ class User extends AbstractController
             return $this->error($errors);
         }
 
+        /** @var \XF\Entity\User $user */
         $user = $registration->save();
 
         if ($visitor->user_id == 0) {
@@ -151,12 +158,20 @@ class User extends AbstractController
             \XF::setVisitor($user);
         }
 
-        // TODO: Generate new token for user
+        /** @var Server $apiServer */
+        $apiServer = $this->app->container('api.server');
+        $scopes = [];
+        $scopes[] = Server::SCOPE_READ;
+        $scopes[] = Server::SCOPE_POST;
+        $scopes[] = Server::SCOPE_MANAGE_ACCOUNT_SETTINGS;
+        $scopes[] = Server::SCOPE_PARTICIPATE_IN_CONVERSATIONS;
+
+        $accessToken = $apiServer->newAccessToken(strval($user->user_id), $client, $scopes);
 
         $data = [
             'user' => $user,
             '_user' => $user->toArray(),
-            'token' => ''
+            'token' => $accessToken
         ];
 
         return $this->api($data);
