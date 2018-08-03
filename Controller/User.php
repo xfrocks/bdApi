@@ -67,7 +67,7 @@ class User extends AbstractController
                 $this->error(\XF::phrase('new_registrations_currently_not_being_accepted'))
             );
         }
-        
+
         // prevent discouraged IP addresses from registering
         if ($this->options()->preventDiscouragedRegistration && $this->isDiscouraged()) {
             throw $this->exception(
@@ -169,11 +169,11 @@ class User extends AbstractController
         $accessToken = $apiServer->newAccessToken(strval($user->user_id), $client, $scopes);
 
         $data = [
-            'user' => $user,
+            'user' => $this->transformEntityLazily($user),
             '_user' => $user->toArray(),
             'token' => $accessToken
         ];
-
+        
         return $this->api($data);
     }
 
@@ -244,6 +244,20 @@ class User extends AbstractController
         ];
 
         return $this->api($data);
+    }
+
+    protected function getDefaultApiScopeForAction($action)
+    {
+        if ($action === 'PostIndex') {
+            $session = $this->session();
+            /** @var Token|null $token */
+            $token = $session->getToken();
+            if (!$token || !$token->client_id) {
+                return null;
+            }
+        }
+
+        return parent::getDefaultApiScopeForAction($action);
     }
 
     /**

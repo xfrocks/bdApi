@@ -404,7 +404,7 @@ class Server
         $session->associateClient($libClient);
 
         // Generate the access token
-        $accessToken = new AccessTokenEntity($this->server);
+        $accessToken = new AccessTokenEntity($authorizationServer);
         $accessToken->setId(SecureKey::generate());
         $accessToken->setExpireTime($this->getOptionAccessTokenTTL() + time());
 
