@@ -2,6 +2,9 @@
 
 namespace Xfrocks\Api\Controller;
 
+use XF\Entity\UserAuth;
+use XF\Entity\UserGroup;
+use XF\InputFilterer;
 use XF\Mvc\ParameterBag;
 use XF\Util\Php;
 use XF\Validator\Email;
@@ -173,8 +176,202 @@ class User extends AbstractController
             '_user' => $user->toArray(),
             'token' => $accessToken
         ];
-        
+
         return $this->api($data);
+    }
+
+    public function actionPutIndex(ParameterBag $params)
+    {
+        $user = $this->assertViewableUser($params->user_id);
+
+        $params = $this
+            ->params()
+            ->define('password', 'str', 'data of the new password')
+            ->define('password_old', 'str', 'data of the existing password')
+            ->define('password_algo', 'str', 'algorithm used to encrypt the password and password_old parameters')
+            ->define('user_email', 'str', 'new email of the user')
+            ->define('username', 'str', 'new username of the user')
+            ->define('user_title', 'str', 'new custom title of the user')
+            ->define('primary_group_id', 'uint', 'id of new primary group')
+            ->define('secondary_group_ids', 'array-uint', 'array of ids of new secondary groups')
+            ->define('user_dob_day', 'uint', 'new date of birth (day) of the user')
+            ->define('user_dob_month', 'uint', 'new date of birth (month) of the user')
+            ->define('user_dob_year', 'uint', 'new date of birth (year) of the user')
+            ->define('fields', 'array', 'array of values for user fields');
+
+        $visitor = \XF::visitor();
+        $session = $this->session();
+
+        $isAdmin = $session->hasScope(Server::SCOPE_MANAGE_SYSTEM) && $visitor->hasAdminPermission('user');
+        $requiredAuth = 0;
+
+        if (!empty($params['password'])) {
+            $requiredAuth++;
+        }
+        if (!empty($params['user_email'])) {
+            $requiredAuth++;
+        }
+
+        if ($requiredAuth > 0) {
+            $isAuth = false;
+            if ($isAdmin && $visitor->user_id !== $user->user_id) {
+                $isAuth = true;
+            } elseif (!empty($params['password_old'])) {
+                /** @var \XF\Entity\UserAuth|null $userAuth */
+                $userAuth = $user->Auth;
+                if ($userAuth) {
+                    $passwordOld = Crypt::decrypt($params['password_old'], $params['password_algo']);
+                    $authHandler = $userAuth->getAuthenticationHandler();
+                    if ($authHandler && $authHandler->hasPassword() && $userAuth->authenticate($passwordOld)) {
+                        $isAuth = true;
+                    }
+                }
+            }
+
+            if (!$isAuth) {
+                return $this->error(\XF::phrase('bdapi_slash_users_requires_password_old'), 403);
+            }
+        }
+
+        if ($isAdmin) {
+            $user->setOption('admin_edit', true);
+        }
+
+        if (!empty($params['password'])) {
+            $password = Crypt::decrypt($params['password'], $params['password_algo']);
+            /** @var UserAuth $userAuth */
+            $userAuth = $user->getRelationOrDefault('Auth');
+            $userAuth->setPassword($password);
+        }
+
+        if (!empty($params['user_email'])) {
+            $user->email = $params['user_email'];
+            $options = $this->options();
+
+            if ($user->isChanged('email')
+                && $options->registrationSetup['emailConfirmation']
+            ) {
+                switch ($user->user_state) {
+                    case 'moderated':
+                    case 'email_confirm':
+                        $user->user_state = 'email_confirm';
+                        break;
+                    default:
+                        $user->user_state = 'email_confirm_edit';
+                }
+            }
+        }
+
+        if (!empty($params['username'])) {
+            $user->username = $params['username'];
+            if ($user->isChanged('username') && !$isAdmin) {
+                return $this->error(\XF::phrase('bdapi_slash_users_denied_username'), 403);
+            }
+        }
+
+        if ($this->request()->exists('user_title')) {
+            $user->custom_title = $params['user_title'];
+            if ($user->isChanged('custom_title')
+                && !$isAdmin
+            ) {
+                return $this->error(\XF::phrase('bdapi_slash_users_denied_user_title'), 403);
+            }
+        }
+
+        if ($params['primary_group_id'] > 0) {
+            /** @var UserGroup[] $userGroups */
+            $userGroups = $this->finder('XF:UserGroup')->fetch();
+
+            if (!isset($userGroups[$params['primary_group_id']])) {
+                return $this->notFound(\XF::phrase('requested_user_group_not_found'));
+            }
+
+            if (!empty($params['secondary_group_ids'])) {
+                foreach ($params['secondary_group_ids'] as $secondaryGroupId) {
+                    if (!isset($userGroups[$secondaryGroupId])) {
+                        return $this->notFound(\XF::phrase('requested_user_group_not_found'));
+                    }
+                }
+            }
+
+            $user->user_group_id = $params['primary_group_id'];
+
+            $secondaryGroupIds = $params['secondary_group_ids'];
+            $secondaryGroupIds = array_map('intval', $secondaryGroupIds);
+            $secondaryGroupIds = array_unique($secondaryGroupIds);
+            sort($secondaryGroupIds, SORT_NUMERIC);
+
+            $zeroKey = array_search(0, $secondaryGroupIds);
+            if ($zeroKey !== false) {
+                unset($secondaryGroupIds[$zeroKey]);
+            }
+
+            $user->secondary_group_ids = $secondaryGroupIds;
+        }
+
+        if (!empty($params['user_dob_day']) && !empty($params['user_dob_month']) && !empty($params['user_dob_year'])) {
+            $user->Profile->setDob($params['user_dob_day'], $params['user_dob_month'], $params['user_dob_year']);
+
+            $hasExistingDob = false;
+            $hasExistingDob = $hasExistingDob || !!$user->Profile->getExistingValue('dob_day');
+            $hasExistingDob = $hasExistingDob || !!$user->Profile->getExistingValue('dob_month');
+            $hasExistingDob = $hasExistingDob || !!$user->Profile->getExistingValue('dob_year');
+
+            if ($hasExistingDob
+                && (
+                    $user->Profile->isChanged('dob_day')
+                    || $user->Profile->isChanged('dob_month')
+                    || $user->Profile->isChanged('dob_year')
+                )
+                && !$isAdmin
+            ) {
+                return $this->error(\XF::phrase('bdapi_slash_users_denied_dob'), 403);
+            }
+        }
+
+        if (!empty($params['fields'])) {
+            $inputFilter = $this->app()->inputFilterer();
+            $profileFields = $inputFilter->filterArray($params['fields'], [
+                'about' => 'str',
+                'homepage' => 'str',
+                'location' => 'str',
+                'occupation' => 'str'
+            ]);
+
+            $user->Profile->bulkSet($profileFields);
+            $user->Profile->custom_fields->bulkSet($params['fields']);
+        }
+
+        $user->preSave();
+
+        if (!$isAdmin) {
+            if ($user->isChanged('user_group_id')
+                || $user->isChanged('secondary_group_ids')
+            ) {
+                return $this->error(\XF::phrase('bdapi_slash_users_denied_user_group'), 403);
+            }
+        }
+
+        $shouldSendEmailConfirmation = false;
+        if ($user->isChanged('email')
+            && in_array($user->user_state, ['email_confirm', 'email_confirm_edit'])
+        ) {
+            $shouldSendEmailConfirmation = true;
+        }
+        
+        if ($user->hasErrors()) {
+            return $this->error($user->getErrors());
+        }
+
+        $user->save();
+
+        if ($shouldSendEmailConfirmation) {
+            /** @var \XF\Service\User\EmailConfirmation $emailConfirmation */
+            $emailConfirmation = $this->service('XF:User\EmailConfirmation', $user);
+            $emailConfirmation->triggerConfirmation();
+        }
+
+        return $this->message(\XF::phrase('saved_changes'));
     }
 
     public function actionGetFields()
