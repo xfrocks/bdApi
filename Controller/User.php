@@ -8,6 +8,7 @@ use XF\Entity\UserGroup;
 use XF\InputFilterer;
 use XF\Mvc\ParameterBag;
 use XF\Service\User\Avatar;
+use XF\Service\User\Follow;
 use XF\Util\Php;
 use XF\Validator\Email;
 use Xfrocks\Api\Entity\Client;
@@ -487,7 +488,7 @@ class User extends AbstractController
     public function actionGetFollowers(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
-        
+
         /** @var \XF\Repository\UserFollow $userFollowRepo */
         $userFollowRepo = $this->repository('XF:UserFollow');
         $userFollowersFinder = $userFollowRepo->findFollowersForProfile($user);
@@ -513,6 +514,22 @@ class User extends AbstractController
         }
 
         return $this->api($data);
+    }
+
+    public function actionPostFollowers(ParameterBag $params)
+    {
+        $user = $this->assertViewableUser($params->user_id);
+
+        $visitor = \XF::visitor();
+        if (!$visitor->canFollowUser($user)) {
+            return $this->noPermission();
+        }
+
+        /** @var Follow $follow */
+        $follow = $this->service('XF:User\Follow', $user);
+        $follow->follow();
+
+        return $this->message(\XF::phrase('changes_saved'));
     }
 
     protected function actionSingle($userId)
