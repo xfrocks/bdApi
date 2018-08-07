@@ -618,7 +618,7 @@ class User extends AbstractController
         return $this->api($data);
     }
 
-    public function actionPostIgnored(ParameterBag $params)
+    public function actionPostIgnore(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
 
@@ -629,6 +629,21 @@ class User extends AbstractController
         /** @var Ignore $ignore */
         $ignore = $this->service('XF:User\Ignore', $user);
         $ignore->ignore();
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionDeleteIgnore(ParameterBag $params)
+    {
+        $user = $this->assertViewableUser($params->user_id);
+
+        if (!\XF::visitor()->canIgnoreUser($user, $error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var Ignore $ignore */
+        $ignore = $this->service('XF:User\Ignore', $user);
+        $ignore->unignore();
 
         return $this->message(\XF::phrase('changes_saved'));
     }
