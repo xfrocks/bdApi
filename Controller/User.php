@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Entity\UserAuth;
+use XF\Entity\UserFollow;
 use XF\Entity\UserGroup;
 use XF\InputFilterer;
 use XF\Mvc\ParameterBag;
@@ -481,6 +482,37 @@ class User extends AbstractController
         $avatar->deleteAvatar();
 
         return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionGetFollowers(ParameterBag $params)
+    {
+        $user = $this->assertViewableUser($params->user_id);
+        
+        /** @var \XF\Repository\UserFollow $userFollowRepo */
+        $userFollowRepo = $this->repository('XF:UserFollow');
+        $userFollowersFinder = $userFollowRepo->findFollowersForProfile($user);
+
+        if ($this->request()->exists('total')) {
+            $data = [
+                'users_total' => $userFollowersFinder->total()
+            ];
+
+            return $this->api($data);
+        }
+
+        $data = [
+            'users' => []
+        ];
+
+        /** @var UserFollow $userFollow */
+        foreach ($userFollowersFinder->fetch() as $userFollow) {
+            $data['users'][] = [
+                'user_id' => $userFollow->User->user_id,
+                'username' => $userFollow->User->username
+            ];
+        }
+
+        return $this->api($data);
     }
 
     protected function actionSingle($userId)
