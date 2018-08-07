@@ -6,6 +6,7 @@ use XF\Entity\UserAuth;
 use XF\Entity\UserFollow;
 use XF\Entity\UserGroup;
 use XF\InputFilterer;
+use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
 use XF\Service\User\Avatar;
 use XF\Service\User\Follow;
@@ -573,6 +574,43 @@ class User extends AbstractController
             $data['users'][] = [
                 'user_id' => $userFollow->FollowUser->user_id,
                 'username' => $userFollow->FollowUser->username
+            ];
+        }
+
+        return $this->api($data);
+    }
+
+    public function actionGetIgnored()
+    {
+        $this->assertRegistrationRequired();
+
+        $visitor = \XF::visitor();
+
+        /** @var Finder|null $finder */
+        $finder = null;
+        if ($visitor->Profile->ignored) {
+            $finder = $this->finder('XF:User')
+                ->where('user_id', array_keys($visitor->Profile->ignored))
+                ->order('username');
+        }
+
+        if ($this->request()->exists('total')) {
+            $data = [
+                'users_total' => $finder ? $finder->total() : 0
+            ];
+
+            return $this->api($data);
+        }
+
+        $data = [
+            'users' => []
+        ];
+
+        /** @var \XF\Entity\User $user */
+        foreach ($finder->fetch() as $user) {
+            $data['users'][] = [
+                'user_id' => $user->user_id,
+                'username' => $user->username
             ];
         }
 
