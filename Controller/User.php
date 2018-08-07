@@ -548,6 +548,37 @@ class User extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    public function actionGetFollowings(ParameterBag $params)
+    {
+        $user = $this->assertViewableUser($params->user_id);
+
+        /** @var \XF\Repository\UserFollow $userFollowRepo */
+        $userFollowRepo = $this->repository('XF:UserFollow');
+        $userFollowingFinder = $userFollowRepo->findFollowingForProfile($user);
+
+        if ($this->request()->exists('total')) {
+            $data = [
+                'users_total' => $userFollowingFinder->total()
+            ];
+
+            return $this->api($data);
+        }
+
+        $data = [
+            'users' => []
+        ];
+
+        /** @var UserFollow $userFollow */
+        foreach ($userFollowingFinder->fetch() as $userFollow) {
+            $data['users'][] = [
+                'user_id' => $userFollow->FollowUser->user_id,
+                'username' => $userFollow->FollowUser->username
+            ];
+        }
+
+        return $this->api($data);
+    }
+
     protected function actionSingle($userId)
     {
         $user = $this->assertViewableUser($userId);
