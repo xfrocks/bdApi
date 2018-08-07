@@ -6,6 +6,7 @@ use XF\Entity\UserAuth;
 use XF\Entity\UserGroup;
 use XF\InputFilterer;
 use XF\Mvc\ParameterBag;
+use XF\Service\User\Avatar;
 use XF\Util\Php;
 use XF\Validator\Email;
 use Xfrocks\Api\Entity\Client;
@@ -358,7 +359,7 @@ class User extends AbstractController
         ) {
             $shouldSendEmailConfirmation = true;
         }
-        
+
         if ($user->hasErrors()) {
             return $this->error($user->getErrors());
         }
@@ -430,6 +431,37 @@ class User extends AbstractController
     public function actionGetMe()
     {
         return $this->actionGetIndex($this->buildParamsForVisitor());
+    }
+
+    public function actionPostAvatar(ParameterBag $params)
+    {
+        $user = $this->assertViewableUser($params->user_id);
+
+        $params = $this
+            ->params()
+            ->define('avatar', 'file', 'binary data of the avatar');
+
+        if ($user->user_id !== \XF::visitor()->user_id) {
+            return $this->noPermission();
+        }
+
+        if (!$user->canUploadAvatar()) {
+            return $this->noPermission();
+        }
+
+        if (empty($params['avatar'])) {
+            return $this->error(\XF::phrase('bdapi_requires_upload_x', [
+                'field' => 'avatar'
+            ]), 400);
+        }
+
+        /** @var Avatar $avatar */
+        $avatar = $this->service('XF:User\Avatar', $user);
+        $avatar->setImageFromUpload($params['avatar']);
+
+        $avatar->updateAvatar();
+
+        return $this->message(\XF::phrase('upload_completed_successfully'));
     }
 
     protected function actionSingle($userId)
