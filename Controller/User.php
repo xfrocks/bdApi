@@ -10,6 +10,7 @@ use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
 use XF\Service\User\Avatar;
 use XF\Service\User\Follow;
+use XF\Service\User\Ignore;
 use XF\Util\Php;
 use XF\Validator\Email;
 use Xfrocks\Api\Entity\Client;
@@ -615,6 +616,21 @@ class User extends AbstractController
         }
 
         return $this->api($data);
+    }
+
+    public function actionPostIgnored(ParameterBag $params)
+    {
+        $user = $this->assertViewableUser($params->user_id);
+
+        if (!\XF::visitor()->canIgnoreUser($user, $error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var Ignore $ignore */
+        $ignore = $this->service('XF:User\Ignore', $user);
+        $ignore->ignore();
+
+        return $this->message(\XF::phrase('changes_saved'));
     }
 
     protected function actionSingle($userId)
