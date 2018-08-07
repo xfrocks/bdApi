@@ -720,6 +720,31 @@ class User extends AbstractController
         return $this->api($data);
     }
 
+    public function actionGetTimeline(ParameterBag $params)
+    {
+        $user = $this->assertViewableUser($params->user_id);
+        if (!$user->canViewProfilePosts($error)) {
+            return $this->noPermission($error);
+        }
+
+        return $this->rerouteController('Xfrocks\Api:Search', 'user-timeline', $params);
+    }
+    
+    public function actionPostTimeline(ParameterBag $params)
+    {
+        return $this->rerouteController('Xfrocks\Api:ProfilePost', 'post-index', $params);
+    }
+
+    public function actionGetMeTimeline()
+    {
+        return $this->actionGetTimeline($this->buildParamsForVisitor());
+    }
+
+    public function actionPostMeTimeline()
+    {
+        return $this->actionPostTimeline($this->buildParamsForVisitor());
+    }
+
     protected function actionSingle($userId)
     {
         $user = $this->assertViewableUser($userId);
