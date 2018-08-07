@@ -648,6 +648,48 @@ class User extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    public function actionGetGroups(ParameterBag $params)
+    {
+        if ($params->user_id) {
+            $user = $this->assertViewableUser($params->user_id);
+
+            $userGroupIds = $user->secondary_group_ids;
+            $userGroupIds[] = $user->user_group_id;
+
+            $finder = $this->finder('XF:UserGroup');
+            $finder->whereIds($userGroupIds);
+        } else {
+            $this->assertApiScope(Server::SCOPE_MANAGE_SYSTEM);
+            if (!\XF::visitor()->hasAdminPermission('user')) {
+                return $this->noPermission();
+            }
+
+            $user = null;
+            $finder = $this->finder('XF:UserGroup');
+        }
+
+        $this->params()->getTransformContext()->onTransformedCallbacks[] = function ($context, array &$data) use($user) {
+            $source = $context->getSource();
+            if (!($source instanceof UserGroup)) {
+                return;
+            }
+
+            if ($user) {
+                $data['is_primary_group'] = $source->user_group_id == $user->user_group_id;
+            }
+        };
+
+        $data = [
+            'user_groups' => $this->transformFinderLazily($finder)
+        ];
+
+        if (!empty($user)) {
+            $data['user_id'] = $user->user_id;
+        }
+
+        return $this->api($data);
+    }
+
     protected function actionSingle($userId)
     {
         $user = $this->assertViewableUser($userId);
