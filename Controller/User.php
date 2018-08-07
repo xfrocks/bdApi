@@ -457,6 +457,11 @@ class User extends AbstractController
         return $this->actionGetFollowers($this->buildParamsForVisitor());
     }
 
+    public function actionGetMeFollowings()
+    {
+        return $this->actionGetFollowings($this->buildParamsForVisitor());
+    }
+
     public function actionPostAvatar(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
