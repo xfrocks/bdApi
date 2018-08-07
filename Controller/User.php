@@ -464,6 +464,25 @@ class User extends AbstractController
         return $this->message(\XF::phrase('upload_completed_successfully'));
     }
 
+    public function actionDeleteAvatar(ParameterBag $params)
+    {
+        $user = $this->assertViewableUser($params->user_id);
+
+        if ($user->user_id != \XF::visitor()->user_id) {
+            return $this->noPermission();
+        }
+
+        if (!$user->canUploadAvatar()) {
+            return $this->noPermission();
+        }
+
+        /** @var Avatar $avatar */
+        $avatar = $this->service('XF:User\Avatar', $user);
+        $avatar->deleteAvatar();
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
     protected function actionSingle($userId)
     {
         $user = $this->assertViewableUser($userId);
