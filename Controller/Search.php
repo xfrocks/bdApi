@@ -101,6 +101,31 @@ class Search extends AbstractController
         return $this->rerouteController(__CLASS__, 'getResults', ['search_id' => $search->search_id]);
     }
 
+    public function actionUserTimeline(ParameterBag $params)
+    {
+        /** @var \XF\Entity\User $user */
+        $user = $this->assertRecordExists('XF:User', $params->user_id, [], 'requested_user_not_found');
+
+        $searcher = $this->app->search();
+        $query = $searcher->getQuery();
+        $query->byUserId($user->user_id)
+            ->orderedBy('date');
+
+        /** @var \XF\Repository\Search $searchRepo */
+        $searchRepo = $this->repository('XF:Search');
+        $search = $searchRepo->runSearch($query, [
+            'users' => $user->username
+        ], false);
+
+        if (!$search) {
+            return $this->message(\XF::phrase('no_results_found'));
+        }
+        
+        return $this->rerouteController(__CLASS__, 'get-results', [
+            'search_id' => $search->search_id
+        ]);
+    }
+
     /**
      * @param int $searchId
      * @param array $extraWith
