@@ -532,6 +532,22 @@ class User extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    public function actionDeleteFollowers(ParameterBag $params)
+    {
+        $user = $this->assertViewableUser($params->user_id);
+
+        $visitor = \XF::visitor();
+        if (!$visitor->canFollowUser($user)) {
+            return $this->noPermission();
+        }
+
+        /** @var Follow $follow */
+        $follow = $this->service('XF:User\Follow', $user);
+        $follow->unfollow();
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
     protected function actionSingle($userId)
     {
         $user = $this->assertViewableUser($userId);
