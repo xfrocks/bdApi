@@ -400,6 +400,7 @@ class Server
         $session = new SessionEntity($authorizationServer);
         $session->setOwner(SessionStorage::OWNER_TYPE_USER, $userId);
 
+        /** @var \League\OAuth2\Server\Entity\ClientEntity $libClient */
         $libClient = $authorizationServer->getClientStorage()->get($client->client_id);
         $session->associateClient($libClient);
 

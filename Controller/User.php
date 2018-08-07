@@ -58,7 +58,7 @@ class User extends AbstractController
     {
         $params = $this
             ->params()
-            ->define('user_email','str', 'email of the new user')
+            ->define('user_email', 'str', 'email of the new user')
             ->define('username', 'str', 'username of the new user')
             ->define('password', 'str', 'password of the new user')
             ->define('password_algo', 'str', 'algorithm used to encrypt the password parameter')
@@ -153,8 +153,7 @@ class User extends AbstractController
         $registration->setFromInput($input);
         $registration->checkForSpam();
 
-        if (!$registration->validate($errors))
-        {
+        if (!$registration->validate($errors)) {
             return $this->error($errors);
         }
 
@@ -318,9 +317,11 @@ class User extends AbstractController
             $user->Profile->setDob($params['user_dob_day'], $params['user_dob_month'], $params['user_dob_year']);
 
             $hasExistingDob = false;
-            $hasExistingDob = $hasExistingDob || !!$user->Profile->getExistingValue('dob_day');
-            $hasExistingDob = $hasExistingDob || !!$user->Profile->getExistingValue('dob_month');
-            $hasExistingDob = $hasExistingDob || !!$user->Profile->getExistingValue('dob_year');
+            if (!!$user->Profile->getExistingValue('dob_day')
+                || !!$user->Profile->getExistingValue('dob_month')
+                || !!$user->Profile->getExistingValue('dob_year')) {
+                $hasExistingDob = true;
+            }
 
             if ($hasExistingDob
                 && (
@@ -698,7 +699,7 @@ class User extends AbstractController
             $finder = $this->finder('XF:UserGroup');
         }
 
-        $this->params()->getTransformContext()->onTransformedCallbacks[] = function ($context, array &$data) use($user) {
+        $this->params()->getTransformContext()->onTransformedCallbacks[] = function ($context, array &$data) use ($user) {
             $source = $context->getSource();
             if (!($source instanceof UserGroup)) {
                 return;

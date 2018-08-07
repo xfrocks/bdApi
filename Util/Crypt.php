@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Util;
 
 use XF\PrintableException;
+use Xfrocks\Api\Entity\Token;
 
 class Crypt
 {
@@ -26,10 +27,20 @@ class Crypt
 
         switch ($algo) {
             case self::ALGO_AES_128:
-                $encrypted = base64_encode(self::aes128Encrypt($data, $key));
+                $data = self::aes128Encrypt($data, $key);
+                if (!$data) {
+                    throw new \InvalidArgumentException('Cannot encrypt data');
+                }
+
+                $encrypted = base64_encode($data);
                 break;
             case self::ALGO_AES_256:
-                $encrypted = base64_encode(self::aes256Encrypt($data, $key));
+                $data = self::aes256Encrypt($data, $key);
+                if (!$data) {
+                    throw new \InvalidArgumentException('Cannot encrypt data');
+                }
+
+                $encrypted = base64_encode($data);
                 break;
             default:
                 $encrypted = $data;
@@ -44,12 +55,17 @@ class Crypt
             $key = self::getKey();
         }
 
+        $data = base64_decode($data);
+        if (!$data) {
+            throw new \InvalidArgumentException('Cannot decrypt data.');
+        }
+
         switch ($algo) {
             case self::ALGO_AES_128:
-                $decrypted = self::aes128Decrypt(base64_decode($data), $key);
+                $decrypted = self::aes128Decrypt($data, $key);
                 break;
             case self::ALGO_AES_256:
-                $decrypted = self::aes256Decrypt(base64_decode($data), $key);
+                $decrypted = self::aes256Decrypt($data, $key);
                 break;
             default:
                 $decrypted = $data;
@@ -68,7 +84,7 @@ class Crypt
     public static function decryptTypeOne($data, $timestamp)
     {
         if ($timestamp < \XF::$time) {
-            throw new \InvalidArgumentException('$timestamp has expired', false);
+            throw new \InvalidArgumentException('$timestamp has expired');
         }
 
         $algo = self::getDefaultAlgo();
@@ -78,9 +94,19 @@ class Crypt
 
     protected static function getKey()
     {
-        /* @var $session \Xfrocks\Api\XF\Session\Session */
+        /* @var \Xfrocks\Api\XF\Session\Session $session */
         $session = \XF::app()->session();
-        $clientSecret = $session->getToken() ? $session->getToken()->Client->client_secret : null;
+        $callable = [$session, 'getToken'];
+
+        $clientSecret = null;
+        if (is_callable($callable)) {
+            /** @var Token|null $token */
+            $token = call_user_func($callable);
+            if ($token) {
+                $clientSecret = $token->Client->client_secret;
+            }
+        }
+
         if (empty($clientSecret)) {
             throw new PrintableException(\XF::phrase('bdapi_request_must_authorize_to_encrypt'));
         }
@@ -95,24 +121,12 @@ class Crypt
      *
      * @param string $data
      * @param string $key
-     * @return string
+     * @return string|false
      */
     protected static function aes128Encrypt($data, $key)
     {
-        if (function_exists('openssl_encrypt')) {
-            $key = md5($key, true);
-            return openssl_encrypt($data, self::OPENSSL_METHOD_AES128, $key, self::OPENSSL_OPT_RAW_DATA);
-        }
-
-        if (function_exists('mcrypt_encrypt')) {
-            $key = md5($key, true);
-            $padding = 16 - (strlen($data) % 16);
-            $data .= str_repeat(chr($padding), $padding);
-            /** @noinspection PhpDeprecationInspection */
-            return mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_ECB);
-        }
-
-        throw new \RuntimeException('Cannot encrypt data');
+        $key = md5($key, true);
+        return openssl_encrypt($data, self::OPENSSL_METHOD_AES128, $key, self::OPENSSL_OPT_RAW_DATA);
     }
 
     /**
@@ -122,24 +136,12 @@ class Crypt
      *
      * @param string $data
      * @param string $key
-     * @return string
+     * @return string|false
      */
     protected static function aes128Decrypt($data, $key)
     {
-        if (function_exists('openssl_decrypt')) {
-            $key = md5($key, true);
-            return openssl_decrypt($data, self::OPENSSL_METHOD_AES128, $key, self::OPENSSL_OPT_RAW_DATA);
-        }
-
-        if (function_exists('mcrypt_decrypt')) {
-            $key = md5($key, true);
-            /** @noinspection PhpDeprecationInspection */
-            $data = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_ECB);
-            $padding = ord($data[strlen($data) - 1]);
-            return substr($data, 0, -$padding);
-        }
-
-        throw new \RuntimeException('Cannot decrypt data');
+        $key = md5($key, true);
+        return openssl_decrypt($data, self::OPENSSL_METHOD_AES128, $key, self::OPENSSL_OPT_RAW_DATA);
     }
 
     /**
@@ -152,15 +154,19 @@ class Crypt
      */
     protected static function aes256Encrypt($data, $key)
     {
-        if (function_exists('mb_substr') && function_exists('openssl_encrypt')) {
-            $ivLength = openssl_cipher_iv_length(self::OPENSSL_METHOD_AES256);
-            $iv = openssl_random_pseudo_bytes($ivLength);
-            $encrypted = openssl_encrypt($data, self::OPENSSL_METHOD_AES256, $key, self::OPENSSL_OPT_RAW_DATA, $iv);
-
-            return self::ALGO_AES_256 . $iv . $encrypted;
+        $ivLength = openssl_cipher_iv_length(self::OPENSSL_METHOD_AES256);
+        if ($ivLength === false) {
+            throw new \InvalidArgumentException('Cannot encrypt data');
         }
 
-        throw new \RuntimeException('Cannot encrypt data');
+        $iv = openssl_random_pseudo_bytes($ivLength);
+        if ($iv === false) {
+            throw new \InvalidArgumentException('Cannot encrypt data');
+        }
+
+        $encrypted = openssl_encrypt($data, self::OPENSSL_METHOD_AES256, $key, self::OPENSSL_OPT_RAW_DATA, $iv);
+
+        return self::ALGO_AES_256 . $iv . $encrypted;
     }
 
     /**
@@ -169,22 +175,28 @@ class Crypt
      *
      * @param string $data
      * @param string $key
-     * @return string
+     * @return string|false
      */
     protected static function aes256Decrypt($data, $key)
     {
-        if (function_exists('mb_substr') && function_exists('openssl_encrypt')) {
-            $prefixLength = mb_strlen(self::ALGO_AES_256, '8bit');
-            $prefix = mb_substr($data, 0, $prefixLength);
-            if ($prefix === self::ALGO_AES_256) {
-                $ivLength = openssl_cipher_iv_length(self::OPENSSL_METHOD_AES256);
-                $iv = mb_substr($data, $prefixLength, $ivLength, '8bit');
-                $encrypted = mb_substr($data, $prefixLength + $ivLength, null, '8bit');
-
-                return openssl_decrypt($encrypted, self::OPENSSL_METHOD_AES256, $key, self::OPENSSL_OPT_RAW_DATA, $iv);
-            }
+        $prefixLength = mb_strlen(self::ALGO_AES_256, '8bit');
+        if ($prefixLength === false) {
+            throw new \InvalidArgumentException('Cannot decrypt data');
         }
 
-        throw new \RuntimeException('Cannot decrypt data');
+        $prefix = mb_substr($data, 0, $prefixLength);
+        if ($prefix === self::ALGO_AES_256) {
+            $ivLength = openssl_cipher_iv_length(self::OPENSSL_METHOD_AES256);
+            if ($ivLength === false) {
+                throw new \InvalidArgumentException('Cannot decrypt data');
+            }
+
+            $iv = mb_substr($data, $prefixLength, $ivLength, '8bit');
+            $encrypted = mb_substr($data, $prefixLength + $ivLength, null, '8bit');
+
+            return openssl_decrypt($encrypted, self::OPENSSL_METHOD_AES256, $key, self::OPENSSL_OPT_RAW_DATA, $iv);
+        }
+
+        return false;
     }
 }
