@@ -287,13 +287,13 @@ class User extends AbstractController
             $userGroups = $this->finder('XF:UserGroup')->fetch();
 
             if (!isset($userGroups[$params['primary_group_id']])) {
-                return $this->notFound(\XF::phrase('requested_user_group_not_found'));
+                return $this->notFound(\XF::phrase('bdapi_requested_user_group_not_found'));
             }
 
             if (!empty($params['secondary_group_ids'])) {
                 foreach ($params['secondary_group_ids'] as $secondaryGroupId) {
                     if (!isset($userGroups[$secondaryGroupId])) {
-                        return $this->notFound(\XF::phrase('requested_user_group_not_found'));
+                        return $this->notFound(\XF::phrase('bdapi_requested_user_group_not_found'));
                     }
                 }
             }
@@ -377,7 +377,7 @@ class User extends AbstractController
             $emailConfirmation->triggerConfirmation();
         }
 
-        return $this->message(\XF::phrase('saved_changes'));
+        return $this->message(\XF::phrase('changes_saved'));
     }
 
     public function actionGetFields()

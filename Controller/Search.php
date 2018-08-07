@@ -120,7 +120,7 @@ class Search extends AbstractController
         if (!$search) {
             return $this->message(\XF::phrase('no_results_found'));
         }
-        
+
         return $this->rerouteController(__CLASS__, 'get-results', [
             'search_id' => $search->search_id
         ]);
