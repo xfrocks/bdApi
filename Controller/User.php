@@ -177,7 +177,6 @@ class User extends AbstractController
 
         $data = [
             'user' => $this->transformEntityLazily($user),
-            '_user' => $user->toArray(),
             'token' => $accessToken
         ];
 
