@@ -33,9 +33,7 @@ class User extends AbstractController
 
         /** @var \XF\Finder\User $finder */
         $finder = $this->finder('XF:User');
-        $finder->with('Option', true);
-        $finder->with('Profile', true);
-
+        
         $finder->isValidUser();
         $finder->order('user_id');
 
