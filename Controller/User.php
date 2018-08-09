@@ -134,14 +134,14 @@ class User extends AbstractController
             $registration->setNoPassword();
         }
 
-        $allowEmailConfirm = true;
+        $skipEmailConfirmation = false;
         if (!empty($extraData['user_email'])
             && $extraData['user_email'] == $input['email']
         ) {
-            $allowEmailConfirm = false;
+            $skipEmailConfirmation = true;
         }
 
-        $registration->skipEmailConfirmation(!$allowEmailConfirm);
+        $registration->skipEmailConfirmation($skipEmailConfirmation);
 
         $visitor = \XF::visitor();
         if ($visitor->hasAdminPermission('user')
