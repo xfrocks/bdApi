@@ -16,6 +16,7 @@ use XF\Validator\Email;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\Entity\Token;
 use Xfrocks\Api\OAuth2\Server;
+use Xfrocks\Api\Transformer;
 use Xfrocks\Api\Util\Crypt;
 use Xfrocks\Api\Util\PageNav;
 
@@ -33,7 +34,7 @@ class User extends AbstractController
 
         /** @var \XF\Finder\User $finder */
         $finder = $this->finder('XF:User');
-        
+
         $finder->isValidUser();
         $finder->order('user_id');
 
@@ -379,12 +380,19 @@ class User extends AbstractController
 
     public function actionGetFields()
     {
-        $finder = $this->finder('XF:UserField');
+        $app = $this->app;
 
-        $userFields = $this->transformFinderLazily($finder);
+        /** @var \XF\CustomField\DefinitionSet $definitionSet */
+        $definitionSet = $app->container('customFields.users');
+
+        /** @var Transformer $transformer */
+        $transformer = $app->container('api.transformer');
+
+        $context = $this->params()->getTransformContext();
+        $fields = $transformer->transformCustomFieldDefinitionSet($context, $definitionSet, '');
 
         $data = [
-            'fields' => $userFields
+            'fields' => $fields
         ];
 
         return $this->api($data);
