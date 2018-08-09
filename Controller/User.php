@@ -473,7 +473,7 @@ class User extends AbstractController
 
         $params = $this
             ->params()
-            ->define('avatar', 'file', 'binary data of the avatar');
+            ->defineFile('avatar', 'binary data of the avatar');
 
         if ($user->user_id !== \XF::visitor()->user_id) {
             return $this->noPermission();
