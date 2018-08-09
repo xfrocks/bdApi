@@ -115,10 +115,6 @@ class Crypt
     }
 
     /**
-     * Legacy AES 128 encryption.
-     * Supports both OpenSSL and mcrypt.
-     * Warning: This method is insecure and potentially dangerous, should be avoided for new application.
-     *
      * @param string $data
      * @param string $key
      * @return string|false
@@ -130,10 +126,6 @@ class Crypt
     }
 
     /**
-     * Legacy AES 128 decryption.
-     * Supports both OpenSSL and mcrypt.
-     * Warning: This method is insecure and potentially dangerous, should be avoided for new application.
-     *
      * @param string $data
      * @param string $key
      * @return string|false
@@ -145,9 +137,6 @@ class Crypt
     }
 
     /**
-     * Secure AES 256 encryption.
-     * This method only supports OpenSSL (unlike the AES 128 variant which also supports mcrypt).
-     *
      * @param string $data
      * @param string $key
      * @return string
@@ -170,9 +159,6 @@ class Crypt
     }
 
     /**
-     * Secure AES 256 decryption.
-     * This method only supports OpenSSL (unlike the AES 128 variant which also supports mcrypt).
-     *
      * @param string $data
      * @param string $key
      * @return string|false
