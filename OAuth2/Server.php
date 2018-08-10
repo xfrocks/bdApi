@@ -200,6 +200,20 @@ class Server
     }
 
     /**
+     * @return string[]
+     */
+    public function getScopeDefaults()
+    {
+        $scopes = [];
+        $scopes[] = Server::SCOPE_READ;
+        $scopes[] = Server::SCOPE_POST;
+        $scopes[] = Server::SCOPE_MANAGE_ACCOUNT_SETTINGS;
+        $scopes[] = Server::SCOPE_PARTICIPATE_IN_CONVERSATIONS;
+
+        return $scopes;
+    }
+
+    /**
      * @param string $scopeId
      * @return null|\XF\Phrase
      */
@@ -359,6 +373,7 @@ class Server
      * @return array
      * @throws \XF\Mvc\Reply\Exception
      * @throws \League\OAuth2\Server\Exception\InvalidGrantException
+     * @throws \XF\PrintableException
      */
     public function grantFinalize($controller)
     {
@@ -379,6 +394,15 @@ class Server
                     $request->set('password', $decryptedPassword);
                     $request->set('password_algo', '');
                 }
+            }
+        }
+
+        $grantType = $request->get('grant_type');
+        if ($grantType === 'password') {
+            $scope = $request->get('scope');
+            if (empty($scope)) {
+                $scopeDefaults = implode(' ', $this->getScopeDefaults());
+                $request->set('scope', $scopeDefaults);
             }
         }
 

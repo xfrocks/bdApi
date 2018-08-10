@@ -166,11 +166,7 @@ class User extends AbstractController
 
         /** @var Server $apiServer */
         $apiServer = $this->app->container('api.server');
-        $scopes = [];
-        $scopes[] = Server::SCOPE_READ;
-        $scopes[] = Server::SCOPE_POST;
-        $scopes[] = Server::SCOPE_MANAGE_ACCOUNT_SETTINGS;
-        $scopes[] = Server::SCOPE_PARTICIPATE_IN_CONVERSATIONS;
+        $scopes = $apiServer->getScopeDefaults();
 
         $accessToken = $apiServer->newAccessToken(strval($user->user_id), $client, $scopes);
 
