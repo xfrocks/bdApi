@@ -1,0 +1,1 @@
+Request must be authorized to encrypt data.

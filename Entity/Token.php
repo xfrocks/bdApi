@@ -19,6 +19,7 @@ use XF\Mvc\Entity\Structure;
  *
  * RELATIONS
  * @property \XF\Entity\User User
+ * @property Client|null Client
  */
 class Token extends TokenWithScope
 {
@@ -44,6 +45,12 @@ class Token extends TokenWithScope
                 'entity' => 'XF:User',
                 'type' => self::TO_ONE,
                 'conditions' => 'user_id',
+                'primary' => true
+            ],
+            'Client' => [
+                'entity' => 'Xfrocks\Api:Client',
+                'type' => self::TO_ONE,
+                'conditions' => 'client_id',
                 'primary' => true
             ]
         ];

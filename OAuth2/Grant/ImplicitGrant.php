@@ -3,9 +3,7 @@
 namespace Xfrocks\Api\OAuth2\Grant;
 
 use League\OAuth2\Server\Entity\AccessTokenEntity;
-use League\OAuth2\Server\Entity\SessionEntity;
 use League\OAuth2\Server\Grant\AbstractGrant;
-use League\OAuth2\Server\Util\SecureKey;
 
 class ImplicitGrant extends AbstractGrant
 {
@@ -13,27 +11,13 @@ class ImplicitGrant extends AbstractGrant
 
     protected $responseType = 'token';
 
-    public function authorize($type, $typeId, $authParams = [])
+    /**
+     * @param AccessTokenEntity $accessToken
+     * @param array $authParams
+     * @return mixed|string
+     */
+    public function authorize($accessToken, $authParams = [])
     {
-        // Create a new session
-        $session = new SessionEntity($this->server);
-        $session->setOwner($type, $typeId);
-        $session->associateClient($authParams['client']);
-
-        // Generate the access token
-        $accessToken = new AccessTokenEntity($this->server);
-        $accessToken->setId(SecureKey::generate());
-        $accessToken->setExpireTime($this->getAccessTokenTTL() + time());
-
-        foreach ($authParams['scopes'] as $scope) {
-            $session->associateScope($scope);
-            $accessToken->associateScope($scope);
-        }
-
-        $session->save();
-        $accessToken->setSession($session);
-        $accessToken->save();
-
         $redirectUri = $authParams['redirect_uri'];
 
         $queryDelimiter = '#';

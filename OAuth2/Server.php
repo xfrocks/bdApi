@@ -4,12 +4,15 @@ namespace Xfrocks\Api\OAuth2;
 
 use League\OAuth2\Server\AbstractServer;
 use League\OAuth2\Server\AuthorizationServer;
+use League\OAuth2\Server\Entity\AccessTokenEntity;
 use League\OAuth2\Server\Entity\ScopeEntity;
+use League\OAuth2\Server\Entity\SessionEntity;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 use League\OAuth2\Server\Grant\PasswordGrant;
 use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\ResourceServer;
+use League\OAuth2\Server\Util\SecureKey;
 use Symfony\Component\HttpFoundation\Request;
 use XF\Container;
 use XF\Mvc\Controller;
@@ -311,30 +314,34 @@ class Server
         /** @var AuthorizationServer $authorizationServer */
         $authorizationServer = $this->container['server.auth'];
 
-        if (isset($params['client'])) {
-            /** @var Client $xfClient */
-            $xfClient = $params['client'];
-            $params['client'] = $authorizationServer->getClientStorage()->get($xfClient->client_id);
-        }
-
-        if (isset($params['scopes'])) {
-            $scopes = $params['scopes'];
-            $params['scopes'] = $this->getScopeObjArrayFromStrArray($scopes, $authorizationServer);
-        }
-
-        $type = SessionStorage::OWNER_TYPE_USER;
-        $typeId = $this->app->session()->get(SessionStorage::SESSION_KEY_USER_ID);
+        $userId = $this->app->session()->get(SessionStorage::SESSION_KEY_USER_ID);
         $responseType = isset($params['response_type']) ? $params['response_type'] : 'code';
         switch ($responseType) {
             case 'code':
                 /** @var AuthCodeGrant $authCodeGrant */
                 $authCodeGrant = $authorizationServer->getGrantType('authorization_code');
-                $redirectUri = $authCodeGrant->newAuthorizeRequest($type, $typeId, $params);
+                $authCodeType = SessionStorage::OWNER_TYPE_USER;
+                $authCodeTypeId = $userId;
+                $authCodeParams = $params;
+
+                if (isset($authCodeParams['client'])) {
+                    /** @var Client $xfClient */
+                    $xfClient = $authCodeParams['client'];
+                    $authCodeParams['client'] = $authorizationServer->getClientStorage()->get($xfClient->client_id);
+                }
+
+                if (isset($authCodeParams['scopes'])) {
+                    $scopes = $authCodeParams['scopes'];
+                    $authCodeParams['scopes'] = $this->getScopeObjArrayFromStrArray($scopes, $authorizationServer);
+                }
+
+                $redirectUri = $authCodeGrant->newAuthorizeRequest($authCodeType, $authCodeTypeId, $authCodeParams);
                 break;
             case 'token':
+                $accessToken = $this->newAccessToken($userId, $params['client'], $params['scopes']);
                 /** @var ImplicitGrant $implicitGrant */
                 $implicitGrant = $authorizationServer->getGrantType('implicit');
-                $redirectUri = $implicitGrant->authorize($type, $typeId, $params);
+                $redirectUri = $implicitGrant->authorize($accessToken, $params);
                 break;
             default:
                 throw new \League\OAuth2\Server\Exception\UnsupportedResponseTypeException(
@@ -376,6 +383,43 @@ class Server
 
             throw $this->buildControllerException($controller, $e);
         }
+    }
+
+    /**
+     * @param string $userId
+     * @param Client $client
+     * @param string[] $scopes
+     * @return AccessTokenEntity
+     */
+    public function newAccessToken($userId, $client, array $scopes)
+    {
+        /** @var AuthorizationServer $authorizationServer */
+        $authorizationServer = $this->container['server.auth'];
+
+        // Create a new session
+        $session = new SessionEntity($authorizationServer);
+        $session->setOwner(SessionStorage::OWNER_TYPE_USER, $userId);
+
+        /** @var \League\OAuth2\Server\Entity\ClientEntity $libClient */
+        $libClient = $authorizationServer->getClientStorage()->get($client->client_id);
+        $session->associateClient($libClient);
+
+        // Generate the access token
+        $accessToken = new AccessTokenEntity($authorizationServer);
+        $accessToken->setId(SecureKey::generate());
+        $accessToken->setExpireTime($this->getOptionAccessTokenTTL() + time());
+
+        $libScopes = $this->getScopeObjArrayFromStrArray($scopes, $authorizationServer);
+        foreach ($libScopes as $libScope) {
+            $session->associateScope($libScope);
+            $accessToken->associateScope($libScope);
+        }
+
+        $session->save();
+        $accessToken->setSession($session);
+        $accessToken->save();
+
+        return $accessToken;
     }
 
     /**

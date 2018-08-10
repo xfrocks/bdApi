@@ -125,6 +125,12 @@
         "version_string": "2.0.0 Alpha 1",
         "hash": "7da2f3cf0c8413bc87aa5bf34b78bdaa"
     },
+    "bdapi_request_must_authorize_to_encrypt.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "669f8e35dd1f369ace5dae1b997aa438"
+    },
     "bdapi_requested_client_not_found.txt": {
         "global_cache": false,
         "version_id": 2000000,
@@ -136,6 +142,18 @@
         "version_id": 2000000,
         "version_string": "2.0.0",
         "hash": "4fe90555d2b744eb298b1a50278fb07e"
+    },
+    "bdapi_requested_user_group_not_found.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "a278c25ca3bf991b13b91787fcf9377e"
+    },
+    "bdapi_requires_upload_x.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "cb4f4ba5151dea146ab0c89f352d750c"
     },
     "bdapi_scope_admincp.txt": {
         "global_cache": false,
@@ -178,6 +196,36 @@
         "version_id": 2000012,
         "version_string": "2.0.0 Alpha 2",
         "hash": "6bd7463cea5befd13d46ff23867efb1b"
+    },
+    "bdapi_slash_users_denied_dob.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "38ce5361fa0db71f443bd15d9a0b52e8"
+    },
+    "bdapi_slash_users_denied_user_group.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "612f94d29c40c7c079e0adf58b80cdd4"
+    },
+    "bdapi_slash_users_denied_user_title.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "25406015c61f1038abb3e4b799bda72d"
+    },
+    "bdapi_slash_users_denied_username.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "b25f974a4dc3f39dabdeddecc00f4bbf"
+    },
+    "bdapi_slash_users_requires_password_old.txt": {
+        "global_cache": false,
+        "version_id": 2000012,
+        "version_string": "2.0.0 Alpha 2",
+        "hash": "da72b878e0cc6a6c185793da2e1291c4"
     },
     "bdapi_whitelisted_domains.txt": {
         "global_cache": false,
