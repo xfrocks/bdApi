@@ -940,7 +940,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             }
 
             if (!empty($latestPostIds)) {
-                $threadData['latest_posts'] = array();
+                $threadData['_latestPosts'] = array();
                 foreach ($posts as $post) {
                     if ($post['thread_id'] != $threadRef['thread_id']) {
                         continue;
@@ -952,9 +952,14 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                         continue;
                     }
 
-                    $threadData['latest_posts'][] = $this->_getPostModel()
-                        ->prepareApiDataForPost($post, $threadRef, $forumRef);
+                    $threadData['_latestPosts'][$post['post_id']] = $post;
                 }
+
+                $threadData['latest_posts'] = $this->_getPostModel()->prepareApiDataForPosts(
+                    $threadData['_latestPosts'],
+                    $threadRef,
+                    $forumRef
+                );
             } elseif (!empty($lastPostIds)
                 && isset($posts[$threadRef['last_post_id']])
             ) {
