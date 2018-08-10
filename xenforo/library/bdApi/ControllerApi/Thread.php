@@ -904,7 +904,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
             if ((!empty($firstPostIds) && !$this->_isFieldExcluded('first_post.attachments'))
                 || (!empty($lastPostIds) && !$this->_isFieldExcluded('last_post.attachments'))
-                || (!empty($latestPostIds) && !$this->_isFieldExcluded('latest_posts.*.attachments'))
+                || (!empty($latestPostIds) && !$this->_isFieldExcluded('latest_posts.attachments'))
             ) {
                 $posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
             }

@@ -258,7 +258,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
      * This method name had been prefixed with "_" before it was updated to public visibility.
      * The name is kept for backward compatibility.
      *
-     * @param $field
+     * @param string $field
      * @param array $prefixes
      * @param bool $hasChild
      * @return bool
@@ -270,6 +270,8 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         if (!($this->_fieldsFilterType & self::FIELDS_FILTER_INCLUDE)) {
             return false;
         }
+
+        $this->_prepareFieldAndPrefixes($field, $prefixes);
 
         $pattern = $field;
         if (count($prefixes)) {
@@ -300,7 +302,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
      * This method name had been prefixed with "_" before it was updated to public visibility.
      * The name is kept for backward compatibility.
      *
-     * @param $field
+     * @param string $field
      * @param array $prefixes
      * @param bool $hasChild
      * @return bool
@@ -308,6 +310,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
     public function _isFieldExcluded($field, array $prefixes = array(), $hasChild = true)
     {
         $this->_prepareFieldsFilter();
+        $this->_prepareFieldAndPrefixes($field, $prefixes);
 
         if ($this->_fieldsFilterType & self::FIELDS_FILTER_INCLUDE) {
             if ($this->_isFieldIncluded($field, $prefixes, $hasChild)) {
@@ -368,6 +371,21 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         }
 
         return false;
+    }
+
+    /**
+     * @param string $field
+     * @param array $prefixes
+     */
+    protected function _prepareFieldAndPrefixes(&$field, array &$prefixes)
+    {
+        if (strpos($field, '.') !== false) {
+            $fieldParts = explode('.', $field);
+            $field = array_pop($fieldParts);
+            foreach ($fieldParts as $fieldPart) {
+                $prefixes[] = $fieldPart;
+            }
+        }
     }
 
     protected function _prepareFieldsFilter()
