@@ -14,11 +14,21 @@ class Crypt
     const OPENSSL_METHOD_AES256 = 'aes-256-cbc';
     const OPENSSL_OPT_RAW_DATA = 1;
 
+    /**
+     * @return string
+     */
     public static function getDefaultAlgo()
     {
         return self::ALGO_AES_128;
     }
 
+    /**
+     * @param string $data
+     * @param string $algo
+     * @param string|false $key
+     * @return string
+     * @throws PrintableException
+     */
     public static function encrypt($data, $algo, $key = false)
     {
         if ($key === false) {
@@ -49,6 +59,13 @@ class Crypt
         return $encrypted;
     }
 
+    /**
+     * @param string $data
+     * @param string $algo
+     * @param string|false $key
+     * @return string|false
+     * @throws PrintableException
+     */
     public static function decrypt($data, $algo, $key = false)
     {
         if ($key === false) {
@@ -74,6 +91,12 @@ class Crypt
         return $decrypted;
     }
 
+    /**
+     * @param string $data
+     * @param int $timestamp
+     * @return string
+     * @throws PrintableException
+     */
     public static function encryptTypeOne($data, $timestamp)
     {
         $algo = self::getDefaultAlgo();
@@ -81,6 +104,12 @@ class Crypt
         return self::encrypt($data, $algo, $key);
     }
 
+    /**
+     * @param string $data
+     * @param int $timestamp
+     * @return string|false
+     * @throws PrintableException
+     */
     public static function decryptTypeOne($data, $timestamp)
     {
         if ($timestamp < \XF::$time) {
@@ -92,9 +121,13 @@ class Crypt
         return self::decrypt($data, $algo, $key);
     }
 
+    /**
+     * @return string
+     * @throws PrintableException
+     */
     protected static function getKey()
     {
-        /* @var \Xfrocks\Api\XF\Session\Session $session */
+        /** @var mixed $session */
         $session = \XF::app()->session();
         $callable = [$session, 'getToken'];
 
@@ -166,10 +199,6 @@ class Crypt
     protected static function aes256Decrypt($data, $key)
     {
         $prefixLength = mb_strlen(self::ALGO_AES_256, '8bit');
-        if ($prefixLength === false) {
-            throw new \InvalidArgumentException('Cannot decrypt data');
-        }
-
         $prefix = mb_substr($data, 0, $prefixLength);
         if ($prefix === self::ALGO_AES_256) {
             $ivLength = openssl_cipher_iv_length(self::OPENSSL_METHOD_AES256);

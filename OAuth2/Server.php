@@ -29,6 +29,7 @@ use Xfrocks\Api\OAuth2\Storage\ClientStorage;
 use Xfrocks\Api\OAuth2\Storage\RefreshTokenStorage;
 use Xfrocks\Api\OAuth2\Storage\ScopeStorage;
 use Xfrocks\Api\OAuth2\Storage\SessionStorage;
+use Xfrocks\Api\Util\Crypt;
 use Xfrocks\Api\XF\Pub\Controller\Account;
 
 class Server
@@ -363,6 +364,23 @@ class Server
     {
         /** @var AuthorizationServer $authorizationServer */
         $authorizationServer = $this->container['server.auth'];
+
+        $request = $authorizationServer->getRequest()->request;
+        $clientId = $request->get('client_id');
+        $password = $request->get('password');
+        $passwordAlgo = $request->get('password_algo');
+        if (!empty($clientId) && !empty($password) && !empty($passwordAlgo)) {
+            /** @var Client|null $client */
+            $client = $this->app->find('Xfrocks\Api:Client', $clientId);
+            if ($client !== null) {
+                $decryptedPassword = Crypt::decrypt($password, $passwordAlgo, $client->client_secret);
+                if (!empty($decryptedPassword)) {
+                    $request->set('client_secret', $client->client_secret);
+                    $request->set('password', $decryptedPassword);
+                    $request->set('password_algo', '');
+                }
+            }
+        }
 
         /** @var PasswordGrant $passwordGrant */
         $passwordGrant = $authorizationServer->getGrantType('password');
