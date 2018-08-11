@@ -95,7 +95,7 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
 
         if ($return === null) {
             foreach (array_keys($params) as $paramKey) {
-                if (strpos($paramKey, '_') === 0) {
+                if (substr($paramKey, 0, 1) === '_') {
                     // filter out internal params
                     unset($params[$paramKey]);
                 }

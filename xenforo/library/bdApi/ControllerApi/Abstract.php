@@ -230,6 +230,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
         $filtered = array();
         foreach (array_keys($resourceData) as $field) {
+            if (substr($field, 0, 1) === '_') {
+                continue;
+            }
+
             $hasChild = is_array($resourceData[$field]);
 
             if (!is_int($field) && $this->_isFieldExcluded($field, $prefixes, $hasChild)) {
