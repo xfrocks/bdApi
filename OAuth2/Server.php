@@ -30,6 +30,7 @@ use Xfrocks\Api\OAuth2\Storage\RefreshTokenStorage;
 use Xfrocks\Api\OAuth2\Storage\ScopeStorage;
 use Xfrocks\Api\OAuth2\Storage\SessionStorage;
 use Xfrocks\Api\Util\Crypt;
+use Xfrocks\Api\Util\OneTimeToken;
 use Xfrocks\Api\XF\Pub\Controller\Account;
 
 class Server
@@ -466,6 +467,7 @@ class Server
 
     /**
      * @return AccessTokenHybrid|null
+     * @throws \League\OAuth2\Server\Exception\InvalidRequestException
      */
     public function parseRequest()
     {
@@ -473,8 +475,16 @@ class Server
             throw new \RuntimeException('Cannot parse request twice');
         }
 
+        $this->parsedRequest = true;
+
         /** @var ResourceServer $resourceServer */
         $resourceServer = $this->container['server.resource'];
+        $xfToken = OneTimeToken::parse($resourceServer->determineAccessToken(false));
+        if ($xfToken !== null) {
+            $accessTokenHybrid = new AccessTokenHybrid($resourceServer, $xfToken);
+            return $accessTokenHybrid;
+        }
+
         $accessDenied = false;
         try {
             $resourceServer->isValidRequest(false);
@@ -483,8 +493,6 @@ class Server
         } catch (\League\OAuth2\Server\Exception\OAuthException $e) {
             // ignore other exception
         }
-
-        $this->parsedRequest = true;
 
         if ($accessDenied) {
             return null;

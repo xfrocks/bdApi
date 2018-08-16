@@ -4,6 +4,7 @@ namespace Xfrocks\Api\Controller;
 
 use Xfrocks\Api\Data\Param;
 use Xfrocks\Api\Util\Crypt;
+use Xfrocks\Api\Util\OneTimeToken;
 
 class Tool extends AbstractController
 {
@@ -29,6 +30,25 @@ class Tool extends AbstractController
         }
 
         return $this->api(['link' => $link]);
+    }
+
+    public function actionPostOtt()
+    {
+        $params = $this->params()
+            ->define('ttl', 'uint', 'Time to live in seconds');
+
+        if (!\XF::$debugMode) {
+            return $this->noPermission();
+        }
+
+        $session = $this->session();
+        $token = $session->getToken();
+        if ($token === null) {
+            return $this->noPermission();
+        }
+        $client = $token->Client;
+
+        return $this->api(['ott' => OneTimeToken::generate($params['ttl'], $client)]);
     }
 
     public function actionPostPasswordTest()

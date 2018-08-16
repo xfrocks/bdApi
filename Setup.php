@@ -63,6 +63,29 @@ class Setup extends AbstractSetup
         });
     }
 
+    public function upgrade2000013Step1()
+    {
+        $sm = $this->schemaManager();
+
+        $sm->alterTable('xf_bdapi_auth_code', function (Alter $table) {
+            $table->addIndex()->type('key')->columns('expire_date');
+        });
+
+        $sm->alterTable('xf_bdapi_client', function (Alter $table) {
+            $table->addIndex()->type('key')->columns('user_id');
+        });
+
+        $sm->alterTable('xf_bdapi_refresh_token', function (Alter $table) {
+            $table->addIndex()->type('key')->columns('expire_date');
+        });
+
+        $sm->alterTable('xf_bdapi_token', function (Alter $table) {
+            $table->addIndex()->type('key')->columns('client_id');
+            $table->addIndex()->type('key')->columns('expire_date');
+            $table->addIndex()->type('key')->columns('user_id');
+        });
+    }
+
     private function getTables()
     {
         $tables = [];
