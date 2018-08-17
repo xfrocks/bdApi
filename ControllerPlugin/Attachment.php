@@ -4,6 +4,7 @@ namespace Xfrocks\Api\ControllerPlugin;
 
 use XF\Attachment\Manipulator;
 use XF\ControllerPlugin\AbstractPlugin;
+use XF\PrintableException;
 use Xfrocks\Api\Controller\AbstractController;
 use Xfrocks\Api\Entity\Token;
 use Xfrocks\Api\XF\Session\Session;
@@ -16,11 +17,16 @@ class Attachment extends AbstractPlugin
         $attachRepo = $this->repository('XF:Attachment');
         $handler = $attachRepo->getAttachmentHandler($contentType);
 
-        if (!$handler || !$handler->canManageAttachments($context, $error)) {
-            throw $this->controller->errorException($error);
+        if (!$handler) {
+            throw new PrintableException('Invalid content type.');
+        }
+
+        if (!$handler->canManageAttachments($context)) {
+            throw $this->controller->exception($this->controller->noPermission());
         }
 
         $manipulator = new Manipulator($handler, $attachRepo, $context, $hash);
+
         if (!$manipulator->canUpload($uploadErrors)) {
             throw $this->controller->exception($this->controller->error($uploadErrors));
         }
