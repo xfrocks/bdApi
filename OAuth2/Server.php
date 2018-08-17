@@ -29,6 +29,7 @@ use Xfrocks\Api\OAuth2\Storage\ClientStorage;
 use Xfrocks\Api\OAuth2\Storage\RefreshTokenStorage;
 use Xfrocks\Api\OAuth2\Storage\ScopeStorage;
 use Xfrocks\Api\OAuth2\Storage\SessionStorage;
+use Xfrocks\Api\OAuth2\TokenType\BearerWithScope;
 use Xfrocks\Api\Util\Crypt;
 use Xfrocks\Api\Util\OneTimeToken;
 use Xfrocks\Api\XF\Pub\Controller\Account;
@@ -125,6 +126,8 @@ class Server
                 ->setRequest($c['request'])
                 ->setScopeStorage($c['storage.scope'])
                 ->setSessionStorage($c['storage.session']);
+
+            $authorizationServer->setTokenType(new BearerWithScope());
 
             return $authorizationServer;
         };
@@ -467,7 +470,6 @@ class Server
 
     /**
      * @return AccessTokenHybrid|null
-     * @throws \League\OAuth2\Server\Exception\InvalidRequestException
      */
     public function parseRequest()
     {
@@ -479,10 +481,16 @@ class Server
 
         /** @var ResourceServer $resourceServer */
         $resourceServer = $this->container['server.resource'];
-        $xfToken = OneTimeToken::parse($this, $resourceServer->determineAccessToken(false));
-        if ($xfToken !== null) {
-            $accessTokenHybrid = new AccessTokenHybrid($resourceServer, $xfToken);
-            return $accessTokenHybrid;
+
+        try {
+            $xfToken = OneTimeToken::parse($this, $resourceServer->determineAccessToken(false));
+            if ($xfToken !== null) {
+                $accessTokenHybrid = new AccessTokenHybrid($resourceServer, $xfToken);
+                return $accessTokenHybrid;
+            }
+        } catch (\League\OAuth2\Server\Exception\InvalidRequestException $ire) {
+            // request does not have an access token, no need to go further
+            return null;
         }
 
         $accessDenied = false;
