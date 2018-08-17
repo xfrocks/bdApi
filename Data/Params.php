@@ -24,6 +24,11 @@ class Params implements \ArrayAccess
     protected $filtered = [];
 
     /**
+     * @var bool
+     */
+    protected $isDeprecated = false;
+
+    /**
      * @var array[]
      */
     protected $orderChoices = [];
@@ -378,6 +383,11 @@ class Params implements \ArrayAccess
         $finder->limitByPage($page, $limit);
 
         return $page;
+    }
+
+    public function markAsDeprecated()
+    {
+        $this->isDeprecated = true;
     }
 
     public function offsetExists($offset)

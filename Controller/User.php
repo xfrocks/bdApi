@@ -240,6 +240,7 @@ class User extends AbstractController
             /** @var UserAuth $userAuth */
             $userAuth = $user->getRelationOrDefault('Auth');
             $userAuth->setPassword($password);
+            $user->addCascadedSave($userAuth);
         }
 
         if (!empty($params['user_email'])) {
@@ -372,6 +373,12 @@ class User extends AbstractController
         }
 
         return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionPostPassword(ParameterBag $params)
+    {
+        $this->params()->markAsDeprecated();
+        return $this->actionPutIndex($params);
     }
 
     public function actionGetFields()
@@ -731,7 +738,7 @@ class User extends AbstractController
 
         return $this->rerouteController('Xfrocks\Api:Search', 'user-timeline', $params);
     }
-    
+
     public function actionPostTimeline(ParameterBag $params)
     {
         return $this->rerouteController('Xfrocks\Api:ProfilePost', 'post-index', $params);

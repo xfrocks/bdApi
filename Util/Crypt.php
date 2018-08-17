@@ -72,17 +72,12 @@ class Crypt
             $key = self::getKey();
         }
 
-        $data = base64_decode($data);
-        if (!$data) {
-            throw new \InvalidArgumentException('Cannot decrypt data.');
-        }
-
         switch ($algo) {
             case self::ALGO_AES_128:
-                $decrypted = self::aes128Decrypt($data, $key);
+                $decrypted = self::aes128Decrypt(strval(base64_decode($data)), $key);
                 break;
             case self::ALGO_AES_256:
-                $decrypted = self::aes256Decrypt($data, $key);
+                $decrypted = self::aes256Decrypt(strval(base64_decode($data)), $key);
                 break;
             default:
                 $decrypted = $data;
