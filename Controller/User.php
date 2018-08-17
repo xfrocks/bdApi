@@ -408,32 +408,31 @@ class User extends AbstractController
         $params = $this
             ->params()
             ->define('username', 'str', 'username to filter')
-            ->define('user_email', 'str', 'email to filter');
+            ->define('user_email', 'str', 'email to filter')
+            ->define('email', 'str', 'email to filter (deprecated)');
 
         /** @var \XF\Finder\User $userFinder */
         $userFinder = $this->finder('XF:User');
+        $userFinder->isValidUser();
 
         $users = [];
 
-        if (!empty($params['user_email'])) {
+        $email = $params['user_email'] ?: $params['email'];
+        if (!empty($email)) {
+            $this->assertApiScope(Server::SCOPE_MANAGE_SYSTEM);
+            if (!\XF::visitor()->hasAdminPermission('user')) {
+                return $this->noPermission();
+            }
+
             /** @var Email $emailValidator */
             $emailValidator = \XF::app()->validator('XF:Email');
-            if ($emailValidator->isValid($params['user_email'])
-                && \XF::visitor()->hasAdminPermission('user')
-                && $this->session()->hasScope(Server::SCOPE_MANAGE_SYSTEM)
-            ) {
-                $userFinder->where('email', $params['user_email']);
-
-                $total = $userFinder->total();
-                $users = $total > 0 ? $this->transformFinderLazily($userFinder) : [];
+            if ($emailValidator->isValid($email)) {
+                $userFinder->where('email', $email);
+                $users = $this->transformFinderLazily($userFinder);
             }
-        }
-
-        if (empty($users) && utf8_strlen($params['username']) >= 0) {
+        } elseif (strlen($params['username']) > 0) {
             $userFinder->where('username', 'like', $userFinder->escapeLike($params['username'], '?%'));
-
-            $total = $userFinder->total();
-            $users = $total > 0 ? $this->transformFinderLazily($userFinder->limit(10)) : [];
+            $users = $this->transformFinderLazily($userFinder->limit(10));
         }
 
         $data = [
