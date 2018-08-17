@@ -2,6 +2,9 @@
     "bdApi_authCodeTTL.json": {
         "hash": "b4e446ab89f79780d5feebc30db4b1cd"
     },
+    "bdApi_cors.json": {
+        "hash": "49bf33143e73258b7e96ede1f0dfd214"
+    },
     "bdApi_paramLimitDefault.json": {
         "hash": "3c27531eabd7183a898bd70cfc3f1779"
     },

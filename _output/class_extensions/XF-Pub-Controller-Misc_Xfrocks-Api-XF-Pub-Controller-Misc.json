@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Pub\\Controller\\Misc",
+    "to_class": "Xfrocks\\Api\\XF\\Pub\\Controller\\Misc",
+    "execute_order": 10,
+    "active": true
+}

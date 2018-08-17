@@ -5,12 +5,15 @@ namespace Xfrocks\Api\XF\Mvc\Renderer;
 use XF\Db\AbstractAdapter;
 use XF\Mvc\Renderer\Html;
 use XF\Mvc\Reply\AbstractReply;
+use Xfrocks\Api\Util\Cors;
 use Xfrocks\Api\XF\Session\Session;
 
 class Json extends XFCP_Json
 {
     public function postFilter($content, AbstractReply $reply)
     {
+        Cors::addHeaders($this->response);
+
         $json = parent::postFilter($content, $reply);
 
         if (\XF::$debugMode) {

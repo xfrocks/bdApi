@@ -86,7 +86,33 @@ class Setup extends AbstractSetup
         });
     }
 
+    public function upgrade2000014Step1()
+    {
+        $sm = $this->schemaManager();
+
+        foreach ($this->getTables2() as $tableName => $closure) {
+            $sm->createTable($tableName, $closure);
+        }
+
+        $sm->alterTable('xf_bdapi_user_scope', function (Alter $table) {
+            $table->changeColumn('client_id', 'varbinary')->length(255);
+            $table->changeColumn('scope', 'varbinary')->length(255);
+
+            $table->addIndex()->type('unique')->columns(['client_id', 'user_id', 'scope']);
+        });
+    }
+
     private function getTables()
+    {
+        $tables = [];
+
+        $tables += $this->getTables1();
+        $tables += $this->getTables2();
+
+        return $tables;
+    }
+
+    private function getTables1()
     {
         $tables = [];
 
@@ -132,6 +158,23 @@ class Setup extends AbstractSetup
             $table->addColumn('scope', 'blob');
 
             $table->addUniqueKey('token_text');
+        };
+
+        return $tables;
+    }
+
+    private function getTables2()
+    {
+        $tables = [];
+
+        $tables['xf_bdapi_user_scope'] = function (Create $table) {
+            $table->addColumn('client_id', 'varbinary')->length(255);
+            $table->addColumn('user_id', 'int');
+            $table->addColumn('scope', 'varbinary')->length(255);
+            $table->addColumn('accept_date', 'int');
+
+            $table->addKey('user_id');
+            $table->addUniqueKey(['client_id', 'user_id', 'scope']);
         };
 
         return $tables;

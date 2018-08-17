@@ -135,12 +135,34 @@ class Account extends XFCP_Account
         unset($linkParams['scopes']);
 
         $needAuthScopes = [];
+        $requestedScopes = [];
+        $userScopes = $this->finder('Xfrocks\Api:UserScope')
+            ->where('client_id', $client->client_id)
+            ->where('user_id', \XF::visitor()->user_id)
+            ->keyedBy('scope')
+            ->fetch();
         foreach ($scopeIds as $scopeId) {
-            $needAuthScopes[$scopeId] = $apiServer->getScopeDescription($scopeId);
+            $requestedScopes[$scopeId] = $apiServer->getScopeDescription($scopeId);
+
+            // TODO: auto authorize scopes
+
+            if (!isset($userScopes[$scopeId])) {
+                $needAuthScopes[$scopeId] = $requestedScopes[$scopeId];
+            }
         }
 
-        if ($this->isPost()) {
-            $authorizeParams['scopes'] = $this->filter('scopes', 'array-str');
+        $bypassConfirmation = false;
+        if (count($requestedScopes) > 0 && count($needAuthScopes) === 0) {
+            $bypassConfirmation = true;
+        }
+        if ($clientIsAuto) {
+            $bypassConfirmation = false;
+        }
+
+        if ($this->isPost() || $bypassConfirmation) {
+            if ($this->isPost()) {
+                $authorizeParams['scopes'] = $this->filter('scopes', 'array-str');
+            }
 
             return $apiServer->grantAuthCodeNewAuthRequest($this, $authorizeParams);
         }
