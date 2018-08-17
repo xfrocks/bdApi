@@ -21,8 +21,8 @@ class Attachment extends AbstractPlugin
             throw new PrintableException('Invalid content type.');
         }
 
-        if (!$handler->canManageAttachments($context)) {
-            throw $this->controller->exception($this->controller->noPermission());
+        if (!$handler->canManageAttachments($context, $error)) {
+            throw $this->controller->exception($this->controller->noPermission($error));
         }
 
         $manipulator = new Manipulator($handler, $attachRepo, $context, $hash);
@@ -42,7 +42,7 @@ class Attachment extends AbstractPlugin
 
         $attachment = $manipulator->insertAttachmentFromUpload($file, $error);
         if (!$attachment) {
-            throw $this->controller->errorException($error);
+            throw $this->controller->exception($this->controller->noPermission($error));
         }
 
         $data = [
