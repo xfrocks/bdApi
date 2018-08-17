@@ -174,13 +174,7 @@ class User extends AbstractController
 
         $data = [
             'user' => $this->transformEntityLazily($user),
-
-            // TODO: find a better way to keep token response data in sync
-            'token' => [
-                'access_token' => $accessToken,
-                'expires_in' => $accessToken->getExpireTime() - time(),
-                'scope' => implode(Listener::$scopeDelimiter, $scopes)
-            ]
+            'token' => \Xfrocks\Api\Util\Token::transformLibAccessTokenEntity($accessToken),
         ];
 
         return $this->api($data);
