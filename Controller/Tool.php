@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Controller;
 
 use Xfrocks\Api\Data\Param;
+use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Util\Crypt;
 use Xfrocks\Api\Util\OneTimeToken;
 
@@ -69,5 +70,10 @@ class Tool extends AbstractController
         }
 
         return $this->api(['result' => $result]);
+    }
+
+    protected function getDefaultApiScopeForAction($action)
+    {
+        return false;
     }
 }

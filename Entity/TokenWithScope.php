@@ -70,7 +70,7 @@ abstract class TokenWithScope extends Entity
             throw new \InvalidArgumentException('Scopes must be an array');
         }
 
-        $this->set('scope', implode(' ', $scopes));
+        $this->set('scope', implode(Listener::$scopeDelimiter, $scopes));
 
         unset($this->_getterCache['scopes']);
     }

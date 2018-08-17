@@ -402,7 +402,7 @@ class Server
         if ($grantType === 'password') {
             $scope = $request->get('scope');
             if (empty($scope)) {
-                $scopeDefaults = implode(' ', $this->getScopeDefaults());
+                $scopeDefaults = implode(Listener::$scopeDelimiter, $this->getScopeDefaults());
                 $request->set('scope', $scopeDefaults);
             }
         }
@@ -479,7 +479,7 @@ class Server
 
         /** @var ResourceServer $resourceServer */
         $resourceServer = $this->container['server.resource'];
-        $xfToken = OneTimeToken::parse($resourceServer->determineAccessToken(false));
+        $xfToken = OneTimeToken::parse($this, $resourceServer->determineAccessToken(false));
         if ($xfToken !== null) {
             $accessTokenHybrid = new AccessTokenHybrid($resourceServer, $xfToken);
             return $accessTokenHybrid;
