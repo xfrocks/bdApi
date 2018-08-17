@@ -15,6 +15,7 @@ use XF\Util\Php;
 use XF\Validator\Email;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\Entity\Token;
+use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\Util\Crypt;
@@ -58,6 +59,7 @@ class User extends AbstractController
         $params = $this
             ->params()
             ->define('user_email', 'str', 'email of the new user')
+            ->define('email', 'str', 'email of the new user (deprecated)')
             ->define('username', 'str', 'username of the new user')
             ->define('password', 'str', 'password of the new user')
             ->define('password_algo', 'str', 'algorithm used to encrypt the password parameter')
@@ -118,7 +120,7 @@ class User extends AbstractController
         $registration = $this->service('XF:User\Registration');
 
         $input = [
-            'email' => $params['user_email'],
+            'email' => $params['user_email'] ?: $params['email'],
             'username' => $params['username'],
             'dob_day' => $params['user_dob_day'],
             'dob_month' => $params['user_dob_month'],
@@ -172,7 +174,13 @@ class User extends AbstractController
 
         $data = [
             'user' => $this->transformEntityLazily($user),
-            'token' => $accessToken
+
+            // TODO: find a better way to keep token response data in sync
+            'token' => [
+                'access_token' => $accessToken,
+                'expires_in' => $accessToken->getExpireTime() - time(),
+                'scope' => implode(Listener::$scopeDelimiter, $scopes)
+            ]
         ];
 
         return $this->api($data);
