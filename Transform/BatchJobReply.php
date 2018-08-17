@@ -8,7 +8,6 @@ class BatchJobReply extends AbstractHandler
 {
     const DYNAMIC_KEY_ERROR = '_job_error';
     const DYNAMIC_KEY_MESSAGE = '_job_message';
-    const DYNAMIC_KEY_RESPONSE = '_job_response';
     const DYNAMIC_KEY_RESPONSE_CODE = '_job_response_code';
     const DYNAMIC_KEY_RESULT = '_job_result';
 
@@ -40,16 +39,11 @@ class BatchJobReply extends AbstractHandler
             }
         } elseif ($reply instanceof \Xfrocks\Api\Mvc\Reply\Api) {
             switch ($key) {
-                case self::DYNAMIC_KEY_RESPONSE:
-                    return $reply->getData();
                 case self::DYNAMIC_KEY_RESULT:
                     return self::RESULT_OK;
             }
         } else {
             switch ($key) {
-                case self::DYNAMIC_KEY_RESPONSE:
-                    // TODO
-                    return null;
                 case self::DYNAMIC_KEY_RESULT:
                     $responseCode = $reply->getResponseCode();
                     if ($responseCode >= 200 && $responseCode < 300) {
@@ -73,7 +67,6 @@ class BatchJobReply extends AbstractHandler
         return [
             self::DYNAMIC_KEY_ERROR,
             self::DYNAMIC_KEY_MESSAGE,
-            self::DYNAMIC_KEY_RESPONSE,
             self::DYNAMIC_KEY_RESULT,
         ];
     }
@@ -91,6 +84,16 @@ class BatchJobReply extends AbstractHandler
         }
 
         return $data;
+    }
+
+    public function onTransformed($context, array &$data)
+    {
+        $reply = $context->data('reply');
+        if (is_object($reply) && $reply instanceof \Xfrocks\Api\Mvc\Reply\Api) {
+            $data += $this->transformer->transformArray($context, '', $reply->getData());
+        }
+
+        parent::onTransformed($context, $data);
     }
 
     protected function prepareContextSelector($context)

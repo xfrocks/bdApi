@@ -4,6 +4,7 @@ namespace Xfrocks\Api\Util;
 
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\Entity\Token;
+use Xfrocks\Api\OAuth2\Server;
 
 class OneTimeToken
 {
@@ -36,10 +37,11 @@ class OneTimeToken
     }
 
     /**
+     * @param Server $server
      * @param string $ott
      * @return Token|null
      */
-    public static function parse($ott)
+    public static function parse($server, $ott)
     {
         if (!preg_match('/^(\d+),(\d+),(.{32}),(.+)$/', $ott, $matches)) {
             return null;
@@ -61,6 +63,7 @@ class OneTimeToken
         $token->token_text = $ott;
         $token->expire_date = $timestamp;
         $token->user_id = $userId;
+        $token->setScopes($server->getScopeDefaults());
 
         if ($userId === 0 &&
             $once === self::generateOnce($userId, $timestamp, '', $token->Client->client_secret)
