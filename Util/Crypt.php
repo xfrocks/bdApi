@@ -72,17 +72,12 @@ class Crypt
             $key = self::getKey();
         }
 
-        $data = base64_decode($data);
-        if (!$data) {
-            throw new \InvalidArgumentException('Cannot decrypt data.');
-        }
-
         switch ($algo) {
             case self::ALGO_AES_128:
-                $decrypted = self::aes128Decrypt($data, $key);
+                $decrypted = self::aes128Decrypt(strval(base64_decode($data)), $key);
                 break;
             case self::ALGO_AES_256:
-                $decrypted = self::aes256Decrypt($data, $key);
+                $decrypted = self::aes256Decrypt(strval(base64_decode($data)), $key);
                 break;
             default:
                 $decrypted = $data;
@@ -107,7 +102,7 @@ class Crypt
     /**
      * @param string $data
      * @param int $timestamp
-     * @return string|false
+     * @return string
      * @throws PrintableException
      */
     public static function decryptTypeOne($data, $timestamp)
@@ -118,7 +113,13 @@ class Crypt
 
         $algo = self::getDefaultAlgo();
         $key = $timestamp . \XF::app()->config('globalSalt');
-        return self::decrypt($data, $algo, $key);
+        $decrypted = self::decrypt($data, $algo, $key);
+
+        if ($decrypted === false || $decrypted === '') {
+            throw new \LogicException('$data could not be decrypted');
+        }
+
+        return $decrypted;
     }
 
     /**

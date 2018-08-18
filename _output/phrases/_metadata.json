@@ -257,6 +257,12 @@
         "version_string": "2.0.0",
         "hash": "b6625714888627165777b2080daa5269"
     },
+    "option.bdApi_cors.txt": {
+        "global_cache": false,
+        "version_id": 2000013,
+        "version_string": "2.0.0 Alpha 3",
+        "hash": "f32e6135189e1780b06505465eecaa60"
+    },
     "option.bdApi_paramLimitDefault.txt": {
         "global_cache": false,
         "version_id": 2000011,
@@ -298,6 +304,12 @@
         "version_id": 2000000,
         "version_string": "2.0.0",
         "hash": "ba56fdafd8809f135ed9aabc6599fd56"
+    },
+    "option_explain.bdApi_cors.txt": {
+        "global_cache": false,
+        "version_id": 2000013,
+        "version_string": "2.0.0 Alpha 3",
+        "hash": "f89a4fb8e37f6de3702730af93c7371b"
     },
     "option_explain.bdApi_paramLimitDefault.txt": {
         "global_cache": false,

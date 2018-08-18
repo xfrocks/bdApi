@@ -1,0 +1,1 @@
+Cross-Origin Resource Sharing (CORS) is a specification that enables truly open access across domain-boundaries. Enable this option to add the CORS headers to API responses. For more information regarding CORS, <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS" target="_blank" tabindex="-1">see here</a>.

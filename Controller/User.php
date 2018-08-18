@@ -15,6 +15,7 @@ use XF\Util\Php;
 use XF\Validator\Email;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\Entity\Token;
+use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\Util\Crypt;
@@ -58,6 +59,7 @@ class User extends AbstractController
         $params = $this
             ->params()
             ->define('user_email', 'str', 'email of the new user')
+            ->define('email', 'str', 'email of the new user (deprecated)')
             ->define('username', 'str', 'username of the new user')
             ->define('password', 'str', 'password of the new user')
             ->define('password_algo', 'str', 'algorithm used to encrypt the password parameter')
@@ -118,7 +120,7 @@ class User extends AbstractController
         $registration = $this->service('XF:User\Registration');
 
         $input = [
-            'email' => $params['user_email'],
+            'email' => $params['user_email'] ?: $params['email'],
             'username' => $params['username'],
             'dob_day' => $params['user_dob_day'],
             'dob_month' => $params['user_dob_month'],
@@ -172,7 +174,7 @@ class User extends AbstractController
 
         $data = [
             'user' => $this->transformEntityLazily($user),
-            'token' => $accessToken
+            'token' => \Xfrocks\Api\Util\Token::transformLibAccessTokenEntity($accessToken),
         ];
 
         return $this->api($data);
@@ -240,6 +242,7 @@ class User extends AbstractController
             /** @var UserAuth $userAuth */
             $userAuth = $user->getRelationOrDefault('Auth');
             $userAuth->setPassword($password);
+            $user->addCascadedSave($userAuth);
         }
 
         if (!empty($params['user_email'])) {
@@ -374,6 +377,12 @@ class User extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    public function actionPostPassword(ParameterBag $params)
+    {
+        $this->params()->markAsDeprecated();
+        return $this->actionPutIndex($params);
+    }
+
     public function actionGetFields()
     {
         $app = $this->app;
@@ -399,32 +408,31 @@ class User extends AbstractController
         $params = $this
             ->params()
             ->define('username', 'str', 'username to filter')
-            ->define('user_email', 'str', 'email to filter');
+            ->define('user_email', 'str', 'email to filter')
+            ->define('email', 'str', 'email to filter (deprecated)');
 
         /** @var \XF\Finder\User $userFinder */
         $userFinder = $this->finder('XF:User');
+        $userFinder->isValidUser();
 
         $users = [];
 
-        if (!empty($params['user_email'])) {
+        $email = $params['user_email'] ?: $params['email'];
+        if (!empty($email)) {
+            $this->assertApiScope(Server::SCOPE_MANAGE_SYSTEM);
+            if (!\XF::visitor()->hasAdminPermission('user')) {
+                return $this->noPermission();
+            }
+
             /** @var Email $emailValidator */
             $emailValidator = \XF::app()->validator('XF:Email');
-            if ($emailValidator->isValid($params['user_email'])
-                && \XF::visitor()->hasAdminPermission('user')
-                && $this->session()->hasScope(Server::SCOPE_MANAGE_SYSTEM)
-            ) {
-                $userFinder->where('email', $params['user_email']);
-
-                $total = $userFinder->total();
-                $users = $total > 0 ? $this->transformFinderLazily($userFinder) : [];
+            if ($emailValidator->isValid($email)) {
+                $userFinder->where('email', $email);
+                $users = $this->transformFinderLazily($userFinder);
             }
-        }
-
-        if (empty($users) && utf8_strlen($params['username']) >= 0) {
+        } elseif (strlen($params['username']) > 0) {
             $userFinder->where('username', 'like', $userFinder->escapeLike($params['username'], '?%'));
-
-            $total = $userFinder->total();
-            $users = $total > 0 ? $this->transformFinderLazily($userFinder->limit(10)) : [];
+            $users = $this->transformFinderLazily($userFinder->limit(10));
         }
 
         $data = [
@@ -731,7 +739,7 @@ class User extends AbstractController
 
         return $this->rerouteController('Xfrocks\Api:Search', 'user-timeline', $params);
     }
-    
+
     public function actionPostTimeline(ParameterBag $params)
     {
         return $this->rerouteController('Xfrocks\Api:ProfilePost', 'post-index', $params);

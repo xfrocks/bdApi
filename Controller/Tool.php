@@ -2,13 +2,27 @@
 
 namespace Xfrocks\Api\Controller;
 
+use Xfrocks\Api\ControllerPlugin\Login;
 use Xfrocks\Api\Data\Param;
-use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Util\Crypt;
 use Xfrocks\Api\Util\OneTimeToken;
 
 class Tool extends AbstractController
 {
+    public function actionGetLogin()
+    {
+        /** @var Login $loginPlugin */
+        $loginPlugin = $this->plugin('Xfrocks\Api:Login');
+        return $loginPlugin->initiate('misc/api-login');
+    }
+
+    public function actionGetLogout()
+    {
+        /** @var Login $loginPlugin */
+        $loginPlugin = $this->plugin('Xfrocks\Api:Login');
+        return $loginPlugin->initiate('account/api-logout');
+    }
+
     public function actionPostLink()
     {
         $paramType = new Param('str', 'Link type (admin, api, or public)');

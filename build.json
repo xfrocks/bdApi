@@ -1,6 +1,8 @@
 {
   "additional_files": [
     "api/bootstrap.php",
-    "api/index.php"
-  ]
+    "api/index.php",
+    "js/Xfrocks/Api"
+  ],
+  "minify": "*"
 }

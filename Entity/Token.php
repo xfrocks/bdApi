@@ -28,6 +28,36 @@ class Token extends TokenWithScope
         return $this->token_text;
     }
 
+    protected function _postSave()
+    {
+        if ($this->isChanged('scope')) {
+            $this->updateUserScopes();
+        }
+    }
+
+    protected function updateUserScopes()
+    {
+        $values = [];
+        foreach ($this->getScopes() as $scope) {
+            $values[] = sprintf(
+                '(%s, %d, %s, %d)',
+                $this->db()->quote($this->get('client_id')),
+                $this->get('user_id'),
+                $this->db()->quote($scope),
+                \XF::$time
+            );
+        }
+        if (count($values) === 0) {
+            return;
+        }
+
+        $this->db()->query('
+            INSERT IGNORE INTO `xf_bdapi_user_scope`
+            (`client_id`, `user_id`, `scope`, `accept_date`)
+            VALUES ' . implode(', ', $values) . ' 
+        ');
+    }
+
     public static function getStructure(Structure $structure)
     {
         $structure->table = 'xf_bdapi_token';

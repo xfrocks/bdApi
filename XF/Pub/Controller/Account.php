@@ -4,8 +4,10 @@ namespace Xfrocks\Api\XF\Pub\Controller;
 
 use XF\Mvc\Entity\Finder;
 use XF\Util\Random;
+use Xfrocks\Api\ControllerPlugin\Login;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\OAuth2\Server;
+use Xfrocks\Api\Util\Crypt;
 
 class Account extends XFCP_Account
 {
@@ -102,6 +104,13 @@ class Account extends XFCP_Account
         return $this->redirect($this->buildLink('account/api'));
     }
 
+    public function actionApiLogout()
+    {
+        /** @var Login $loginPlugin */
+        $loginPlugin = $this->plugin('Xfrocks\Api:Login');
+        return $loginPlugin->logout();
+    }
+
     public function actionAuthorize()
     {
         /** @var Server $apiServer */
@@ -135,12 +144,34 @@ class Account extends XFCP_Account
         unset($linkParams['scopes']);
 
         $needAuthScopes = [];
+        $requestedScopes = [];
+        $userScopes = $this->finder('Xfrocks\Api:UserScope')
+            ->where('client_id', $client->client_id)
+            ->where('user_id', \XF::visitor()->user_id)
+            ->keyedBy('scope')
+            ->fetch();
         foreach ($scopeIds as $scopeId) {
-            $needAuthScopes[$scopeId] = $apiServer->getScopeDescription($scopeId);
+            $requestedScopes[$scopeId] = $apiServer->getScopeDescription($scopeId);
+
+            // TODO: auto authorize scopes
+
+            if (!isset($userScopes[$scopeId])) {
+                $needAuthScopes[$scopeId] = $requestedScopes[$scopeId];
+            }
         }
 
-        if ($this->isPost()) {
-            $authorizeParams['scopes'] = $this->filter('scopes', 'array-str');
+        $bypassConfirmation = false;
+        if (count($requestedScopes) > 0 && count($needAuthScopes) === 0) {
+            $bypassConfirmation = true;
+        }
+        if ($clientIsAuto) {
+            $bypassConfirmation = false;
+        }
+
+        if ($this->isPost() || $bypassConfirmation) {
+            if ($this->isPost()) {
+                $authorizeParams['scopes'] = $this->filter('scopes', 'array-str');
+            }
 
             return $apiServer->grantAuthCodeNewAuthRequest($this, $authorizeParams);
         }

@@ -15,6 +15,7 @@ class Modules
 
     public function __construct()
     {
+        $this->addController('Xfrocks:Asset', 'assets');
         $this->addController('Xfrocks:Attachment', 'attachments', ':int<attachment_id>/');
         $this->addController('Xfrocks:Batch', 'batch');
         $this->addController('Xfrocks:Category', 'categories', ':int<node_id>/');
