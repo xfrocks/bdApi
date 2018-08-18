@@ -169,8 +169,10 @@ class Thread extends AbstractController
         $forum = $this->assertViewableForum($params['forum_id']);
 
         $context = [
+            'node_id' => $forum->node_id,
             'forum_id' => $forum->node_id
         ];
+
 
         /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
         $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
