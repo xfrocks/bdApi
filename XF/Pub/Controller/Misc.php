@@ -3,9 +3,11 @@
 namespace Xfrocks\Api\XF\Pub\Controller;
 
 use XF\Mvc\ParameterBag;
+use Xfrocks\Api\ControllerPlugin\Login;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Server;
+use Xfrocks\Api\Util\Crypt;
 
 class Misc extends XFCP_Misc
 {
@@ -77,6 +79,13 @@ class Misc extends XFCP_Misc
         $this->setResponseType('raw');
 
         return $this->view('Xfrocks\Api:Misc\ApiData', '', $viewParams);
+    }
+
+    public function actionApiLogin()
+    {
+        /** @var Login $loginPlugin */
+        $loginPlugin = $this->plugin('Xfrocks\Api:Login');
+        return $loginPlugin->login('misc/api-login');
     }
 
     public function checkCsrfIfNeeded($action, ParameterBag $params)

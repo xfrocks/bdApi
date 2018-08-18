@@ -102,7 +102,7 @@ class Crypt
     /**
      * @param string $data
      * @param int $timestamp
-     * @return string|false
+     * @return string
      * @throws PrintableException
      */
     public static function decryptTypeOne($data, $timestamp)
@@ -113,7 +113,13 @@ class Crypt
 
         $algo = self::getDefaultAlgo();
         $key = $timestamp . \XF::app()->config('globalSalt');
-        return self::decrypt($data, $algo, $key);
+        $decrypted = self::decrypt($data, $algo, $key);
+
+        if ($decrypted === false || $decrypted === '') {
+            throw new \LogicException('$data could not be decrypted');
+        }
+
+        return $decrypted;
     }
 
     /**

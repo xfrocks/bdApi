@@ -4,8 +4,10 @@ namespace Xfrocks\Api\XF\Pub\Controller;
 
 use XF\Mvc\Entity\Finder;
 use XF\Util\Random;
+use Xfrocks\Api\ControllerPlugin\Login;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\OAuth2\Server;
+use Xfrocks\Api\Util\Crypt;
 
 class Account extends XFCP_Account
 {
@@ -100,6 +102,13 @@ class Account extends XFCP_Account
         $client->save();
 
         return $this->redirect($this->buildLink('account/api'));
+    }
+
+    public function actionApiLogout()
+    {
+        /** @var Login $loginPlugin */
+        $loginPlugin = $this->plugin('Xfrocks\Api:Login');
+        return $loginPlugin->logout();
     }
 
     public function actionAuthorize()
