@@ -1,0 +1,8 @@
+includes:
+	- /var/www/html/src/addons/DevHelper/PHPStan/phpstan.neon
+
+services:
+	-
+		class: dev\PHPStan\Reflection\PropertiesClassReflectionExtension
+		tags:
+			- phpstan.broker.propertiesClassReflectionExtension

@@ -1,0 +1,40 @@
+variables:
+  ADDONS_PATH: /var/www/html/src/addons
+  MYSQL_DATABASE: xenforo2
+  MYSQL_ROOT_PASSWORD: root
+
+build:
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - _releases
+  image: registry.gitlab.com/xfrocks/xenforo2/master-devhelper
+  script:
+    - mysqlrestore.sh
+    - composer install --no-dev
+    - mkdir $ADDONS_PATH/Xfrocks
+    - cp -R . $ADDONS_PATH/Xfrocks/Api
+    - cd /var/www/html
+    - php cmd.php xf-addon:install Xfrocks/Api
+    - php cmd.php devhelper:autogen Xfrocks/Api
+    - php cmd.php xf-addon:build-release Xfrocks/Api
+    - cp -R $ADDONS_PATH/Xfrocks/Api/_releases $CI_PROJECT_DIR/_releases
+  services:
+    - mysql:5.7.23
+  stage: build
+
+test:
+  image: registry.gitlab.com/xfrocks/xenforo2/master
+  script:
+    - mysqlrestore.sh
+    - unzip _releases/*.zip
+    - cp -R upload/* /var/www/html
+    - cd /var/www/html
+    - php cmd.php xf-addon:install Xfrocks/Api
+    - php cmd.php xfrocks-api:pre-test
+    - apache2ctl start
+    - cd $CI_PROJECT_DIR
+    - composer install
+    - composer test
+  services:
+    - mysql:5.7.23

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="_files/tests/autoload.php">
+    <testsuites>
+        <testsuite name="API Test Suite">
+            <directory>_files/tests/api</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
