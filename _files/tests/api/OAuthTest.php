@@ -48,6 +48,6 @@ class OAuthTest extends ApiTestCase
 
     protected function postOauthToken(array $params)
     {
-        return $this->httpRequestJson('POST', 'oauth/token', ['form_params' => $params]);
+        return $this->httpRequestJson('POST', 'oauth/token', ['body' => $params]);
     }
 }

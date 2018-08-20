@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 abstract class ApiTestCase extends TestCase
 {
     /**
-     * @var \Psr\Http\Message\ResponseInterface|null
+     * @var \GuzzleHttp\Message\ResponseInterface|null
      */
     private $latestResponse = null;
 
@@ -24,30 +24,30 @@ abstract class ApiTestCase extends TestCase
     public static function setUpBeforeClass()
     {
         self::$http = new \GuzzleHttp\Client([
-            'base_uri' => 'http://localhost/api/',
+            'base_url' => 'http://localhost/api/',
             'http_errors' => false,
         ]);
     }
 
     /**
-     * @return \Psr\Http\Message\ResponseInterface|null
+     * @return \GuzzleHttp\Message\ResponseInterface|null
      */
     protected function httpLatestResponse()
     {
         return $this->latestResponse;
     }
 
-    /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * @param string $method
      * @param string $path
      * @param array $options
-     * @return \Psr\Http\Message\ResponseInterface
+     * @return \GuzzleHttp\Message\ResponseInterface
      */
     protected function httpRequest($method, $path, array $options = [])
     {
         $uri = 'index.php?' . str_replace('?', '&', $path);
-        $this->latestResponse = self::$http->request($method, $uri, $options);
+        $request = self::$http->createRequest($method, $uri, $options);
+        $this->latestResponse = self::$http->send($request);
 
         return $this->latestResponse;
     }
@@ -65,7 +65,7 @@ abstract class ApiTestCase extends TestCase
         $contentType = $response->getHeaders()['Content-Type'][0];
         $this->assertContains('application/json', $contentType);
 
-        $json = json_decode($response->getBody(), true);
+        $json = json_decode(strval($response->getBody()), true);
         $this->assertTrue(is_array($json));
 
         return $json;

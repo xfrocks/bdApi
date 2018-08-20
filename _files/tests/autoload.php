@@ -1,5 +1,8 @@
 <?php
 
+/** @noinspection PhpIncludeInspection */
+require('/var/www/html/src/vendor/autoload.php');
+
 /** @var \Composer\Autoload\ClassLoader $loader */
 $loader = require(dirname(dirname(__DIR__)) . '/vendor/autoload.php');
 
