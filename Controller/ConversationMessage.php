@@ -98,8 +98,7 @@ class ConversationMessage extends AbstractController
 
         if ($conversation->canUploadAndManageAttachments()) {
             $context = [
-                'conversation_id' => $params['conversation_id'],
-                'message_id' => $params['message_id']
+                'conversation_id' => $params['conversation_id']
             ];
 
             /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
@@ -130,6 +129,7 @@ class ConversationMessage extends AbstractController
             ->define('message_body', 'str', 'new content of the message')
             ->defineAttachmentHash();
 
+        $error = null;
         if (!$message->canEdit($error)) {
             return $this->noPermission($error);
         }
@@ -219,6 +219,7 @@ class ConversationMessage extends AbstractController
             ->params()
             ->define('message', 'str', 'reason of the report');
 
+        $error = null;
         if (!$message->canReport($error)) {
             return $this->noPermission($error);
         }
@@ -261,6 +262,7 @@ class ConversationMessage extends AbstractController
     {
         $message = $this->assertViewableMessage($params->message_id);
 
+        $error = null;
         if (!$message->canLike($error)) {
             return $this->noPermission($error);
         }
@@ -279,6 +281,7 @@ class ConversationMessage extends AbstractController
     {
         $message = $this->assertViewableMessage($params->message_id);
 
+        $error = null;
         if (!$message->canLike($error)) {
             return $this->noPermission($error);
         }
@@ -304,12 +307,6 @@ class ConversationMessage extends AbstractController
         return $message;
     }
 
-    /**
-     * @param $conversationId
-     * @param array $extraWith
-     * @return ConversationMaster
-     * @throws \XF\Mvc\Reply\Exception
-     */
     protected function assertViewableConversation($conversationId, array $extraWith = [])
     {
         /** @var ConversationMaster $conversation */
