@@ -99,7 +99,7 @@ class Conversation extends AbstractController
         $recipient = $conversation->Recipients[\XF::visitor()->user_id];
         $recipient->recipient_state = 'deleted';
         $recipient->save();
-        
+
         return $this->message(\XF::phrase('changes_saved'));
     }
 

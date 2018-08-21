@@ -4,6 +4,7 @@ namespace Xfrocks\Api\Controller;
 
 use XF\Entity\ConversationMaster;
 use XF\Mvc\ParameterBag;
+use XF\Service\Conversation\Replier;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
 
@@ -75,6 +76,74 @@ class ConversationMessage extends AbstractController
         return $this->api($data);
     }
 
+    public function actionPostIndex()
+    {
+        $params = $this
+            ->params()
+            ->define('conversation_id', 'uint', 'id of the target conversation')
+            ->define('message_body', 'str', 'content of the new message')
+            ->defineAttachmentHash();
+
+        $conversation = $this->assertViewableConversation($params['conversation_id']);
+        if (!$conversation->canReply()) {
+            return $this->noPermission();
+        }
+
+        /** @var Replier $replier */
+        $replier = $this->service('XF:Conversation\Replier', $conversation, \XF::visitor());
+
+        $replier->setMessageContent($params['message_body']);
+
+        if ($conversation->canUploadAndManageAttachments()) {
+            $context = [
+                'conversation_id' => $params['conversation_id'],
+                'message_id' => $params['message_id']
+            ];
+
+            /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+            $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+            $tempHash = $attachmentPlugin->getAttachmentTempHash($context);
+
+            $replier->setAttachmentHash($tempHash);
+        }
+
+        $replier->checkForSpam();
+
+        if (!$replier->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $this->assertNotFlooding('conversation');
+
+        $message = $replier->save();
+        return $this->actionSingle($message->message_id);
+    }
+    
+    public function actionPostAttachments()
+    {
+        $params = $this
+            ->params()
+            ->defineFile('file')
+            ->define('conversation_id', 'uint', 'id of the container conversation of the target message')
+            ->define('message_id', 'uint', 'id of the target message')
+            ->defineAttachmentHash();
+
+        if (empty($params['conversation_id']) && empty($params['message_id'])) {
+            return $this->error(\XF::phrase('bdapi_slash_conversation_messages_attachments_requires_ids'), 400);
+        }
+
+        $context = [
+            'conversation_id' => $params['conversation_id'],
+            'message_id' => $params['message_id']
+        ];
+
+        /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+        $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+        $tempHash = $attachmentPlugin->getAttachmentTempHash($context);
+
+        return $attachmentPlugin->doUpload($tempHash, 'conversation_message', $context);
+    }
+
     protected function assertViewableMessage($messageId, array $extraWith = [])
     {
         /** @var \XF\Entity\ConversationMessage $message */
@@ -84,6 +153,23 @@ class ConversationMessage extends AbstractController
         }
 
         return $message;
+    }
+
+    /**
+     * @param $conversationId
+     * @param array $extraWith
+     * @return ConversationMaster
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    protected function assertViewableConversation($conversationId, array $extraWith = [])
+    {
+        /** @var ConversationMaster $conversation */
+        $conversation = $this->assertRecordExists('XF:ConversationMaster', $conversationId, $extraWith);
+        if (!$conversation->canView($error)) {
+            throw $this->exception($this->noPermission($error));
+        }
+
+        return $conversation;
     }
 
     protected function applyMessagesFilters(\XF\Finder\ConversationMessage $finder, Params $params)
