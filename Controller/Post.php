@@ -178,14 +178,16 @@ class Post extends AbstractController
             if ($this->request()->exists('fields')) {
                 $threadEditor->setCustomFields($params['fields']);
             }
+            
+            if ($post->Thread->canEditTags()) {
+                /** @var \XF\Service\Tag\Changer $tagger */
+                $tagger = $this->service('XF:Tag\Changer', 'thread', $post->Thread);
 
-            /** @var \XF\Service\Tag\Changer $tagger */
-            $tagger = $this->service('XF:Tag\Changer', 'thread', $post->Thread);
+                $tagger->setEditableTags($params['thread_tags']);
 
-            $tagger->setEditableTags($params['thread_tags']);
-
-            if ($tagger->hasErrors()) {
-                $errors = array_merge($errors, $tagger->getErrors());
+                if ($tagger->hasErrors()) {
+                    $errors = array_merge($errors, $tagger->getErrors());
+                }
             }
 
             $threadErrors = [];
