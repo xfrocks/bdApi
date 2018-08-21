@@ -9,7 +9,7 @@ abstract class ApiTestCase extends TestCase
     /**
      * @var \GuzzleHttp\Message\ResponseInterface|null
      */
-    private $latestResponse = null;
+    private static $latestResponse = null;
 
     /**
      * @var \GuzzleHttp\Client
@@ -30,11 +30,15 @@ abstract class ApiTestCase extends TestCase
     }
 
     /**
-     * @return \GuzzleHttp\Message\ResponseInterface|null
+     * @return \GuzzleHttp\Message\ResponseInterface
      */
-    protected function httpLatestResponse()
+    protected static function httpLatestResponse()
     {
-        return $this->latestResponse;
+        /** @var \GuzzleHttp\Message\ResponseInterface $response */
+        $response = self::$latestResponse;
+        static::assertNotNull($response);
+
+        return $response;
     }
 
     /**
@@ -43,13 +47,13 @@ abstract class ApiTestCase extends TestCase
      * @param array $options
      * @return \GuzzleHttp\Message\ResponseInterface
      */
-    protected function httpRequest($method, $path, array $options = [])
+    protected static function httpRequest($method, $path, array $options = [])
     {
         $uri = 'index.php?' . str_replace('?', '&', $path);
         $request = self::$http->createRequest($method, $uri, $options);
-        $this->latestResponse = self::$http->send($request);
+        self::$latestResponse = self::$http->send($request);
 
-        return $this->latestResponse;
+        return self::$latestResponse;
     }
 
     /**
@@ -58,55 +62,93 @@ abstract class ApiTestCase extends TestCase
      * @param array $options
      * @return array
      */
-    protected function httpRequestJson($method, $path, array $options = [])
+    protected static function httpRequestJson($method, $path, array $options = [])
     {
-        $response = $this->httpRequest($method, $path, $options);
+        $response = static::httpRequest($method, $path, $options);
 
         $contentType = $response->getHeaders()['Content-Type'][0];
-        $this->assertContains('application/json', $contentType);
+        static::assertContains('application/json', $contentType);
 
         $json = json_decode(strval($response->getBody()), true);
-        $this->assertTrue(is_array($json));
+        static::assertTrue(is_array($json));
 
         return $json;
     }
 
     /**
-     * @param string ...$keys
+     * @param string|int ...$keys
      * @return mixed
      */
-    protected function data(...$keys)
+    protected static function data(...$keys)
     {
-        $message = 'Execute cli command `xfrocks-api:pre-test` to prepare test data';
-
         if (!is_array(self::$testData)) {
             self::$testData = [];
 
             $path = '/tmp/api-test.json';
-            $this->assertFileExists($path, $message);
+            static::assertFileExists($path);
 
             $json = json_decode(file_get_contents($path) ?: '', true);
-            $this->assertTrue(is_array($json), $message);
+            static::assertTrue(is_array($json));
 
             self::$testData = $json;
         }
 
         $data = self::$testData;
         foreach ($keys as $key) {
-            $this->assertArrayHasKey($key, $data, $message);
+            static::assertArrayHasKey($key, $data);
             $data = $data[$key];
         }
 
         return $data;
     }
 
-    protected function dataApiClient()
+    /**
+     * @return array
+     */
+    protected static function dataApiClient()
     {
-        return $this->data('apiClient');
+        return static::data('apiClient');
     }
 
-    protected function dataUser($i = 0)
+    /**
+     * @return array
+     */
+    protected static function dataForum()
     {
-        return $this->data('users', $i);
+        return static::data('forum');
+    }
+
+    /**
+     * @param int $i
+     * @return array
+     */
+    protected static function dataUser($i = 0)
+    {
+        return static::data('users', $i);
+    }
+
+    /**
+     * @param array $client
+     * @param array $user
+     * @return array
+     */
+    protected static function postPassword(array $client, array $user)
+    {
+        return static::postOauthToken([
+            'grant_type' => 'password',
+            'client_id' => $client['client_id'],
+            'client_secret' => $client['client_secret'],
+            'username' => $user['username'],
+            'password' => $user['password']
+        ]);
+    }
+
+    /**
+     * @param array $params
+     * @return array
+     */
+    protected static function postOauthToken(array $params)
+    {
+        return static::httpRequestJson('POST', 'oauth/token', ['body' => $params]);
     }
 }

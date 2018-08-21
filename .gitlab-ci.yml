@@ -35,6 +35,6 @@ test:
     - apache2ctl start
     - cd $CI_PROJECT_DIR
     - composer install
-    - composer test
+    - composer test-only
   services:
     - mysql:5.7.23

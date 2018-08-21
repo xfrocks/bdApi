@@ -34,20 +34,4 @@ class OAuthTest extends ApiTestCase
         $this->assertArrayHasKey('access_token', $json);
         $this->assertArrayHasKey('refresh_token', $json);
     }
-
-    protected function postPassword(array $client, array $user)
-    {
-        return $this->postOauthToken([
-            'grant_type' => 'password',
-            'client_id' => $client['client_id'],
-            'client_secret' => $client['client_secret'],
-            'username' => $user['username'],
-            'password' => $user['password']
-        ]);
-    }
-
-    protected function postOauthToken(array $params)
-    {
-        return $this->httpRequestJson('POST', 'oauth/token', ['body' => $params]);
-    }
 }
