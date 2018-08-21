@@ -230,6 +230,19 @@ class Post extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    public function actionGetAttachments(ParameterBag $params)
+    {
+        $post = $this->assertViewablePost($params->post_id);
+
+        $finder = $post->getRelationFinder('Attachments');
+
+        $data = [
+            'attachments' => $this->transformFinderLazily($finder)
+        ];
+
+        return $this->api($data);
+    }
+
     public function actionPostAttachments()
     {
         $params = $this
