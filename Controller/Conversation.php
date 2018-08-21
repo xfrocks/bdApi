@@ -57,6 +57,55 @@ class Conversation extends AbstractController
         return $this->api($data);
     }
 
+    public function actionPostIndex()
+    {
+        $params = $this
+            ->params()
+            ->define('conversation_title', 'str', 'title of the new conversation')
+            ->define('recipients', 'str', 'usernames of recipients of the new conversation')
+            ->define('message_body', 'str', 'content of the new conversation')
+            ->defineAttachmentHash();
+
+        $visitor = \XF::visitor();
+
+        /** @var \XF\Service\Conversation\Creator $creator */
+        $creator = $this->service('XF:Conversation\Creator', $visitor);
+        $creator->setRecipients($params['recipients']);
+        $creator->setContent($params['conversation_title'], $params['message_body']);
+
+        $contentData = ['message_id' => 0];
+        /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+        $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+        $tempHash = $attachmentPlugin->getAttachmentTempHash($contentData);
+
+        if ($creator->getConversation()->canUploadAndManageAttachments()) {
+            $creator->setAttachmentHash($tempHash);
+        }
+
+        $creator->checkForSpam();
+
+        if (!$creator->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $conversation = $creator->save();
+        return $this->actionSingle($conversation->conversation_id);
+    }
+
+    public function actionPostAttachments()
+    {
+        $this->params()
+            ->defineFile('file')
+            ->defineAttachmentHash();
+
+        $contentData = ['message_id' => 0];
+        /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+        $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+        $tempHash = $attachmentPlugin->getAttachmentTempHash($contentData);
+
+        return $attachmentPlugin->doUpload($tempHash, 'conversation_message', $contentData);
+    }
+
     protected function assertViewableConversation($conversationId, array $extraWith = [])
     {
         /** @var ConversationMaster $conversation */
