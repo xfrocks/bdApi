@@ -2,6 +2,7 @@
 
 namespace Xfrocks\Api\Controller;
 
+use XF\Entity\LikedContent;
 use XF\Mvc\ParameterBag;
 use XF\Service\Post\Deleter;
 use XF\Service\Post\Editor;
@@ -234,6 +235,14 @@ class Post extends AbstractController
     {
         $post = $this->assertViewablePost($params->post_id);
 
+        $params = $this
+            ->params()
+            ->define('attachment_id', 'uint');
+
+        if ($params['attachment_id']> 0) {
+            return $this->rerouteController('Xfrocks\Api\Controller\Attachment', 'get-data');
+        }
+
         $finder = $post->getRelationFinder('Attachments');
 
         $data = [
@@ -268,6 +277,27 @@ class Post extends AbstractController
         return $attachmentPlugin->doUpload($tempHash, 'post', $context);
     }
 
+    public function actionGetLikes(ParameterBag $params)
+    {
+        $post = $this->assertViewablePost($params->post_id);
+
+        $finder = $post->getRelationFinder('Likes');
+        $finder->with('Liker');
+
+        $users = [];
+
+        /** @var LikedContent $liked */
+        foreach ($finder->fetch() as $liked) {
+            $users[] = [
+                'user_id' => $liked->Liker->user_id,
+                'username' => $liked->Liker->username
+            ];
+        }
+
+        $data = ['users' => $users];
+        return $this->api($data);
+    }
+    
     /**
      * @param int $postId
      * @param array $extraWith
