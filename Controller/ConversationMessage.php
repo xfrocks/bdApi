@@ -145,7 +145,7 @@ class ConversationMessage extends AbstractController
             /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
             $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
             $tempHash = $attachmentPlugin->getAttachmentTempHash($context);
-            
+
             $editor->setAttachmentHash($tempHash);
         }
 
@@ -157,6 +157,24 @@ class ConversationMessage extends AbstractController
 
         $message = $editor->save();
         return $this->actionSingle($message->message_id);
+    }
+
+    public function actionDeleteIndex(ParameterBag $params)
+    {
+        return $this->noPermission();
+    }
+
+    public function actionGetAttachments(ParameterBag $params)
+    {
+        $message = $this->assertViewableMessage($params->message_id);
+
+        $finder = $message->getRelationFinder('Attachments');
+
+        $data = [
+            'attachments' => $message->attach_count > 0 ? $this->transformFinderLazily($finder) : []
+        ];
+
+        return $this->api($data);
     }
 
     public function actionPostAttachments()
