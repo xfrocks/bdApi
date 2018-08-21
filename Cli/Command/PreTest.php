@@ -7,7 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use XF\Util\Random;
 
-class Test extends Command
+class PreTest extends Command
 {
     const VERSION_ID = 2018082101;
 
@@ -104,8 +104,8 @@ class Test extends Command
     protected function configure()
     {
         $this
-            ->setName('xfrocks-api:test')
-            ->setDescription('Run API tests');
+            ->setName('xfrocks-api:pre-test')
+            ->setDescription('Prepare environment for API testings');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -123,25 +123,15 @@ class Test extends Command
                 $data = @json_decode($json, true) ?: [];
             }
         }
-        $dataBefore = md5(serialize($data));
 
         $this->createForum($data);
         $this->createUsers($data);
 
         $this->createApiClient($data['users'][0], $data);
 
-        $dataAfter = md5(serialize($data));
+        file_put_contents($jsonPath, json_encode($data, JSON_PRETTY_PRINT));
+        $output->writeln("Written test data to {$jsonPath}");
 
-        if ($dataAfter === $dataBefore) {
-            $dir = dirname(dirname(__DIR__));
-            chdir($dir);
-            passthru('composer test', $returnVar);
-        } else {
-            file_put_contents($jsonPath, json_encode($data, JSON_PRETTY_PRINT));
-            $output->writeln("Written test data to {$jsonPath}, execute again to run tests");
-            $returnVar = 0;
-        }
-
-        return $returnVar;
+        return 0;
     }
 }

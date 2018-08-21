@@ -9,7 +9,7 @@
     "phpunit/phpunit": "^7.3"
   },
   "scripts": {
-    "export": "./vendor/bin/phpunit --testdox && xf-dev--export--addon.sh Xfrocks/Api",
+    "export": "composer install && cmd-php.sh xfrocks-api:pre-test && ./vendor/bin/phpunit --testdox && xf-dev--export--addon.sh Xfrocks/Api",
     "export-only": "xf-dev--export--addon.sh Xfrocks/Api",
     "test-only": "./vendor/bin/phpunit --testdox"
   }
