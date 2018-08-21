@@ -4,6 +4,7 @@ namespace Xfrocks\Api\Controller;
 
 use XF\Entity\ConversationMaster;
 use XF\Mvc\ParameterBag;
+use XF\Service\Conversation\MessageEditor;
 use XF\Service\Conversation\Replier;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
@@ -118,7 +119,46 @@ class ConversationMessage extends AbstractController
         $message = $replier->save();
         return $this->actionSingle($message->message_id);
     }
-    
+
+    public function actionPutIndex(ParameterBag $params)
+    {
+        $message = $this->assertViewableMessage($params->message_id);
+
+        $params = $this
+            ->params()
+            ->define('message_body', 'str', 'new content of the message')
+            ->defineAttachmentHash();
+
+        if (!$message->canEdit($error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var MessageEditor $editor */
+        $editor = $this->service('XF:Conversation\MessageEditor', $message);
+        $editor->setMessageContent($params['message_body']);
+
+        if ($message->Conversation->canUploadAndManageAttachments()) {
+            $context = [
+                'message_id' => $message->message_id
+            ];
+
+            /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+            $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+            $tempHash = $attachmentPlugin->getAttachmentTempHash($context);
+            
+            $editor->setAttachmentHash($tempHash);
+        }
+
+        $editor->checkForSpam();
+
+        if (!$editor->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $message = $editor->save();
+        return $this->actionSingle($message->message_id);
+    }
+
     public function actionPostAttachments()
     {
         $params = $this
