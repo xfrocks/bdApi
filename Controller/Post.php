@@ -305,10 +305,31 @@ class Post extends AbstractController
         if (!$post->canLike($error)) {
             return $this->noPermission($error);
         }
+        
+        $visitor = \XF::visitor();
+        if (empty($post->Likes[$visitor->user_id])) {
+            /** @var \XF\Repository\LikedContent $likeRepo */
+            $likeRepo = $this->repository('XF:LikedContent');
+            $likeRepo->toggleLike('post', $post->post_id, $visitor);
+        }
 
-        /** @var \XF\Repository\LikedContent $likeRepo */
-        $likeRepo = $this->repository('XF:LikedContent');
-        $likeRepo->toggleLike('post', $post->post_id, \XF::visitor());
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionDeleteLikes(ParameterBag $params)
+    {
+        $post = $this->assertViewablePost($params->post_id);
+
+        if (!$post->canLike($error)) {
+            return $this->noPermission($error);
+        }
+
+        $visitor = \XF::visitor();
+        if (!empty($post->Likes[$visitor->user_id])) {
+            /** @var \XF\Repository\LikedContent $likeRepo */
+            $likeRepo = $this->repository('XF:LikedContent');
+            $likeRepo->toggleLike('post', $post->post_id, $visitor);
+        }
 
         return $this->message(\XF::phrase('changes_saved'));
     }
