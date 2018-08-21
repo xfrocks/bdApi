@@ -297,7 +297,22 @@ class Post extends AbstractController
         $data = ['users' => $users];
         return $this->api($data);
     }
-    
+
+    public function actionPostLikes(ParameterBag $params)
+    {
+        $post = $this->assertViewablePost($params->post_id);
+
+        if (!$post->canLike($error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var \XF\Repository\LikedContent $likeRepo */
+        $likeRepo = $this->repository('XF:LikedContent');
+        $likeRepo->toggleLike('post', $post->post_id, \XF::visitor());
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
     /**
      * @param int $postId
      * @param array $extraWith
