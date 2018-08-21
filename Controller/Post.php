@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Mvc\ParameterBag;
+use XF\Service\Post\Deleter;
 use XF\Service\Post\Editor;
 use XF\Service\Thread\Replier;
 use Xfrocks\Api\Data\Params;
@@ -129,7 +130,7 @@ class Post extends AbstractController
 
         return $this->actionSingle($post->post_id);
     }
-    
+
     public function actionPutIndex(ParameterBag $params)
     {
         $post = $this->assertViewablePost($params->post_id);
@@ -208,6 +209,25 @@ class Post extends AbstractController
         }
 
         return $this->actionSingle($post->post_id);
+    }
+
+    public function actionDeleteIndex(ParameterBag $params)
+    {
+        $post = $this->assertViewablePost($params->post_id);
+
+        $params = $this
+            ->params()
+            ->define('reason', 'str', 'reason of the post removal');
+
+        if (!$post->canDelete('soft', $error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var Deleter $deleter */
+        $deleter = $this->service('XF:Post\Deleter', $post);
+        $deleter->delete('soft', $params['reason']);
+
+        return $this->message(\XF::phrase('changes_saved'));
     }
 
     public function actionPostAttachments()
