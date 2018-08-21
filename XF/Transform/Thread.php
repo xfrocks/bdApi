@@ -205,7 +205,7 @@ class Thread extends AbstractHandler
             $firstPosts = [];
             /** @var \XF\Entity\Thread $thread */
             foreach ($entities as $thread) {
-                $firstPosts[] = $thread->FirstPost;
+                $firstPosts[$thread->FirstPost->post_id] = $thread->FirstPost;
             }
 
             $subContext = $context->getSubContext(self::DYNAMIC_KEY_FIRST_POST, null, null);
