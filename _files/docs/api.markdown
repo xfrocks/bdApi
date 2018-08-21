@@ -1062,6 +1062,7 @@ Parameters:
  * `thread_title` (_optional_, since forum-2014052203): new title of the thread (only used if the post is the first post in the thread and the authenticated user can edit thread).
  * `thread_prefix_id` (_optional_, since forum-2016031001): new id of the thread's prefix (only used if the post is the first post in the thread and the authenticated user can edit thread).
  * `thread_tags` (_optional_, since forum-2015091101): new tags of the thread (only used if the post is the first post in the thread and the authenticated user can edit thread tags).
+* `fields` (_optional_, since forum-2018082101): new fields of the thread (only used if the post is the first post in the thread)
 
 Required scopes:
 
