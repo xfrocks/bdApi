@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Mvc\ParameterBag;
+use XF\Service\Post\Editor;
 use XF\Service\Thread\Replier;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
@@ -84,7 +85,7 @@ class Post extends AbstractController
             ->params()
             ->define('thread_id', 'uint', 'id of the target thread')
             ->define('quote_post_id', 'uint', 'id of the quote post')
-            ->define('post_body', 'content of the new post')
+            ->define('post_body', 'str', 'content of the new post')
             ->defineAttachmentHash();
 
         if (!empty($params['quote_post_id'])) {
@@ -126,11 +127,87 @@ class Post extends AbstractController
 
         $post = $replier->save();
 
-        $data = [
-            'post' => $this->transformEntityLazily($post)
-        ];
+        return $this->actionSingle($post->post_id);
+    }
+    
+    public function actionPutIndex(ParameterBag $params)
+    {
+        $post = $this->assertViewablePost($params->post_id);
 
-        return $this->api($data);
+        $params = $this
+            ->params()
+            ->define('post_body', 'str', 'new content of the post')
+            ->define('thread_title', 'str', 'new title of the thread')
+            ->define('thread_prefix_id', 'uint', 'new id of the thread\'s prefix')
+            ->define('thread_tags', 'str', 'new tags of the thread')
+            ->define('fields', 'array')
+            ->defineAttachmentHash();
+
+        if (!$post->canEdit($error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var Editor $editor */
+        $editor = $this->service('XF:Post\Editor', $post);
+
+        $editor->setMessage($params['post_body']);
+
+        /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+        $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+        $tempHash = $attachmentPlugin->getAttachmentTempHash([
+            'post_id' => $post->post_id
+        ]);
+
+        $editor->setAttachmentHash($tempHash);
+
+        $editor->checkForSpam();
+
+        $threadEditor = null;
+        $tagger = null;
+        $errors = [];
+
+        if ($post->isFirstPost()) {
+            /** @var \XF\Service\Thread\Editor $threadEditor */
+            $threadEditor = $this->service('XF:Thread\Editor', $post->Thread);
+
+            $threadEditor->setTitle($params['thread_title']);
+            $threadEditor->setPrefix($params['thread_prefix_id']);
+            $threadEditor->setCustomFields($params['fields']);
+
+            /** @var \XF\Service\Tag\Changer $tagger */
+            $tagger = $this->service('XF:Tag\Changer', 'thread', $post->Thread);
+
+            $tagger->setEditableTags($params['thread_tags']);
+
+            if ($tagger->hasErrors()) {
+                $errors = array_merge($errors, $tagger->getErrors());
+            }
+
+            $threadErrors = [];
+            $threadEditor->validate($threadErrors);
+
+            $errors = array_merge($errors, $threadErrors);
+        }
+
+        $postErrors = [];
+        $editor->validate($postErrors);
+
+        $errors = array_merge($errors, $postErrors);
+        if ($errors) {
+            return $this->error($errors);
+        }
+
+        $post = $editor->save();
+
+        if ($threadEditor) {
+            $threadEditor->save();
+        }
+
+        if ($tagger) {
+            $tagger->save();
+        }
+
+        return $this->actionSingle($post->post_id);
     }
 
     public function actionPostAttachments()
