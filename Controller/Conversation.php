@@ -92,6 +92,17 @@ class Conversation extends AbstractController
         return $this->actionSingle($conversation->conversation_id);
     }
 
+    public function actionDeleteIndex(ParameterBag $params)
+    {
+        $conversation = $this->assertViewableConversation($params->conversation_id);
+
+        $recipient = $conversation->Recipients[\XF::visitor()->user_id];
+        $recipient->recipient_state = 'deleted';
+        $recipient->save();
+        
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
     public function actionPostAttachments()
     {
         $this->params()
