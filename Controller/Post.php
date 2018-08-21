@@ -305,7 +305,7 @@ class Post extends AbstractController
         if (!$post->canLike($error)) {
             return $this->noPermission($error);
         }
-        
+
         $visitor = \XF::visitor();
         if (empty($post->Likes[$visitor->user_id])) {
             /** @var \XF\Repository\LikedContent $likeRepo */
@@ -330,6 +330,31 @@ class Post extends AbstractController
             $likeRepo = $this->repository('XF:LikedContent');
             $likeRepo->toggleLike('post', $post->post_id, $visitor);
         }
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionPostReport(ParameterBag $params)
+    {
+        $post = $this->assertViewablePost($params->post_id);
+
+        $params = $this
+            ->params()
+            ->define('message', 'str', 'reason of the report');
+
+        if (!$post->canReport($error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var \XF\Service\Report\Creator $creator */
+        $creator = $this->service('XF:Report\Creator', 'post', $post);
+        $creator->setMessage($params['message']);
+        
+        if (!$creator->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $creator->save();
 
         return $this->message(\XF::phrase('changes_saved'));
     }
