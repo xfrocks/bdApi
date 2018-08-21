@@ -174,7 +174,10 @@ class Post extends AbstractController
 
             $threadEditor->setTitle($params['thread_title']);
             $threadEditor->setPrefix($params['thread_prefix_id']);
-            $threadEditor->setCustomFields($params['fields']);
+
+            if ($this->request()->exists('fields')) {
+                $threadEditor->setCustomFields($params['fields']);
+            }
 
             /** @var \XF\Service\Tag\Changer $tagger */
             $tagger = $this->service('XF:Tag\Changer', 'thread', $post->Thread);
@@ -349,7 +352,7 @@ class Post extends AbstractController
         /** @var \XF\Service\Report\Creator $creator */
         $creator = $this->service('XF:Report\Creator', 'post', $post);
         $creator->setMessage($params['message']);
-        
+
         if (!$creator->validate($errors)) {
             return $this->error($errors);
         }
