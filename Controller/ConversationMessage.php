@@ -168,6 +168,14 @@ class ConversationMessage extends AbstractController
     {
         $message = $this->assertViewableMessage($params->message_id);
 
+        $params = $this
+            ->params()
+            ->define('attachment_id', 'uint');
+
+        if ($params['attachment_id'] > 0) {
+            return $this->rerouteController('Xfrocks\Api\Controller\Attachment', 'get-data');
+        }
+
         $finder = $message->getRelationFinder('Attachments');
 
         $data = [
@@ -200,6 +208,31 @@ class ConversationMessage extends AbstractController
         $tempHash = $attachmentPlugin->getAttachmentTempHash($context);
 
         return $attachmentPlugin->doUpload($tempHash, 'conversation_message', $context);
+    }
+
+    public function actionPostReport(ParameterBag $params)
+    {
+        $message = $this->assertViewableMessage($params->message_id);
+
+        $params = $this
+            ->params()
+            ->define('message', 'str', 'reason of the report');
+
+        if (!$message->canReport($error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var \XF\Service\Report\Creator $creator */
+        $creator = $this->service('XF:Report\Creator', 'conversation_message', $message);
+        $creator->setMessage($params['message']);
+
+        if (!$creator->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $creator->save();
+
+        return $this->message(\XF::phrase('changes_saved'));
     }
 
     protected function assertViewableMessage($messageId, array $extraWith = [])
