@@ -238,9 +238,9 @@ class ConversationMessage extends AbstractController
 
     public function actionGetLikes(ParameterBag $params)
     {
-        $post = $this->assertViewableMessage($params->message_id);
+        $message = $this->assertViewableMessage($params->message_id);
 
-        $finder = $post->getRelationFinder('Likes');
+        $finder = $message->getRelationFinder('Likes');
         $finder->with('Liker');
 
         $users = [];
@@ -255,6 +255,42 @@ class ConversationMessage extends AbstractController
 
         $data = ['users' => $users];
         return $this->api($data);
+    }
+
+    public function actionPostLikes(ParameterBag $params)
+    {
+        $message = $this->assertViewableMessage($params->message_id);
+
+        if (!$message->canLike($error)) {
+            return $this->noPermission($error);
+        }
+
+        $visitor = \XF::visitor();
+        if (empty($message->Likes[$visitor->user_id])) {
+            /** @var \XF\Repository\LikedContent $likeRepo */
+            $likeRepo = $this->repository('XF:LikedContent');
+            $likeRepo->toggleLike('conversation_message', $message->message_id, $visitor);
+        }
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionDeleteLikes(ParameterBag $params)
+    {
+        $message = $this->assertViewableMessage($params->message_id);
+
+        if (!$message->canLike($error)) {
+            return $this->noPermission($error);
+        }
+
+        $visitor = \XF::visitor();
+        if (!empty($message->Likes[$visitor->user_id])) {
+            /** @var \XF\Repository\LikedContent $likeRepo */
+            $likeRepo = $this->repository('XF:LikedContent');
+            $likeRepo->toggleLike('conversation_message', $message->message_id, $visitor);
+        }
+
+        return $this->message(\XF::phrase('changes_saved'));
     }
 
     protected function assertViewableMessage($messageId, array $extraWith = [])
