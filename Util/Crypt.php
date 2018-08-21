@@ -199,6 +199,7 @@ class Crypt
      */
     protected static function aes256Decrypt($data, $key)
     {
+        /** @var int|false $prefixLength */
         $prefixLength = mb_strlen(self::ALGO_AES_256, '8bit');
         if ($prefixLength === false) {
             throw new \InvalidArgumentException('Cannot decrypt data');

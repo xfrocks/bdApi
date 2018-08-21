@@ -91,7 +91,8 @@ class Thread extends AbstractController
             ->define('post_body', 'str', 'content of the new thread')
             ->define('thread_prefix_id', 'uint', 'id of a prefix for the new thread')
             ->define('thread_tags', 'str', 'thread tags for the new thread')
-            ->define('fields', 'array', 'thread fields for the new thread');
+            ->define('fields', 'array', 'thread fields for the new thread')
+            ->defineAttachmentHash();
 
         $forum = $this->assertViewableForum($params['forum_id']);
         if (!$forum->canCreateThread($error)) {
@@ -113,6 +114,13 @@ class Thread extends AbstractController
         if ($params['fields']) {
             $creator->setCustomFields($params['fields']);
         }
+
+        /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+        $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+        $creator->setAttachmentHash($attachmentPlugin->getAttachmentTempHash([
+            'node_id' => $forum->node_id,
+            'forum_id' => $forum->node_id
+        ]));
 
         $creator->checkForSpam();
 
