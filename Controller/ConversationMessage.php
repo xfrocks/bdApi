@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Entity\ConversationMaster;
+use XF\Entity\LikedContent;
 use XF\Mvc\ParameterBag;
 use XF\Service\Conversation\MessageEditor;
 use XF\Service\Conversation\Replier;
@@ -233,6 +234,27 @@ class ConversationMessage extends AbstractController
         $creator->save();
 
         return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionGetLikes(ParameterBag $params)
+    {
+        $post = $this->assertViewableMessage($params->message_id);
+
+        $finder = $post->getRelationFinder('Likes');
+        $finder->with('Liker');
+
+        $users = [];
+
+        /** @var LikedContent $liked */
+        foreach ($finder->fetch() as $liked) {
+            $users[] = [
+                'user_id' => $liked->Liker->user_id,
+                'username' => $liked->Liker->username
+            ];
+        }
+
+        $data = ['users' => $users];
+        return $this->api($data);
     }
 
     protected function assertViewableMessage($messageId, array $extraWith = [])
