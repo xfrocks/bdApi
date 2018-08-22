@@ -1,0 +1,1 @@
+/conversation-messages/attachments requires `conversation_id` for new message or `message_id` for existing message.
