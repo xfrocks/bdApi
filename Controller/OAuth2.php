@@ -160,7 +160,7 @@ class OAuth2 extends AbstractController
         $extraTimestamp = intval(time() + $this->app()->options()->bdApi_refreshTokenTTLDays * 86400);
 
         $userData += [
-            'extra_data' => Crypt::decryptTypeOne($extraData, $extraTimestamp),
+            'extra_data' => Crypt::encryptTypeOne($extraData, $extraTimestamp),
             'extra_timestamp' => $extraTimestamp
         ];
 
