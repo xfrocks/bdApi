@@ -79,7 +79,7 @@ class OAuth2 extends AbstractController
         $provider = $this->assertProviderExists('facebook');
         $handler = $provider->getHandler();
 
-        if (!$handler->isUsable($provider)) {
+        if (!$handler || !$handler->isUsable($provider)) {
             return $this->noPermission();
         }
 
@@ -157,7 +157,7 @@ class OAuth2 extends AbstractController
         }
 
         $extraData = serialize($extraData);
-        $extraTimestamp = time() + $this->app()->options()->bdApi_refreshTokenTTLDays * 86400;
+        $extraTimestamp = intval(time() + $this->app()->options()->bdApi_refreshTokenTTLDays * 86400);
 
         $userData += [
             'extra_data' => Crypt::decryptTypeOne($extraData, $extraTimestamp),
@@ -209,13 +209,13 @@ class OAuth2 extends AbstractController
         $apiServer = $this->app()->container('api.server');
         $scopes = $apiServer->getScopeDefaults();
 
-        $token = $apiServer->newAccessToken($user->user_id, $client, $scopes);
+        $token = $apiServer->newAccessToken(strval($user->user_id), $client, $scopes);
 
         return $this->api(Token::transformLibAccessTokenEntity($token));
     }
 
     /**
-     * @param $id
+     * @param string $id
      * @param null $with
      * @param null $phraseKey
      * @return ConnectedAccountProvider

@@ -317,9 +317,11 @@ class ConversationMessage extends AbstractController
         $finder->where('conversation_id', $conversationId);
         $finder->with($extraWith);
 
-        /** @var \XF\Entity\ConversationUser $conversation */
+        /** @var \XF\Entity\ConversationUser|null $conversation */
         $conversation = $finder->fetchOne();
-        if (!$conversation || !$conversation->Master) {
+        /** @var ConversationMaster|null $convoMaster */
+        $convoMaster = $conversation ? $conversation->Master : null;
+        if (!$conversation || !$convoMaster) {
             throw $this->exception($this->notFound(\XF::phrase('requested_conversation_not_found')));
         }
 
