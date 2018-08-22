@@ -2,6 +2,7 @@
 
 namespace Xfrocks\Api\Controller;
 
+use OAuth\OAuth2\Token\StdOAuth2Token;
 use XF\Entity\ConnectedAccountProvider;
 use XF\Entity\UserAuth;
 use XF\Entity\UserFollow;
@@ -168,12 +169,20 @@ class User extends AbstractController
             \XF::setVisitor($user);
         }
 
-        if (!empty($extraData['external_provider']) && !empty($extraData['external_provider_key'])) {
+        if (!empty($extraData['external_provider'])
+            && !empty($extraData['external_provider_key'])
+            && !empty($extraData['access_token'])
+        ) {
             /** @var ConnectedAccountProvider|null $provider */
             $provider = $this->em()->find('XF:ConnectedAccountProvider', $extraData['external_provider']);
             $handler = $provider ? $provider->getHandler() : null;
             if ($handler && $provider) {
+                $tokenObj = new StdOAuth2Token();
+                $tokenObj->setAccessToken($extraData['access_token']);
+
                 $storageState = $handler->getStorageState($provider, $user);
+                $storageState->storeToken($tokenObj);
+                
                 $providerData = $handler->getProviderData($storageState);
 
                 /** @var ConnectedAccount $connectedAccountRepo */

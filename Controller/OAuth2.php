@@ -147,7 +147,8 @@ class OAuth2 extends AbstractController
 
         $extraData = [
             'external_provider' => 'facebook',
-            'external_provider_key' => $externalProviderKey
+            'external_provider_key' => $externalProviderKey,
+            'access_token' => $params['facebook_token']
         ];
 
         if (!empty($userData['user_email'])) {
