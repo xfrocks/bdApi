@@ -6,7 +6,6 @@ use League\OAuth2\Server\AbstractServer;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Entity\AccessTokenEntity;
 use League\OAuth2\Server\Entity\ScopeEntity;
-use League\OAuth2\Server\Entity\SessionEntity;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
 use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 use League\OAuth2\Server\Grant\PasswordGrant;
@@ -19,6 +18,7 @@ use XF\Mvc\Controller;
 use Xfrocks\Api\App;
 use Xfrocks\Api\Controller\OAuth2;
 use Xfrocks\Api\Entity\Client;
+use Xfrocks\Api\Entity\Token;
 use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Entity\AccessTokenHybrid;
 use Xfrocks\Api\OAuth2\Entity\ClientHybrid;
@@ -327,6 +327,7 @@ class Server
      * @return \XF\Mvc\Reply\Redirect
      * @throws \League\OAuth2\Server\Exception\InvalidGrantException
      * @throws \League\OAuth2\Server\Exception\UnsupportedResponseTypeException
+     * @throws \XF\PrintableException
      */
     public function grantAuthCodeNewAuthRequest($controller, array $params)
     {
@@ -432,40 +433,27 @@ class Server
     }
 
     /**
-     * @param string $userId
+     * @param mixed $userId
      * @param Client $client
      * @param string[] $scopes
      * @return AccessTokenEntity
+     * @throws \XF\PrintableException
      */
     public function newAccessToken($userId, $client, array $scopes)
     {
+        /** @var Token $xfToken */
+        $xfToken = $this->app->em()->create('Xfrocks\Api:Token');
+        $xfToken->client_id = $client->client_id;
+        $xfToken->token_text = SecureKey::generate();
+        $xfToken->expire_date = time() + $this->getOptionAccessTokenTTL();
+        $xfToken->user_id = intval($userId);
+        $xfToken->setScopes($scopes);
+        $xfToken->save();
+
         /** @var AuthorizationServer $authorizationServer */
         $authorizationServer = $this->container['server.auth'];
 
-        // Create a new session
-        $session = new SessionEntity($authorizationServer);
-        $session->setOwner(SessionStorage::OWNER_TYPE_USER, $userId);
-
-        /** @var \League\OAuth2\Server\Entity\ClientEntity $libClient */
-        $libClient = $authorizationServer->getClientStorage()->get($client->client_id);
-        $session->associateClient($libClient);
-
-        // Generate the access token
-        $accessToken = new AccessTokenEntity($authorizationServer);
-        $accessToken->setId(SecureKey::generate());
-        $accessToken->setExpireTime($this->getOptionAccessTokenTTL() + time());
-
-        $libScopes = $this->getScopeObjArrayFromStrArray($scopes, $authorizationServer);
-        foreach ($libScopes as $libScope) {
-            $session->associateScope($libScope);
-            $accessToken->associateScope($libScope);
-        }
-
-        $session->save();
-        $accessToken->setSession($session);
-        $accessToken->save();
-
-        return $accessToken;
+        return new AccessTokenHybrid($authorizationServer, $xfToken);
     }
 
     /**

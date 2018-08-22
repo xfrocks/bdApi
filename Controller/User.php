@@ -170,7 +170,7 @@ class User extends AbstractController
         $apiServer = $this->app->container('api.server');
         $scopes = $apiServer->getScopeDefaults();
 
-        $accessToken = $apiServer->newAccessToken(strval($user->user_id), $client, $scopes);
+        $accessToken = $apiServer->newAccessToken($user->user_id, $client, $scopes);
 
         $data = [
             'user' => $this->transformEntityLazily($user),
