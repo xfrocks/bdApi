@@ -70,9 +70,7 @@ class OAuth2 extends AbstractController
             'bdapi_requested_client_not_found'
         );
 
-        /** @var \XF\Entity\User|null $user */
-        $user = $client->User;
-        if ($client->client_secret !== $params['client_secret'] || !$user) {
+        if ($client->client_secret !== $params['client_secret']) {
             return $this->noPermission();
         }
 
@@ -83,7 +81,7 @@ class OAuth2 extends AbstractController
             return $this->noPermission();
         }
 
-        $storageState = $handler->getStorageState($provider, $user);
+        $storageState = $handler->getStorageState($provider, \XF::visitor());
 
         $tokenObj = new StdOAuth2Token();
         $tokenObj->setAccessToken($params['facebook_token']);
