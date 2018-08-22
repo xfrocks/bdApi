@@ -2,12 +2,14 @@
 
 namespace Xfrocks\Api\Controller;
 
+use XF\Entity\ConnectedAccountProvider;
 use XF\Entity\UserAuth;
 use XF\Entity\UserFollow;
 use XF\Entity\UserGroup;
 use XF\InputFilterer;
 use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
+use XF\Repository\ConnectedAccount;
 use XF\Service\User\Avatar;
 use XF\Service\User\Follow;
 use XF\Service\User\Ignore;
@@ -164,6 +166,20 @@ class User extends AbstractController
         if ($visitor->user_id == 0) {
             $session->changeUser($user);
             \XF::setVisitor($user);
+        }
+
+        if (!empty($extraData['external_provider']) && !empty($extraData['external_provider_key'])) {
+            /** @var ConnectedAccountProvider|null $provider */
+            $provider = $this->em()->find('XF:ConnectedAccountProvider', $extraData['external_provider']);
+            $handler = $provider ? $provider->getHandler() : null;
+            if ($handler && $provider) {
+                $storageState = $handler->getStorageState($provider, $user);
+                $providerData = $handler->getProviderData($storageState);
+
+                /** @var ConnectedAccount $connectedAccountRepo */
+                $connectedAccountRepo = $this->repository('XF:ConnectedAccount');
+                $connectedAccountRepo->associateConnectedAccountWithUser($user, $providerData);
+            }
         }
 
         /** @var Server $apiServer */
