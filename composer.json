@@ -11,6 +11,7 @@
   "scripts": {
     "export": "composer install && cmd-php.sh xfrocks-api:pre-test && ./vendor/bin/phpunit --testdox && xf-dev--export--addon.sh Xfrocks/Api",
     "export-only": "xf-dev--export--addon.sh Xfrocks/Api",
+    "quick-check": "devhelper-autocheck.sh Xfrocks/Api && devhelper-phpstan.sh /var/www/html/src/addons/Xfrocks/Api",
     "test-only": "./vendor/bin/phpunit --testdox"
   }
 }
