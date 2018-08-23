@@ -5,7 +5,7 @@ namespace Xfrocks\Api\Mvc;
 use XF\App;
 use Xfrocks\Api\Data\Modules;
 use Xfrocks\Api\Listener;
-use Xfrocks\Api\XF\Session\Session;
+use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class Router extends \XF\Mvc\Router
 {

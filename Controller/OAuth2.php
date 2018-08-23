@@ -2,7 +2,6 @@
 
 namespace Xfrocks\Api\Controller;
 
-use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Util\Token;
 

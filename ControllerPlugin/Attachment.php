@@ -7,7 +7,7 @@ use XF\ControllerPlugin\AbstractPlugin;
 use XF\PrintableException;
 use Xfrocks\Api\Controller\AbstractController;
 use Xfrocks\Api\Entity\Token;
-use Xfrocks\Api\XF\Session\Session;
+use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class Attachment extends AbstractPlugin
 {

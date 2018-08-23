@@ -5,7 +5,6 @@ namespace Xfrocks\Api\Controller;
 use XF\Entity\UserAuth;
 use XF\Entity\UserFollow;
 use XF\Entity\UserGroup;
-use XF\InputFilterer;
 use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
 use XF\Service\User\Avatar;
@@ -15,7 +14,6 @@ use XF\Util\Php;
 use XF\Validator\Email;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\Entity\Token;
-use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\Util\Crypt;
@@ -381,6 +379,30 @@ class User extends AbstractController
     {
         $this->params()->markAsDeprecated();
         return $this->actionPutIndex($params);
+    }
+
+    public function actionGetDefaultAvatar(ParameterBag $paramBag)
+    {
+        $avatarSizeMap = $this->app->container('avatarSizeMap');
+        $sizes = implode(', ', array_keys($avatarSizeMap));
+
+        $params = $this->params()
+            ->define('size', 'str', "Avatar size ({$sizes})", 'l');
+
+        $user = $this->assertViewableUser($paramBag->user_id);
+
+        if (!isset($avatarSizeMap[$params['size']])) {
+            return $this->noPermission();
+        }
+        $size = $avatarSizeMap[$params['size']];
+
+        $viewParams = [
+            'user' => $user,
+            'size' => $size
+        ];
+
+        $this->setResponseType('raw');
+        return $this->view('Xfrocks:User\DefaultAvatar', '', $viewParams);
     }
 
     public function actionGetFields()

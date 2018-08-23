@@ -7,7 +7,6 @@ use XF\Util\Random;
 use Xfrocks\Api\ControllerPlugin\Login;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\OAuth2\Server;
-use Xfrocks\Api\Util\Crypt;
 
 class Account extends XFCP_Account
 {

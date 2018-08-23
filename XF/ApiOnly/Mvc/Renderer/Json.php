@@ -1,12 +1,12 @@
 <?php
 
-namespace Xfrocks\Api\XF\Mvc\Renderer;
+namespace Xfrocks\Api\XF\ApiOnly\Mvc\Renderer;
 
 use XF\Db\AbstractAdapter;
 use XF\Mvc\Renderer\Html;
 use XF\Mvc\Reply\AbstractReply;
 use Xfrocks\Api\Util\Cors;
-use Xfrocks\Api\XF\Session\Session;
+use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class Json extends XFCP_Json
 {

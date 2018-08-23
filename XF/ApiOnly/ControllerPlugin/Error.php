@@ -1,6 +1,6 @@
 <?php
 
-namespace Xfrocks\Api\XF\ControllerPlugin;
+namespace Xfrocks\Api\XF\ApiOnly\ControllerPlugin;
 
 use Xfrocks\Api\Transformer;
 

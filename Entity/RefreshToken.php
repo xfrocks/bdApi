@@ -2,7 +2,6 @@
 
 namespace Xfrocks\Api\Entity;
 
-use XF\Entity\User;
 use XF\Mvc\Entity\Structure;
 
 /**

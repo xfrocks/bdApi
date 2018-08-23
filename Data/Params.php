@@ -80,11 +80,12 @@ class Params implements \ArrayAccess
 
     /**
      * @param string $key
-     * @param string|Param $type
-     * @param string $description
+     * @param string|Param|null $type
+     * @param string|null $description
+     * @param mixed|null $default
      * @return Params
      */
-    public function define($key, $type = null, $description = null)
+    public function define($key, $type = null, $description = null, $default = null)
     {
         if ($this->defineCompleted) {
             throw new \LogicException('All params must be defined together and before the first param parsing.');
@@ -94,6 +95,10 @@ class Params implements \ArrayAccess
             $param = new Param($type, $description);
         } else {
             $param = $type;
+        }
+
+        if ($default !== null) {
+            $param->default = $default;
         }
 
         $this->params[$key] = $param;

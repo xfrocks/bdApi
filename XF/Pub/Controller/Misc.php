@@ -7,7 +7,6 @@ use Xfrocks\Api\ControllerPlugin\Login;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Server;
-use Xfrocks\Api\Util\Crypt;
 
 class Misc extends XFCP_Misc
 {
