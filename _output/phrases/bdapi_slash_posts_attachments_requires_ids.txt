@@ -1,0 +1,1 @@
+/posts/attachments requires `thread_id` for new post or `post_id` for existing post.

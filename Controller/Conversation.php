@@ -30,10 +30,11 @@ class Conversation extends AbstractController
         /** @var \XF\Repository\Conversation $conversionRepo */
         $conversionRepo = $this->repository('XF:Conversation');
 
-        $finder = $conversionRepo->findConversationsStartedByUser($visitor);
+        $finder = $conversionRepo->findUserConversations($visitor);
         $params->limitFinderByPage($finder);
 
         $total = $finder->total();
+
         $conversations = $total > 0 ? $this->transformFinderLazily($finder) : [];
 
         $data = [
@@ -57,14 +58,84 @@ class Conversation extends AbstractController
         return $this->api($data);
     }
 
-    protected function assertViewableConversation($conversationId, array $extraWith = [])
+    public function actionPostIndex()
     {
-        /** @var ConversationMaster $conversation */
-        $conversation = $this->assertRecordExists('XF:ConversationMaster', $conversationId, $extraWith);
-        if (!$conversation->canView($error)) {
-            throw $this->exception($this->noPermission($error));
+        $params = $this
+            ->params()
+            ->define('conversation_title', 'str', 'title of the new conversation')
+            ->define('recipients', 'str', 'usernames of recipients of the new conversation')
+            ->define('message_body', 'str', 'content of the new conversation')
+            ->defineAttachmentHash();
+
+        $visitor = \XF::visitor();
+
+        /** @var \XF\Service\Conversation\Creator $creator */
+        $creator = $this->service('XF:Conversation\Creator', $visitor);
+        $creator->setRecipients($params['recipients']);
+        $creator->setContent($params['conversation_title'], $params['message_body']);
+
+        $contentData = ['message_id' => 0];
+        /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+        $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+        $tempHash = $attachmentPlugin->getAttachmentTempHash($contentData);
+
+        if ($creator->getConversation()->canUploadAndManageAttachments()) {
+            $creator->setAttachmentHash($tempHash);
         }
 
-        return $conversation;
+        $creator->checkForSpam();
+
+        if (!$creator->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $conversation = $creator->save();
+        return $this->actionSingle($conversation->conversation_id);
+    }
+
+    public function actionDeleteIndex(ParameterBag $params)
+    {
+        $conversation = $this->assertViewableConversation($params->conversation_id);
+
+        $recipient = $conversation->Recipients[\XF::visitor()->user_id];
+        $recipient->recipient_state = 'deleted';
+        $recipient->save();
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionPostAttachments()
+    {
+        $this->params()
+            ->defineFile('file')
+            ->defineAttachmentHash();
+
+        $contentData = ['message_id' => 0];
+        /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+        $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+        $tempHash = $attachmentPlugin->getAttachmentTempHash($contentData);
+
+        return $attachmentPlugin->doUpload($tempHash, 'conversation_message', $contentData);
+    }
+
+    protected function assertViewableConversation($conversationId, array $extraWith = [])
+    {
+        $visitor = \XF::visitor();
+
+        /** @var \XF\Finder\ConversationUser $finder */
+        $finder = $this->finder('XF:ConversationUser');
+        $finder->forUser($visitor, false);
+        $finder->where('conversation_id', $conversationId);
+        $finder->with($extraWith);
+
+        /** @var \XF\Entity\ConversationUser|null $conversation */
+        $conversation = $finder->fetchOne();
+        /** @var ConversationMaster|null $convoMaster */
+        $convoMaster = $conversation ? $conversation->Master : null;
+        if (!$conversation || !$convoMaster) {
+            throw $this->exception($this->notFound(\XF::phrase('requested_conversation_not_found')));
+        }
+
+        return $conversation->Master;
     }
 }

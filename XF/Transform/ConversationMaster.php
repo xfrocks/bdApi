@@ -113,7 +113,7 @@ class ConversationMaster extends AbstractHandler
         /** @var \XF\Entity\ConversationMaster $conversation */
         $conversation = $context->getSource();
         $links = [
-            self::LINK_PERMALINK => $this->buildApiLink('conversations', $conversation),
+            self::LINK_PERMALINK => $this->buildPublicLink('conversations', $conversation),
             self::LINK_DETAIL => $this->buildApiLink('conversations', $conversation),
             self::LINK_MESSAGES => $this->buildApiLink(
                 'conversation-messages',

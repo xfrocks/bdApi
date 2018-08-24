@@ -65,6 +65,18 @@
         "version_string": "2.0.0",
         "hash": "bbe1851a4bf6476f10ba4c77ec78d11d"
     },
+    "bdapi_invalid_facebook_token.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "7d19af7a3995fc262806c4037a19e452"
+    },
+    "bdapi_no_facebook_association_found.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "1d489502a4dff67f38846b80ef599d18"
+    },
     "bdapi_oauth2_error_access_denied.txt": {
         "global_cache": false,
         "version_id": 2000012,
@@ -190,6 +202,18 @@
         "version_id": 2000011,
         "version_string": "2.0.0 Alpha 1",
         "hash": "fb0d1eb2316a30f4aef20628b3f650b9"
+    },
+    "bdapi_slash_conversation_messages_attachments_requires_ids.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "30ecbbcc636d95fbfc3a13a2983074d1"
+    },
+    "bdapi_slash_posts_attachments_requires_ids.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "a45bd6337fe42280f7e8f5d8a6495e79"
     },
     "bdapi_slash_search_requires_q.txt": {
         "global_cache": false,
