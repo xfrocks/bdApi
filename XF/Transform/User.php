@@ -114,9 +114,6 @@ class User extends AbstractHandler
 
                 return $handler->hasPassword();
             case self::DYNAMIC_KEY_IS_FOLLOWED:
-                if ($context->data('flagFullAccess') !== true) {
-                    return null;
-                }
                 return $visitor->isFollowing($user);
             case self::DYNAMIC_KEY_IS_IGNORED:
                 return $visitor->isIgnoring($user->user_id);
