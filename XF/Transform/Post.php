@@ -176,7 +176,7 @@ class Post extends AbstractHandler implements AttachmentParent
             self::LINK_ATTACHMENTS => $this->buildApiLink('posts/attachments', $post),
             self::LINK_DETAIL => $this->buildApiLink('posts', $post),
             self::LINK_LIKES => $this->buildApiLink('posts/likes', $post),
-            self::LINK_PERMALINK => $this->buildApiLink('posts', $post),
+            self::LINK_PERMALINK => $this->buildPublicLink('posts', $post),
             self::LINK_REPORT => $this->buildApiLink('posts/report', $post),
             self::LINK_THREAD => $this->buildApiLink('threads', $post->Thread),
         ];

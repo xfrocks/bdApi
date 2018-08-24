@@ -131,7 +131,7 @@ class Thread extends AbstractHandler
             self::LINK_FORUM => $this->buildApiLink('forums', $thread->Forum),
             self::LINK_LAST_POSTER => $this->buildApiLink('users', $thread->LastPoster),
             self::LINK_LAST_POST => $this->buildApiLink('posts', ['post_id' => $thread->last_post_id]),
-            self::LINK_PERMALINK => $this->buildApiLink('threads', $thread),
+            self::LINK_PERMALINK => $this->buildPublicLink('threads', $thread),
             self::LINK_POSTS => $this->buildApiLink('posts', null, ['thread_id' => $thread->thread_id]),
         ];
 
