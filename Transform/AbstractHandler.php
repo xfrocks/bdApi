@@ -7,7 +7,7 @@ use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
-use Xfrocks\Api\XF\Session\Session;
+use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 abstract class AbstractHandler
 {

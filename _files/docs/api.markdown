@@ -1539,6 +1539,17 @@ Required scopes:
 
  * `post`
 
+### GET `/users/:userId/default-avatar`
+Default avatar (binary) of a user. Since forum-2018082301.
+
+Parameters:
+
+ * N/A
+
+Required scopes:
+
+ * `read`
+
 ### GET `/users/:userId/followers`
 List of a user's followers
 

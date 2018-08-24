@@ -1,8 +1,7 @@
 <?php
 
-namespace Xfrocks\Api\XF\Session;
+namespace Xfrocks\Api\XF\ApiOnly\Session;
 
-use XF\Session\StorageInterface;
 use Xfrocks\Api\Entity\Token;
 use Xfrocks\Api\Mvc\Session\InMemoryStorage;
 
@@ -11,15 +10,25 @@ class Session extends XFCP_Session
     const KEY_TOKEN = 'apiToken';
 
     /**
-     * @var StorageInterface
+     * @var \XF\Session\StorageInterface
      */
     private $_unusedStorage;
 
-    public function __construct(StorageInterface $storage, array $config = [])
+    public function __construct(\XF\Session\StorageInterface $storage, array $config = [])
     {
         parent::__construct(new InMemoryStorage(), $config);
 
         $this->_unusedStorage = $storage;
+    }
+
+    public function applyToResponse(\XF\Http\Response $response)
+    {
+        $headers = $response->headers();
+        if (isset($headers['Cache-Control'])) {
+            return;
+        }
+
+        $response->header('Cache-control', 'private, no-cache, max-age=0');
     }
 
     /**

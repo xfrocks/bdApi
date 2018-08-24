@@ -3,7 +3,6 @@
 namespace Xfrocks\Api\Controller;
 
 use Xfrocks\Api\ControllerPlugin\Login;
-use Xfrocks\Api\Data\Param;
 use Xfrocks\Api\Util\Crypt;
 use Xfrocks\Api\Util\OneTimeToken;
 
@@ -25,13 +24,9 @@ class Tool extends AbstractController
 
     public function actionPostLink()
     {
-        $paramType = new Param('str', 'Link type (admin, api, or public)');
-        $paramType->options['default'] = 'public';
-        $paramRoute = new Param('str', 'Link route');
-        $paramRoute->options['default'] = 'index';
         $params = $this->params()
-            ->define('type', $paramType)
-            ->define('route', $paramRoute);
+            ->define('type', 'str', 'Link type (admin, api, or public)', 'public')
+            ->define('route', 'str', 'Link route', 'index');
 
         switch ($params['type']) {
             case 'admin':

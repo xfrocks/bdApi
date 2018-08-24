@@ -161,11 +161,11 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     }
 
     /**
-     * @return \Xfrocks\Api\XF\Session\Session
+     * @return \Xfrocks\Api\XF\ApiOnly\Session\Session
      */
     public function session()
     {
-        /** @var \Xfrocks\Api\XF\Session\Session $session */
+        /** @var \Xfrocks\Api\XF\ApiOnly\Session\Session $session */
         $session = parent::session();
         return $session;
     }
@@ -205,15 +205,6 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         $lazyTransformer = new LazyTransformer($this);
         $lazyTransformer->setFinder($finder);
         return $lazyTransformer;
-    }
-
-    public function view($viewClass = '', $templateName = '', array $params = [])
-    {
-        if (!empty($viewClass)) {
-            $viewClass = \XF::stringToClass($viewClass, '%s\%s\View\%s', 'Pub');
-        }
-
-        return parent::view($viewClass, $templateName, $params);
     }
 
     protected function canUpdateSessionActivity($action, ParameterBag $params, AbstractReply &$reply, &$viewState)

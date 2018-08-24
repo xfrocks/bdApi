@@ -1,6 +1,6 @@
 <?php
 
-namespace Xfrocks\Api\XF\Mvc;
+namespace Xfrocks\Api\XF\ApiOnly\Mvc;
 
 class Dispatcher extends XFCP_Dispatcher
 {

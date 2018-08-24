@@ -25,19 +25,25 @@ class App extends \XF\Pub\App
         };
 
         $container->extend('extension.classExtensions', function (array $classExtensions) {
-            $classes = [
-                'XF\ControllerPlugin\Error',
-                'XF\Mvc\Dispatcher',
-                'XF\Mvc\Renderer\Json',
-                'XF\Session\Session'
+            $xfClasses = [
+                'ControllerPlugin\Error',
+                'Entity\User',
+                'Image\Gd',
+                'Image\Imagick',
+                'Mvc\Dispatcher',
+                'Mvc\Renderer\Json',
+                'Session\Session',
+                'Template\Templater',
             ];
 
-            foreach ($classes as $base) {
-                if (!isset($classExtensions[$base])) {
-                    $classExtensions[$base] = [];
+            foreach ($xfClasses as $xfClass) {
+                $extendBase = 'XF\\' . $xfClass;
+                if (!isset($classExtensions[$extendBase])) {
+                    $classExtensions[$extendBase] = [];
                 }
 
-                $classExtensions[$base][] = 'Xfrocks\Api\\' . $base;
+                $extendClass = 'Xfrocks\Api\\' . 'XF\\ApiOnly\\' . $xfClass;
+                $classExtensions[$extendBase][] = $extendClass;
             }
 
             return $classExtensions;
@@ -87,7 +93,7 @@ class App extends \XF\Pub\App
         $apiServer = $this->container('api.server');
         $accessToken = $apiServer->parseRequest();
 
-        /** @var \Xfrocks\Api\XF\Session\Session $apiSession */
+        /** @var \Xfrocks\Api\XF\ApiOnly\Session\Session $apiSession */
         $apiSession = $session;
         $apiSession->setToken($accessToken ? $accessToken->getXfToken() : null);
     }
