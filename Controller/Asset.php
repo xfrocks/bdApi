@@ -11,19 +11,25 @@ class Asset extends AbstractController
 
         $prefix = preg_replace('/[^a-zA-Z0-9]/', '', $params['prefix']);
 
+        $sdkPath = '';
         if (\XF::$debugMode) {
-            $sdkPath = dirname(__DIR__) . '/_files/js/Xfrocks/Api/sdk.js';
-        } else {
+            $devSdkPath = dirname(__DIR__) . '/_files/js/Xfrocks/Api/sdk.js';
+            if (file_exists($devSdkPath)) {
+                $sdkPath = $devSdkPath;
+            }
+        }
+
+        if ($sdkPath === '') {
             $sdkPath = sprintf(
                 '%1$s%2$sjs%2$sXfrocks%2$sApi%2$s' . 'sdk.min.js',
                 \XF::getRootDirectory(),
                 DIRECTORY_SEPARATOR
             );
         }
-
         if (!file_exists($sdkPath)) {
             return $this->noPermission();
         }
+
         $sdk = strval(file_get_contents($sdkPath));
         $sdk = str_replace('{prefix}', $prefix, $sdk);
         $sdk = str_replace('{data_uri}', $this->app->router('public')->buildLink('misc/api-data'), $sdk);

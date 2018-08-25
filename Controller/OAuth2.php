@@ -2,7 +2,6 @@
 
 namespace Xfrocks\Api\Controller;
 
-
 use OAuth\OAuth2\Token\StdOAuth2Token;
 use XF\ConnectedAccount\ProviderData\Facebook;
 use XF\Entity\ConnectedAccountProvider;

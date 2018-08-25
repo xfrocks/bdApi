@@ -9,6 +9,7 @@
     "phpunit/phpunit": "^7.3"
   },
   "scripts": {
+    "build-release": "xf-addon--build-release Xfrocks/Api",
     "export": "composer install && cmd-php.sh xfrocks-api:pre-test && ./vendor/bin/phpunit --testdox && xf-dev--export--addon.sh Xfrocks/Api",
     "export-only": "xf-dev--export--addon.sh Xfrocks/Api",
     "quick-check": "export ADDON_DIR=/var/www/html/src/addons/Xfrocks/Api && devhelper-phpcs.sh $ADDON_DIR && devhelper-phpstan.sh $ADDON_DIR",
