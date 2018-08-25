@@ -427,7 +427,7 @@ class User extends AbstractController
         ];
 
         $this->setResponseType('raw');
-        return $this->view('Xfrocks:User\DefaultAvatar', '', $viewParams);
+        return $this->view('Xfrocks\Api\View\User\DefaultAvatar', '', $viewParams);
     }
 
     public function actionGetFields()

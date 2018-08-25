@@ -207,6 +207,15 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         return $lazyTransformer;
     }
 
+    public function view($viewClass = '', $templateName = '', array $params = [])
+    {
+        if (!empty($viewClass)) {
+            $viewClass = \XF::stringToClass($viewClass, '%s\%s\View\%s', 'Pub');
+        }
+
+        return parent::view($viewClass, $templateName, $params);
+    }
+
     protected function canUpdateSessionActivity($action, ParameterBag $params, AbstractReply &$reply, &$viewState)
     {
         return false;

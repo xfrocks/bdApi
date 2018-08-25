@@ -30,7 +30,7 @@ class Asset extends AbstractController
         $sdk = str_replace('{request_uri}', $this->buildApiLink('index'), $sdk);
 
         $this->setResponseType('raw');
-        return $this->view('Xfrocks:Asset\Sdk', '', ['sdk' => $sdk]);
+        return $this->view('Xfrocks\Api\View\Asset\Sdk', '', ['sdk' => $sdk]);
     }
 
     public function assertBoardActive($action)
