@@ -45,7 +45,8 @@ class UserAlert extends AbstractHandler
             case self::DYNAMIC_KEY_IS_UNREAD:
                 return $alert->isUnviewed();
             case self::DYNAMIC_KEY_NOTIFICATION_TYPE:
-                return sprintf('%s_%d_%s',
+                return sprintf(
+                    '%s_%d_%s',
                     $alert->content_type,
                     $alert->content_id,
                     $alert->action
