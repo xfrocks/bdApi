@@ -44,6 +44,18 @@ class Notification extends AbstractController
         return $this->api($data);
     }
 
+    public function actionPostRead()
+    {
+        $visitor = \XF::visitor();
+        if ($visitor->alerts_unread > 0) {
+            /** @var \XF\Repository\UserAlert $alertRepo */
+            $alertRepo = $this->repository('XF:UserAlert');
+            $alertRepo->markUserAlertsRead(\XF::visitor());
+        }
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
     public function actionGetContent(ParameterBag $params)
     {
         /** @var UserAlert $alert */
