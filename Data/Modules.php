@@ -23,6 +23,7 @@ class Modules
         $this->addController('Xfrocks:ConversationMessage', 'conversation-messages', ':int<message_id>/');
         $this->addController('Xfrocks:Index', 'index');
         $this->addController('Xfrocks:Forum', 'forums', ':int<node_id>/');
+        $this->addController('Xfrocks:Notification', 'notifications', ':int<alert_id>/');
         $this->addController('Xfrocks:OAuth2', 'oauth');
         $this->addController('Xfrocks:Post', 'posts', ':int<post_id>/');
         $this->addController('Xfrocks:Search', 'search', ':int<search_id>/');
