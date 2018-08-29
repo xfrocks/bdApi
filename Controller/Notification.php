@@ -2,7 +2,10 @@
 
 namespace Xfrocks\Api\Controller;
 
+use XF\Entity\ConversationMaster;
 use XF\Entity\UserAlert;
+use XF\Mvc\Entity\Entity;
+use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
 use Xfrocks\Api\Util\PageNav;
 
@@ -64,14 +67,28 @@ class Notification extends AbstractController
             return $this->noPermission();
         }
 
-        $contentControllerResponse = $this->getContentControllerResponse($alert);
-        if ($contentControllerResponse !== null) {
-            return $contentControllerResponse;
+
+        $contentEntity = $this->getContentControllerResponse($alert);
+        if ($contentEntity instanceof Entity) {
+            if (method_exists($contentEntity, 'canView')) {
+                if (!$contentEntity->canView()) {
+                    return $this->noPermission();
+                }
+            }
+
+            $contentEntity = $this->transformEntityLazily($contentEntity);
+        } elseif ($contentEntity instanceof Finder) {
+            $contentEntity = $this->transformFinderLazily($contentEntity);
         }
 
         $data = [
-            'notification_id' => $alert->alert_id
+            'notification_id' => $alert->alert_id,
+            'notification' => $this->transformEntityLazily($alert)
         ];
+
+        if ($contentEntity) {
+            $data['content'] = $contentEntity;
+        }
 
         return $this->api($data);
     }
@@ -81,25 +98,26 @@ class Notification extends AbstractController
         switch ($alert->content_type) {
             case 'conversation':
                 switch ($alert->action) {
-                    case 'insert':
-                    case 'join':
-                    case 'reply':
-                        $this->request()->set('conversation_id', $alert->content_id);
-
-                        return $this->rerouteController('Xfrocks\Api\Controller\ConversationMessage', 'get-index');
+                    // TODO: Support special action case
                 }
 
-                return $this->rerouteController('Xfrocks\Api\Controller\Conversation', 'get-index', [
-                    'conversation_id' => $alert->content_id
-                ]);
+                $visitor = \XF::visitor();
+
+                /** @var \XF\Finder\ConversationUser $finder */
+                $finder = $this->finder('XF:ConversationUser');
+                $finder->forUser($visitor, false);
+                $finder->where('conversation_id', $alert->content_id);
+
+                /** @var \XF\Entity\ConversationUser|null $conversation */
+                $conversation = $finder->fetchOne();
+                /** @var ConversationMaster|null $convoMaster */
+                $convoMaster = $conversation ? $conversation->Master : null;
+
+                return $convoMaster;
             case 'thread':
-                return $this->rerouteController('Xfrocks\Api\Controller\Thread', 'get-index', [
-                    'thread_id' => $alert->content_id
-                ]);
+                return $this->assertRecordExists('XF:Thread', $alert->content_id);
             case 'post':
-                return $this->rerouteController('Xfrocks\Api\Controller\Post', 'get-index', [
-                    'post_id' => $alert->content_id
-                ]);
+                return $this->assertRecordExists('XF:Post', $alert->content_id);
             case 'user':
                 switch ($alert->action) {
                     case 'following':
@@ -109,22 +127,17 @@ class Notification extends AbstractController
                     case 'post_copy':
                     case 'post_move':
                     case 'thread_merge':
-//                        if (!empty($alert->extra_data['targetLink'])) {
-//                            $this->request()->set('link', $alert->extra_data['targetLink']);
-//                            return $this->rerouteController('bdApi_ControllerApi_Tool', 'get-parse-link');
-//                        }
                         // TODO: Support user alert action (post_copy, post_move, thread_merge)
                         break;
                     case 'thread_move':
                         break;
                 }
 
-                return $this->rerouteController('Xfrocks\Api\Controller\User', 'get-index', [
-                    'user_id' => $alert->content_id
-                ]);
+                return $this->assertRecordExists('XF:User', $alert->content_id);
             case 'profile_post':
-                $this->request()->set('profile_post_id', $alert->content_id);
-                return $this->rerouteController('Xfrocks\Api\Controller\ProfilePost', 'get-comments');
+                // TODO: Support special action case
+
+                return null;
         }
 
         return null;
