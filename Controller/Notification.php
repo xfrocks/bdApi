@@ -7,6 +7,8 @@ use XF\Entity\UserAlert;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
+use Xfrocks\Api\Data\BatchJob;
+use Xfrocks\Api\Transformer;
 use Xfrocks\Api\Util\PageNav;
 
 class Notification extends AbstractController
@@ -67,18 +69,18 @@ class Notification extends AbstractController
             return $this->noPermission();
         }
 
+        $jobConfig = $this->getBatchJobConfig($alert);
+        $contentResponse = null;
 
-        $contentEntity = $this->getContentControllerResponse($alert);
-        if ($contentEntity instanceof Entity) {
-            if (method_exists($contentEntity, 'canView')) {
-                if (!$contentEntity->canView()) {
-                    return $this->noPermission();
-                }
-            }
+        if ($jobConfig) {
+            $jobConfig = array_replace([
+                'method' => 'GET',
+                'uri' => null,
+                'params' => []
+            ], $jobConfig);
 
-            $contentEntity = $this->transformEntityLazily($contentEntity);
-        } elseif ($contentEntity instanceof Finder) {
-            $contentEntity = $this->transformFinderLazily($contentEntity);
+            $job = new BatchJob($this->app, $jobConfig['method'], $jobConfig['params'], $jobConfig['uri']);
+            $contentResponse = $job->execute();
         }
 
         $data = [
@@ -86,44 +88,61 @@ class Notification extends AbstractController
             'notification' => $this->transformEntityLazily($alert)
         ];
 
-        if ($contentEntity) {
-            $data['content'] = $contentEntity;
+        if ($contentResponse) {
+            /** @var Transformer $transformer */
+            $transformer = $this->app()->container('api.transformer');
+
+            $data = array_merge($data, $transformer->transformBatchJobReply($contentResponse));
         }
 
         return $this->api($data);
     }
 
-    protected function getContentControllerResponse(UserAlert $alert)
+    protected function getBatchJobConfig(UserAlert $alert)
     {
         switch ($alert->content_type) {
             case 'conversation':
                 switch ($alert->action) {
-                    // TODO: Support special action case
+                    case 'insert':
+                    case 'join':
+                    case 'reply':
+                        return [
+                            'uri' => $this->buildApiLink('conversation-messages'),
+                            'params' => [
+                                'conversation_id' => $alert->content_id
+                            ]
+                        ];
                 }
 
-                $visitor = \XF::visitor();
-
-                /** @var \XF\Finder\ConversationUser $finder */
-                $finder = $this->finder('XF:ConversationUser');
-                $finder->forUser($visitor, false);
-                $finder->where('conversation_id', $alert->content_id);
-
-                /** @var \XF\Entity\ConversationUser|null $conversation */
-                $conversation = $finder->fetchOne();
-                /** @var ConversationMaster|null $convoMaster */
-                $convoMaster = $conversation ? $conversation->Master : null;
-
-                return $convoMaster;
+                return [
+                    'uri' => $this->buildApiLink('conversations'),
+                    'params' => [
+                        'conversation_id' => $alert->content_id
+                    ]
+                ];
             case 'thread':
-                return $this->assertRecordExists('XF:Thread', $alert->content_id);
+                return [
+                    'uri' => $this->buildApiLink('threads'),
+                    'params' => [
+                        'thread_id' => $alert->content_id
+                    ]
+                ];
             case 'post':
-                return $this->assertRecordExists('XF:Post', $alert->content_id);
+                return [
+                    'uri' => $this->buildApiLink('posts'),
+                    'params' => [
+                        'post_id' => $alert->content_id
+                    ]
+                ];
             case 'user':
                 switch ($alert->action) {
                     case 'following':
-                        return $this->rerouteController('Xfrocks\Api\Controller\User', 'get-followers', [
-                            'user_id' => $alert->content_id
-                        ]);
+                        return [
+                            'uri' => $this->buildApiLink('users/followers'),
+                            'params' => [
+                                'user_id' => $alert->content_id
+                            ]
+                        ];
                     case 'post_copy':
                     case 'post_move':
                     case 'thread_merge':
@@ -133,11 +152,26 @@ class Notification extends AbstractController
                         break;
                 }
 
-                return $this->assertRecordExists('XF:User', $alert->content_id);
+                return [
+                    'uri' => $this->buildApiLink('users'),
+                    'params' => [
+                        'user_id' => $alert->content_id
+                    ]
+                ];
             case 'profile_post':
-                // TODO: Support special action case
-
-                return null;
+                return [
+                    'uri' => $this->buildApiLink('profile-posts/comments'),
+                    'params' => [
+                        'profile_post_id' => $alert->content_id
+                    ]
+                ];
+            case 'profile_post_comment':
+                return [
+                    'uri' => $this->buildApiLink('profile-posts/comments'),
+                    'params' => [
+                        'page_of_comment_id' => $alert->content_id
+                    ]
+                ];
         }
 
         return null;
