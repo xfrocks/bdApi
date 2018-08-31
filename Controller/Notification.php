@@ -107,7 +107,7 @@ class Notification extends AbstractController
                     case 'join':
                     case 'reply':
                         return [
-                            'uri' => $this->buildApiLink('conversation-messages'),
+                            'uri' => 'conversation-messages',
                             'params' => [
                                 'conversation_id' => $alert->content_id
                             ]
@@ -115,30 +115,30 @@ class Notification extends AbstractController
                 }
 
                 return [
-                    'uri' => $this->buildApiLink('conversations'),
+                    'uri' => 'conversations',
                     'params' => [
                         'conversation_id' => $alert->content_id
                     ]
                 ];
             case 'thread':
                 return [
-                    'uri' => $this->buildApiLink('threads'),
+                    'uri' => 'threads',
                     'params' => [
                         'thread_id' => $alert->content_id
                     ]
                 ];
             case 'post':
                 return [
-                    'uri' => $this->buildApiLink('posts'),
+                    'uri' => 'posts',
                     'params' => [
-                        'post_id' => $alert->content_id
+                        'page_of_post_id' => $alert->content_id
                     ]
                 ];
             case 'user':
                 switch ($alert->action) {
                     case 'following':
                         return [
-                            'uri' => $this->buildApiLink('users/followers'),
+                            'uri' => 'users/followers',
                             'params' => [
                                 'user_id' => $alert->content_id
                             ]
@@ -153,21 +153,21 @@ class Notification extends AbstractController
                 }
 
                 return [
-                    'uri' => $this->buildApiLink('users'),
+                    'uri' => 'users',
                     'params' => [
                         'user_id' => $alert->content_id
                     ]
                 ];
             case 'profile_post':
                 return [
-                    'uri' => $this->buildApiLink('profile-posts/comments'),
+                    'uri' => 'profile-posts/comments',
                     'params' => [
                         'profile_post_id' => $alert->content_id
                     ]
                 ];
             case 'profile_post_comment':
                 return [
-                    'uri' => $this->buildApiLink('profile-posts/comments'),
+                    'uri' => 'profile-posts/comments',
                     'params' => [
                         'page_of_comment_id' => $alert->content_id
                     ]
