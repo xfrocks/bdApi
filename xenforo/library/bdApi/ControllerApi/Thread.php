@@ -21,6 +21,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $sticky = $this->_input->filterSingle('sticky', XenForo_Input::STRING);
         $stickyBool = intval($sticky) > 0;
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
+        $threadUpdateDate = $this->_input->filterSingle('thread_update_date', XenForo_Input::UINT);
 
         $forumIdInput = preg_split('#[^0-9]#', $forumIdInput, -1, PREG_SPLIT_NO_EMPTY);
         $viewableNodes = $this->_getNodeModel()->getViewableNodeList();
@@ -142,6 +143,10 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                     // disable paging for this order if not in a forum
                     $fetchOptions['page'] = 0;
                 }
+
+                if ($threadUpdateDate > 0) {
+                    $conditions['last_post_date'] = array('>', $threadUpdateDate);
+                }
                 break;
             case 'thread_update_date_reverse':
                 $fetchOptions['order'] = 'last_post_date';
@@ -151,6 +156,10 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                 if ($theForumId < 1) {
                     // disable paging for this order if not in a forum
                     $fetchOptions['page'] = 0;
+                }
+
+                if ($threadUpdateDate > 0) {
+                    $conditions['last_post_date'] = array('<', $threadUpdateDate);
                 }
                 break;
             case 'thread_view_count':
