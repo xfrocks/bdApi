@@ -1,0 +1,12 @@
+{
+    "edit_format": "onoff",
+    "edit_format_params": "",
+    "data_type": "unsigned_integer",
+    "sub_options": [],
+    "validation_class": "Xfrocks\\Api\\Option\\ColumnOption",
+    "validation_method": "verifyOnOffOption",
+    "default_value": "0",
+    "relations": {
+        "bdApi": 25
+    }
+}

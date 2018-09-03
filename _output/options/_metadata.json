@@ -20,7 +20,28 @@
     "bdApi_restrictAccess.json": {
         "hash": "ff2162ef2e2a81673654bd0df46f6021"
     },
+    "bdApi_subscriptionColumnThreadPost.json": {
+        "hash": "1d8ea47bd0923f2c4739e5c5f95cb6aa"
+    },
+    "bdApi_subscriptionColumnUser.json": {
+        "hash": "f2cbca5cf10d34674a814f0e2f201d59"
+    },
+    "bdApi_subscriptionColumnUserNotification.json": {
+        "hash": "cd507424d986a96c97e3074a67735b2e"
+    },
+    "bdApi_subscriptionThreadPost.json": {
+        "hash": "b9d8eaf2d22b9858c0120a889b005197"
+    },
+    "bdApi_subscriptionUser.json": {
+        "hash": "3f4259d8dbc3e0a0a1c424af751faa4b"
+    },
+    "bdApi_subscriptionUserNotification.json": {
+        "hash": "f7ef9569354e95a851937d8a81c0d325"
+    },
     "bdApi_tokenTTL.json": {
         "hash": "5717f8abd434e3672265f1d6672f7668"
+    },
+    "bdApi_userNotificationConversation.json": {
+        "hash": "431d431e2388ccec592b94cf1b9d50ed"
     }
 }

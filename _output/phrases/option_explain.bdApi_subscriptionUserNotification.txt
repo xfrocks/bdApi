@@ -1,0 +1,1 @@
+Enable this option to allow clients to <a href="https://github.com/xfrocks/bdApi/blob/master/docs/api.markdown#subscriptions" target="_blank" tabindex="-1">subscribe</a> for user alerts.

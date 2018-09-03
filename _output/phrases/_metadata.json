@@ -317,11 +317,53 @@
         "version_string": "2.0.0",
         "hash": "34faac305878c1caba32fa0e4ced9e23"
     },
+    "option.bdApi_subscriptionColumnThreadPost.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "fe9f53ebf9e0f327b320f7f473092458"
+    },
+    "option.bdApi_subscriptionColumnUser.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "715282f33c5ff53d7c9d34d9a2d91917"
+    },
+    "option.bdApi_subscriptionColumnUserNotification.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "5d0a9594de833f95228d4d0dd10fc61c"
+    },
+    "option.bdApi_subscriptionThreadPost.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "8d435865582087e724337475d2811ed8"
+    },
+    "option.bdApi_subscriptionUser.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "9cedd12b812b4581f976de5792cf7cb8"
+    },
+    "option.bdApi_subscriptionUserNotification.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "94394be1ad3ba0d2da3aef58e5d2b4a9"
+    },
     "option.bdApi_tokenTTL.txt": {
         "global_cache": false,
         "version_id": 2000000,
         "version_string": "2.0.0",
         "hash": "41f6cd1daf504b93ffde06aa9e45ef4b"
+    },
+    "option.bdApi_userNotificationConversation.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "a8023022c2be5cab44fd75415f2cc346"
     },
     "option_explain.bdApi_authCodeTTL.txt": {
         "global_cache": false,
@@ -365,11 +407,53 @@
         "version_string": "2.0.0",
         "hash": "b616b9028b34d09facb37b7aefd8429c"
     },
+    "option_explain.bdApi_subscriptionColumnThreadPost.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "790a6f22442d9f25263ce0ec7ee3c5b4"
+    },
+    "option_explain.bdApi_subscriptionColumnUser.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "1bf3fb6c3e6baf14d27f14f15f91003c"
+    },
+    "option_explain.bdApi_subscriptionColumnUserNotification.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "88f8cea9f33a0fb261759be3a31681b9"
+    },
+    "option_explain.bdApi_subscriptionThreadPost.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "6b4a0ec66486d95cd6e4396972bb227f"
+    },
+    "option_explain.bdApi_subscriptionUser.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "2c41c7e8c33f1011f61068af2d42d11a"
+    },
+    "option_explain.bdApi_subscriptionUserNotification.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "67c6effff4559ae323a7ca080e7ce762"
+    },
     "option_explain.bdApi_tokenTTL.txt": {
         "global_cache": false,
         "version_id": 2000000,
         "version_string": "2.0.0",
         "hash": "5ce5b570bba867e981e38d8d284ecc18"
+    },
+    "option_explain.bdApi_userNotificationConversation.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "9933da44ff5c288a90f730af8973657c"
     },
     "option_group.bdApi.txt": {
         "global_cache": false,
