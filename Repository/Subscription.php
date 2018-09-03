@@ -5,6 +5,8 @@ namespace Xfrocks\Api\Repository;
 use XF\Entity\Thread;
 use XF\Entity\User;
 use XF\Mvc\Entity\Repository;
+use XF\Util\Php;
+use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class Subscription extends Repository
 {
@@ -225,6 +227,48 @@ class Subscription extends Repository
         }
 
         return false;
+    }
+
+    public function prepareDiscoveryParams(array &$params, $topicType, $topicId, $selfLink, $subscriptionOption)
+    {
+        if (!self::getSubscription($topicType)) {
+            return false;
+        }
+
+        $response = $this->app()->response();
+
+        $hubLink = $this->app()->router('api')->buildLink('subscriptions', null, [
+            'hub.topic' => self::getTopic($topicType, $topicId),
+            'oauth_token' => ''
+        ]);
+
+        $response->header('Link', sprintf('<%s>; rel=hub', $hubLink));
+        if (!empty($selfLink)) {
+            $response->header('Link', sprintf('<%s>; rel=self', $selfLink));
+        }
+
+        if (!empty($subscriptionOption)) {
+            if (is_string($subscriptionOption)) {
+                $subscriptionOption = Php::safeUnserialize($subscriptionOption);
+            }
+
+            /** @var Session $session */
+            $session = $this->app()->session();
+            $clientId = $session->getToken() ? $session->getToken()->client_id : '';
+
+            if (is_array($subscriptionOption)
+                && $clientId
+                && !empty($subscriptionOption['subscriptions'])
+            ) {
+                foreach ($subscriptionOption['subscriptions'] as $subscription) {
+                    if ($subscription['client_id'] == $clientId) {
+                        $params['subscription_callback'] = $subscription['callback'];
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     public static function getTopic($type, $id)

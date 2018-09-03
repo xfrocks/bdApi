@@ -2,10 +2,7 @@
 
 namespace Xfrocks\Api\Controller;
 
-use XF\Entity\ConversationMaster;
 use XF\Entity\UserAlert;
-use XF\Mvc\Entity\Entity;
-use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
 use Xfrocks\Api\Data\BatchJob;
 use Xfrocks\Api\Transformer;
@@ -43,6 +40,16 @@ class Notification extends AbstractController
             'notifications' => $notifications,
             'notifications_total' => $total
         ];
+
+        /** @var \Xfrocks\Api\Repository\Subscription $subscriptionRepo */
+        $subscriptionRepo = $this->repository('Xfrocks\Api:Subscription');
+        $subscriptionRepo->prepareDiscoveryParams(
+            $data,
+            \Xfrocks\Api\Repository\Subscription::TYPE_NOTIFICATION,
+            \XF::visitor()->user_id,
+            $this->buildApiLink('notifications', null, ['oauth_token' => '']),
+            \XF::visitor()->getValue($this->options()->bdApi_subscriptionColumnUserNotification)
+        );
 
         PageNav::addLinksToData($data, $params, $total, 'notifications');
 
