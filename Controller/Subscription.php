@@ -28,14 +28,14 @@ class Subscription extends AbstractController
 
         $validator = $this->app->validator('XF:Url');
         if (!$validator->isValid($params['hub_callback'])) {
-            return $this->error(\XF::phrase('bdapi_subscription_callback_is_required'), 400);
+            return $this->responseError(\XF::phrase('bdapi_subscription_callback_is_required'));
         }
 
         if (!in_array($params['hub_mode'], [
             'subscribe',
             'unsubscribe'
         ], true)) {
-            return $this->error(\XF::phrase('bdapi_subscription_mode_must_valid'), 400);
+            return $this->responseError(\XF::phrase('bdapi_subscription_mode_must_valid'));
         }
 
         /** @var \Xfrocks\Api\Entity\Subscription[]|null $existingSubscriptions */
@@ -48,7 +48,7 @@ class Subscription extends AbstractController
             }
 
             if (!$this->subscriptionRepo()->isValidTopic($hubTopic)) {
-                return $this->error(\XF::phrase('bdapi_subscription_topic_not_recognized'));
+                return $this->responseError(\XF::phrase('bdapi_subscription_topic_not_recognized'));
             }
         } else {
             $existingSubscriptions = $this->finder('Xfrocks\Api:Subscription')
@@ -104,12 +104,32 @@ class Subscription extends AbstractController
                     if ($params['hub_lease_seconds'] > 0) {
                         $subscriptionEntity->expire_date = \XF::$time + $params['hub_lease_seconds'];
                     }
-                    
+
                     $subscriptionEntity->save();
             }
+
+            $this->setResponseType('raw');
+            return $this->view('Xfrocks\Api:Subscription\Post', 'DEFAULT', [
+                'httpResponseCode' => 202
+            ]);
         }
 
-        return $this->error(\XF::phrase('bdapi_subscription_cannot_verify_intent_of_subscriber'));
+        return $this->responseError(\XF::phrase('bdapi_subscription_cannot_verify_intent_of_subscriber'));
+    }
+
+    protected function responseError($error)
+    {
+        $this->setResponseType('raw');
+
+        return $this->view('Xfrocks\Api:Subscription\Post', 'DEFAULT', [
+            'httpResponseCode' => 400,
+            'message' => $error
+        ]);
+    }
+
+    protected function getDefaultApiScopeForAction($action)
+    {
+        return null;
     }
 
     /**
