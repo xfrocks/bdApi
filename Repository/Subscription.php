@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Repository;
 
 use GuzzleHttp\Exception\ClientException;
+use XF\Entity\Post;
 use XF\Entity\Thread;
 use XF\Entity\User;
 use XF\Entity\UserAlert;
@@ -32,6 +33,14 @@ class Subscription extends Repository
         }
 
         return $data;
+    }
+
+    public function deleteSubscriptionsForTopic($type, $id)
+    {
+        $topic = self::getTopic($type, $id);
+        $deleted = $this->db()->delete('xf_bdapi_subscription', 'topic = ?', $topic);
+
+        return $deleted;
     }
 
     public function updateCallbacksForTopic($topic)
@@ -338,6 +347,58 @@ class Subscription extends Repository
                 $objectType,
                 $pingData,
                 $subscription['expire_date']
+            );
+        }
+
+        return true;
+    }
+
+    public function pingThreadPost($action, Post $post)
+    {
+        if (!self::getSubscription(self::TYPE_THREAD_POST)) {
+            return false;
+        }
+
+        $subColumn = $this->options()->bdApi_subscriptionColumnThreadPost;
+        if (!empty($post->Thread->getValue($subColumn))) {
+            $option = $post->Thread->getValue($subColumn);
+            $this->ping(
+                $option,
+                $action,
+                self::TYPE_THREAD_POST,
+                $post->post_id
+            );
+        }
+
+        return true;
+    }
+
+    public function pingUser($action, User $user)
+    {
+        if (!self::getSubscription(self::TYPE_USER)) {
+            return false;
+        }
+
+        if ($action === 'insert') {
+            $user0Option = $this->app()->simpleCache()->getValue('Xfrocks/Api', self::TYPE_USER_0_SIMPLE_CACHE);
+            if (!empty($user0Option)) {
+                $this->ping(
+                    $user0Option,
+                    $action,
+                    self::TYPE_USER,
+                    $user->user_id
+                );
+            }
+        }
+
+        $subColumn = $this->options()->bdApi_subscriptionColumnUser;
+        $userOption = $user->Option->getValue($subColumn);
+        if (!empty($userOption)) {
+            $this->ping(
+                $userOption,
+                $action,
+                self::TYPE_USER,
+                $user->user_id
             );
         }
 

@@ -2,7 +2,28 @@
     "app_pub_setup_b5c183c96455035dde6ad0e9dde9561d.json": {
         "hash": "4cc61338a5fbe18ba2f01785b8e2eef0"
     },
-    "entity_post_save_4d6fa5b4f77b0da6afd22ff6d90f985d.json": {
-        "hash": "230d7f3715bea72b0825ddfb07ebe1e9"
+    "entity_post_delete_4954212b235cbede9c6c3d58dbeae51d.json": {
+        "hash": "c97189c77b62aabae6ae8e8a646b30a4"
+    },
+    "entity_post_delete_e736a98aaa83c37debec3ee9a8f73185.json": {
+        "hash": "ac464476060fac3f81493def792ed1ea"
+    },
+    "entity_post_delete_f78e22d51b95226a7df625c0be4b97c2.json": {
+        "hash": "2a4331d080b6b946fba60d2a7bb298f1"
+    },
+    "entity_post_save_0b675a7c65c1ef2d63011c577fd2e3d8.json": {
+        "hash": "fe246e1025f477f258bb87729dea300b"
+    },
+    "entity_post_save_65b87da9d860cc1344bb0a0b4c054ccd.json": {
+        "hash": "17f1b408956e878f7504dcd7f6d17a04"
+    },
+    "entity_post_save_cf676a60403126a7131f0028f4beac94.json": {
+        "hash": "7f71469f753704a379642ad9a2d817a8"
+    },
+    "entity_structure_e0642b88800a83a4bab06e835481cab2.json": {
+        "hash": "7be0f83d24c8a427d9f41c92f5ac4e41"
+    },
+    "entity_structure_ede856f66703b33cecdc650ded5bef0f.json": {
+        "hash": "95715f1f87a7d50e060f6506188ca046"
     }
 }

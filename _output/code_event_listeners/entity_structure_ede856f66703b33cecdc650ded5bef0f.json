@@ -1,0 +1,9 @@
+{
+    "event_id": "entity_structure",
+    "execute_order": 10,
+    "callback_class": "Xfrocks\\Api\\Listener",
+    "callback_method": "onEntityUserOptionStructure",
+    "active": true,
+    "hint": "XF\\Entity\\UserOption",
+    "description": "XF\\Entity\\UserOption"
+}
