@@ -401,9 +401,6 @@ class Subscription extends Repository
 
         $viewingUsers = $this->preparePingDataGetViewingUsers($userIds);
 
-        /** @var \XF\Repository\UserAlert $userAlertRepo */
-        $userAlertRepo = $this->repository('XF:UserAlert');
-
         foreach ($alertsByUser as $userId => &$userAlerts) {
             if (!isset($viewingUsers[$userId])) {
                 // user not found
