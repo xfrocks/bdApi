@@ -317,6 +317,12 @@
         "version_string": "2.0.0 Alpha 3",
         "hash": "f32e6135189e1780b06505465eecaa60"
     },
+    "option.bdApi_logRetentionDays.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "54e0d0669a98f808307c323e0dad0da9"
+    },
     "option.bdApi_paramLimitDefault.txt": {
         "global_cache": false,
         "version_id": 2000011,
@@ -334,6 +340,12 @@
         "version_id": 2000011,
         "version_string": "2.0.0 Alpha 1",
         "hash": "adaf87680c83c38ec9d56867abb630f4"
+    },
+    "option.bdApi_pingQueueUseDefer.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "9982a58bf12c7fa12deb6ee2707f830d"
     },
     "option.bdApi_refreshTokenTTLDays.txt": {
         "global_cache": false,
@@ -407,6 +419,12 @@
         "version_string": "2.0.0 Alpha 3",
         "hash": "f89a4fb8e37f6de3702730af93c7371b"
     },
+    "option_explain.bdApi_logRetentionDays.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "ce2abbaa56705c706a1daf101250549f"
+    },
     "option_explain.bdApi_paramLimitDefault.txt": {
         "global_cache": false,
         "version_id": 2000011,
@@ -424,6 +442,12 @@
         "version_id": 2000011,
         "version_string": "2.0.0 Alpha 1",
         "hash": "06ed2a9928d193e8d79efb8875e1ea20"
+    },
+    "option_explain.bdApi_pingQueueUseDefer.txt": {
+        "global_cache": false,
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "d41d8cd98f00b204e9800998ecf8427e"
     },
     "option_explain.bdApi_refreshTokenTTLDays.txt": {
         "global_cache": false,

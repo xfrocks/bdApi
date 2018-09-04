@@ -19,6 +19,14 @@ class Log extends Repository
         self::$logging++;
     }
 
+    public function pruneExpired()
+    {
+        $days = $this->options()->bdApi_logRetentionDays;
+        $cutoff = \XF::$time - $days * 86400;
+
+        return $this->db()->delete('xf_bdapi_log', 'request_date < ?', $cutoff);
+    }
+
     public function logRequest(
         $requestMethod,
         $requestUri,

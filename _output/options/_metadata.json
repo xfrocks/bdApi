@@ -5,6 +5,9 @@
     "bdApi_cors.json": {
         "hash": "49bf33143e73258b7e96ede1f0dfd214"
     },
+    "bdApi_logRetentionDays.json": {
+        "hash": "25b4b3d13494a5a699d23f2276c7058d"
+    },
     "bdApi_paramLimitDefault.json": {
         "hash": "3c27531eabd7183a898bd70cfc3f1779"
     },
@@ -13,6 +16,9 @@
     },
     "bdApi_paramPageMax.json": {
         "hash": "f105958153411491e0ac4fa2e7c81c2b"
+    },
+    "bdApi_pingQueueUseDefer.json": {
+        "hash": "d0c01d3fb6954583fd4865edadb2103e"
     },
     "bdApi_refreshTokenTTLDays.json": {
         "hash": "0e0669e64483b08378cb183ce1c7fe09"

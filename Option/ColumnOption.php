@@ -33,7 +33,7 @@ class ColumnOption extends AbstractOption
 
         $column = \XF::app()
             ->options()
-            ->offsetGet('bdApi_subscriptionColumn' . $table);
+            ->offsetGet('bdApi_subscriptionColumn' . $subscriptionTopicType);
 
         if (!self::checkColumnExists($table, $column, $option)) {
             return false;
