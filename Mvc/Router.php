@@ -31,9 +31,12 @@ class Router extends \XF\Mvc\Router
     public function buildLink($link, $data = null, array $parameters = [])
     {
         if (!isset($parameters[Listener::$accessTokenParamKey])) {
-            /** @var Session $session */
+            /** @var mixed $session */
             $session = $this->app->session();
-            $parameters[Listener::$accessTokenParamKey] = $session->getTokenText();
+            $getTokenText = [$session, 'getTokenText'];
+            if (is_callable($getTokenText)) {
+                $parameters[Listener::$accessTokenParamKey] = call_user_func($getTokenText);
+            }
         }
 
         return parent::buildLink($link, $data, $parameters);
