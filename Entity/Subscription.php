@@ -18,6 +18,8 @@ use XF\Mvc\Entity\Structure;
  */
 class Subscription extends Entity
 {
+    const OPTION_UPDATE_CALLBACKS = 'updateCallbacks';
+
     public static function getStructure(Structure $structure)
     {
         $structure->table = 'xf_bdapi_subscription';
@@ -33,6 +35,32 @@ class Subscription extends Entity
             'expire_date' => ['type' => self::UINT, 'default' => 0]
         ];
 
+        $structure->options = [
+            self::OPTION_UPDATE_CALLBACKS => true
+        ];
+
         return $structure;
+    }
+
+    protected function _postSave()
+    {
+        if ($this->getOption(self::OPTION_UPDATE_CALLBACKS)) {
+            $this->subscriptionRepo()->updateCallbacksForTopic($this->topic);
+        }
+    }
+
+    protected function _postDelete()
+    {
+        if ($this->getOption(self::OPTION_UPDATE_CALLBACKS)) {
+            $this->subscriptionRepo()->updateCallbacksForTopic($this->topic);
+        }
+    }
+
+    /**
+     * @return \Xfrocks\Api\Repository\Subscription
+     */
+    protected function subscriptionRepo()
+    {
+        return $this->repository('Xfrocks\Api:Subscription');
     }
 }

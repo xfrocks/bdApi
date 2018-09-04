@@ -8,6 +8,8 @@ use XF\Entity\User;
 use XF\Entity\UserAlert;
 use XF\Mvc\Entity\Repository;
 use XF\Util\Php;
+use Xfrocks\Api\Transform\TransformContext;
+use Xfrocks\Api\Transformer;
 use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class Subscription extends Repository
@@ -21,6 +23,17 @@ class Subscription extends Repository
     const TYPE_CLIENT = '__client__';
     const TYPE_CLIENT_DATA_REGISTRY = 'apiSubs';
 
+    public function getClientSubscriptionsData()
+    {
+        $data = $this->app()->registry()->get(self::TYPE_CLIENT_DATA_REGISTRY);
+
+        if (empty($data)) {
+            $data = array();
+        }
+
+        return $data;
+    }
+
     public function updateCallbacksForTopic($topic)
     {
         list($type, $id) = self::parseTopic($topic);
@@ -30,11 +43,15 @@ class Subscription extends Repository
         $finder->active();
         $finder->where('topic', $topic);
 
-        $subscriptions = $finder->fetch();
+        $subscriptions = [];
+        /** @var \Xfrocks\Api\Entity\Subscription $subscription */
+        foreach ($finder->fetch() as $subscription) {
+            $subscriptions[$subscription->subscription_id] = $subscription->toArray();
+        }
 
         switch ($type) {
             case self::TYPE_NOTIFICATION:
-                if ($subscriptions->count() > 0) {
+                if (!empty($subscriptions)) {
                     $userOption = array(
                         'topic' => $topic,
                         'link' => $this->app()->router('api')->buildLink(
@@ -348,9 +365,6 @@ class Subscription extends Repository
 
     protected function preparePingDataManyNotification($pingDataMany)
     {
-        /* @var $alertModel bdApi_XenForo_Model_Alert */
-//        $alertModel = $this->getModelFromCache('XenForo_Model_Alert');
-
         $alertIds = array();
         $alerts = array();
         foreach ($pingDataMany as $key => &$pingDataRef) {
@@ -386,11 +400,9 @@ class Subscription extends Repository
         }
 
         $viewingUsers = $this->preparePingDataGetViewingUsers($userIds);
-        $templater = $this->app()->templater();
 
         /** @var \XF\Repository\UserAlert $userAlertRepo */
         $userAlertRepo = $this->repository('XF:UserAlert');
-        $alertHandlers = $userAlertRepo->getAlertHandlers();
 
         foreach ($alertsByUser as $userId => &$userAlerts) {
             if (!isset($viewingUsers[$userId])) {
@@ -422,9 +434,12 @@ class Subscription extends Repository
             }
             $alertRef = &$alerts[$pingDataRef['object_data']];
 
-            $pingDataRef['object_data'] = $alertModel->prepareApiDataForAlert($alertRef);
-            if (isset($alertRef['template'])) {
-                $pingDataRef['object_data']['notification_html'] = strval($alertRef['template']);
+            if ($alertRef instanceof UserAlert) {
+                $transformContext = new TransformContext();
+                /** @var Transformer $transformer */
+                $transformer = $this->app()->container('api.transformer');
+
+                $pingDataRef['object_data'] = $transformer->transformEntity($transformContext, null, $alertRef);
             }
             if (!is_numeric($alertRef['alert_id'])
                 && !empty($alertRef['extra']['object_data'])
