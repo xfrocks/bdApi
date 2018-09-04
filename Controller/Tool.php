@@ -22,6 +22,23 @@ class Tool extends AbstractController
         return $loginPlugin->initiate('account/api-logout');
     }
 
+    public function actionGetWebsubEchoHubChallenge()
+    {
+        if (!\XF::$debugMode) {
+            return $this->noPermission();
+        }
+
+        $params = $this->params()
+            ->define('hub_challenge', 'str');
+
+        die($params['hub_challenge']);
+    }
+
+    public function actionGetWebsubEchoNone()
+    {
+        exit(0);
+    }
+
     public function actionPostLink()
     {
         $params = $this->params()
@@ -79,6 +96,18 @@ class Tool extends AbstractController
         }
 
         return $this->api(['result' => $result]);
+    }
+
+    public function actionPostWebsubEchoHubChallenge()
+    {
+        if (!\XF::$debugMode) {
+            return $this->noPermission();
+        }
+
+        $inputRaw = $this->request->getInputRaw();
+        \XF\Util\File::log(__METHOD__, $inputRaw);
+
+        exit(0);
     }
 
     protected function getDefaultApiScopeForAction($action)

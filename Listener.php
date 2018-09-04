@@ -23,6 +23,13 @@ class Listener
     {
         $container = $app->container();
 
+        if ($container->offsetExists('api.server')) {
+            // temporary workaround for XF2 job.php weird-behavior
+            // https://xenforo.com/community/threads/job-php-runs-app-setup-twice.153198/
+            // TODO: implement permanent solution or remove this after XF is updated
+            return;
+        }
+
         $container['api.server'] = function () use ($app) {
             $class = $app->extendClass('Xfrocks\Api\OAuth2\Server');
             return new $class($app);

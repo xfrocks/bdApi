@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 
 abstract class ApiTestCase extends TestCase
 {
+    public static $apiRoot = 'http://localhost/api/';
+
     /**
      * @var \GuzzleHttp\Message\ResponseInterface|null
      */
@@ -24,8 +26,7 @@ abstract class ApiTestCase extends TestCase
     public static function setUpBeforeClass()
     {
         self::$http = new \GuzzleHttp\Client([
-            'base_url' => 'http://localhost/api/',
-            'http_errors' => false,
+            'base_url' => self::$apiRoot,
         ]);
     }
 
