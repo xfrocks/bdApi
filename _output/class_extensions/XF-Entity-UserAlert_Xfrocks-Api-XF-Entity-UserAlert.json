@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Entity\\UserAlert",
+    "to_class": "Xfrocks\\Api\\XF\\Entity\\UserAlert",
+    "execute_order": 10,
+    "active": true
+}

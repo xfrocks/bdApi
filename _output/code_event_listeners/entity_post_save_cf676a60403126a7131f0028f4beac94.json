@@ -1,9 +1,0 @@
-{
-    "event_id": "entity_post_save",
-    "execute_order": 10,
-    "callback_class": "Xfrocks\\Api\\Listener",
-    "callback_method": "onEntityUserPostSave",
-    "active": true,
-    "hint": "XF\\Entity\\User",
-    "description": "XF\\Entity\\User"
-}

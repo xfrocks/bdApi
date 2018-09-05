@@ -1,9 +1,0 @@
-{
-    "event_id": "entity_structure",
-    "execute_order": 10,
-    "callback_class": "Xfrocks\\Api\\Listener",
-    "callback_method": "onThreadEntityStructure",
-    "active": true,
-    "hint": "XF\\Entity\\Thread",
-    "description": "XF\\Entity\\Thread"
-}
