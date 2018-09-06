@@ -234,6 +234,19 @@ class TransformContext
     }
 
     /**
+     * @param string $key
+     * @return bool
+     */
+    public function selectorShouldIncludeField($key)
+    {
+        if ($this->selector === null) {
+            return false;
+        }
+
+        return $this->selector->shouldIncludeField($key);
+    }
+
+    /**
      * @param array $data
      */
     public function setData(array $data)
