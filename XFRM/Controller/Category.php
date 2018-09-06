@@ -13,10 +13,6 @@ class Category extends AbstractController
             return $this->actionSingle($params->resource_category_id);
         }
 
-        /** @var \XFRM\XF\Entity\User $user */
-        $user = \XF::visitor();
-        $user->cacheResourceCategoryPermissions();
-
         $finder = $this->finder('XFRM:Category')->order('lft');
         $categories = $this->transformFinderLazily($finder);
 

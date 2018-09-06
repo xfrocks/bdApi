@@ -124,9 +124,6 @@ class ResourceItem extends AbstractController
 
             $categoryIds = array_unique($categoryIds);
             $finder->where('resource_category_id', $categoryIds);
-            /** @var \XFRM\XF\Entity\User $user */
-            $user = \XF::visitor();
-            $user->cacheResourceCategoryPermissions($categoryIds);
         }
     }
 

@@ -5,7 +5,6 @@ namespace Xfrocks\Api\Transform;
 use XF\App;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
-use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
@@ -47,6 +46,11 @@ abstract class AbstractHandler
     protected $type;
 
     /**
+     * @var array
+     */
+    protected static $entitiesToAddAttachmentsTo = [];
+
+    /**
      * @param App $app
      * @param Transformer $transformer
      * @param string $type
@@ -56,6 +60,23 @@ abstract class AbstractHandler
         $this->app = $app;
         $this->transformer = $transformer;
         $this->type = $type;
+    }
+
+    public function addAttachmentsToQueuedEntities()
+    {
+        /** @var \XF\Repository\Attachment $attachmentRepo */
+        $attachmentRepo = $this->app->repository('XF:Attachment');
+
+        foreach (self::$entitiesToAddAttachmentsTo as $q) {
+            $attachmentRepo->addAttachmentsToContent(
+                $q['entities'],
+                $q['contentType'],
+                $q['countKey'],
+                $q['relationKey']
+            );
+        }
+
+        self::$entitiesToAddAttachmentsTo = [];
     }
 
     /**
@@ -84,14 +105,6 @@ abstract class AbstractHandler
     public function collectPermissions($context)
     {
         return null;
-    }
-
-    /**
-     * @return array
-     */
-    public function getExtraWith()
-    {
-        return [];
     }
 
     /**
@@ -179,27 +192,93 @@ abstract class AbstractHandler
     }
 
     /**
-     * @param string $scope
-     * @return bool
+     * @param TransformContext $context
+     * @param Entity[] $entities
+     * @param string|null $contextKey
+     * @param string $relationKey
      */
-    protected function checkSessionScope($scope)
+    protected function callOnTransformEntitiesForRelation($context, $entities, $contextKey, $relationKey)
     {
-        /** @var Session $session */
-        $session = $this->app->session();
-        return is_callable([$session, 'hasScope']) && $session->hasScope($scope);
+        $entity = reset($entities);
+        if ($entity === false) {
+            return;
+        }
+
+        $entityStructure = $entity->structure();
+        if (!isset($entityStructure->relations[$relationKey])) {
+            return;
+        }
+
+        $relationConfig = $entityStructure->relations[$relationKey];
+        if (!is_array($relationConfig) ||
+            !isset($relationConfig['type']) ||
+            !isset($relationConfig['entity'])
+        ) {
+            return;
+        }
+
+        $subHandler = $this->transformer->handler($relationConfig['entity']);
+        $subContext = $context->getSubContext($contextKey, $subHandler);
+
+        $subEntities = [];
+        foreach ($entities as $entity) {
+            if ($relationConfig['type'] === Entity::TO_ONE) {
+                /** @var Entity $subEntity */
+                $subEntity = $entity->getRelation($relationKey);
+                $subEntities[$subEntity->getEntityId()] = $subEntity;
+            } else {
+                /** @var Entity[] $_subEntities */
+                $_subEntities = $entity->getRelation($relationKey);
+                foreach ($_subEntities as $subEntity) {
+                    $subEntities[$subEntity->getEntityId()] = $subEntity;
+                }
+            }
+        }
+
+        $subHandler->onTransformEntities($subContext, $subEntities);
     }
 
     /**
-     * @param string $permissionId
-     * @return bool
+     * @param TransformContext $context
+     * @param Finder $finder
+     * @param string|null $contextKey
+     * @param string $relationKey
+     * @param string|null $shortName
+     * @throws \Exception
      */
-    protected function checkAdminPermission($permissionId)
+    protected function callOnTransformFinderForRelation($context, $finder, $contextKey, $relationKey, $shortName = null)
     {
-        if (!$this->checkSessionScope(Server::SCOPE_MANAGE_SYSTEM)) {
-            return false;
+        $finder->with($relationKey);
+
+        if ($shortName === null) {
+            $shortName = $this->type;
         }
 
-        return \XF::visitor()->hasAdminPermission($permissionId);
+        $em = $this->app->em();
+        $entityStructure = $em->getEntityStructure($shortName);
+        if (!isset($entityStructure->relations[$relationKey])) {
+            return;
+        }
+
+        $relationConfig = $entityStructure->relations[$relationKey];
+        if (!is_array($relationConfig) || !isset($relationConfig['entity'])) {
+            return;
+        }
+
+        $subHandler = $this->transformer->handler($relationConfig['entity']);
+        $subContext = $context->getSubContext($contextKey, $subHandler);
+
+        $relationStructure = $em->getEntityStructure($relationConfig['entity']);
+        $finderClass = \XF::stringToClass($shortName, '%s\Finder\%s');
+        $finderClass = $this->app->extendClass($finderClass, '\XF\Mvc\Entity\Finder');
+        if (!$finderClass || !class_exists($finderClass)) {
+            $finderClass = '\XF\Mvc\Entity\Finder';
+        }
+        /** @var Finder $relationFinder */
+        $relationFinder = new $finderClass($em, $relationStructure);
+        $relationFinder->setParentFinder($finder, $relationKey);
+
+        $subHandler->onTransformFinder($subContext, $relationFinder);
     }
 
     /**
@@ -218,6 +297,53 @@ abstract class AbstractHandler
 
         $attachmentContext = $attachmentHandler->getContext($entity);
         return $attachmentHandler->canManageAttachments($attachmentContext);
+    }
+
+    /**
+     * @param string $scope
+     * @return bool
+     */
+    protected function checkSessionScope($scope)
+    {
+        /** @var Session $session */
+        $session = $this->app->session();
+        return is_callable([$session, 'hasScope']) && $session->hasScope($scope);
+    }
+
+    /**
+     * @param Entity[] $entities
+     * @param string $contentType
+     * @param string $countKey
+     * @param string $relationKey
+     */
+    protected function enqueueEntitiesToAddAttachmentsTo(
+        $entities,
+        $contentType,
+        $countKey = 'attach_count',
+        $relationKey = 'Attachments'
+    ) {
+        $key = sprintf('%s_%s_%s', $contentType, $countKey, $relationKey);
+        if (!isset(self::$entitiesToAddAttachmentsTo[$key])) {
+            self::$entitiesToAddAttachmentsTo[$key] = [
+                'entities' => [],
+                'contentType' => $contentType,
+                'countKey' => $countKey,
+                'relationKey' => $relationKey,
+            ];
+        }
+        $ref =& self::$entitiesToAddAttachmentsTo[$key];
+
+        foreach ($entities as $entityId => $entity) {
+            $ref['entities'][$entityId] = $entity;
+        }
+    }
+
+    /**
+     * @return \XF\Template\Templater
+     */
+    protected function getTemplater()
+    {
+        return $this->app->templater();
     }
 
     /**
@@ -252,13 +378,5 @@ abstract class AbstractHandler
 
         $formatter = $this->app->stringFormatter();
         return $formatter->stripBbCode($string, $options);
-    }
-
-    /**
-     * @return \XF\Template\Templater
-     */
-    protected function getTemplater()
-    {
-        return $this->app->templater();
     }
 }

@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Util\ParentFinder;
 
 class Thread extends AbstractHandler
 {
@@ -147,29 +148,6 @@ class Thread extends AbstractHandler
         return $links;
     }
 
-    public function getExtraWith()
-    {
-        $with = [
-            'Forum',
-            'Forum.Node',
-            'User',
-            'FirstPost',
-        ];
-
-        $userId = \XF::visitor()->user_id;
-        if ($userId > 0) {
-            $with = array_merge($with, [
-                'FirstPost.Likes|' . $userId,
-                'Forum.Node.Permissions|' . $userId,
-                'Read|' . $userId,
-                'ReplyBans|' . $userId,
-                'Watch|' . $userId,
-            ]);
-        }
-
-        return $with;
-    }
-
     public function getMappings($context)
     {
         return [
@@ -200,18 +178,40 @@ class Thread extends AbstractHandler
     public function onTransformEntities($context, $entities)
     {
         if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_FIRST_POST)) {
-            $postTransformer = $this->transformer->handler('XF:Post');
-
-            $firstPosts = [];
-            /** @var \XF\Entity\Thread $thread */
-            foreach ($entities as $thread) {
-                $firstPosts[$thread->FirstPost->post_id] = $thread->FirstPost;
-            }
-
-            $subContext = $context->getSubContext(self::DYNAMIC_KEY_FIRST_POST, null, null);
-            $postTransformer->onTransformEntities($subContext, $firstPosts);
+            $this->callOnTransformEntitiesForRelation(
+                $context,
+                $entities,
+                self::DYNAMIC_KEY_FIRST_POST,
+                'FirstPost'
+            );
         }
 
         return $entities;
+    }
+
+    public function onTransformFinder($context, $finder)
+    {
+        $forumFinder = new ParentFinder($finder, 'Forum');
+        $visitor = \XF::visitor();
+
+        $forumFinder->with('Node.Permissions|' . $visitor->permission_combination_id);
+
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_FIRST_POST)) {
+            $this->callOnTransformFinderForRelation(
+                $context,
+                $finder,
+                self::DYNAMIC_KEY_FIRST_POST,
+                'FirstPost'
+            );
+        }
+
+        $userId = $visitor->user_id;
+        if ($userId > 0) {
+            if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_IS_FOLLOWED)) {
+                $finder->with('Watch|' . $userId);
+            }
+        }
+
+        return parent::onTransformFinder($context, $finder);
     }
 }
