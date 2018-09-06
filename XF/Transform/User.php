@@ -242,7 +242,7 @@ class User extends AbstractHandler
             if ($user->user_id === $visitor->user_id) {
                 $data['flagFullAccess'] = true;
             } else {
-                $data['flagFullAccess'] = $this->checkAdminPermission('user');
+                $data['flagFullAccess'] = $visitor->hasAdminPermission('user');
             }
         }
 

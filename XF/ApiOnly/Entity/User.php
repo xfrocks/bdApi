@@ -2,6 +2,9 @@
 
 namespace Xfrocks\Api\XF\ApiOnly\Entity;
 
+use Xfrocks\Api\OAuth2\Server;
+use Xfrocks\Api\XF\ApiOnly\Session\Session;
+
 class User extends XFCP_User
 {
     public function getAvatarUrl($sizeCode, $forceType = null, $canonical = false)
@@ -13,6 +16,17 @@ class User extends XFCP_User
         }
 
         return $url;
+    }
+
+    public function hasAdminPermission($permissionId)
+    {
+        /** @var Session $session */
+        $session = $this->app()->session();
+        if (!$session->hasScope(Server::SCOPE_MANAGE_SYSTEM)) {
+            return false;
+        }
+
+        return parent::hasAdminPermission($permissionId);
     }
 }
 

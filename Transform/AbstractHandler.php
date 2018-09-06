@@ -5,7 +5,6 @@ namespace Xfrocks\Api\Transform;
 use XF\App;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
-use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
@@ -280,19 +279,6 @@ abstract class AbstractHandler
         $relationFinder->setParentFinder($finder, $relationKey);
 
         $subHandler->onTransformFinder($subContext, $relationFinder);
-    }
-
-    /**
-     * @param string $permissionId
-     * @return bool
-     */
-    protected function checkAdminPermission($permissionId)
-    {
-        if (!$this->checkSessionScope(Server::SCOPE_MANAGE_SYSTEM)) {
-            return false;
-        }
-
-        return \XF::visitor()->hasAdminPermission($permissionId);
     }
 
     /**

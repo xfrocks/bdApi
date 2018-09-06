@@ -39,7 +39,6 @@ class OAuth2 extends AbstractController
             return $this->noPermission();
         }
 
-        $this->assertApiScope(Server::SCOPE_MANAGE_SYSTEM);
         if (!\XF::visitor()->hasAdminPermission('user')) {
             return $this->noPermission();
         }
