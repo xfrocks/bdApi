@@ -114,8 +114,8 @@ class PreTest extends Command
                      'bdApi_subscriptionColumnUser' => 'xf_user_option',
                      'bdApi_subscriptionColumnUserNotification' => 'xf_user_option',
                  ] as $optionName => $tableName) {
-            $columnName = $options->offsetGet($optionName);
-            if (empty($columnName)) {
+            $columnName = strval($options->offsetGet($optionName));
+            if (strpos($columnName, $optionName) !== 0) {
                 $sm = \XF::db()->getSchemaManager();
 
                 $columnName = sprintf('%s_%d', $optionName, \XF::$time);
