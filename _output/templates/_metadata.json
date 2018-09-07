@@ -1,4 +1,9 @@
 {
+    "admin/bdapi_column_option_onoff.html": {
+        "version_id": 2000014,
+        "version_string": "2.0.0 Alpha 4",
+        "hash": "0e5d7f1abae08a24192f5de9ccaa93e1"
+    },
     "public/bdapi_account_api.html": {
         "version_id": 2000000,
         "version_string": "2.0.0",

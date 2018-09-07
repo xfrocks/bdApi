@@ -11,7 +11,7 @@ class PreTest extends Command
 {
     const VERSION_ID = 2018082101;
 
-    public $prefix = 'api-test';
+    public $prefix = 'api_test';
     public $users = 3;
 
     public function createForum(array &$data)
@@ -101,6 +101,44 @@ class PreTest extends Command
         return $data['apiClient'];
     }
 
+    public function enableSubscriptions(array &$data)
+    {
+        $app = \XF::app();
+        $options = $app->options();
+        /** @var \XF\Repository\Option $optionRepo */
+        $optionRepo = $app->repository('XF:Option');
+        $data['subscriptions'] = ['options' => []];
+
+        foreach ([
+                     'bdApi_subscriptionColumnThreadPost' => 'xf_thread',
+                     'bdApi_subscriptionColumnUser' => 'xf_user_option',
+                     'bdApi_subscriptionColumnUserNotification' => 'xf_user_option',
+                 ] as $optionName => $tableName) {
+            $columnName = strval($options->offsetGet($optionName));
+            if (strpos($columnName, $optionName) !== 0) {
+                $sm = \XF::db()->getSchemaManager();
+
+                $columnName = sprintf('%s_%d', $optionName, \XF::$time);
+                $sm->alterTable($tableName, function (\XF\Db\Schema\Alter $table) use ($columnName) {
+                    $table->addColumn($columnName, 'MEDIUMBLOB')->nullable(true);
+                });
+
+                $optionRepo->updateOption($optionName, $columnName);
+                $options[$optionName] = $columnName;
+            }
+
+            $data['subscriptions']['options'][$optionName] = $columnName;
+        }
+
+        foreach ([
+                     'bdApi_subscriptionThreadPost',
+                     'bdApi_subscriptionUser',
+                     'bdApi_subscriptionUserNotification',
+                 ] as $optionName) {
+            $optionRepo->updateOption($optionName, true);
+        }
+    }
+
     protected function configure()
     {
         $this
@@ -123,6 +161,8 @@ class PreTest extends Command
                 $data = @json_decode($json, true) ?: [];
             }
         }
+
+        $this->enableSubscriptions($data);
 
         $this->createForum($data);
         $this->createUsers($data);

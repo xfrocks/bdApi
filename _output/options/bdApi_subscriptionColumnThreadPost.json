@@ -1,0 +1,12 @@
+{
+    "edit_format": "textbox",
+    "edit_format_params": "",
+    "data_type": "string",
+    "sub_options": [],
+    "validation_class": "Xfrocks\\Api\\Option\\ColumnOption",
+    "validation_method": "verifyTextboxOption",
+    "default_value": "",
+    "relations": {
+        "bdApi": 70
+    }
+}

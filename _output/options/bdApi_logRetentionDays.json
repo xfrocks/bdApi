@@ -1,0 +1,12 @@
+{
+    "edit_format": "spinbox",
+    "edit_format_params": "min=0\nstep=30",
+    "data_type": "unsigned_integer",
+    "sub_options": [],
+    "validation_class": "",
+    "validation_method": "",
+    "default_value": "90",
+    "relations": {
+        "bdApi": 600
+    }
+}

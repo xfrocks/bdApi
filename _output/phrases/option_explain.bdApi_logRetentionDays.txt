@@ -1,0 +1,1 @@
+Enter the number of days to keep API log entries. If you don't want to log anything, enter 0 (zero).

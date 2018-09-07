@@ -1,0 +1,1 @@
+You have to create the field with a query like this: <code>ALTER TABLE `xf_user_option` ADD COLUMN `bdapi_user_notification` MEDIUMBLOB</code>
