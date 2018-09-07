@@ -91,6 +91,19 @@ abstract class AbstractHandler
 
     /**
      * @param TransformContext $context
+     * @return bool
+     */
+    public function canView($context)
+    {
+        /** @var callable $callable */
+        $callable = [$context->getSource(), 'canView'];
+
+        // we do not check is_callable here, PHP will just complain (loudly) if it doesn't work
+        return call_user_func($callable);
+    }
+
+    /**
+     * @param TransformContext $context
      * @return array|null
      */
     public function collectLinks($context)

@@ -91,6 +91,11 @@ class BatchJobReply extends AbstractHandler
         return null;
     }
 
+    public function canView($context)
+    {
+        return true;
+    }
+
     public function getMappings($context)
     {
         return [

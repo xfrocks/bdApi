@@ -21,6 +21,11 @@ class Generic extends AbstractHandler
         return call_user_func($value, $this, $key);
     }
 
+    public function canView($context)
+    {
+        return true;
+    }
+
     public function getMappings($context)
     {
         $mappings = [];

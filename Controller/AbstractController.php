@@ -11,6 +11,7 @@ use XF\Mvc\RouteMatch;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transform\LazyTransformer;
+use Xfrocks\Api\Transform\TransformContext;
 
 class AbstractController extends \XF\Pub\Controller\AbstractController
 {
@@ -39,6 +40,14 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      */
     public function api(array $data)
     {
+        foreach (array_keys($data) as $key) {
+            if (is_object($data[$key]) && $data[$key] instanceof LazyTransformer) {
+                /** @var LazyTransformer $lazyTransformer */
+                $lazyTransformer = $data[$key];
+                $data[$key] = $lazyTransformer->transform();
+            }
+        }
+
         return new \Xfrocks\Api\Mvc\Reply\Api($data);
     }
 
@@ -121,6 +130,60 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     }
 
     /**
+     * @param string $type
+     * @param array|int $whereId
+     * @return LazyTransformer
+     */
+    public function findAndTransformLazily($type, $whereId)
+    {
+        $finder = $this->finder($type);
+        $finder->whereId($whereId);
+
+        $sortByList = null;
+        $isSingle = true;
+        if (is_array($whereId)) {
+            $primaryKey = $finder->getStructure()->primaryKey;
+            if (is_array($primaryKey) && count($primaryKey) === 1) {
+                $primaryKey = reset($primaryKey);
+            }
+            if (!is_array($primaryKey)) {
+                $isSingle = false;
+                $sortByList = $whereId;
+            } else {
+                // TODO: implement this
+                throw new \RuntimeException('Compound primary key is not supported');
+            }
+        }
+
+        $lazyTransformer = new LazyTransformer($this);
+        $lazyTransformer->setFinder($finder);
+
+        $lazyTransformer->addCallbackFinderPostFetch(function ($entities) use ($sortByList) {
+            if ($sortByList !== null) {
+                /** @var \XF\Mvc\Entity\ArrayCollection $arrayCollection */
+                $arrayCollection = $entities;
+                $entities = $arrayCollection->sortByList($sortByList);
+            }
+
+            return $entities;
+        });
+
+        $lazyTransformer->addCallbackPostTransform(function ($data) use ($isSingle) {
+            if (!$isSingle) {
+                return $data;
+            }
+
+            if (count($data) === 1) {
+                return $data[0];
+            }
+
+            throw $this->exception($this->notFound());
+        });
+
+        return $lazyTransformer;
+    }
+
+    /**
      * @return Params
      */
     public function params()
@@ -179,7 +242,14 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     public function transformEntityIfNeeded(array &$data, $key, $entity)
     {
         $lazyTransformer = $this->transformEntityLazily($entity);
-        $lazyTransformer->setKey($key);
+        $lazyTransformer->addCallbackPreTransform(function ($context) use ($key) {
+            /** @var TransformContext $context */
+            if ($context->selectorShouldExcludeField($key)) {
+                return null;
+            }
+
+            return $context->getSubContext($key, null, null);
+        });
         $data[$key] = $lazyTransformer;
 
         return $lazyTransformer;

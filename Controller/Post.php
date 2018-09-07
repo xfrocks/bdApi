@@ -63,8 +63,7 @@ class Post extends AbstractController
     {
         $posts = [];
         if (count($ids) > 0) {
-            $finder = $this->finder('XF:Post')->whereIds($ids);
-            $posts = $this->transformFinderLazily($finder)->sortByList($ids);
+            $posts = $this->findAndTransformLazily('XF:Post', $ids);
         }
 
         return $this->api(['posts' => $posts]);
@@ -72,13 +71,7 @@ class Post extends AbstractController
 
     public function actionSingle($postId)
     {
-        $post = $this->assertViewablePost($postId);
-
-        $data = [
-            'post' => $this->transformEntityLazily($post)
-        ];
-
-        return $this->api($data);
+        return $this->api(['post' => $this->findAndTransformLazily('XF:Post', intval($postId))]);
     }
 
     public function actionPostIndex()
@@ -178,7 +171,7 @@ class Post extends AbstractController
             if ($this->request()->exists('fields')) {
                 $threadEditor->setCustomFields($params['fields']);
             }
-            
+
             if ($post->Thread->canEditTags()) {
                 /** @var \XF\Service\Tag\Changer $tagger */
                 $tagger = $this->service('XF:Tag\Changer', 'thread', $post->Thread);
@@ -244,7 +237,7 @@ class Post extends AbstractController
             ->params()
             ->define('attachment_id', 'uint');
 
-        if ($params['attachment_id']> 0) {
+        if ($params['attachment_id'] > 0) {
             return $this->rerouteController('Xfrocks\Api\Controller\Attachment', 'get-data');
         }
 
