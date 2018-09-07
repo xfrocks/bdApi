@@ -102,6 +102,15 @@ class Setup extends AbstractSetup
         });
     }
 
+    public function upgrade2000015Step1()
+    {
+        $sm = $this->schemaManager();
+
+        foreach ($this->getTables3() as $tableName => $closure) {
+            $sm->createTable($tableName, $closure);
+        }
+    }
+
     private function getTables()
     {
         $tables = [];
@@ -190,24 +199,36 @@ class Setup extends AbstractSetup
             $table->addColumn('client_id', 'varchar', 255);
             $table->addColumn('callback', 'text');
             $table->addColumn('topic', 'varchar', 255);
-            $table->addColumn('subscrie_date', 'int')->unsigned();
+            $table->addColumn('subscribe_date', 'int')->unsigned();
             $table->addColumn('expire_date', 'int')->unsigned()->setDefault(0);
 
             $table->addKey('client_id');
             $table->addKey('topic');
         };
 
-        $tables['xf_bdapi_log'] = function(Create $table) {
+        $tables['xf_bdapi_log'] = function (Create $table) {
             $table->addColumn('log_id', 'int')->autoIncrement()->primaryKey();
-            $table->addColumn('client_id','varchar', 255);
+            $table->addColumn('client_id', 'varchar', 255);
             $table->addColumn('user_id', 'int')->unsigned();
-            $table->addColumn('ip_address', 'varchar',50);
+            $table->addColumn('ip_address', 'varchar', 50);
             $table->addColumn('request_date', 'int')->unsigned();
             $table->addColumn('request_method', 'varchar', 10);
             $table->addColumn('request_uri', 'text');
             $table->addColumn('request_data', 'mediumblob');
             $table->addColumn('response_code', 'int')->unsigned();
             $table->addColumn('response_output', 'mediumblob');
+        };
+
+        $tables['xf_bdapi_ping_queue'] = function (Create $table) {
+            $table->addColumn('ping_queue_id', 'int')->autoIncrement()->primaryKey();
+            $table->addColumn('callback_md5', 'varchar', 32);
+            $table->addColumn('callback', 'text');
+            $table->addColumn('object_type', 'varbinary', 25);
+            $table->addColumn('data', 'mediumblob');
+            $table->addColumn('queue_date', 'int')->unsigned();
+            $table->addColumn('expire_date', 'int')->unsigned()->setDefault(0);
+
+            $table->addKey('callback_md5');
         };
 
         return $tables;

@@ -19,6 +19,14 @@ class Log extends Repository
         self::$logging++;
     }
 
+    public function pruneExpired()
+    {
+        $days = $this->options()->bdApi_logRetentionDays;
+        $cutoff = \XF::$time - $days * 86400;
+
+        return $this->db()->delete('xf_bdapi_log', 'request_date < ?', $cutoff);
+    }
+
     public function logRequest(
         $requestMethod,
         $requestUri,
@@ -43,7 +51,12 @@ class Log extends Repository
         if (!isset($bulkSet['client_id'])) {
             /** @var Session $session */
             $session = $this->app()->session();
-            $log->client_id = $session->getToken() ? $session->getToken()->client_id : '';
+            $token = $session->getToken();
+            $log->client_id = '';
+
+            if ($token) {
+                $log->client_id = $token->client_id;
+            }
         }
 
         if (!isset($bulkSet['user_id'])) {

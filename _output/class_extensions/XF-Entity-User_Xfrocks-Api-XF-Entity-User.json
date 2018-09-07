@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Entity\\User",
+    "to_class": "Xfrocks\\Api\\XF\\Entity\\User",
+    "execute_order": 10,
+    "active": true
+}

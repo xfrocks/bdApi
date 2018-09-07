@@ -29,7 +29,7 @@ class Log extends Entity
         $structure->shortName = 'Xfrocks\Api:Log';
         $structure->columns = [
             'log_id' => ['type' => self::UINT, 'nullable' => true, 'autoIncrement' => true],
-            'client_id' => ['type' => self::STR, 'maxLength' => 255, 'required' => true],
+            'client_id' => ['type' => self::STR, 'maxLength' => 255, 'default' => ''],
             'user_id' => ['type' => self::UINT, 'required' => true],
             'ip_address' => ['type' => self::STR, 'maxLength' => 50, 'required' => true],
             'request_date' => ['type' => self::UINT, 'default' => \XF::$time],

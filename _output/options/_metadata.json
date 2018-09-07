@@ -5,6 +5,9 @@
     "bdApi_cors.json": {
         "hash": "49bf33143e73258b7e96ede1f0dfd214"
     },
+    "bdApi_logRetentionDays.json": {
+        "hash": "25b4b3d13494a5a699d23f2276c7058d"
+    },
     "bdApi_paramLimitDefault.json": {
         "hash": "3c27531eabd7183a898bd70cfc3f1779"
     },
@@ -42,6 +45,6 @@
         "hash": "5717f8abd434e3672265f1d6672f7668"
     },
     "bdApi_userNotificationConversation.json": {
-        "hash": "431d431e2388ccec592b94cf1b9d50ed"
+        "hash": "b3ca1de80285f0b6b8fc467b95402865"
     }
 }

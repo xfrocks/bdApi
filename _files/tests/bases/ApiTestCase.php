@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 
 abstract class ApiTestCase extends TestCase
 {
+    public static $apiRoot = 'http://localhost/api/';
+
     /**
      * @var \GuzzleHttp\Message\ResponseInterface|null
      */
@@ -24,8 +26,7 @@ abstract class ApiTestCase extends TestCase
     public static function setUpBeforeClass()
     {
         self::$http = new \GuzzleHttp\Client([
-            'base_url' => 'http://localhost/api/',
-            'http_errors' => false,
+            'base_url' => self::$apiRoot,
         ]);
     }
 
@@ -84,7 +85,7 @@ abstract class ApiTestCase extends TestCase
         if (!is_array(self::$testData)) {
             self::$testData = [];
 
-            $path = '/tmp/api-test.json';
+            $path = '/tmp/api_test.json';
             static::assertFileExists($path);
 
             $json = json_decode(file_get_contents($path) ?: '', true);

@@ -1,4 +1,19 @@
 {
+    "XF-Entity-Post_Xfrocks-Api-XF-Entity-Post.json": {
+        "hash": "afa2f2b4f50ac4d3ddb40574f4e4b1f4"
+    },
+    "XF-Entity-Thread_Xfrocks-Api-XF-Entity-Thread.json": {
+        "hash": "014ff641979958ef7027fd26ac786bea"
+    },
+    "XF-Entity-UserAlert_Xfrocks-Api-XF-Entity-UserAlert.json": {
+        "hash": "af90a9fe08b2b303408776c3c7a27301"
+    },
+    "XF-Entity-UserOption_Xfrocks-Api-XF-Entity-UserOption.json": {
+        "hash": "43dda0de74c45389e5909291d632637a"
+    },
+    "XF-Entity-User_Xfrocks-Api-XF-Entity-User.json": {
+        "hash": "ae48a23e0edac88b42ddfba1c29cea4d"
+    },
     "XF-Pub-Controller-Account_Xfrocks-Api-XF-Pub-Controller-Account.json": {
         "hash": "a0f1bad1fd472ab41ecf0ec219dd5d3d"
     },

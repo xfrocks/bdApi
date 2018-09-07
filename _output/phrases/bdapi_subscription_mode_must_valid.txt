@@ -1,0 +1,1 @@
+`hub.mode` must be either "subscribe" or "unsubscribe".
