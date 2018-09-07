@@ -16,7 +16,7 @@ class User extends XFCP_User
         parent::_postSave();
 
         /** @var Subscription $subRepo */
-        $subRepo = \XF::repository('Xfrocks\Api:Subscription');
+        $subRepo = $this->repository('Xfrocks\Api:Subscription');
 
         if ($this->isInsert()) {
             $subRepo->pingUser('insert', $this);
@@ -28,12 +28,16 @@ class User extends XFCP_User
         parent::_postDelete();
 
         /** @var Subscription $subRepo */
-        $subRepo = \XF::repository('Xfrocks\Api:Subscription');
+        $subRepo = $this->repository('Xfrocks\Api:Subscription');
         $subRepo->pingUser('delete', $this);
 
-        $subRepo->deleteSubscriptionsForTopic(
-            Subscription::TYPE_USER,
-            $this->user_id
-        );
+        if ($this->app()->options()->bdApi_subscriptionUser
+            || $this->app()->options()->bdApi_subscriptionUserNotification
+        ) {
+            $subRepo->deleteSubscriptionsForTopic(
+                Subscription::TYPE_USER,
+                $this->user_id
+            );
+        }
     }
 }

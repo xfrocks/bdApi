@@ -17,7 +17,9 @@ class Thread extends XFCP_Thread
         $structure = parent::getStructure($structure);
 
         $subColumn = \XF::options()->bdApi_subscriptionColumnThreadPost;
-        if (!empty($subColumn)) {
+        if (\XF::options()->bdApi_subscriptionThreadPost
+            && !empty($subColumn)
+        ) {
             $structure->columns[$subColumn] = ['type' => self::SERIALIZED_ARRAY, 'default' => []];
         }
 
@@ -28,11 +30,13 @@ class Thread extends XFCP_Thread
     {
         parent::_postDelete();
 
-        /** @var Subscription $subRepo */
-        $subRepo = \XF::repository('Xfrocks\Api:Subscription');
-        $subRepo->deleteSubscriptionsForTopic(
-            Subscription::TYPE_THREAD_POST,
-            $this->thread_id
-        );
+        if ($this->app()->options()->bdApi_subscriptionThreadPost) {
+            /** @var Subscription $subRepo */
+            $subRepo = $this->repository('Xfrocks\Api:Subscription');
+            $subRepo->deleteSubscriptionsForTopic(
+                Subscription::TYPE_THREAD_POST,
+                $this->thread_id
+            );
+        }
     }
 }

@@ -15,14 +15,20 @@ class UserOption extends XFCP_UserOption
     {
         $structure = parent::getStructure($structure);
 
-        $userColumn = \XF::options()->bdApi_subscriptionColumnUser;
-        $userNotifyColumn = \XF::options()->bdApi_subscriptionColumnUserNotification;
+        $options = \XF::options();
 
-        if (!empty($userColumn)) {
+        $userColumn = $options->bdApi_subscriptionColumnUser;
+        $userNotifyColumn = $options->bdApi_subscriptionColumnUserNotification;
+
+        if ($options->bdApi_subscriptionUser
+            && !empty($userColumn)
+        ) {
             $structure->columns[$userColumn] = ['type' => self::SERIALIZED_ARRAY, 'default' => []];
         }
 
-        if (!empty($userNotifyColumn)) {
+        if ($options->bdApi_subscriptionUserNotification
+            && !empty($userNotifyColumn)
+        ) {
             $structure->columns[$userNotifyColumn] = ['type' => self::SERIALIZED_ARRAY, 'default' => []];
         }
 

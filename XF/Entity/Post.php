@@ -16,7 +16,7 @@ class Post extends XFCP_Post
         parent::_postSave();
 
         /** @var Subscription $subRepo */
-        $subRepo = \XF::repository('Xfrocks\Api:Subscription');
+        $subRepo = $this->repository('Xfrocks\Api:Subscription');
 
         if ($this->isInsert()) {
             $subRepo->pingThreadPost('insert', $this);
@@ -36,7 +36,7 @@ class Post extends XFCP_Post
         parent::_postDelete();
 
         /** @var Subscription $subRepo */
-        $subRepo = \XF::repository('Xfrocks\Api:Subscription');
+        $subRepo = $this->repository('Xfrocks\Api:Subscription');
         if ($this->message_state === 'visible') {
             $subRepo->pingThreadPost('delete', $this);
         }

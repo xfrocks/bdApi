@@ -19,7 +19,7 @@ class UserAlert extends XFCP_UserAlert
         static $userOptions = [];
 
         /** @var Subscription $subRepo */
-        $subRepo = \XF::repository('Xfrocks\Api:Subscription');
+        $subRepo = $this->repository('Xfrocks\Api:Subscription');
 
         if (Subscription::getSubscription(Subscription::TYPE_NOTIFICATION)) {
             if ($this->alerted_user_id > 0) {
