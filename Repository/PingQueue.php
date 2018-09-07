@@ -89,7 +89,7 @@ class PingQueue extends Repository
             if ($maxRunTime && microtime(true) - $s > $maxRunTime) {
                 break;
             }
-        } while($queueRecords);
+        } while ($queueRecords);
 
         return $this->hasQueue();
     }
@@ -115,7 +115,7 @@ class PingQueue extends Repository
                         continue;
                     }
 
-                    if ($record['expire_date'] > 0 AND $record['expire_date'] < \XF::$time) {
+                    if ($record['expire_date'] > 0 and $record['expire_date'] < \XF::$time) {
                         // expired
                         continue;
                     }
@@ -145,7 +145,7 @@ class PingQueue extends Repository
                 $responseCode = 500;
             }
 
-            if ($responseCode < 200 OR $responseCode > 299) {
+            if ($responseCode < 200 or $responseCode > 299) {
                 $this->reInsertQueue($records);
                 $reInserted = true;
             }

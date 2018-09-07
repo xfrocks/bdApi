@@ -206,11 +206,11 @@ class Setup extends AbstractSetup
             $table->addKey('topic');
         };
 
-        $tables['xf_bdapi_log'] = function(Create $table) {
+        $tables['xf_bdapi_log'] = function (Create $table) {
             $table->addColumn('log_id', 'int')->autoIncrement()->primaryKey();
-            $table->addColumn('client_id','varchar', 255);
+            $table->addColumn('client_id', 'varchar', 255);
             $table->addColumn('user_id', 'int')->unsigned();
-            $table->addColumn('ip_address', 'varchar',50);
+            $table->addColumn('ip_address', 'varchar', 50);
             $table->addColumn('request_date', 'int')->unsigned();
             $table->addColumn('request_method', 'varchar', 10);
             $table->addColumn('request_uri', 'text');

@@ -199,7 +199,7 @@ class Subscription extends Repository
             return false;
         }
 
-        if ($httpCode < 200 OR $httpCode > 299) {
+        if ($httpCode < 200 or $httpCode > 299) {
             return false;
         }
 
@@ -222,7 +222,10 @@ class Subscription extends Repository
         $session = \XF::app()->session();
 
         $token = $session->getToken();
-        $client = $token->Client;
+        $client = null;
+        if ($token) {
+            $client = $token->Client;
+        }
 
         switch ($type) {
             case self::TYPE_NOTIFICATION:
@@ -232,7 +235,7 @@ class Subscription extends Repository
                     $topic = self::getTopic($type, $id);
                 }
 
-                return (($id > 0) AND ($id == $user->user_id));
+                return (($id > 0) and ($id == $user->user_id));
             case self::TYPE_THREAD_POST:
                 /** @var Thread|null $thread */
                 $thread = $this->em->find('XF:Thread', $id);
@@ -288,7 +291,13 @@ class Subscription extends Repository
 
             /** @var Session $session */
             $session = $this->app()->session();
-            $clientId = $session->getToken() ? $session->getToken()->client_id : '';
+            $token = $session->getToken();
+
+            $clientId = '';
+
+            if ($token) {
+                $clientId = $token->client_id;
+            }
 
             if (is_array($subscriptionOption)
                 && $clientId

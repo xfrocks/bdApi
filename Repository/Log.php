@@ -51,7 +51,12 @@ class Log extends Repository
         if (!isset($bulkSet['client_id'])) {
             /** @var Session $session */
             $session = $this->app()->session();
-            $log->client_id = $session->getToken() ? $session->getToken()->client_id : '';
+            $token = $session->getToken();
+            $log->client_id = '';
+
+            if ($token) {
+                $log->client_id = $token->client_id;
+            }
         }
 
         if (!isset($bulkSet['user_id'])) {

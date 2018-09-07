@@ -14,7 +14,12 @@ class Subscription extends AbstractController
             ->define('client_id', 'str');
 
         $session = $this->session();
-        $clientId = $session->getToken() ? $session->getToken()->client_id : null;
+        $token = $session->getToken();
+
+        if ($token) {
+            $clientId = $token->client_id;
+        }
+
         $isSessionClientId = true;
 
         if (empty($clientId)) {
@@ -137,6 +142,9 @@ class Subscription extends AbstractController
      */
     protected function subscriptionRepo()
     {
-        return $this->repository('Xfrocks\Api:Subscription');
+        /** @var \Xfrocks\Api\Repository\Subscription $repo */
+        $repo = $this->repository('Xfrocks\Api:Subscription');
+
+        return $repo;
     }
 }

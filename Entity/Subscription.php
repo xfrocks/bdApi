@@ -61,6 +61,9 @@ class Subscription extends Entity
      */
     protected function subscriptionRepo()
     {
-        return $this->repository('Xfrocks\Api:Subscription');
+        /** @var \Xfrocks\Api\Repository\Subscription $subRepo */
+        $subRepo = $this->repository('Xfrocks\Api:Subscription');
+
+        return $subRepo;
     }
 }
