@@ -41,15 +41,17 @@ class Notification extends AbstractController
             'notifications_total' => $total
         ];
 
-        /** @var \Xfrocks\Api\Repository\Subscription $subscriptionRepo */
-        $subscriptionRepo = $this->repository('Xfrocks\Api:Subscription');
-        $subscriptionRepo->prepareDiscoveryParams(
-            $data,
-            \Xfrocks\Api\Repository\Subscription::TYPE_NOTIFICATION,
-            \XF::visitor()->user_id,
-            $this->buildApiLink('notifications', null, ['oauth_token' => '']),
-            \XF::visitor()->getValue($this->options()->bdApi_subscriptionColumnUserNotification)
-        );
+        if ($this->options()->bdApi_subscriptionUserNotification) {
+            /** @var \Xfrocks\Api\Repository\Subscription $subscriptionRepo */
+            $subscriptionRepo = $this->repository('Xfrocks\Api:Subscription');
+            $subscriptionRepo->prepareDiscoveryParams(
+                $data,
+                \Xfrocks\Api\Repository\Subscription::TYPE_NOTIFICATION,
+                \XF::visitor()->user_id,
+                $this->buildApiLink('notifications', null, ['oauth_token' => '']),
+                \XF::visitor()->Option->getValue($this->options()->bdApi_subscriptionColumnUserNotification)
+            );
+        }
 
         PageNav::addLinksToData($data, $params, $total, 'notifications');
 
