@@ -5,6 +5,7 @@ namespace Xfrocks\Api\XF\Transform;
 use XF\Entity\Forum;
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\AttachmentParent;
+use Xfrocks\Api\Util\ParentFinder;
 
 class Post extends AbstractHandler implements AttachmentParent
 {
@@ -192,27 +193,6 @@ class Post extends AbstractHandler implements AttachmentParent
         return $links;
     }
 
-    public function getExtraWith()
-    {
-        $with = [
-            'User',
-            'User.Profile',
-            'User.Privacy',
-            'Thread',
-            'Thread.Forum.Node',
-        ];
-
-        $userId = \XF::visitor()->user_id;
-        if ($userId > 0) {
-            $with = array_merge($with, [
-                'Thread.Forum.Node.Permissions|' . $userId,
-                'Likes|' . $userId,
-            ]);
-        }
-
-        return $with;
-    }
-
     public function getMappings($context)
     {
         return [
@@ -250,11 +230,37 @@ class Post extends AbstractHandler implements AttachmentParent
             $needAttachments = true;
         }
         if ($needAttachments) {
-            /** @var \XF\Repository\Attachment $attachmentRepo */
-            $attachmentRepo = $this->app->repository('XF:Attachment');
-            $entities = $attachmentRepo->addAttachmentsToContent($entities, self::CONTENT_TYPE_POST);
+            $this->enqueueEntitiesToAddAttachmentsTo($entities, self::CONTENT_TYPE_POST);
         }
 
         return $entities;
+    }
+
+    public function onTransformFinder($context, $finder)
+    {
+        $threadFinder = new ParentFinder($finder, 'Thread');
+        $visitor = \XF::visitor();
+
+        $threadFinder->with('Forum.Node.Permissions|' . $visitor->permission_combination_id);
+
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_SIGNATURE) ||
+            !$context->selectorShouldExcludeField(self::DYNAMIC_KEY_SIGNATURE_HTML) ||
+            !$context->selectorShouldExcludeField(self::DYNAMIC_KEY_SIGNATURE_PLAIN)
+        ) {
+            $finder->with('User.Profile');
+        }
+
+        $userId = $visitor->user_id;
+        if ($userId > 0) {
+            if (!$context->selectorShouldExcludeField(self::KEY_PERMISSIONS)) {
+                $threadFinder->with('ReplyBans|' . $userId);
+            }
+
+            if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_IS_LIKED)) {
+                $finder->with('Likes|' . $userId);
+            }
+        }
+
+        return parent::onTransformFinder($context, $finder);
     }
 }

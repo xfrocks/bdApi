@@ -6,11 +6,24 @@ use Xfrocks\Api\Transform\AbstractHandler;
 
 class ConversationUser extends AbstractHandler
 {
+    public function onTransformEntities($context, $entities)
+    {
+        $this->callOnTransformEntitiesForRelation($context, $entities, null, 'Master');
+
+        return parent::onTransformEntities($context, $entities);
+    }
+
+    public function onTransformFinder($context, $finder)
+    {
+        $this->callOnTransformFinderForRelation($context, $finder, null, 'Master');
+
+        return parent::onTransformFinder($context, $finder);
+    }
+
     public function onTransformed($context, array &$data)
     {
         parent::onTransformed($context, $data);
 
-        $newData = $this->transformer->transformEntityRelation($context, '', $context->getSource(), 'Master');
-        $data = array_replace_recursive($data, $newData);
+        $data += $this->transformer->transformEntityRelation($context, null, $context->getSource(), 'Master');
     }
 }

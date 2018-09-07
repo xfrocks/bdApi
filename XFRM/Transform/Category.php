@@ -91,4 +91,13 @@ class Category extends AbstractHandler
             self::DYNAMIC_KEY_FIELDS,
         ];
     }
+
+    public function onTransformFinder($context, $finder)
+    {
+        $visitor = \XF::visitor();
+
+        $finder->with('Permissions|' . $visitor->permission_combination_id);
+
+        return parent::onTransformFinder($context, $finder);
+    }
 }

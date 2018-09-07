@@ -4,6 +4,7 @@ namespace Xfrocks\Api\XFRM\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\AttachmentParent;
+use Xfrocks\Api\Util\ParentFinder;
 
 class ResourceItem extends AbstractHandler implements AttachmentParent
 {
@@ -229,28 +230,6 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return $permissions;
     }
 
-    public function getExtraWith()
-    {
-        $with = [
-            'Category',
-            'CurrentVersion',
-            'Description',
-            'User',
-        ];
-
-        $visitor = \XF::visitor();
-        $userId = $visitor->user_id;
-        if ($userId > 0) {
-            $with = array_merge($with, [
-                'Category.Permissions|' . $visitor->permission_combination_id,
-                'Description.Likes|' . $userId,
-                'Watch|' . $userId,
-            ]);
-        }
-
-        return $with;
-    }
-
     public function getMappings($context)
     {
         return [
@@ -307,11 +286,34 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
                 $descriptions[$description->resource_update_id] = $description;
             }
 
-            /** @var \XF\Repository\Attachment $attachmentRepo */
-            $attachmentRepo = $this->app->repository('XF:Attachment');
-            $attachmentRepo->addAttachmentsToContent($descriptions, self::CONTENT_TYPE_RESOURCE_UPDATE);
+            $this->enqueueEntitiesToAddAttachmentsTo($descriptions, self::CONTENT_TYPE_RESOURCE_UPDATE);
         }
 
         return $entities;
+    }
+
+    public function onTransformFinder($context, $finder)
+    {
+        $categoryFinder = new ParentFinder($finder, 'Category');
+        $visitor = \XF::visitor();
+
+        $categoryFinder->with('Permissions|' . $visitor->permission_combination_id);
+
+        $finder->with('CurrentVersion');
+        $finder->with('Description');
+        $finder->with('User');
+
+        $userId = $visitor->user_id;
+        if ($userId > 0) {
+            if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_IS_FOLLOWED)) {
+                $finder->with('Watch|' . $userId);
+            }
+
+            if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_IS_LIKED)) {
+                $finder->with('Description.Likes|' . $userId);
+            }
+        }
+
+        return parent::onTransformFinder($context, $finder);
     }
 }

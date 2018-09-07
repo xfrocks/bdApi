@@ -146,9 +146,7 @@ class User extends AbstractController
         $registration->skipEmailConfirmation($skipEmailConfirmation);
 
         $visitor = \XF::visitor();
-        if ($visitor->hasAdminPermission('user')
-            && $session->hasScope(Server::SCOPE_MANAGE_SYSTEM)
-        ) {
+        if ($visitor->hasAdminPermission('user')) {
             $input['user_state'] = 'valid';
         }
 
@@ -223,9 +221,7 @@ class User extends AbstractController
             ->define('fields', 'array', 'array of values for user fields');
 
         $visitor = \XF::visitor();
-        $session = $this->session();
-
-        $isAdmin = $session->hasScope(Server::SCOPE_MANAGE_SYSTEM) && $visitor->hasAdminPermission('user');
+        $isAdmin = $visitor->hasAdminPermission('user');
         $requiredAuth = 0;
 
         if (!empty($params['password'])) {
@@ -466,7 +462,6 @@ class User extends AbstractController
 
         $email = $params['user_email'] ?: $params['email'];
         if (!empty($email)) {
-            $this->assertApiScope(Server::SCOPE_MANAGE_SYSTEM);
             if (!\XF::visitor()->hasAdminPermission('user')) {
                 return $this->noPermission();
             }
@@ -746,7 +741,6 @@ class User extends AbstractController
             $finder = $this->finder('XF:UserGroup');
             $finder->whereIds($userGroupIds);
         } else {
-            $this->assertApiScope(Server::SCOPE_MANAGE_SYSTEM);
             if (!\XF::visitor()->hasAdminPermission('user')) {
                 return $this->noPermission();
             }

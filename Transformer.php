@@ -58,7 +58,7 @@ class Transformer
 
     /**
      * @param TransformContext $context
-     * @param string $key
+     * @param string|null $key
      * @param array $values
      * @return array
      */
@@ -141,7 +141,7 @@ class Transformer
 
     /**
      * @param TransformContext $context
-     * @param string $key
+     * @param string|null $key
      * @param Entity $entity
      * @param string $relationKey
      * @return array
@@ -286,6 +286,8 @@ class Transformer
 
         $contextData = $handler->onNewContext($context);
         $context->setData($contextData);
+
+        $handler->addAttachmentsToQueuedEntities();
 
         $mappings = $handler->getMappings($context);
         foreach ($mappings as $key => $mapping) {

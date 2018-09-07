@@ -19,11 +19,6 @@ class App extends \XF\Pub\App
 
         $container['app.classType'] = 'Api';
 
-        $container['em'] = function (\XF\Container $c) {
-            // TODO: find a better way to extend entity manager
-            return new \Xfrocks\Api\Mvc\Entity\Manager($c['db'], $c['em.valueFormatter'], $c['extension']);
-        };
-
         $container->extend('extension.classExtensions', function (array $classExtensions) {
             $xfClasses = [
                 'ControllerPlugin\Error',
