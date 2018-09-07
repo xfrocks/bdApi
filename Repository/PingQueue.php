@@ -19,16 +19,14 @@ class PingQueue extends Repository
             'expire_date' => $expireDate,
         ));
 
-        if ($this->options()->bdApi_pingQueueUseDefer) {
-            $triggerDate = null;
-            if ($queueDate > 0) {
-                $triggerDate = $queueDate;
-            }
-
-            $this->app()
-                ->jobManager()
-                ->enqueueLater(__CLASS__, $triggerDate, 'Xfrocks\Api\Job\PingQueue', [], false);
+        $triggerDate = null;
+        if ($queueDate > 0) {
+            $triggerDate = $queueDate;
         }
+
+        $this->app()
+            ->jobManager()
+            ->enqueueLater(__CLASS__, $triggerDate, 'Xfrocks\Api\Job\PingQueue', [], false);
     }
 
     public function reInsertQueue($records)

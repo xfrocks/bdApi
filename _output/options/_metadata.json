@@ -17,9 +17,6 @@
     "bdApi_paramPageMax.json": {
         "hash": "f105958153411491e0ac4fa2e7c81c2b"
     },
-    "bdApi_pingQueueUseDefer.json": {
-        "hash": "d0c01d3fb6954583fd4865edadb2103e"
-    },
     "bdApi_refreshTokenTTLDays.json": {
         "hash": "0e0669e64483b08378cb183ce1c7fe09"
     },
