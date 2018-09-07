@@ -420,8 +420,7 @@ class Thread extends AbstractController
     {
         $threads = [];
         if (count($ids) > 0) {
-            $finder = $this->finder('XF:Thread')->whereIds($ids);
-            $threads = $this->transformFinderLazily($finder)->sortByList($ids);
+            $threads = $this->findAndTransformLazily('XF:Thread', $ids);
         }
 
         return $this->api(['threads' => $threads]);
@@ -429,13 +428,7 @@ class Thread extends AbstractController
 
     public function actionSingle($threadId)
     {
-        $thread = $this->assertViewableThread($threadId);
-
-        $data = [
-            'thread' => $this->transformEntityLazily($thread)
-        ];
-
-        return $this->api($data);
+        return $this->api(['thread' => $this->findAndTransformLazily('XF:Thread', intval($threadId))]);
     }
 
     protected function applyFilters(\XF\Finder\Thread $finder, Params $params)

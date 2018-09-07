@@ -2,7 +2,6 @@
 
 namespace Xfrocks\Api\Transform;
 
-use XF\Mvc\Entity\ArrayCollection;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
 use Xfrocks\Api\Controller\AbstractController;
@@ -14,19 +13,24 @@ class LazyTransformer implements \JsonSerializable
     const SOURCE_TYPE_FINDER = 'finder';
 
     /**
+     * @var callable[]
+     */
+    protected $callbacksFinderPostFetch = [];
+
+    /**
+     * @var callable[]
+     */
+    protected $callbacksPostTransform = [];
+
+    /**
+     * @var callable[]
+     */
+    protected $callbacksPreTransform = [];
+
+    /**
      * @var AbstractController
      */
     protected $controller;
-
-    /**
-     * @var array|null
-     */
-    protected $finderSortByList = null;
-
-    /**
-     * @var string|null
-     */
-    protected $key = null;
 
     /**
      * @var mixed|null
@@ -44,6 +48,34 @@ class LazyTransformer implements \JsonSerializable
     public function __construct($controller)
     {
         $this->controller = $controller;
+    }
+
+    /**
+     * @param callable $f
+     */
+    public function addCallbackFinderPostFetch($f)
+    {
+        if ($this->sourceType !== self::SOURCE_TYPE_FINDER) {
+            throw new \LogicException('Source is not a Finder: ' . $this->sourceType);
+        }
+
+        $this->callbacksFinderPostFetch[] = $f;
+    }
+
+    /**
+     * @param callable $f
+     */
+    public function addCallbackPostTransform($f)
+    {
+        $this->callbacksPostTransform[] = $f;
+    }
+
+    /**
+     * @param callable $f
+     */
+    public function addCallbackPreTransform($f)
+    {
+        $this->callbacksPreTransform[] = $f;
     }
 
     /**
@@ -81,28 +113,6 @@ class LazyTransformer implements \JsonSerializable
     }
 
     /**
-     * @param string $key
-     */
-    public function setKey($key)
-    {
-        $this->key = $key;
-    }
-
-    /**
-     * @param array $keys
-     * @return LazyTransformer
-     */
-    public function sortByList(array $keys)
-    {
-        if ($this->sourceType !== self::SOURCE_TYPE_FINDER) {
-            throw new \LogicException('Source is not a Finder: ' . $this->sourceType);
-        }
-
-        $this->finderSortByList = $keys;
-        return $this;
-    }
-
-    /**
      * @return array|null
      */
     public function transform()
@@ -112,34 +122,41 @@ class LazyTransformer implements \JsonSerializable
         $transformer = $controller->app()->container('api.transformer');
         $context = $controller->params()->getTransformContext();
 
-        if ($this->key !== null) {
-            if ($context->selectorShouldExcludeField($this->key)) {
+        foreach (array_reverse($this->callbacksPreTransform) as $f) {
+            $context = call_user_func($f, $context);
+            if ($context === null) {
                 return null;
             }
-
-            $context = $context->getSubContext($this->key, null, null);
         }
 
         switch ($this->sourceType) {
             case self::SOURCE_TYPE_ENTITY:
                 /** @var Entity $entity */
                 $entity = $this->source;
-                return $transformer->transformEntity($context, null, $entity);
+                $data = $transformer->transformEntity($context, null, $entity);
+                break;
             case self::SOURCE_TYPE_FINDER:
                 /** @var Finder $finder */
                 $finder = $this->source;
-                return $transformer->transformFinder($context, null, $finder, function ($result) {
-                    /** @var ArrayCollection $entities */
-                    $entities = $result;
-
-                    if ($this->finderSortByList !== null) {
-                        $entities = $entities->sortByList($this->finderSortByList);
+                $data = $transformer->transformFinder($context, null, $finder, function ($entities) {
+                    foreach (array_reverse($this->callbacksFinderPostFetch) as $f) {
+                        $entities = call_user_func($f, $entities);
                     }
 
                     return $entities;
                 });
+                break;
+            default:
+                throw new \LogicException('Unrecognized source type ' . $this->sourceType);
         }
 
-        throw new \LogicException('Unrecognized source type ' . $this->sourceType);
+        foreach (array_reverse($this->callbacksPostTransform) as $f) {
+            $data = call_user_func($f, $data);
+            if ($data === null) {
+                return null;
+            }
+        }
+
+        return $data;
     }
 }

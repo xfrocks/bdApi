@@ -58,7 +58,7 @@ class Transformer
 
     /**
      * @param TransformContext $context
-     * @param string $key
+     * @param string|null $key
      * @param array $values
      * @return array
      */
@@ -141,7 +141,7 @@ class Transformer
 
     /**
      * @param TransformContext $context
-     * @param string $key
+     * @param string|null $key
      * @param Entity $entity
      * @param string $relationKey
      * @return array
@@ -210,15 +210,16 @@ class Transformer
         $handler = $this->handler($finder->getStructure()->shortName);
         $finder = $handler->onTransformFinder($context, $finder);
 
-        $result = $finder->fetch();
+        $entities = $finder->fetch();
         if ($postFetchCallback !== null) {
-            $result = call_user_func($postFetchCallback, $result);
+            $entities = call_user_func($postFetchCallback, $entities);
         }
-
-        $data = [];
-        $entities = $result->toArray();
+        if (is_object($entities) && $entities instanceof \XF\Mvc\Entity\ArrayCollection) {
+            $entities = $entities->toArray();
+        }
         $entities = $handler->onTransformEntities($context, $entities);
 
+        $data = [];
         foreach ($entities as $entity) {
             $entityContext = $context->getSubContext(null, $handler, $entity);
             $entityData = $this->transform($entityContext);
@@ -286,6 +287,12 @@ class Transformer
 
         $contextData = $handler->onNewContext($context);
         $context->setData($contextData);
+
+        if (!$handler->canView($context)) {
+            return $data;
+        }
+
+        $handler->addAttachmentsToQueuedEntities();
 
         $mappings = $handler->getMappings($context);
         foreach ($mappings as $key => $mapping) {

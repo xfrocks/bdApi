@@ -192,18 +192,6 @@ class User extends AbstractHandler
         ];
     }
 
-    public function getExtraWith()
-    {
-        $with = [
-            'Activity',
-            'Auth',
-            'Privacy',
-            'Profile',
-        ];
-
-        return $with;
-    }
-
     public function getMappings($context)
     {
         $mappings = [
@@ -254,7 +242,7 @@ class User extends AbstractHandler
             if ($user->user_id === $visitor->user_id) {
                 $data['flagFullAccess'] = true;
             } else {
-                $data['flagFullAccess'] = $this->checkAdminPermission('user');
+                $data['flagFullAccess'] = $visitor->hasAdminPermission('user');
             }
         }
 
@@ -374,5 +362,28 @@ class User extends AbstractHandler
             self::PERM_SELF_CREATE_CONVO => $canStartConversation,
             self::PERM_SELF_ATTACH_CONVO => $canUploadAndManageAttachments
         ];
+    }
+
+    public function onTransformFinder($context, $finder)
+    {
+        $finder->with('Privacy');
+
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_DOB_DAY) ||
+            !$context->selectorShouldExcludeField(self::DYNAMIC_KEY_DOB_MONTH) ||
+            !$context->selectorShouldExcludeField(self::DYNAMIC_KEY_DOB_YEAR) ||
+            !$context->selectorShouldExcludeField(self::DYNAMIC_KEY_EXTERNAL_AUTHS)
+        ) {
+            $finder->with('Profile');
+        }
+
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_HAS_PASSWORD)) {
+            $finder->with('Auth');
+        }
+
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_LAST_SEEN_DATE)) {
+            $finder->with('Activity');
+        }
+
+        return parent::onTransformFinder($context, $finder);
     }
 }

@@ -82,8 +82,7 @@ class ResourceItem extends AbstractController
     {
         $resources = [];
         if (count($ids) > 0) {
-            $finder = $this->finder('XFRM:ResourceItem')->whereIds($ids);
-            $resources = $this->transformFinderLazily($finder)->sortByList($ids);
+            $resources = $this->findAndTransformLazily('XFRM:ResourceItem', $ids);
         }
 
         return $this->api(['resources' => $resources]);
@@ -91,13 +90,7 @@ class ResourceItem extends AbstractController
 
     public function actionSingle($resourceId)
     {
-        $resource = $this->assertViewableResource($resourceId);
-
-        $data = [
-            'resource' => $this->transformEntityLazily($resource)
-        ];
-
-        return $this->api($data);
+        return $this->api(['resource' => $this->findAndTransformLazily('XFRM:ResourceItem', intval($resourceId))]);
     }
 
     protected function applyFilters(\XFRM\Finder\ResourceItem $finder, Params $params)
@@ -124,9 +117,6 @@ class ResourceItem extends AbstractController
 
             $categoryIds = array_unique($categoryIds);
             $finder->where('resource_category_id', $categoryIds);
-            /** @var \XFRM\XF\Entity\User $user */
-            $user = \XF::visitor();
-            $user->cacheResourceCategoryPermissions($categoryIds);
         }
     }
 

@@ -91,6 +91,11 @@ class BatchJobReply extends AbstractHandler
         return null;
     }
 
+    public function canView($context)
+    {
+        return true;
+    }
+
     public function getMappings($context)
     {
         return [
@@ -121,7 +126,7 @@ class BatchJobReply extends AbstractHandler
     {
         $reply = $context->data('reply');
         if (is_object($reply) && $reply instanceof \Xfrocks\Api\Mvc\Reply\Api) {
-            $data += $this->transformer->transformArray($context, '', $reply->getData());
+            $data += $this->transformer->transformArray($context, null, $reply->getData());
         }
 
         parent::onTransformed($context, $data);

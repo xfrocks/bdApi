@@ -200,9 +200,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
         }
 
         if ($needAttachments) {
-            /** @var \XF\Repository\Attachment $attachmentRepo */
-            $attachmentRepo = $this->app->repository('XF:Attachment');
-            $entities = $attachmentRepo->addAttachmentsToContent($entities, self::CONTENT_TYPE_CONVO_MESSAGE);
+            $this->enqueueEntitiesToAddAttachmentsTo($entities, self::CONTENT_TYPE_CONVO_MESSAGE);
         }
 
         return $entities;

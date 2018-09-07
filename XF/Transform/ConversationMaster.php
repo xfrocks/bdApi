@@ -25,7 +25,7 @@ class ConversationMaster extends AbstractHandler
     const LINK_MESSAGES = 'messages';
 
     const PERM_REPLY = 'reply';
-    const PERM_UPLOAD_ACTTACHMENT = 'upload_attachment';
+    const PERM_UPLOAD_ATTACHMENT = 'upload_attachment';
 
     public function getMappings($context)
     {
@@ -100,6 +100,10 @@ class ConversationMaster extends AbstractHandler
 
                 return $recipient->last_read_date < $conversation->last_message_date;
             case self::DYNAMIC_KEY_LAST_MESSAGE:
+                if (!$context->selectorShouldIncludeField($key)) {
+                    return null;
+                }
+
                 return $this->transformer->transformEntity($context, $key, $conversation->LastMessage);
             case self::DYNAMIC_KEY_RECIPIENTS:
                 return $this->transformer->transformEntityRelation($context, $key, $conversation, 'Recipients');
@@ -132,9 +136,72 @@ class ConversationMaster extends AbstractHandler
         $perms = [
             self::PERM_REPLY => $conversation->canReply(),
             self::PERM_DELETE => true,
-            self::PERM_UPLOAD_ACTTACHMENT => $conversation->canUploadAndManageAttachments()
+            self::PERM_UPLOAD_ATTACHMENT => $conversation->canUploadAndManageAttachments()
         ];
 
         return $perms;
+    }
+
+    public function onTransformEntities($context, $entities)
+    {
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_FIRST_MESSAGE)) {
+            $this->callOnTransformEntitiesForRelation(
+                $context,
+                $entities,
+                self::DYNAMIC_KEY_FIRST_MESSAGE,
+                'FirstMessage'
+            );
+        }
+
+        if ($context->selectorShouldIncludeField(self::DYNAMIC_KEY_LAST_MESSAGE)) {
+            $this->callOnTransformEntitiesForRelation(
+                $context,
+                $entities,
+                self::DYNAMIC_KEY_LAST_MESSAGE,
+                'LastMessage'
+            );
+        }
+
+        $convoIds = array_keys($entities);
+        if (count($convoIds) > 0) {
+            $convoUsers = $this->app->em()->getFinder('XF:ConversationUser')
+                ->where('conversation_id', $convoIds)
+                ->fetch();
+            $convoUsersByConvoId = [];
+            /** @var \XF\Entity\ConversationUser $convoUser */
+            foreach ($convoUsers as $convoUser) {
+                $convoUsersByConvoId[$convoUser->conversation_id][$convoUser->owner_user_id] = $convoUser;
+            }
+            /** @var \XF\Entity\ConversationMaster $convo */
+            foreach ($entities as $convo) {
+                $thisConvoUsers = $convoUsersByConvoId[$convo->conversation_id];
+                $convo->hydrateRelation('Users', new \XF\Mvc\Entity\ArrayCollection($thisConvoUsers));
+            }
+        }
+
+        return parent::onTransformEntities($context, $entities);
+    }
+
+    public function onTransformFinder($context, $finder)
+    {
+        if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_FIRST_MESSAGE)) {
+            $this->callOnTransformFinderForRelation(
+                $context,
+                $finder,
+                self::DYNAMIC_KEY_FIRST_MESSAGE,
+                'FirstMessage'
+            );
+        }
+
+        if ($context->selectorShouldIncludeField(self::DYNAMIC_KEY_LAST_MESSAGE)) {
+            $this->callOnTransformFinderForRelation(
+                $context,
+                $finder,
+                self::DYNAMIC_KEY_LAST_MESSAGE,
+                'LastMessage'
+            );
+        }
+
+        return parent::onTransformFinder($context, $finder);
     }
 }
