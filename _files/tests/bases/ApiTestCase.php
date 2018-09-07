@@ -85,7 +85,7 @@ abstract class ApiTestCase extends TestCase
         if (!is_array(self::$testData)) {
             self::$testData = [];
 
-            $path = '/tmp/api-test.json';
+            $path = '/tmp/api_test.json';
             static::assertFileExists($path);
 
             $json = json_decode(file_get_contents($path) ?: '', true);
