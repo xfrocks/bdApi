@@ -53,6 +53,11 @@ class User extends AbstractHandler
     const PERM_SELF_CREATE_CONVO = 'create_conversation';
     const PERM_SELF_ATTACH_CONVO = 'upload_attachment_conversation';
 
+    public function canView($context)
+    {
+        return true;
+    }
+
     public function calculateDynamicValue($context, $key)
     {
         /** @var \XF\Entity\User $user */
