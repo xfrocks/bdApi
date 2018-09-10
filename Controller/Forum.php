@@ -41,6 +41,33 @@ class Forum extends AbstractNode
         return $this->api($data);
     }
 
+    public function actionPostFollowers(ParameterBag $paramBag)
+    {
+        $params = $this
+            ->params()
+            ->define('post', 'uint', 'whether to receive notification for post')
+            ->define('alert', 'uint', 'whether to receive notification as alert', 1)
+            ->define('email', 'uint', 'whether to receive notification as email');
+
+        $forum = $this->assertViewableForum($paramBag->node_id);
+
+        if (!$forum->canWatch($error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var \XF\Repository\ForumWatch $forumWatchRepo */
+        $forumWatchRepo = $this->repository('XF:ForumWatch');
+        $forumWatchRepo->setWatchState(
+            $forum,
+            \XF::visitor(),
+            $params['post'] > 0 ? 'message' : 'thread',
+            $params['alert'],
+            $params['email']
+        );
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
     protected function getNodeTypeId()
     {
         return 'Forum';
