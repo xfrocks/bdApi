@@ -7,6 +7,66 @@ use XF\Mvc\ParameterBag;
 
 class Forum extends AbstractNode
 {
+    public function actionGetFollowed()
+    {
+        $this->assertRegistrationRequired();
+
+        $visitor = \XF::visitor();
+        $finder = $this->finder('XF:ForumWatch')
+            ->where('user_id', $visitor->user_id);
+
+        if ($this->request()->exists('total')) {
+            $total = $finder->total();
+
+            $data = [
+                'forums_total' => $total
+            ];
+
+            return $this->api($data);
+        }
+
+        $finder->with('Forum');
+        /** @var ForumWatch[] $forumWatches */
+        $forumWatches = $finder->fetch();
+
+        $forums = [];
+
+        $this->params()->getTransformContext()->onTransformedCallbacks[] = function($context, &$data) use($forumWatches) {
+            $source = $context->getSource();
+            if (!($source instanceof \XF\Entity\Forum)) {
+                return;
+            }
+
+            /** @var ForumWatch|null $watched */
+            $watched = null;
+            foreach ($forumWatches as $forumWatch) {
+                if ($forumWatch->node_id == $source->node_id) {
+                    $watched = $forumWatch;
+
+                    break;
+                }
+            }
+
+            if ($watched) {
+                $data['follow'] = [
+                    'post' => $watched->notify_on == 'message',
+                    'alert' => $watched->send_alert,
+                    'email' => $watched->send_email
+                ];
+            }
+        };
+
+        foreach ($forumWatches as $forumWatch) {
+            $forums[] = $this->transformEntityLazily($forumWatch->Forum);
+        }
+
+        $data = [
+            'forums' => $forums
+        ];
+
+        return $this->api($data);
+    }
+
     public function actionGetFollowers(ParameterBag $paramBag)
     {
         $forum = $this->assertViewableForum($paramBag->node_id);
