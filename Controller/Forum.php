@@ -68,6 +68,21 @@ class Forum extends AbstractNode
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    public function actionDeleteFollowers(ParameterBag $paramBag)
+    {
+        $forum = $this->assertViewableForum($paramBag->node_id);
+
+        if (!$forum->canWatch($error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var \XF\Repository\ForumWatch $forumWatchRepo */
+        $forumWatchRepo = $this->repository('XF:ForumWatch');
+        $forumWatchRepo->setWatchState($forum, \XF::visitor(), 'delete');
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
     protected function getNodeTypeId()
     {
         return 'Forum';
