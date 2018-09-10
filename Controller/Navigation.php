@@ -48,15 +48,9 @@ class Navigation extends AbstractController
         $forumIds = [];
         $forums = null;
 
-        foreach ($tree as $subTree) {
-            if ($subTree->record->node_type_id == 'Forum') {
-                $forumIds[] = $subTree->id;
-            }
-
-            foreach ($subTree as $record) {
-                if ($record->record->node_type_id == 'Forum') {
-                    $forumIds[] = $record->id;
-                }
+        foreach ($tree->getFlattened(0) as $item) {
+            if ($item['record']->node_type_id == 'Forum') {
+                $forumIds[] = $item['record']->node_id;
             }
         }
 
@@ -85,7 +79,7 @@ class Navigation extends AbstractController
         $parentNodeId,
         array &$options = []
     ) {
-        $this->params()->getTransformContext()->onTransformedCallbacks[] = function($context, &$data) use($elements, $tree, $options) {
+        $this->params()->getTransformContext()->onTransformedCallbacks[] = function($context, &$data) use($tree) {
             $source = $context->getSource();
             if (!($source instanceof \XF\Entity\AbstractNode)) {
                 return;
@@ -106,43 +100,42 @@ class Navigation extends AbstractController
                     null,
                     ['parent' => $data['navigation_id']]
                 );
-
-                if ($data['has_sub_elements'] && !is_int($options['expectedParentNodeId'])) {
-                    $this->arrangeElements($elements, $tree, $source->node_id, $options);
-                }
             }
         };
 
-        foreach ($tree->children($parentNodeId) as $node) {
+        foreach ($tree->getFlattened(0, $parentNodeId) as $item) {
             $element = null;
 
-            switch ($node->record->node_type_id) {
+            /** @var Node $node */
+            $node = $item['record'];
+
+            switch ($node->node_type_id) {
                 case 'Category':
                     $category = $this->em()->instantiateEntity(
                         'XF:Category',
                         [
-                            'node_id' => $node->id
+                            'node_id' => $node->node_id
                         ],
                         [
-                            'Node' => $node->record
+                            'Node' => $node
                         ]
                     );
 
                     $element = $this->transformEntityLazily($category);
                     break;
                 case 'Forum':
-                    if (!empty($options['forums'][$node->id])) {
-                        $element = $this->transformEntityLazily($options['forums'][$node->id]);
+                    if (!empty($options['forums'][$node->node_id])) {
+                        $element = $this->transformEntityLazily($options['forums'][$node->node_id]);
                     }
                     break;
                 case 'LinkForum':
                     $category = $this->em()->instantiateEntity(
                         'XF:LinkForum',
                         [
-                            'node_id' => $node->id
+                            'node_id' => $node->node_id
                         ],
                         [
-                            'Node' => $node->record
+                            'Node' => $node
                         ]
                     );
 
@@ -152,10 +145,10 @@ class Navigation extends AbstractController
                     $category = $this->em()->instantiateEntity(
                         'XF:Page',
                         [
-                            'node_id' => $node->id
+                            'node_id' => $node->node_id
                         ],
                         [
-                            'Node' => $node->record
+                            'Node' => $node
                         ]
                     );
 
