@@ -32,6 +32,20 @@ class Page extends AbstractNode
         return parent::calculateDynamicValue($context, $key);
     }
 
+    public function collectLinks($context)
+    {
+        $links = parent::collectLinks($context);
+
+        /** @var \XF\Entity\Page $page */
+        $page = $context->getSource();
+
+        $links['sub-pages'] = $this->buildApiLink('pages', null, [
+            'parent_page_id' => $page->node_id
+        ]);
+
+        return $links;
+    }
+
     protected function getNameSingular()
     {
         return 'page';
