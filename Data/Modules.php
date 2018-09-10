@@ -27,6 +27,7 @@ class Modules
         $this->addController('Xfrocks:Notification', 'notifications', ':int<alert_id>/');
         $this->addController('Xfrocks:OAuth2', 'oauth');
         $this->addController('Xfrocks:Page', 'pages', ':int<node_id>/');
+        $this->addController('Xfrocks:ProfilePost', 'profile-posts', ':int<profile_post_id>/');
         $this->addController('Xfrocks:Post', 'posts', ':int<post_id>/');
         $this->addController('Xfrocks:Search', 'search', ':int<search_id>/');
         $this->addController('Xfrocks:Subscription', 'subscriptions', ':int<subscription_id>/');
