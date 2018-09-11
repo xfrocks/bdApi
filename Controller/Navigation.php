@@ -2,6 +2,7 @@
 
 namespace Xfrocks\Api\Controller;
 
+use XF\Entity\LinkForum;
 use XF\Entity\Node;
 use XF\Tree;
 
@@ -79,7 +80,7 @@ class Navigation extends AbstractController
         $parentNodeId,
         array &$options = []
     ) {
-        $this->params()->getTransformContext()->onTransformedCallbacks[] = function($context, &$data) use($tree) {
+        $this->params()->getTransformContext()->onTransformedCallbacks[] = function ($context, &$data) use ($tree) {
             $source = $context->getSource();
             if (!($source instanceof \XF\Entity\AbstractNode)) {
                 return;
@@ -111,6 +112,7 @@ class Navigation extends AbstractController
 
             switch ($node->node_type_id) {
                 case 'Category':
+                    /** @var \XF\Entity\Category|null $category */
                     $category = $this->em()->instantiateEntity(
                         'XF:Category',
                         [
@@ -121,7 +123,9 @@ class Navigation extends AbstractController
                         ]
                     );
 
-                    $element = $this->transformEntityLazily($category);
+                    if ($category) {
+                        $element = $this->transformEntityLazily($category);
+                    }
                     break;
                 case 'Forum':
                     if (!empty($options['forums'][$node->node_id])) {
@@ -129,7 +133,8 @@ class Navigation extends AbstractController
                     }
                     break;
                 case 'LinkForum':
-                    $category = $this->em()->instantiateEntity(
+                    /** @var LinkForum|null $linkForum */
+                    $linkForum = $this->em()->instantiateEntity(
                         'XF:LinkForum',
                         [
                             'node_id' => $node->node_id
@@ -139,10 +144,13 @@ class Navigation extends AbstractController
                         ]
                     );
 
-                    $element = $this->transformEntityLazily($category);
+                    if ($linkForum) {
+                        $element = $this->transformEntityLazily($linkForum);
+                    }
                     break;
                 case 'Page':
-                    $category = $this->em()->instantiateEntity(
+                    /** @var \XF\Entity\Page|null $page */
+                    $page = $this->em()->instantiateEntity(
                         'XF:Page',
                         [
                             'node_id' => $node->node_id
@@ -152,7 +160,9 @@ class Navigation extends AbstractController
                         ]
                     );
 
-                    $element = $this->transformEntityLazily($category);
+                    if ($page) {
+                        $element = $this->transformEntityLazily($page);
+                    }
                     break;
             }
 

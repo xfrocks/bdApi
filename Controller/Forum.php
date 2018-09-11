@@ -31,7 +31,7 @@ class Forum extends AbstractNode
 
         $forums = [];
 
-        $this->params()->getTransformContext()->onTransformedCallbacks[] = function($context, &$data) use($forumWatches) {
+        $this->params()->getTransformContext()->onTransformedCallbacks[] = function ($context, &$data) use ($forumWatches) {
             $source = $context->getSource();
             if (!($source instanceof \XF\Entity\Forum)) {
                 return;
@@ -111,6 +111,7 @@ class Forum extends AbstractNode
 
         $forum = $this->assertViewableForum($paramBag->node_id);
 
+        $error = null;
         if (!$forum->canWatch($error)) {
             return $this->noPermission($error);
         }
@@ -132,6 +133,7 @@ class Forum extends AbstractNode
     {
         $forum = $this->assertViewableForum($paramBag->node_id);
 
+        $error = null;
         if (!$forum->canWatch($error)) {
             return $this->noPermission($error);
         }

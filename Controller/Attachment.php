@@ -32,8 +32,9 @@ class Attachment extends AbstractController
         if (!$handler) {
             return $this->noPermission();
         }
-        
+
         $context = [];
+        $error = null;
         if (!$handler->canManageAttachments($context, $error)) {
             return $this->noPermission($error);
         }

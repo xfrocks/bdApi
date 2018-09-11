@@ -309,7 +309,7 @@ class ProfilePost extends AbstractController
     }
 
     /**
-     * @param $commentId
+     * @param int $commentId
      * @param array $extraWith
      * @return \XF\Entity\ProfilePostComment
      * @throws \XF\Mvc\Reply\Exception
@@ -321,14 +321,12 @@ class ProfilePost extends AbstractController
         $extraWith[] = 'ProfilePost.ProfileUser.Privacy';
         array_unique($extraWith);
 
-        /** @var \XF\Entity\ProfilePostComment $comment */
+        /** @var \XF\Entity\ProfilePostComment|null $comment */
         $comment = $this->em()->find('XF:ProfilePostComment', $commentId, $extraWith);
-        if (!$comment)
-        {
+        if (!$comment) {
             throw $this->exception($this->notFound(\XF::phrase('requested_comment_not_found')));
         }
-        if (!$comment->canView($error))
-        {
+        if (!$comment->canView($error)) {
             throw $this->exception($this->noPermission($error));
         }
 
@@ -336,7 +334,7 @@ class ProfilePost extends AbstractController
     }
 
     /**
-     * @param $profilePostId
+     * @param int $profilePostId
      * @param array $extraWith
      * @return \XF\Entity\ProfilePost
      * @throws \XF\Mvc\Reply\Exception
@@ -348,7 +346,7 @@ class ProfilePost extends AbstractController
         $extraWith[] = 'ProfileUser.Privacy';
         array_unique($extraWith);
 
-        /** @var \XF\Entity\ProfilePost $profilePost */
+        /** @var \XF\Entity\ProfilePost|null $profilePost */
         $profilePost = $this->em()->find('XF:ProfilePost', $profilePostId, $extraWith);
         if (!$profilePost) {
             throw $this->exception($this->notFound(\XF::phrase('requested_profile_post_not_found')));
