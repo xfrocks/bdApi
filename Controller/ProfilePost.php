@@ -3,7 +3,10 @@
 namespace Xfrocks\Api\Controller;
 
 use XF\Entity\LikedContent;
+use XF\Entity\ProfilePostComment;
 use XF\Mvc\ParameterBag;
+use XF\Service\ProfilePostComment\Creator;
+use XF\Service\ProfilePostComment\Deleter;
 
 class ProfilePost extends AbstractController
 {
@@ -127,11 +130,161 @@ class ProfilePost extends AbstractController
             ->params()
             ->define('before', 'uint')
             ->define('page_of_comment_id', 'uint')
-            ->define('comment_id', 'uint');
+            ->define('comment_id', 'uint')
+            ->definePageNav();
+
+        /** @var ProfilePostComment|null $comment */
+        $comment = null;
+        if ($params['page_of_comment_id'] > 0) {
+            $comment = $this->assertViewableComment($params['page_of_comment_id']);
+            $profilePost = $comment->ProfilePost;
+        } else {
+            $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
+
+            if ($params['comment_id'] > 0) {
+                $comment = $this->assertViewableComment($params['comment_id']);
+                if ($comment->profile_post_id != $profilePost->profile_post_id) {
+                    return $this->noPermission();
+                }
+
+                $data = [
+                    'comment' => $this->transformEntityLazily($comment)
+                ];
+
+                return $this->api($data);
+            }
+        }
+
+        $beforeDate = $params['before'];
+        if ($comment) {
+            $beforeDate = $comment->comment_date + 1;
+        }
+
+        list($limit,) = $params->filterLimitAndPage();
+
+        /** @var \XF\Repository\ProfilePost $profilePostRepo */
+        $profilePostRepo = $this->repository('XF:ProfilePost');
+        $finder = $profilePostRepo->findNewestCommentsForProfilePost($profilePost, $beforeDate);
+
+        $finder->limit($limit);
+
+        $comments = $finder->fetch()->reverse(true);
+
+        /** @var ProfilePostComment|false $oldestComment */
+        $oldestComment = $comments->first();
+        /** @var ProfilePostComment|false $latestComment */
+        $latestComment = $comments->last();
+
+        $data = [
+            'comments' => [],
+            'comment_total' => $profilePost->comment_count,
+            'links' => [],
+            'profile_post' => $this->transformEntityLazily($profilePost),
+            'timeline_user' => $this->transformEntityLazily($profilePost->ProfileUser)
+        ];
+
+        foreach ($comments as $comment) {
+            $data['comments'][] = $this->transformEntityLazily($comment);
+        }
+
+        if ($oldestComment && $oldestComment->comment_date != $profilePost->first_comment_date) {
+            $data['links']['prev'] = $this->buildApiLink(
+                'profile-posts/comments',
+                $profilePost,
+                ['before' => $oldestComment->comment_date]
+            );
+        }
+
+        if ($latestComment && $latestComment->comment_date != $profilePost->last_comment_date) {
+            $data['links']['latest'] = $this->buildApiLink(
+                'profile-posts/comments',
+                $profilePost
+            );
+        }
+
+        return $this->api($data);
+    }
+
+    public function actionPostComments(ParameterBag $paramBag)
+    {
+        $params = $this
+            ->params()
+            ->define('comment_body', 'str');
 
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
 
+        if (!$profilePost->canComment($error)) {
+            return $this->noPermission($error);
+        }
 
+        /** @var Creator $creator */
+        $creator = $this->service('XF:ProfilePostComment\Creator', $profilePost);
+        $creator->setContent($params['comment_body']);
+
+        $creator->checkForSpam();
+
+        if (!$creator->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $this->assertNotFlooding('post');
+
+        /** @var ProfilePostComment $comment */
+        $comment = $creator->save();
+        $creator->sendNotifications();
+
+        $this->request()->set('comment_id', $comment->profile_post_comment_id);
+        return $this->rerouteController(__CLASS__, 'get-comments', [
+            'profile_post_id' => $profilePost->profile_post_id
+        ]);
+    }
+
+    public function actionDeleteComments(ParameterBag $paramBag)
+    {
+        $params = $this
+            ->params()
+            ->define('comment_id', 'uint')
+            ->define('reason', 'str');
+
+        $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
+        $comment = $this->assertViewableComment($params['comment_id']);
+
+        if ($comment->profile_post_id != $profilePost->profile_post_id) {
+            return $this->noPermission();
+        }
+
+        if (!$comment->canDelete('soft', $error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var Deleter $deleter */
+        $deleter = $this->service('XF:ProfilePostComment\Deleter', $comment);
+        $deleter->delete('soft', $params['reason']);
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionPostReport(ParameterBag $paramBag)
+    {
+        $params = $this->params()->define('message', 'str');
+
+        $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
+
+        if (!$profilePost->canReport($error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var \XF\Service\Report\Creator $creator */
+        $creator = $this->service('XF:Report\Creator', 'profile_post', $profilePost);
+        $creator->setMessage($params['message']);
+
+        if (!$creator->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $creator->save();
+
+        return $this->message(\XF::phrase('changes_saved'));
     }
 
     public function actionMultiple(array $ids)
@@ -153,6 +306,33 @@ class ProfilePost extends AbstractController
         ];
 
         return $this->api($data);
+    }
+
+    /**
+     * @param $commentId
+     * @param array $extraWith
+     * @return \XF\Entity\ProfilePostComment
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    protected function assertViewableComment($commentId, array $extraWith = [])
+    {
+        $extraWith[] = 'User';
+        $extraWith[] = 'ProfilePost.ProfileUser';
+        $extraWith[] = 'ProfilePost.ProfileUser.Privacy';
+        array_unique($extraWith);
+
+        /** @var \XF\Entity\ProfilePostComment $comment */
+        $comment = $this->em()->find('XF:ProfilePostComment', $commentId, $extraWith);
+        if (!$comment)
+        {
+            throw $this->exception($this->notFound(\XF::phrase('requested_comment_not_found')));
+        }
+        if (!$comment->canView($error))
+        {
+            throw $this->exception($this->noPermission($error));
+        }
+
+        return $comment;
     }
 
     /**

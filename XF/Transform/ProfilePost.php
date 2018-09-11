@@ -54,7 +54,7 @@ class ProfilePost extends AbstractHandler
 
         switch ($key) {
             case self::DYNAMIC_KEY_POST_BODY:
-                break;
+                return $this->app->templater()->fn('structured_text', [$profilePost->message]);
             case self::DYNAMIC_KEY_TIMELINE_USER_ID:
                 return $profilePost->ProfileUser->user_id;
             case self::DYNAMIC_KEY_TIMELINE_USER_NAME:
