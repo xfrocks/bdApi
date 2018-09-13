@@ -28,6 +28,11 @@ if (!empty($inputJson)) {
     // because PHP parse input incorrectly with json payload
     // we have to reset $_POST/$_REQUEST for them
     foreach ($_POST as $postKey => $postValue) {
+        if (isset($_GET[$postKey])) {
+            $_REQUEST[$postKey] = $_GET[$postKey];
+            continue;
+        }
+
         unset($_REQUEST[$postKey]);
     }
     $_POST = array();
