@@ -49,7 +49,8 @@ class PropertiesClassReflectionExtension implements \PHPStan\Reflection\Properti
                     $method = $classReflection->getNativeMethod($mapEntry['methodName']);
                     return new EntityGetterReflection(
                         $classReflection,
-                        $method->getVariants()[0]->getReturnType()
+                        $method->getVariants()[0]->getReturnType(),
+                        false
                     );
                 }
                 break;
