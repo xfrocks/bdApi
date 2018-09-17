@@ -99,7 +99,7 @@ class PreTest extends Command
             }
 
             /** @var \XF\Service\Thread\Creator $creator */
-            $creator = \XF::asVisitor($user, function () use($forum, $app) {
+            $creator = \XF::asVisitor($user, function () use ($forum, $app) {
                 return $app->service('XF:Thread\Creator', $forum);
             });
 
@@ -142,7 +142,7 @@ class PreTest extends Command
             }
 
             /** @var Replier $replier */
-            $replier = \XF::asVisitor($user, function() use($app, $thread) {
+            $replier = \XF::asVisitor($user, function () use ($app, $thread) {
                 return $app->service('XF:Thread\Replier', $thread);
             });
 
