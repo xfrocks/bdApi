@@ -5,6 +5,9 @@ namespace Xfrocks\Api\Cli\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use XF\Entity\Forum;
+use XF\Entity\User;
+use XF\PrintableException;
 use XF\Util\Random;
 
 class PreTest extends Command
@@ -13,6 +16,7 @@ class PreTest extends Command
 
     public $prefix = 'api_test';
     public $users = 3;
+    public $threads = 3;
 
     public function createForum(array &$data)
     {
@@ -72,6 +76,49 @@ class PreTest extends Command
         }
 
         return $data['users'];
+    }
+
+    public function createThreads(array &$data)
+    {
+        if (!isset($data['threads'])) {
+            $data['threads'] = [];
+        }
+
+        $app = \XF::app();
+        /** @var Forum $forum */
+        $forum = $app->em()->find('XF:Forum', $data['forum']['node_id']);
+        /** @var User $user */
+        $user = $app->em()->find('XF:User', $data['users'][0]['user_id']);
+
+        for ($i = 0; $i < $this->threads; $i++) {
+            if (isset($data['threads'][$i])) {
+                continue;
+            }
+
+            /** @var \XF\Service\Thread\Creator $creator */
+            $creator = \XF::asVisitor($user, function () use($forum, $app) {
+                return $app->service('XF:Thread\Creator', $forum);
+            });
+
+            $creator->setContent(
+                sprintf('%s-%d-%d', $this->prefix, \XF::$time, $i + 1),
+                str_repeat(__METHOD__ . ' ', 10)
+            );
+
+            if (!$creator->validate($errors)) {
+                throw new PrintableException($errors);
+            }
+
+            $thread = $creator->save();
+            $data['threads'][$i] = [
+                'thread_id' => $thread->thread_id,
+                'title' => $thread->title,
+                'node_id' => $thread->node_id,
+                'version_id' => self::VERSION_ID
+            ];
+        }
+
+        return $data['threads'];
     }
 
     public function createApiClient(array $userData, array &$data)
@@ -166,6 +213,7 @@ class PreTest extends Command
 
         $this->createForum($data);
         $this->createUsers($data);
+        $this->createThreads($data);
 
         $this->createApiClient($data['users'][0], $data);
 
