@@ -138,6 +138,15 @@ abstract class ApiTestCase extends TestCase
     }
 
     /**
+     * @param int $i
+     * @return array
+     */
+    protected static function dataPost($i = 0)
+    {
+        return static::data('posts', $i);
+    }
+
+    /**
      * @param array $client
      * @param array $user
      * @return array

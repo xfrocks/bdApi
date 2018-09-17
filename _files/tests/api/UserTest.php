@@ -30,19 +30,9 @@ class UserTest extends ApiTestCase
         ]);
         $this->assertArrayHasKey('users', $jsonUsers);
 
-        $jsonUser = static::httpRequestJson(
-            'GET',
-            'users/' . $user['user_id'],
-            [
-                'query' => [
-                    'oauth_token' => self::$accessToken
-                ]
-            ]
-        );
-        $this->assertArrayHasKey('user', $jsonUser);
-
         // test exclude fields.
         $excludeFields = [
+            '',
             'user_last_seen_date',
             'user_external_authentications',
             'user_dob_day',
@@ -52,18 +42,22 @@ class UserTest extends ApiTestCase
         ];
 
         foreach ($excludeFields as $excludeField) {
-            $jsonUserWithoutField = static::httpRequestJson(
+            $jsonUser = static::httpRequestJson(
                 'GET',
                 'users/' . $user['user_id'],
                 [
                     'query' => [
                         'oauth_token' => self::$accessToken,
-                        'exclude_field' => $excludeField
+                        'exclude_field' => $excludeField ?: null
                     ]
                 ]
             );
 
-            $this->assertArrayNotHasKey($excludeField, $jsonUserWithoutField);
+            $this->assertArrayHasKey('user', $jsonUser);
+
+            if ($excludeField) {
+                $this->assertArrayNotHasKey($excludeField, $jsonUser);
+            }
         }
     }
 

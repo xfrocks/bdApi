@@ -36,35 +36,28 @@ class ThreadTest extends ApiTestCase
         $this->assertArrayHasKey('threads', $jsonThreads);
 
         $thread = $this->dataThread();
-        $jsonThread = $this->httpRequestJson(
-            'GET',
-            'threads/' . $thread['thread_id'],
-            [
-                'query' => [
-                    'oauth_token' => self::$accessToken
-                ]
-            ]
-        );
-        $this->assertArrayHasKey('thread', $jsonThread);
-
         $excludeFields = [
+            '',
             'first_post',
             'thread_is_followed'
         ];
 
         foreach ($excludeFields as $excludeField) {
-            $jsonThreadWithoutField = $this->httpRequestJson(
+            $jsonThread = $this->httpRequestJson(
                 'GET',
                 'threads/' . $thread['thread_id'],
                 [
                     'query' => [
                         'oauth_token' => self::$accessToken,
-                        'exclude_field' => $excludeField
+                        'exclude_field' => $excludeField ?: null
                     ]
                 ]
             );
 
-            $this->assertArrayNotHasKey($excludeField, $jsonThreadWithoutField);
+            $this->assertArrayHasKey('thread', $jsonThread);
+            if ($excludeField) {
+                $this->assertArrayNotHasKey($excludeField, $jsonThread);
+            }
         }
     }
 
