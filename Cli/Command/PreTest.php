@@ -6,8 +6,10 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use XF\Entity\Forum;
+use XF\Entity\Thread;
 use XF\Entity\User;
 use XF\PrintableException;
+use XF\Service\Thread\Replier;
 use XF\Util\Random;
 
 class PreTest extends Command
@@ -17,6 +19,7 @@ class PreTest extends Command
     public $prefix = 'api_test';
     public $users = 3;
     public $threads = 3;
+    public $posts = 3;
 
     public function createForum(array &$data)
     {
@@ -121,6 +124,44 @@ class PreTest extends Command
         return $data['threads'];
     }
 
+    public function createPosts(array &$data)
+    {
+        if (!isset($data['posts'])) {
+            $data['posts'] = [];
+        }
+
+        $app = \XF::app();
+        /** @var Thread $thread */
+        $thread = $app->em()->find('XF:Thread', $data['threads'][0]['thread_id']);
+        /** @var User $user */
+        $user = $app->em()->find('XF:User', $data['users'][0]['user_id']);
+
+        for ($i = 0; $i < $this->posts; $i++) {
+            if (isset($data['posts'][$i])) {
+                continue;
+            }
+
+            /** @var Replier $replier */
+            $replier = \XF::asVisitor($user, function() use($app, $thread) {
+                return $app->service('XF:Thread\Replier', $thread);
+            });
+
+            $replier->setMessage(str_repeat(__METHOD__ . ' ', 10));
+            if (!$replier->validate($errors)) {
+                throw new PrintableException($errors);
+            }
+
+            $post = $replier->save();
+            $data['posts'][$i] = [
+                'post_id' => $post->post_id,
+                'thread_id' => $thread->thread_id,
+                'version_id' => self::VERSION_ID
+            ];
+        }
+
+        return $data['posts'];
+    }
+
     public function createApiClient(array $userData, array &$data)
     {
         if (!isset($data['apiClient'])) {
@@ -214,6 +255,7 @@ class PreTest extends Command
         $this->createForum($data);
         $this->createUsers($data);
         $this->createThreads($data);
+        $this->createPosts($data);
 
         $this->createApiClient($data['users'][0], $data);
 
