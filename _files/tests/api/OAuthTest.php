@@ -15,6 +15,8 @@ class OAuthTest extends ApiTestCase
         $this->assertArrayHasKey('access_token', $json);
         $this->assertArrayHasKey('expires_in', $json);
         $this->assertArrayHasKey('scope', $json);
+
+        $this->assertEquals($user['user_id'], $json['user_id']);
     }
 
     public function testGrantTypeRefreshToken()
