@@ -1,0 +1,109 @@
+<?php
+
+namespace tests\api;
+
+use tests\bases\ApiTestCase;
+use XF\Util\Random;
+
+class UserTest extends ApiTestCase
+{
+    /**
+     * @var string
+     */
+    private static $accessToken = '';
+
+    public static function setUpBeforeClass()
+    {
+        parent::setUpBeforeClass();
+
+        $token = static::postPassword(static::dataApiClient(), static::dataUser());
+        self::$accessToken = $token['access_token'];
+    }
+
+    public function testGetIndex()
+    {
+        $user = $this->dataUser();
+
+        $jsonUsers = static::httpRequestJson('GET', 'users', [
+            'query' => [
+                'oauth_token' => self::$accessToken
+            ]
+        ]);
+        $this->assertArrayHasKey('users', $jsonUsers);
+
+        $jsonUser = static::httpRequestJson(
+            'GET',
+            'users/' . $user['user_id'],
+            [
+                'query' => [
+                    'oauth_token' => self::$accessToken
+                ]
+            ]
+        );
+        $this->assertArrayHasKey('user', $jsonUser);
+
+        // test exclude fields.
+        $excludeFields = [
+            'user_last_seen_date',
+            'user_external_authentications',
+            'user_dob_day',
+            'user_dob_month',
+            'user_dob_year',
+            'user_has_password'
+        ];
+
+        foreach ($excludeFields as $excludeField) {
+            $jsonUserWithoutField = static::httpRequestJson(
+                'GET',
+                'users/' . $user['user_id'],
+                [
+                    'query' => [
+                        'oauth_token' => self::$accessToken,
+                        'exclude_field' => $excludeField
+                    ]
+                ]
+            );
+
+            $this->assertArrayNotHasKey($excludeField, $jsonUserWithoutField);
+        }
+    }
+
+    public function testPostIndex()
+    {
+        $userEmail = 'tests_' . Random::getRandomString(6) . '@local.com';
+        $username = 'tests_' . Random::getRandomString(6);
+
+        $json = $this->httpRequestJson(
+            'POST',
+            'users',
+            [
+                'body' => [
+                    'user_email' => $userEmail,
+                    'username' => $username,
+                    'password' => '123456',
+                    'oauth_token' => self::$accessToken
+                ]
+            ]
+        );
+
+        $this->assertArrayHasKey('user', $json);
+    }
+
+    public function testPutIndex()
+    {
+        $user = $this->dataUser();
+
+        $json = $this->httpRequestJson(
+            'PUT',
+            'users/' . $user['user_id'],
+            [
+                'body' => [
+                    'oauth_token' => self::$accessToken
+                ]
+            ]
+        );
+
+        $this->assertArrayHasKey('status', $json);
+        $this->assertEquals('ok', $json['status']);
+    }
+}
