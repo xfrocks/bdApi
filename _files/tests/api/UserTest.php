@@ -3,7 +3,6 @@
 namespace tests\api;
 
 use tests\bases\ApiTestCase;
-use XF\Util\Random;
 
 class UserTest extends ApiTestCase
 {
@@ -70,8 +69,10 @@ class UserTest extends ApiTestCase
 
     public function testPostIndex()
     {
-        $userEmail = 'tests_' . Random::getRandomString(6) . '@local.com';
-        $username = 'tests_' . Random::getRandomString(6);
+        $now = time();
+
+        $userEmail = 'tests_' . $now . '@local.com';
+        $username = 'tests_' . $now;
 
         $json = $this->httpRequestJson(
             'POST',
