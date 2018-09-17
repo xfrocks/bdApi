@@ -27,7 +27,7 @@ test:
   image: registry.gitlab.com/xfrocks/xenforo2/master
   script:
     - mysqlrestore.sh
-    - unzip -qq _releases/*.zip
+    - unzip -qq _releases/*.zip 2>/dev/null || true
     - cp -R upload/* /var/www/html
     - cd /var/www/html
     - php cmd.php xf-addon:install Xfrocks/Api
