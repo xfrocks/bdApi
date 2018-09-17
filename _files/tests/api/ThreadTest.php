@@ -19,6 +19,55 @@ class ThreadTest extends ApiTestCase
         self::$accessToken = $token['access_token'];
     }
 
+    public function testGetIndex()
+    {
+        $forum = $this->dataForum();
+
+        $jsonThreads = $this->httpRequestJson(
+            'GET',
+            'threads',
+            [
+                'query' => [
+                    'forum_id' => $forum['node_id'],
+                    'oauth_token' => self::$accessToken
+                ]
+            ]
+        );
+        $this->assertArrayHasKey('threads', $jsonThreads);
+
+        $thread = $this->dataThread();
+        $jsonThread = $this->httpRequestJson(
+            'GET',
+            'threads/' . $thread['thread_id'],
+            [
+                'query' => [
+                    'oauth_token' => self::$accessToken
+                ]
+            ]
+        );
+        $this->assertArrayHasKey('thread', $jsonThread);
+
+        $excludeFields = [
+            'first_post',
+            'thread_is_followed'
+        ];
+
+        foreach ($excludeFields as $excludeField) {
+            $jsonThreadWithoutField = $this->httpRequestJson(
+                'GET',
+                'threads/' . $thread['thread_id'],
+                [
+                    'query' => [
+                        'oauth_token' => self::$accessToken,
+                        'exclude_field' => $excludeField
+                    ]
+                ]
+            );
+
+            $this->assertArrayNotHasKey($excludeField, $jsonThreadWithoutField);
+        }
+    }
+
     public function testPostIndex()
     {
         $forum = $this->dataForum();
@@ -37,5 +86,23 @@ class ThreadTest extends ApiTestCase
         );
 
         $this->assertArrayHasKey('thread', $json);
+    }
+
+    public function testPutIndex()
+    {
+        $thread = $this->dataThread();
+
+        $json = $this->httpRequestJson(
+            'PUT',
+            'threads/' . $thread['thread_id'],
+            [
+                'body' => [
+                    'post_body' => str_repeat(__METHOD__ . ' ', 10),
+                    'oauth_token' => self::$accessToken
+                ]
+            ]
+        );
+
+        $this->assertArrayHasKey('post', $json);
     }
 }
