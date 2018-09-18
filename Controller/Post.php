@@ -165,7 +165,10 @@ class Post extends AbstractController
             /** @var \XF\Service\Thread\Editor $threadEditor */
             $threadEditor = $this->service('XF:Thread\Editor', $post->Thread);
 
-            $threadEditor->setTitle($params['thread_title']);
+            if ($this->request()->exists('thread_title')) {
+                $threadEditor->setTitle($params['thread_title']);
+            }
+
             $threadEditor->setPrefix($params['thread_prefix_id']);
 
             if ($this->request()->exists('fields')) {

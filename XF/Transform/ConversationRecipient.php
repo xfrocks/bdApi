@@ -13,6 +13,11 @@ class ConversationRecipient extends AbstractHandler
     const DYNAMIC_KEY_AVATAR_BIG = 'avatar_big';
     const DYNAMIC_KEY_AVATAR_SMALL = 'avatar_small';
 
+    public function canView($context)
+    {
+        return true;
+    }
+
     public function getMappings($context)
     {
         return [
