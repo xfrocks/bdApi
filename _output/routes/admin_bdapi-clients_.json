@@ -1,0 +1,11 @@
+{
+    "route_type": "admin",
+    "route_prefix": "bdapi-clients",
+    "sub_name": "",
+    "format": ":str<client_id>",
+    "build_class": "",
+    "build_method": "",
+    "controller": "Xfrocks\\Api:Client",
+    "context": "bdApi",
+    "action_prefix": ""
+}

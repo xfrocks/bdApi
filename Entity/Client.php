@@ -79,6 +79,31 @@ class Client extends Entity
         $this->set('options', Arr::mapMerge($this->options ?: [], $options));
     }
 
+    public function getEntityColumnLabel($columnName)
+    {
+        switch ($columnName) {
+            case 'client_id':
+                return \XF::phrase('bdapi_client_id');
+            case 'client_secret':
+                return \XF::phrase('bdapi_client_secret');
+            case 'redirect_uri':
+                return \XF::phrase('bdapi_client_redirect_uri');
+            case 'name':
+            case 'description':
+                return \XF::phrase('bdapi_client_' . $columnName);
+            case 'user_id':
+                return \XF::phrase('user_name');
+
+        }
+
+        return null;
+    }
+
+    public function getEntityLabel()
+    {
+        return $this->name;
+    }
+
     public static function getStructure(Structure $structure)
     {
         $structure->table = 'xf_bdapi_client';

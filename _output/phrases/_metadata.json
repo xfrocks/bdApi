@@ -1,4 +1,16 @@
 {
+    "admin_navigation.bdApi.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "caa09fcc5fecfa1a8a0af20151f7d195"
+    },
+    "admin_navigation.bdApi_clients.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "0f558243fbf45f1cd840fff01957f57b"
+    },
     "bdapi_authorize_access.txt": {
         "global_cache": false,
         "version_id": 2000000,
@@ -28,6 +40,18 @@
         "version_id": 2000000,
         "version_string": "2.0.0",
         "hash": "49c18084f9912495404084a74b517761"
+    },
+    "bdapi_client_entities.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "0f558243fbf45f1cd840fff01957f57b"
+    },
+    "bdapi_client_entity.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "577d7068826de925ea2aec01dbadf5e4"
     },
     "bdapi_client_id.txt": {
         "global_cache": false,
