@@ -29,6 +29,12 @@
         "version_string": "2.0.0 Alpha 5",
         "hash": "0f558243fbf45f1cd840fff01957f57b"
     },
+    "admin_permission.bdApi.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "f31afc34f3646e515ac887280a1abd04"
+    },
     "bdapi_auth_code_add.txt": {
         "global_cache": false,
         "version_id": 2000015,

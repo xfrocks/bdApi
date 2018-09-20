@@ -3,7 +3,7 @@
     "display_order": 70,
     "link": "api-tokens",
     "icon": "",
-    "admin_permission_id": "",
+    "admin_permission_id": "bdApi",
     "debug_only": false,
     "hide_no_children": false
 }
