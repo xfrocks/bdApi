@@ -1,8 +1,17 @@
 {
+    "XfrocksApiRefreshToken.json": {
+        "hash": "1768d176fef1cc0738b42a0bf6e1c812"
+    },
     "bdApi.json": {
         "hash": "9e682e4da055af85d8e5342d8f1e47d4"
     },
+    "bdApi_Tokens.json": {
+        "hash": "d69c4567d8668c267bb6b634de191ffd"
+    },
+    "bdApi_authCodes.json": {
+        "hash": "e66e079104ffb062567bdf07436c779d"
+    },
     "bdApi_clients.json": {
-        "hash": "08905f6baa6c3a3e767b9b48051de2d4"
+        "hash": "1059dc9a484c59156a34d41bbeebaee0"
     }
 }

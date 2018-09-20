@@ -27,6 +27,27 @@ class Token extends TokenWithScope
         return $this->token_text;
     }
 
+    public function getEntityColumnLabel($columnName)
+    {
+        switch ($columnName) {
+            case 'client_id':
+                return \XF::phrase('bdapi_client_id');
+            case 'token_text':
+                return \XF::phrase('bdapi_token_text');
+            case 'expire_date':
+                return \XF::phrase('bdapi_expire_date');
+            case 'user_id':
+                return \XF::phrase('user_name');
+        }
+
+        return null;
+    }
+
+    public function getEntityLabel()
+    {
+        return $this->token_text;
+    }
+
     protected function _postSave()
     {
         if ($this->isChanged('scope')) {

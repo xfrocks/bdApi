@@ -1,5 +1,14 @@
 {
-    "admin_bdapi-clients_.json": {
-        "hash": "2751f1c0ef0e55843407425474dda524"
+    "admin_api-auth-codes_.json": {
+        "hash": "637f37854bdf87fd271f5db136bb2aba"
+    },
+    "admin_api-clients_.json": {
+        "hash": "0783752b8eb3a5bd7fa44de9ebd97775"
+    },
+    "admin_api-refresh-token_.json": {
+        "hash": "dc45bd087db0d5427290c03eca1f90d8"
+    },
+    "admin_api-tokens_.json": {
+        "hash": "2718812e4a3d7231815febccbfb2bf99"
     }
 }

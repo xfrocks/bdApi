@@ -26,6 +26,27 @@ class RefreshToken extends TokenWithScope
         return $this->refresh_token_text;
     }
 
+    public function getEntityColumnLabel($columnName)
+    {
+        switch ($columnName) {
+            case 'client_id':
+                return \XF::phrase('bdapi_client_id');
+            case 'refresh_token_text':
+                return \XF::phrase('bdapi_refresh_token_text');
+            case 'expire_date':
+                return \XF::phrase('bdapi_expire_date');
+            case 'user_id':
+                return \XF::phrase('user_name');
+        }
+
+        return null;
+    }
+
+    public function getEntityLabel()
+    {
+        return $this->refresh_token_text;
+    }
+
     public static function getStructure(Structure $structure)
     {
         $structure->table = 'xf_bdapi_refresh_token';

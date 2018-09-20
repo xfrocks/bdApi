@@ -93,7 +93,6 @@ class Client extends Entity
                 return \XF::phrase('bdapi_client_' . $columnName);
             case 'user_id':
                 return \XF::phrase('user_name');
-
         }
 
         return null;

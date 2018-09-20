@@ -27,6 +27,29 @@ class AuthCode extends TokenWithScope
         return $this->auth_code_text;
     }
 
+    public function getEntityColumnLabel($columnName)
+    {
+        switch ($columnName) {
+            case 'client_id':
+                return \XF::phrase('bdapi_client_id');
+            case 'auth_code_text':
+                return \XF::phrase('bdapi_auth_code_text');
+            case 'redirect_uri':
+                return \XF::phrase('bdapi_client_redirect_uri');
+            case 'user_id':
+                return \XF::phrase('user_name');
+            case 'expire_date':
+                return \XF::phrase('bdapi_expire_date');
+        }
+
+        return null;
+    }
+
+    public function getEntityLabel()
+    {
+        return $this->auth_code_text;
+    }
+
     public static function getStructure(Structure $structure)
     {
         $structure->table = 'xf_bdapi_auth_code';
