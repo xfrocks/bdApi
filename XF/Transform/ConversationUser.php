@@ -6,6 +6,11 @@ use Xfrocks\Api\Transform\AbstractHandler;
 
 class ConversationUser extends AbstractHandler
 {
+    public function canView($context)
+    {
+        return true;
+    }
+
     public function onTransformEntities($context, $entities)
     {
         $this->callOnTransformEntitiesForRelation($context, $entities, null, 'Master');

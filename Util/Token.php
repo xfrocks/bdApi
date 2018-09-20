@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Util;
 
 use Xfrocks\Api\Listener;
+use Xfrocks\Api\OAuth2\Storage\SessionStorage;
 use Xfrocks\Api\OAuth2\TokenType\BearerWithScope;
 
 class Token
@@ -22,11 +23,18 @@ class Token
         }
 
         // TODO: find a better way to keep token response data in sync with BearerWithScope
-        return [
+        $response = [
             'access_token' => $accessToken->getId(),
             'expires_in' => $accessToken->getExpireTime() - time(),
             'scope' => implode(Listener::$scopeDelimiter, $scopeIds),
             'token_type' => 'Bearer',
         ];
+
+        $session = $accessToken->getSession();
+        if (!empty($session) && $session->getOwnerType() === SessionStorage::OWNER_TYPE_USER) {
+            $response['user_id'] = intval($session->getOwnerId());
+        }
+
+        return $response;
     }
 }

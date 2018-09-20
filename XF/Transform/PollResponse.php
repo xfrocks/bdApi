@@ -12,6 +12,11 @@ class PollResponse extends AbstractHandler
 
     const DYNAMIC_KEY_IS_VOTED = 'response_is_voted';
 
+    public function canView($context)
+    {
+        return true;
+    }
+
     public function calculateDynamicValue($context, $key)
     {
         /** @var \XF\Entity\PollResponse $response */
