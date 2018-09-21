@@ -4,7 +4,6 @@ namespace Xfrocks\Api\Admin\Controller;
 
 use XF\Entity\User;
 use XF\Mvc\Entity\Finder;
-use XF\Util\Random;
 
 class Token extends Entity
 {
@@ -52,17 +51,5 @@ class Token extends Entity
         }
 
         return $data;
-    }
-
-    protected function entityAddEdit($entity)
-    {
-        if ($entity instanceof \Xfrocks\Api\Entity\Token
-            && !$entity->token_id
-            && empty($entity->token_text)
-        ) {
-            $entity->token_text = Random::getRandomString(40);
-        }
-
-        return parent::entityAddEdit($entity);
     }
 }

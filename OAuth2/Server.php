@@ -32,6 +32,7 @@ use Xfrocks\Api\OAuth2\Storage\SessionStorage;
 use Xfrocks\Api\OAuth2\TokenType\BearerWithScope;
 use Xfrocks\Api\Util\Crypt;
 use Xfrocks\Api\Util\OneTimeToken;
+use Xfrocks\Api\Util\Vendor;
 use Xfrocks\Api\XF\Pub\Controller\Account;
 
 class Server
@@ -62,7 +63,7 @@ class Server
      */
     public function __construct($app)
     {
-        require_once(dirname(__DIR__) . '/vendor/autoload.php');
+        Vendor::load();
 
         $this->app = $app;
 

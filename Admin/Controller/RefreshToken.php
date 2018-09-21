@@ -4,7 +4,6 @@ namespace Xfrocks\Api\Admin\Controller;
 
 use XF\Entity\User;
 use XF\Mvc\Entity\Finder;
-use XF\Util\Random;
 
 class RefreshToken extends Entity
 {
@@ -43,17 +42,5 @@ class RefreshToken extends Entity
         }
 
         return $data;
-    }
-
-    protected function entityAddEdit($entity)
-    {
-        if ($entity instanceof \Xfrocks\Api\Entity\RefreshToken
-            && !$entity->refresh_token_id
-            && empty($entity->refresh_token_text)
-        ) {
-            $entity->refresh_token_text = Random::getRandomString(40);
-        }
-
-        return parent::entityAddEdit($entity);
     }
 }

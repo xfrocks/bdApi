@@ -2,7 +2,9 @@
 
 namespace Xfrocks\Api\Entity;
 
+use League\OAuth2\Server\Util\SecureKey;
 use XF\Mvc\Entity\Structure;
+use Xfrocks\Api\Util\Vendor;
 
 /**
  * COLUMNS
@@ -82,13 +84,15 @@ class Token extends TokenWithScope
 
     public static function getStructure(Structure $structure)
     {
+        Vendor::load();
+
         $structure->table = 'xf_bdapi_token';
         $structure->shortName = 'Xfrocks\Api:Token';
         $structure->primaryKey = 'token_id';
         $structure->columns = [
             'token_id' => ['type' => self::UINT, 'autoIncrement' => true, 'nullable' => true],
             'client_id' => ['type' => self::STR, 'maxLength' => 255, 'required' => true],
-            'token_text' => ['type' => self::STR, 'maxLength' => 255, 'required' => true],
+            'token_text' => ['type' => self::STR, 'maxLength' => 255, 'default' => SecureKey::generate()],
             'expire_date' => ['type' => self::UINT, 'required' => true],
             'user_id' => ['type' => self::UINT, 'required' => true],
         ];
