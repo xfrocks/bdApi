@@ -34,6 +34,8 @@ class Token extends TokenWithScope
                 return \XF::phrase('bdapi_client_id');
             case 'token_text':
                 return \XF::phrase('bdapi_token_text');
+            case 'scope':
+                return \XF::phrase('bdapi_token_scope');
             case 'expire_date':
                 return \XF::phrase('bdapi_expire_date');
             case 'user_id':

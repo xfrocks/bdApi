@@ -419,6 +419,12 @@
         "version_string": "2.0.0 Alpha 5",
         "hash": "459a6f79ad9b13cbcb5f692d2cc7a94d"
     },
+    "bdapi_token_scope.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "5d113f2038d289f391614c39043629e8"
+    },
     "bdapi_token_text.txt": {
         "global_cache": false,
         "version_id": 2000015,
