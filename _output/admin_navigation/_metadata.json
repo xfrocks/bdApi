@@ -5,6 +5,12 @@
     "bdApi.json": {
         "hash": "9c6bd7464836e917498878f1fc92aec7"
     },
+    "bdApi_Logs.json": {
+        "hash": "e78471c458e77306224a7570906bd4c1"
+    },
+    "bdApi_Subscriptions.json": {
+        "hash": "9e1556001b1f939e2d2409017903ee5b"
+    },
     "bdApi_Tokens.json": {
         "hash": "87924993133d19a8d59fa2dbdcf7238e"
     },

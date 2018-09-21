@@ -1,0 +1,11 @@
+{
+    "route_type": "admin",
+    "route_prefix": "api-subscriptions",
+    "sub_name": "",
+    "format": ":int<subscription_id>/",
+    "build_class": "",
+    "build_method": "",
+    "controller": "Xfrocks\\Api:Subscription",
+    "context": "bdApi",
+    "action_prefix": ""
+}

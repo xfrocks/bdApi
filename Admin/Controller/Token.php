@@ -31,7 +31,7 @@ class Token extends Entity
 
         return $entity->scope;
     }
-    
+
     public function getEntityExplain($entity)
     {
         if (!($entity instanceof \Xfrocks\Api\Entity\Token)) {

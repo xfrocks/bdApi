@@ -19,6 +19,21 @@
         "version_string": "2.0.0 Alpha 5",
         "hash": "69f20b39c03cd1c9a235d6597122b58b"
     },
+    "admin/bdapi_log_list.html": {
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "222cf5ecb3b537be537047bd207050a0"
+    },
+    "admin/bdapi_log_view.html": {
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "36388a7eeb2c4a8a283f72a0f240205c"
+    },
+    "admin/bdapi_subscription_list.html": {
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "8493eb549394ddf3731f82f46536b9ec"
+    },
     "public/bdapi_account_api.html": {
         "version_id": 2000000,
         "version_string": "2.0.0",

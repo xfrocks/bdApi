@@ -40,6 +40,15 @@ class Log extends Entity
             'response_output' => ['type' => self::SERIALIZED_ARRAY, 'default' => []]
         ];
 
+        $structure->relations = [
+            'User' => [
+                'type' => self::TO_ONE,
+                'entity' => 'XF:User',
+                'conditions' => 'user_id',
+                'primary' => true
+            ]
+        ];
+
         return $structure;
     }
 }

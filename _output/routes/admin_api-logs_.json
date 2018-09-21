@@ -1,0 +1,11 @@
+{
+    "route_type": "admin",
+    "route_prefix": "api-logs",
+    "sub_name": "",
+    "format": ":int<log_id>/",
+    "build_class": "",
+    "build_method": "",
+    "controller": "Xfrocks\\Api:Log",
+    "context": "bdApi",
+    "action_prefix": ""
+}
