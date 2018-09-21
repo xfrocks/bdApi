@@ -2,7 +2,6 @@
 
 namespace Xfrocks\Api\Admin\Controller;
 
-
 class AuthCode extends Entity
 {
     protected function getShortName()
