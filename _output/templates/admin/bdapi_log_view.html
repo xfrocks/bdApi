@@ -1,0 +1,17 @@
+<xf:title>{{ phrase('bdapi_log_entry') }}</xf:title>
+
+<div class="block">
+    <div class="block-container">
+        <div class="block-body">
+            <xf:formrow label="{{ phrase('bdapi_client_id') }}">{$log.client_id}</xf:formrow>
+            <xf:formrow label="{{ phrase('user_name') }}">{{ $log.User ? $log.User.username : '' }}</xf:formrow>
+            <xf:formrow label="{{ phrase('bdapi_log_ip_address') }}">{$log.ip_address}</xf:formrow>
+            <xf:formrow label="{{ phrase('bdapi_log_request_date') }}"><xf:date time="$log.request_date" /></xf:formrow>
+            <xf:formrow label="{{ phrase('bdapi_log_request_method') }}">{$log.request_method}</xf:formrow>
+            <xf:formrow label="{{ phrase('bdapi_log_request_uri') }}">{$log.request_uri}</xf:formrow>
+            <xf:formrow label="{{ phrase('bdapi_log_request_data') }}">{{ dump($log.request_data) }}</xf:formrow>
+            <xf:formrow label="{{ phrase('bdapi_log_response_code') }}">{$log.response_code}</xf:formrow>
+            <xf:formrow label="{{ phrase('bdapi_log_response_output') }}">{{ dump($log.response_output) }}</xf:formrow>
+        </div>
+    </div>
+</div>
