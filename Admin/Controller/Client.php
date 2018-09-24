@@ -3,7 +3,7 @@
 namespace Xfrocks\Api\Admin\Controller;
 
 use XF\Entity\User;
-use XF\Mvc\Entity\Finder;
+use Xfrocks\Api\Entity\Client as EntityClient;
 
 class Client extends Entity
 {
@@ -33,22 +33,21 @@ class Client extends Entity
 
     public function getEntityExplain($entity)
     {
-        if (!($entity instanceof \Xfrocks\Api\Entity\Client)) {
-            return parent::getEntityHint($entity);
-        }
-
+        /** @var EntityClient $client */
+        $client = $entity;
         /** @var User|null $user */
-        $user = $entity->User;
-        return ($user ? $user->username : '') . ' - ' . $entity->description;
-    }
+        $user = $client->User;
 
-    protected function entityListData()
-    {
-        $data = parent::entityListData();
-        if ($data[0] instanceof Finder) {
-            $data[0]->with('User');
+        $parts = [];
+
+        if ($user !== null) {
+            $parts[] = $user->username;
         }
 
-        return $data;
+        if (strlen($client->description) > 0) {
+            $parts[] = $client->description;
+        }
+
+        return implode(' - ', $parts);
     }
 }

@@ -3,7 +3,7 @@
 namespace Xfrocks\Api\Admin\Controller;
 
 use XF\Entity\User;
-use XF\Mvc\Entity\Finder;
+use Xfrocks\Api\Entity\Token as EntityToken;
 
 class Token extends Entity
 {
@@ -24,32 +24,18 @@ class Token extends Entity
 
     public function getEntityHint($entity)
     {
-        if (!($entity instanceof \Xfrocks\Api\Entity\Token)) {
-            return parent::getEntityHint($entity);
-        }
-
-        return $entity->scope;
+        /** @var EntityToken $token */
+        $token = $entity;
+        return $token->scope;
     }
 
     public function getEntityExplain($entity)
     {
-        if (!($entity instanceof \Xfrocks\Api\Entity\Token)) {
-            return parent::getEntityExplain($entity);
-        }
-
+        /** @var EntityToken $token */
+        $token = $entity;
         /** @var User|null $user */
-        $user = $entity->User;
+        $user = $token->User;
 
         return $user ? $user->username : '';
-    }
-
-    protected function entityListData()
-    {
-        $data = parent::entityListData();
-        if ($data[0] instanceof Finder) {
-            $data[0]->with('User');
-        }
-
-        return $data;
     }
 }

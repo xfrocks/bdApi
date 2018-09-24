@@ -3,7 +3,7 @@
 namespace Xfrocks\Api\Admin\Controller;
 
 use XF\Entity\User;
-use XF\Mvc\Entity\Finder;
+use Xfrocks\Api\Entity\RefreshToken as EntityRefreshToken;
 
 class RefreshToken extends Entity
 {
@@ -24,23 +24,11 @@ class RefreshToken extends Entity
 
     public function getEntityHint($entity)
     {
-        if (!($entity instanceof \Xfrocks\Api\Entity\RefreshToken)) {
-            return parent::getEntityHint($entity);
-        }
-
+        /** @var EntityRefreshToken $refreshToken */
+        $refreshToken = $entity;
         /** @var User|null $user */
-        $user = $entity->User;
+        $user = $refreshToken->User;
 
         return $user ? $user->username : '';
-    }
-
-    protected function entityListData()
-    {
-        $data = parent::entityListData();
-        if ($data[0] instanceof Finder) {
-            $data[0]->with('User');
-        }
-
-        return $data;
     }
 }
