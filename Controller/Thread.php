@@ -437,9 +437,9 @@ class Thread extends AbstractController
         if ($params['forum_id'] > 0) {
             /** @var Forum $forum */
             $forum = $this->assertViewableForum($params['forum_id']);
-            $finder->applyVisibilityChecksInForum($forum);
+            $finder->inForum($forum);
         }
-
+        
         if ($params['creator_user_id'] > 0) {
             $finder->where('user_id', $params['creator_user_id']);
         }
