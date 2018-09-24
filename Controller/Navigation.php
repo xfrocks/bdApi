@@ -41,7 +41,7 @@ class Navigation extends AbstractController
 
         /** @var \XF\Repository\Node $nodeRepo */
         $nodeRepo = $this->repository('XF:Node');
-        $nodeList = $nodeRepo->getNodeList($parentNode);
+        $nodeList = $nodeRepo->getNodeList();
 
         $elements = [];
 
@@ -109,7 +109,7 @@ class Navigation extends AbstractController
 
             /** @var Node $node */
             $node = $item->record;
-            
+
             switch ($node->node_type_id) {
                 case 'Category':
                     /** @var \XF\Entity\Category|null $category */
