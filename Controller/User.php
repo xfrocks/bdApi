@@ -190,12 +190,12 @@ class User extends AbstractController
         /** @var Server $apiServer */
         $apiServer = $this->app->container('api.server');
         $scopes = $apiServer->getScopeDefaults();
-
         $accessToken = $apiServer->newAccessToken($user->user_id, $client, $scopes);
+        $refreshToken = $apiServer->newRefreshToken($user->user_id, $client, $scopes);
 
         $data = [
             'user' => $this->transformEntityLazily($user),
-            'token' => \Xfrocks\Api\Util\Token::transformLibAccessTokenEntity($accessToken),
+            'token' => \Xfrocks\Api\Util\Token::transformLibAccessTokenEntity($accessToken, $refreshToken),
         ];
 
         return $this->api($data);

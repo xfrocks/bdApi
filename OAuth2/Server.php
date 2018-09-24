@@ -11,17 +11,18 @@ use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 use League\OAuth2\Server\Grant\PasswordGrant;
 use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\ResourceServer;
-use League\OAuth2\Server\Util\SecureKey;
 use Symfony\Component\HttpFoundation\Request;
 use XF\Container;
 use XF\Mvc\Controller;
 use Xfrocks\Api\App;
 use Xfrocks\Api\Controller\OAuth2;
 use Xfrocks\Api\Entity\Client;
+use Xfrocks\Api\Entity\RefreshToken;
 use Xfrocks\Api\Entity\Token;
 use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Entity\AccessTokenHybrid;
 use Xfrocks\Api\OAuth2\Entity\ClientHybrid;
+use Xfrocks\Api\OAuth2\Entity\RefreshTokenHybrid;
 use Xfrocks\Api\OAuth2\Grant\ImplicitGrant;
 use Xfrocks\Api\OAuth2\Storage\AccessTokenStorage;
 use Xfrocks\Api\OAuth2\Storage\AuthCodeStorage;
@@ -445,7 +446,6 @@ class Server
         /** @var Token $xfToken */
         $xfToken = $this->app->em()->create('Xfrocks\Api:Token');
         $xfToken->client_id = $client->client_id;
-        $xfToken->token_text = SecureKey::generate();
         $xfToken->expire_date = time() + $this->getOptionAccessTokenTTL();
         $xfToken->user_id = intval($userId);
         $xfToken->setScopes($scopes);
@@ -455,6 +455,29 @@ class Server
         $authorizationServer = $this->container['server.auth'];
 
         return new AccessTokenHybrid($authorizationServer, $xfToken);
+    }
+
+    /**
+     * @param mixed $userId
+     * @param Client $client
+     * @param string[] $scopes
+     * @return RefreshTokenHybrid
+     * @throws \XF\PrintableException
+     */
+    public function newRefreshToken($userId, $client, array $scopes)
+    {
+        /** @var RefreshToken $xfRefreshToken */
+        $xfRefreshToken = $this->app->em()->create('Xfrocks\Api:RefreshToken');
+        $xfRefreshToken->client_id = $client->client_id;
+        $xfRefreshToken->expire_date = time() + $this->getOptionRefreshTokenTTL();
+        $xfRefreshToken->user_id = intval($userId);
+        $xfRefreshToken->setScopes($scopes);
+        $xfRefreshToken->save();
+
+        /** @var AuthorizationServer $authorizationServer */
+        $authorizationServer = $this->container['server.auth'];
+
+        return new RefreshTokenHybrid($authorizationServer, $xfRefreshToken);
     }
 
     /**
