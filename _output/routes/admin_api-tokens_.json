@@ -1,0 +1,11 @@
+{
+    "route_type": "admin",
+    "route_prefix": "api-tokens",
+    "sub_name": "",
+    "format": ":int<token_id>/",
+    "build_class": "",
+    "build_method": "",
+    "controller": "Xfrocks\\Api:Token",
+    "context": "bdApi",
+    "action_prefix": ""
+}

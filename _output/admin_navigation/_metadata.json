@@ -1,0 +1,23 @@
+{
+    "XfrocksApiRefreshToken.json": {
+        "hash": "b1c8f94026288c3ea4582339e93b45e2"
+    },
+    "bdApi.json": {
+        "hash": "9c6bd7464836e917498878f1fc92aec7"
+    },
+    "bdApi_Logs.json": {
+        "hash": "e78471c458e77306224a7570906bd4c1"
+    },
+    "bdApi_Subscriptions.json": {
+        "hash": "9e1556001b1f939e2d2409017903ee5b"
+    },
+    "bdApi_Tokens.json": {
+        "hash": "87924993133d19a8d59fa2dbdcf7238e"
+    },
+    "bdApi_authCodes.json": {
+        "hash": "3766ad0fa0262b44955116def725e096"
+    },
+    "bdApi_clients.json": {
+        "hash": "ddad37424b30b71efd0b171e4ac8417a"
+    }
+}

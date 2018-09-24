@@ -4,6 +4,36 @@
         "version_string": "2.0.0 Alpha 4",
         "hash": "0e5d7f1abae08a24192f5de9ccaa93e1"
     },
+    "admin/bdapi_entity_delete.html": {
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "6b4d4c43aec7949d705dd36d09a53a34"
+    },
+    "admin/bdapi_entity_edit.html": {
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "de660feaf87fef084cf1385e462941e5"
+    },
+    "admin/bdapi_entity_list.html": {
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "fcaa4500cbacc33f1a01cf5a82bc0359"
+    },
+    "admin/bdapi_log_list.html": {
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "222cf5ecb3b537be537047bd207050a0"
+    },
+    "admin/bdapi_log_view.html": {
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "36388a7eeb2c4a8a283f72a0f240205c"
+    },
+    "admin/bdapi_subscription_list.html": {
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "8493eb549394ddf3731f82f46536b9ec"
+    },
     "public/bdapi_account_api.html": {
         "version_id": 2000000,
         "version_string": "2.0.0",

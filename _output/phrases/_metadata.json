@@ -1,4 +1,82 @@
 {
+    "admin_navigation.XfrocksApiRefreshToken.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "ad35fbaef240a8ec1f43e8a0d5e15099"
+    },
+    "admin_navigation.bdApi.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "caa09fcc5fecfa1a8a0af20151f7d195"
+    },
+    "admin_navigation.bdApi_Logs.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "b2d37ae1cedf42ff874289b721860af2"
+    },
+    "admin_navigation.bdApi_Subscriptions.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "4ca2c509994c2776d0880357b4e8e5be"
+    },
+    "admin_navigation.bdApi_Tokens.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "f6861770bdf2fb702a665f1b34e4f9ed"
+    },
+    "admin_navigation.bdApi_authCodes.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "0da4c9abdb4a778669ed035ae1c80db8"
+    },
+    "admin_navigation.bdApi_clients.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "0f558243fbf45f1cd840fff01957f57b"
+    },
+    "admin_permission.bdApi.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "f31afc34f3646e515ac887280a1abd04"
+    },
+    "bdapi_auth_code_add.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "804a550346819a06526872330c539e2b"
+    },
+    "bdapi_auth_code_edit.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "26b1d9ce9320457dc90b4b4618f7ae35"
+    },
+    "bdapi_auth_code_entities.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "0da4c9abdb4a778669ed035ae1c80db8"
+    },
+    "bdapi_auth_code_entity.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "79e27edbed5e9f0ebf4ff9746cfdbfe3"
+    },
+    "bdapi_auth_code_text.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "c6ae53504383ca0bb6badcea1de9006e"
+    },
     "bdapi_authorize_access.txt": {
         "global_cache": false,
         "version_id": 2000000,
@@ -28,6 +106,18 @@
         "version_id": 2000000,
         "version_string": "2.0.0",
         "hash": "49c18084f9912495404084a74b517761"
+    },
+    "bdapi_client_entities.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "0f558243fbf45f1cd840fff01957f57b"
+    },
+    "bdapi_client_entity.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "577d7068826de925ea2aec01dbadf5e4"
     },
     "bdapi_client_id.txt": {
         "global_cache": false,
@@ -65,6 +155,12 @@
         "version_string": "2.0.0 Alpha 4",
         "hash": "8fee5376ada959d58f9c09e3413ef1bd"
     },
+    "bdapi_expire_date.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "5a787141d53b573ec9b86e900bfe0d79"
+    },
     "bdapi_home.txt": {
         "global_cache": false,
         "version_id": 2000000,
@@ -76,6 +172,60 @@
         "version_id": 2000014,
         "version_string": "2.0.0 Alpha 4",
         "hash": "7d19af7a3995fc262806c4037a19e452"
+    },
+    "bdapi_log_entry.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "b7cc931e9edfc5d2232748b203de4aef"
+    },
+    "bdapi_log_ip_address.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "5b8c99dad1893a85076709b2d3c2d2d0"
+    },
+    "bdapi_log_request_data.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "df5baf123e804b8c31151724197c0da2"
+    },
+    "bdapi_log_request_date.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "b89aa19e2adefc268c3e2260d9242548"
+    },
+    "bdapi_log_request_method.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "b6434258c743f8673997b5aeb3721c27"
+    },
+    "bdapi_log_request_uri.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "efc92fb772a0037d7b1fab20dff56a85"
+    },
+    "bdapi_log_response_code.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "2affe82cc56bc171ff3febf97c70b119"
+    },
+    "bdapi_log_response_output.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "15c25a7f3e8605e0bd46c0616c7d7727"
+    },
+    "bdapi_logs.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "b2d37ae1cedf42ff874289b721860af2"
     },
     "bdapi_no_facebook_association_found.txt": {
         "global_cache": false,
@@ -142,6 +292,36 @@
         "version_id": 2000011,
         "version_string": "2.0.0 Alpha 1",
         "hash": "7da2f3cf0c8413bc87aa5bf34b78bdaa"
+    },
+    "bdapi_refresh_token_add.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "38282c07f2722d6987b39e88af7b52a8"
+    },
+    "bdapi_refresh_token_edit.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "5c3e142462db9262707a36074c35b3e1"
+    },
+    "bdapi_refresh_token_entities.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "14a979d64cc730b9761f38af7044b4af"
+    },
+    "bdapi_refresh_token_entity.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "ad35fbaef240a8ec1f43e8a0d5e15099"
+    },
+    "bdapi_refresh_token_text.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "b4fd2a8fc6fca69e174d82b986893fca"
     },
     "bdapi_request_must_authorize_to_encrypt.txt": {
         "global_cache": false,
@@ -257,6 +437,12 @@
         "version_string": "2.0.0 Alpha 2",
         "hash": "da72b878e0cc6a6c185793da2e1291c4"
     },
+    "bdapi_subscription_callback.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "406c70d61a3eefd08d468bd8a7b1b77f"
+    },
     "bdapi_subscription_callback_is_required.txt": {
         "global_cache": false,
         "version_id": 2000014,
@@ -269,17 +455,77 @@
         "version_string": "2.0.0 Alpha 4",
         "hash": "8295d1375bc34e2ca897761198c9f978"
     },
+    "bdapi_subscription_expire_date.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "5a787141d53b573ec9b86e900bfe0d79"
+    },
     "bdapi_subscription_mode_must_valid.txt": {
         "global_cache": false,
         "version_id": 2000014,
         "version_string": "2.0.0 Alpha 4",
         "hash": "9add525b43640f1ac42bd76c8f6ae1f2"
     },
+    "bdapi_subscription_subscribe_date.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "d9f45ddaf7c253541626ff7663f367a9"
+    },
+    "bdapi_subscription_topic.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "25812bf456959aa5f28dc570f341a3ba"
+    },
     "bdapi_subscription_topic_not_recognized.txt": {
         "global_cache": false,
         "version_id": 2000014,
         "version_string": "2.0.0 Alpha 4",
         "hash": "09dcae9a170966cee2820d69a15e1e1b"
+    },
+    "bdapi_subscriptions.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "4ca2c509994c2776d0880357b4e8e5be"
+    },
+    "bdapi_token_add.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "550ffd3053faa40aebaa0e3a1ef4f3cf"
+    },
+    "bdapi_token_edit.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "d2c691f5b2f8c212464e52c212911827"
+    },
+    "bdapi_token_entities.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "f6861770bdf2fb702a665f1b34e4f9ed"
+    },
+    "bdapi_token_entity.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "459a6f79ad9b13cbcb5f692d2cc7a94d"
+    },
+    "bdapi_token_scope.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "5d113f2038d289f391614c39043629e8"
+    },
+    "bdapi_token_text.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "e021187deb3b25a11b1f4aae4e59aec7"
     },
     "bdapi_whitelisted_domains.txt": {
         "global_cache": false,

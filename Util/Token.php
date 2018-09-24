@@ -10,12 +10,13 @@ class Token
 {
     /**
      * @param \League\OAuth2\Server\Entity\AccessTokenEntity $accessToken
+     * @param \League\OAuth2\Server\Entity\RefreshTokenEntity|null $refreshToken
      * @return array
      *
      * @see \League\OAuth2\Server\TokenType\Bearer::generateResponse()
      * @see BearerWithScope::generateResponse()
      */
-    public static function transformLibAccessTokenEntity($accessToken)
+    public static function transformLibAccessTokenEntity($accessToken, $refreshToken = null)
     {
         $scopeIds = [];
         foreach ($accessToken->getScopes() as $scope) {
@@ -29,6 +30,10 @@ class Token
             'scope' => implode(Listener::$scopeDelimiter, $scopeIds),
             'token_type' => 'Bearer',
         ];
+
+        if ($refreshToken !== null) {
+            $return['refresh_token'] = $refreshToken->getId();
+        }
 
         $session = $accessToken->getSession();
         if (!empty($session) && $session->getOwnerType() === SessionStorage::OWNER_TYPE_USER) {

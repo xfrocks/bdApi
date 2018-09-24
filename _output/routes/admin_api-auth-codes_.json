@@ -1,0 +1,11 @@
+{
+    "route_type": "admin",
+    "route_prefix": "api-auth-codes",
+    "sub_name": "",
+    "format": ":int<auth_code_id>/",
+    "build_class": "",
+    "build_method": "",
+    "controller": "Xfrocks\\Api:AuthCode",
+    "context": "bdApi",
+    "action_prefix": ""
+}
