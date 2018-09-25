@@ -1,0 +1,8 @@
+{
+  "require-dev": {
+    "phpunit/phpunit": "^7.3"
+  },
+  "scripts": {
+    "test": "./vendor/bin/phpunit --testdox"
+  }
+}

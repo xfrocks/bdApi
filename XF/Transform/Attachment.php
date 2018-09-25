@@ -25,6 +25,20 @@ class Attachment extends AbstractHandler
         return parent::calculateDynamicValue($context, $key);
     }
 
+    public function canView($context)
+    {
+        /** @var \XF\Entity\Attachment $attachment */
+        $attachment = $context->getSource();
+
+        if (strlen($attachment->temp_hash) > 0 &&
+            $context->data('tempHash') === $attachment->temp_hash
+        ) {
+            return true;
+        }
+
+        return $attachment->canView();
+    }
+
     public function collectLinks($context)
     {
         /** @var \XF\Entity\Attachment $attachment */

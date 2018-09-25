@@ -7,6 +7,7 @@ use XF\ControllerPlugin\AbstractPlugin;
 use XF\PrintableException;
 use Xfrocks\Api\Controller\AbstractController;
 use Xfrocks\Api\Entity\Token;
+use Xfrocks\Api\Transform\TransformContext;
 use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class Attachment extends AbstractPlugin
@@ -45,11 +46,15 @@ class Attachment extends AbstractPlugin
             throw $this->controller->exception($this->controller->noPermission($error));
         }
 
-        $data = [
-            'attachment' => $controller->transformEntityLazily($attachment)
-        ];
+        $lazyTransformer = $controller->transformEntityLazily($attachment);
+        $lazyTransformer->addCallbackPreTransform(function ($context) use ($hash) {
+            /** @var TransformContext $context */
+            $context->setData($hash, 'tempHash');
 
-        return $controller->api($data);
+            return $context;
+        });
+
+        return $controller->api(['attachment' => $lazyTransformer]);
     }
 
     public function getAttachmentTempHash(array $contentData = [])

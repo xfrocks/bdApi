@@ -22,12 +22,12 @@ class TransformContext
     public $onTransformedCallbacks = [];
 
     /**
-     * @var array|null
+     * @var array
      *
      * @see AbstractHandler::onNewContext()
      * @see Transformer::transform()
      */
-    protected $contextData;
+    protected $contextData = [];
 
     /**
      * @var AbstractHandler|null
@@ -194,6 +194,10 @@ class TransformContext
         $subContext->parentContext = $this;
         $subContext->rootContext = $this->rootContext;
 
+        if ($key === null) {
+            $subContext->setData($this->contextData);
+        }
+
         return $subContext;
     }
 
@@ -247,15 +251,20 @@ class TransformContext
     }
 
     /**
-     * @param array $data
+     * @param array|mixed $data
+     * @param mixed|null $key
      */
-    public function setData(array $data)
+    public function setData($data, $key = null)
     {
-        if ($this->contextData !== null) {
-            throw new \LogicException('Context data can only be set once');
-        }
+        if ($key === null) {
+            if (!is_array($data)) {
+                throw new \InvalidArgumentException('$data is not an array');
+            }
 
-        $this->contextData = $data;
+            $this->contextData = array_merge($this->contextData, $data);
+        } else {
+            $this->contextData[$key] = $data;
+        }
     }
 
     /**
