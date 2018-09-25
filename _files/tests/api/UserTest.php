@@ -82,6 +82,13 @@ class UserTest extends ApiTestCase
         );
 
         $this->assertArrayHasKey('user', $json);
+        $this->assertArrayHasKey('token', $json);
+
+        $token = $json['token'];
+        $this->assertArrayHasKey('access_token', $token);
+        $this->assertArrayHasKey('expires_in', $token);
+        $this->assertArrayHasKey('scope', $token);
+        $this->assertArrayHasKey('refresh_token', $token);
     }
 
     public function testPutIndex()
