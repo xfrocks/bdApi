@@ -8,7 +8,7 @@ class Modules
 {
     private $routes = [];
     private $versions = [
-        'forum' => 2018082301,
+        'forum' => 2018092500,
         'oauth2' => 2016030902,
         'subscription' => 2014092301,
     ];
