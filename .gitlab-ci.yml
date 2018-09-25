@@ -33,8 +33,8 @@ test:
     - php cmd.php xf-addon:install Xfrocks/Api
     - php cmd.php xfrocks-api:pre-test
     - apache2ctl start
-    - cd $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR/_files/tests
     - composer install
-    - composer test-only
+    - composer test
   services:
     - mysql:5.7.23
