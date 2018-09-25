@@ -534,7 +534,7 @@ class User extends AbstractController
         /** @var \XF\Service\Report\Creator $creator */
         $creator = $this->service('XF:Report\Creator', 'user', $user);
         $creator->setMessage($params['message']);
-        
+
         if (!$creator->validate($errors)) {
             return $this->error($errors);
         }
