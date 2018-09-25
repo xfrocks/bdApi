@@ -50,9 +50,24 @@ abstract class ApiTestCase extends TestCase
      */
     protected static function httpRequest($method, $path, array $options = [])
     {
-        $uri = 'index.php?' . str_replace('?', '&', $path);
+        if (preg_match('#^https?://#', $path)) {
+            $uri = $path;
+        } else {
+            $uri = 'index.php?' . str_replace('?', '&', $path);
+        }
+
+        if (self::debugMode()) {
+            echo(str_repeat('----', 10) . "\n");
+            var_dump($method, $uri, $options);
+        }
+
         $request = self::$http->createRequest($method, $uri, $options);
         self::$latestResponse = self::$http->send($request);
+
+        if (self::debugMode()) {
+            var_dump(self::$latestResponse->getStatusCode());
+            echo(str_repeat('----', 10) . "\n\n");
+        }
 
         return self::$latestResponse;
     }
@@ -147,6 +162,14 @@ abstract class ApiTestCase extends TestCase
     }
 
     /**
+     * @return bool
+     */
+    protected static function debugMode()
+    {
+        return (getenv('API_TEST_CASE_DEBUG') === '1');
+    }
+
+    /**
      * @param array $client
      * @param array $user
      * @return array
@@ -169,5 +192,21 @@ abstract class ApiTestCase extends TestCase
     protected static function postOauthToken(array $params)
     {
         return static::httpRequestJson('POST', 'oauth/token', ['body' => $params]);
+    }
+
+    /**
+     * @param array $data
+     * @param mixed ...$keys
+     * @return mixed
+     */
+    protected static function assertArrayHasKeyPath(array $data, ...$keys)
+    {
+        $ref =& $data;
+        foreach ($keys as $key) {
+            self::assertArrayHasKey($key, $ref);
+            $ref =& $ref[$key];
+        }
+
+        return $ref;
     }
 }

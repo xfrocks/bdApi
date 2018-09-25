@@ -99,25 +99,12 @@ class ThreadTest extends ApiTestCase
         $this->assertArrayHasKey('post', $json);
     }
 
-    public function testPostAttachments()
+    /** @noinspection PhpUnusedPrivateMethodInspection */
+    /**
+     * @see AttachmentTest::postThreadsAttachments()
+     */
+    private function _testPostAttachments()
     {
-        $accessToken = self::$accessToken;
-        $fileName = 'white.png';
-        $forum = $this->dataForum();
-
-        $json = $this->httpRequestJson(
-            'POST',
-            "threads/attachments?forum_id={$forum['node_id']}&oauth_token={$accessToken}",
-            [
-                'body' => [
-                    'file' => fopen(__DIR__ . "/files/{$fileName}", 'r')
-                ]
-            ]
-        );
-
-        $this->assertArrayHasKey('attachment', $json);
-
-        $attachment = $json['attachment'];
-        $this->assertArrayHasKey('attachment_id', $attachment);
+        // intentionally left blank
     }
 }

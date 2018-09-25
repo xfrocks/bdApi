@@ -16,34 +16,33 @@ class Attachment extends AbstractController
         return $this->notFound();
     }
 
-    public function actionDeleteIndex(ParameterBag $paramBag)
+    public function actionDeleteIndex(ParameterBag $pb)
     {
-        $params = $this
-            ->params()
-            ->define('temp_hash', 'str');
+        $params = $this->params()
+            ->define('hash', 'str');
 
-        /** @var \XF\Entity\Attachment|null $attachment */
-        $attachment = $this->em()->find('XF:Attachment', $paramBag->attachment_id);
-        if (!$attachment) {
-            return $this->notFound();
-        }
+        /** @var \XF\Entity\Attachment $attachment */
+        $attachment = $this->assertRecordExists('XF:Attachment', $pb->attachment_id);
 
         $handler = $attachment->getHandler();
-        if (!$handler) {
+        if ($handler === null) {
             return $this->noPermission();
         }
 
-        $context = [];
-        $error = null;
-        if (!$handler->canManageAttachments($context, $error)) {
-            return $this->noPermission($error);
+        if (strlen($attachment->temp_hash) > 0) {
+            if ($params['hash'] !== $attachment->temp_hash) {
+                return $this->noPermission();
+            }
+        } else {
+            $entity = $handler->getContainerEntity($attachment->content_id);
+            $context = $handler->getContext($entity);
+            $error = null;
+            if (!$handler->canManageAttachments($context, $error)) {
+                return $this->noPermission($error);
+            }
         }
 
-        /** @var \XF\Repository\Attachment $attachRepo */
-        $attachRepo = $this->repository('XF:Attachment');
-
-        $manipulator = new Manipulator($handler, $attachRepo, $context, $params['temp_hash']);
-        $manipulator->deleteAttachment($attachment->attachment_id);
+        $attachment->delete();
 
         return $this->message(\XF::phrase('changes_saved'));
     }

@@ -4,7 +4,7 @@ namespace tests\api;
 
 use tests\bases\ApiTestCase;
 
-class ParamsTest extends ApiTestCase
+class ZzzTest extends ApiTestCase
 {
     /**
      * @var string
@@ -19,7 +19,7 @@ class ParamsTest extends ApiTestCase
         self::$accessToken = $token['access_token'];
     }
 
-    public function testPostThreadsAttachments()
+    public function testPostMultipartWithQueryParams()
     {
         $accessToken = self::$accessToken;
         $fileName = 'white.png';
@@ -38,7 +38,7 @@ class ParamsTest extends ApiTestCase
         $this->assertEquals(200, static::httpLatestResponse()->getStatusCode());
     }
 
-    public function testPostThreadsAttachmentsParamsInBody()
+    public function testPostMultipartWithBodyParams()
     {
         $fileName = 'white.png';
         $forum = $this->dataForum();
