@@ -1678,7 +1678,7 @@ Required scopes:
   * `post`
 
 ### POST `/users/:userId/report`
-Report an user. Since 2018092500
+Report an user. Since forum-2018092500
 ```
 {
     status: "ok",
