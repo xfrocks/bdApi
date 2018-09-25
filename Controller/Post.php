@@ -125,9 +125,9 @@ class Post extends AbstractController
         return $this->actionSingle($post->post_id);
     }
 
-    public function actionPutIndex(ParameterBag $params)
+    public function actionPutIndex(ParameterBag $pb)
     {
-        $post = $this->assertViewablePost($params->post_id);
+        $post = $this->assertViewablePost($pb->post_id);
 
         $params = $this
             ->params()
@@ -149,9 +149,8 @@ class Post extends AbstractController
 
         /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
         $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
-        $tempHash = $attachmentPlugin->getAttachmentTempHash([
-            'post_id' => $post->post_id
-        ]);
+        $attachmentContentData = $pb->_attachmentContentData ?: ['post_id' => $post->post_id];
+        $tempHash = $attachmentPlugin->getAttachmentTempHash($attachmentContentData);
 
         $editor->setAttachmentHash($tempHash);
 

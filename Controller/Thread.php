@@ -143,6 +143,7 @@ class Thread extends AbstractController
         $thread = $this->assertViewableThread($params->thread_id);
 
         return $this->rerouteController('Xfrocks\Api\Controller\Post', 'put-index', [
+            '_attachmentContentData' => ['thread_id' => $thread->thread_id],
             'post_id' => $thread->first_post_id
         ]);
     }

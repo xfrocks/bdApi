@@ -101,7 +101,7 @@ class ThreadTest extends ApiTestCase
 
     /** @noinspection PhpUnusedPrivateMethodInspection */
     /**
-     * @see AttachmentTest::postThreadsAttachments()
+     * @see ThreadAttachmentTest::postThreadsAttachments()
      */
     private function _testPostAttachments()
     {
