@@ -32,7 +32,7 @@ class Token
         ];
 
         if ($refreshToken !== null) {
-            $return['refresh_token'] = $refreshToken->getId();
+            $response['refresh_token'] = $refreshToken->getId();
         }
 
         $session = $accessToken->getSession();

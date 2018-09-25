@@ -206,9 +206,10 @@ class OAuth2 extends AbstractController
         $apiServer = $this->app()->container('api.server');
         $scopes = $apiServer->getScopeDefaults();
 
-        $token = $apiServer->newAccessToken(strval($user->user_id), $client, $scopes);
+        $token = $apiServer->newAccessToken($user->user_id, $client, $scopes);
+        $refreshToken = $apiServer->newRefreshToken($user->user_id, $client, $scopes);
 
-        return $this->api(Token::transformLibAccessTokenEntity($token));
+        return $this->api(Token::transformLibAccessTokenEntity($token, $refreshToken));
     }
 
     /**
