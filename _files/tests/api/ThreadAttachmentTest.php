@@ -9,14 +9,14 @@ class ThreadAttachmentTest extends ApiTestCase
     /**
      * @var string
      */
-    private static $accessToken = '';
+    private static $accessTokenBypassFloodCheck = '';
 
     public static function setUpBeforeClass()
     {
         parent::setUpBeforeClass();
 
-        $token = static::postPassword(static::dataApiClient(), static::dataUser());
-        self::$accessToken = $token['access_token'];
+        $token = static::postPassword(static::dataApiClient(), static::dataUserWithBypassFloodCheckPermission());
+        self::$accessTokenBypassFloodCheck = $token['access_token'];
     }
 
     public function testUploadForExistingThread()
@@ -34,7 +34,7 @@ class ThreadAttachmentTest extends ApiTestCase
             [
                 'body' => [
                     'attachment_hash' => $hash,
-                    'oauth_token' => self::$accessToken,
+                    'oauth_token' => self::$accessTokenBypassFloodCheck,
                     'post_body' => __METHOD__ . ' now with attachment',
                 ],
             ]
@@ -94,7 +94,7 @@ class ThreadAttachmentTest extends ApiTestCase
                 'body' => [
                     'attachment_hash' => $hash,
                     'forum_id' => $forum['node_id'],
-                    'oauth_token' => self::$accessToken,
+                    'oauth_token' => self::$accessTokenBypassFloodCheck,
                     'post_body' => $method,
                     'thread_title' => $method,
                 ],
@@ -106,7 +106,7 @@ class ThreadAttachmentTest extends ApiTestCase
 
     private function postThreadsAttachments($hash = '')
     {
-        $accessToken = self::$accessToken;
+        $accessToken = self::$accessTokenBypassFloodCheck;
         $fileName = 'white.png';
         $forum = $this->dataForum();
 

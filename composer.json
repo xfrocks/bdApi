@@ -7,9 +7,9 @@
   },
   "scripts": {
     "build-release": "xf-addon--build-release Xfrocks/Api",
-    "export": "composer install --quiet && cmd-php.sh xfrocks-api:pre-test && composer test && xf-dev--export--addon.sh Xfrocks/Api",
+    "export": "composer install --quiet && composer test && xf-dev--export--addon.sh Xfrocks/Api",
     "export-only": "xf-dev--export--addon.sh Xfrocks/Api",
     "quick-check": "export ADDON_DIR=/var/www/html/src/addons/Xfrocks/Api && devhelper-phpcs.sh $ADDON_DIR && devhelper-phpstan.sh $ADDON_DIR",
-    "test": "cd _files/tests && composer install --quiet && composer test"
+    "test": "cmd-php.sh xfrocks-api:pre-test && cd _files/tests && composer install --quiet && composer test"
   }
 }

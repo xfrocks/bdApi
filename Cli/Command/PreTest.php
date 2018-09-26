@@ -17,7 +17,7 @@ class PreTest extends Command
     const VERSION_ID = 2018082101;
 
     public $prefix = 'api_test';
-    public $users = 3;
+    public $users = 4;
     public $threads = 3;
     public $posts = 3;
 
@@ -76,6 +76,17 @@ class PreTest extends Command
                 'password' => $password,
                 'version_id' => self::VERSION_ID
             ];
+
+            if ($i === 3) {
+                /** @var \XF\Service\UpdatePermissions $permissionUpdater */
+                $permissionUpdater = $app->service('XF:UpdatePermissions');
+                $permissionUpdater->setUser($user)->setGlobal();
+                $permissionUpdater->updatePermissions([
+                    'general' => [
+                        'bypassFloodCheck' => 'allow'
+                    ]
+                ]);
+            }
         }
 
         return $data['users'];

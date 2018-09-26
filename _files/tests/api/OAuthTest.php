@@ -22,7 +22,7 @@ class OAuthTest extends ApiTestCase
     public function testGrantTypeRefreshToken()
     {
         $client = $this->dataApiClient();
-        $user = $this->dataUser(1);
+        $user = $this->dataUser();
         $passwordJson = $this->postPassword($client, $user);
         $this->assertArrayHasKey('refresh_token', $passwordJson);
 

@@ -76,9 +76,10 @@ abstract class ApiTestCase extends TestCase
      * @param string $method
      * @param string $path
      * @param array $options
+     * @param bool $checkError
      * @return array
      */
-    protected static function httpRequestJson($method, $path, array $options = [])
+    protected static function httpRequestJson($method, $path, array $options = [], $checkError = true)
     {
         $response = static::httpRequest($method, $path, $options);
 
@@ -87,6 +88,13 @@ abstract class ApiTestCase extends TestCase
 
         $json = json_decode(strval($response->getBody()), true);
         static::assertTrue(is_array($json));
+
+        if ($checkError) {
+            foreach (['error', 'error_description', 'errors'] as $errorKey) {
+                $errorMessage = "{$errorKey}: " . var_export(isset($json[$errorKey]) ? $json[$errorKey] : '', true);
+                static::assertArrayNotHasKey($errorKey, $json, $errorMessage);
+            }
+        }
 
         return $json;
     }
@@ -141,6 +149,14 @@ abstract class ApiTestCase extends TestCase
     protected static function dataUser($i = 0)
     {
         return static::data('users', $i);
+    }
+
+    /**
+     * @return array
+     */
+    protected static function dataUserWithBypassFloodCheckPermission()
+    {
+        return static::dataUser(3);
     }
 
     /**
@@ -203,7 +219,8 @@ abstract class ApiTestCase extends TestCase
     {
         $ref =& $data;
         foreach ($keys as $key) {
-            self::assertArrayHasKey($key, $ref);
+            self::assertTrue(is_array($ref), var_export($ref, true) . ' is not an array');
+            self::assertArrayHasKey($key, $ref, "Key '{$key}' not found: " . implode(', ', array_keys($ref)));
             $ref =& $ref[$key];
         }
 

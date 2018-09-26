@@ -9,14 +9,14 @@ class ThreadTest extends ApiTestCase
     /**
      * @var string
      */
-    private static $accessToken = '';
+    private static $accessTokenBypassFloodCheck = '';
 
     public static function setUpBeforeClass()
     {
         parent::setUpBeforeClass();
 
-        $token = static::postPassword(static::dataApiClient(), static::dataUser());
-        self::$accessToken = $token['access_token'];
+        $token = static::postPassword(static::dataApiClient(), static::dataUserWithBypassFloodCheckPermission());
+        self::$accessTokenBypassFloodCheck = $token['access_token'];
     }
 
     public function testGetIndex()
@@ -29,7 +29,7 @@ class ThreadTest extends ApiTestCase
             [
                 'query' => [
                     'forum_id' => $forum['node_id'],
-                    'oauth_token' => self::$accessToken
+                    'oauth_token' => self::$accessTokenBypassFloodCheck
                 ]
             ]
         );
@@ -48,7 +48,7 @@ class ThreadTest extends ApiTestCase
                 'threads/' . $thread['thread_id'],
                 [
                     'query' => [
-                        'oauth_token' => self::$accessToken,
+                        'oauth_token' => self::$accessTokenBypassFloodCheck,
                         'exclude_field' => $excludeField ?: null
                     ]
                 ]
@@ -71,7 +71,7 @@ class ThreadTest extends ApiTestCase
             [
                 'body' => [
                     'forum_id' => $forum['node_id'],
-                    'oauth_token' => self::$accessToken,
+                    'oauth_token' => self::$accessTokenBypassFloodCheck,
                     'post_body' => str_repeat(__METHOD__ . ' ', 10),
                     'thread_title' => __METHOD__,
                 ],
@@ -84,6 +84,7 @@ class ThreadTest extends ApiTestCase
     public function testPutIndex()
     {
         $thread = $this->dataThread();
+        $token = $this::postPassword($this->dataApiClient(), $this->dataUser());
 
         $json = $this->httpRequestJson(
             'PUT',
@@ -91,7 +92,7 @@ class ThreadTest extends ApiTestCase
             [
                 'body' => [
                     'post_body' => str_repeat(__METHOD__ . ' ', 10),
-                    'oauth_token' => self::$accessToken
+                    'oauth_token' => $token['access_token']
                 ]
             ]
         );
