@@ -1677,6 +1677,24 @@ Required scopes:
 
   * `post`
 
+### POST `/users/:userId/report`
+Report an user. Since forum-2018092501
+```
+{
+    status: "ok",
+    message: "Changes Saved"
+}
+```
+
+
+ Parameters:
+
+  * `message` (__required__): reason of the report
+
+ Required scopes:
+
+  * `post`
+  
 ### GET `/users/groups`
 List of all user groups. Since forum-2014092301.
 

@@ -519,6 +519,31 @@ class User extends AbstractController
         return $this->actionGetGroups($this->buildParamsForVisitor());
     }
 
+    public function actionPostReport(ParameterBag $paramBag)
+    {
+        $params = $this
+            ->params()
+            ->define('message', 'str', 'reason of the report');
+
+        $user = $this->assertViewableUser($paramBag->user_id);
+
+        if (!$user->canBeReported($error)) {
+            return $this->noPermission();
+        }
+
+        /** @var \XF\Service\Report\Creator $creator */
+        $creator = $this->service('XF:Report\Creator', 'user', $user);
+        $creator->setMessage($params['message']);
+
+        if (!$creator->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        $creator->save();
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
     public function actionPostAvatar(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
