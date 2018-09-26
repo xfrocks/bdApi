@@ -17,6 +17,8 @@ class Json extends XFCP_Json
         $json = parent::postFilter($content, $reply);
 
         if (\XF::$debugMode) {
+            $json = json_encode(json_decode($json), JSON_PRETTY_PRINT);
+
             $app = \XF::app();
             $container = $app->container();
             $language = $app->language();

@@ -39,6 +39,36 @@ class Tool extends AbstractController
         exit(0);
     }
 
+    public function actionPostCrypt()
+    {
+        $params = $this->params()
+            ->define('algo', 'str', 'Encryption algorithm', Crypt::ALGO_AES_128)
+            ->define('data', 'str', 'Data string to be encrypted', 'data')
+            ->define('data_encrypted', 'str', 'Data string to be decrypted')
+            ->define('key', 'str', 'Key to encrypt/decrypt', 'key');
+
+        $data = [
+            'algo' => $params['algo'],
+            'key' => $params['key'],
+            'results' => [
+                'encrypt' => [
+                    'input' => $params['data'],
+                    'output' => Crypt::encrypt($params['data'], $params['algo'], $params['key'])
+                ],
+            ],
+        ];
+
+        $dataEncrypted = $params['data_encrypted'];
+        if (strlen($dataEncrypted) > 0) {
+            $data['results']['decrypt'] = [
+                'input' => $dataEncrypted,
+                'output' => Crypt::decrypt($dataEncrypted, $params['algo'], $params['key'])
+            ];
+        }
+
+        return $this->api($data);
+    }
+
     public function actionPostLink()
     {
         $params = $this->params()
