@@ -95,6 +95,37 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $logoutLink);
     }
 
+    public function actionPostCrypt()
+    {
+        $input = $this->_input->filter(array(
+            'algo' => array(XenForo_Input::STRING, 'default' => bdApi_Crypt::AES128),
+            'data' => array(XenForo_Input::STRING, 'default' => 'data'),
+            'data_encrypted' => XenForo_Input::STRING,
+            'key' => array(XenForo_Input::STRING, 'default' => 'key'),
+        ));
+
+        $data = [
+            'algo' => $input['algo'],
+            'key' => $input['key'],
+            'results' => [
+                'encrypt' => [
+                    'input' => $input['data'],
+                    'output' => bdApi_Crypt::encrypt($input['data'], $input['algo'], $input['key'])
+                ],
+            ],
+        ];
+
+        $dataEncrypted = $input['data_encrypted'];
+        if (strlen($dataEncrypted) > 0) {
+            $data['results']['decrypt'] = [
+                'input' => $dataEncrypted,
+                'output' => bdApi_Crypt::decrypt($dataEncrypted, $input['algo'], $input['key'])
+            ];
+        }
+
+        return $this->responseData('bdApi_ViewApi_Tool_Crypt', $data);
+    }
+
     public function actionPostOtt()
     {
         if (!XenForo_Application::debugMode()) {
