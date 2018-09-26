@@ -209,6 +209,10 @@ class Post extends AbstractController
             $tagger->save();
         }
 
+        if (is_callable($pb->_replyCallback)) {
+            return call_user_func($pb->_replyCallback, $this);
+        }
+
         return $this->actionSingle($post->post_id);
     }
 

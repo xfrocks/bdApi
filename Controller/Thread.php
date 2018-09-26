@@ -138,12 +138,24 @@ class Thread extends AbstractController
         return $this->actionSingle($thread->thread_id);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Reroute
+     * @throws \XF\Mvc\Reply\Exception
+     *
+     * @see Post::actionPutIndex()
+     */
     public function actionPutIndex(ParameterBag $params)
     {
         $thread = $this->assertViewableThread($params->thread_id);
 
         return $this->rerouteController('Xfrocks\Api\Controller\Post', 'put-index', [
             '_attachmentContentData' => ['thread_id' => $thread->thread_id],
+            '_replyCallback' => function ($controller) use ($thread) {
+                /** @var Post $controller */
+                $params = ['thread_id' => $thread->thread_id];
+                return $controller->rerouteController('Xfrocks\Api\Controller\Thread', 'get-index', $params);
+            },
             'post_id' => $thread->first_post_id
         ]);
     }
@@ -440,7 +452,7 @@ class Thread extends AbstractController
             $forum = $this->assertViewableForum($params['forum_id']);
             $finder->inForum($forum);
         }
-        
+
         if ($params['creator_user_id'] > 0) {
             $finder->where('user_id', $params['creator_user_id']);
         }

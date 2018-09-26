@@ -39,10 +39,10 @@ class ThreadAttachmentTest extends ApiTestCase
                 ],
             ]
         );
-        $post = $this->assertArrayHasKeyPath($json, 'post');
-        $postThreadId = $this->assertArrayHasKeyPath($post, 'thread_id');
-        $this->assertEquals($threadId, $postThreadId);
-        $postAttachments = $this->assertArrayHasKeyPath($post, 'attachments');
+        $thread = $this->assertArrayHasKeyPath($json, 'thread');
+        $jsonThreadId = $this->assertArrayHasKeyPath($thread, 'thread_id');
+        $this->assertEquals($threadId, $jsonThreadId);
+        $postAttachments = $this->assertArrayHasKeyPath($thread, 'first_post', 'attachments');
 
         $attachmentFound = false;
         foreach ($postAttachments as $postAttachment) {

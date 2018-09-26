@@ -83,24 +83,9 @@ class PostTest extends ApiTestCase
 
     public function testPutIndex()
     {
-        $thread = $this->dataThread();
         $post = $this->dataPost();
 
-        // first post
-        $jsonFirstPost = $this->httpRequestJson(
-            'PUT',
-            'threads/' . $thread['thread_id'],
-            [
-                'body' => [
-                    'oauth_token' => self::$accessToken,
-                    'post_body' => str_repeat(__METHOD__ . ' ', 10)
-                ]
-            ]
-        );
-
-        $this->assertArrayHasKey('post', $jsonFirstPost);
-
-        $jsonPost = $this->httpRequestJson(
+        $json = $this->httpRequestJson(
             'PUT',
             'posts/' . $post['post_id'],
             [
@@ -111,6 +96,7 @@ class PostTest extends ApiTestCase
             ]
         );
 
-        $this->assertArrayHasKey('post', $jsonPost);
+        $jsonPostId = $this->assertArrayHasKeyPath($json, 'post', 'post_id');
+        $this->assertEquals($post['post_id'], $jsonPostId);
     }
 }

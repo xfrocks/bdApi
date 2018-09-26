@@ -97,7 +97,8 @@ class ThreadTest extends ApiTestCase
             ]
         );
 
-        $this->assertArrayHasKey('post', $json);
+        $jsonThreadId = $this->assertArrayHasKeyPath($json, 'thread', 'thread_id');
+        $this->assertEquals($thread['thread_id'], $jsonThreadId);
     }
 
     /** @noinspection PhpUnusedPrivateMethodInspection */

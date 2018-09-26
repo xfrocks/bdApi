@@ -158,15 +158,15 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         $lazyTransformer = new LazyTransformer($this);
         $lazyTransformer->setFinder($finder);
 
-        $lazyTransformer->addCallbackFinderPostFetch(function ($entities) use ($sortByList) {
-            if ($sortByList !== null) {
+        if ($sortByList !== null) {
+            $lazyTransformer->addCallbackFinderPostFetch(function ($entities) use ($sortByList) {
                 /** @var \XF\Mvc\Entity\ArrayCollection $arrayCollection */
                 $arrayCollection = $entities;
                 $entities = $arrayCollection->sortByList($sortByList);
-            }
 
-            return $entities;
-        });
+                return $entities;
+            });
+        }
 
         $lazyTransformer->addCallbackPostTransform(function ($data) use ($isSingle) {
             if (!$isSingle) {
