@@ -6,6 +6,7 @@ use OAuth\OAuth2\Token\StdOAuth2Token;
 use XF\ConnectedAccount\ProviderData\Facebook;
 use XF\Entity\ConnectedAccountProvider;
 use XF\Repository\ConnectedAccount;
+use XF\Repository\Tfa;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Util\Crypt;
@@ -194,10 +195,58 @@ class OAuth2 extends AbstractController
         /** @var \XF\ControllerPlugin\Login $loginPlugin */
         $loginPlugin = $this->plugin('XF:Login');
         if ($loginPlugin->isTfaConfirmationRequired($user)) {
-            throw $this->errorException(\XF::phrase('two_step_verification_required'));
+            if ($this->runTfaValidation($user) === true) {
+                // validation success
+            } else {
+                throw $this->errorException(\XF::phrase('two_step_verification_required'), 202);
+            }
         }
 
         return $user->user_id;
+    }
+
+    protected function runTfaValidation(\XF\Entity\User $user)
+    {
+        $params = $this
+            ->params()
+            ->define('tfa_provider', 'str')
+            ->define('tfa_trigger', 'bool');
+
+        /** @var Tfa $tfaRepo */
+        $tfaRepo = $this->repository('XF:Tfa');
+        $providers = $tfaRepo->getAvailableProvidersForUser($user->user_id);
+        if (empty($providers)) {
+            return true;
+        }
+
+        $response = $this->app()->response();
+        $response->header('X-Api-Tfa-Providers', implode(', ', array_keys($providers)));
+
+        $tfaProvider = $params['tfa_provider'];
+        if (strlen($tfaProvider) === 0) {
+            return false;
+        }
+
+        /** @var \XF\Service\User\Tfa $tfaService */
+        $tfaService = $this->service('XF:User\Tfa', $user);
+
+        if ($params['tfa_trigger']) {
+            $tfaService->trigger($this->request(), $tfaProvider);
+            throw $this->exception($this->message(\XF::phrase('changes_saved')));
+        }
+
+        if ($tfaService->hasTooManyTfaAttempts()) {
+            throw $this->errorException(
+                \XF::phrase('your_account_has_temporarily_been_locked_due_to_failed_login_attempts')
+            );
+        }
+
+        $verified = $tfaService->verify($this->request, $tfaProvider);
+        if ($verified === true) {
+            return true;
+        }
+
+        throw $this->errorException(\XF::phrase('two_step_verification_value_could_not_be_confirmed'));
     }
 
     protected function postTokenNonStandard(Client $client, \XF\Entity\User $user)
