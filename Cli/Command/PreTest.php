@@ -6,6 +6,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use XF\Entity\Forum;
+use XF\Entity\TfaProvider;
 use XF\Entity\Thread;
 use XF\Entity\User;
 use XF\PrintableException;
@@ -17,7 +18,7 @@ class PreTest extends Command
     const VERSION_ID = 2018082101;
 
     public $prefix = 'api_test';
-    public $users = 4;
+    public $users = 5;
     public $threads = 3;
     public $posts = 3;
 
@@ -86,6 +87,18 @@ class PreTest extends Command
                         'bypassFloodCheck' => 'allow'
                     ]
                 ]);
+            } elseif ($i === 4) {
+                /** @var TfaProvider $tfaProvider */
+                $tfaProvider = $app->em()->find('XF:TfaProvider', 'totp');
+                $handler = $tfaProvider->getHandler();
+                if ($handler) {
+                    $initialData = $handler->generateInitialData($user);
+                    $data['users'][$i]['tfa_secret'] = $initialData['secret'];
+
+                    /** @var \XF\Repository\Tfa $tfaRepo */
+                    $tfaRepo = $app->repository('XF:Tfa');
+                    $tfaRepo->enableUserTfaProvider($user, $tfaProvider, $initialData);
+                }
             }
         }
 

@@ -7,6 +7,7 @@ use XF\Entity\Post;
 use XF\Entity\Thread;
 use XF\Entity\User;
 use XF\Entity\UserAlert;
+use XF\Entity\UserOption;
 use XF\Mvc\Entity\Repository;
 use XF\Util\Php;
 use Xfrocks\Api\Transform\TransformContext;
@@ -401,10 +402,16 @@ class Subscription extends Repository
         }
 
         $subColumn = $this->options()->bdApi_subscriptionColumnUser;
-        $userOption = $user->Option->getValue($subColumn);
-        if (!empty($userOption)) {
+        /** @var UserOption|null $userOption */
+        $userOption = $user->Option;
+        if (!$userOption) {
+            return false;
+        }
+
+        $userOptionValue = $userOption->getValue($subColumn);
+        if (!empty($userOptionValue)) {
             $this->ping(
-                $userOption,
+                $userOptionValue,
                 $action,
                 self::TYPE_USER,
                 $user->user_id
