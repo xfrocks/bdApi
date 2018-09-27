@@ -192,14 +192,8 @@ class OAuth2 extends AbstractController
             return false;
         }
 
-        /** @var \XF\ControllerPlugin\Login $loginPlugin */
-        $loginPlugin = $this->plugin('XF:Login');
-        if ($loginPlugin->isTfaConfirmationRequired($user)) {
-            if ($this->runTfaValidation($user) === true) {
-                // validation success
-            } else {
-                throw $this->errorException(\XF::phrase('two_step_verification_required'), 202);
-            }
+        if (!$this->runTfaValidation($user)) {
+            return false;
         }
 
         return $user->user_id;
@@ -211,6 +205,12 @@ class OAuth2 extends AbstractController
             ->params()
             ->define('tfa_provider', 'str')
             ->define('tfa_trigger', 'bool');
+
+        /** @var \XF\ControllerPlugin\Login $loginPlugin */
+        $loginPlugin = $this->plugin('XF:Login');
+        if (!$loginPlugin->isTfaConfirmationRequired($user)) {
+            return true;
+        }
 
         /** @var Tfa $tfaRepo */
         $tfaRepo = $this->repository('XF:Tfa');
@@ -224,7 +224,7 @@ class OAuth2 extends AbstractController
 
         $tfaProvider = $params['tfa_provider'];
         if (strlen($tfaProvider) === 0) {
-            return false;
+            throw $this->errorException(\XF::phrase('two_step_verification_required'), 202);
         }
 
         /** @var \XF\Service\User\Tfa $tfaService */
@@ -241,8 +241,7 @@ class OAuth2 extends AbstractController
             );
         }
 
-        $verified = $tfaService->verify($this->request, $tfaProvider);
-        if ($verified === true) {
+        if ($tfaService->verify($this->request, $tfaProvider)) {
             return true;
         }
 
