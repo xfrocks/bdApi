@@ -35,6 +35,22 @@ class SubscriptionTest extends ApiTestCase
         $this->assertEquals(400, static::httpLatestResponse()->getStatusCode());
     }
 
+    public function testNotifications()
+    {
+        $json = $this->httpRequestJson('GET', 'notifications', [
+            'query' => [
+                'oauth_token' => self::$accessToken
+            ]
+        ]);
+
+        $this->assertArrayHasKey('subscription_callback', $json);
+
+        $response = $this->httpLatestResponse();
+        $link = $response->getHeader('Link');
+
+        $this->assertNotEmpty($link);
+    }
+
     private function postSubscriptions($hubCallback)
     {
         return static::httpRequest(
