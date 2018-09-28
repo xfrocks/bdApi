@@ -282,7 +282,7 @@ class Subscription extends Repository
 
         $response->header('Link', sprintf('<%s>; rel=hub', $hubLink));
         if (!empty($selfLink)) {
-            $response->header('Link', sprintf('<%s>; rel=self', $selfLink));
+            $response->header('Link', sprintf('<%s>; rel=self', $selfLink), false);
         }
 
         if (!empty($subscriptionOption)) {
