@@ -5,11 +5,13 @@ namespace Xfrocks\Api\Controller;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
 use XF\Mvc\ParameterBag;
+use XF\Mvc\Reply;
 use XF\Mvc\Reply\AbstractReply;
 use XF\Mvc\Reply\Redirect;
 use XF\Mvc\RouteMatch;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\OAuth2\Server;
+use Xfrocks\Api\Repository\Log;
 use Xfrocks\Api\Transform\LazyTransformer;
 use Xfrocks\Api\Transform\TransformContext;
 
@@ -289,6 +291,41 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     protected function canUpdateSessionActivity($action, ParameterBag $params, AbstractReply &$reply, &$viewState)
     {
         return false;
+    }
+
+    public function postDispatch($action, ParameterBag $params, Reply\AbstractReply &$reply)
+    {
+        $this->logRequest($reply, $action);
+
+        parent::postDispatch($action, $params, $reply);
+    }
+
+    protected function logRequest(AbstractReply $reply, $action)
+    {
+        $requestMethod = $this->request()->getServer('REQUEST_METHOD');
+        $requestUri = $this->request()->getRequestUri();
+
+        if ($reply instanceof Redirect) {
+            $responseCode = 301;
+            $responseOutput = [
+                'redirectType' => $reply->getType(),
+                'redirectMessage' => $reply->getMessage(),
+                'redirectUri' => $reply->getUrl()
+            ];
+        } else {
+            $responseCode = $reply->getResponseCode();
+            $responseOutput = [
+                'raw' => $reply,
+                'controller' => $reply->getControllerClass(),
+                'action' => $action
+            ];
+        }
+
+        $requestData = $this->request()->getInputForLogs();
+
+        /** @var Log $logRepo */
+        $logRepo = $this->repository('Xfrocks\Api:Log');
+        $logRepo->logRequest($requestMethod, $requestUri, $requestData, $responseCode, $responseOutput);
     }
 
     /**
