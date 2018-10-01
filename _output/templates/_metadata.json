@@ -17,12 +17,12 @@
     "admin/bdapi_entity_list.html": {
         "version_id": 2000015,
         "version_string": "2.0.0 Alpha 5",
-        "hash": "fcaa4500cbacc33f1a01cf5a82bc0359"
+        "hash": "69f20b39c03cd1c9a235d6597122b58b"
     },
     "admin/bdapi_log_list.html": {
         "version_id": 2000015,
         "version_string": "2.0.0 Alpha 5",
-        "hash": "222cf5ecb3b537be537047bd207050a0"
+        "hash": "002ed63813f5359dc3922edc0ecdc015"
     },
     "admin/bdapi_log_view.html": {
         "version_id": 2000015,

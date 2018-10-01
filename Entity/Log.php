@@ -22,6 +22,16 @@ use XF\Mvc\Entity\Structure;
  */
 class Log extends Entity
 {
+    public function getEntityColumnLabel($columnName)
+    {
+        return null;
+    }
+
+    public function getEntityLabel()
+    {
+        return $this->request_uri;
+    }
+
     public static function getStructure(Structure $structure)
     {
         $structure->table = 'xf_bdapi_log';
