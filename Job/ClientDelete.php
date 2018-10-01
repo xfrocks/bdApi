@@ -22,8 +22,8 @@ class ClientDelete extends AbstractJob
         if (empty($this->data['clientId'])) {
             return $this->complete();
         }
-
-        $timer = new Timer($this->data['clientId']);
+        
+        $timer = new Timer($maxRunTime);
         $finder = $this->app
             ->finder('Xfrocks\Api:Subscription')
             ->where('client_id', $this->data['clientId']);
