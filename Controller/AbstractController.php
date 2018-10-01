@@ -304,6 +304,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     {
         $requestMethod = $this->request()->getServer('REQUEST_METHOD');
         $requestUri = $this->request()->getRequestUri();
+        $responseCode  = $reply->getResponseCode();
 
         if ($reply instanceof Redirect) {
             $responseCode = 301;
@@ -313,12 +314,11 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
                 'redirectUri' => $reply->getUrl()
             ];
         } else {
-            $responseCode = $reply->getResponseCode();
-            $responseOutput = [
-                'raw' => $reply,
-                'controller' => $reply->getControllerClass(),
-                'action' => $action
-            ];
+            $responseOutput = $this->getControllerResponseOutput($reply);
+        }
+
+        if ($responseOutput === false) {
+            return;
         }
 
         $requestData = $this->request()->getInputForLogs();
@@ -326,6 +326,23 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         /** @var Log $logRepo */
         $logRepo = $this->repository('Xfrocks\Api:Log');
         $logRepo->logRequest($requestMethod, $requestUri, $requestData, $responseCode, $responseOutput);
+    }
+
+    protected function getControllerResponseOutput($reply)
+    {
+        if ($reply instanceof Reply\View) {
+            $responseOutput = $reply->getParams();
+        } elseif ($reply instanceof Reply\Error) {
+            $responseOutput = ['errors' => $reply->getErrors()];
+        } elseif ($reply instanceof Reply\Exception) {
+            $responseOutput = $this->getControllerResponseOutput($reply->getReply());
+        } elseif ($reply instanceof Reply\Message) {
+            $responseOutput = ['message' => $reply->getMessage()];
+        } else {
+            return false;
+        }
+
+        return $responseOutput;
     }
 
     /**

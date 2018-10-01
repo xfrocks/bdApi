@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Repository;
 
 use XF\Mvc\Entity\Repository;
+use Xfrocks\Api\Transform\LazyTransformer;
 use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class Log extends Repository
@@ -117,14 +118,9 @@ class Log extends Repository
                 } elseif (is_numeric($value)) {
                     $filtered[$key] = $value;
                 } elseif (is_string($value)) {
-                    if (strlen($value) > 0) {
-                        $maxLength = 32;
-                        if (utf8_strlen($value) > $maxLength) {
-                            $filtered[$key] = utf8_substr($value, 0, $maxLength - 1) . '…';
-                        } else {
-                            $filtered[$key] = $value;
-                        }
-                    }
+                    $filtered[$key] = $value;
+                } elseif ($value instanceof LazyTransformer) {
+                    $value = $value->getLogData();
                 } else {
                     $filtered[$key] = '?';
                 }
