@@ -372,6 +372,13 @@ class Subscription extends Repository
             return false;
         }
 
+        $subColumn = $this->options()->bdApi_subscriptionColumnUser;
+        /** @var UserOption|null $userOption */
+        $userOption = $alertedUser->Option;
+        if (!$userOption) {
+            return false;
+        }
+
         $templater = $this->app()->templater();
 
         $triggerUser = $triggerUser ?: $message->User;
@@ -400,13 +407,6 @@ class Subscription extends Repository
             'view_date' => 0,
             'extra_data' => serialize($extraData)
         ];
-
-        $subColumn = $this->options()->bdApi_subscriptionColumnUser;
-        /** @var UserOption|null $userOption */
-        $userOption = $alertedUser->Option;
-        if (!$userOption) {
-            return false;
-        }
 
         $userOptionValue = $userOption->getValue($subColumn);
         if (!empty($userOptionValue)) {
