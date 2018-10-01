@@ -25,6 +25,32 @@ class SubscriptionTest extends ApiTestCase
         $this->postSubscriptions($hubCallback);
 
         $this->assertEquals(202, static::httpLatestResponse()->getStatusCode());
+
+        $json = $this->httpRequestJson('GET', 'notifications', [
+            'query' => [
+                'oauth_token' => self::$accessToken
+            ]
+        ]);
+
+        $this->assertArrayHasKey('subscription_callback', $json);
+
+        $response = $this->httpLatestResponse();
+        $links = $response->getHeader('Link');
+
+        $this->assertNotEmpty($links);
+        $this->assertContains('rel=hub', $links);
+        $this->assertContains('rel=self', $links);
+
+        $this->postSubscriptions($hubCallback, 'unsubscribe');
+        $this->assertEquals(202, $this->httpLatestResponse()->getStatusCode());
+
+        $notifyJson = $this->httpRequestJson('GET', 'notifications', [
+            'query' => [
+                'oauth_token' => self::$accessToken
+            ]
+        ]);
+
+        $this->assertArrayNotHasKey('subscription_callback', $notifyJson);
     }
 
     public function testSubscribeFailure()
@@ -35,23 +61,7 @@ class SubscriptionTest extends ApiTestCase
         $this->assertEquals(400, static::httpLatestResponse()->getStatusCode());
     }
 
-    public function testNotifications()
-    {
-        $json = $this->httpRequestJson('GET', 'notifications', [
-            'query' => [
-                'oauth_token' => self::$accessToken
-            ]
-        ]);
-
-        $this->assertArrayHasKey('subscription_callback', $json);
-
-        $response = $this->httpLatestResponse();
-        $link = $response->getHeader('Link');
-
-        $this->assertNotEmpty($link);
-    }
-
-    private function postSubscriptions($hubCallback)
+    private function postSubscriptions($hubCallback, $hubMode = 'subscribe')
     {
         return static::httpRequest(
             'POST',
@@ -59,7 +69,7 @@ class SubscriptionTest extends ApiTestCase
             [
                 'body' => [
                     'hub.callback' => $hubCallback,
-                    'hub.mode' => 'subscribe',
+                    'hub.mode' => $hubMode,
                     'hub.topic' => 'user_notification_me',
                     'oauth_token' => self::$accessToken,
                 ],
