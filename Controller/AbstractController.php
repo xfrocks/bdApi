@@ -40,14 +40,6 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      */
     public function api(array $data)
     {
-        foreach (array_keys($data) as $key) {
-            if (is_object($data[$key]) && $data[$key] instanceof LazyTransformer) {
-                /** @var LazyTransformer $lazyTransformer */
-                $lazyTransformer = $data[$key];
-                $data[$key] = $lazyTransformer->transform();
-            }
-        }
-
         return new \Xfrocks\Api\Mvc\Reply\Api($data);
     }
 

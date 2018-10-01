@@ -11,6 +11,15 @@ class App extends \XF\Pub\App
         return new \XF\Mvc\RouteMatch('Xfrocks:Error', $action, $params, $responseType);
     }
 
+    public function getGlobalTemplateData(\XF\Mvc\Reply\AbstractReply $reply = null)
+    {
+        $data = parent::getGlobalTemplateData($reply);
+
+        $data['isApi'] = true;
+
+        return $data;
+    }
+
     public function initializeExtra()
     {
         parent::initializeExtra();
