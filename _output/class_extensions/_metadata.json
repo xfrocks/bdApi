@@ -19,5 +19,8 @@
     },
     "XF-Pub-Controller-Misc_Xfrocks-Api-XF-Pub-Controller-Misc.json": {
         "hash": "3c8843fcf5b4cc24e709fa61fc308c09"
+    },
+    "XF-Service-User-DeleteCleanUp_Xfrocks-Api-XF-Service-User-DeleteCleanUp.json": {
+        "hash": "0a078c2e5fd8b7902570609f74e1485c"
     }
 }

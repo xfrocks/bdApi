@@ -43,4 +43,13 @@ class Listener
             $extension->addClassExtension('Xfrocks\Api\Data\Modules', 'Xfrocks\Api\XFRM\Data\Modules');
         }
     }
+
+    /**
+     * @param \XF\Service\User\ContentChange $changeService
+     * @param array $updates
+     */
+    public static function userContentChangeInit($changeService, array &$updates)
+    {
+        $updates['xf_bdapi_client'] = ['user_id'];
+    }
 }
