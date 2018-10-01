@@ -136,4 +136,21 @@ class Client extends Entity
 
         return $structure;
     }
+
+    protected function _postDelete()
+    {
+        $db = $this->db();
+
+        $db->delete('xf_bdapi_auth_code', 'client_id = ?', $this->client_id);
+        $db->delete('xf_bdapi_refresh_token', 'client_id = ?', $this->client_id);
+        $db->delete('xf_bdapi_token', 'client_id = ?', $this->client_id);
+        $db->delete('xf_bdapi_user_scope', 'client_id = ?', $this->client_id);
+
+        $this
+            ->app()
+            ->jobManager()
+            ->enqueueUnique('bdapi_' . $this->client_id, 'Xfrocks\Api\Job\ClientDelete', [
+                'clientId' => $this->client_id
+            ]);
+    }
 }
