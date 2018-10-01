@@ -5,6 +5,7 @@ namespace Xfrocks\Api\Entity;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Structure;
 use Xfrocks\Api\Listener;
+use Xfrocks\Api\OAuth2\Server;
 
 /**
  * COLUMNS
@@ -77,7 +78,7 @@ abstract class TokenWithScope extends Entity
 
     protected static function addDefaultTokenElements(Structure $structure)
     {
-        $structure->columns['scope'] = ['type' => self::STR];
+        $structure->columns['scope'] = ['type' => self::STR, 'default' => Server::SCOPE_READ];
         $structure->getters['scopes'] = true;
 
         return $structure;

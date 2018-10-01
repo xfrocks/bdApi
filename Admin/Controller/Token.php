@@ -2,11 +2,22 @@
 
 namespace Xfrocks\Api\Admin\Controller;
 
-use XF\Entity\User;
 use Xfrocks\Api\Entity\Token as EntityToken;
 
 class Token extends Entity
 {
+    public function getEntityExplain($entity)
+    {
+        return $this->getEntityClientAndUser($entity);
+    }
+
+    public function getEntityHint($entity)
+    {
+        /** @var EntityToken $token */
+        $token = $entity;
+        return $token->scope;
+    }
+
     protected function getShortName()
     {
         return 'Xfrocks\Api:Token';
@@ -20,22 +31,5 @@ class Token extends Entity
     protected function getRoutePrefix()
     {
         return 'api-tokens';
-    }
-
-    public function getEntityHint($entity)
-    {
-        /** @var EntityToken $token */
-        $token = $entity;
-        return $token->scope;
-    }
-
-    public function getEntityExplain($entity)
-    {
-        /** @var EntityToken $token */
-        $token = $entity;
-        /** @var User|null $user */
-        $user = $token->User;
-
-        return $user ? $user->username : '';
     }
 }

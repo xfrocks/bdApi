@@ -9,9 +9,9 @@ class Listener
     public static $accessTokenParamKey = 'oauth_token';
 
     /**
-     * @param \XF\Pub\App $app
+     * @param \XF\App $app
      */
-    public static function appPubSetup($app)
+    public static function appSetup($app)
     {
         $container = $app->container();
 

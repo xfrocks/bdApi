@@ -2,18 +2,17 @@
 
 namespace Xfrocks\Api\Entity;
 
-use League\OAuth2\Server\Util\SecureKey;
 use XF\Mvc\Entity\Structure;
-use Xfrocks\Api\Util\Vendor;
+use Xfrocks\Api\OAuth2\Server;
 
 /**
  * COLUMNS
- * @property int|null auth_code_id
- * @property string client_id
+ * @property int auth_code_id
  * @property string auth_code_text
- * @property string redirect_uri
- * @property int expire_date
+ * @property string client_id
  * @property int user_id
+ * @property int expire_date
+ * @property string redirect_uri
  * @property string scope
  *
  * GETTERS
@@ -21,6 +20,7 @@ use Xfrocks\Api\Util\Vendor;
  *
  * RELATIONS
  * @property \XF\Entity\User User
+ * @property \Xfrocks\Api\Entity\Client Client
  */
 class AuthCode extends TokenWithScope
 {
@@ -32,16 +32,14 @@ class AuthCode extends TokenWithScope
     public function getEntityColumnLabel($columnName)
     {
         switch ($columnName) {
-            case 'client_id':
-                return \XF::phrase('bdapi_client_id');
             case 'auth_code_text':
-                return \XF::phrase('bdapi_auth_code_text');
+            case 'client_id':
+            case 'expire_date':
             case 'redirect_uri':
-                return \XF::phrase('bdapi_client_redirect_uri');
+            case 'scope':
+                return \XF::phrase('bdapi_' . $columnName);
             case 'user_id':
                 return \XF::phrase('user_name');
-            case 'expire_date':
-                return \XF::phrase('bdapi_expire_date');
         }
 
         return null;
@@ -54,24 +52,36 @@ class AuthCode extends TokenWithScope
 
     public static function getStructure(Structure $structure)
     {
-        Vendor::load();
+        /** @var Server $apiServer */
+        $apiServer = \XF::app()->container('api.server');
 
         $structure->table = 'xf_bdapi_auth_code';
         $structure->shortName = 'Xfrocks\Api:AuthCode';
         $structure->primaryKey = 'auth_code_id';
         $structure->columns = [
-            'auth_code_id' => ['type' => self::UINT, 'autoIncrement' => true, 'nullable' => true],
+            'auth_code_id' => ['type' => self::UINT, 'autoIncrement' => true],
+            'auth_code_text' => [
+                'type' => self::STR,
+                'maxLength' => 255,
+                'default' => $apiServer->generateSecureKey(),
+                'writeOnce' => true,
+            ],
             'client_id' => ['type' => self::STR, 'maxLength' => 255, 'required' => true],
-            'auth_code_text' => ['type' => self::STR, 'maxLength' => 255, 'default' => SecureKey::generate()],
+            'user_id' => ['type' => self::UINT, 'default' => \XF::visitor()->user_id],
+            'expire_date' => ['type' => self::UINT, 'default' => \XF::$time + $apiServer->getOptionAuthCodeTTL()],
             'redirect_uri' => ['type' => self::STR, 'required' => true],
-            'expire_date' => ['type' => self::UINT, 'required' => true],
-            'user_id' => ['type' => self::UINT, 'required' => true],
         ];
         $structure->relations = [
             'User' => [
                 'entity' => 'XF:User',
                 'type' => self::TO_ONE,
                 'conditions' => 'user_id',
+                'primary' => true
+            ],
+            'Client' => [
+                'entity' => 'Xfrocks\Api:Client',
+                'type' => self::TO_ONE,
+                'conditions' => 'client_id',
                 'primary' => true
             ]
         ];

@@ -2,29 +2,36 @@
 
 namespace Xfrocks\Api\Admin\Controller;
 
-use XF\Admin\Controller\AbstractController;
+use Xfrocks\Api\Entity\Subscription as EntitySubscription;
 
-class Subscription extends AbstractController
+class Subscription extends Entity
 {
-    public function actionIndex()
+    public function getEntityExplain($entity)
     {
-        $finder = $this->finder('Xfrocks\Api:Subscription');
-        $finder->order('subscribe_date', 'DESC');
+        /** @var EntitySubscription $subscription */
+        $subscription = $entity;
+        return $subscription->Client->name;
+    }
 
-        $page = $this->filterPage();
-        $perPage = 20;
+    public function getEntityHint($entity)
+    {
+        /** @var EntitySubscription $subscription */
+        $subscription = $entity;
+        return $subscription->callback;
+    }
 
-        $finder->limitByPage($page, $perPage);
+    protected function getShortName()
+    {
+        return 'Xfrocks\Api:Subscription';
+    }
 
-        $total = $finder->total();
+    protected function getPrefixForPhrases()
+    {
+        return 'bdapi_subscription';
+    }
 
-        $this->assertValidPage($page, $perPage, $total, 'api-subscriptions');
-
-        return $this->view('Xfrocks\Api:Subscription\Index', 'bdapi_subscription_list', [
-            'total' => $total,
-            'page' => $page,
-            'perPage' => $perPage,
-            'subscriptions' => $finder->fetch()
-        ]);
+    protected function getRoutePrefix()
+    {
+        return 'api-subscriptions';
     }
 }

@@ -2,17 +2,16 @@
 
 namespace Xfrocks\Api\Entity;
 
-use League\OAuth2\Server\Util\SecureKey;
 use XF\Mvc\Entity\Structure;
-use Xfrocks\Api\Util\Vendor;
+use Xfrocks\Api\OAuth2\Server;
 
 /**
  * COLUMNS
  * @property int|null token_id
- * @property string client_id
  * @property string token_text
- * @property int expire_date
+ * @property string client_id
  * @property int user_id
+ * @property int expire_date
  * @property string scope
  *
  * GETTERS
@@ -20,7 +19,7 @@ use Xfrocks\Api\Util\Vendor;
  *
  * RELATIONS
  * @property \XF\Entity\User User
- * @property Client|null Client
+ * @property \Xfrocks\Api\Entity\Client Client
  */
 class Token extends TokenWithScope
 {
@@ -33,13 +32,10 @@ class Token extends TokenWithScope
     {
         switch ($columnName) {
             case 'client_id':
-                return \XF::phrase('bdapi_client_id');
-            case 'token_text':
-                return \XF::phrase('bdapi_token_text');
-            case 'scope':
-                return \XF::phrase('bdapi_token_scope');
             case 'expire_date':
-                return \XF::phrase('bdapi_expire_date');
+            case 'scope':
+            case 'token_text':
+                return \XF::phrase('bdapi_' . $columnName);
             case 'user_id':
                 return \XF::phrase('user_name');
         }
@@ -84,17 +80,23 @@ class Token extends TokenWithScope
 
     public static function getStructure(Structure $structure)
     {
-        Vendor::load();
+        /** @var Server $apiServer */
+        $apiServer = \XF::app()->container('api.server');
 
         $structure->table = 'xf_bdapi_token';
         $structure->shortName = 'Xfrocks\Api:Token';
         $structure->primaryKey = 'token_id';
         $structure->columns = [
             'token_id' => ['type' => self::UINT, 'autoIncrement' => true, 'nullable' => true],
+            'token_text' => [
+                'type' => self::STR,
+                'maxLength' => 255,
+                'default' => $apiServer->generateSecureKey(),
+                'writeOnce' => true,
+            ],
             'client_id' => ['type' => self::STR, 'maxLength' => 255, 'required' => true],
-            'token_text' => ['type' => self::STR, 'maxLength' => 255, 'default' => SecureKey::generate()],
-            'expire_date' => ['type' => self::UINT, 'required' => true],
-            'user_id' => ['type' => self::UINT, 'required' => true],
+            'user_id' => ['type' => self::UINT, 'default' => \XF::visitor()->user_id],
+            'expire_date' => ['type' => self::UINT, 'default' => \XF::$time + $apiServer->getOptionAccessTokenTTL()],
         ];
         $structure->relations = [
             'User' => [

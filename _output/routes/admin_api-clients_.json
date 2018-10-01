@@ -6,6 +6,6 @@
     "build_class": "",
     "build_method": "",
     "controller": "Xfrocks\\Api:Client",
-    "context": "bdApi",
+    "context": "XfrocksApiClients",
     "action_prefix": ""
 }

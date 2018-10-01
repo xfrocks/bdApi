@@ -4,7 +4,7 @@ namespace Xfrocks\Api\Finder;
 
 use Xfrocks\Api\Admin\Controller\Entity;
 
-class RefreshToken extends \XF\Mvc\Entity\Finder
+class AuthCode extends \XF\Mvc\Entity\Finder
 {
     /**
      * @param Entity $controller
@@ -14,7 +14,7 @@ class RefreshToken extends \XF\Mvc\Entity\Finder
     public function entityDoListData($controller, array $filters)
     {
         $this->with(['Client', 'User']);
-        $this->setDefaultOrder('refresh_token_id', 'desc');
+        $this->setDefaultOrder('auth_code_id', 'desc');
 
         return $filters;
     }
@@ -22,13 +22,13 @@ class RefreshToken extends \XF\Mvc\Entity\Finder
     /**
      * @param string $match
      * @param bool $prefixMatch
-     * @return RefreshToken
+     * @return AuthCode
      */
     public function entityDoXfFilter($match, $prefixMatch = false)
     {
         if ($match) {
             $this->where(
-                $this->columnUtf8('refresh_token_text'),
+                $this->columnUtf8('auth_code_text'),
                 'LIKE',
                 $this->escapeLike($match, $prefixMatch ? '?%' : '%?%')
             );

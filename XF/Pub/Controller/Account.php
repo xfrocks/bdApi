@@ -30,7 +30,7 @@ class Account extends XFCP_Account
     public function actionApiClientAdd()
     {
         $viewParams = [
-            'client' => $this->getApiClientRepo()->newClient()
+            'client' => $this->em()->create('Xfrocks\Api:Client')
         ];
 
         $view = $this->view('Xfrocks\Api:Account\Api\Edit', 'bdapi_account_api_client_add', $viewParams);
@@ -71,17 +71,13 @@ class Account extends XFCP_Account
     {
         $this->assertPostOnly();
 
-        $clientRepo = $this->getApiClientRepo();
         $clientId = $this->filter('client_id', 'str');
 
         if (!empty($clientId)) {
             $client = $this->assertEditableApiClient($clientId);
         } else {
-            $client = $clientRepo->newClient([
-                'client_id' => $clientRepo->generateClientId(),
-                'client_secret' => $clientRepo->generateClientSecret(),
-                'user_id' => \XF::visitor()->user_id
-            ]);
+            /** @var Client $client */
+            $client = $this->em()->create('Xfrocks\Api:Client');
         }
 
         $client->bulkSet($this->filter([
