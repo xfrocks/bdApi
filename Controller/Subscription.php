@@ -47,13 +47,13 @@ class Subscription extends AbstractController
         $existingSubscriptions = null;
         $hubTopic = $params['hub_topic'];
 
+        if (!$this->subscriptionRepo()->isValidTopic($hubTopic)) {
+            return $this->responseError(\XF::phrase('bdapi_subscription_topic_not_recognized'));
+        }
+
         if ($params['hub_mode'] === 'subscribe') {
             if (!$isSessionClientId) {
                 return $this->noPermission();
-            }
-
-            if (!$this->subscriptionRepo()->isValidTopic($hubTopic)) {
-                return $this->responseError(\XF::phrase('bdapi_subscription_topic_not_recognized'));
             }
         } else {
             $existingSubscriptions = $this->finder('Xfrocks\Api:Subscription')
