@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Repository;
 
 use GuzzleHttp\Exception\ClientException;
+use XF\Entity\ConversationMessage;
 use XF\Entity\Post;
 use XF\Entity\Thread;
 use XF\Entity\User;
@@ -358,6 +359,58 @@ class Subscription extends Repository
                 $pingData,
                 $subscription['expire_date']
             );
+        }
+
+        return true;
+    }
+
+    public function pingConversationMessage($action, ConversationMessage $message, User $alertedUser, User $triggerUser = null)
+    {
+        if (!$this->options()->bdApi_userNotificationConversation
+            || !static::getSubscription(self::TYPE_NOTIFICATION)
+        ) {
+            return false;
+        }
+
+        $templater = $this->app()->templater();
+
+        $triggerUser = $triggerUser ?: $message->User;
+
+        $extraData = [
+            'notification_id' => 0,
+            'notification_html' => ''
+        ];
+
+        $extraData['object_data']['message'] = [
+            'conversation_id' => $message->conversation_id,
+            'title' => $message->Conversation->title,
+            'message_id' => $message->message_id,
+            'message' => $templater->fn('snippet', [$message->message, 140, ['stripQuote' => true]])
+        ];
+
+        $fakeAlert = [
+            'alert_id' => 0,
+            'alerted_user_id' => $alertedUser->user_id,
+            'user_id' => $triggerUser->user_id,
+            'username' => $triggerUser->username,
+            'content_type' => 'conversation',
+            'content_id' => $message->Conversation->conversation_id,
+            'action' => $action,
+            'event_date' => \XF::$time,
+            'view_date' => 0,
+            'extra_data' => serialize($extraData)
+        ];
+
+        $subColumn = $this->options()->bdApi_subscriptionColumnUser;
+        /** @var UserOption|null $userOption */
+        $userOption = $alertedUser->Option;
+        if (!$userOption) {
+            return false;
+        }
+
+        $userOptionValue = $userOption->getValue($subColumn);
+        if (!empty($userOptionValue)) {
+            $this->ping($userOptionValue, $action, self::TYPE_NOTIFICATION, $fakeAlert);
         }
 
         return true;

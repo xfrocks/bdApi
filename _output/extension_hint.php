@@ -17,3 +17,8 @@ namespace Xfrocks\Api\XF\Pub\Controller
 	class XFCP_Account extends \XF\Pub\Controller\Account {}
 	class XFCP_Misc extends \XF\Pub\Controller\Misc {}
 }
+
+namespace Xfrocks\Api\XF\Service\Conversation
+{
+	class XFCP_Notifier extends \XF\Service\Conversation\Notifier {}
+}

@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Service\\Conversation\\Notifier",
+    "to_class": "Xfrocks\\Api\\XF\\Service\\Conversation\\Notifier",
+    "execute_order": 10,
+    "active": true
+}
