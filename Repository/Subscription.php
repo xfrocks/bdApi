@@ -280,9 +280,9 @@ class Subscription extends Repository
             'oauth_token' => ''
         ]);
 
-        $response->header('Link', sprintf('<%s>; rel=hub', $hubLink));
+        $response->header('Link', sprintf('<%s>; rel=hub', $hubLink), false);
         if (!empty($selfLink)) {
-            $response->header('Link', sprintf('<%s>; rel=self', $selfLink));
+            $response->header('Link', sprintf('<%s>; rel=self', $selfLink), false);
         }
 
         if (!empty($subscriptionOption)) {
