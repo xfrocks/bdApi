@@ -1,1 +1,1 @@
-Refresh Token Text
+Refresh token

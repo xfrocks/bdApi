@@ -50,7 +50,7 @@
                 <xf:textarearow label="{{ phrase('bdapi_client_description') }}" name="description"
                                 value="{$client.description}"/>
 
-                <xf:textboxrow label="{{ phrase('bdapi_client_redirect_uri') }}"
+                <xf:textboxrow label="{{ phrase('bdapi_redirect_uri') }}"
                                name="redirect_uri"
                                type="url"
                                value="{$client.redirect_uri}"/>
@@ -62,7 +62,7 @@
                                 value="{$client.options.whitelisted_domains}"/>
             </div>
 
-            <xf:if is="{$client}">
+            <xf:if is="{$client.exists()}">
                 <xf:hiddenval name="client_id" value="{$client.client_id}"/>
             </xf:if>
 

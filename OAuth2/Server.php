@@ -11,6 +11,7 @@ use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 use League\OAuth2\Server\Grant\PasswordGrant;
 use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use League\OAuth2\Server\ResourceServer;
+use League\OAuth2\Server\Util\SecureKey;
 use Symfony\Component\HttpFoundation\Request;
 use XF\Container;
 use XF\Mvc\Controller;
@@ -33,7 +34,6 @@ use Xfrocks\Api\OAuth2\Storage\SessionStorage;
 use Xfrocks\Api\OAuth2\TokenType\BearerWithScope;
 use Xfrocks\Api\Util\Crypt;
 use Xfrocks\Api\Util\OneTimeToken;
-use Xfrocks\Api\Util\Vendor;
 use Xfrocks\Api\XF\Pub\Controller\Account;
 
 class Server
@@ -64,7 +64,7 @@ class Server
      */
     public function __construct($app)
     {
-        Vendor::load();
+        require_once(dirname(__DIR__) . '/vendor/autoload.php');
 
         $this->app = $app;
 
@@ -179,6 +179,14 @@ class Server
     public function container($key = null)
     {
         return $key === null ? $this->container : $this->container[$key];
+    }
+
+    /**
+     * @return string
+     */
+    public function generateSecureKey()
+    {
+        return SecureKey::generate();
     }
 
     /**

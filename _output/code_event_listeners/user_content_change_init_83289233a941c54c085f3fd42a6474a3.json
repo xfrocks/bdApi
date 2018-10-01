@@ -1,0 +1,9 @@
+{
+    "event_id": "user_content_change_init",
+    "execute_order": 10,
+    "callback_class": "Xfrocks\\Api\\Listener",
+    "callback_method": "userContentChangeInit",
+    "active": true,
+    "hint": "",
+    "description": ""
+}

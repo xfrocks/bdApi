@@ -1,11 +1,11 @@
 {
     "route_type": "admin",
-    "route_prefix": "api-refresh-token",
+    "route_prefix": "api-refresh-tokens",
     "sub_name": "",
     "format": ":int<refresh_token_id>/",
     "build_class": "",
     "build_method": "",
     "controller": "Xfrocks\\Api:RefreshToken",
-    "context": "bdApi",
+    "context": "XfrocksApiRefreshTokens",
     "action_prefix": ""
 }

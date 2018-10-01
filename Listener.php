@@ -9,9 +9,9 @@ class Listener
     public static $accessTokenParamKey = 'oauth_token';
 
     /**
-     * @param \XF\Pub\App $app
+     * @param \XF\App $app
      */
-    public static function appPubSetup($app)
+    public static function appSetup($app)
     {
         $container = $app->container();
 
@@ -42,5 +42,14 @@ class Listener
         if (!empty($addOnCache['XFRM'])) {
             $extension->addClassExtension('Xfrocks\Api\Data\Modules', 'Xfrocks\Api\XFRM\Data\Modules');
         }
+    }
+
+    /**
+     * @param \XF\Service\User\ContentChange $changeService
+     * @param array $updates
+     */
+    public static function userContentChangeInit($changeService, array &$updates)
+    {
+        $updates['xf_bdapi_client'] = ['user_id'];
     }
 }

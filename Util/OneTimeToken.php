@@ -65,9 +65,14 @@ class OneTimeToken
         $token->user_id = $userId;
         $token->setScopes($server->getScopeDefaults());
 
-        if ($userId === 0 &&
-            $once === self::generateOnce($userId, $timestamp, '', $token->Client->client_secret)
-        ) {
+        if ($userId === 0) {
+            $client = $token->Client;
+            if ($client === null) {
+                return null;
+            }
+            if ($once !== self::generateOnce($userId, $timestamp, '', $client->client_secret)) {
+                return null;
+            }
             return $token;
         }
 
@@ -82,7 +87,7 @@ class OneTimeToken
             ->where('client_id', $clientId)
             ->where('user_id', $userId)
             ->with($with)
-            ->with('Client')
+            ->with('Client', true)
             ->pluckFrom('expire_date', 'token_text')
             ->fetch();
 

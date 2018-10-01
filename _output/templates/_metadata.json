@@ -29,15 +29,10 @@
         "version_string": "2.0.0 Alpha 5",
         "hash": "36388a7eeb2c4a8a283f72a0f240205c"
     },
-    "admin/bdapi_subscription_list.html": {
+    "public/bdapi_account_api.html": {
         "version_id": 2000015,
         "version_string": "2.0.0 Alpha 5",
-        "hash": "8493eb549394ddf3731f82f46536b9ec"
-    },
-    "public/bdapi_account_api.html": {
-        "version_id": 2000000,
-        "version_string": "2.0.0",
-        "hash": "a35b3fb547af7291feba670c639967e2"
+        "hash": "1af48c0622198909e00469e4ca77364e"
     },
     "public/bdapi_account_api_client_add.html": {
         "version_id": 2000000,
@@ -55,9 +50,9 @@
         "hash": "15f93fbf695c367999738d2e2032d73f"
     },
     "public/bdapi_account_authorize.html": {
-        "version_id": 2000011,
-        "version_string": "2.0.0 Alpha 1",
-        "hash": "951a58912b9d17810c9b8a8d9a2b60c5"
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "3496982c65002dbbc051ec8bdb856e3c"
     },
     "public/bdapi_account_wrapper.html": {
         "version_id": 2000000,
@@ -65,8 +60,8 @@
         "hash": "ba083eca31bf1baeb18250a651af8551"
     },
     "public/bdapi_client_macros.html": {
-        "version_id": 2000000,
-        "version_string": "2.0.0",
-        "hash": "7d678856b9e6a86e0b4c47682720a41b"
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "c8ede50f973589cb68608746320a2411"
     }
 }

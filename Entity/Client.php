@@ -8,12 +8,12 @@ use XF\Util\Arr;
 
 /**
  * COLUMNS
- * @property string client_id
- * @property string client_secret
- * @property string redirect_uri
  * @property string name
  * @property string description
  * @property int user_id
+ * @property string redirect_uri
+ * @property string client_id
+ * @property string client_secret
  * @property array options
  *
  * RELATIONS
@@ -83,11 +83,9 @@ class Client extends Entity
     {
         switch ($columnName) {
             case 'client_id':
-                return \XF::phrase('bdapi_client_id');
             case 'client_secret':
-                return \XF::phrase('bdapi_client_secret');
             case 'redirect_uri':
-                return \XF::phrase('bdapi_client_redirect_uri');
+                return \XF::phrase('bdapi_' . $columnName);
             case 'name':
             case 'description':
                 return \XF::phrase('bdapi_client_' . $columnName);
@@ -109,12 +107,22 @@ class Client extends Entity
         $structure->shortName = 'Xfrocks\Api:Client';
         $structure->primaryKey = 'client_id';
         $structure->columns = [
-            'client_id' => ['type' => self::STR, 'maxLength' => 255, 'required' => true],
-            'client_secret' => ['type' => self::STR, 'maxLength' => 255, 'required' => true],
-            'redirect_uri' => ['type' => self::STR, 'required' => true],
             'name' => ['type' => self::STR, 'maxLength' => 255, 'required' => true],
             'description' => ['type' => self::STR, 'required' => true],
-            'user_id' => ['type' => self::UINT, 'required' => true],
+            'user_id' => ['type' => self::UINT, 'default' => \XF::visitor()->user_id],
+            'redirect_uri' => ['type' => self::STR, 'required' => true],
+            'client_id' => [
+                'type' => self::STR,
+                'default' => \XF::generateRandomString(10),
+                'maxLength' => 255,
+                'unique' => true,
+                'writeOnce' => true,
+            ],
+            'client_secret' => [
+                'type' => self::STR,
+                'default' => \XF::generateRandomString(15),
+                'maxLength' => 255,
+            ],
             'options' => ['type' => self::SERIALIZED_ARRAY]
         ];
         $structure->relations = [
@@ -127,5 +135,22 @@ class Client extends Entity
         ];
 
         return $structure;
+    }
+
+    protected function _postDelete()
+    {
+        $db = $this->db();
+
+        $db->delete('xf_bdapi_auth_code', 'client_id = ?', $this->client_id);
+        $db->delete('xf_bdapi_refresh_token', 'client_id = ?', $this->client_id);
+        $db->delete('xf_bdapi_token', 'client_id = ?', $this->client_id);
+        $db->delete('xf_bdapi_user_scope', 'client_id = ?', $this->client_id);
+
+        $this
+            ->app()
+            ->jobManager()
+            ->enqueueUnique('bdapi_' . $this->client_id, 'Xfrocks\Api\Job\ClientDelete', [
+                'clientId' => $this->client_id
+            ]);
     }
 }

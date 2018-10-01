@@ -2,11 +2,26 @@
 
 namespace Xfrocks\Api\Admin\Controller;
 
-use XF\Entity\User;
 use Xfrocks\Api\Entity\Client as EntityClient;
 
 class Client extends Entity
 {
+    public function getEntityExplain($entity)
+    {
+        /** @var EntityClient $client */
+        $client = $entity;
+        $user = $client->User;
+
+        return $user ? $user->username : '';
+    }
+
+    public function getEntityHint($entity)
+    {
+        /** @var EntityClient $client */
+        $client = $entity;
+        return $client->redirect_uri;
+    }
+
     protected function getShortName()
     {
         return 'Xfrocks\Api:Client';
@@ -22,32 +37,8 @@ class Client extends Entity
         return 'api-clients';
     }
 
-    public function getEntityHint($entity)
+    protected function supportsAdding()
     {
-        if (!($entity instanceof \Xfrocks\Api\Entity\Client)) {
-            return parent::getEntityHint($entity);
-        }
-
-        return $entity->client_id;
-    }
-
-    public function getEntityExplain($entity)
-    {
-        /** @var EntityClient $client */
-        $client = $entity;
-        /** @var User|null $user */
-        $user = $client->User;
-
-        $parts = [];
-
-        if ($user !== null) {
-            $parts[] = $user->username;
-        }
-
-        if (strlen($client->description) > 0) {
-            $parts[] = $client->description;
-        }
-
-        return implode(' - ', $parts);
+        return false;
     }
 }

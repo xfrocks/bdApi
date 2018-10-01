@@ -6,6 +6,6 @@
     "build_class": "",
     "build_method": "",
     "controller": "Xfrocks\\Api:Subscription",
-    "context": "bdApi",
+    "context": "XfrocksApiSubscriptions",
     "action_prefix": ""
 }

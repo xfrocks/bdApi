@@ -1,1 +1,1 @@
-Auth Code Text
+Authentication code

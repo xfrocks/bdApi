@@ -1,7 +1,7 @@
 {
-    "parent_navigation_id": "bdApi",
-    "display_order": 90,
-    "link": "api-logs",
+    "parent_navigation_id": "XfrocksApi",
+    "display_order": 5000,
+    "link": "api-subscriptions",
     "icon": "",
     "admin_permission_id": "bdApi",
     "debug_only": false,

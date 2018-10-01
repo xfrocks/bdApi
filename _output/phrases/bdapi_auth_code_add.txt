@@ -1,1 +1,1 @@
-Add new Auth Code
+Add new auth code

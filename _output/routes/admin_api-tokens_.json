@@ -6,6 +6,6 @@
     "build_class": "",
     "build_method": "",
     "controller": "Xfrocks\\Api:Token",
-    "context": "bdApi",
+    "context": "XfrocksApiTokens",
     "action_prefix": ""
 }

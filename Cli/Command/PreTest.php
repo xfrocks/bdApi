@@ -12,6 +12,7 @@ use XF\Entity\User;
 use XF\PrintableException;
 use XF\Service\Thread\Replier;
 use XF\Util\Random;
+use Xfrocks\Api\Entity\Client;
 
 class PreTest extends Command
 {
@@ -190,17 +191,13 @@ class PreTest extends Command
     {
         if (!isset($data['apiClient'])) {
             $app = \XF::app();
-            /** @var \Xfrocks\Api\Repository\Client $clientRepo */
-            $clientRepo = $app->repository('Xfrocks\Api:Client');
-            $client = $clientRepo->newClient([
-                'client_id' => $clientRepo->generateClientId(),
-                'client_secret' => $clientRepo->generateClientSecret(),
-                'user_id' => $userData['user_id']
-            ]);
 
+            /** @var Client $client */
+            $client = $app->em()->create('Xfrocks\Api:Client');
             $client->name = $this->prefix;
             $client->description = __METHOD__;
             $client->redirect_uri = $app->options()->boardUrl;
+            $client->user_id = $userData['user_id'];
             $client->save();
 
             $data['apiClient'] = [

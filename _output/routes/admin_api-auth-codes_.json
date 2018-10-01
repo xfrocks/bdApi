@@ -6,6 +6,6 @@
     "build_class": "",
     "build_method": "",
     "controller": "Xfrocks\\Api:AuthCode",
-    "context": "bdApi",
+    "context": "XfrocksApiAuthCodes",
     "action_prefix": ""
 }

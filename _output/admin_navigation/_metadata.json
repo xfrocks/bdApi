@@ -1,23 +1,23 @@
 {
-    "XfrocksApiRefreshToken.json": {
-        "hash": "b1c8f94026288c3ea4582339e93b45e2"
+    "XfrocksApi.json": {
+        "hash": "2fdf0c0d301531f3dc5c5d3a3cc34270"
     },
-    "bdApi.json": {
-        "hash": "9c6bd7464836e917498878f1fc92aec7"
+    "XfrocksApiAuthCodes.json": {
+        "hash": "aaa72b63a71b595576eabd20f659cf86"
     },
-    "bdApi_Logs.json": {
-        "hash": "e78471c458e77306224a7570906bd4c1"
+    "XfrocksApiClients.json": {
+        "hash": "3109c06cc4da08dac83e6ef7ab373e8d"
     },
-    "bdApi_Subscriptions.json": {
-        "hash": "9e1556001b1f939e2d2409017903ee5b"
+    "XfrocksApiLogs.json": {
+        "hash": "b7e2f995e170dc1d33ad356553e8c4cd"
     },
-    "bdApi_Tokens.json": {
-        "hash": "87924993133d19a8d59fa2dbdcf7238e"
+    "XfrocksApiRefreshTokens.json": {
+        "hash": "33e876f049d934a17b542292b127d7be"
     },
-    "bdApi_authCodes.json": {
-        "hash": "3766ad0fa0262b44955116def725e096"
+    "XfrocksApiSubscriptions.json": {
+        "hash": "62d1d4f54292c4c532676b2c9ec366e9"
     },
-    "bdApi_clients.json": {
-        "hash": "ddad37424b30b71efd0b171e4ac8417a"
+    "XfrocksApiTokens.json": {
+        "hash": "2fa132c94a179c65e101f3bdba248329"
     }
 }

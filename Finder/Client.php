@@ -17,4 +17,22 @@ class Client extends \XF\Mvc\Entity\Finder
 
         return $filters;
     }
+
+    /**
+     * @param string $match
+     * @param bool $prefixMatch
+     * @return Client
+     */
+    public function entityDoXfFilter($match, $prefixMatch = false)
+    {
+        if ($match) {
+            $this->where(
+                $this->columnUtf8('name'),
+                'LIKE',
+                $this->escapeLike($match, $prefixMatch ? '?%' : '%?%')
+            );
+        }
+
+        return $this;
+    }
 }

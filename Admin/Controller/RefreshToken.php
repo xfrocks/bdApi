@@ -2,11 +2,22 @@
 
 namespace Xfrocks\Api\Admin\Controller;
 
-use XF\Entity\User;
 use Xfrocks\Api\Entity\RefreshToken as EntityRefreshToken;
 
 class RefreshToken extends Entity
 {
+    public function getEntityExplain($entity)
+    {
+        return $this->getEntityClientAndUser($entity);
+    }
+
+    public function getEntityHint($entity)
+    {
+        /** @var EntityRefreshToken $refreshToken */
+        $refreshToken = $entity;
+        return $refreshToken->scope;
+    }
+
     protected function getShortName()
     {
         return 'Xfrocks\Api:RefreshToken';
@@ -19,16 +30,6 @@ class RefreshToken extends Entity
 
     protected function getRoutePrefix()
     {
-        return 'api-refresh-token';
-    }
-
-    public function getEntityHint($entity)
-    {
-        /** @var EntityRefreshToken $refreshToken */
-        $refreshToken = $entity;
-        /** @var User|null $user */
-        $user = $refreshToken->User;
-
-        return $user ? $user->username : '';
+        return 'api-refresh-tokens';
     }
 }

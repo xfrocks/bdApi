@@ -1,6 +1,6 @@
 {
-    "parent_navigation_id": "bdApi",
-    "display_order": 70,
+    "parent_navigation_id": "XfrocksApi",
+    "display_order": 20,
     "link": "api-tokens",
     "icon": "",
     "admin_permission_id": "bdApi",

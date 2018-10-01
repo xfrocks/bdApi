@@ -1,8 +1,8 @@
 {
-    "event_id": "app_pub_setup",
+    "event_id": "app_setup",
     "execute_order": 10,
     "callback_class": "Xfrocks\\Api\\Listener",
-    "callback_method": "appPubSetup",
+    "callback_method": "appSetup",
     "active": true,
     "hint": "",
     "description": ""

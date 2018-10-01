@@ -5,6 +5,13 @@ namespace Xfrocks\Api\Entity;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Structure;
 
+/**
+ * COLUMNS
+ * @property string client_id
+ * @property int user_id
+ * @property string scope
+ * @property int accept_date
+ */
 class UserScope extends Entity
 {
     public static function getStructure(Structure $structure)

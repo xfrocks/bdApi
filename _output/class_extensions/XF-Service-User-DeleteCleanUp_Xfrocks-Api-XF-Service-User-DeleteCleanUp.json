@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Service\\User\\DeleteCleanUp",
+    "to_class": "Xfrocks\\Api\\XF\\Service\\User\\DeleteCleanUp",
+    "execute_order": 10,
+    "active": true
+}

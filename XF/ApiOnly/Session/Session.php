@@ -73,7 +73,7 @@ class Session extends XFCP_Session
     {
         $this->__set(self::KEY_TOKEN, $token);
 
-        if ($token && $token->user_id > 0) {
+        if ($token && $token->user_id > 0 && $token->User !== null) {
             $this->changeUser($token->User);
         }
     }

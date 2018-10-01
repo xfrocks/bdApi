@@ -22,5 +22,8 @@
     },
     "XF-Service-Conversation-Notifier_Xfrocks-Api-XF-Service-Conversation-Notifier.json": {
         "hash": "da13a532d2404806c8685a15313b5a22"
+    },
+    "XF-Service-User-DeleteCleanUp_Xfrocks-Api-XF-Service-User-DeleteCleanUp.json": {
+        "hash": "0a078c2e5fd8b7902570609f74e1485c"
     }
 }
