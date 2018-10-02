@@ -295,28 +295,17 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
     public function postDispatch($action, ParameterBag $params, Reply\AbstractReply &$reply)
     {
-        $this->logRequest($reply, $action);
+        $this->logRequest($reply);
 
         parent::postDispatch($action, $params, $reply);
     }
 
-    protected function logRequest(AbstractReply $reply, $action)
+    protected function logRequest(AbstractReply $reply)
     {
         $requestMethod = $this->request()->getServer('REQUEST_METHOD');
         $requestUri = $this->request()->getRequestUri();
-        $responseCode  = $reply->getResponseCode();
 
-        if ($reply instanceof Redirect) {
-            $responseCode = 301;
-            $responseOutput = [
-                'redirectType' => $reply->getType(),
-                'redirectMessage' => $reply->getMessage(),
-                'redirectUri' => $reply->getUrl()
-            ];
-        } else {
-            $responseOutput = $this->getControllerResponseOutput($reply);
-        }
-
+        $responseOutput = $this->getControllerResponseOutput($reply, $responseCode);
         if ($responseOutput === false) {
             return;
         }
@@ -328,14 +317,25 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         $logRepo->logRequest($requestMethod, $requestUri, $requestData, $responseCode, $responseOutput);
     }
 
-    protected function getControllerResponseOutput($reply)
+    protected function getControllerResponseOutput($reply, &$responseCode)
     {
-        if ($reply instanceof Reply\View) {
+        if ($reply instanceof AbstractReply) {
+            $responseCode = $reply->getResponseCode();
+        }
+
+        if ($reply instanceof Redirect) {
+            $responseCode = 301;
+            $responseOutput = [
+                'redirectType' => $reply->getType(),
+                'redirectMessage' => $reply->getMessage(),
+                'redirectUri' => $reply->getUrl()
+            ];
+        } elseif ($reply instanceof Reply\View) {
             $responseOutput = $reply->getParams();
         } elseif ($reply instanceof Reply\Error) {
             $responseOutput = ['errors' => $reply->getErrors()];
         } elseif ($reply instanceof Reply\Exception) {
-            $responseOutput = $this->getControllerResponseOutput($reply->getReply());
+            $responseOutput = $this->getControllerResponseOutput($reply->getReply(),$responseCode);
         } elseif ($reply instanceof Reply\Message) {
             $responseOutput = ['message' => $reply->getMessage()];
         } else {
