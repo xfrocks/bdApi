@@ -335,7 +335,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         } elseif ($reply instanceof Reply\Error) {
             $responseOutput = ['errors' => $reply->getErrors()];
         } elseif ($reply instanceof Reply\Exception) {
-            $responseOutput = $this->getControllerResponseOutput($reply->getReply(),$responseCode);
+            $responseOutput = $this->getControllerResponseOutput($reply->getReply(), $responseCode);
         } elseif ($reply instanceof Reply\Message) {
             $responseOutput = ['message' => $reply->getMessage()];
         } else {

@@ -85,7 +85,7 @@ class Batch extends AbstractController
         return null;
     }
 
-    protected function logRequest(AbstractReply $reply, $action)
+    protected function logRequest(AbstractReply $reply)
     {
         // Does not support log request for this controller
     }
