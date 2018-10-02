@@ -161,18 +161,6 @@
         "version_string": "2.0.0 Alpha 4",
         "hash": "7d19af7a3995fc262806c4037a19e452"
     },
-    "bdapi_log_add.txt": {
-        "global_cache": false,
-        "version_id": 2000015,
-        "version_string": "2.0.0 Alpha 5",
-        "hash": "869ac9cd483a537286baf3d3a3d3d34c"
-    },
-    "bdapi_log_edit.txt": {
-        "global_cache": false,
-        "version_id": 2000015,
-        "version_string": "2.0.0 Alpha 5",
-        "hash": "fa8487cc276114ec2c4949c6d2b89fac"
-    },
     "bdapi_log_entities.txt": {
         "global_cache": false,
         "version_id": 2000015,
