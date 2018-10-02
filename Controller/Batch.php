@@ -2,6 +2,7 @@
 
 namespace Xfrocks\Api\Controller;
 
+use XF\Mvc\Reply\AbstractReply;
 use Xfrocks\Api\Data\BatchJob;
 use Xfrocks\Api\Transformer;
 
@@ -82,6 +83,11 @@ class Batch extends AbstractController
     protected function getDefaultApiScopeForAction($action)
     {
         return null;
+    }
+
+    protected function logRequest(AbstractReply $reply)
+    {
+        // Does not support log request for this controller
     }
 
     /**

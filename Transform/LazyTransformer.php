@@ -86,6 +86,30 @@ class LazyTransformer implements \JsonSerializable
         return $this->transform();
     }
 
+    public function getLogData()
+    {
+        switch ($this->sourceType) {
+            case 'entity':
+                /** @var Entity $entity */
+                $entity = $this->source;
+                return sprintf(
+                    'LazyTransformer(%s@%d)',
+                    \XF::stringToClass($entity->structure()->shortName, '%s\Entity\%s'),
+                    $entity->getEntityId()
+                );
+            case 'finder':
+                /** @var Finder $finder */
+                $finder = $this->source;
+                return sprintf(
+                    'LazyTransformer(%s) => %s',
+                    \XF::stringToClass($finder->getStructure()->shortName, '%s\Finder\%s'),
+                    $finder->getQuery()
+                );
+            default:
+                return 'LazyTransformer(' . $this->sourceType . ')';
+        }
+    }
+
     /**
      * @param Entity $entity
      */
