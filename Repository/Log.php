@@ -81,29 +81,12 @@ class Log extends Repository
     {
         $filtered = array();
 
-        $i = 0;
         foreach ($data as $key => &$value) {
             $keyFirstChar = substr($key, 0, 1);
             if ($keyFirstChar === '.'
                 || $keyFirstChar === '_'
             ) {
                 continue;
-            }
-
-            $i++;
-            if ($i === 2) {
-                // only expand the first item in a pure array
-                $keys = array_keys($data);
-                $isNotNumeric = false;
-                foreach ($keys as $_key) {
-                    if (!is_numeric($_key)) {
-                        $isNotNumeric = true;
-                    }
-                }
-                if (!$isNotNumeric) {
-                    $filtered['...'] = count($keys);
-                    return $filtered;
-                }
             }
 
             if (is_array($value)) {
@@ -120,7 +103,7 @@ class Log extends Repository
                 } elseif (is_string($value)) {
                     $filtered[$key] = $value;
                 } elseif ($value instanceof LazyTransformer) {
-                    $value = $value->getLogData();
+                    $filtered[$key] = $value->getLogData();
                 } else {
                     $filtered[$key] = '?';
                 }
