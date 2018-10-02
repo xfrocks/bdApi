@@ -221,12 +221,6 @@
         "version_string": "2.0.0 Alpha 5",
         "hash": "15c25a7f3e8605e0bd46c0616c7d7727"
     },
-    "bdapi_logs.txt": {
-        "global_cache": false,
-        "version_id": 2000015,
-        "version_string": "2.0.0 Alpha 5",
-        "hash": "b2d37ae1cedf42ff874289b721860af2"
-    },
     "bdapi_no_facebook_association_found.txt": {
         "global_cache": false,
         "version_id": 2000014,
