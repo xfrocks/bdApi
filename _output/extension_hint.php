@@ -18,6 +18,10 @@ namespace Xfrocks\Api\XF\Pub\Controller
 	class XFCP_Misc extends \XF\Pub\Controller\Misc {}
 }
 
+
+namespace Xfrocks\Api\XF\Service\Conversation {
+    class XFCP_Notifier extends \XF\Service\Conversation\Notifier{}
+}
 namespace Xfrocks\Api\XF\Service\User
 {
 	class XFCP_DeleteCleanUp extends \XF\Service\User\DeleteCleanUp {}
