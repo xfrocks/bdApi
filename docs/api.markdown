@@ -194,6 +194,7 @@ For sensitive information like password, encryption can be used to increase data
  * `aes128`: AES 128 bit encryption (mode: ECB, padding: PKCS#7). Because of algorithm limitation, the binary md5 hash of key will be used instead of the key itself.
 
 ### Headers
+ * `Api-Bb-Code-Chr: !youtube`: Replace multimedia tags (except youtube) in bb code html with `tools/chr` link. Since forum-2018100301.
  * `Api-Username-Inline-Style`: Return rich username for `username` fields. Since forum-2018052101.
 
 ## Categories

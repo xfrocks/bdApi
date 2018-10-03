@@ -1665,6 +1665,38 @@ step=3600</edit_format_params>
 
 
 <xen:include template="helper_login_form" />]]></template>
+    <template title="bdapi_misc_chr" version_id="1060201" version_string="1.6.2"><![CDATA[<!doctype html>
+<html lang="{$visitorLanguage.language_code}" dir="{$visitorLanguage.text_direction}" class="Public NoJs NoSidebar Responsive ApiChr">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<xen:if is="{$requestPaths.fullBasePath}">
+		<base href="{$requestPaths.fullBasePath}" />
+		<script><xen:comment>/* Chrome bug and for Google cache */</xen:comment>
+			var _b = document.getElementsByTagName('base')[0], _bH = "{xen:jsescape $requestPaths.fullBasePath}";
+			if (_b && _b.href != _bH) _b.href = _bH;
+		</script>
+	</xen:if>
+
+	<title>{$xenOptions.boardTitle}</title>
+	<noscript><style>.JsOnly, .jsOnly { display: none !important; }</style></noscript>
+	<link rel="stylesheet" href="css.php?css=xenforo,form,public&amp;style={xen:urlencode $_styleId}&amp;dir={$visitorLanguage.text_direction}&amp;d={$visitorStyle.last_modified_date}" />
+	<!--XenForo_Require:CSS-->	
+	<xen:include template="google_analytics" />
+	<xen:include template="page_container_js_head" />
+	<xen:if is="{$head}"><xen:foreach loop="$head" value="$headElement">{xen:raw $headElement}</xen:foreach></xen:if>
+</head>
+<body>
+	<div id="content" class="bdapi_misc_chr">
+		<div class="pageContent">
+			<div class="baseHtml">{xen:raw $html}</div>
+		</div>
+	</div>
+</body>
+</html>
+
+<xen:edithint template="PAGE_CONTAINER" />]]></template>
     <template title="bdapi_navigation_visitor_tab" version_id="67" version_string="1.4.3-BETA"><![CDATA[<xen:if is="{xen:property bdApi_linkNavVisitor} && {xen:helper api_visitorHasPermission, clientNew}">
 	<li><a href="{xen:link account/api}">{xen:phrase bdapi_clients}</a></li>
 </xen:if>]]></template>

@@ -2,6 +2,34 @@
 
 class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 {
+    public function actionGetChr()
+    {
+        $linkParams = $this->_input->filter(array(
+            'html' => XenForo_Input::STRING,
+            'required' => XenForo_Input::STRING,
+            'timestamp' => XenForo_Input::UINT,
+        ));
+        $link = XenForo_Link::buildPublicLink('misc/api-chr', null, $linkParams);
+
+        $userId = XenForo_Visitor::getUserId();
+        if ($userId > 0) {
+            $loginLinkData = array(
+                'redirect' => $link,
+                'timestamp' => XenForo_Application::$time + 10,
+            );
+            $loginLinkData['user_id'] = bdApi_Crypt::encryptTypeOne($userId, $loginLinkData['timestamp']);
+
+            $loginLink = XenForo_Link::buildPublicLink('login/api', null, $loginLinkData);
+
+            return $this->responseRedirect(
+                XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
+                $loginLink
+            );
+        }
+
+        return $this->responseRedirect(XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT, $link);
+    }
+
     public function actionGetLogin()
     {
         $redirectUri = $this->_input->filterSingle('redirect_uri', XenForo_Input::STRING);

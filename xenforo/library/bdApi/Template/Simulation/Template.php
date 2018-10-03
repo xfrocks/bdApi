@@ -7,6 +7,46 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
         'bb_code_tag_attach' => 'bdapi_bb_code_tag_attach',
     );
 
+    protected static $_bdApi_requiredExternalActiveContext = null;
+    protected static $_bdApi_requiredExternalsByContext = array();
+
+    public function bdApi_clearRequiredExternalsByContext()
+    {
+        self::$_bdApi_requiredExternalsByContext = array();
+    }
+
+    public function bdApi_getRequiredExternalsByContext($context)
+    {
+        $ref =& self::$_bdApi_requiredExternalsByContext;
+        if (!isset($ref[$context])) {
+            return array();
+        }
+
+        $result = $ref[$context];
+        unset($ref[$context]);
+
+        return $result;
+    }
+
+    public function bdApi_setRequiredExternalContext($context)
+    {
+        self::$_bdApi_requiredExternalActiveContext = $context;
+    }
+
+    public function addRequiredExternal($type, $requirement)
+    {
+        $context = self::$_bdApi_requiredExternalActiveContext;
+        if ($context !== null) {
+            $ref =& self::$_bdApi_requiredExternalsByContext;
+            if (empty($ref[$context][$type])) {
+                $ref[$context][$type] = array();
+            }
+            $ref[$context][$type][] = $requirement;
+        }
+
+        parent::addRequiredExternal($type, $requirement);
+    }
+
     public function clearRequiredExternalsForApi()
     {
         $this->_setRequiredExternals(array());

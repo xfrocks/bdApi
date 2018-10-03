@@ -2,6 +2,34 @@
 
 class bdApi_XenForo_ControllerPublic_Misc extends XFCP_bdApi_XenForo_ControllerPublic_Misc
 {
+    public function actionApiChr()
+    {
+        $linkParams = $this->_input->filter(array(
+            'html' => XenForo_Input::STRING,
+            'required' => XenForo_Input::STRING,
+            'timestamp' => XenForo_Input::UINT,
+        ));
+
+        $html = bdApi_Crypt::decryptTypeOne($linkParams['html'], $linkParams['timestamp']);
+
+        $required = array();
+        if (!empty($linkParams['required'])) {
+            $required = bdApi_Crypt::decryptTypeOne($linkParams['required'], $linkParams['timestamp']);
+            $required = json_decode($required, true);
+        }
+
+        $viewParams = array(
+            'html' => $html,
+            'required' => $required,
+        );
+
+        $viewParams['jQuerySource'] = XenForo_Dependencies_Public::getJquerySource();
+        $viewParams['jQuerySourceLocal'] = XenForo_Dependencies_Public::getJquerySource(true);
+        $viewParams['javaScriptSource'] = XenForo_Application::$javaScriptUrl;
+
+        return $this->responseView('bdApi_ViewPublic_Misc_Api_Chr', 'bdapi_misc_chr', $viewParams);
+    }
+
     public function actionApiData()
     {
         /* @var $clientModel bdApi_Model_Client */
