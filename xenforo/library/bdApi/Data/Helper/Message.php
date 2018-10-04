@@ -27,7 +27,7 @@ class bdApi_Data_Helper_Message
         $useSnippet = $config->get('bdApi_useSnippet');
 
         if (!empty($useSnippet)) {
-            return XenForo_Template_Helper_Core::callHelper('snippet', array(
+            $html = XenForo_Template_Helper_Core::callHelper('snippet', array(
                 $bbCode,
                 0,
                 array(
@@ -35,6 +35,8 @@ class bdApi_Data_Helper_Message
                     'stripHtml' => false,
                 )
             ));
+
+            return htmlspecialchars_decode($html, ENT_QUOTES);
         } else {
             // from XenForo_Helper_String::bbCodeStrip
             $string = $bbCode;
@@ -49,7 +51,7 @@ class bdApi_Data_Helper_Message
             $string = trim($string);
             $string = XenForo_Helper_String::censorString($string);
 
-            return htmlspecialchars($string);
+            return $string;
         }
     }
 }
