@@ -26,7 +26,7 @@ class OttTest extends ApiTestCase
 
     public function testWithUser()
     {
-        $user = $this->dataUser(3);
+        $user = $this->dataUser();
         $this->requestActiveOttToken($user['user_id']);
     }
 
@@ -38,7 +38,7 @@ class OttTest extends ApiTestCase
 
         $once = md5($userId . $timestamp . $accessToken . $client['client_secret']);
         $ott = sprintf('%d,%d,%s,%s', $userId, $timestamp, $once, $client['client_id']);
-var_dump($accessToken . ' - ' . $ott);
+
         $json = $this->httpRequestJson('GET', 'index', [
             'query' => [
                 'oauth_token' => $ott
