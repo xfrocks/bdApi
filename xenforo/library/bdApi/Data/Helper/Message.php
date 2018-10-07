@@ -18,7 +18,7 @@ class bdApi_Data_Helper_Message
             }
         }
 
-        if (isset($bbCodeOptions['states'])) {
+        if (!isset($bbCodeOptions['states'])) {
             $bbCodeOptions['states'] = array();
         }
         $statesRef =& $bbCodeOptions['states'];
