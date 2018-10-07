@@ -3,9 +3,6 @@
 class bdApi_Template_Simulation_Template extends XenForo_Template_Public
 {
     public static $bdApi_visitor = null;
-    public static $bdApi_mapping = array(
-        'bb_code_tag_attach' => 'bdapi_bb_code_tag_attach',
-    );
 
     protected static $_bdApi_requiredExternalActiveContext = null;
     protected static $_bdApi_requiredExternalsByContext = array();
@@ -79,10 +76,6 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
 
     public function __construct($templateName, array $params = array())
     {
-        if (isset(self::$bdApi_mapping[$templateName])) {
-            $templateName = self::$bdApi_mapping[$templateName];
-        }
-
         if (self::$bdApi_visitor !== null) {
             $params['visitor'] = self::$bdApi_visitor;
         }
@@ -95,6 +88,7 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
             $languageId = XenForo_Application::getOptions()->get('defaultLanguageId');
         }
 
+        $params['isApiTemplateSimulation'] = true;
         $params['xenOptions'] = XenForo_Application::getOptions()->getOptions();
 
         parent::__construct(sprintf('__%s_%d', $templateName, $languageId), $params);
