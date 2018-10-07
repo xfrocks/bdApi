@@ -7,18 +7,8 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
     /** @var null|null */
     protected $_bdApiChr = null;
 
-    /** @var array */
-    protected $_bdApiMediaHtmlTags = array(
-        'audio',
-        'canvas',
-        'div',
-        'embed',
-        'iframe',
-        'object',
-        'source',
-        'track',
-        'video',
-    );
+    /** @var string */
+    protected $_bdApiMediaHtmlTagsRegEx = '#<(audio|canvas|embed|iframe|object|video)(\s|>)#i';
 
     /** @var bdApi_Template_Simulation_Template|null */
     protected $_bdApiNoNameTemplate;
@@ -42,12 +32,9 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
         $this->_bdApiNoNameTemplate->bdApi_setRequiredExternalContext($tagContext);
         $rendered = utf8_trim(parent::renderValidTag($tagInfo, $tag, $rendererStates));
 
-        if ($this->_bdApiTagCount === $tagCount && preg_match('#^<(\w+)(>|\s)#', $rendered, $matches)) {
-            $htmlTag = strtolower($matches[1]);
-            if (in_array($htmlTag, $this->_bdApiMediaHtmlTags, true)) {
-                $requiredExternals = $this->_bdApiNoNameTemplate->bdApi_getRequiredExternalsByContext($tagContext);
-                return $this->_bdApi_renderCHR($rendered, $requiredExternals);
-            }
+        if ($this->_bdApiTagCount === $tagCount && preg_match($this->_bdApiMediaHtmlTagsRegEx, $rendered)) {
+            $requiredExternals = $this->_bdApiNoNameTemplate->bdApi_getRequiredExternalsByContext($tagContext);
+            return $this->_bdApi_renderCHR($rendered, $requiredExternals);
         }
 
         return $rendered;
@@ -119,7 +106,12 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
             $label = md5($html);
         }
 
-        return sprintf('<a %s href="%s">%s</a>', $attributes, htmlentities($href), $label);
+        return sprintf(
+            "<div style=\"text-align: center\"><a %s href=\"%s\">%s</a></div><br />\n",
+            $attributes,
+            htmlentities($href),
+            $label
+        );
     }
 
     protected function _getMediaSiteHtmlFromCallback($mediaKey, array $site, $siteId)
