@@ -18,6 +18,17 @@ class bdApi_Data_Helper_Message
             }
         }
 
+        if (isset($bbCodeOptions['states'])) {
+            $bbCodeOptions['states'] = array();
+        }
+        $statesRef =& $bbCodeOptions['states'];
+        if (!isset($statesRef['lightBox'])) {
+            $statesRef['lightBox'] = false;
+        }
+        if (!isset($statesRef['shortenUrl'])) {
+            $statesRef['shortenUrl'] = false;
+        }
+
         return XenForo_ViewPublic_Helper_Message::getBbCodeWrapper($message, $bbCodeParser, $bbCodeOptions);
     }
 

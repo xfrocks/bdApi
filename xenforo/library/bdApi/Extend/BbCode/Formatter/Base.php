@@ -26,6 +26,10 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
     /** @var int */
     protected $_bdApiTagCount = 0;
 
+    protected $_smilieTemplate = '<span class="smilie" data-image-url="%1$s" data-title="%3$s">%2$s</span>';
+
+    protected $_smilieSpriteTemplate = '<span class="smilie" data-title="%3$s">%2$s</span>';
+
     public function renderValidTag(array $tagInfo, array $tag, array $rendererStates)
     {
         if ($this->_bdApiChr === null) {
