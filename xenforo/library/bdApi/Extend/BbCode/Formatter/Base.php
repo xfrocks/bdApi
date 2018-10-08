@@ -22,7 +22,7 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
 
     public function renderValidTag(array $tagInfo, array $tag, array $rendererStates)
     {
-        if ($this->_bdApiChr === null) {
+        if ($this->_bdApiChr === null || $this->_bdApiNoNameTemplate === null) {
             return parent::renderValidTag($tagInfo, $tag, $rendererStates);
         }
 
