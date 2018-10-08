@@ -33,21 +33,23 @@ class OttTest extends ApiTestCase
     protected function requestActiveOttToken($userId)
     {
         $timestamp = time() + 5 * 30;
-        $accessToken = ($userId > 0) ? self::$accessToken : __METHOD__;
+        $accessToken = ($userId > 0) ? self::$accessToken : '';
         $client = $this->dataApiClient();
 
         $once = md5($userId . $timestamp . $accessToken . $client['client_secret']);
         $ott = sprintf('%d,%d,%s,%s', $userId, $timestamp, $once, $client['client_id']);
 
-        $json = $this->httpRequestJson('GET', 'index', [
+        $defaultUserId = $this->dataUser()['user_id'];
+
+        $json = $this->httpRequestJson('GET', 'users/' . ($userId > 0 ? $userId : $defaultUserId), [
             'query' => [
                 'oauth_token' => $ott
             ]
         ]);
 
-        $this->assertArrayHasKey('links', $json);
+        $this->assertArrayHasKey('user', $json);
         if ($userId > 0) {
-            $this->assertArrayHasKey('conversations', $json['links']);
+            $this->assertArrayHasKey('user_email', $json['user']);
         }
     }
 }
