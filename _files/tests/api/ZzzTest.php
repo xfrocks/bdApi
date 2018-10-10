@@ -57,4 +57,35 @@ class ZzzTest extends ApiTestCase
 
         $this->assertEquals(200, static::httpLatestResponse()->getStatusCode());
     }
+
+    public function testOttWithGuest()
+    {
+        $this->requestActiveOttToken(0);
+    }
+
+    public function testOttWithUser()
+    {
+        $user = $this->dataUser();
+        $this->requestActiveOttToken($user['user_id']);
+    }
+
+    protected function requestActiveOttToken($userId)
+    {
+        $timestamp = time() + 5 * 30;
+        $accessToken = ($userId > 0) ? self::$accessToken : '';
+        $client = $this->dataApiClient();
+        $forum = $this->dataForum();
+
+        $once = md5($userId . $timestamp . $accessToken . $client['client_secret']);
+        $ott = sprintf('%d,%d,%s,%s', $userId, $timestamp, $once, $client['client_id']);
+
+        $json = $this->httpRequestJson('GET', 'threads', [
+            'query' => [
+                'oauth_token' => $ott,
+                'forum_id' => ($userId > 0) ? $forum['node_id'] : 0
+            ]
+        ]);
+
+        $this->assertArrayHasKey('threads', $json);
+    }
 }
