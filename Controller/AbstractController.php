@@ -102,6 +102,16 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         }
     }
 
+    protected function assertValidToken()
+    {
+        $session = $this->session();
+        $token = $session->getTokenText();
+
+        if (empty($token)) {
+            throw $this->exception($this->noPermission());
+        }
+    }
+
     /**
      * @param string $link
      * @param mixed $data

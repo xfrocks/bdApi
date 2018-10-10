@@ -46,6 +46,10 @@ class Thread extends AbstractController
             return $this->actionMultiple($threadIds);
         }
 
+        if ($params['forum_id'] < 1) {
+            $this->assertValidToken();
+        }
+
         /** @var \XF\Finder\Thread $finder */
         $finder = $this->finder('XF:Thread');
         $this->applyFilters($finder, $params);
