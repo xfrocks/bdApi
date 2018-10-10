@@ -35,21 +35,18 @@ class OttTest extends ApiTestCase
         $timestamp = time() + 5 * 30;
         $accessToken = ($userId > 0) ? self::$accessToken : '';
         $client = $this->dataApiClient();
+        $forum = $this->dataForum();
 
         $once = md5($userId . $timestamp . $accessToken . $client['client_secret']);
         $ott = sprintf('%d,%d,%s,%s', $userId, $timestamp, $once, $client['client_id']);
 
-        $defaultUserId = $this->dataUser()['user_id'];
-
-        $json = $this->httpRequestJson('GET', 'users/' . ($userId > 0 ? $userId : $defaultUserId), [
+        $json = $this->httpRequestJson('GET', 'threads', [
             'query' => [
-                'oauth_token' => $ott
+                'oauth_token' => $ott,
+                'forum_id' => ($userId > 0) ? $forum['node_id'] : 0
             ]
         ]);
 
-        $this->assertArrayHasKey('user', $json);
-        if ($userId > 0) {
-            $this->assertArrayHasKey('user_email', $json['user']);
-        }
+        $this->assertArrayHasKey('threads', $json);
     }
 }
