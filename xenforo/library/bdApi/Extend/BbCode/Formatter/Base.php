@@ -4,7 +4,7 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
 {
     CONST CHR_HEADER_VALUE_EXCEPT_YOUTUBE = '!youtube';
 
-    /** @var null|null */
+    /** @var array|null */
     protected $_bdApiChr = null;
 
     /** @var string */
@@ -16,9 +16,35 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
     /** @var int */
     protected $_bdApiTagCount = 0;
 
+    /** @var array|null */
+    protected $_bdApiTagMediaInfo = null;
+
     protected $_smilieTemplate = '<span class="smilie" data-image-url="%1$s" data-title="%3$s">%2$s</span>';
 
     protected $_smilieSpriteTemplate = '<span class="smilie" data-title="%3$s">%2$s</span>';
+
+    public function renderTagMedia(array $tag, array $rendererStates)
+    {
+        $this->_bdApiTagMediaInfo = null;
+
+        $rendered = parent::renderTagMedia($tag, $rendererStates);
+
+        if ($this->_bdApiChr !== null && is_array($this->_bdApiTagMediaInfo)) {
+            $mediaKey = $this->_bdApiTagMediaInfo['mediaKey'];
+            $siteId = $this->_bdApiTagMediaInfo['siteId'];
+            switch ($siteId) {
+                case 'youtube':
+                    $rendered = str_replace(
+                        '<iframe ',
+                        "<iframe data-chr-thumbnail=\"https://img.youtube.com/vi/$mediaKey/0.jpg\" ",
+                        $rendered
+                    );
+                    break;
+            }
+        }
+
+        return $rendered;
+    }
 
     public function renderValidTag(array $tagInfo, array $tag, array $rendererStates)
     {
@@ -116,6 +142,8 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
 
     protected function _getMediaSiteHtmlFromCallback($mediaKey, array $site, $siteId)
     {
+        $this->_bdApiTagMediaInfo = array('mediaKey' => $mediaKey, 'siteId' => $siteId);
+
         if ($this->_bdApiChr !== null &&
             $siteId === 'youtube' &&
             in_array(self::CHR_HEADER_VALUE_EXCEPT_YOUTUBE, $this->_bdApiChr)
