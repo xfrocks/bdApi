@@ -92,10 +92,21 @@ class LazyTransformer implements \JsonSerializable
             case 'entity':
                 /** @var Entity $entity */
                 $entity = $this->source;
+                if (is_string($entity->structure()->primaryKey)) {
+                    $entityId = $entity->getEntityId();
+                } else {
+                    $entityId = [];
+                    foreach ($entity->structure()->primaryKey as $primaryKey) {
+                        $entityId[] = $entity->getValue($primaryKey);
+                    }
+
+                    $entityId = implode('-', $entityId);
+                }
+                
                 return sprintf(
-                    'LazyTransformer(%s@%d)',
+                    'LazyTransformer(%s@%s)',
                     \XF::stringToClass($entity->structure()->shortName, '%s\Entity\%s'),
-                    $entity->getEntityId()
+                    $entityId
                 );
             case 'finder':
                 /** @var Finder $finder */
