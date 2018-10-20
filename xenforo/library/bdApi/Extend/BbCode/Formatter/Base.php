@@ -56,7 +56,7 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
         $tagCount = $this->_bdApiTagCount;
         $tagContext = md5($tagCount . rand());
         $this->_bdApiNoNameTemplate->bdApi_setRequiredExternalContext($tagContext);
-        $rendered = utf8_trim(parent::renderValidTag($tagInfo, $tag, $rendererStates));
+        $rendered = parent::renderValidTag($tagInfo, $tag, $rendererStates);
 
         if ($this->_bdApiTagCount === $tagCount && preg_match($this->_bdApiMediaHtmlTagsRegEx, $rendered)) {
             $requiredExternals = $this->_bdApiNoNameTemplate->bdApi_getRequiredExternalsByContext($tagContext);
