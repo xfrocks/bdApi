@@ -50,7 +50,10 @@ class bdApi_Data_Helper_Batch
         $fc = self::getFc();
 
         $requestUri = bdApi_Data_Helper_Core::safeConvertApiUriToAbsoluteUri($uri, true);
+
+        $getBackup = $_GET;
         $request = new bdApi_Zend_Controller_Request_Http($requestUri);
+        $_GET = $getBackup;
         $request->setMethod($method);
 
         /** @var XenForo_Controller $latestController */
