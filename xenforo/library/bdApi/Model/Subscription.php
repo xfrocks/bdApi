@@ -133,6 +133,11 @@ class bdApi_Model_Subscription extends XenForo_Model
         $pingQueueModel = $this->getModelFromCache('bdApi_Model_PingQueue');
 
         foreach ($option['subscriptions'] as $subscription) {
+            if (!isset($subscription['subscription_id']) || !isset($subscription['expire_date'])) {
+                // bad subscription data, do not continue
+                continue;
+            }
+
             if ($subscription['expire_date'] > 0
                 && $subscription['expire_date'] < XenForo_Application::$time
             ) {
@@ -141,6 +146,7 @@ class bdApi_Model_Subscription extends XenForo_Model
             }
 
             $pingData = array(
+                'subscription_id' => $subscription['subscription_id'],
                 'client_id' => $subscription['client_id'],
                 'topic' => $option['topic'],
                 'action' => $action,
