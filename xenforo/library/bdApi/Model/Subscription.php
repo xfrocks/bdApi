@@ -129,8 +129,6 @@ class bdApi_Model_Subscription extends XenForo_Model
             return false;
         }
 
-        $pingedClientIds = array();
-
         /* @var $pingQueueModel bdApi_Model_PingQueue */
         $pingQueueModel = $this->getModelFromCache('bdApi_Model_PingQueue');
 
@@ -141,12 +139,6 @@ class bdApi_Model_Subscription extends XenForo_Model
                 // expired
                 continue;
             }
-
-            if (in_array($subscription['client_id'], $pingedClientIds, true)) {
-                // duplicated subscription
-                continue;
-            }
-            $pingedClientIds[] = $subscription['client_id'];
 
             $pingData = array(
                 'client_id' => $subscription['client_id'],
