@@ -196,7 +196,9 @@ class bdApi_Model_Subscription extends XenForo_Model
         $alerts = array();
         foreach ($pingDataMany as $key => &$pingDataRef) {
             if (is_numeric($pingDataRef['object_data'])) {
-                $alertIds[] = $pingDataRef['object_data'];
+                if ($pingDataRef['object_data'] > 0) {
+                    $alertIds[] = $pingDataRef['object_data'];
+                }
             } elseif (is_array($pingDataRef['object_data'])
                 && isset($pingDataRef['object_data']['alert_id'])
                 && $pingDataRef['object_data']['alert_id'] == 0
@@ -254,8 +256,11 @@ class bdApi_Model_Subscription extends XenForo_Model
         foreach (array_keys($pingDataMany) as $pingDataKey) {
             $pingDataRef = &$pingDataMany[$pingDataKey];
 
-            if (empty($pingDataRef['object_data'])) {
-                // no alert is attached to object data
+            if ($pingDataRef['object_data'] === 0) {
+                // read action
+                $pingDataRef['object_data'] = array(
+                    'user_unread_notification_count' => 0,
+                );
                 continue;
             }
 
