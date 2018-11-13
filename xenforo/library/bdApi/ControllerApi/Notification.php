@@ -137,6 +137,12 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
                             return $this->responseReroute('bdApi_ControllerApi_Tool', 'get-parse-link');
                         }
                         break;
+                    case 'from_admin':
+                        $extra = @unserialize($alert['extra_data']);
+                        if (!empty($extra['link_url'])) {
+                            $this->_request->setParam('link', $extra['link_url']);
+                            return $this->responseReroute('bdApi_ControllerApi_Tool', 'get-parse-link');
+                        }
                 }
                 $this->_request->setParam('user_id', $alert['content_id']);
                 return $this->responseReroute('bdApi_ControllerApi_User', 'get-index');
