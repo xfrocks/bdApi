@@ -4,7 +4,6 @@ namespace Xfrocks\Api\Transform;
 
 use XF\App;
 use XF\Mvc\Entity\AbstractCollection;
-use XF\Mvc\Entity\ArrayCollection;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
 use Xfrocks\Api\Transformer;
@@ -208,7 +207,7 @@ abstract class AbstractHandler
 
     /**
      * @param TransformContext $context
-     * @param Entity[]|ArrayCollection $entities
+     * @param Entity[]|AbstractCollection $entities
      * @param string|null $contextKey
      * @param string $relationKey
      */
