@@ -3,6 +3,8 @@
 namespace Xfrocks\Api\Transform;
 
 use XF\App;
+use XF\Mvc\Entity\AbstractCollection;
+use XF\Mvc\Entity\ArrayCollection;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
 use Xfrocks\Api\Transformer;
@@ -206,13 +208,22 @@ abstract class AbstractHandler
 
     /**
      * @param TransformContext $context
-     * @param Entity[] $entities
+     * @param Entity[]|ArrayCollection $entities
      * @param string|null $contextKey
      * @param string $relationKey
      */
     protected function callOnTransformEntitiesForRelation($context, $entities, $contextKey, $relationKey)
     {
-        $entity = reset($entities);
+        if ($entities instanceof AbstractCollection) {
+            if (!$entities->count()) {
+                return;
+            }
+
+            $entity = $entities->first();
+        } else {
+            $entity = reset($entities);
+        }
+
         if ($entity === false) {
             return;
         }
