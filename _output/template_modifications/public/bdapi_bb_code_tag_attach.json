@@ -1,7 +1,7 @@
 {
     "template": "bb_code_tag_attach",
     "description": "Use api link for attachment data.",
-    "execution_order": 10,
+    "execution_order": 9000,
     "enabled": true,
     "action": "preg_replace",
     "find": "#\\A.+\\z#s",
