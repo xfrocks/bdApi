@@ -557,6 +557,7 @@ Parameters:
  * `page` (_optional_): page number of threads.
  * `limit` (_optional_): number of threads in a page. Default value depends on the system configuration.
  * `order` (_optional_): ordering of threads. Support `natural`, `thread_create_date`, `thread_create_date_reverse`, `thread_update_date`, `thread_update_date_reverse`, `thread_view_count` (since forum-2014011801), `thread_view_count_reverse` (since forum-2014011801), `thread_post_count` (since forum-2014011801), `thread_post_count_reverse` (since forum-2014011801).
+ * `thread_create_date` (_optional_): filter thread by date, only works with `thread_create_date`, `thread_create_date_reverse` ordering. Since forum-2018112401.
  * `thread_update_date` (_optional_): filter thread by date, only works with `thread_update_date`, `thread_update_date_reverse` ordering. Since forum-2018083101.
 
 Required scopes:
