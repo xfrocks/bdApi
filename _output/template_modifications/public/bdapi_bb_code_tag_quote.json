@@ -1,0 +1,9 @@
+{
+    "template": "bb_code_tag_quote",
+    "description": "Remove click to expand element",
+    "execution_order": 10,
+    "enabled": true,
+    "action": "str_replace",
+    "find": "<div class=\"bbCodeBlock-expandLink\"><a>{{ phrase('click_to_expand') }}</a></div>",
+    "replace": "<xf:if is=\"!$xf.isApi\">$0</xf:if>"
+}
