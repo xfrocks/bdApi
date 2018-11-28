@@ -627,9 +627,14 @@ class bdApi_Model_Subscription extends XenForo_Model
             }
         }
 
+        $orderBy = $this->getOrderByClause(array(
+            'subscription_id' => 'subscription.subscription_id',
+        ), $fetchOptions);
+
         return array(
             'selectFields' => $selectFields,
-            'joinTables' => $joinTables
+            'joinTables' => $joinTables,
+            'orderBy' => $orderBy,
         );
     }
 
