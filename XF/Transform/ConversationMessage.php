@@ -159,13 +159,19 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
     {
         /** @var \XF\Entity\ConversationMessage $message */
         $message = $context->getSource();
+        /** @var \XF\Entity\User|null $user */
+        $user = $message->User;
+
         $links = [
             self::LINK_DETAIL => $this->buildApiLink('conversation-messages', $message),
             self::LINK_CONVERSATION => $this->buildApiLink('conversations', $message->Conversation),
-            self::LINK_CREATOR => $this->buildApiLink('users', $message->User),
-            self::LINK_CREATOR_AVATAR => $message->User->getAvatarUrl('l'),
             self::LINK_REPORT => $this->buildApiLink('conversation-messages/report', $message)
         ];
+
+        if ($user) {
+            $links[self::LINK_CREATOR] = $this->buildApiLink('users', $user);
+            $links[self::LINK_CREATOR_AVATAR] = $user->getAvatarUrl('l');
+        }
 
         return $links;
     }

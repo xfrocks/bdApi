@@ -76,18 +76,23 @@ class ProfilePost extends AbstractHandler
     {
         /** @var \XF\Entity\ProfilePost $profilePost */
         $profilePost = $context->getSource();
+        /** @var \XF\Entity\User|null $user */
+        $user = $profilePost->User;
 
         $links = [
             self::LINK_PERMALINK => $this->buildPublicLink('profile-posts', $profilePost),
             self::LINK_DETAIL => $this->buildApiLink('profile-posts', $profilePost),
             self::LINK_TIMELINE => $this->buildApiLink('users/timeline', $profilePost->ProfileUser),
             self::LINK_TIMELINE_USER => $this->buildApiLink('users', $profilePost->ProfileUser),
-            self::LINK_POSTER => $this->buildApiLink('users', $profilePost->User),
             self::LINK_LIKES => $this->buildApiLink('profile-posts/likes', $profilePost),
             self::LINK_COMMENTS => $this->buildApiLink('profile-posts/comments', $profilePost),
             self::LINK_REPORT => $this->buildApiLink('profile-posts/report', $profilePost),
-            self::LINK_POSTER_AVATAR => $profilePost->User->getAvatarUrl('m')
         ];
+
+        if ($user) {
+            $links[self::LINK_POSTER] = $this->buildApiLink('users', $user);
+            $links[self::LINK_POSTER_AVATAR] = $user->getAvatarUrl('m');
+        }
 
         return $links;
     }
