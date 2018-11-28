@@ -223,10 +223,10 @@ class OAuth2 extends AbstractController
         $response->header('X-Api-Tfa-Providers', implode(', ', array_keys($providers)));
 
         $tfaProvider = $params['tfa_provider'];
-        if (strlen($tfaProvider) === 0) {
+        if (!isset($providers[$tfaProvider])) {
             throw $this->errorException(\XF::phrase('two_step_verification_required'), 202);
         }
-
+        
         /** @var \XF\Service\User\Tfa $tfaService */
         $tfaService = $this->service('XF:User\Tfa', $user);
 
