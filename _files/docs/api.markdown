@@ -2425,6 +2425,65 @@ Required scopes:
 
  * `post`
 
+### GET `/conversation-messages/:messageId/likes`
+Get all likes of message. Since forum-2018112900
+
+```
+{
+    users: [
+        {
+            user_id: (int),
+            username: (string)
+        },
+        ...
+    ]
+}
+```
+
+Parameters:
+
+* N/A
+
+Required scopes:
+
+* `read`
+
+### POST `/conversation-messages/:messageId/likes`
+Like a message
+```
+{
+    status: "ok",
+    message: "Changes Saved"
+}
+```
+
+Parameters:
+
+* N/A
+
+Required scopes:
+
+* `post`
+
+### DELETE `/conversation-messages/:messageId/likes`
+Unlike a message
+
+```
+{
+    status: "ok",
+    message: "Changes Saved"
+}
+```
+
+Parameters:
+
+* N/A
+
+Required scopes:
+
+* `post`
+
+
 ## Notifications
 
 ### GET `/notifications`
