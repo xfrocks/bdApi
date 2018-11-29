@@ -19,11 +19,6 @@
         "version_string": "2.0.0 Alpha 5",
         "hash": "fcaa4500cbacc33f1a01cf5a82bc0359"
     },
-    "admin/bdapi_log_list.html": {
-        "version_id": 2000015,
-        "version_string": "2.0.0 Alpha 5",
-        "hash": "222cf5ecb3b537be537047bd207050a0"
-    },
     "admin/bdapi_log_view.html": {
         "version_id": 2000015,
         "version_string": "2.0.0 Alpha 5",

@@ -4,6 +4,7 @@ namespace Xfrocks\Api\XF\Transform;
 
 use XF\Entity\ConversationMaster;
 use XF\Entity\UserProfile;
+use XF\Repository\UserFollow;
 use XF\Repository\UserGroup;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Transform\AbstractHandler;
@@ -23,6 +24,8 @@ class User extends AbstractHandler
     const DYNAMIC_KEY_EMAIL = 'user_email';
     const DYNAMIC_KEY_EXTERNAL_AUTHS = 'user_external_authentications';
     const DYNAMIC_KEY_FIELDS = 'fields';
+    const DYNAMIC_KEY_FOLLOWERS_TOTAL = 'user_followers_total';
+    const DYNAMIC_KEY_FOLLOWINGS_TOTAL = 'user_followings_total';
     const DYNAMIC_KEY_GROUPS = 'user_groups';
     const DYNAMIC_KEY_GROUPS__IS_PRIMARY = 'is_primary_group';
     const DYNAMIC_KEY_HAS_PASSWORD = 'user_has_password';
@@ -101,6 +104,22 @@ class User extends AbstractHandler
                 return $this->collectExternalAuths($context);
             case self::DYNAMIC_KEY_FIELDS:
                 return $this->collectFields();
+            case self::DYNAMIC_KEY_FOLLOWERS_TOTAL:
+                if (!$context->selectorShouldIncludeField($key)) {
+                    return null;
+                }
+
+                /** @var UserFollow $userFollowRepo */
+                $userFollowRepo = $this->app->repository('XF:UserFollow');
+                return $userFollowRepo->findFollowersForProfile($user)->total();
+            case self::DYNAMIC_KEY_FOLLOWINGS_TOTAL:
+                if (!$context->selectorShouldIncludeField($key)) {
+                    return null;
+                }
+                
+                /** @var UserFollow $userFollowRepo */
+                $userFollowRepo = $this->app->repository('XF:UserFollow');
+                return $userFollowRepo->findFollowingForProfile($user)->total();
             case self::DYNAMIC_KEY_GROUPS:
                 return $this->collectGroups($context, $key);
             case self::DYNAMIC_KEY_HAS_PASSWORD:
@@ -212,6 +231,8 @@ class User extends AbstractHandler
             self::DYNAMIC_KEY_EMAIL,
             self::DYNAMIC_KEY_EXTERNAL_AUTHS,
             self::DYNAMIC_KEY_FIELDS,
+            self::DYNAMIC_KEY_FOLLOWERS_TOTAL,
+            self::DYNAMIC_KEY_FOLLOWINGS_TOTAL,
             self::DYNAMIC_KEY_GROUPS,
             self::DYNAMIC_KEY_HAS_PASSWORD,
             self::DYNAMIC_KEY_IS_FOLLOWED,
@@ -225,7 +246,7 @@ class User extends AbstractHandler
             self::DYNAMIC_KEY_TIMEZONE_OFFSET,
             self::DYNAMIC_KEY_TITLE,
             self::DYNAMIC_KEY_UNREAD_CONVO_COUNT,
-            self::DYNAMIC_KEY_UNREAD_NOTIF_COUNT,
+            self::DYNAMIC_KEY_UNREAD_NOTIF_COUNT
         ];
 
         return $mappings;

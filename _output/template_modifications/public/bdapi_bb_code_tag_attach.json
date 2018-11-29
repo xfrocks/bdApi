@@ -1,9 +1,9 @@
 {
     "template": "bb_code_tag_attach",
     "description": "Use api link for attachment data.",
-    "execution_order": 10,
+    "execution_order": 9999,
     "enabled": true,
     "action": "preg_replace",
     "find": "#\\A.+\\z#s",
-    "replace": "{{ $xf.isApi }}\n<xf:if is=\"$xf.isApi && $attachment && $canView && $full\">\n\t<img src=\"{{ link_type('api', 'attachments', $attachment, {'hash': $attachment.temp_hash}) }}\"\n\t\t alt=\"{$attachment.filename}\"\n\t\t data-permalink=\"{{ link('full:attachments', $attachment, {'hash': $attachment.temp_hash}) }}\" />\n<xf:else/>\n$0\n</xf:if>"
+    "replace": "<xf:if is=\"$xf.isApi && $attachment && $canView && $attachment.Data.height && $attachment.Data.width && $full\">\n\t<img src=\"{{ link_type('api', 'attachments', $attachment, {'hash': $attachment.temp_hash}) }}\"\n\t\t alt=\"{$attachment.filename}\"\n\t\t data-height=\"{$attachment.Data.height}\"\n\t\t data-permalink=\"{{ link('full:attachments', $attachment, {'hash': $attachment.temp_hash}) }}\"\n\t\t data-width=\"{$attachment.Data.width}\" />\n<xf:else/>\n$0\n</xf:if>"
 }

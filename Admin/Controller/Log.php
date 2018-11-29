@@ -2,34 +2,47 @@
 
 namespace Xfrocks\Api\Admin\Controller;
 
-use XF\Admin\Controller\AbstractController;
 use XF\Mvc\ParameterBag;
 
-class Log extends AbstractController
+class Log extends Entity
 {
-    public function actionIndex(ParameterBag $paramBag)
+    protected function getShortName()
     {
-        if ($paramBag->log_id) {
-            return $this->rerouteController(__CLASS__, 'view', $paramBag);
+        return 'Xfrocks\Api:Log';
+    }
+
+    protected function getPrefixForPhrases()
+    {
+        return 'bdapi_log';
+    }
+
+    protected function getRoutePrefix()
+    {
+        return 'api-logs';
+    }
+
+    protected function supportsAdding()
+    {
+        return false;
+    }
+
+    protected function supportsEditing()
+    {
+        return false;
+    }
+
+    protected function supportsViewing()
+    {
+        return true;
+    }
+
+    public function getEntityExplain($entity)
+    {
+        if (!($entity instanceof \Xfrocks\Api\Entity\Log)) {
+            return parent::getEntityExplain($entity);
         }
 
-        $finder = $this->finder('Xfrocks\Api:Log');
-        $finder->with('User');
-        $finder->order('request_date', 'DESC');
-
-        $page = $this->filterPage();
-        $perPage = 20;
-
-        $total = $finder->total();
-
-        $this->assertValidPage($page, $perPage, $total, 'api-logs');
-
-        return $this->view('Xfrocks\Api:Logs\Index', 'bdapi_log_list', [
-            'total' => $total,
-            'page' => $page,
-            'perPage' => $perPage,
-            'logs' => $finder->fetch()
-        ]);
+        return sprintf('%s - %s', $entity->client_id, $entity->ip_address);
     }
 
     public function actionView(ParameterBag $paramBag)

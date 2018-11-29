@@ -161,6 +161,18 @@
         "version_string": "2.0.0 Alpha 4",
         "hash": "7d19af7a3995fc262806c4037a19e452"
     },
+    "bdapi_log_entities.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "b2d37ae1cedf42ff874289b721860af2"
+    },
+    "bdapi_log_entity.txt": {
+        "global_cache": false,
+        "version_id": 2000015,
+        "version_string": "2.0.0 Alpha 5",
+        "hash": "ce0be71e33226e4c1db2bcea5959f16b"
+    },
     "bdapi_log_entry.txt": {
         "global_cache": false,
         "version_id": 2000015,
@@ -208,12 +220,6 @@
         "version_id": 2000015,
         "version_string": "2.0.0 Alpha 5",
         "hash": "15c25a7f3e8605e0bd46c0616c7d7727"
-    },
-    "bdapi_logs.txt": {
-        "global_cache": false,
-        "version_id": 2000015,
-        "version_string": "2.0.0 Alpha 5",
-        "hash": "b2d37ae1cedf42ff874289b721860af2"
     },
     "bdapi_no_facebook_association_found.txt": {
         "global_cache": false,

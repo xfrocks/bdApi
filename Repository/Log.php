@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Repository;
 
 use XF\Mvc\Entity\Repository;
+use Xfrocks\Api\Transform\LazyTransformer;
 use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class Log extends Repository
@@ -80,29 +81,12 @@ class Log extends Repository
     {
         $filtered = array();
 
-        $i = 0;
         foreach ($data as $key => &$value) {
             $keyFirstChar = substr($key, 0, 1);
             if ($keyFirstChar === '.'
                 || $keyFirstChar === '_'
             ) {
                 continue;
-            }
-
-            $i++;
-            if ($i === 2) {
-                // only expand the first item in a pure array
-                $keys = array_keys($data);
-                $isNotNumeric = false;
-                foreach ($keys as $_key) {
-                    if (!is_numeric($_key)) {
-                        $isNotNumeric = true;
-                    }
-                }
-                if (!$isNotNumeric) {
-                    $filtered['...'] = count($keys);
-                    return $filtered;
-                }
             }
 
             if (is_array($value)) {
@@ -117,14 +101,9 @@ class Log extends Repository
                 } elseif (is_numeric($value)) {
                     $filtered[$key] = $value;
                 } elseif (is_string($value)) {
-                    if (strlen($value) > 0) {
-                        $maxLength = 32;
-                        if (utf8_strlen($value) > $maxLength) {
-                            $filtered[$key] = utf8_substr($value, 0, $maxLength - 1) . '…';
-                        } else {
-                            $filtered[$key] = $value;
-                        }
-                    }
+                    $filtered[$key] = $value;
+                } elseif ($value instanceof LazyTransformer) {
+                    $filtered[$key] = $value->getLogData();
                 } else {
                     $filtered[$key] = '?';
                 }
