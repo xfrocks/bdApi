@@ -2284,6 +2284,7 @@ Detail information of a message.
             creator_username: (string),
             user_is_ignored: (boolean), # since forum-2015072304
             message_create_date: (unix timestamp in seconds),
+            message_is_liked: (boolean), # since forum-2018112900
             message_body: (string),
             message_body_html: (string),
             message_body_plain_text: (string),
@@ -2323,7 +2324,8 @@ Detail information of a message.
                 delete: (boolean),
                 reply: (boolean),
                 upload_attachment: (boolean), # since forum-2014081801
-                report: (uri) # since forum-2015081101
+                report: (uri) # since forum-2015081101,
+                like: (boolean) # since forum-2018112900
             }
         }
     }
