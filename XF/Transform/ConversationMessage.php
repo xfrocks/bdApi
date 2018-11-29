@@ -22,6 +22,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
     const DYNAMIC_KEY_BODY = 'message_body';
     const DYNAMIC_KEY_BODY_HTML = 'message_body_html';
     const DYNAMIC_KEY_BODY_PLAIN = 'message_body_plain_text';
+    const DYNAMIC_KEY_IS_LIKED = 'message_is_liked';
     const DYNAMIC_KEY_SIGNATURE = 'signature';
     const DYNAMIC_KEY_SIGNATURE_HTML = 'signature_html';
     const DYNAMIC_KEY_SIGNATURE_PLAIN = 'signature_plain_text';
@@ -112,6 +113,8 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
                 return $this->renderBbCodeHtml($key, $message->message, $message);
             case self::DYNAMIC_KEY_BODY_PLAIN:
                 return $this->renderBbCodePlainText($message->message);
+            case self::DYNAMIC_KEY_IS_LIKED:
+                return $message->isLiked();
             case self::DYNAMIC_KEY_SIGNATURE:
                 if ($message->user_id < 1) {
                     return null;
@@ -189,7 +192,9 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
             self::PERM_DELETE => true,
 
             self::PERM_REPLY => $message->Conversation->canReply(),
-            self::PERM_UPLOAD_ATTACHMENT => $message->Conversation->canUploadAndManageAttachments()
+            self::PERM_UPLOAD_ATTACHMENT => $message->Conversation->canUploadAndManageAttachments(),
+            
+            self::PERM_LIKE => $message->canLike()
         ];
 
         return $perms;
