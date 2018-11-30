@@ -58,6 +58,8 @@ class ProfilePostComment extends AbstractHandler
     {
         /** @var \XF\Entity\ProfilePostComment $comment */
         $comment = $context->getSource();
+        /** @var \XF\Entity\User|null $user */
+        $user = $comment->User;
 
         $links = [
             self::LINK_DETAIL => $this->buildApiLink('profile-posts/comments', $comment->ProfilePost, [
@@ -65,10 +67,13 @@ class ProfilePostComment extends AbstractHandler
             ]),
             self::LINK_PROFILE_POST => $this->buildApiLink('profile-posts', $comment->ProfilePost),
             self::LINK_TIMELINE => $this->buildApiLink('users/timeline', $comment->ProfilePost->ProfileUser),
-            self::LINK_TIMELINE_USER => $this->buildApiLink('users', $comment->ProfilePost->ProfileUser),
-            self::LINK_POSTER => $this->buildApiLink('users', $comment->User),
-            self::LINK_POSTER_AVATAR => $comment->User->getAvatarUrl('m')
+            self::LINK_TIMELINE_USER => $this->buildApiLink('users', $comment->ProfilePost->ProfileUser)
         ];
+
+        if ($user) {
+            $links[self::LINK_POSTER] = $this->buildApiLink('users', $user);
+            $links[self::LINK_POSTER_AVATAR] = $user->getAvatarUrl('m');
+        }
 
         return $links;
     }
