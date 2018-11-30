@@ -401,6 +401,12 @@
         "version_string": "2.0.0 Alpha 4",
         "hash": "30ecbbcc636d95fbfc3a13a2983074d1"
     },
+    "bdapi_slash_lost_password_requires_username_or_email.txt": {
+        "global_cache": false,
+        "version_id": 2000031,
+        "version_string": "2.0.0 Beta 1",
+        "hash": "4bd8aaee0b63c55bfdbf342746a5d67f"
+    },
     "bdapi_slash_posts_attachments_requires_ids.txt": {
         "global_cache": false,
         "version_id": 2000014,
