@@ -8,10 +8,11 @@ class LostPassword extends AbstractController
 {
     public function actionPostIndex()
     {
-        $username = $this->filter('username', 'str');
-        $email = $this->filter('email', 'str');
-        $usernameOrEmail = $username ?: $email;
+        $params = $this->params()
+            ->define('username', 'str')
+            ->define('email', 'str');
 
+        $usernameOrEmail = $params['username'] ?: $params['email'];
         if (empty($usernameOrEmail)) {
             return $this->error(\XF::phrase('bdapi_slash_lost_password_requires_username_or_email'), 400);
         }
