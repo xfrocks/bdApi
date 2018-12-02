@@ -48,6 +48,8 @@ class Album extends AbstractHandler
             'description' => self::KEY_DESCRIPTION,
             'user_id' => self::KEY_USER_ID,
             'username' => self::KEY_USERNAME,
+            'create_date' => self::KEY_CREATE_DATE,
+            'last_update_date' => self::KEY_LAST_UPDATE_DATE,
             'media_count' => self::KEY_MEDIA_COUNT,
             'likes' => self::KEY_LIKE_COUNT,
             'comment_count' => self::KEY_COMMENT_COUNT,
