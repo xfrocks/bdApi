@@ -55,6 +55,106 @@ class Media extends AbstractController
         return $this->api($data);
     }
 
+    public function actionPostIndex()
+    {
+        $params = $this
+            ->params()
+            ->define('album_id', 'uint', 'id of the target album')
+            ->define('category_id', 'uint', 'id of the target category')
+            ->define('title', 'str', 'title of the new media')
+            ->define('description', 'str', 'description of the new media')
+            ->defineAttachmentHash()
+            ->defineFile('file', 'binary data of the attachment');
+
+        if (!empty($params['album_id'])) {
+            $container = $this->assertViewableAlbum($params['album_id']);
+            $context = ['media_album_id' => $params['album_id']];
+        } else if (!empty($params['category_id'])) {
+            $container = $this->assertViewableCategory($params['category_id']);
+            $context = ['media_category_id' => $params['category_id']];
+        } else {
+            return $this->noPermission();
+        }
+
+        if (!$container->canAddMedia($error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
+        $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
+        $tempHash = $attachmentPlugin->getAttachmentTempHash($context);
+        $attachment = $attachmentPlugin->doUpload($tempHash, 'xfmg_media', $context);
+
+        /** @var \XFMG\Entity\MediaTemp $tempMedia */
+        $mediaTemp = $this->em()->findOne('XFMG:MediaTemp', ['attachment_id' => $attachment->attachment_id]);
+
+        /** @var \XFMG\Service\Media\Creator $creator */
+        $creator = $this->service('XFMG:Media\Creator', $mediaTemp);
+        $creator->setContainer($container);
+        $creator->setTitle($params['title'], $params['description']);
+        $creator->setAttachment($attachment->attachment_id, $attachment->temp_hash);
+
+        $creator->checkForSpam();
+
+        if (!$creator->validate($errors)) {
+            return $this->error($errors);
+        }
+
+        /** @var \XFMG\Entity\MediaItem $item */
+        $item = $creator->save();
+
+        // Clear entity cache
+        $this->em()->detachEntity($item);
+        $this->em()->detachEntity($attachment);
+
+        return $this->actionSingle($item->media_id);
+    }
+    /**
+     * @param int $albumId
+     * @param array $extraWith
+     * @return \XFMG\Entity\Album
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    protected function assertViewableAlbum($albumId, array $extraWith = [])
+    {
+        /** @var \XFMG\Entity\Album $album */
+        $album = $this->assertRecordExists(
+            'XFMG:Album',
+            $albumId,
+            $extraWith,
+            'xfmg_requested_album_not_found'
+        );
+
+        if (!$album->canView($error)) {
+            throw $this->exception($this->noPermission($error));
+        }
+
+        return $album;
+    }
+
+    /**
+     * @param int $categoryId
+     * @param array $extraWith
+     * @return \XFMG\Entity\Category
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    protected function assertViewableCategory($categoryId, array $extraWith = [])
+    {
+        /** @var \XFMG\Entity\Category $category */
+        $category = $this->assertRecordExists(
+            'XFMG:Category',
+            $categoryId,
+            $extraWith,
+            'xfmg_requested_category_not_found'
+        );
+
+        if (!$category->canView($error)) {
+            throw $this->exception($this->noPermission($error));
+        }
+
+        return $category;
+    }
+
     /**
      * @param int $mediaId
      * @param array $extraWith

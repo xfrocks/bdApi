@@ -45,7 +45,15 @@ class Attachment extends AbstractPlugin
         if (!$attachment) {
             throw $this->controller->exception($this->controller->noPermission($error));
         }
+        return $attachment;
+    }
 
+    public function doUploadAndRespond($hash, $contentType, $context, $formField = 'file')
+    {
+        $attachment = $this->doUpload($hash, $contentType, $context, $formField);
+
+        /** @var AbstractController $controller */
+        $controller = $this->controller;
         $lazyTransformer = $controller->transformEntityLazily($attachment);
         $lazyTransformer->addCallbackPreTransform(function ($context) use ($hash) {
             /** @var TransformContext $context */
@@ -80,6 +88,10 @@ class Attachment extends AbstractPlugin
             $prefix = sprintf('message%d', $contentData['message_id']);
         } elseif (!empty($contentData['conversation_id'])) {
             $prefix = sprintf('conversation%d', $contentData['conversation_id']);
+        } elseif (!empty($contentData['media_album_id'])) {
+            $prefix = sprintf('media_album%d', $contentData['media_album_id']);
+        } elseif (!empty($contentData['media_category_id'])) {
+            $prefix = sprintf('media_category%d', $contentData['media_category_id']);
         }
 
         /** @var Session $session */

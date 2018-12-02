@@ -203,7 +203,7 @@ class Thread extends AbstractController
         $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
         $tempHash = $attachmentPlugin->getAttachmentTempHash($context);
 
-        return $attachmentPlugin->doUpload($tempHash, 'post', $context);
+        return $attachmentPlugin->doUploadAndRespond($tempHash, 'post', $context);
     }
 
     public function actionGetFollowers(ParameterBag $params)
