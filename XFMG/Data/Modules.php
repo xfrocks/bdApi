@@ -11,12 +11,19 @@ class Modules extends XFCP_Modules
         parent::__construct();
 
         $this->addController(
+            'Xfrocks\Api\XFMG\Controller\Media',
+            'media',
+            ':int<media_id>/'
+        );
+        $this->addController(
             'Xfrocks\Api\XFMG\Controller\Album',
-            'albums',
-            ':int<album_id>/'
+            'media',
+            'albums/:int<album_id>/',
+            null,
+            'albums'
         );
 
-        $this->register('album', 2018100101);
+        $this->register('xfmg', 2018100101);
     }
 
     /**
@@ -29,7 +36,8 @@ class Modules extends XFCP_Modules
 
         $app = $controller->app();
         $apiRouter = $app->router('api');
-        $data['links']['albums'] = $apiRouter->buildLink('albums');
+        $data['links']['media'] = $apiRouter->buildLink('media');
+        $data['links']['media/albums'] = $apiRouter->buildLink('media/albums');
 
         return $data;
     }
