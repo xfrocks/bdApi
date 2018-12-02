@@ -15,12 +15,14 @@ class MediaItem extends AbstractHandler implements AttachmentParent
 {
     const ATTACHMENT__DYNAMIC_KEY_ID = 'media_id';
     const ATTACHMENT__LINK_MEDIA = 'media';
+    const ATTACHMENT__LINK_THUMBNAIL = 'thumbnail';
 
     const KEY_ID = 'media_id';
     const KEY_MEDIA_TYPE = 'media_type';
     const KEY_ALBUM_ID = 'album_id';
     const KEY_TITLE = 'title';
     const KEY_DESCRIPTION = 'description';
+    const KEY_EXIF_DATA = 'exif_data';
     const KEY_MEDIA_DATE = 'media_date';
     const KEY_LAST_EDIT_DATE = 'last_edit_date';
     const KEY_USER_ID = 'user_id';
@@ -30,6 +32,8 @@ class MediaItem extends AbstractHandler implements AttachmentParent
     const KEY_RATING_COUNT = 'rating_count';
     const KEY_RATING = 'rating';
     const KEY_COMMENT_COUNT = 'comment_count';
+
+    const LINK_ALBUM = 'album';
 
     const DYNAMIC_KEY_ATTACHMENT = 'attachment';
 
@@ -45,8 +49,10 @@ class MediaItem extends AbstractHandler implements AttachmentParent
 
     public function attachmentCollectLinks($context, array &$links)
     {
+        /** @var \XFMG\Entity\MediaItem $item */
         $item = $context->getParentSource();
         $links[self::ATTACHMENT__LINK_MEDIA] = $this->buildApiLink('media', $item);
+        $links[self::ATTACHMENT__LINK_THUMBNAIL] = $item->getCurrentThumbnailUrl();
     }
 
     public function attachmentCollectPermissions($context, array &$permissions)
@@ -80,6 +86,7 @@ class MediaItem extends AbstractHandler implements AttachmentParent
 
         $links = [
             self::LINK_PERMALINK => $this->buildPublicLink('media', $item),
+            self::LINK_ALBUM => $this->buildPublicLink('media/albums', $item),
         ];
 
         return $links;
@@ -92,6 +99,7 @@ class MediaItem extends AbstractHandler implements AttachmentParent
             'media_type' => self::KEY_MEDIA_TYPE,
             'title' => self::KEY_TITLE,
             'description' => self::KEY_DESCRIPTION,
+            'exif_data' => self::KEY_EXIF_DATA,
             'album_id' => self::KEY_ALBUM_ID,
             'user_id' => self::KEY_USER_ID,
             'username' => self::KEY_USERNAME,
