@@ -11,16 +11,16 @@ class Modules extends XFCP_Modules
         parent::__construct();
 
         $this->addController(
-            'Xfrocks\Api\XFMG\Controller\Media',
-            'media',
-            ':int<media_id>/'
-        );
-        $this->addController(
             'Xfrocks\Api\XFMG\Controller\Album',
             'media',
             'albums/:int<album_id>/',
             null,
             'albums'
+        );
+        $this->addController(
+            'Xfrocks\Api\XFMG\Controller\Media',
+            'media',
+            ':int<media_id>/'
         );
 
         $this->register('xfmg', 2018100101);
