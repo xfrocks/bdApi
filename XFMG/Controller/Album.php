@@ -57,6 +57,45 @@ class Album extends AbstractController
         return $this->api($data);
     }
 
+    public function actionPostIndex(ParameterBag $params)
+    {
+        /** @var \XFMG\XF\Entity\User $visitor */
+        $visitor = \XF::visitor();
+        if (!$visitor->canCreateAlbum())
+        {
+            return $this->noPermission();
+        }
+
+        $params = $this->defineAlbumParams()
+            ->define('category_id', 'uint', 'category of the new album')
+        ;
+
+        /** @var \XFMG\Service\Album\Creator $creator */
+        $creator = $this->service('XFMG:Album\Creator');
+
+        if (!empty($params['category_id'])) {
+            $category = $this->assertViewableCategory($params['category_id']);
+            if (!$category->canCreateAlbum())
+            {
+                return $this->noPermission();
+            }
+            $creator->setCategory($category);
+        }
+        $creator->setTitle($params['title'], $params['description']);
+        $creator->setViewPrivacy($params['view_privacy'], $params['view_users']);
+        $creator->setAddPrivacy($params['add_privacy'], $params['add_users']);
+
+        $creator->checkForSpam();
+
+        if (!$creator->validate($errors))
+        {
+            return $this->error($errors);
+        }
+        $album = $creator->save();
+
+        return $this->actionSingle($album->album_id);
+    }
+
     public function actionPutIndex(ParameterBag $params)
     {
         $album = $this->assertViewableAlbum($params->album_id);
@@ -65,14 +104,7 @@ class Album extends AbstractController
             return $this->noPermission($error);
         }
 
-        $params = $this->params()
-            ->define('title', 'str', 'new title of the album')
-            ->define('description', 'str', 'new description of the album')
-            ->define('view_privacy', 'str', 'public, members, or private', 'public')
-            ->define('view_users', 'str', 'specific users who can view this album', null)
-            ->define('add_privacy', 'str', 'public, members, or private', 'private')
-            ->define('add_users', 'str', 'specific users who can add media to this album', null)
-        ;
+        $params = $this->defineAlbumParams();
         $title = $params['title'];
         $description = $params['description'];
 
@@ -120,5 +152,40 @@ class Album extends AbstractController
         }
 
         return $album;
+    }
+
+    /**
+     * @param int $categoryId
+     * @param array $extraWith
+     * @return \XFMG\Entity\Category
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    protected function assertViewableCategory($categoryId, array $extraWith = [])
+    {
+        /** @var \XFMG\Entity\Category $category */
+        $category = $this->assertRecordExists(
+            'XFMG:Category',
+            $categoryId,
+            $extraWith,
+            'xfmg_requested_category_not_found'
+        );
+
+        if (!$category->canView($error)) {
+            throw $this->exception($this->noPermission($error));
+        }
+
+        return $category;
+    }
+
+    protected function defineAlbumParams()
+    {
+        return $this->params()
+            ->define('title', 'str', 'new title of the album')
+            ->define('description', 'str', 'new description of the album')
+            ->define('view_privacy', 'str', 'public, members, or private', 'public')
+            ->define('view_users', 'str', 'specific users who can view this album', null)
+            ->define('add_privacy', 'str', 'public, members, or private', 'private')
+            ->define('add_users', 'str', 'specific users who can add media to this album', null)
+        ;
     }
 }
