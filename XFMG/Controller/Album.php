@@ -57,6 +57,48 @@ class Album extends AbstractController
         return $this->api($data);
     }
 
+    public function actionPutIndex(ParameterBag $params)
+    {
+        $album = $this->assertViewableAlbum($params->album_id);
+        if (!$album->canEdit($error))
+        {
+            return $this->noPermission($error);
+        }
+
+        $params = $this->params()
+            ->define('title', 'str', 'new title of the album')
+            ->define('description', 'str', 'new description of the album')
+            ->define('view_privacy', 'str', 'public, members, or private', 'public')
+            ->define('view_users', 'str', 'specific users who can view this album', null)
+            ->define('add_privacy', 'str', 'public, members, or private', 'private')
+            ->define('add_users', 'str', 'specific users who can add media to this album', null)
+        ;
+        $title = $params['title'];
+        $description = $params['description'];
+
+        /** @var \XFMG\Service\Album\Editor $editor */
+        $editor = $this->service('XFMG:Album\Editor', $album);
+
+        if (!empty($title) && !empty($description)) {
+            $editor->setTitle($title, $description);
+        }
+        if ($album->canChangePrivacy())
+        {
+            $editor->setViewPrivacy($params['view_privacy'], $params['view_users']);
+            $editor->setAddPrivacy($params['add_privacy'], $params['add_users']);
+        }
+
+        $editor->checkForSpam();
+
+        if (!$editor->validate($errors))
+        {
+            return $this->error($errors);
+        }
+        $editor->save();
+
+        return $this->actionSingle($album->album_id);
+    }
+
     /**
      * @param int $albumId
      * @param array $extraWith
