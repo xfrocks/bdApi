@@ -147,8 +147,6 @@ class Album extends AbstractController
         $deleter = $this->service('XFMG:Album\Deleter', $album);
         $deleter->delete('soft');
 
-        $this->em()->detachEntity($album);
-
         return $this->actionSingle($album->album_id);
     }
 
