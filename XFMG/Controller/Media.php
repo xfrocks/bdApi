@@ -135,6 +135,21 @@ class Media extends AbstractController
         return $this->actionSingle($item->media_id);
     }
 
+    public function actionDeleteIndex(ParameterBag $params)
+    {
+        $item = $this->assertViewableItem($params->media_id);
+        if (!$item->canDelete('soft', $error))
+        {
+            return $this->noPermission($error);
+        }
+
+        /** @var \XFMG\Service\Media\Deleter $deleter */
+        $deleter = $this->service('XFMG:Media\Deleter', $item);
+        $deleter->delete('soft');
+
+        return $this->actionSingle($item->media_id);
+    }
+
     /**
      * @param int $albumId
      * @param array $extraWith
