@@ -108,6 +108,33 @@ class Media extends AbstractController
 
         return $this->actionSingle($item->media_id);
     }
+
+    public function actionPutIndex(ParameterBag $params)
+    {
+        $item = $this->assertViewableItem($params->media_id);
+        if (!$item->canEdit($error)) {
+            return $this->noPermission($error);
+        }
+
+        $params = $this->params()
+            ->define('title', 'str', 'title of the new media')
+            ->define('description', 'str', 'description of the new media');
+
+        /** @var \XFMG\Service\Media\Editor $editor */
+        $editor = $this->service('XFMG:Media\Editor', $item);
+        $editor->setTitle($params['title'], $params['description']);
+        $editor->checkForSpam();
+
+        if (!$editor->validate($errors))
+        {
+            return $this->error($errors);
+        }
+        /** @var \XFMG\Entity\MediaItem $item */
+        $item = $editor->save();
+
+        return $this->actionSingle($item->media_id);
+    }
+
     /**
      * @param int $albumId
      * @param array $extraWith
