@@ -25,11 +25,12 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
                 400
             );
         }
-        
+
         $beforeDate = $this->_input->filterSingle('before', XenForo_Input::UINT);
         $afterDate = $this->_input->filterSingle('after', XenForo_Input::UINT);
 
         $conversation = $this->_getConversationOrError($conversationId);
+        $conversationModel = $this->_getConversationModel();
 
         $pageNavParams = array('conversation_id' => $conversation['conversation_id']);
         list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
@@ -44,30 +45,40 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING, array('default' => 'natural'));
         switch ($order) {
             case 'natural_reverse':
-                // load the class to make our constant accessible
-                $this->_getConversationModel();
                 $fetchOptions[bdApi_Extend_Model_Conversation::FETCH_OPTIONS_MESSAGES_ORDER_REVERSE] = true;
                 $pageNavParams['order'] = $order;
                 break;
         }
 
-        $messages = $this->_getConversationModel()->getConversationMessages(
+        $messages = $conversationModel->getConversationMessages(
             $conversation['conversation_id'],
-            $this->_getConversationModel()->getFetchOptionsToPrepareApiDataForMessages($fetchOptions)
+            $conversationModel->getFetchOptionsToPrepareApiDataForMessages($fetchOptions)
         );
         if (!$this->_isFieldExcluded('attachments')) {
-            $messages = $this->_getConversationModel()->getAndMergeAttachmentsIntoConversationMessages($messages);
+            $messages = $conversationModel->getAndMergeAttachmentsIntoConversationMessages($messages);
         }
 
         $total = $conversation['reply_count'] + 1;
 
         $data = array(
-            'messages' => $this->_filterDataMany($this->_getConversationModel()->prepareApiDataForMessages(
+            'messages' => $this->_filterDataMany($conversationModel->prepareApiDataForMessages(
                 $messages,
                 $conversation
             )),
             'messages_total' => $total
         );
+
+        $maxMessageDate = $conversationModel->getMaximumMessageDate($messages);
+        if ($maxMessageDate > $conversation['last_read_date']
+            || ($maxMessageDate == $conversation['last_read_date'] && $conversation['is_unread'])
+        ) {
+            $conversationModel->markConversationAsRead(
+                $conversationId,
+                XenForo_Visitor::getUserId(),
+                $maxMessageDate,
+                $conversation['last_message_date']
+            );
+        }
 
         if (!$this->_isFieldExcluded('conversation')) {
             $data['conversation'] = $this->_filterDataSingle(
