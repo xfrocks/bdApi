@@ -3,8 +3,8 @@
 namespace Xfrocks\Api\XFMG\Controller;
 
 
+use AbstractController;
 use XF\Mvc\ParameterBag;
-use Xfrocks\Api\Controller\AbstractController;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
 
@@ -148,52 +148,6 @@ class Album extends AbstractController
         $deleter->delete('soft');
 
         return $this->actionSingle($album->album_id);
-    }
-
-    /**
-     * @param int $albumId
-     * @param array $extraWith
-     * @return \XFMG\Entity\Album
-     * @throws \XF\Mvc\Reply\Exception
-     */
-    protected function assertViewableAlbum($albumId, array $extraWith = [])
-    {
-        /** @var \XFMG\Entity\Album $album */
-        $album = $this->assertRecordExists(
-            'XFMG:Album',
-            $albumId,
-            $extraWith,
-            'xfmg_requested_album_not_found'
-        );
-
-        if (!$album->canView($error)) {
-            throw $this->exception($this->noPermission($error));
-        }
-
-        return $album;
-    }
-
-    /**
-     * @param int $categoryId
-     * @param array $extraWith
-     * @return \XFMG\Entity\Category
-     * @throws \XF\Mvc\Reply\Exception
-     */
-    protected function assertViewableCategory($categoryId, array $extraWith = [])
-    {
-        /** @var \XFMG\Entity\Category $category */
-        $category = $this->assertRecordExists(
-            'XFMG:Category',
-            $categoryId,
-            $extraWith,
-            'xfmg_requested_category_not_found'
-        );
-
-        if (!$category->canView($error)) {
-            throw $this->exception($this->noPermission($error));
-        }
-
-        return $category;
     }
 
     protected function defineAlbumParams()
