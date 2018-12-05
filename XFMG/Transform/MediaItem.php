@@ -36,6 +36,7 @@ class MediaItem extends AbstractHandler implements AttachmentParent
     const LINK_ALBUM = 'album';
 
     const DYNAMIC_KEY_ATTACHMENT = 'attachment';
+    const DYNAMIC_KEY_IS_LIKED = 'is_liked';
     const DYNAMIC_KEY_IS_DELETED = 'is_deleted';
 
     public function attachmentCalculateDynamicValue($context, $key)
@@ -76,6 +77,8 @@ class MediaItem extends AbstractHandler implements AttachmentParent
                 }
 
                 return $this->transformer->transformEntityRelation($context, $key, $item, 'Attachment');
+            case self::DYNAMIC_KEY_IS_LIKED:
+                return $item->isLiked();
             case self::DYNAMIC_KEY_IS_DELETED:
                 return $item->media_state == 'deleted';
         }
@@ -114,6 +117,7 @@ class MediaItem extends AbstractHandler implements AttachmentParent
             'rating_avg' => self::KEY_RATING,
 
             self::DYNAMIC_KEY_ATTACHMENT,
+            self::DYNAMIC_KEY_IS_LIKED,
             self::DYNAMIC_KEY_IS_DELETED,
         ];
     }
