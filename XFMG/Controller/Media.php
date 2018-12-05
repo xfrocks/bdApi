@@ -148,4 +148,40 @@ class Media extends AbstractController
 
         return $this->actionSingle($item->media_id);
     }
+
+    public function actionPostLikes(ParameterBag $params)
+    {
+        $item = $this->assertViewableMediaItem($params->media_id);
+        if (!$item->canLike($error)) {
+            return $this->noPermission($error);
+        }
+
+        $visitor = \XF::visitor();
+        if (empty($item->Likes[$visitor->user_id])) {
+            /** @var \XF\Repository\LikedContent $likeRepo */
+            $likeRepo = $this->repository('XF:LikedContent');
+            $contentType = $item->getEntityContentType();
+            $likeRepo->toggleLike($contentType, $item->media_id, $visitor);
+        }
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionDeleteLikes(ParameterBag $params)
+    {
+        $item = $this->assertViewableMediaItem($params->media_id);
+        if (!$item->canLike($error)) {
+            return $this->noPermission($error);
+        }
+
+        $visitor = \XF::visitor();
+        if (!empty($item->Likes[$visitor->user_id])) {
+            /** @var \XF\Repository\LikedContent $likeRepo */
+            $likeRepo = $this->repository('XF:LikedContent');
+            $contentType = $item->getEntityContentType();
+            $likeRepo->toggleLike($contentType, $item->media_id, $visitor);
+        }
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
 }
