@@ -27,6 +27,19 @@ class Album extends AbstractHandler
     const KEY_RATING = 'rating';
     const KEY_COMMENT_COUNT = 'comment_count';
 
+    const DYNAMIC_KEY_IS_DELETED = 'is_deleted';
+
+    public function calculateDynamicValue($context, $key)
+    {
+        /** @var \XFMG\Entity\Album $album */
+        $album = $context->getSource();
+        switch ($key) {
+            case self::DYNAMIC_KEY_IS_DELETED:
+                return $album->album_state == 'deleted';
+        }
+        return null;
+    }
+
     public function collectLinks($context)
     {
         /** @var \XFMG\Entity\Album $album */
@@ -55,6 +68,8 @@ class Album extends AbstractHandler
             'comment_count' => self::KEY_COMMENT_COUNT,
             'rating_count' => self::KEY_RATING_COUNT,
             'rating_avg' => self::KEY_RATING,
+
+            self::DYNAMIC_KEY_IS_DELETED,
         ];
     }
 }

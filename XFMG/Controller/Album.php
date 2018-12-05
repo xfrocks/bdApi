@@ -131,6 +131,23 @@ class Album extends AbstractController
         return $this->actionSingle($album->album_id);
     }
 
+    public function actionDeleteIndex(ParameterBag $params)
+    {
+        $album = $this->assertViewableAlbum($params->album_id);
+        if (!$album->canDelete('soft', $error))
+        {
+            return $this->noPermission($error);
+        }
+
+        /** @var \XFMG\Service\Album\Deleter $deleter */
+        $deleter = $this->service('XFMG:Album\Deleter', $album);
+        $deleter->delete('soft');
+
+        $this->em()->detachEntity($album);
+
+        return $this->actionSingle($album->album_id);
+    }
+
     /**
      * @param int $albumId
      * @param array $extraWith
