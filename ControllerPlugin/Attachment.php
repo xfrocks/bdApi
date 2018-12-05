@@ -72,10 +72,9 @@ class Attachment extends AbstractPlugin
         $params = $controller->params();
 
         $prefix = '';
-        $inputHash = $params['attachment_hash'];
 
-        if (!empty($inputHash)) {
-            $prefix = sprintf('hash%s', $inputHash);
+        if (!empty($params['attachment_hash'])) {
+            $prefix = sprintf('hash%s', $params['attachment_hash']);
         } elseif (!empty($contentData['post_id'])) {
             $prefix = sprintf('post%d', $contentData['post_id']);
         } elseif (!empty($contentData['thread_id'])) {

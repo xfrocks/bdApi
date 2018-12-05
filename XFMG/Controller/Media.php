@@ -63,7 +63,6 @@ class Media extends AbstractController
             ->define('category_id', 'uint', 'id of the target category')
             ->define('title', 'str', 'title of the new media')
             ->define('description', 'str', 'description of the new media')
-            ->defineAttachmentHash()
             ->defineFile('file', 'binary data of the attachment');
 
         if (!empty($params['album_id'])) {
