@@ -5,6 +5,7 @@ namespace Xfrocks\Api\XFMG\Controller;
 
 use XF\Mvc\ParameterBag;
 use Xfrocks\Api\Controller\AbstractController;
+use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
 
 class Album extends AbstractController
@@ -16,6 +17,8 @@ class Album extends AbstractController
         }
 
         $params = $this->params()
+            ->define('category_id', 'int', '', -1)
+            ->define('user_id', 'uint')
             ->defineOrder([
                 'natural' => ['create_date', 'asc'],
                 'natural_reverse' => ['create_date', 'desc'],
@@ -30,6 +33,7 @@ class Album extends AbstractController
 
         /** @var \XFMG\Finder\Album $finder */
         $finder = $this->finder('XFMG:Album');
+        $this->applyFilters($finder, $params);
         $params->sortFinder($finder);
         $params->limitFinderByPage($finder);
 
@@ -204,5 +208,15 @@ class Album extends AbstractController
             ->define('add_privacy', 'str', 'public, members, or private', 'private')
             ->define('add_users', 'str', 'specific users who can add media to this album', null)
         ;
+    }
+
+    protected function applyFilters(\XFMG\Finder\Album $finder, Params $params)
+    {
+        if ($params['category_id'] > -1) {
+            $finder->inCategory($params['category_id']);
+        }
+        if ($params['user_id'] > 0) {
+            $finder->byUser($params['user_id']);
+        }
     }
 }
