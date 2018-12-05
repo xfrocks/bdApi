@@ -149,6 +149,42 @@ class Album extends AbstractController
         return $this->actionSingle($album->album_id);
     }
 
+    public function actionPostLikes(ParameterBag $params)
+    {
+        $album = $this->assertViewableAlbum($params->album_id);
+        if (!$album->canLike($error)) {
+            return $this->noPermission($error);
+        }
+
+        $visitor = \XF::visitor();
+        if (empty($album->Likes[$visitor->user_id])) {
+            /** @var \XF\Repository\LikedContent $likeRepo */
+            $likeRepo = $this->repository('XF:LikedContent');
+            $contentType = $album->getEntityContentType();
+            $likeRepo->toggleLike($contentType, $album->album_id, $visitor);
+        }
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionDeleteLikes(ParameterBag $params)
+    {
+        $album = $this->assertViewableAlbum($params->album_id);
+        if (!$album->canLike($error)) {
+            return $this->noPermission($error);
+        }
+
+        $visitor = \XF::visitor();
+        if (!empty($album->Likes[$visitor->user_id])) {
+            /** @var \XF\Repository\LikedContent $likeRepo */
+            $likeRepo = $this->repository('XF:LikedContent');
+            $contentType = $album->getEntityContentType();
+            $likeRepo->toggleLike($contentType, $album->album_id, $visitor);
+        }
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
     protected function defineAlbumParams()
     {
         return $this->params()
