@@ -6,6 +6,8 @@
  * Time: 21:39
  */
 
+namespace Xfrocks\Api\XFMG\Controller;
+
 abstract class AbstractController extends \Xfrocks\Api\Controller\AbstractController
 {
     /**

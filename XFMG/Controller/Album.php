@@ -3,7 +3,6 @@
 namespace Xfrocks\Api\XFMG\Controller;
 
 
-use AbstractController;
 use XF\Mvc\ParameterBag;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
