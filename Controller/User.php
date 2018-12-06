@@ -353,15 +353,21 @@ class User extends AbstractController
 
         if (!empty($params['fields'])) {
             $inputFilter = $this->app()->inputFilterer();
-            $profileFields = $inputFilter->filterArray($params['fields'], [
+            $fields = $params['fields'];
+
+            $profileFields = $inputFilter->filterArray($fields, [
                 'about' => 'str',
                 'homepage' => 'str',
-                'location' => 'str',
-                'occupation' => 'str'
+                'location' => 'str'
             ]);
+            $fields = array_diff($fields, $profileFields);
 
-            $user->Profile->bulkSet($profileFields);
-            $user->Profile->custom_fields->bulkSet($params['fields']);
+            $user->Profile->bulkSet([
+                'about' => $profileFields['about'],
+                'website' => $profileFields['homepage'],
+                'location' => $profileFields['location']
+            ]);
+            $user->Profile->custom_fields->bulkSet($fields);
         }
 
         $user->preSave();
