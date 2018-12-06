@@ -89,9 +89,13 @@ class bdApi_DataWriter_Log extends XenForo_DataWriter
             $syslogPri = bdApi_Option::getConfig('syslogPri');
             $date = gmdate('M d H:i:s', $this->get('request_date'));
             $hostname = gethostname();
+
+            $requestData = XenForo_Helper_Php::safeUnserialize($this->get('request_data'));
+
             $syslogLine = json_encode(array(
                 'client_id' => $this->get('client_id'),
                 'ip_address' => $this->get('ip_address'),
+                'is_job' => !empty($requestData['_isApiJob']),
                 'response_code' => $this->get('response_code'),
                 'request_method' => $this->get('request_method'),
                 'request_uri' => $this->get('request_uri'),
@@ -107,7 +111,6 @@ class bdApi_DataWriter_Log extends XenForo_DataWriter
             $elapsed = microtime(true) - $microtime;
 
             if (XenForo_Application::debugMode()) {
-                $requestData = XenForo_Helper_Php::safeUnserialize($this->get('request_data'));
                 $requestData['_syslog'] = array(
                     'sent' => $sent,
                     'elapsed' => $elapsed,

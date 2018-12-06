@@ -290,6 +290,8 @@ class bdApi_Model_Log extends XenForo_Model
             }
         }
 
+        $filtered['_isApiJob'] = !empty($data['_isApiJob']);
+
         return $filtered;
     }
 }
