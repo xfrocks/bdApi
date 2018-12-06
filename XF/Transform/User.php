@@ -341,7 +341,7 @@ class User extends AbstractHandler
             $data[] = $systemField;
         }
 
-        return $data;
+        return $this->transformer->transformArray($context, 'fields', $data);
     }
 
     /**
