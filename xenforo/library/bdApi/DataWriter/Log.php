@@ -79,6 +79,44 @@ class bdApi_DataWriter_Log extends XenForo_DataWriter
         return implode(' AND ', $conditions);
     }
 
+    protected function _preSave()
+    {
+        parent::_preSave();
+
+        $syslogHost = bdApi_Option::getConfig('syslogHost');
+        if ($syslogHost !== '') {
+            $syslogPort = bdApi_Option::getConfig('syslogPort');
+            $syslogPri = bdApi_Option::getConfig('syslogPri');
+            $date = gmdate('M d H:i:s', $this->get('request_date'));
+            $hostname = gethostname();
+            $syslogLine = json_encode(array(
+                'client_id' => $this->get('client_id'),
+                'ip_address' => $this->get('ip_address'),
+                'response_code' => $this->get('response_code'),
+                'request_method' => $this->get('request_method'),
+                'request_uri' => $this->get('request_uri'),
+                'user_id' => $this->get('user_id'),
+            ));
+
+            // https://gist.github.com/troy/2220679
+            $microtime = microtime(true);
+            $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+            $syslogMessage = "<{$syslogPri}> {$date} {$hostname} api: {$syslogLine}";
+            $sent = socket_sendto($socket, $syslogMessage, strlen($syslogMessage), 0, $syslogHost, $syslogPort);
+            socket_close($socket);
+            $elapsed = microtime(true) - $microtime;
+
+            if (XenForo_Application::debugMode()) {
+                $requestData = XenForo_Helper_Php::safeUnserialize($this->get('request_data'));
+                $requestData['_syslog'] = array(
+                    'sent' => $sent,
+                    'elapsed' => $elapsed,
+                );
+                $this->set('request_data', $requestData);
+            }
+        }
+    }
+
     /**
      * @return bdApi_Model_Log
      */

@@ -24,6 +24,11 @@ class bdApi_Option
 
         if ($config === null) {
             $config = array(
+                'syslogHost' => '',
+                'syslogPort' => 514,
+                // https://tools.ietf.org/html/rfc3164#section-4.1.1
+                // local0 info = 16*8+6 = 134
+                'syslogPri' => 134,
                 'pingQueueUseDefer' => true,
                 'publicSessionToken' => 'public',
                 'publicSessionClientId' => '',
