@@ -103,7 +103,7 @@ class User extends AbstractHandler
             case self::DYNAMIC_KEY_EXTERNAL_AUTHS:
                 return $this->collectExternalAuths($context);
             case self::DYNAMIC_KEY_FIELDS:
-                return $this->collectFields();
+                return $this->collectFields($context);
             case self::DYNAMIC_KEY_FOLLOWERS_TOTAL:
                 if (!$context->selectorShouldIncludeField($key)) {
                     return null;
@@ -305,12 +305,43 @@ class User extends AbstractHandler
     }
 
     /**
+     * @param TransformContext $context
      * @return array|null
      */
-    protected function collectFields()
+    protected function collectFields($context)
     {
-        // TODO
-        return null;
+        /** @var \XF\Entity\User $user */
+        $user = $context->getSource();
+
+        $systemFields = ['about', 'homepage', 'location'];
+        $data = $this->transformer->transformCustomFieldSet($context, $user->Profile->custom_fields);
+
+        foreach ($systemFields as $systemFieldId) {
+            $systemField = [
+                'id' => $systemFieldId,
+                'title' => \XF::phrase($systemFieldId),
+                'description' => '',
+                'position' => 'personal',
+                'is_required' => false
+            ];
+
+            switch ($systemFieldId) {
+                case 'about':
+                    $systemField['value'] = $user->Profile->about;
+                    break;
+                case 'homepage':
+                    $systemField['value'] = $user->Profile->website;
+                    $systemField['title'] = \XF::phrase('website');
+                    break;
+                case 'location':
+                    $systemField['value'] = $user->Profile->location;
+                    break;
+            }
+
+            $data[] = $systemField;
+        }
+
+        return $data;
     }
 
     /**
