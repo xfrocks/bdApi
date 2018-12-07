@@ -329,21 +329,24 @@ class User extends AbstractController
             $user->secondary_group_ids = $secondaryGroupIds;
         }
 
+        $userProfile = $user->Profile;
+        $user->addCascadedSave($userProfile);
+
         if (!empty($params['user_dob_day']) && !empty($params['user_dob_month']) && !empty($params['user_dob_year'])) {
-            $user->Profile->setDob($params['user_dob_day'], $params['user_dob_month'], $params['user_dob_year']);
+            $userProfile->setDob($params['user_dob_day'], $params['user_dob_month'], $params['user_dob_year']);
 
             $hasExistingDob = false;
-            if (!!$user->Profile->getExistingValue('dob_day')
-                || !!$user->Profile->getExistingValue('dob_month')
-                || !!$user->Profile->getExistingValue('dob_year')) {
+            if (!!$userProfile->getExistingValue('dob_day')
+                || !!$userProfile->getExistingValue('dob_month')
+                || !!$userProfile->getExistingValue('dob_year')) {
                 $hasExistingDob = true;
             }
 
             if ($hasExistingDob
                 && (
-                    $user->Profile->isChanged('dob_day')
-                    || $user->Profile->isChanged('dob_month')
-                    || $user->Profile->isChanged('dob_year')
+                    $userProfile->isChanged('dob_day')
+                    || $userProfile->isChanged('dob_month')
+                    || $userProfile->isChanged('dob_year')
                 )
                 && !$isAdmin
             ) {
@@ -362,12 +365,12 @@ class User extends AbstractController
             ]);
             $fields = array_diff($fields, $profileFields);
 
-            $user->Profile->bulkSet([
+            $userProfile->bulkSet([
                 'about' => $profileFields['about'],
                 'website' => $profileFields['homepage'],
                 'location' => $profileFields['location']
             ]);
-            $user->Profile->custom_fields->bulkSet($fields);
+            $userProfile->custom_fields->bulkSet($fields);
         }
 
         $user->preSave();
