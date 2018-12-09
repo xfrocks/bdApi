@@ -33,12 +33,14 @@ class MediaItem extends AbstractHandler implements AttachmentParent
     const KEY_RATING = 'rating';
     const KEY_COMMENT_COUNT = 'comment_count';
 
-    const LINK_ALBUM = 'album';
-
     const DYNAMIC_KEY_ATTACHMENT = 'attachment';
     const DYNAMIC_KEY_IS_LIKED = 'is_liked';
     const DYNAMIC_KEY_IS_FOLLOWED = 'is_followed';
     const DYNAMIC_KEY_IS_DELETED = 'is_deleted';
+
+    const LINK_ALBUM = 'album';
+
+    const PERM_COMMENT = 'comment';
 
     public function attachmentCalculateDynamicValue($context, $key)
     {
@@ -102,6 +104,22 @@ class MediaItem extends AbstractHandler implements AttachmentParent
         ];
 
         return $links;
+    }
+
+    public function collectPermissions($context)
+    {
+        /** @var \XFMG\Entity\MediaItem $item */
+        $item = $context->getSource();
+
+        $permissions = [
+            self::PERM_DELETE => $item->canDelete(),
+            self::PERM_EDIT => $item->canEdit(),
+            self::PERM_LIKE => $item->canLike(),
+            self::PERM_FOLLOW => $item->canWatch(),
+            self::PERM_COMMENT => $item->canAddComment(),
+        ];
+
+        return $permissions;
     }
 
     public function getMappings($context)

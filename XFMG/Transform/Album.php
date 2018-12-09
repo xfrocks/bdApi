@@ -31,6 +31,9 @@ class Album extends AbstractHandler
     const DYNAMIC_KEY_IS_FOLLOWED = 'is_followed';
     const DYNAMIC_KEY_IS_DELETED = 'is_deleted';
 
+    const PERM_ADD_MEDIA = 'add_media';
+    const PERM_COMMENT = 'comment';
+
     public function calculateDynamicValue($context, $key)
     {
         /** @var \XFMG\Entity\Album $album */
@@ -44,6 +47,23 @@ class Album extends AbstractHandler
                 return $album->album_state == 'deleted';
         }
         return null;
+    }
+
+    public function collectPermissions($context)
+    {
+        /** @var \XFMG\Entity\Album $album */
+        $album = $context->getSource();
+
+        $permissions = [
+            self::PERM_DELETE => $album->canDelete(),
+            self::PERM_EDIT => $album->canEdit(),
+            self::PERM_LIKE => $album->canLike(),
+            self::PERM_FOLLOW => $album->canWatch(),
+            self::PERM_ADD_MEDIA => $album->canAddMedia(),
+            self::PERM_COMMENT => $album->canAddComment(),
+        ];
+
+        return $permissions;
     }
 
     public function collectLinks($context)
