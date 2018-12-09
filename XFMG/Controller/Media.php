@@ -101,6 +101,10 @@ class Media extends AbstractController
         /** @var \XFMG\Entity\MediaItem $item */
         $item = $creator->save();
 
+        /** @var \XFMG\Repository\MediaWatch $watchRepo */
+        $watchRepo = $this->repository('XFMG:MediaWatch');
+        $watchRepo->autoWatchMediaItem($item, \XF::visitor(), true);
+
         // Clear entity cache
         $this->em()->detachEntity($item);
         $this->em()->detachEntity($attachment);
@@ -181,6 +185,46 @@ class Media extends AbstractController
             $contentType = $item->getEntityContentType();
             $likeRepo->toggleLike($contentType, $item->media_id, $visitor);
         }
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionPostFollowers(ParameterBag $params)
+    {
+        $item = $this->assertViewableMediaItem($params->media_id);
+        if (!$item->canWatch($error)) {
+            return $this->noPermission($error);
+        }
+
+        $params = $this->params()
+            ->define('send_alert', 'bool', '', true)
+            ->define('send_email', 'bool', '', true)
+        ;
+
+        $action = 'watch';
+        $config = [
+            'notify_on' => 'comment',
+            'send_alert' => $params['send_alert'],
+            'send_email' => $params['send_email'],
+        ];
+        $visitor = \XF::visitor();
+
+        /** @var \XFMG\Repository\MediaWatch $watchRepo */
+        $watchRepo = $this->repository('XFMG:MediaWatch');
+        $watchRepo->setWatchState($item, $visitor, $action, $config);
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionDeleteFollowers(ParameterBag $params)
+    {
+        $item = $this->assertViewableMediaItem($params->media_id);
+
+        $visitor = \XF::visitor();
+
+        /** @var \XFMG\Repository\MediaWatch $watchRepo */
+        $watchRepo = $this->repository('XFMG:MediaWatch');
+        $watchRepo->setWatchState($item, $visitor, 'delete');
 
         return $this->message(\XF::phrase('changes_saved'));
     }

@@ -37,6 +37,7 @@ class MediaItem extends AbstractHandler implements AttachmentParent
 
     const DYNAMIC_KEY_ATTACHMENT = 'attachment';
     const DYNAMIC_KEY_IS_LIKED = 'is_liked';
+    const DYNAMIC_KEY_IS_FOLLOWED = 'is_followed';
     const DYNAMIC_KEY_IS_DELETED = 'is_deleted';
 
     public function attachmentCalculateDynamicValue($context, $key)
@@ -79,6 +80,8 @@ class MediaItem extends AbstractHandler implements AttachmentParent
                 return $this->transformer->transformEntityRelation($context, $key, $item, 'Attachment');
             case self::DYNAMIC_KEY_IS_LIKED:
                 return $item->isLiked();
+            case self::DYNAMIC_KEY_IS_FOLLOWED:
+                return !empty($item->Watch[\XF::visitor()->user_id]);
             case self::DYNAMIC_KEY_IS_DELETED:
                 return $item->media_state == 'deleted';
         }
@@ -118,6 +121,7 @@ class MediaItem extends AbstractHandler implements AttachmentParent
 
             self::DYNAMIC_KEY_ATTACHMENT,
             self::DYNAMIC_KEY_IS_LIKED,
+            self::DYNAMIC_KEY_IS_FOLLOWED,
             self::DYNAMIC_KEY_IS_DELETED,
         ];
     }
