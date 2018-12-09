@@ -18,6 +18,13 @@ class Modules extends XFCP_Modules
             'albums'
         );
         $this->addController(
+            'Xfrocks\Api\XFMG\Controller\Comment',
+            'media',
+            'comments/:int<comment_id>/',
+            null,
+            'comments'
+        );
+        $this->addController(
             'Xfrocks\Api\XFMG\Controller\Media',
             'media',
             ':int<media_id>/'
