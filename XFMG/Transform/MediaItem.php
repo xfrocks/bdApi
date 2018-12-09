@@ -95,7 +95,10 @@ class MediaItem extends AbstractHandler implements AttachmentParent
 
         $links = [
             self::LINK_PERMALINK => $this->buildPublicLink('media', $item),
-            self::LINK_ALBUM => $this->buildPublicLink('media/albums', $item),
+            self::LINK_DETAIL => $this->buildApiLink('media', $item),
+            self::LINK_LIKES => $this->buildApiLink('media/likes', $item),
+            self::LINK_FOLLOWERS => $this->buildApiLink('media/followers', $item),
+            self::LINK_ALBUM => $this->buildPublicLink('media', $item),
         ];
 
         return $links;

@@ -53,6 +53,9 @@ class Album extends AbstractHandler
 
         $links = [
             self::LINK_PERMALINK => $this->buildPublicLink('media/albums', $album),
+            self::LINK_DETAIL => $this->buildApiLink('media/albums', $album),
+            self::LINK_LIKES => $this->buildApiLink('media/albums/likes', $album),
+            self::LINK_FOLLOWERS => $this->buildApiLink('media/albums/followers', $album),
         ];
 
         return $links;
