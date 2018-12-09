@@ -96,6 +96,12 @@ class Album extends AbstractController
         }
         $album = $creator->save();
 
+        $creator->sendNotifications();
+
+        /** @var \XFMG\Repository\AlbumWatch $watchRepo */
+        $watchRepo = $this->repository('XFMG:AlbumWatch');
+        $watchRepo->autoWatchAlbum($album, \XF::visitor(), true);
+
         return $this->actionSingle($album->album_id);
     }
 
@@ -181,6 +187,47 @@ class Album extends AbstractController
             $contentType = $album->getEntityContentType();
             $likeRepo->toggleLike($contentType, $album->album_id, $visitor);
         }
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionPostFollowers(ParameterBag $params)
+    {
+        $album = $this->assertViewableAlbum($params->album_id);
+        if (!$album->canWatch($error)) {
+            return $this->noPermission($error);
+        }
+
+        $params = $this->params()
+            ->define('notify_on', 'str', 'comment|media|media_comment', 'media_comment')
+            ->define('send_alert', 'bool', '', true)
+            ->define('send_email', 'bool', '', true)
+        ;
+
+        $action = 'watch';
+        $config = [
+            'notify_on' => $params['notify_on'],
+            'send_alert' => $params['send_alert'],
+            'send_email' => $params['send_email'],
+        ];
+        $visitor = \XF::visitor();
+
+        /** @var \XFMG\Repository\AlbumWatch $watchRepo */
+        $watchRepo = $this->repository('XFMG:AlbumWatch');
+        $watchRepo->setWatchState($album, $visitor, $action, $config);
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    public function actionDeleteFollowers(ParameterBag $params)
+    {
+        $album = $this->assertViewableAlbum($params->album_id);
+
+        $visitor = \XF::visitor();
+
+        /** @var \XFMG\Repository\AlbumWatch $watchRepo */
+        $watchRepo = $this->repository('XFMG:AlbumWatch');
+        $watchRepo->setWatchState($album, $visitor, 'delete');
 
         return $this->message(\XF::phrase('changes_saved'));
     }

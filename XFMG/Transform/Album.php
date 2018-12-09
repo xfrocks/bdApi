@@ -28,6 +28,7 @@ class Album extends AbstractHandler
     const KEY_COMMENT_COUNT = 'comment_count';
 
     const DYNAMIC_KEY_IS_LIKED = 'is_liked';
+    const DYNAMIC_KEY_IS_FOLLOWED = 'is_followed';
     const DYNAMIC_KEY_IS_DELETED = 'is_deleted';
 
     public function calculateDynamicValue($context, $key)
@@ -37,6 +38,8 @@ class Album extends AbstractHandler
         switch ($key) {
             case self::DYNAMIC_KEY_IS_LIKED:
                 return $album->isLiked();
+            case self::DYNAMIC_KEY_IS_FOLLOWED:
+                return !empty($album->Watch[\XF::visitor()->user_id]);
             case self::DYNAMIC_KEY_IS_DELETED:
                 return $album->album_state == 'deleted';
         }
@@ -73,6 +76,7 @@ class Album extends AbstractHandler
             'rating_avg' => self::KEY_RATING,
 
             self::DYNAMIC_KEY_IS_LIKED,
+            self::DYNAMIC_KEY_IS_FOLLOWED,
             self::DYNAMIC_KEY_IS_DELETED,
         ];
     }
