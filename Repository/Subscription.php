@@ -523,7 +523,7 @@ class Subscription extends Repository
                         ? $pingDataRef['object_data']['extra_data']
                         : unserialize($pingDataRef['object_data']['extra_data']);
                 }
-                
+
                 $fakeAlert->setReadOnly(true);
 
                 $alerts[$fakeAlertId] = $fakeAlert;
