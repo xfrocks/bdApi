@@ -14,12 +14,19 @@ class Notifier extends XFCP_Notifier
     ) {
         $sent = parent::_sendNotifications($actionType, $notifyUsers, $message, $sender);
 
-        foreach ($sent as $user) {
+        $message = $message ?: $this->conversation->FirstMessage;
+        $sender = $sender ?: $message->User;
+
+        foreach ($notifyUsers as $user) {
+            if ($sender->user_id == $user->user_id) {
+                continue;
+            }
+
             /** @var Subscription $subscriptionRepo */
             $subscriptionRepo = $this->repository('Xfrocks\Api:Subscription');
             $subscriptionRepo->pingConversationMessage(
                 $actionType,
-                $message ?: $this->conversation->FirstMessage,
+                $message,
                 $user,
                 $sender
             );

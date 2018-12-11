@@ -372,7 +372,7 @@ class Subscription extends Repository
             return false;
         }
 
-        $subColumn = $this->options()->bdApi_subscriptionColumnUser;
+        $subColumn = $this->options()->bdApi_subscriptionColumnUserNotification;
         /** @var UserOption|null $userOption */
         $userOption = $alertedUser->Option;
         if (!$userOption) {
@@ -385,7 +385,8 @@ class Subscription extends Repository
 
         $extraData = [
             'notification_id' => 0,
-            'notification_html' => ''
+            'notification_html' => '',
+            'object_data' => []
         ];
 
         $extraData['object_data']['message'] = [
@@ -492,7 +493,7 @@ class Subscription extends Repository
 
         return array();
     }
-
+    
     protected function preparePingDataManyNotification($pingDataMany)
     {
         $alertIds = array();
