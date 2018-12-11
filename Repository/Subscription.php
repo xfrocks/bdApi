@@ -493,7 +493,7 @@ class Subscription extends Repository
 
         return array();
     }
-    
+
     protected function preparePingDataManyNotification($pingDataMany)
     {
         $alertIds = array();
