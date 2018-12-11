@@ -568,6 +568,11 @@ class Subscription extends Repository
                 $transformer = $this->app()->container('api.transformer');
 
                 $pingDataRef['object_data'] = $transformer->transformEntity($transformContext, null, $alertRef);
+            } elseif (is_array($alertRef)) {
+                $pingDataRef['object_data'] = $alertRef;
+            } else {
+                // don't know it is
+                continue;
             }
             if (!is_numeric($alertRef['alert_id'])
                 && !empty($alertRef['extra']['object_data'])
