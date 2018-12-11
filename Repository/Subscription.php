@@ -507,7 +507,26 @@ class Subscription extends Repository
             ) {
                 $fakeAlertId = sprintf(md5($key));
                 $pingDataRef['object_data']['alert_id'] = $fakeAlertId;
-                $alerts[$fakeAlertId] = $pingDataRef['object_data'];
+
+                /** @var UserAlert $fakeAlert */
+                $fakeAlert = $this->em->create('XF:UserAlert');
+                $fakeAlert->alerted_user_id = $pingDataRef['object_data']['alerted_user_id'];
+                $fakeAlert->user_id = $pingDataRef['object_data']['user_id'];
+                $fakeAlert->username = $pingDataRef['object_data']['username'];
+                $fakeAlert->content_type = $pingDataRef['object_data']['content_type'];
+                $fakeAlert->content_id = $pingDataRef['object_data']['content_id'];
+                $fakeAlert->action = $pingDataRef['object_data']['action'];
+                $fakeAlert->event_date = $pingDataRef['object_data']['event_date'];
+                $fakeAlert->view_date = $pingDataRef['object_data']['view_date'];
+                if (!empty($pingDataRef['object_data']['extra_data'])) {
+                    $fakeAlert->extra_data = is_array($pingDataRef['object_data']['extra_data'])
+                        ? $pingDataRef['object_data']['extra_data']
+                        : unserialize($pingDataRef['object_data']['extra_data']);
+                }
+                
+                $fakeAlert->setReadOnly(true);
+
+                $alerts[$fakeAlertId] = $fakeAlert;
                 $pingDataRef['object_data'] = $fakeAlertId;
             }
         }
@@ -568,12 +587,8 @@ class Subscription extends Repository
                 $transformer = $this->app()->container('api.transformer');
 
                 $pingDataRef['object_data'] = $transformer->transformEntity($transformContext, null, $alertRef);
-            } elseif (is_array($alertRef)) {
-                $pingDataRef['object_data'] = $alertRef;
-            } else {
-                // don't know it is
-                continue;
             }
+
             if (!is_numeric($alertRef['alert_id'])
                 && !empty($alertRef['extra']['object_data'])
             ) {
