@@ -590,12 +590,12 @@ class Subscription extends Repository
             }
 
             if (!is_numeric($alertRef['alert_id'])
-                && !empty($alertRef['extra']['object_data'])
+                && !empty($alertRef['extra_data']['object_data'])
             ) {
                 // fake alert, use the included object_data
                 $pingDataRef['object_data'] = array_merge(
                     $pingDataRef['object_data'],
-                    $alertRef['extra']['object_data']
+                    $alertRef['extra_data']['object_data']
                 );
             }
 
