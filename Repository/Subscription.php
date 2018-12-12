@@ -508,24 +508,23 @@ class Subscription extends Repository
             ) {
                 $fakeAlertId = sprintf(md5($key));
                 $pingDataRef['object_data']['alert_id'] = $fakeAlertId;
+                $alertRaw = $pingDataRef['object_data'];
 
                 /** @var UserAlert $fakeAlert */
                 $fakeAlert = $this->em->create('XF:UserAlert');
-                $fakeAlert->alerted_user_id = $pingDataRef['object_data']['alerted_user_id'];
-                $fakeAlert->user_id = $pingDataRef['object_data']['user_id'];
-                $fakeAlert->username = $pingDataRef['object_data']['username'];
-                $fakeAlert->content_type = $pingDataRef['object_data']['content_type'];
-                $fakeAlert->content_id = $pingDataRef['object_data']['content_id'];
-                $fakeAlert->action = $pingDataRef['object_data']['action'];
-                $fakeAlert->event_date = $pingDataRef['object_data']['event_date'];
-                $fakeAlert->view_date = $pingDataRef['object_data']['view_date'];
-                if (!empty($pingDataRef['object_data']['extra_data'])) {
-                    $fakeAlert->extra_data = is_array($pingDataRef['object_data']['extra_data'])
-                        ? $pingDataRef['object_data']['extra_data']
-                        : unserialize($pingDataRef['object_data']['extra_data']);
+                $fakeAlert->alerted_user_id = $alertRaw['alerted_user_id'];
+                $fakeAlert->user_id = $alertRaw['user_id'];
+                $fakeAlert->username = $alertRaw['username'];
+                $fakeAlert->content_type = $alertRaw['content_type'];
+                $fakeAlert->content_id = $alertRaw['content_id'];
+                $fakeAlert->action = $alertRaw['action'];
+                $fakeAlert->event_date = $alertRaw['event_date'];
+                $fakeAlert->view_date = $alertRaw['view_date'];
+                if (!empty($alertRaw['extra_data'])) {
+                    $fakeAlert->extra_data = is_array($alertRaw['extra_data'])
+                        ? $alertRaw['extra_data']
+                        : unserialize($alertRaw['extra_data']);
                 }
-
-                $fakeAlert->setReadOnly(true);
 
                 $alerts[$fakeAlertId] = $fakeAlert;
                 $pingDataRef['object_data'] = $fakeAlertId;
