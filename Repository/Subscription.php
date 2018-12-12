@@ -384,9 +384,10 @@ class Subscription extends Repository
         $triggerUser = $triggerUser ?: $message->User;
 
         $extraData = [
-            'notification_id' => 0,
-            'notification_html' => '',
-            'object_data' => []
+            'object_data' => [
+                'notification_id' => 0,
+                'notification_html' => ''
+            ]
         ];
 
         $extraData['object_data']['message'] = [
