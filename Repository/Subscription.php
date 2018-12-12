@@ -372,7 +372,7 @@ class Subscription extends Repository
             return false;
         }
 
-        $subColumn = $this->options()->bdApi_subscriptionColumnUser;
+        $subColumn = $this->options()->bdApi_subscriptionColumnUserNotification;
         /** @var UserOption|null $userOption */
         $userOption = $alertedUser->Option;
         if (!$userOption) {
@@ -384,8 +384,10 @@ class Subscription extends Repository
         $triggerUser = $triggerUser ?: $message->User;
 
         $extraData = [
-            'notification_id' => 0,
-            'notification_html' => ''
+            'object_data' => [
+                'notification_id' => 0,
+                'notification_html' => ''
+            ]
         ];
 
         $extraData['object_data']['message'] = [
@@ -400,8 +402,8 @@ class Subscription extends Repository
             'alerted_user_id' => $alertedUser->user_id,
             'user_id' => $triggerUser->user_id,
             'username' => $triggerUser->username,
-            'content_type' => 'conversation',
-            'content_id' => $message->Conversation->conversation_id,
+            'content_type' => 'conversation_message',
+            'content_id' => $message->message_id,
             'action' => $action,
             'event_date' => \XF::$time,
             'view_date' => 0,
@@ -506,7 +508,27 @@ class Subscription extends Repository
             ) {
                 $fakeAlertId = sprintf(md5($key));
                 $pingDataRef['object_data']['alert_id'] = $fakeAlertId;
-                $alerts[$fakeAlertId] = $pingDataRef['object_data'];
+                $alertRaw = $pingDataRef['object_data'];
+
+                /** @var UserAlert $fakeAlert */
+                $fakeAlert = $this->em->create('XF:UserAlert');
+                $fakeAlert->alerted_user_id = $alertRaw['alerted_user_id'];
+                $fakeAlert->user_id = $alertRaw['user_id'];
+                $fakeAlert->username = $alertRaw['username'];
+                $fakeAlert->content_type = $alertRaw['content_type'];
+                $fakeAlert->content_id = $alertRaw['content_id'];
+                $fakeAlert->action = $alertRaw['action'];
+                $fakeAlert->event_date = $alertRaw['event_date'];
+                $fakeAlert->view_date = $alertRaw['view_date'];
+                if (!empty($alertRaw['extra_data'])) {
+                    $fakeAlert->extra_data = is_array($alertRaw['extra_data'])
+                        ? $alertRaw['extra_data']
+                        : unserialize($alertRaw['extra_data']);
+                }
+
+                $fakeAlert->setReadOnly(true);
+
+                $alerts[$fakeAlertId] = $fakeAlert;
                 $pingDataRef['object_data'] = $fakeAlertId;
             }
         }
@@ -566,15 +588,23 @@ class Subscription extends Repository
                 /** @var Transformer $transformer */
                 $transformer = $this->app()->container('api.transformer');
 
-                $pingDataRef['object_data'] = $transformer->transformEntity($transformContext, null, $alertRef);
+                $visitor = \XF::visitor();
+                if (!$visitor->user_id && !empty($alertRef['alerted_user_id'])) {
+                    $visitor = $this->em->find('XF:User', $alertRef['alerted_user_id']);
+                }
+
+                $pingDataRef['object_data'] = \XF::asVisitor($visitor, function () use ($transformer, $transformContext, $alertRef) {
+                    return $transformer->transformEntity($transformContext, null, $alertRef);
+                });
             }
+            
             if (!is_numeric($alertRef['alert_id'])
-                && !empty($alertRef['extra']['object_data'])
+                && !empty($alertRef['extra_data']['object_data'])
             ) {
                 // fake alert, use the included object_data
                 $pingDataRef['object_data'] = array_merge(
                     $pingDataRef['object_data'],
-                    $alertRef['extra']['object_data']
+                    $alertRef['extra_data']['object_data']
                 );
             }
 
