@@ -526,6 +526,8 @@ class Subscription extends Repository
                         : unserialize($alertRaw['extra_data']);
                 }
 
+                $fakeAlert->setReadOnly(true);
+
                 $alerts[$fakeAlertId] = $fakeAlert;
                 $pingDataRef['object_data'] = $fakeAlertId;
             }
@@ -586,9 +588,16 @@ class Subscription extends Repository
                 /** @var Transformer $transformer */
                 $transformer = $this->app()->container('api.transformer');
 
-                $pingDataRef['object_data'] = $transformer->transformEntity($transformContext, null, $alertRef);
-            }
+                $visitor = \XF::visitor();
+                if (!$visitor->user_id && !empty($alertRef['alerted_user_id'])) {
+                    $visitor = $this->em->find('XF:User', $alertRef['alerted_user_id']);
+                }
 
+                $pingDataRef['object_data'] = \XF::asVisitor($visitor, function () use ($transformer, $transformContext, $alertRef) {
+                    return $transformer->transformEntity($transformContext, null, $alertRef);
+                });
+            }
+            
             if (!is_numeric($alertRef['alert_id'])
                 && !empty($alertRef['extra_data']['object_data'])
             ) {
