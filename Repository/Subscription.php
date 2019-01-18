@@ -379,6 +379,11 @@ class Subscription extends Repository
             return false;
         }
 
+        if ($action === 'reply') {
+            // XF has removed reply alert. So use own action to prevent conflict
+            $action = 'bdapi_reply';
+        }
+
         $templater = $this->app()->templater();
 
         $triggerUser = $triggerUser ?: $message->User;

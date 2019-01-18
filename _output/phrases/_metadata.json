@@ -551,6 +551,12 @@
         "version_string": "2.0.0",
         "hash": "c2dec20d1853caee52c94e0ef0132e9e"
     },
+    "bdapi_x_replied_in_the_conversation_y.txt": {
+        "global_cache": false,
+        "version_id": 2000031,
+        "version_string": "2.0.0 Beta 1",
+        "hash": "9c5f04d09ff92059d1c4b2d71c4cae52"
+    },
     "bdapi_you_will_be_redirected_x.txt": {
         "global_cache": false,
         "version_id": 2000000,

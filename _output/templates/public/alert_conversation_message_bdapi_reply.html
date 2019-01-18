@@ -1,0 +1,4 @@
+{{ phrase('bdapi_x_replied_in_the_conversation_y', {
+    'name': username_link($user, false, {'defaultname': $alert.username}),
+    'title': '<a href="' . link('conversations/messages', $content) . '" class="fauxBlockLink-blockLink">' . $content.Conversation.title . '</a>'
+}) }}
