@@ -319,11 +319,23 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             'group_discussion' => false,
         );
 
+        if (!empty($userId)) {
+            /** @var XenForo_Model_User $userModel */
+            $userModel = $this->getModelFromCache('XenForo_Model_User');
+            $user = $userModel->getUserById($userId);
+            if (empty($user)) {
+                return $this->responseError(new XenForo_Phrase('requested_member_not_found'), 404);
+            }
+            $constraints['user'] = array($user['user_id']);
+        }
+
         if (empty($options[self::OPTION_NO_KEYWORDS])) {
             $input['keywords'] = $this->_input->filterSingle('q', XenForo_Input::STRING);
-            $input['keywords'] = XenForo_Helper_String::censorString($input['keywords'], null, '');
+
             // don't allow searching of censored stuff
-            if (empty($input['keywords'])) {
+            $input['keywords'] = XenForo_Helper_String::censorString($input['keywords'], null, '');
+
+            if (empty($input['keywords']) && !isset($constraints['user'])) {
                 throw $this->responseException($this->responseError(
                     new XenForo_Phrase('bdapi_slash_search_requires_q'),
                     400
@@ -355,10 +367,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             if (!$constraints['node']) {
                 unset($constraints['node']);
             }
-        }
-
-        if (!empty($userId)) {
-            $constraints['user'] = array($userId);
         }
 
         if (XenForo_Application::$versionId >= 1050000) {
@@ -431,7 +439,7 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
     protected function _fetchResultsData(array $results)
     {
         if (empty($results)) {
-            return $results;
+            return array();
         }
 
         // WARNING: only two legacy types (thread & post) use `data_limit` param

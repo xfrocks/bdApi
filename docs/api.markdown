@@ -2520,11 +2520,8 @@ Search for threads.
 
 Parameters:
 
- * `q` (__required__): query to search for.
- * `limit` (_optional_): maximum number of results. The limit may get decreased if the value is too large (depending on the system configuration).
- * `forum_id` (_optional_): id of the container forum to search for contents. Child forums of the specified forum will be included in the search.
- * `user_id` (_optional_): id of the creator to search for contents. Since forum-2015041502.
  * `data_limit` (_optional_): number of thread data to be returned. By default, no data is returned. Since forum-2015032403.
+ * All other [POST `/search`](#post-search) parameters
 
 Required scopes:
 
@@ -2548,12 +2545,8 @@ Search for posts.
 
 Parameters:
 
- * `q` (__required__): query to search for.
- * `limit` (_optional_): maximum number of results. The limit may get decreased if the value is too large (depending on the system configuration).
- * `forum_id` (_optional_): id of the container forum to search for contents. Child forums of the specified forum will be included in the search.
- * `thread_id` (_optional_): id of the container thread to search for posts.
- * `user_id` (_optional_): id of the creator to search for contents. Since forum-2015041502.
  * `data_limit` (_optional_): number of post data to be returned. By default, no data is returned. Since forum-2015032403.
+ * All other [POST `/search`](#post-search) parameters
 
 Required scopes:
 
@@ -2580,7 +2573,7 @@ Search for all supported contents. Since forum-2015042002.
 
 Parameters:
 
- * `q` (__required__): query to search for.
+ * `q`: query to search for. Before forum-2019012901: this parameter is __required__; after forum-2019012901: can be skipped if `user_id` is set.
  * `tag` (_optional_): tag to search for tagged contents. Since forum-2015091001.
  * `forum_id` (_optional_): id of the container forum to search for contents. Child forums of the specified forum will be included in the search.
  * `user_id` (_optional_): id of the creator to search for contents.
