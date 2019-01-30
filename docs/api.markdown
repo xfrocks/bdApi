@@ -2520,7 +2520,7 @@ Search for threads.
 
 Parameters:
 
- * `data_limit` (_optional_): number of thread data to be returned. By default, no data is returned. Since forum-2015032403.
+ * `data_limit` (~deprecated~, _optional_): number of thread data to be returned. Default value depends on the system configuration. Since forum-2015032403.
  * All other [POST `/search`](#post-search) parameters
 
 Required scopes:
@@ -2545,7 +2545,7 @@ Search for posts.
 
 Parameters:
 
- * `data_limit` (_optional_): number of post data to be returned. By default, no data is returned. Since forum-2015032403.
+ * `data_limit` (~deprecated~, _optional_): number of post data to be returned. Default value depends on the system configuration. Since forum-2015032403.
  * All other [POST `/search`](#post-search) parameters
 
 Required scopes:

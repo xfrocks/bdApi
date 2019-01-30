@@ -349,17 +349,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
         $maxResults = XenForo_Application::getOptions()->get('maximumSearchResults');
 
-        switch ($contentType) {
-            case 'thread':
-            case 'post':
-                // only these two legacy content types support `limit` param while searching
-                // others use `limit` to control how many pieces of data are returned
-                list($limit,) = $this->filterLimitAndPage();
-                if ($limit > 0) {
-                    $maxResults = min($maxResults, $limit);
-                }
-        }
-
         if (!empty($forumId)) {
             $childNodeIds = array_keys($this->_getNodeModel()->getChildNodesForNodeIds(array($forumId)));
             $nodeIds = array_unique(array_merge(array($forumId), $childNodeIds));
@@ -442,22 +431,23 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             return array();
         }
 
+        $tempArray = array();
+        list($limit,) = $this->filterLimitAndPage($tempArray);
+
         // WARNING: only two legacy types (thread & post) use `data_limit` param
         list($dataLimit,) = $this->filterLimitAndPage($tempArray, 'data_limit');
-        if (empty($dataLimit)) {
-            return array();
-        }
+        $limit = min($limit, $dataLimit);
 
-        $dataResults = array_slice($results, 0, $dataLimit);
+        $dataResults = array_slice($results, 0, $limit);
 
         $searchModel = $this->_getSearchModel();
         $contentData = $searchModel->prepareApiContentDataForSearch($dataResults);
 
         return array(
             'data' => array_values($contentData),
-            'limit' => $dataLimit,
+            'limit' => $limit,
             'page' => 1,
-            'pageLinkParams' => array('limit' => $dataLimit),
+            'pageLinkParams' => array('limit' => $limit),
         );
     }
 
