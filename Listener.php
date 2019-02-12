@@ -4,9 +4,9 @@ namespace Xfrocks\Api;
 
 class Listener
 {
+    public static $accessTokenParamKey = 'oauth_token';
     public static $apiDirName = 'api';
     public static $scopeDelimiter = ' ';
-    public static $accessTokenParamKey = 'oauth_token';
 
     /**
      * @param \XF\App $app
@@ -14,6 +14,19 @@ class Listener
     public static function appSetup($app)
     {
         $container = $app->container();
+
+        $apiConfig = $app->config('api');
+        if (is_array($apiConfig)) {
+            foreach ($apiConfig as $apiConfigKey => $apiConfigValue) {
+                switch ($apiConfigKey) {
+                    case 'accessTokenParamKey':
+                    case 'apiDirName':
+                    case 'scopeDelimiter':
+                        self::$$apiConfigKey = $apiConfigValue;
+                        break;
+                }
+            }
+        }
 
         if ($container->offsetExists('api.server')) {
             // temporary workaround for XF2 job.php weird-behavior
