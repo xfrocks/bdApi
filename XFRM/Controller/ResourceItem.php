@@ -10,6 +10,11 @@ use Xfrocks\Api\Util\Tree;
 
 class ResourceItem extends AbstractController
 {
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetIndex(ParameterBag $params)
     {
         if ($params->resource_id) {
@@ -93,7 +98,11 @@ class ResourceItem extends AbstractController
         return $this->api(['resource' => $this->findAndTransformLazily('XFRM:ResourceItem', intval($resourceId))]);
     }
 
-    protected function applyFilters(\XFRM\Finder\ResourceItem $finder, Params $params)
+    /**
+     * @param \XFRM\Finder\ResourceItem $finder
+     * @param Params $params
+     */
+    protected function applyFilters($finder, Params $params)
     {
         $finder->applyGlobalVisibilityChecks();
 

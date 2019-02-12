@@ -364,8 +364,12 @@ class Subscription extends Repository
         return true;
     }
 
-    public function pingConversationMessage($action, ConversationMessage $message, User $alertedUser, User $triggerUser = null)
-    {
+    public function pingConversationMessage(
+        $action,
+        ConversationMessage $message,
+        User $alertedUser,
+        User $triggerUser = null
+    ) {
         if (!$this->options()->bdApi_userNotificationConversation
             || !static::getSubscription(self::TYPE_NOTIFICATION)
         ) {
@@ -598,11 +602,18 @@ class Subscription extends Repository
                     $visitor = $this->em->find('XF:User', $alertRef['alerted_user_id']);
                 }
 
-                $pingDataRef['object_data'] = \XF::asVisitor($visitor, function () use ($transformer, $transformContext, $alertRef) {
-                    return $transformer->transformEntity($transformContext, null, $alertRef);
-                });
+                try {
+                    $pingDataRef['object_data'] = \XF::asVisitor(
+                        $visitor,
+                        function () use ($transformer, $transformContext, $alertRef) {
+                            return $transformer->transformEntity($transformContext, null, $alertRef);
+                        }
+                    );
+                } catch (\Exception $e) {
+                    $pingDataRef['object_data'] = [];
+                }
             }
-            
+
             if (!is_numeric($alertRef['alert_id'])
                 && !empty($alertRef['extra_data']['object_data'])
             ) {
@@ -647,7 +658,10 @@ class Subscription extends Repository
 
         if (!empty($dbUserIds)) {
             $dbUsers = $this->em->findByIds('XF:User', $dbUserIds, [
-                'Option', 'Profile', 'PermissionCombination', 'Privacy'
+                'Option',
+                'Profile',
+                'PermissionCombination',
+                'Privacy'
             ]);
 
             foreach ($dbUsers as $user) {

@@ -3,13 +3,14 @@
 namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Transform\TransformContext;
 
 abstract class AbstractNode extends AbstractHandler
 {
     const LINK_SUB_CATEGORIES = 'sub-categories';
     const LINK_SUB_FORUMS = 'sub-forums';
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             'node_id' => $this->getNameSingular() . '_id',
@@ -18,7 +19,7 @@ abstract class AbstractNode extends AbstractHandler
         ];
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         /** @var \XF\Entity\AbstractNode $node */
         $node = $context->getSource();
@@ -40,7 +41,7 @@ abstract class AbstractNode extends AbstractHandler
         return $links;
     }
 
-    public function collectPermissions($context)
+    public function collectPermissions(TransformContext $context)
     {
         $perms = [];
 

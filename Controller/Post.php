@@ -12,6 +12,11 @@ use Xfrocks\Api\Util\PageNav;
 
 class Post extends AbstractController
 {
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetIndex(ParameterBag $params)
     {
         if ($params->post_id) {
@@ -74,6 +79,10 @@ class Post extends AbstractController
         return $this->api(['post' => $this->findAndTransformLazily('XF:Post', intval($postId))]);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostIndex()
     {
         $params = $this
@@ -125,6 +134,11 @@ class Post extends AbstractController
         return $this->actionSingle($post->post_id);
     }
 
+    /**
+     * @param ParameterBag $pb
+     * @return mixed|\XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPutIndex(ParameterBag $pb)
     {
         $post = $this->assertViewablePost($pb->post_id);
@@ -216,6 +230,11 @@ class Post extends AbstractController
         return $this->actionSingle($post->post_id);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteIndex(ParameterBag $params)
     {
         $post = $this->assertViewablePost($params->post_id);
@@ -235,6 +254,11 @@ class Post extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Reroute|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetAttachments(ParameterBag $params)
     {
         $post = $this->assertViewablePost($params->post_id);
@@ -256,6 +280,11 @@ class Post extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionPostAttachments()
     {
         $params = $this
@@ -281,6 +310,11 @@ class Post extends AbstractController
         return $attachmentPlugin->doUpload($tempHash, 'post', $context);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetLikes(ParameterBag $params)
     {
         $post = $this->assertViewablePost($params->post_id);
@@ -302,6 +336,11 @@ class Post extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostLikes(ParameterBag $params)
     {
         $post = $this->assertViewablePost($params->post_id);
@@ -320,6 +359,11 @@ class Post extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteLikes(ParameterBag $params)
     {
         $post = $this->assertViewablePost($params->post_id);
@@ -338,6 +382,11 @@ class Post extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostReport(ParameterBag $params)
     {
         $post = $this->assertViewablePost($params->post_id);
@@ -399,7 +448,12 @@ class Post extends AbstractController
         return $thread;
     }
 
-    protected function applyFilters(\XF\Finder\Post $finder, Params $params)
+    /**
+     * @param \XF\Finder\Post $finder
+     * @param Params $params
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    protected function applyFilters($finder, Params $params)
     {
         if ($params['thread_id'] > 0) {
             /** @var \XF\Entity\Thread $thread */

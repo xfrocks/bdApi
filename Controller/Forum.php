@@ -4,9 +4,14 @@ namespace Xfrocks\Api\Controller;
 
 use XF\Entity\ForumWatch;
 use XF\Mvc\ParameterBag;
+use Xfrocks\Api\Transform\TransformContext;
 
 class Forum extends AbstractNode
 {
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetFollowed()
     {
         $this->assertRegistrationRequired();
@@ -32,6 +37,7 @@ class Forum extends AbstractNode
         $forums = [];
 
         $this->params()->getTransformContext()->onTransformedCallbacks[] = function ($context, &$data) use ($forumWatches) {
+            /** @var TransformContext $context */
             $source = $context->getSource();
             if (!($source instanceof \XF\Entity\Forum)) {
                 return;
@@ -67,6 +73,11 @@ class Forum extends AbstractNode
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetFollowers(ParameterBag $paramBag)
     {
         $forum = $this->assertViewableForum($paramBag->node_id);
@@ -101,6 +112,11 @@ class Forum extends AbstractNode
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostFollowers(ParameterBag $paramBag)
     {
         $params = $this
@@ -129,6 +145,11 @@ class Forum extends AbstractNode
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteFollowers(ParameterBag $paramBag)
     {
         $forum = $this->assertViewableForum($paramBag->node_id);
@@ -160,6 +181,12 @@ class Forum extends AbstractNode
         return 'forum';
     }
 
+    /**
+     * @param int $forumId
+     * @param array $extraWith
+     * @return \XF\Entity\Forum
+     * @throws \XF\Mvc\Reply\Exception
+     */
     protected function assertViewableForum($forumId, array $extraWith = [])
     {
         /** @var \XF\Entity\Forum $forum */

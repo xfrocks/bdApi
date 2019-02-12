@@ -56,12 +56,12 @@ class User extends AbstractHandler
     const PERM_SELF_CREATE_CONVO = 'create_conversation';
     const PERM_SELF_ATTACH_CONVO = 'upload_attachment_conversation';
 
-    public function canView($context)
+    public function canView(TransformContext $context)
     {
         return true;
     }
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XF\Entity\User $user */
         $user = $context->getSource();
@@ -116,7 +116,7 @@ class User extends AbstractHandler
                 if (!$context->selectorShouldIncludeField($key)) {
                     return null;
                 }
-                
+
                 /** @var UserFollow $userFollowRepo */
                 $userFollowRepo = $this->app->repository('XF:UserFollow');
                 return $userFollowRepo->findFollowingForProfile($user)->total();
@@ -159,7 +159,11 @@ class User extends AbstractHandler
                     return null;
                 }
                 $dtz = new \DateTimeZone($user->timezone);
-                $dt = new \DateTime('now', $dtz);
+                try {
+                    $dt = new \DateTime('now', $dtz);
+                } catch (\Exception $e) {
+                    return null;
+                }
                 return $dtz->getOffset($dt);
             case self::DYNAMIC_KEY_TITLE:
                 return strip_tags($this->getTemplater()->fn('user_title', [$user]));
@@ -179,7 +183,7 @@ class User extends AbstractHandler
         return null;
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         /** @var \XF\Entity\User $user */
         $user = $context->getSource();
@@ -202,7 +206,7 @@ class User extends AbstractHandler
         return $links;
     }
 
-    public function collectPermissions($context)
+    public function collectPermissions(TransformContext $context)
     {
         /** @var \XF\Entity\User $user */
         $user = $context->getSource();
@@ -216,7 +220,7 @@ class User extends AbstractHandler
         ];
     }
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         $mappings = [
             'like_count' => self::KEY_LIKE_COUNT,
@@ -252,11 +256,7 @@ class User extends AbstractHandler
         return $mappings;
     }
 
-    /**
-     * @param TransformContext $context
-     * @return array
-     */
-    public function onNewContext($context)
+    public function onNewContext(TransformContext $context)
     {
         $data = parent::onNewContext($context);
         $data['flagFullAccess'] = false;
@@ -421,7 +421,7 @@ class User extends AbstractHandler
         ];
     }
 
-    public function onTransformFinder($context, $finder)
+    public function onTransformFinder(TransformContext $context, \XF\Mvc\Entity\Finder $finder)
     {
         $finder->with('Privacy');
 

@@ -11,6 +11,11 @@ class Login extends AbstractPlugin
     const INITIATE_TTL = 10;
     const TWO_STEP_TTL = 300;
 
+    /**
+     * @param string $publicLink
+     * @return \XF\Mvc\Reply\AbstractReply|\XF\Mvc\Reply\Redirect
+     * @throws \XF\PrintableException
+     */
     public function initiate($publicLink)
     {
         /** @var AbstractController $apiController */
@@ -49,6 +54,12 @@ class Login extends AbstractPlugin
         return $this->redirectSilently($redirectTarget);
     }
 
+    /**
+     * @param string $selfLink
+     * @return \XF\Mvc\Reply\Redirect
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function login($selfLink)
     {
         $params = $this->filter([
@@ -89,6 +100,10 @@ class Login extends AbstractPlugin
         return $this->redirectSilently($redirect);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Redirect
+     * @throws \XF\PrintableException
+     */
     public function logout()
     {
         $params = $this->filter([

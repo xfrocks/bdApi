@@ -2,9 +2,11 @@
 
 namespace Xfrocks\Api\XF\Transform;
 
+use Xfrocks\Api\Transform\TransformContext;
+
 class LinkForum extends AbstractNode
 {
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         $links = parent::collectLinks($context);
 

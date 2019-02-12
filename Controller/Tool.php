@@ -8,6 +8,10 @@ use Xfrocks\Api\Util\OneTimeToken;
 
 class Tool extends AbstractController
 {
+    /**
+     * @return \XF\Mvc\Reply\AbstractReply|\XF\Mvc\Reply\Redirect
+     * @throws \XF\PrintableException
+     */
     public function actionGetLogin()
     {
         /** @var Login $loginPlugin */
@@ -15,6 +19,10 @@ class Tool extends AbstractController
         return $loginPlugin->initiate('misc/api-login');
     }
 
+    /**
+     * @return \XF\Mvc\Reply\AbstractReply|\XF\Mvc\Reply\Redirect
+     * @throws \XF\PrintableException
+     */
     public function actionGetLogout()
     {
         /** @var Login $loginPlugin */
@@ -39,6 +47,10 @@ class Tool extends AbstractController
         exit(0);
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\PrintableException
+     */
     public function actionPostCrypt()
     {
         $params = $this->params()
@@ -108,6 +120,10 @@ class Tool extends AbstractController
         return $this->api(['ott' => OneTimeToken::generate($params['ttl'], $client)]);
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\PrintableException
+     */
     public function actionPostPasswordTest()
     {
         $params = $this->params()

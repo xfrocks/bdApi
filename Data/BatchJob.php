@@ -40,7 +40,6 @@ class BatchJob
 
     /**
      * @return \XF\Mvc\Reply\AbstractReply
-     * @throws \Exception
      */
     public function execute()
     {
@@ -102,14 +101,17 @@ class BatchJob
     /**
      * @param \XF\Http\Request $request
      * @return \XF\Mvc\Dispatcher
-     * @throws \Exception
      */
     protected function buildDispatcher($request)
     {
         $app = $this->app;
-        $class = $app->extendClass('XF\Mvc\Dispatcher');
-        $dispatcher = new $class($app, $request);
+        try {
+            $class = $app->extendClass('XF\Mvc\Dispatcher');
+            $dispatcher = new $class($app, $request);
 
-        return $dispatcher;
+            return $dispatcher;
+        } catch (\Exception $e) {
+            throw new \RuntimeException('', 0, $e);
+        }
     }
 }

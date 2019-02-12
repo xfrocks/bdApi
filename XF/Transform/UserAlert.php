@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Transform\TransformContext;
 
 class UserAlert extends AbstractHandler
 {
@@ -18,7 +19,7 @@ class UserAlert extends AbstractHandler
     const DYNAMIC_KEY_NOTIFICATION_TYPE = 'notification_type';
     const DYNAMIC_KEY_NOTIFICATION_HTML = 'notification_html';
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             'alert_id' => self::KEY_ID,
@@ -36,7 +37,7 @@ class UserAlert extends AbstractHandler
         ];
     }
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XF\Entity\UserAlert $alert */
         $alert = $context->getSource();
@@ -58,7 +59,7 @@ class UserAlert extends AbstractHandler
         return parent::calculateDynamicValue($context, $key);
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         /** @var \XF\Entity\UserAlert $alert */
         $alert = $context->getSource();
@@ -77,10 +78,11 @@ class UserAlert extends AbstractHandler
         return $links;
     }
 
-    public function onTransformEntities($context, $entities)
+    public function onTransformEntities(TransformContext $context, $entities)
     {
         /** @var \XF\Repository\UserAlert $userAlertRepo */
         $userAlertRepo = $this->app->repository('XF:UserAlert');
+        /** @var \XF\Entity\UserAlert[] $entities */
         $userAlertRepo->addContentToAlerts($entities);
 
         return parent::onTransformEntities($context, $entities);

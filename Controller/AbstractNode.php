@@ -7,6 +7,11 @@ use XF\Repository\Node;
 
 abstract class AbstractNode extends AbstractController
 {
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetIndex(ParameterBag $params)
     {
         if ($params->node_id) {
@@ -71,6 +76,11 @@ abstract class AbstractNode extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param int $nodeId
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionSingle($nodeId)
     {
         $nodeTypes = $this->app()->container('nodeTypes');

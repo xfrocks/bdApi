@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Transform\TransformContext;
 
 class PollResponse extends AbstractHandler
 {
@@ -12,12 +13,12 @@ class PollResponse extends AbstractHandler
 
     const DYNAMIC_KEY_IS_VOTED = 'response_is_voted';
 
-    public function canView($context)
+    public function canView(TransformContext $context)
     {
         return true;
     }
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XF\Entity\PollResponse $response */
         $response = $context->getSource();
@@ -36,7 +37,7 @@ class PollResponse extends AbstractHandler
         return null;
     }
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             'poll_response_id' => self::KEY_ID,

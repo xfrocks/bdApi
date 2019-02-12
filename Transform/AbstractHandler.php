@@ -85,7 +85,7 @@ abstract class AbstractHandler
      * @param string $key
      * @return mixed
      */
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         return null;
     }
@@ -94,7 +94,7 @@ abstract class AbstractHandler
      * @param TransformContext $context
      * @return bool
      */
-    public function canView($context)
+    public function canView(TransformContext $context)
     {
         /** @var callable $callable */
         $callable = [$context->getSource(), 'canView'];
@@ -107,7 +107,7 @@ abstract class AbstractHandler
      * @param TransformContext $context
      * @return array|null
      */
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         return null;
     }
@@ -116,7 +116,7 @@ abstract class AbstractHandler
      * @param TransformContext $context
      * @return array|null
      */
-    public function collectPermissions($context)
+    public function collectPermissions(TransformContext $context)
     {
         return null;
     }
@@ -125,7 +125,7 @@ abstract class AbstractHandler
      * @param TransformContext $context
      * @return array
      */
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [];
     }
@@ -134,7 +134,7 @@ abstract class AbstractHandler
      * @param TransformContext $context
      * @return array
      */
-    public function onNewContext($context)
+    public function onNewContext(TransformContext $context)
     {
         $context->makeSureSelectorIsNotNull($this->type);
 
@@ -146,7 +146,7 @@ abstract class AbstractHandler
      * @param Finder $finder
      * @return Finder
      */
-    public function onTransformFinder($context, $finder)
+    public function onTransformFinder(TransformContext $context, Finder $finder)
     {
         foreach ($context->getOnTransformFinderCallbacks() as $callback) {
             call_user_func_array($callback, [$context, $finder]);
@@ -160,7 +160,7 @@ abstract class AbstractHandler
      * @param Entity[] $entities
      * @return Entity[]
      */
-    public function onTransformEntities($context, $entities)
+    public function onTransformEntities(TransformContext $context, $entities)
     {
         foreach ($context->getOnTransformEntitiesCallbacks() as $callback) {
             call_user_func_array($callback, [$context, $entities]);
@@ -173,7 +173,7 @@ abstract class AbstractHandler
      * @param TransformContext $context
      * @param array $data
      */
-    public function onTransformed($context, array &$data)
+    public function onTransformed(TransformContext $context, array &$data)
     {
         foreach ($context->getOnTransformedCallbacks() as $callback) {
             $params = [$context, &$data];
@@ -211,8 +211,12 @@ abstract class AbstractHandler
      * @param string|null $contextKey
      * @param string $relationKey
      */
-    protected function callOnTransformEntitiesForRelation($context, $entities, $contextKey, $relationKey)
-    {
+    protected function callOnTransformEntitiesForRelation(
+        TransformContext $context,
+        $entities,
+        $contextKey,
+        $relationKey
+    ) {
         if ($entities instanceof AbstractCollection) {
             if (!$entities->count()) {
                 return;
@@ -267,10 +271,14 @@ abstract class AbstractHandler
      * @param string|null $contextKey
      * @param string $relationKey
      * @param string|null $shortName
-     * @throws \Exception
      */
-    protected function callOnTransformFinderForRelation($context, $finder, $contextKey, $relationKey, $shortName = null)
-    {
+    protected function callOnTransformFinderForRelation(
+        TransformContext $context,
+        Finder $finder,
+        $contextKey,
+        $relationKey,
+        $shortName = null
+    ) {
         $finder->with($relationKey);
 
         if ($shortName === null) {
@@ -293,7 +301,11 @@ abstract class AbstractHandler
 
         $relationStructure = $em->getEntityStructure($relationConfig['entity']);
         $finderClass = \XF::stringToClass($shortName, '%s\Finder\%s');
-        $finderClass = $this->app->extendClass($finderClass, '\XF\Mvc\Entity\Finder');
+        try {
+            $finderClass = $this->app->extendClass($finderClass, '\XF\Mvc\Entity\Finder');
+        } catch (\Exception $e) {
+            // ignore
+        }
         if (!$finderClass || !class_exists($finderClass)) {
             $finderClass = '\XF\Mvc\Entity\Finder';
         }

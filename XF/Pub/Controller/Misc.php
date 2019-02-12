@@ -10,6 +10,10 @@ use Xfrocks\Api\OAuth2\Server;
 
 class Misc extends XFCP_Misc
 {
+    /**
+     * @return \XF\Mvc\Reply\View
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionApiData()
     {
         $callback = $this->filter('callback', 'str');
@@ -80,6 +84,11 @@ class Misc extends XFCP_Misc
         return $this->view('Xfrocks\Api:Misc\ApiData', '', $viewParams);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Redirect
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionApiLogin()
     {
         /** @var Login $loginPlugin */

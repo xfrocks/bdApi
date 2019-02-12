@@ -2,13 +2,15 @@
 
 namespace Xfrocks\Api\XF\Transform;
 
+use Xfrocks\Api\Transform\TransformContext;
+
 class Page extends AbstractNode
 {
     const KEY_VIEW_COUNT = 'page_view_count';
 
     const DYNAMIC_KEY_PAGE_HTML = 'page_html';
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         $mappings = parent::getMappings($context);
 
@@ -18,7 +20,7 @@ class Page extends AbstractNode
         return $mappings;
     }
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XF\Entity\Page $page */
         $page = $context->getSource();
@@ -32,7 +34,7 @@ class Page extends AbstractNode
         return parent::calculateDynamicValue($context, $key);
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         $links = parent::collectLinks($context);
 

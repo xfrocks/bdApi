@@ -2,8 +2,6 @@
 
 namespace Xfrocks\Api\Transform;
 
-use XF\Mvc\Reply\AbstractReply;
-
 class BatchJobReply extends AbstractHandler
 {
     const DYNAMIC_KEY_ERROR = '_job_error';
@@ -17,9 +15,9 @@ class BatchJobReply extends AbstractHandler
     const RESULT_REDIRECT = 'redirect';
     const RESULT_OK = 'ok';
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
-        /** @var AbstractReply $reply */
+        /** @var \XF\Mvc\Reply\AbstractReply $reply */
         $reply = $context->data('reply');
         if (empty($reply)) {
             return null;
@@ -91,12 +89,12 @@ class BatchJobReply extends AbstractHandler
         return null;
     }
 
-    public function canView($context)
+    public function canView(TransformContext $context)
     {
         return true;
     }
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             self::DYNAMIC_KEY_ERROR,
@@ -107,7 +105,7 @@ class BatchJobReply extends AbstractHandler
         ];
     }
 
-    public function onNewContext($context)
+    public function onNewContext(TransformContext $context)
     {
         $data = parent::onNewContext($context);
         $data['reply'] = null;
@@ -122,7 +120,7 @@ class BatchJobReply extends AbstractHandler
         return $data;
     }
 
-    public function onTransformed($context, array &$data)
+    public function onTransformed(TransformContext $context, array &$data)
     {
         $reply = $context->data('reply');
         if (is_object($reply) && $reply instanceof \Xfrocks\Api\Mvc\Reply\Api) {

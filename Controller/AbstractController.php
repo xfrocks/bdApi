@@ -69,7 +69,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
         try {
             parent::assertCanonicalUrl($linkUrl);
-        } catch (\XF\Mvc\Reply\Exception $exceptionReply) {
+        } catch (Reply\Exception $exceptionReply) {
             $reply = $exceptionReply->getReply();
             if ($reply instanceof Redirect) {
                 /** @var Redirect $redirect */
@@ -102,6 +102,9 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         }
     }
 
+    /**
+     * @throws Reply\Exception
+     */
     protected function assertValidToken()
     {
         $session = $this->session();
@@ -199,6 +202,11 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         return $this->apiParams;
     }
 
+    /**
+     * @param string $action
+     * @param ParameterBag $params
+     * @throws Reply\Exception
+     */
     public function preDispatch($action, ParameterBag $params)
     {
         parent::preDispatch($action, $params);

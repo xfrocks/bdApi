@@ -18,12 +18,18 @@ use XF\Validator\Email;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\Entity\Token;
 use Xfrocks\Api\OAuth2\Server;
+use Xfrocks\Api\Transform\TransformContext;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\Util\Crypt;
 use Xfrocks\Api\Util\PageNav;
 
 class User extends AbstractController
 {
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetIndex(ParameterBag $params)
     {
         if ($params->user_id) {
@@ -55,6 +61,11 @@ class User extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\AbstractReply
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionPostIndex()
     {
         $params = $this
@@ -201,6 +212,12 @@ class User extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionPutIndex(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
@@ -405,12 +422,23 @@ class User extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionPostPassword(ParameterBag $params)
     {
         $this->params()->markAsDeprecated();
         return $this->actionPutIndex($params);
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \XF\Mvc\Reply\View
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetDefaultAvatar(ParameterBag $paramBag)
     {
         $avatarSizeMap = $this->app->container('avatarSizeMap');
@@ -493,41 +521,75 @@ class User extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetMe()
     {
         return $this->actionGetIndex($this->buildParamsForVisitor());
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionPutMe()
     {
         return $this->actionPutIndex($this->buildParamsForVisitor());
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostMeAvatar()
     {
         return $this->actionPostAvatar($this->buildParamsForVisitor());
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteMeAvatar()
     {
         return $this->actionDeleteAvatar($this->buildParamsForVisitor());
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetMeFollowers()
     {
         return $this->actionGetFollowers($this->buildParamsForVisitor());
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetMeFollowings()
     {
         return $this->actionGetFollowings($this->buildParamsForVisitor());
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetMeGroups()
     {
         return $this->actionGetGroups($this->buildParamsForVisitor());
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostReport(ParameterBag $paramBag)
     {
         $params = $this
@@ -553,6 +615,11 @@ class User extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostAvatar(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
@@ -584,6 +651,11 @@ class User extends AbstractController
         return $this->message(\XF::phrase('upload_completed_successfully'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteAvatar(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
@@ -603,6 +675,11 @@ class User extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetFollowers(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
@@ -634,6 +711,11 @@ class User extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostFollowers(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
@@ -650,6 +732,11 @@ class User extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteFollowers(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
@@ -666,6 +753,11 @@ class User extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetFollowings(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
@@ -697,6 +789,10 @@ class User extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetIgnored()
     {
         $this->assertRegistrationRequired();
@@ -734,6 +830,11 @@ class User extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostIgnore(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
@@ -749,6 +850,11 @@ class User extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteIgnore(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
@@ -764,6 +870,11 @@ class User extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetGroups(ParameterBag $params)
     {
         if ($params->user_id) {
@@ -784,6 +895,7 @@ class User extends AbstractController
         }
 
         $this->params()->getTransformContext()->onTransformedCallbacks[] = function ($context, array &$data) use ($user) {
+            /** @var TransformContext $context */
             $source = $context->getSource();
             if (!($source instanceof UserGroup)) {
                 return;
@@ -805,6 +917,11 @@ class User extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Reroute
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetTimeline(ParameterBag $params)
     {
         $user = $this->assertViewableUser($params->user_id);
@@ -820,16 +937,29 @@ class User extends AbstractController
         return $this->rerouteController('Xfrocks\Api:ProfilePost', 'post-index', $params);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Reroute
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetMeTimeline()
     {
         return $this->actionGetTimeline($this->buildParamsForVisitor());
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Reroute
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostMeTimeline()
     {
         return $this->actionPostTimeline($this->buildParamsForVisitor());
     }
 
+    /**
+     * @param int $userId
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     protected function actionSingle($userId)
     {
         $user = $this->assertViewableUser($userId);

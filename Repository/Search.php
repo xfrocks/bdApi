@@ -13,6 +13,14 @@ class Search extends Repository
 {
     const OPTION_SEARCH_TYPE = 'searchType';
 
+    /**
+     * @param Params $input
+     * @param string $contentType
+     * @param array $constraints
+     * @param array $options
+     * @return \XF\Entity\Search|null
+     * @throws PrintableException
+     */
     public function search(Params $input, $contentType = '', array $constraints = [], array $options = [])
     {
         $httpRequest = new Request($this->app()->inputFilterer(), $input->getFilteredValues());
@@ -70,6 +78,7 @@ class Search extends Repository
 
         /** @var \XF\Repository\Search $xfSearchRepo */
         $xfSearchRepo = $this->repository('XF:Search');
+        /** @var \XF\Entity\Search|null $search */
         $search = $xfSearchRepo->runSearch($query, $constraints);
 
         return $search;

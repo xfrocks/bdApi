@@ -16,7 +16,7 @@ class CustomField extends AbstractHandler
     const DYNAMIC_KEY_VALUE = 'value';
     const DYNAMIC_KEY_VALUES = 'values';
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var Definition|null $definition */
         $definition = $context->data('definition');
@@ -90,12 +90,12 @@ class CustomField extends AbstractHandler
         return null;
     }
 
-    public function canView($context)
+    public function canView(TransformContext $context)
     {
         return true;
     }
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             self::DYNAMIC_KEY_CHOICES,
@@ -110,7 +110,7 @@ class CustomField extends AbstractHandler
         ];
     }
 
-    public function onNewContext($context)
+    public function onNewContext(TransformContext $context)
     {
         $data = parent::onNewContext($context);
         $data['definition'] = null;

@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Transform\TransformContext;
 
 class ProfilePostComment extends AbstractHandler
 {
@@ -22,7 +23,7 @@ class ProfilePostComment extends AbstractHandler
     const LINK_POSTER = 'poster';
     const LINK_POSTER_AVATAR = 'poster_avatar';
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             'profile_post_comment_id' => self::KEY_ID,
@@ -37,7 +38,7 @@ class ProfilePostComment extends AbstractHandler
         ];
     }
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XF\Entity\ProfilePostComment $comment */
         $comment = $context->getSource();
@@ -54,7 +55,7 @@ class ProfilePostComment extends AbstractHandler
         return null;
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         /** @var \XF\Entity\ProfilePostComment $comment */
         $comment = $context->getSource();
@@ -78,7 +79,7 @@ class ProfilePostComment extends AbstractHandler
         return $links;
     }
 
-    public function collectPermissions($context)
+    public function collectPermissions(TransformContext $context)
     {
         /** @var \XF\Entity\ProfilePostComment $comment */
         $comment = $context->getSource();

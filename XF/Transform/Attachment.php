@@ -4,6 +4,7 @@ namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\AttachmentParent;
+use Xfrocks\Api\Transform\TransformContext;
 
 class Attachment extends AbstractHandler
 {
@@ -14,7 +15,7 @@ class Attachment extends AbstractHandler
     const LINK_DATA = 'data';
     const LINK_THUMBNAIL = 'thumbnail';
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var AttachmentParent|null $parentHandler */
         $parentHandler = $context->getParentHandler();
@@ -25,7 +26,7 @@ class Attachment extends AbstractHandler
         return parent::calculateDynamicValue($context, $key);
     }
 
-    public function canView($context)
+    public function canView(TransformContext $context)
     {
         /** @var \XF\Entity\Attachment $attachment */
         $attachment = $context->getSource();
@@ -39,7 +40,7 @@ class Attachment extends AbstractHandler
         return $attachment->canView();
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         /** @var \XF\Entity\Attachment $attachment */
         $attachment = $context->getSource();
@@ -63,7 +64,7 @@ class Attachment extends AbstractHandler
         return $links;
     }
 
-    public function collectPermissions($context)
+    public function collectPermissions(TransformContext $context)
     {
         /** @var \XF\Entity\Attachment $attachment */
         $attachment = $context->getSource();
@@ -82,7 +83,7 @@ class Attachment extends AbstractHandler
         return $permissions;
     }
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         $mappings = [
             'attachment_id' => self::KEY_ID,

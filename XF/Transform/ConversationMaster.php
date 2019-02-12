@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Transform\TransformContext;
 
 class ConversationMaster extends AbstractHandler
 {
@@ -27,7 +28,7 @@ class ConversationMaster extends AbstractHandler
     const PERM_REPLY = 'reply';
     const PERM_UPLOAD_ATTACHMENT = 'upload_attachment';
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             'start_date' => self::KEY_CREATE_DATE,
@@ -48,7 +49,7 @@ class ConversationMaster extends AbstractHandler
         ];
     }
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XF\Entity\ConversationMaster $conversation */
         $conversation = $context->getSource();
@@ -112,7 +113,7 @@ class ConversationMaster extends AbstractHandler
         return null;
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         /** @var \XF\Entity\ConversationMaster $conversation */
         $conversation = $context->getSource();
@@ -129,7 +130,7 @@ class ConversationMaster extends AbstractHandler
         return $links;
     }
 
-    public function collectPermissions($context)
+    public function collectPermissions(TransformContext $context)
     {
         /** @var \XF\Entity\ConversationMaster $conversation */
         $conversation = $context->getSource();
@@ -142,7 +143,7 @@ class ConversationMaster extends AbstractHandler
         return $perms;
     }
 
-    public function onTransformEntities($context, $entities)
+    public function onTransformEntities(TransformContext $context, $entities)
     {
         if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_FIRST_MESSAGE)) {
             $this->callOnTransformEntitiesForRelation(
@@ -182,7 +183,7 @@ class ConversationMaster extends AbstractHandler
         return parent::onTransformEntities($context, $entities);
     }
 
-    public function onTransformFinder($context, $finder)
+    public function onTransformFinder(TransformContext $context, \XF\Mvc\Entity\Finder $finder)
     {
         if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_FIRST_MESSAGE)) {
             $this->callOnTransformFinderForRelation(

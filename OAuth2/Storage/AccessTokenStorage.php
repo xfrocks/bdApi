@@ -14,6 +14,10 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
 {
     protected $fakeTokenTexts = [];
 
+    /**
+     * @inheritdoc
+     * @throws \XF\PrintableException
+     */
     public function associateScope(AccessTokenEntity $token, ScopeEntity $scope)
     {
         $hybrid = $this->getHybrid($token);
@@ -27,6 +31,10 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
         }
     }
 
+    /**
+     * @inheritdoc
+     * @throws \XF\PrintableException
+     */
     public function create($token, $expireTime, $sessionId)
     {
         /** @var SessionStorage $sessionStorage */
@@ -46,6 +54,10 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
         $this->doXfEntitySave($xfToken);
     }
 
+    /**
+     * @inheritdoc
+     * @throws \XF\PrintableException
+     */
     public function delete(AccessTokenEntity $token)
     {
         if (isset($this->fakeTokenTexts[$token->getId()])) {

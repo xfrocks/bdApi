@@ -7,6 +7,11 @@ use Xfrocks\Api\Controller\AbstractController;
 
 class Category extends AbstractController
 {
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetIndex(ParameterBag $params)
     {
         if ($params->resource_category_id) {
@@ -19,6 +24,11 @@ class Category extends AbstractController
         return $this->api(['categories' => $categories]);
     }
 
+    /**
+     * @param int $resourceCategoryId
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     protected function actionSingle($resourceCategoryId)
     {
         $category = $this->assertViewableCategory($resourceCategoryId);

@@ -12,10 +12,16 @@ use XF\Repository\ThreadWatch;
 use XF\Service\Thread\Creator;
 use XF\Service\Thread\Deleter;
 use Xfrocks\Api\Data\Params;
+use Xfrocks\Api\Transform\TransformContext;
 use Xfrocks\Api\Util\PageNav;
 
 class Thread extends AbstractController
 {
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetIndex(ParameterBag $params)
     {
         if ($params->thread_id) {
@@ -86,6 +92,10 @@ class Thread extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostIndex()
     {
         $params = $this
@@ -164,6 +174,11 @@ class Thread extends AbstractController
         ]);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteIndex(ParameterBag $params)
     {
         $thread = $this->assertViewableThread($params->thread_id);
@@ -183,6 +198,11 @@ class Thread extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionPostAttachments()
     {
         $params = $this
@@ -206,6 +226,11 @@ class Thread extends AbstractController
         return $attachmentPlugin->doUpload($tempHash, 'post', $context);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetFollowers(ParameterBag $params)
     {
         $thread = $this->assertViewableThread($params->thread_id);
@@ -234,6 +259,11 @@ class Thread extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostFollowers(ParameterBag $params)
     {
         $thread = $this->assertViewableThread($params->thread_id);
@@ -257,6 +287,11 @@ class Thread extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteFollowers(ParameterBag $params)
     {
         $thread = $this->assertViewableThread($params->thread_id);
@@ -268,6 +303,10 @@ class Thread extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetFollowed()
     {
         $params = $this
@@ -293,6 +332,7 @@ class Thread extends AbstractController
 
         $context = $this->params()->getTransformContext();
         $context->onTransformedCallbacks[] = function ($context, &$data) {
+            /** @var TransformContext $context */
             $source = $context->getSource();
             if (!($source instanceof \XF\Entity\Thread)) {
                 return;
@@ -317,6 +357,11 @@ class Thread extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostPollVotes(ParameterBag $params)
     {
         $thread = $this->assertViewableThread($params->thread_id);
@@ -353,6 +398,11 @@ class Thread extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetPollResults(ParameterBag $params)
     {
         $thread = $this->assertViewableThread($params->thread_id);
@@ -376,6 +426,7 @@ class Thread extends AbstractController
 
         $transformContext = $this->params()->getTransformContext();
         $transformContext->onTransformedCallbacks[] = function ($context, &$data) use ($users) {
+            /** @var TransformContext $context */
             $source = $context->getSource();
             if (!($source instanceof PollResponse)) {
                 return;
@@ -403,6 +454,11 @@ class Thread extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionGetNew()
     {
         $this
@@ -419,6 +475,11 @@ class Thread extends AbstractController
         return $this->getNewOrRecentResponse('threads_new', $finder);
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionGetRecent()
     {
         $this
@@ -448,9 +509,13 @@ class Thread extends AbstractController
         return $this->api(['thread' => $this->findAndTransformLazily('XF:Thread', intval($threadId))]);
     }
 
-    protected function applyFilters(\XF\Finder\Thread $finder, Params $params)
+    /**
+     * @param \XF\Finder\Thread $finder
+     * @param Params $params
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    protected function applyFilters($finder, Params $params)
     {
-
         if ($params['forum_id'] > 0) {
             /** @var Forum $forum */
             $forum = $this->assertViewableForum($params['forum_id']);
@@ -472,6 +537,13 @@ class Thread extends AbstractController
         // TODO: Add more filters?
     }
 
+    /**
+     * @param string $searchType
+     * @param Finder $finder
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     protected function getNewOrRecentResponse($searchType, Finder $finder)
     {
         $params = $this->params();

@@ -12,6 +12,15 @@ use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class Attachment extends AbstractPlugin
 {
+    /**
+     * @param string $hash
+     * @param string $contentType
+     * @param mixed $context
+     * @param string $formField
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws PrintableException
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function doUpload($hash, $contentType, $context, $formField = 'file')
     {
         /** @var \XF\Repository\Attachment $attachRepo */

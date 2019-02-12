@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Transform\TransformContext;
 use Xfrocks\Api\Util\ParentFinder;
 
 class Thread extends AbstractHandler
@@ -40,7 +41,7 @@ class Thread extends AbstractHandler
     const PERM_POST = 'post';
     const PERM_UPLOAD_ATTACHMENT = 'upload_attachment';
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XF\Entity\Thread $thread */
         $thread = $context->getSource();
@@ -103,7 +104,7 @@ class Thread extends AbstractHandler
         return null;
     }
 
-    public function collectPermissions($context)
+    public function collectPermissions(TransformContext $context)
     {
         /** @var \XF\Entity\Thread $thread */
         $thread = $context->getSource();
@@ -121,7 +122,7 @@ class Thread extends AbstractHandler
         return $permissions;
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         /** @var \XF\Entity\Thread $thread */
         $thread = $context->getSource();
@@ -148,7 +149,7 @@ class Thread extends AbstractHandler
         return $links;
     }
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             // xf_thread
@@ -175,7 +176,7 @@ class Thread extends AbstractHandler
         ];
     }
 
-    public function onTransformEntities($context, $entities)
+    public function onTransformEntities(TransformContext $context, $entities)
     {
         if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_FIRST_POST)) {
             $this->callOnTransformEntitiesForRelation(
@@ -189,7 +190,7 @@ class Thread extends AbstractHandler
         return $entities;
     }
 
-    public function onTransformFinder($context, $finder)
+    public function onTransformFinder(TransformContext $context, \XF\Mvc\Entity\Finder $finder)
     {
         $forumFinder = new ParentFinder($finder, 'Forum');
         $visitor = \XF::visitor();

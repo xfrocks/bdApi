@@ -23,6 +23,11 @@ class PreTest extends Command
     public $threads = 3;
     public $posts = 3;
 
+    /**
+     * @param array $data
+     * @return mixed
+     * @throws PrintableException
+     */
     public function createForum(array &$data)
     {
         if (!isset($data['forum'])) {
@@ -106,6 +111,12 @@ class PreTest extends Command
         return $data['users'];
     }
 
+    /**
+     * @param array $data
+     * @return mixed
+     * @throws \Exception
+     * @throws PrintableException
+     */
     public function createThreads(array &$data)
     {
         if (!isset($data['threads'])) {
@@ -149,6 +160,12 @@ class PreTest extends Command
         return $data['threads'];
     }
 
+    /**
+     * @param array $data
+     * @return mixed
+     * @throws \Exception
+     * @throws PrintableException
+     */
     public function createPosts(array &$data)
     {
         if (!isset($data['posts'])) {
@@ -187,6 +204,12 @@ class PreTest extends Command
         return $data['posts'];
     }
 
+    /**
+     * @param array $userData
+     * @param array $data
+     * @return mixed
+     * @throws PrintableException
+     */
     public function createApiClient(array $userData, array &$data)
     {
         if (!isset($data['apiClient'])) {
@@ -255,6 +278,12 @@ class PreTest extends Command
             ->setDescription('Prepare environment for API testings');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|null
+     * @throws PrintableException
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (!\XF::$debugMode) {

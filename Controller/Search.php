@@ -19,6 +19,11 @@ class Search extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetResults(ParameterBag $params)
     {
         $search = $this->assertViewableSearch($params->search_id);
@@ -51,6 +56,10 @@ class Search extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Reroute
+     * @throws \XF\PrintableException
+     */
     public function actionPostThreads()
     {
         if (!\XF::visitor()->canSearch($error)) {
@@ -75,6 +84,10 @@ class Search extends AbstractController
         return $this->rerouteController(__CLASS__, 'getResults', ['search_id' => $search->search_id]);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Reroute
+     * @throws \XF\PrintableException
+     */
     public function actionPostPosts()
     {
         if (!\XF::visitor()->canSearch($error)) {
@@ -101,6 +114,11 @@ class Search extends AbstractController
         return $this->rerouteController(__CLASS__, 'getResults', ['search_id' => $search->search_id]);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message|\XF\Mvc\Reply\Reroute
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionUserTimeline(ParameterBag $params)
     {
         /** @var \XF\Entity\User $user */

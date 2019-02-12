@@ -2,6 +2,8 @@
 
 namespace Xfrocks\Api\XF\Transform;
 
+use Xfrocks\Api\Transform\TransformContext;
+
 class Forum extends AbstractNode
 {
     const KEY_POST_COUNT = 'forum_post_count';
@@ -17,7 +19,7 @@ class Forum extends AbstractNode
     const PERM_CREATE_THREAD = 'create_thread';
     const PERM_UPLOAD_ATTACHMENT = 'upload_attachment';
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         $mappings = parent::getMappings($context);
 
@@ -34,7 +36,7 @@ class Forum extends AbstractNode
         return $mappings;
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         $links = parent::collectLinks($context);
 
@@ -49,7 +51,7 @@ class Forum extends AbstractNode
         return $links;
     }
 
-    public function collectPermissions($context)
+    public function collectPermissions(TransformContext $context)
     {
         $perms = parent::collectPermissions($context);
 
@@ -65,7 +67,7 @@ class Forum extends AbstractNode
         return $perms;
     }
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XF\Entity\Forum $forum */
         $forum = $context->getSource();

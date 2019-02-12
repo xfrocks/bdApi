@@ -74,7 +74,11 @@ class Log extends Repository
         $log->response_code = $responseCode;
         $log->response_output = $this->filterData($responseOutput);
 
-        return $log->save();
+        try {
+            return $log->save();
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     protected function filterData(array &$data, $level = 0)

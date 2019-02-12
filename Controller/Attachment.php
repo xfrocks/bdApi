@@ -2,11 +2,15 @@
 
 namespace Xfrocks\Api\Controller;
 
-use XF\Attachment\Manipulator;
 use XF\Mvc\ParameterBag;
 
 class Attachment extends AbstractController
 {
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\View
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetIndex(ParameterBag $params)
     {
         if ($params->attachment_id) {
@@ -16,6 +20,12 @@ class Attachment extends AbstractController
         return $this->notFound();
     }
 
+    /**
+     * @param ParameterBag $pb
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionDeleteIndex(ParameterBag $pb)
     {
         $params = $this->params()
@@ -47,6 +57,11 @@ class Attachment extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param int $attachmentId
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\View
+     * @throws \XF\Mvc\Reply\Exception
+     */
     protected function actionSingle($attachmentId)
     {
         /** @var \XF\Entity\Attachment|null $attachment */

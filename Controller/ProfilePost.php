@@ -10,6 +10,11 @@ use XF\Service\ProfilePostComment\Deleter;
 
 class ProfilePost extends AbstractController
 {
+    /**
+     * @param ParameterBag $paramBag
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetIndex(ParameterBag $paramBag)
     {
         $params = $this
@@ -25,6 +30,11 @@ class ProfilePost extends AbstractController
         return $this->actionSingle($paramBag->profile_post_id);
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPutIndex(ParameterBag $paramBag)
     {
         $params = $this
@@ -49,6 +59,11 @@ class ProfilePost extends AbstractController
         return $this->actionSingle($profilePost->profile_post_id);
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteIndex(ParameterBag $paramBag)
     {
         $params = $this
@@ -67,6 +82,11 @@ class ProfilePost extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetLikes(ParameterBag $paramBag)
     {
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
@@ -88,6 +108,11 @@ class ProfilePost extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostLikes(ParameterBag $paramBag)
     {
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
@@ -106,6 +131,11 @@ class ProfilePost extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteLikes(ParameterBag $paramBag)
     {
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
@@ -124,6 +154,11 @@ class ProfilePost extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetComments(ParameterBag $paramBag)
     {
         $params = $this
@@ -205,6 +240,11 @@ class ProfilePost extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Reroute
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostComments(ParameterBag $paramBag)
     {
         $params = $this
@@ -239,6 +279,11 @@ class ProfilePost extends AbstractController
         ]);
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteComments(ParameterBag $paramBag)
     {
         $params = $this
@@ -264,6 +309,11 @@ class ProfilePost extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostReport(ParameterBag $paramBag)
     {
         $params = $this->params()->define('message', 'str');
@@ -297,6 +347,11 @@ class ProfilePost extends AbstractController
         return $this->api(['profile_posts' => $profilePosts]);
     }
 
+    /**
+     * @param int $profilePostId
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionSingle($profilePostId)
     {
         $profilePost = $this->assertViewableProfilePost($profilePostId);

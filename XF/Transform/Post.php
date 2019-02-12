@@ -5,6 +5,7 @@ namespace Xfrocks\Api\XF\Transform;
 use XF\Entity\Forum;
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\AttachmentParent;
+use Xfrocks\Api\Transform\TransformContext;
 use Xfrocks\Api\Util\ParentFinder;
 
 class Post extends AbstractHandler implements AttachmentParent
@@ -83,7 +84,7 @@ class Post extends AbstractHandler implements AttachmentParent
         $mappings[] = self::ATTACHMENT__DYNAMIC_KEY_ID;
     }
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XF\Entity\Post $post */
         $post = $context->getSource();
@@ -151,7 +152,7 @@ class Post extends AbstractHandler implements AttachmentParent
         return null;
     }
 
-    public function collectPermissions($context)
+    public function collectPermissions(TransformContext $context)
     {
         /** @var \XF\Entity\Post $post */
         $post = $context->getSource();
@@ -168,7 +169,7 @@ class Post extends AbstractHandler implements AttachmentParent
         return $permissions;
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         /** @var \XF\Entity\Post $post */
         $post = $context->getSource();
@@ -193,7 +194,7 @@ class Post extends AbstractHandler implements AttachmentParent
         return $links;
     }
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             'attach_count' => self::KEY_ATTACHMENT_COUNT,
@@ -220,7 +221,7 @@ class Post extends AbstractHandler implements AttachmentParent
         ];
     }
 
-    public function onTransformEntities($context, $entities)
+    public function onTransformEntities(TransformContext $context, $entities)
     {
         $needAttachments = false;
         if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_ATTACHMENTS)) {
@@ -236,7 +237,7 @@ class Post extends AbstractHandler implements AttachmentParent
         return $entities;
     }
 
-    public function onTransformFinder($context, $finder)
+    public function onTransformFinder(TransformContext $context, \XF\Mvc\Entity\Finder $finder)
     {
         $threadFinder = new ParentFinder($finder, 'Thread');
         $visitor = \XF::visitor();

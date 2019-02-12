@@ -37,6 +37,11 @@ class Account extends XFCP_Account
         return $this->addAccountWrapperParams($view, 'api');
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Redirect|\XF\Mvc\Reply\View
+     * @throws \XF\PrintableException
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionApiClientDelete()
     {
         $client = $this->assertEditableApiClient($this->filter('client_id', 'str'));
@@ -55,6 +60,10 @@ class Account extends XFCP_Account
         return $this->addAccountWrapperParams($view, 'api');
     }
 
+    /**
+     * @return \XF\Mvc\Reply\View
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionApiClientEdit()
     {
         $client = $this->assertEditableApiClient($this->filter('client_id', 'str'));
@@ -67,6 +76,11 @@ class Account extends XFCP_Account
         return $this->addAccountWrapperParams($view, 'api');
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Redirect
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionApiClientSave()
     {
         $this->assertPostOnly();
@@ -99,6 +113,10 @@ class Account extends XFCP_Account
         return $this->redirect($this->buildLink('account/api'));
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Redirect
+     * @throws \XF\PrintableException
+     */
     public function actionApiLogout()
     {
         /** @var Login $loginPlugin */
@@ -106,6 +124,13 @@ class Account extends XFCP_Account
         return $loginPlugin->logout();
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Redirect|\XF\Mvc\Reply\View
+     * @throws \League\OAuth2\Server\Exception\InvalidGrantException
+     * @throws \League\OAuth2\Server\Exception\UnsupportedResponseTypeException
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionAuthorize()
     {
         /** @var Server $apiServer */
@@ -183,13 +208,18 @@ class Account extends XFCP_Account
         return $this->addAccountWrapperParams($view, 'api');
     }
 
+    /**
+     * @param string $clientId
+     * @return Client
+     * @throws \XF\Mvc\Reply\Exception
+     */
     protected function assertEditableApiClient($clientId)
     {
         /** @var Client $client */
         $client = $this->assertRecordExists('Xfrocks\Api:Client', $clientId);
 
         if (!$client->canEdit()) {
-            return $this->exception($this->notFound(\XF::phrase('bdapi_requested_client_not_found')));
+            throw $this->exception($this->notFound(\XF::phrase('bdapi_requested_client_not_found')));
         }
 
         return $client;

@@ -70,6 +70,11 @@ class Notification extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetContent(ParameterBag $params)
     {
         /** @var UserAlert $alert */

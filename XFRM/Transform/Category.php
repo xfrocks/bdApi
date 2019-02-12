@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\XFRM\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Transform\TransformContext;
 
 class Category extends AbstractHandler
 {
@@ -21,7 +22,7 @@ class Category extends AbstractHandler
     const PERM_ADD_PRICE = 'add_price';
     const PERM_ADD_FILE_LESS = 'add_no_file_or_url';
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XFRM\Entity\Category $category */
         $category = $context->getSource();
@@ -37,7 +38,7 @@ class Category extends AbstractHandler
         return null;
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         /** @var \XFRM\Entity\Category $category */
         $category = $context->getSource();
@@ -60,7 +61,7 @@ class Category extends AbstractHandler
         return $links;
     }
 
-    public function collectPermissions($context)
+    public function collectPermissions(TransformContext $context)
     {
         /** @var \XFRM\Entity\Category $category */
         $category = $context->getSource();
@@ -79,7 +80,7 @@ class Category extends AbstractHandler
         return $permissions;
     }
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             'description' => self::KEY_DESCRIPTION,
@@ -92,7 +93,7 @@ class Category extends AbstractHandler
         ];
     }
 
-    public function onTransformFinder($context, $finder)
+    public function onTransformFinder(TransformContext $context, \XF\Mvc\Entity\Finder $finder)
     {
         $visitor = \XF::visitor();
 

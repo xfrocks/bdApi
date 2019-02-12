@@ -4,6 +4,10 @@ namespace Xfrocks\Api\Controller;
 
 class Subscription extends AbstractController
 {
+    /**
+     * @return \XF\Mvc\Reply\View
+     * @throws \XF\PrintableException
+     */
     public function actionPostIndex()
     {
         $params = $this->params()
@@ -82,7 +86,11 @@ class Subscription extends AbstractController
             switch ($params['hub_mode']) {
                 case 'unsubscribe':
                     foreach ($existingSubscriptions as $subscription) {
-                        $subscription->delete();
+                        try {
+                            $subscription->delete();
+                        } catch (\Exception $e) {
+                            // ignore
+                        }
                     }
 
                     $this->subscriptionRepo()->updateCallbacksForTopic($hubTopic);
@@ -95,8 +103,12 @@ class Subscription extends AbstractController
 
                     /** @var \Xfrocks\Api\Entity\Subscription $subscription */
                     foreach ($subscriptions as $subscription) {
-                        if ($subscription->callback == $params['hub_callback']) {
-                            $subscription->delete();
+                        if ($subscription->callback === $params['hub_callback']) {
+                            try {
+                                $subscription->delete();
+                            } catch (\Exception $e) {
+                                // ignore
+                            }
                         }
                     }
 

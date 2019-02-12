@@ -45,6 +45,11 @@ class Log extends Entity
         return sprintf('%s - %s', $entity->client_id, $entity->ip_address);
     }
 
+    /**
+     * @param ParameterBag $paramBag
+     * @return \XF\Mvc\Reply\View
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionView(ParameterBag $paramBag)
     {
         $log = $this->assertRecordExists('Xfrocks\Api:Log', $paramBag->log_id);

@@ -4,6 +4,7 @@ namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\AttachmentParent;
+use Xfrocks\Api\Transform\TransformContext;
 
 class ConversationMessage extends AbstractHandler implements AttachmentParent
 {
@@ -74,7 +75,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
         $mappings[] = self::ATTACHMENT__DYNAMIC_KEY_ID;
     }
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             'message_id' => self::KEY_ID,
@@ -95,7 +96,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
         ];
     }
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XF\Entity\ConversationMessage $message */
         $message = $context->getSource();
@@ -158,7 +159,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
         return null;
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         /** @var \XF\Entity\ConversationMessage $message */
         $message = $context->getSource();
@@ -179,7 +180,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
         return $links;
     }
 
-    public function collectPermissions($context)
+    public function collectPermissions(TransformContext $context)
     {
         /** @var \XF\Entity\ConversationMessage $message */
         $message = $context->getSource();
@@ -200,7 +201,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
         return $perms;
     }
 
-    public function onTransformEntities($context, $entities)
+    public function onTransformEntities(TransformContext $context, $entities)
     {
         $needAttachments = false;
         if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_ATTACHMENTS)) {

@@ -2,17 +2,18 @@
 
 namespace Xfrocks\Api\Option;
 
-use XF\Entity\Option;
-use XF\Option\AbstractOption;
-use XF\PrintableException;
-
-class ColumnOption extends AbstractOption
+class ColumnOption extends \XF\Option\AbstractOption
 {
-    public static function verifyOnOffOption(&$value, Option $option)
+    /**
+     * @param mixed $value
+     * @param \XF\Entity\Option $option
+     * @return bool
+     * @throws \XF\PrintableException
+     */
+    public static function verifyOnOffOption(&$value, $option)
     {
         if (empty($value)) {
             // no verify when disable the option
-
             return true;
         }
 
@@ -28,7 +29,7 @@ class ColumnOption extends AbstractOption
                 $table = 'xf_thread';
                 break;
             default:
-                throw new PrintableException(sprintf('Unsupported option %s', $subscriptionTopicType));
+                throw new \XF\PrintableException(sprintf('Unsupported option %s', $subscriptionTopicType));
         }
 
         $column = \XF::app()
@@ -42,7 +43,13 @@ class ColumnOption extends AbstractOption
         return true;
     }
 
-    public static function verifyTextboxOption(&$value, Option $option)
+    /**
+     * @param mixed $value
+     * @param \XF\Entity\Option $option
+     * @return bool
+     * @throws \XF\PrintableException
+     */
+    public static function verifyTextboxOption(&$value, $option)
     {
         $subscriptionTopicType = preg_replace('/^.+subscriptionColumn/', '', $option->option_id);
         switch ($subscriptionTopicType) {
@@ -56,7 +63,7 @@ class ColumnOption extends AbstractOption
                 $table = 'xf_thread';
                 break;
             default:
-                throw new PrintableException(sprintf('Unsupported option %s', $subscriptionTopicType));
+                throw new \XF\PrintableException(sprintf('Unsupported option %s', $subscriptionTopicType));
         }
 
         if (!empty($value) && !self::checkColumnExists($table, $value, $option)) {
@@ -66,7 +73,13 @@ class ColumnOption extends AbstractOption
         return true;
     }
 
-    protected static function checkColumnExists($table, $column, Option $option)
+    /**
+     * @param string $table
+     * @param string $column
+     * @param \XF\Entity\Option $option
+     * @return bool
+     */
+    protected static function checkColumnExists($table, $column, $option)
     {
         $existed = \XF::db()->fetchOne(sprintf('SHOW COLUMNS FROM `%s` LIKE "%s"', $table, $column));
         if (!$existed) {

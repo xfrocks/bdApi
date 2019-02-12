@@ -4,6 +4,7 @@ namespace Xfrocks\Api\XFRM\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\AttachmentParent;
+use Xfrocks\Api\Transform\TransformContext;
 use Xfrocks\Api\Util\ParentFinder;
 
 class ResourceItem extends AbstractHandler implements AttachmentParent
@@ -94,7 +95,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         $mappings[] = self::ATTACHMENT__DYNAMIC_KEY_ID;
     }
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
         $resourceItem = $context->getSource();
@@ -169,7 +170,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return null;
     }
 
-    public function collectLinks($context)
+    public function collectLinks(TransformContext $context)
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
         $resourceItem = $context->getSource();
@@ -211,7 +212,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return $links;
     }
 
-    public function collectPermissions($context)
+    public function collectPermissions(TransformContext $context)
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
         $resourceItem = $context->getSource();
@@ -230,7 +231,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return $permissions;
     }
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             // xf_rm_resource
@@ -269,7 +270,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         ];
     }
 
-    public function onTransformEntities($context, $entities)
+    public function onTransformEntities(TransformContext $context, $entities)
     {
         $needAttachments = false;
         if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_ATTACHMENTS)) {
@@ -292,7 +293,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return $entities;
     }
 
-    public function onTransformFinder($context, $finder)
+    public function onTransformFinder(TransformContext $context, \XF\Mvc\Entity\Finder $finder)
     {
         $categoryFinder = new ParentFinder($finder, 'Category');
         $visitor = \XF::visitor();

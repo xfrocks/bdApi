@@ -20,6 +20,11 @@ class ConversationMessage extends AbstractController
         $this->assertRegistrationRequired();
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetIndex(ParameterBag $params)
     {
         if ($params->message_id) {
@@ -67,6 +72,11 @@ class ConversationMessage extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param int $messageId
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionSingle($messageId)
     {
         $message = $this->assertViewableMessage($messageId);
@@ -78,6 +88,10 @@ class ConversationMessage extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostIndex()
     {
         $params = $this
@@ -120,6 +134,11 @@ class ConversationMessage extends AbstractController
         return $this->actionSingle($message->message_id);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPutIndex(ParameterBag $params)
     {
         $message = $this->assertViewableMessage($params->message_id);
@@ -165,6 +184,11 @@ class ConversationMessage extends AbstractController
         return $this->noPermission();
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Reroute|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetAttachments(ParameterBag $params)
     {
         $message = $this->assertViewableMessage($params->message_id);
@@ -186,6 +210,11 @@ class ConversationMessage extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionPostAttachments()
     {
         $params = $this
@@ -211,6 +240,11 @@ class ConversationMessage extends AbstractController
         return $attachmentPlugin->doUpload($tempHash, 'conversation_message', $context);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostReport(ParameterBag $params)
     {
         $message = $this->assertViewableMessage($params->message_id);
@@ -237,6 +271,11 @@ class ConversationMessage extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetLikes(ParameterBag $params)
     {
         $message = $this->assertViewableMessage($params->message_id);
@@ -258,6 +297,11 @@ class ConversationMessage extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostLikes(ParameterBag $params)
     {
         $message = $this->assertViewableMessage($params->message_id);
@@ -277,6 +321,11 @@ class ConversationMessage extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionDeleteLikes(ParameterBag $params)
     {
         $message = $this->assertViewableMessage($params->message_id);
@@ -296,6 +345,12 @@ class ConversationMessage extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param int $messageId
+     * @param array $extraWith
+     * @return \XF\Entity\ConversationMessage
+     * @throws \XF\Mvc\Reply\Exception
+     */
     protected function assertViewableMessage($messageId, array $extraWith = [])
     {
         /** @var \XF\Entity\ConversationMessage $message */
@@ -307,6 +362,12 @@ class ConversationMessage extends AbstractController
         return $message;
     }
 
+    /**
+     * @param int $conversationId
+     * @param array $extraWith
+     * @return ConversationMaster
+     * @throws \XF\Mvc\Reply\Exception
+     */
     protected function assertViewableConversation($conversationId, array $extraWith = [])
     {
         $visitor = \XF::visitor();
@@ -328,7 +389,11 @@ class ConversationMessage extends AbstractController
         return $conversation->Master;
     }
 
-    protected function applyMessagesFilters(\XF\Finder\ConversationMessage $finder, Params $params)
+    /**
+     * @param \XF\Finder\ConversationMessage $finder
+     * @param Params $params
+     */
+    protected function applyMessagesFilters($finder, Params $params)
     {
         if ($params['order'] === 'natural_reverse') {
             $finder->resetOrder()

@@ -16,6 +16,11 @@ class Conversation extends AbstractController
         $this->assertRegistrationRequired();
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetIndex(ParameterBag $params)
     {
         if ($params->conversation_id) {
@@ -47,6 +52,11 @@ class Conversation extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param int $conversationId
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionSingle($conversationId)
     {
         $conversation = $this->assertViewableConversation($conversationId);
@@ -58,6 +68,10 @@ class Conversation extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionPostIndex()
     {
         $params = $this
@@ -93,6 +107,12 @@ class Conversation extends AbstractController
         return $this->actionSingle($conversation->conversation_id);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionDeleteIndex(ParameterBag $params)
     {
         $conversation = $this->assertViewableConversation($params->conversation_id);
@@ -104,6 +124,11 @@ class Conversation extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionPostAttachments()
     {
         $this->params()
@@ -118,6 +143,12 @@ class Conversation extends AbstractController
         return $attachmentPlugin->doUpload($tempHash, 'conversation_message', $contentData);
     }
 
+    /**
+     * @param int $conversationId
+     * @param array $extraWith
+     * @return ConversationMaster
+     * @throws \XF\Mvc\Reply\Exception
+     */
     protected function assertViewableConversation($conversationId, array $extraWith = [])
     {
         $visitor = \XF::visitor();

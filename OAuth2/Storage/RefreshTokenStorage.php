@@ -21,6 +21,10 @@ class RefreshTokenStorage extends AbstractStorage implements RefreshTokenInterfa
         return new RefreshTokenHybrid($this->server, $xfRefreshToken);
     }
 
+    /**
+     * @inheritdoc
+     * @throws \XF\PrintableException
+     */
     public function create($token, $expireTime, $accessToken)
     {
         /** @var AccessTokenHybrid $accessTokenHybrid */
@@ -40,6 +44,10 @@ class RefreshTokenStorage extends AbstractStorage implements RefreshTokenInterfa
         $this->doXfEntitySave($xfRefreshToken);
     }
 
+    /**
+     * @inheritdoc
+     * @throws \XF\PrintableException
+     */
     public function delete(RefreshTokenEntity $token)
     {
         if ($token instanceof RefreshTokenHybrid) {

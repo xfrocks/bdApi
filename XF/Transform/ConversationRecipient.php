@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
+use Xfrocks\Api\Transform\TransformContext;
 
 class ConversationRecipient extends AbstractHandler
 {
@@ -13,12 +14,12 @@ class ConversationRecipient extends AbstractHandler
     const DYNAMIC_KEY_AVATAR_BIG = 'avatar_big';
     const DYNAMIC_KEY_AVATAR_SMALL = 'avatar_small';
 
-    public function canView($context)
+    public function canView(TransformContext $context)
     {
         return true;
     }
 
-    public function getMappings($context)
+    public function getMappings(TransformContext $context)
     {
         return [
             'user_id' => self::KEY_USER_ID,
@@ -30,7 +31,7 @@ class ConversationRecipient extends AbstractHandler
         ];
     }
 
-    public function calculateDynamicValue($context, $key)
+    public function calculateDynamicValue(TransformContext $context, $key)
     {
         /** @var \XF\Entity\ConversationRecipient $recipient */
         $recipient = $context->getSource();

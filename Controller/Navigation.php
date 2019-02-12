@@ -5,9 +5,14 @@ namespace Xfrocks\Api\Controller;
 use XF\Entity\LinkForum;
 use XF\Entity\Node;
 use XF\Tree;
+use Xfrocks\Api\Transform\TransformContext;
 
 class Navigation extends AbstractController
 {
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetIndex()
     {
         $params = $this
@@ -23,6 +28,11 @@ class Navigation extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param int|null $parent
+     * @return array
+     * @throws \XF\Mvc\Reply\Exception
+     */
     protected function getElements($parent)
     {
         if (is_numeric($parent)) {
@@ -81,6 +91,7 @@ class Navigation extends AbstractController
         array &$options = []
     ) {
         $this->params()->getTransformContext()->onTransformedCallbacks[] = function ($context, &$data) use ($tree) {
+            /** @var TransformContext $context */
             $source = $context->getSource();
             if (!($source instanceof \XF\Entity\AbstractNode)) {
                 return;

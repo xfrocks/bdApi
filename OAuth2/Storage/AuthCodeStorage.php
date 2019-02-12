@@ -10,6 +10,10 @@ use Xfrocks\Api\OAuth2\Entity\AuthCodeHybrid;
 
 class AuthCodeStorage extends AbstractStorage implements AuthCodeInterface
 {
+    /**
+     * @inheritdoc
+     * @throws \XF\PrintableException
+     */
     public function associateScope(AuthCodeEntity $token, ScopeEntity $scope)
     {
         $hybrid = $this->getHybrid($token);
@@ -23,6 +27,10 @@ class AuthCodeStorage extends AbstractStorage implements AuthCodeInterface
         }
     }
 
+    /**
+     * @inheritdoc
+     * @throws \XF\PrintableException
+     */
     public function create($token, $expireTime, $sessionId, $redirectUri)
     {
         /** @var SessionStorage $sessionStorage */
@@ -43,6 +51,10 @@ class AuthCodeStorage extends AbstractStorage implements AuthCodeInterface
         $this->doXfEntitySave($xfAuthCode);
     }
 
+    /**
+     * @inheritdoc
+     * @throws \XF\PrintableException
+     */
     public function delete(AuthCodeEntity $token)
     {
         $hybrid = $this->getHybrid($token);

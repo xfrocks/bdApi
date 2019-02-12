@@ -14,6 +14,10 @@ use Xfrocks\Api\Util\Token;
 
 class OAuth2 extends AbstractController
 {
+    /**
+     * @return \XF\Mvc\Reply\AbstractReply
+     * @throws \XF\Mvc\Reply\Exception
+     */
     public function actionGetAuthorize()
     {
         $this->assertCanonicalUrl($this->buildLink('account/authorize'));
@@ -21,6 +25,12 @@ class OAuth2 extends AbstractController
         return $this->noPermission();
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \League\OAuth2\Server\Exception\InvalidGrantException
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionPostToken()
     {
         /** @var Server $apiServer */
@@ -29,6 +39,10 @@ class OAuth2 extends AbstractController
         return $this->api($apiServer->grantFinalize($this));
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\PrintableException
+     */
     public function actionPostTokenAdmin()
     {
         $params = $this->params()
@@ -53,6 +67,11 @@ class OAuth2 extends AbstractController
         return $this->api(Token::transformLibAccessTokenEntity($accessToken));
     }
 
+    /**
+     * @return \XF\Mvc\Reply\AbstractReply
+     * @throws \XF\Mvc\Reply\Exception
+     * @throws \XF\PrintableException
+     */
     public function actionPostTokenFacebook()
     {
         $params = $this
@@ -102,7 +121,7 @@ class OAuth2 extends AbstractController
             ]
         ]);
 
-        $fbApp = json_decode($fbApp, true);
+        $fbApp = json_decode(strval($fbApp), true);
         if (!empty($fbApp['id'])
             && $fbApp['id'] === $provider->options['app_id']
         ) {
@@ -199,6 +218,11 @@ class OAuth2 extends AbstractController
         return $user->user_id;
     }
 
+    /**
+     * @param \XF\Entity\User $user
+     * @return bool
+     * @throws \XF\Mvc\Reply\Exception
+     */
     protected function runTfaValidation(\XF\Entity\User $user)
     {
         $params = $this
@@ -247,6 +271,12 @@ class OAuth2 extends AbstractController
         throw $this->errorException(\XF::phrase('two_step_verification_value_could_not_be_confirmed'));
     }
 
+    /**
+     * @param Client $client
+     * @param \XF\Entity\User $user
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\PrintableException
+     */
     protected function postTokenNonStandard(Client $client, \XF\Entity\User $user)
     {
         /** @var Server $apiServer */
