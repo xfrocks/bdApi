@@ -5,6 +5,7 @@ namespace Xfrocks\Api\XFRM\Transform;
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\AttachmentParent;
 use Xfrocks\Api\Transform\TransformContext;
+use Xfrocks\Api\Util\BackwardCompat21;
 use Xfrocks\Api\Util\ParentFinder;
 
 class ResourceItem extends AbstractHandler implements AttachmentParent
@@ -137,11 +138,11 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
 
                 return !empty($resourceItem->Watch[$userId]);
             case self::DYNAMIC_KEY_IS_LIKED:
-                return $resourceItem->Description->isLiked();
+                return BackwardCompat21::isLiked($resourceItem->Description);
             case self::DYNAMIC_KEY_IS_PUBLISHED:
                 return $resourceItem->resource_state === 'visible';
             case self::DYNAMIC_KEY_LIKE_COUNT:
-                return $resourceItem->Description->likes;
+                return $resourceItem->Description->get(BackwardCompat21::getLikesColumn());
             case self::DYNAMIC_KEY_PRICE:
                 return $resourceItem->external_purchase_url ? $resourceItem->price : null;
             case self::DYNAMIC_KEY_RATING:
@@ -223,7 +224,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
             self::PERM_DOWNLOAD => $resourceItem->canDownload(),
             self::PERM_EDIT => $resourceItem->canEdit(),
             self::PERM_FOLLOW => $resourceItem->canWatch(),
-            self::PERM_LIKE => $resourceItem->Description->canLike(),
+            self::PERM_LIKE => BackwardCompat21::canLike($resourceItem->Description),
             self::PERM_RATE => $resourceItem->canRate(),
             self::PERM_REPORT => $resourceItem->Description->canReport(),
         ];
