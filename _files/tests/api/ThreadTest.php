@@ -25,13 +25,7 @@ class ThreadTest extends ApiTestCase
 
         $jsonThreads = $this->httpRequestJson(
             'GET',
-            'threads',
-            [
-                'query' => [
-                    'forum_id' => $forum['node_id'],
-                    'oauth_token' => self::$accessTokenBypassFloodCheck
-                ]
-            ]
+            "threads?forum_id={$forum['node_id']}&oauth_token=" . self::$accessTokenBypassFloodCheck
         );
         $this->assertArrayHasKey('threads', $jsonThreads);
 
@@ -45,13 +39,7 @@ class ThreadTest extends ApiTestCase
         foreach ($excludeFields as $excludeField) {
             $jsonThread = $this->httpRequestJson(
                 'GET',
-                'threads/' . $thread['thread_id'],
-                [
-                    'query' => [
-                        'oauth_token' => self::$accessTokenBypassFloodCheck,
-                        'exclude_field' => $excludeField ?: null
-                    ]
-                ]
+                "threads/{$thread['thread_id']}?exclude_fields={$excludeField}&oauth_token=" . self::$accessTokenBypassFloodCheck
             );
 
             $this->assertArrayHasKey('thread', $jsonThread);
@@ -69,7 +57,7 @@ class ThreadTest extends ApiTestCase
             'POST',
             'threads',
             [
-                'body' => [
+                'form_params' => [
                     'forum_id' => $forum['node_id'],
                     'oauth_token' => self::$accessTokenBypassFloodCheck,
                     'post_body' => str_repeat(__METHOD__ . ' ', 10),
@@ -90,7 +78,7 @@ class ThreadTest extends ApiTestCase
             'PUT',
             'threads/' . $thread['thread_id'],
             [
-                'body' => [
+                'form_params' => [
                     'post_body' => str_repeat(__METHOD__ . ' ', 10),
                     'oauth_token' => $token['access_token']
                 ]

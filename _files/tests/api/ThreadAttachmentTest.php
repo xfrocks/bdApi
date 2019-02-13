@@ -32,7 +32,7 @@ class ThreadAttachmentTest extends ApiTestCase
             'PUT',
             "threads/{$threadId}",
             [
-                'body' => [
+                'form_params' => [
                     'attachment_hash' => $hash,
                     'oauth_token' => self::$accessTokenBypassFloodCheck,
                     'post_body' => __METHOD__ . ' now with attachment',
@@ -91,7 +91,7 @@ class ThreadAttachmentTest extends ApiTestCase
             'POST',
             'threads',
             [
-                'body' => [
+                'form_params' => [
                     'attachment_hash' => $hash,
                     'forum_id' => $forum['node_id'],
                     'oauth_token' => self::$accessTokenBypassFloodCheck,
@@ -114,8 +114,12 @@ class ThreadAttachmentTest extends ApiTestCase
             'POST',
             "threads/attachments?attachment_hash={$hash}&forum_id={$forum['node_id']}&oauth_token={$accessToken}",
             [
-                'body' => [
-                    'file' => fopen(__DIR__ . "/files/{$fileName}", 'r')
+                'multipart' => [
+                    [
+                        'name' => 'file',
+                        'contents' => fopen(__DIR__ . "/files/{$fileName}", 'r'),
+                        'filename' => $fileName,
+                    ],
                 ]
             ]
         );

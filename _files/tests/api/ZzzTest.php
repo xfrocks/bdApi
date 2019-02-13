@@ -29,8 +29,12 @@ class ZzzTest extends ApiTestCase
             'POST',
             "threads/attachments?forum_id={$forum['node_id']}&oauth_token={$accessToken}",
             [
-                'body' => [
-                    'file' => fopen(__DIR__ . "/files/{$fileName}", 'r')
+                'multipart' => [
+                    [
+                        'name' => 'file',
+                        'contents' => fopen(__DIR__ . "/files/{$fileName}", 'r'),
+                        'filename' => $fileName,
+                    ],
                 ]
             ]
         );
@@ -47,10 +51,20 @@ class ZzzTest extends ApiTestCase
             'POST',
             'threads/attachments',
             [
-                'body' => [
-                    'file' => fopen(__DIR__ . "/files/{$fileName}", 'r'),
-                    'forum_id' => $forum['node_id'],
-                    'oauth_token' => self::$accessToken
+                'multipart' => [
+                    [
+                        'name' => 'file',
+                        'contents' => fopen(__DIR__ . "/files/{$fileName}", 'r'),
+                        'filename' => $fileName,
+                    ],
+                    [
+                        'name' => 'forum_id',
+                        'contents' => $forum['node_id'],
+                    ],
+                    [
+                        'name' => 'oauth_token',
+                        'contents' => self::$accessToken,
+                    ],
                 ]
             ]
         );
@@ -78,13 +92,8 @@ class ZzzTest extends ApiTestCase
 
         $once = md5($userId . $timestamp . $accessToken . $client['client_secret']);
         $ott = sprintf('%d,%d,%s,%s', $userId, $timestamp, $once, $client['client_id']);
-
-        $json = $this->httpRequestJson('GET', 'threads', [
-            'query' => [
-                'oauth_token' => $ott,
-                'forum_id' => ($userId > 0) ? $forum['node_id'] : 0
-            ]
-        ]);
+        $forumId = ($userId > 0) ? $forum['node_id'] : 0;
+        $json = $this->httpRequestJson('GET', "threads?oauth_token={$ott}&forum_id={$forumId}");
 
         $this->assertArrayHasKey('threads', $json);
     }

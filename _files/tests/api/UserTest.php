@@ -23,11 +23,7 @@ class UserTest extends ApiTestCase
     {
         $user = $this->dataUser();
 
-        $jsonUsers = static::httpRequestJson('GET', 'users', [
-            'query' => [
-                'oauth_token' => self::$accessToken
-            ]
-        ]);
+        $jsonUsers = static::httpRequestJson('GET', 'users?oauth_token=' . self::$accessToken);
         $this->assertArrayHasKey('users', $jsonUsers);
 
         // test exclude fields.
@@ -44,13 +40,7 @@ class UserTest extends ApiTestCase
         foreach ($excludeFields as $excludeField) {
             $jsonUser = static::httpRequestJson(
                 'GET',
-                'users/' . $user['user_id'],
-                [
-                    'query' => [
-                        'oauth_token' => self::$accessToken,
-                        'exclude_field' => $excludeField ?: null
-                    ]
-                ]
+                "users/{$user['user_id']}?exclude_field={$excludeField}&oauth_token=" . self::$accessToken
             );
 
             $this->assertArrayHasKey('user', $jsonUser);
@@ -72,7 +62,7 @@ class UserTest extends ApiTestCase
             'POST',
             'users',
             [
-                'body' => [
+                'form_params' => [
                     'user_email' => $userEmail,
                     'username' => $username,
                     'password' => '123456',
@@ -99,7 +89,7 @@ class UserTest extends ApiTestCase
             'PUT',
             'users/' . $user['user_id'],
             [
-                'body' => [
+                'form_params' => [
                     'oauth_token' => self::$accessToken
                 ]
             ]

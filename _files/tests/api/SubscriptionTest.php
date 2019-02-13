@@ -26,31 +26,30 @@ class SubscriptionTest extends ApiTestCase
 
         $this->assertEquals(202, static::httpLatestResponse()->getStatusCode());
 
-        $json = $this->httpRequestJson('GET', 'notifications', [
-            'query' => [
-                'oauth_token' => self::$accessToken
-            ]
-        ]);
-
-        $this->assertArrayHasKey('subscription_callback', $json);
+        $notificationsPath = 'notifications?oauth_token=' . self::$accessToken;
+        $notificationsJson1 = $this->httpRequestJson('GET', $notificationsPath);
+        $this->assertArrayHasKey('subscription_callback', $notificationsJson1);
 
         $response = $this->httpLatestResponse();
         $links = $response->getHeader('Link');
 
-        $this->assertNotEmpty($links);
-        $this->assertContains('rel=hub', $links);
-        $this->assertContains('rel=self', $links);
+        $this->assertTrue(is_array($links));
+
+        $hrefs = [];
+        foreach ($links as $link) {
+            if (!preg_match('#^<(.+)>; rel=(\w+)$#', $link, $matches)) {
+                continue;
+            }
+            $hrefs[$matches[2]] = $matches[1];
+        }
+        $this->assertArrayHasKey('hub', $hrefs);
+        $this->assertArrayHasKey('self', $hrefs);
 
         $this->postSubscriptions($hubCallback, 'unsubscribe');
         $this->assertEquals(202, $this->httpLatestResponse()->getStatusCode());
 
-        $notifyJson = $this->httpRequestJson('GET', 'notifications', [
-            'query' => [
-                'oauth_token' => self::$accessToken
-            ]
-        ]);
-
-        $this->assertArrayNotHasKey('subscription_callback', $notifyJson);
+        $notificationJson2 = $this->httpRequestJson('GET', $notificationsPath);
+        $this->assertArrayNotHasKey('subscription_callback', $notificationJson2);
     }
 
     public function testSubscribeFailure()
@@ -63,16 +62,11 @@ class SubscriptionTest extends ApiTestCase
 
     private function postSubscriptions($hubCallback, $hubMode = 'subscribe')
     {
+        $hubCallbackEncoded = rawurlencode($hubCallback);
         return static::httpRequest(
             'POST',
-            'subscriptions',
+            "subscriptions?hub.callback={$hubCallbackEncoded}&hub.mode={$hubMode}&hub.topic=user_notification_me&oauth_token=" . self::$accessToken,
             [
-                'body' => [
-                    'hub.callback' => $hubCallback,
-                    'hub.mode' => $hubMode,
-                    'hub.topic' => 'user_notification_me',
-                    'oauth_token' => self::$accessToken,
-                ],
                 'exceptions' => false,
             ]
         );

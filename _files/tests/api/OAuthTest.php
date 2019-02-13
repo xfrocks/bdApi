@@ -53,7 +53,7 @@ class OAuthTest extends ApiTestCase
         ];
 
         $this->httpRequestJson('POST', 'oauth/token', [
-            'body' => $oAuthParams
+            'form_params' => $oAuthParams
         ], false);
 
         $response = $this->httpLatestResponse();

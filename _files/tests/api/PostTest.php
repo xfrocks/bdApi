@@ -25,13 +25,7 @@ class PostTest extends ApiTestCase
 
         $jsonPosts = $this->httpRequestJson(
             'GET',
-            'posts',
-            [
-                'query' => [
-                    'thread_id' => $thread['thread_id'],
-                    'oauth_token' => self::$accessToken
-                ]
-            ]
+            "posts?thread_id={$thread['thread_id']}&oauth_token=" . self::$accessToken
         );
         $this->assertArrayHasKey('posts', $jsonPosts);
 
@@ -46,13 +40,7 @@ class PostTest extends ApiTestCase
         foreach ($excludeFields as $excludeField) {
             $jsonPost = $this->httpRequestJson(
                 'GET',
-                'posts/' . $post['post_id'],
-                [
-                    'query' => [
-                        'oauth_token' => self::$accessToken,
-                        'exclude_field' => $excludeField
-                    ]
-                ]
+                "posts/{$post['post_id']}?exclude_field={$excludeField}&oauth_token=" . self::$accessToken
             );
 
             $this->assertArrayHasKey('post', $jsonPost);
@@ -70,7 +58,7 @@ class PostTest extends ApiTestCase
             'POST',
             'posts',
             [
-                'body' => [
+                'form_params' => [
                     'oauth_token' => self::$accessToken,
                     'thread_id' => $thread['thread_id'],
                     'post_body' => str_repeat(__METHOD__ . ' ', 10)
@@ -89,7 +77,7 @@ class PostTest extends ApiTestCase
             'PUT',
             'posts/' . $post['post_id'],
             [
-                'body' => [
+                'form_params' => [
                     'oauth_token' => self::$accessToken,
                     'post_body' => str_repeat(__METHOD__ . ' ', 10)
                 ]

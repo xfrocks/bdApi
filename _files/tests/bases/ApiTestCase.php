@@ -2,6 +2,7 @@
 
 namespace tests\bases;
 
+use GuzzleHttp\Exception\GuzzleException;
 use PHPUnit\Framework\TestCase;
 
 abstract class ApiTestCase extends TestCase
@@ -9,7 +10,7 @@ abstract class ApiTestCase extends TestCase
     public static $apiRoot = 'http://localhost/api/';
 
     /**
-     * @var \GuzzleHttp\Message\ResponseInterface|null
+     * @var \Psr\Http\Message\ResponseInterface|null
      */
     private static $latestResponse = null;
 
@@ -26,16 +27,15 @@ abstract class ApiTestCase extends TestCase
     public static function setUpBeforeClass()
     {
         self::$http = new \GuzzleHttp\Client([
-            'base_url' => self::$apiRoot,
+            'base_uri' => self::$apiRoot,
         ]);
     }
 
     /**
-     * @return \GuzzleHttp\Message\ResponseInterface
+     * @return \Psr\Http\Message\ResponseInterface
      */
     protected static function httpLatestResponse()
     {
-        /** @var \GuzzleHttp\Message\ResponseInterface $response */
         $response = self::$latestResponse;
         static::assertNotNull($response);
 
@@ -46,7 +46,7 @@ abstract class ApiTestCase extends TestCase
      * @param string $method
      * @param string $path
      * @param array $options
-     * @return \GuzzleHttp\Message\ResponseInterface
+     * @return mixed|\Psr\Http\Message\ResponseInterface|null
      */
     protected static function httpRequest($method, $path, array $options = [])
     {
@@ -61,8 +61,11 @@ abstract class ApiTestCase extends TestCase
             var_dump($method, $uri, $options);
         }
 
-        $request = self::$http->createRequest($method, $uri, $options);
-        self::$latestResponse = self::$http->send($request);
+        try {
+            self::$latestResponse = self::$http->request($method, $uri, $options);
+        } catch (GuzzleException $e) {
+            throw new \RuntimeException('', 0, $e);
+        }
 
         if (self::debugMode()) {
             var_dump(self::$latestResponse->getStatusCode());
@@ -207,7 +210,7 @@ abstract class ApiTestCase extends TestCase
      */
     protected static function postOauthToken(array $params)
     {
-        return static::httpRequestJson('POST', 'oauth/token', ['body' => $params]);
+        return static::httpRequestJson('POST', 'oauth/token', ['form_params' => $params]);
     }
 
     /**
