@@ -121,6 +121,13 @@ class OAuth2 extends AbstractController
             ]
         ]);
 
+        if (\XF::$versionId > 2010000) {
+            $getBody = [$fbApp, 'getBody'];
+            if (is_callable($getBody)) {
+                $fbApp = call_user_func($getBody)->getContents();
+            }
+        }
+
         $fbApp = json_decode(strval($fbApp), true);
         if (!empty($fbApp['id'])
             && $fbApp['id'] === $provider->options['app_id']
