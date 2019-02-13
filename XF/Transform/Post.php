@@ -6,6 +6,7 @@ use XF\Entity\Forum;
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\AttachmentParent;
 use Xfrocks\Api\Transform\TransformContext;
+use Xfrocks\Api\Util\BackwardCompat21;
 use Xfrocks\Api\Util\ParentFinder;
 
 class Post extends AbstractHandler implements AttachmentParent
@@ -111,7 +112,7 @@ class Post extends AbstractHandler implements AttachmentParent
 
                 return $post->isIgnored();
             case self::DYNAMIC_KEY_IS_LIKED:
-                return $post->isLiked();
+                return BackwardCompat21::isLiked($post);
             case self::DYNAMIC_KEY_IS_PUBLISHED:
                 return $post->message_state === 'visible';
             case self::DYNAMIC_KEY_SIGNATURE:
@@ -160,7 +161,7 @@ class Post extends AbstractHandler implements AttachmentParent
         $permissions = [
             self::PERM_DELETE => $post->canDelete(),
             self::PERM_EDIT => $post->canEdit(),
-            self::PERM_LIKE => $post->canLike(),
+            self::PERM_LIKE => BackwardCompat21::canLike($post),
             self::PERM_REPLY => $post->Thread->canReply(),
             self::PERM_REPORT => $post->canReport(),
             self::PERM_UPLOAD_ATTACHMENT => $post->Thread->Forum->canUploadAndManageAttachments(),
@@ -199,7 +200,7 @@ class Post extends AbstractHandler implements AttachmentParent
         return [
             'attach_count' => self::KEY_ATTACHMENT_COUNT,
             'last_edit_date' => self::KEY_UPDATE_DATE,
-            'likes' => self::KEY_LIKE_COUNT,
+            BackwardCompat21::getLikesColumn() => self::KEY_LIKE_COUNT,
             'message' => self::KEY_BODY,
             'post_date' => self::KEY_CREATE_DATE,
             'post_id' => self::KEY_ID,
@@ -258,7 +259,7 @@ class Post extends AbstractHandler implements AttachmentParent
             }
 
             if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_IS_LIKED)) {
-                $finder->with('Likes|' . $userId);
+                $finder->with(sprintf('%s|%d', BackwardCompat21::getLikesRelation(), $userId));
             }
         }
 

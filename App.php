@@ -28,6 +28,12 @@ class App extends \XF\Pub\App
 
         $container['app.classType'] = 'Api';
 
+        $container->extend('extension', function (\XF\Extension $extension) {
+            $extension->addListener('dispatcher_match', ['Xfrocks\Api\Listener', 'apiOnlyDispatcherMatch']);
+
+            return $extension;
+        });
+
         $container->extend('extension.classExtensions', function (array $classExtensions) {
             $xfClasses = [
                 'ControllerPlugin\Error',

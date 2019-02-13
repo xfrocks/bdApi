@@ -2,11 +2,11 @@
 
 namespace Xfrocks\Api\Controller;
 
-use XF\Entity\LikedContent;
 use XF\Entity\ProfilePostComment;
 use XF\Mvc\ParameterBag;
 use XF\Service\ProfilePostComment\Creator;
 use XF\Service\ProfilePostComment\Deleter;
+use Xfrocks\Api\Util\BackwardCompat21;
 
 class ProfilePost extends AbstractController
 {
@@ -91,16 +91,19 @@ class ProfilePost extends AbstractController
     {
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
 
-        $finder = $profilePost->getRelationFinder('Likes');
-        $finder->with('Liker');
+        $finder = $profilePost->getRelationFinder(BackwardCompat21::getLikesRelation());
+        $finder->with(BackwardCompat21::getLikerRelation());
 
         $users = [];
 
-        /** @var LikedContent $liked */
+        /** @var \XF\Mvc\Entity\Entity $liked */
         foreach ($finder->fetch() as $liked) {
+            /** @var \XF\Entity\User $liker */
+            $liker = $liked->getRelation(BackwardCompat21::getLikerRelation());
+
             $users[] = [
-                'user_id' => $liked->Liker->user_id,
-                'username' => $liked->Liker->username
+                'user_id' => $liker->user_id,
+                'username' => $liker->username
             ];
         }
 
@@ -117,12 +120,12 @@ class ProfilePost extends AbstractController
     {
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
 
-        if (!$profilePost->canLike($error)) {
+        if (!BackwardCompat21::canLike($profilePost, $error)) {
             return $this->noPermission($error);
         }
 
         $visitor = \XF::visitor();
-        if (empty($profilePost->Likes[$visitor->user_id])) {
+        if (!BackwardCompat21::isLiked($profilePost)) {
             /** @var \XF\Repository\LikedContent $likeRepo */
             $likeRepo = $this->repository('XF:LikedContent');
             $likeRepo->toggleLike('profile_post', $profilePost->profile_post_id, $visitor);
@@ -140,12 +143,12 @@ class ProfilePost extends AbstractController
     {
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
 
-        if (!$profilePost->canLike($error)) {
+        if (!BackwardCompat21::canLike($profilePost, $error)) {
             return $this->noPermission($error);
         }
 
         $visitor = \XF::visitor();
-        if (!empty($profilePost->Likes[$visitor->user_id])) {
+        if (BackwardCompat21::isLiked($profilePost)) {
             /** @var \XF\Repository\LikedContent $likeRepo */
             $likeRepo = $this->repository('XF:LikedContent');
             $likeRepo->toggleLike('profile_post', $profilePost->profile_post_id, $visitor);

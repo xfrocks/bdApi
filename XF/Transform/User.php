@@ -222,8 +222,10 @@ class User extends AbstractHandler
 
     public function getMappings(TransformContext $context)
     {
-        $mappings = [
-            'like_count' => self::KEY_LIKE_COUNT,
+        $likeCountColumn = \XF::$versionId < 2010000 ? 'like_count' : 'reaction_score';
+
+        return [
+            $likeCountColumn => self::KEY_LIKE_COUNT,
             'message_count' => self::KEY_MESSAGE_COUNT,
             'register_date' => self::KEY_REGISTER_DATE,
             'user_id' => self::KEY_ID,
@@ -252,8 +254,6 @@ class User extends AbstractHandler
             self::DYNAMIC_KEY_UNREAD_CONVO_COUNT,
             self::DYNAMIC_KEY_UNREAD_NOTIF_COUNT
         ];
-
-        return $mappings;
     }
 
     public function onNewContext(TransformContext $context)

@@ -4,46 +4,9 @@ namespace Xfrocks\Api\XF\ApiOnly\Mvc;
 
 class Dispatcher extends XFCP_Dispatcher
 {
-    public function dispatchClass(
-        $controllerClass,
-        $action,
-        $responseType,
-        \XF\Mvc\ParameterBag $params = null,
-        $sectionContext = null,
-        &$controller = null,
-        \XF\Mvc\Reply\AbstractReply $previousReply = null
-    ) {
-        if ($controllerClass !== 'Xfrocks:Error') {
-            $method = $this->getApiMethod();
-            switch ($method) {
-                case 'head':
-                    $method = 'get';
-                    break;
-                case 'options':
-                    $params = new \XF\Mvc\ParameterBag(['action' => $action]);
-                    $action = 'generic';
-                    break;
-            }
-
-            if (!$params || !$params->offsetExists('_isApiReroute')) {
-                $action = sprintf('%s/%s', $method, $action);
-            }
-        }
-
-        return parent::dispatchClass(
-            $controllerClass,
-            $action,
-            $responseType,
-            $params,
-            $sectionContext,
-            $controller,
-            $previousReply
-        );
-    }
-
     public function getRouter()
     {
-        /** @var Router|null $router */
+        /** @var \XF\Mvc\Router|null $router */
         $router = $this->router;
 
         if (!$router) {
@@ -70,23 +33,6 @@ class Dispatcher extends XFCP_Dispatcher
         $match->setResponseType('json');
 
         return $match;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getApiMethod()
-    {
-        $requestMethod = strtolower($this->request->getServer('REQUEST_METHOD'));
-
-        if ($requestMethod === 'get' && \XF::$debugMode) {
-            $paramMethod = $this->request->filter('_xfApiMethod', 'str');
-            if (!empty($paramMethod)) {
-                return strtolower($paramMethod);
-            }
-        }
-
-        return $requestMethod;
     }
 }
 

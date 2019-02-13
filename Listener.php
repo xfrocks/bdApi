@@ -58,6 +58,38 @@ class Listener
     }
 
     /**
+     * @param \XF\Mvc\Dispatcher $dispatcher
+     * @param \XF\Mvc\RouteMatch $match
+     */
+    public static function apiOnlyDispatcherMatch($dispatcher, &$match)
+    {
+        if ($match->getController() !== 'Xfrocks:Error') {
+            $request = $dispatcher->getRequest();
+
+            $action = $match->getAction();
+            $method = strtolower($request->getServer('REQUEST_METHOD'));
+            if ($method === 'get' && \XF::$debugMode) {
+                $methodDebug = $request->filter('_xfApiMethod', 'str');
+                if (!empty($methodDebug)) {
+                    $method = strtolower($methodDebug);
+                }
+            }
+
+            switch ($method) {
+                case 'head':
+                    $method = 'get';
+                    break;
+                case 'options':
+                    $match->setParam('action', $match->getAction());
+                    $action = 'generic';
+                    break;
+            }
+
+            $match->setAction(sprintf('%s/%s', $method, $action));
+        }
+    }
+
+    /**
      * @param \XF\Service\User\ContentChange $changeService
      * @param array $updates
      */

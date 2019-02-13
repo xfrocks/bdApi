@@ -169,9 +169,11 @@ class Subscription extends Repository
         ), $extraParams);
 
         try {
-            $response = $client->get($callback, [
-                'query' => $requestData
-            ]);
+            $uri = $callback;
+            foreach ($requestData as $key => $value) {
+                $uri .= sprintf('%s%s=%s', strpos($uri, '?') === false ? '?' : '&', $key, rawurlencode($value));
+            }
+            $response = $client->get($uri);
 
             $body = trim($response->getBody()->getContents());
             $httpCode = $response->getStatusCode();
