@@ -20,6 +20,9 @@
     "XF-Pub-Controller-Misc_Xfrocks-Api-XF-Pub-Controller-Misc.json": {
         "hash": "3c8843fcf5b4cc24e709fa61fc308c09"
     },
+    "XF-Service-AddOn-HashGenerator_Xfrocks-Api-XF-Service-AddOn-HashGenerator.json": {
+        "hash": "8b889b931b2efb5470e8a5adb2c5d7d9"
+    },
     "XF-Service-Conversation-Notifier_Xfrocks-Api-XF-Service-Conversation-Notifier.json": {
         "hash": "da13a532d2404806c8685a15313b5a22"
     },
