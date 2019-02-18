@@ -10,6 +10,7 @@ use XF\Mvc\Reply\AbstractReply;
 use XF\Mvc\Reply\Redirect;
 use XF\Mvc\RouteMatch;
 use Xfrocks\Api\Data\Params;
+use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Repository\Log;
 use Xfrocks\Api\Transform\LazyTransformer;
@@ -123,7 +124,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      */
     public function buildApiLink($link, $data = null, array $parameters = [])
     {
-        return $this->app->router('api')->buildLink($link, $data, $parameters);
+        return $this->app->router(Listener::$routerType)->buildLink($link, $data, $parameters);
     }
 
     public function checkCsrfIfNeeded($action, ParameterBag $params)
@@ -227,12 +228,6 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
         $scope = $this->getDefaultApiScopeForAction($action);
         $this->assertApiScope($scope);
-    }
-
-    public function reroute(RouteMatch $match)
-    {
-        $match->setParam('_isApiReroute', true);
-        return parent::reroute($match);
     }
 
     /**

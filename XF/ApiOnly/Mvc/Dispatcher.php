@@ -2,6 +2,8 @@
 
 namespace Xfrocks\Api\XF\ApiOnly\Mvc;
 
+use Xfrocks\Api\Listener;
+
 class Dispatcher extends XFCP_Dispatcher
 {
     public function getRouter()
@@ -10,7 +12,7 @@ class Dispatcher extends XFCP_Dispatcher
         $router = $this->router;
 
         if (!$router) {
-            $router = $this->app->router('api');
+            $router = $this->app->router(Listener::$routerType);
             $this->router = $router;
         }
 

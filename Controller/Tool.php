@@ -94,7 +94,7 @@ class Tool extends AbstractController
                 break;
             case 'api':
             default:
-                $link = $this->router()->buildLink($params['route']);
+                $link = $this->buildApiLink($params['route']);
                 break;
         }
 

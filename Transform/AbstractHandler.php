@@ -6,6 +6,7 @@ use XF\App;
 use XF\Mvc\Entity\AbstractCollection;
 use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
+use Xfrocks\Api\Listener;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
@@ -189,7 +190,7 @@ abstract class AbstractHandler
      */
     protected function buildApiLink($link, $data = null, array $parameters = [])
     {
-        $apiRouter = $this->app->router('api');
+        $apiRouter = $this->app->router(Listener::$routerType);
         return $apiRouter->buildLink($link, $data, $parameters);
     }
 

@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Data;
 
 use XF\Mvc\Controller;
+use Xfrocks\Api\Listener;
 
 class Modules
 {
@@ -44,7 +45,7 @@ class Modules
     public function getDataForApiIndex($controller)
     {
         $app = $controller->app();
-        $apiRouter = $app->router('api');
+        $apiRouter = $app->router(Listener::$routerType);
         $visitor = \XF::visitor();
         $threadLinkParams = ['data_limit' => $app->options()->discussionsPerPage];
 

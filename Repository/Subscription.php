@@ -11,6 +11,7 @@ use XF\Entity\UserAlert;
 use XF\Entity\UserOption;
 use XF\Mvc\Entity\Repository;
 use XF\Util\Php;
+use Xfrocks\Api\Listener;
 use Xfrocks\Api\Transform\TransformContext;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\XF\ApiOnly\Session\Session;
@@ -54,6 +55,8 @@ class Subscription extends Repository
         $finder->active();
         $finder->where('topic', $topic);
 
+        $apiRouter = $this->app()->router(Listener::$routerType);
+
         $subscriptions = [];
         /** @var \Xfrocks\Api\Entity\Subscription $subscription */
         foreach ($finder->fetch() as $subscription) {
@@ -63,72 +66,55 @@ class Subscription extends Repository
         switch ($type) {
             case self::TYPE_NOTIFICATION:
                 if (!empty($subscriptions)) {
-                    $userOption = array(
+                    $userOption = [
                         'topic' => $topic,
-                        'link' => $this->app()->router('api')->buildLink(
-                            'notifications',
-                            null,
-                            array('oauth_token' => '')
-                        ),
+                        'link' => $apiRouter->buildLink('notifications', null, ['oauth_token' => '']),
                         'subscriptions' => $subscriptions,
-                    );
+                    ];
                 } else {
-                    $userOption = array();
+                    $userOption = [];
                 }
 
                 $this->db()->update(
                     'xf_user_option',
-                    array(
-                        $this->options()->bdApi_subscriptionColumnUserNotification => serialize($userOption)
-                    ),
+                    [$this->options()->bdApi_subscriptionColumnUserNotification => serialize($userOption)],
                     'user_id = ?',
                     $id
                 );
                 break;
             case self::TYPE_THREAD_POST:
                 if (!empty($subscriptions)) {
-                    $threadOption = array(
+                    $threadOption = [
                         'topic' => $topic,
-                        'link' => $this->app()->router('api')->buildLink(
-                            'posts',
-                            null,
-                            array(
-                                'thread_id' => $id,
-                                'oauth_token' => '',
-                            )
-                        ),
+                        'link' => $apiRouter->buildLink('posts', null, ['thread_id' => $id, 'oauth_token' => '']),
                         'subscriptions' => $subscriptions,
-                    );
+                    ];
                 } else {
-                    $threadOption = array();
+                    $threadOption = [];
                 }
 
                 $this->db()->update(
                     'xf_thread',
-                    array($this->options()->bdApi_subscriptionColumnThreadPost => serialize($threadOption)),
+                    [$this->options()->bdApi_subscriptionColumnThreadPost => serialize($threadOption)],
                     'thread_id = ?',
                     $id
                 );
                 break;
             case self::TYPE_USER:
                 if (!empty($subscriptions)) {
-                    $userOption = array(
+                    $userOption = [
                         'topic' => $topic,
-                        'link' => $this->app()->router('api')->buildLink(
-                            'users',
-                            array('user_id' => $id),
-                            array('oauth_token' => '')
-                        ),
+                        'link' => $apiRouter->buildLink('users', ['user_id' => $id], ['oauth_token' => '']),
                         'subscriptions' => $subscriptions,
-                    );
+                    ];
                 } else {
-                    $userOption = array();
+                    $userOption = [];
                 }
 
                 if ($id > 0) {
                     $this->db()->update(
                         'xf_user_option',
-                        array($this->options()->bdApi_subscriptionColumnUser => serialize($userOption)),
+                        [$this->options()->bdApi_subscriptionColumnUser => serialize($userOption)],
                         'user_id = ?',
                         $id
                     );
@@ -140,13 +126,13 @@ class Subscription extends Repository
                 break;
             case self::TYPE_CLIENT:
                 if (!empty($subscriptions)) {
-                    $data = array(
+                    $data = [
                         'topic' => $topic,
                         'link' => '',
                         'subscriptions' => $subscriptions,
-                    );
+                    ];
                 } else {
-                    $data = array();
+                    $data = [];
                 }
 
                 $this->app()->registry()->set(self::TYPE_CLIENT_DATA_REGISTRY, $data);
@@ -278,7 +264,7 @@ class Subscription extends Repository
 
         $response = $this->app()->response();
 
-        $hubLink = $this->app()->router('api')->buildLink('subscriptions', null, [
+        $hubLink = $this->app()->router(Listener::$routerType)->buildLink('subscriptions', null, [
             'hub.topic' => self::getTopic($topicType, $topicId),
             'oauth_token' => ''
         ]);
