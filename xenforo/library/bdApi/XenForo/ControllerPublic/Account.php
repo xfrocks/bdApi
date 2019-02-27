@@ -507,6 +507,15 @@ class bdApi_XenForo_ControllerPublic_Account extends XFCP_bdApi_XenForo_Controll
                     && $controllerResponse->controllerName == 'XenForo_ControllerPublic_Error'
                     && $controllerResponse->action == 'registrationRequired'
                 ) {
+                    $guestRedirectUri = $this->_input->filterSingle('guest_redirect_uri', XenForo_Input::STRING);
+                    if (!empty($guestRedirectUri)) {
+                        // TODO: verify via isValidRedirectUri
+                        throw $this->responseException($this->responseRedirect(
+                            XenForo_ControllerResponse_Redirect::RESOURCE_UPDATED,
+                            $guestRedirectUri
+                        ));
+                    }
+
                     // so it is...
                     $requestPaths = XenForo_Application::get('requestPaths');
                     $session = XenForo_Application::getSession();

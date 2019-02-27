@@ -34,6 +34,7 @@ class bdApi_Model_OAuth2 extends XenForo_Model
             'state' => XenForo_Input::STRING,
             'scope' => XenForo_Input::STRING,
 
+            'guest_redirect_uri' => XenForo_Input::STRING,
             'social' => XenForo_Input::STRING,
         );
     }
