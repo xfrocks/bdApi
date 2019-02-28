@@ -2,6 +2,7 @@
 
 namespace Xfrocks\Api\XF\Transform;
 
+use Xfrocks\Api\Repository\Node;
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\TransformContext;
 
@@ -12,11 +13,15 @@ abstract class AbstractNode extends AbstractHandler
 
     public function getMappings(TransformContext $context)
     {
-        return [
+        $mappings = [
             'node_id' => $this->getNameSingular() . '_id',
             'title' => $this->getNameSingular() . '_title',
             'description' => $this->getNameSingular() . '_description'
         ];
+
+        $this->nodeRepo()->apiTransformGetMappings($context, $mappings);
+
+        return $mappings;
     }
 
     public function collectLinks(TransformContext $context)
@@ -38,6 +43,8 @@ abstract class AbstractNode extends AbstractHandler
             ];
         }
 
+        $this->nodeRepo()->apiTransformCollectLinks($context, $links);
+
         return $links;
     }
 
@@ -55,7 +62,20 @@ abstract class AbstractNode extends AbstractHandler
         $perms[self::PERM_EDIT] = $visitor->hasAdminPermission('node');
         $perms[self::PERM_DELETE] = $visitor->hasAdminPermission('node');
 
+        $this->nodeRepo()->apiTransformCollectPermissions($context, $perms);
+
         return $perms;
+    }
+
+    /**
+     * @return Node
+     */
+    protected function nodeRepo()
+    {
+        /** @var Node $nodeRepo */
+        $nodeRepo = $this->app->repository('Xfrocks\Api:Node');
+
+        return $nodeRepo;
     }
 
     abstract protected function getNameSingular();
