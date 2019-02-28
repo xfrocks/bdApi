@@ -92,7 +92,7 @@ class Forum extends AbstractNode
                 return $this->transformer->transformFinder($context, $key, $finder);
         }
 
-        return null;
+        return parent::calculateDynamicValue($context, $key);
     }
 
     protected function getNameSingular()
