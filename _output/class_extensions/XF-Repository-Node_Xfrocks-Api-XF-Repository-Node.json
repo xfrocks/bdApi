@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Repository\\Node",
+    "to_class": "Xfrocks\\Api\\XF\\Repository\\Node",
+    "execute_order": 10,
+    "active": true
+}

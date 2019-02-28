@@ -1,11 +1,10 @@
 <?php
 
-namespace Xfrocks\Api\Repository;
+namespace Xfrocks\Api\XF\Repository;
 
-use XF\Mvc\Entity\Repository;
 use Xfrocks\Api\Transform\TransformContext;
 
-class Node extends Repository
+class Node extends XFCP_Node
 {
     public function apiTransformGetMappings(TransformContext $context, array &$mappings)
     {
@@ -17,5 +16,10 @@ class Node extends Repository
 
     public function apiTransformCollectPermissions(TransformContext $context, array &$permissions)
     {
+    }
+
+    public function apiTransformCalculateDynamicValue(TransformContext $context, $key)
+    {
+        return null;
     }
 }

@@ -2,7 +2,8 @@
 
 namespace Xfrocks\Api\XF\Transform;
 
-use Xfrocks\Api\Repository\Node;
+use XF\Mvc\Entity\Finder;
+use Xfrocks\Api\XF\Repository\Node;
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\TransformContext;
 
@@ -67,13 +68,23 @@ abstract class AbstractNode extends AbstractHandler
         return $perms;
     }
 
+    public function calculateDynamicValue(TransformContext $context, $key)
+    {
+        $value = $this->nodeRepo()->apiTransformCalculateDynamicValue($context, $key);
+        if ($value !== null) {
+            return $value;
+        }
+
+        return parent::calculateDynamicValue($context, $key);
+    }
+
     /**
      * @return Node
      */
     protected function nodeRepo()
     {
         /** @var Node $nodeRepo */
-        $nodeRepo = $this->app->repository('Xfrocks\Api:Node');
+        $nodeRepo = $this->app->repository('XF:Node');
 
         return $nodeRepo;
     }

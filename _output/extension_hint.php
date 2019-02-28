@@ -18,9 +18,9 @@ namespace Xfrocks\Api\XF\Pub\Controller
 	class XFCP_Misc extends \XF\Pub\Controller\Misc {}
 }
 
-namespace Xfrocks\Api\XF\Service\AddOn
+namespace Xfrocks\Api\XF\Repository
 {
-	class XFCP_HashGenerator extends \XF\Service\AddOn\HashGenerator {}
+	class XFCP_Node extends \XF\Repository\Node {}
 }
 
 namespace Xfrocks\Api\XF\Service\Conversation
