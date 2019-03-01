@@ -140,9 +140,10 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     /**
      * @param string $type
      * @param array|int $whereId
+     * @param string|null $phraseKey
      * @return LazyTransformer
      */
-    public function findAndTransformLazily($type, $whereId)
+    public function findAndTransformLazily($type, $whereId, $phraseKey = null)
     {
         $finder = $this->finder($type);
         $finder->whereId($whereId);
@@ -176,7 +177,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
             });
         }
 
-        $lazyTransformer->addCallbackPostTransform(function ($data) use ($isSingle) {
+        $lazyTransformer->addCallbackPostTransform(function ($data) use ($isSingle, $phraseKey) {
             if (!$isSingle) {
                 return $data;
             }
@@ -185,7 +186,11 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
                 return $data[0];
             }
 
-            throw $this->exception($this->notFound());
+            if (!$phraseKey) {
+                $phraseKey = 'requested_page_not_found';
+            }
+
+            throw $this->exception($this->notFound(\XF::phrase($phraseKey)));
         });
 
         return $lazyTransformer;
