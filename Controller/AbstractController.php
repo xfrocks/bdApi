@@ -8,7 +8,6 @@ use XF\Mvc\ParameterBag;
 use XF\Mvc\Reply;
 use XF\Mvc\Reply\AbstractReply;
 use XF\Mvc\Reply\Redirect;
-use XF\Mvc\RouteMatch;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Server;

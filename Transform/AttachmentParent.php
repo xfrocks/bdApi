@@ -9,25 +9,25 @@ interface AttachmentParent
      * @param string $key
      * @return mixed
      */
-    public function attachmentCalculateDynamicValue($context, $key);
+    public function attachmentCalculateDynamicValue(TransformContext $context, $key);
 
     /**
      * @param TransformContext $context
      * @param array $links
      * @return array|null
      */
-    public function attachmentCollectLinks($context, array &$links);
+    public function attachmentCollectLinks(TransformContext $context, array &$links);
 
     /**
      * @param TransformContext $context
      * @param array $permissions
      * @return array|null
      */
-    public function attachmentCollectPermissions($context, array &$permissions);
+    public function attachmentCollectPermissions(TransformContext $context, array &$permissions);
 
     /**
      * @param TransformContext $context
      * @param array $mappings
      */
-    public function attachmentGetMappings($context, array &$mappings);
+    public function attachmentGetMappings(TransformContext $context, array &$mappings);
 }
