@@ -208,7 +208,8 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
 
         $parts = explode('.', $googleToken);
         if (count($parts) === 3) {
-            $jwt = @json_decode(base64_decode($parts[1]), true);
+            $base64UrlEncoding = str_replace(array('-', '_'), array('+', '/'), $parts[1]);
+            $jwt = @json_decode(base64_decode($base64UrlEncoding), true);
             if (!empty($jwt['sub'])) {
                 // looks like a valid jwt
                 $isAccessToken = false;
