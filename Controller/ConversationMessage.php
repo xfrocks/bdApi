@@ -65,6 +65,10 @@ class ConversationMessage extends AbstractController
             $maxReadDate = 0;
             /** @var \XF\Entity\ConversationMessage $entity */
             foreach ($entities as $entity) {
+                if (!$entity instanceof \XF\Entity\ConversationMessage) {
+                    continue;
+                }
+
                 $maxReadDate = max($entity->message_date, $maxReadDate);
             }
 
