@@ -61,10 +61,21 @@ class ConversationMessage extends AbstractController
 
         $total = $finder->total();
 
-        $maxReadDate = null;
-        $this->params()->getTransformContext()->onTransformEntitiesCallbacks[] = function (TransformContext $context) {
-            \XF::dump(func_get_args());die;
+        $this->params()->getTransformContext()->onTransformEntitiesCallbacks[] = function ($context, $entities) use ($conversation) {
+            $maxReadDate = 0;
+            /** @var \XF\Entity\ConversationMessage $entity */
+            foreach ($entities as $entity) {
+                $maxReadDate = max($entity->message_date, $maxReadDate);
+            }
+
+            if ($maxReadDate > 0) {
+                /** @var \XF\Repository\Conversation $convoRepo */
+                $convoRepo = $this->repository('XF:Conversation');
+                $visitor = \XF::visitor();
+                $convoRepo->markUserConversationRead($conversation->Users[$visitor->user_id], $maxReadDate);
+            }
         };
+
         $messages = $total > 0 ? $this->transformFinderLazily($finder) : [];
 
         $data = [
