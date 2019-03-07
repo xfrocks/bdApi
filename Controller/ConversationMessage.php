@@ -7,6 +7,7 @@ use XF\Mvc\ParameterBag;
 use XF\Service\Conversation\MessageEditor;
 use XF\Service\Conversation\Replier;
 use Xfrocks\Api\Data\Params;
+use Xfrocks\Api\Transform\TransformContext;
 use Xfrocks\Api\Util\BackwardCompat21;
 use Xfrocks\Api\Util\PageNav;
 
@@ -59,6 +60,11 @@ class ConversationMessage extends AbstractController
         $this->applyMessagesFilters($finder, $params);
 
         $total = $finder->total();
+
+        $maxReadDate = null;
+        $this->params()->getTransformContext()->onTransformEntitiesCallbacks[] = function (TransformContext $context) {
+            \XF::dump(func_get_args());die;
+        };
         $messages = $total > 0 ? $this->transformFinderLazily($finder) : [];
 
         $data = [

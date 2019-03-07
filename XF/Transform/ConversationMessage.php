@@ -216,6 +216,6 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
             $this->enqueueEntitiesToAddAttachmentsTo($entities, self::CONTENT_TYPE_CONVO_MESSAGE);
         }
 
-        return $entities;
+        return parent::onTransformEntities($context, $entities);
     }
 }
