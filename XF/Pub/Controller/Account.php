@@ -189,9 +189,12 @@ class Account extends XFCP_Account
         }
 
         if ($this->isPost() || $bypassConfirmation) {
+            $userScopeKeys = $userScopes->keys();
             if ($this->isPost()) {
                 $authorizeParams['scopes'] = $this->filter('scopes', 'array-str');
             }
+            $authorizeParams['scopes'] = array_merge($authorizeParams['scopes'], $userScopeKeys);
+            $authorizeParams['scopes'] = array_unique($authorizeParams['scopes']);
 
             return $apiServer->grantAuthCodeNewAuthRequest($this, $authorizeParams);
         }
