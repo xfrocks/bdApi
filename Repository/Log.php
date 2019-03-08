@@ -100,14 +100,16 @@ class Log extends Repository
                     $filtered[$key] = '(array)';
                 }
             } else {
-                if (is_bool($value)) {
+                if (is_bool($value) || is_string($value) || is_numeric($value)) {
                     $filtered[$key] = $value;
-                } elseif (is_numeric($value)) {
-                    $filtered[$key] = $value;
-                } elseif (is_string($value)) {
-                    $filtered[$key] = $value;
-                } elseif ($value instanceof LazyTransformer) {
-                    $filtered[$key] = $value->getLogData();
+                } elseif (is_object($value)) {
+                    if ($value instanceof \XF\Phrase) {
+                        $filtered[$key] = $value->getName();
+                    } elseif ($value instanceof LazyTransformer) {
+                        $filtered[$key] = $value->getLogData();
+                    } else {
+                        $filtered[$key] = get_class($value);
+                    }
                 } else {
                     $filtered[$key] = '?';
                 }
