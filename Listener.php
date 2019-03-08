@@ -57,6 +57,12 @@ class Listener
         if (!empty($addOnCache['XFRM'])) {
             $extension->addClassExtension('Xfrocks\Api\Data\Modules', 'Xfrocks\Api\XFRM\Data\Modules');
         }
+
+        $addOnCache = $container['addon.cache'];
+        $extension = $app->extension();
+        if (!empty($addOnCache['XFMG'])) {
+            $extension->addClassExtension('Xfrocks\Api\Data\Modules', 'Xfrocks\Api\XFMG\Data\Modules');
+        }
     }
 
     /**

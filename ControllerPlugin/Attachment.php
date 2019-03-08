@@ -54,7 +54,15 @@ class Attachment extends AbstractPlugin
         if (!$attachment) {
             throw $this->controller->exception($this->controller->noPermission($error));
         }
+        return $attachment;
+    }
 
+    public function doUploadAndRespond($hash, $contentType, $context, $formField = 'file')
+    {
+        $attachment = $this->doUpload($hash, $contentType, $context, $formField);
+
+        /** @var AbstractController $controller */
+        $controller = $this->controller;
         $lazyTransformer = $controller->transformEntityLazily($attachment);
         $lazyTransformer->addCallbackPreTransform(function ($context) use ($hash) {
             /** @var TransformContext $context */
@@ -73,10 +81,9 @@ class Attachment extends AbstractPlugin
         $params = $controller->params();
 
         $prefix = '';
-        $inputHash = $params['attachment_hash'];
 
-        if (!empty($inputHash)) {
-            $prefix = sprintf('hash%s', $inputHash);
+        if (!empty($params['attachment_hash'])) {
+            $prefix = sprintf('hash%s', $params['attachment_hash']);
         } elseif (!empty($contentData['post_id'])) {
             $prefix = sprintf('post%d', $contentData['post_id']);
         } elseif (!empty($contentData['thread_id'])) {
@@ -89,6 +96,10 @@ class Attachment extends AbstractPlugin
             $prefix = sprintf('message%d', $contentData['message_id']);
         } elseif (!empty($contentData['conversation_id'])) {
             $prefix = sprintf('conversation%d', $contentData['conversation_id']);
+        } elseif (!empty($contentData['media_album_id'])) {
+            $prefix = sprintf('media_album%d', $contentData['media_album_id']);
+        } elseif (!empty($contentData['media_category_id'])) {
+            $prefix = sprintf('media_category%d', $contentData['media_category_id']);
         }
 
         /** @var Session $session */

@@ -258,7 +258,7 @@ class ConversationMessage extends AbstractController
         $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
         $tempHash = $attachmentPlugin->getAttachmentTempHash($context);
 
-        return $attachmentPlugin->doUpload($tempHash, 'conversation_message', $context);
+        return $attachmentPlugin->doUploadAndRespond($tempHash, 'conversation_message', $context);
     }
 
     /**
