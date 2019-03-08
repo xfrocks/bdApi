@@ -14,4 +14,5 @@ $config['api'] = [
 
  * `accessTokenParamKey` default=`oauth_token`
  * `apiDirName` default=`api`
+ * `routerType` default=`XfrocksApi`
  * `scopeDelimiter` default=` ` (space)

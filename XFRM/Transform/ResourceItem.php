@@ -59,7 +59,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
 
     protected $attachmentData = null;
 
-    public function attachmentCalculateDynamicValue($context, $key)
+    public function attachmentCalculateDynamicValue(TransformContext $context, $key)
     {
         switch ($key) {
             case self::ATTACHMENT__DYNAMIC_KEY_ID:
@@ -69,13 +69,13 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         return null;
     }
 
-    public function attachmentCollectLinks($context, array &$links)
+    public function attachmentCollectLinks(TransformContext $context, array &$links)
     {
         $resourceItem = $context->getParentSource();
         $links[self::ATTACHMENT__LINK_RESOURCE] = $this->buildApiLink('resources', $resourceItem);
     }
 
-    public function attachmentCollectPermissions($context, array &$permissions)
+    public function attachmentCollectPermissions(TransformContext $context, array &$permissions)
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
         $resourceItem = $context->getParentSource();
@@ -91,7 +91,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         $permissions[self::PERM_DELETE] = $canDelete;
     }
 
-    public function attachmentGetMappings($context, array &$mappings)
+    public function attachmentGetMappings(TransformContext $context, array &$mappings)
     {
         $mappings[] = self::ATTACHMENT__DYNAMIC_KEY_ID;
     }

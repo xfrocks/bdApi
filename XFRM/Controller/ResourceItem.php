@@ -95,7 +95,13 @@ class ResourceItem extends AbstractController
 
     public function actionSingle($resourceId)
     {
-        return $this->api(['resource' => $this->findAndTransformLazily('XFRM:ResourceItem', intval($resourceId))]);
+        return $this->api([
+            'resource' => $this->findAndTransformLazily(
+                'XFRM:ResourceItem',
+                intval($resourceId),
+                'xfrm_requested_resource_not_found'
+            )
+        ]);
     }
 
     /**

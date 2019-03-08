@@ -506,7 +506,9 @@ class Thread extends AbstractController
 
     public function actionSingle($threadId)
     {
-        return $this->api(['thread' => $this->findAndTransformLazily('XF:Thread', intval($threadId))]);
+        return $this->api([
+            'thread' => $this->findAndTransformLazily('XF:Thread', intval($threadId), 'requested_thread_not_found')
+        ]);
     }
 
     /**

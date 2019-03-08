@@ -17,7 +17,7 @@ class Index extends AbstractController
         if (empty($sessionToken)) {
             $systemInfo += [
                 'oauth/authorize' => $this->app->router('public')->buildLink('account/authorize'),
-                'oauth/token' => $this->app->router('api')->buildLink('oauth/token')
+                'oauth/token' => $this->buildApiLink('oauth/token')
             ];
         } elseif ($sessionToken->hasScope(Server::SCOPE_POST)) {
             $systemInfo += [

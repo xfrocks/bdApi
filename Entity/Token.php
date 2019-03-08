@@ -48,9 +48,6 @@ class Token extends TokenWithScope
         return $this->token_text;
     }
 
-    /**
-     * @throws \XF\Db\Exception
-     */
     protected function _postSave()
     {
         if ($this->isChanged('scope')) {
@@ -58,9 +55,6 @@ class Token extends TokenWithScope
         }
     }
 
-    /**
-     * @throws \XF\Db\Exception
-     */
     protected function updateUserScopes()
     {
         $values = [];

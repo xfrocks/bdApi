@@ -37,7 +37,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
     const LINK_CREATOR = 'creator';
     const LINK_CREATOR_AVATAR = 'creator_avatar';
 
-    public function attachmentCalculateDynamicValue($context, $key)
+    public function attachmentCalculateDynamicValue(TransformContext $context, $key)
     {
         switch ($key) {
             case self::ATTACHMENT__DYNAMIC_KEY_ID:
@@ -47,7 +47,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
         return null;
     }
 
-    public function attachmentCollectPermissions($context, array &$permissions)
+    public function attachmentCollectPermissions(TransformContext $context, array &$permissions)
     {
         /** @var \XF\Entity\ConversationMessage $message */
         $message = $context->getParentSource();
@@ -63,7 +63,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
         $permissions[self::PERM_DELETE] = $canDelete;
     }
 
-    public function attachmentCollectLinks($context, array &$links)
+    public function attachmentCollectLinks(TransformContext $context, array &$links)
     {
         /** @var \XF\Entity\ConversationMessage $message */
         $message = $context->getParentSource();
@@ -71,7 +71,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
         $links[self::ATTACHMENT__LINK_MESSAGE] = $this->buildApiLink('conversation-messages', $message);
     }
 
-    public function attachmentGetMappings($context, array &$mappings)
+    public function attachmentGetMappings(TransformContext $context, array &$mappings)
     {
         $mappings[] = self::ATTACHMENT__DYNAMIC_KEY_ID;
     }
@@ -157,7 +157,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
                 return $message->isIgnored();
         }
 
-        return null;
+        return parent::calculateDynamicValue($context, $key);
     }
 
     public function collectLinks(TransformContext $context)
@@ -216,6 +216,6 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
             $this->enqueueEntitiesToAddAttachmentsTo($entities, self::CONTENT_TYPE_CONVO_MESSAGE);
         }
 
-        return $entities;
+        return parent::onTransformEntities($context, $entities);
     }
 }

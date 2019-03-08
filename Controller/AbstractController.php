@@ -8,8 +8,8 @@ use XF\Mvc\ParameterBag;
 use XF\Mvc\Reply;
 use XF\Mvc\Reply\AbstractReply;
 use XF\Mvc\Reply\Redirect;
-use XF\Mvc\RouteMatch;
 use Xfrocks\Api\Data\Params;
+use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\Repository\Log;
 use Xfrocks\Api\Transform\LazyTransformer;
@@ -123,7 +123,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      */
     public function buildApiLink($link, $data = null, array $parameters = [])
     {
-        return $this->app->router('api')->buildLink($link, $data, $parameters);
+        return $this->app->router(Listener::$routerType)->buildLink($link, $data, $parameters);
     }
 
     public function checkCsrfIfNeeded($action, ParameterBag $params)
@@ -139,9 +139,10 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     /**
      * @param string $type
      * @param array|int $whereId
+     * @param string|null $phraseKey
      * @return LazyTransformer
      */
-    public function findAndTransformLazily($type, $whereId)
+    public function findAndTransformLazily($type, $whereId, $phraseKey = null)
     {
         $finder = $this->finder($type);
         $finder->whereId($whereId);
@@ -175,7 +176,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
             });
         }
 
-        $lazyTransformer->addCallbackPostTransform(function ($data) use ($isSingle) {
+        $lazyTransformer->addCallbackPostTransform(function ($data) use ($isSingle, $phraseKey) {
             if (!$isSingle) {
                 return $data;
             }
@@ -184,7 +185,11 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
                 return $data[0];
             }
 
-            throw $this->exception($this->notFound());
+            if (!$phraseKey) {
+                $phraseKey = 'requested_page_not_found';
+            }
+
+            throw $this->exception($this->notFound(\XF::phrase($phraseKey)));
         });
 
         return $lazyTransformer;
@@ -227,12 +232,6 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
         $scope = $this->getDefaultApiScopeForAction($action);
         $this->assertApiScope($scope);
-    }
-
-    public function reroute(RouteMatch $match)
-    {
-        $match->setParam('_isApiReroute', true);
-        return parent::reroute($match);
     }
 
     /**

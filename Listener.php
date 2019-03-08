@@ -6,6 +6,7 @@ class Listener
 {
     public static $accessTokenParamKey = 'oauth_token';
     public static $apiDirName = 'api';
+    public static $routerType = 'XfrocksApi';
     public static $scopeDelimiter = ' ';
 
     /**
@@ -21,6 +22,7 @@ class Listener
                 switch ($apiConfigKey) {
                     case 'accessTokenParamKey':
                     case 'apiDirName':
+                    case 'routerType':
                     case 'scopeDelimiter':
                         self::$$apiConfigKey = $apiConfigValue;
                         break;
@@ -45,7 +47,7 @@ class Listener
             return new $class($app);
         };
 
-        $container['router.api'] = function () use ($app) {
+        $container['router.' . self::$routerType] = function () use ($app) {
             $class = $app->extendClass('Xfrocks\Api\Mvc\Router');
             return new $class($app);
         };

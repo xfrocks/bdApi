@@ -46,7 +46,7 @@ class Post extends AbstractHandler implements AttachmentParent
 
     protected $attachmentData = null;
 
-    public function attachmentCalculateDynamicValue($context, $key)
+    public function attachmentCalculateDynamicValue(TransformContext $context, $key)
     {
         switch ($key) {
             case self::ATTACHMENT__DYNAMIC_KEY_ID:
@@ -56,13 +56,13 @@ class Post extends AbstractHandler implements AttachmentParent
         return null;
     }
 
-    public function attachmentCollectLinks($context, array &$links)
+    public function attachmentCollectLinks(TransformContext $context, array &$links)
     {
         $post = $context->getParentSource();
         $links[self::ATTACHMENT__LINK_POST] = $this->buildApiLink('posts', $post);
     }
 
-    public function attachmentCollectPermissions($context, array &$permissions)
+    public function attachmentCollectPermissions(TransformContext $context, array &$permissions)
     {
         /** @var \XF\Entity\Post $post */
         $post = $context->getParentSource();
@@ -80,7 +80,7 @@ class Post extends AbstractHandler implements AttachmentParent
         $permissions[self::PERM_DELETE] = $canDelete;
     }
 
-    public function attachmentGetMappings($context, array &$mappings)
+    public function attachmentGetMappings(TransformContext $context, array &$mappings)
     {
         $mappings[] = self::ATTACHMENT__DYNAMIC_KEY_ID;
     }

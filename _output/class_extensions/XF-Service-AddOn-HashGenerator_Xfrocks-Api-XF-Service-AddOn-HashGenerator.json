@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Service\\AddOn\\HashGenerator",
+    "to_class": "Xfrocks\\Api\\XF\\Service\\AddOn\\HashGenerator",
+    "execute_order": 10,
+    "active": true
+}

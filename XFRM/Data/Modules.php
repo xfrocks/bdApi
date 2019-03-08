@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\XFRM\Data;
 
 use Xfrocks\Api\Controller\AbstractController;
+use Xfrocks\Api\Listener;
 
 class Modules extends XFCP_Modules
 {
@@ -33,7 +34,7 @@ class Modules extends XFCP_Modules
         $data = parent::getDataForApiIndex($controller);
 
         $app = $controller->app();
-        $apiRouter = $app->router('api');
+        $apiRouter = $app->router(Listener::$routerType);
         $data['links']['resource-categories'] = $apiRouter->buildLink('resource-categories');
         $data['links']['resources'] = $apiRouter->buildLink('resources');
 

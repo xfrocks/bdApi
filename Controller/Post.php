@@ -76,7 +76,9 @@ class Post extends AbstractController
 
     public function actionSingle($postId)
     {
-        return $this->api(['post' => $this->findAndTransformLazily('XF:Post', intval($postId))]);
+        return $this->api([
+            'post' => $this->findAndTransformLazily('XF:Post', intval($postId), 'requested_post_not_found')
+        ]);
     }
 
     /**

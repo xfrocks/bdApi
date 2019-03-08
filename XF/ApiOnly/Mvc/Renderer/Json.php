@@ -10,6 +10,8 @@ use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class Json extends XFCP_Json
 {
+    private $prepareJsonEncodeDepth = 0;
+
     public function postFilter($content, AbstractReply $reply)
     {
         Cors::addHeaders($this->response);
@@ -93,14 +95,45 @@ class Json extends XFCP_Json
 
     protected function prepareJsonEncode($value)
     {
-        $value = parent::prepareJsonEncode($value);
+        $this->prepareJsonEncodeDepth++;
 
-        if (is_array($value)) {
-            foreach (array_keys($value) as $key) {
-                if ($value[$key] === null) {
-                    unset($value[$key]);
+        /** @var \Throwable|null $throwable */
+        $throwable = null;
+
+        try {
+            $value = parent::prepareJsonEncode($value);
+
+            if (is_array($value)) {
+                foreach (array_keys($value) as $key) {
+                    if ($value[$key] === null) {
+                        unset($value[$key]);
+                    }
                 }
             }
+        } catch (\Throwable $e) {
+            $throwable = $e;
+
+            if ($this->prepareJsonEncodeDepth === 1) {
+                if ($e instanceof \XF\Mvc\Reply\Exception) {
+                    $reply = $e->getReply();
+
+                    if ($reply instanceof \XF\Mvc\Reply\Error) {
+                        $value = $this->renderErrors($reply->getErrors());
+                        $this->setResponseCode($reply->getResponseCode());
+                        $throwable = null;
+                    }
+                } else {
+                    $value = $this->renderErrors([\XF::phrase('unexpected_error_occurred')]);
+                    $this->setResponseCode(500);
+                    $throwable = null;
+                }
+            }
+        }
+
+        $this->prepareJsonEncodeDepth--;
+
+        if ($throwable !== null) {
+            throw $throwable;
         }
 
         return $value;

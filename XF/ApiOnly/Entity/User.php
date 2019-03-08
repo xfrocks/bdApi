@@ -2,6 +2,7 @@
 
 namespace Xfrocks\Api\XF\ApiOnly\Entity;
 
+use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Server;
 use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
@@ -12,7 +13,8 @@ class User extends XFCP_User
         $url = parent::getAvatarUrl($sizeCode, $forceType, $canonical);
 
         if ($url === null) {
-            $url = $this->app()->router('api')->buildLink('users/default-avatar', $this, ['size' => $sizeCode]);
+            $apiRouter = $this->app()->router(Listener::$routerType);
+            $url = $apiRouter->buildLink('users/default-avatar', $this, ['size' => $sizeCode]);
         }
 
         return $url;
