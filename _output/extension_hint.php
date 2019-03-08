@@ -23,6 +23,11 @@ namespace Xfrocks\Api\XF\Repository
 	class XFCP_Node extends \XF\Repository\Node {}
 }
 
+namespace Xfrocks\Api\XF\Service\AddOn
+{
+	class XFCP_HashGenerator extends \XF\Service\AddOn\HashGenerator {}
+}
+
 namespace Xfrocks\Api\XF\Service\Conversation
 {
 	class XFCP_Notifier extends \XF\Service\Conversation\Notifier {}
