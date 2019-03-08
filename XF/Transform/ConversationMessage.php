@@ -157,7 +157,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
                 return $message->isIgnored();
         }
 
-        return null;
+        return parent::calculateDynamicValue($context, $key);
     }
 
     public function collectLinks(TransformContext $context)
@@ -216,6 +216,6 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
             $this->enqueueEntitiesToAddAttachmentsTo($entities, self::CONTENT_TYPE_CONVO_MESSAGE);
         }
 
-        return $entities;
+        return parent::onTransformEntities($context, $entities);
     }
 }
