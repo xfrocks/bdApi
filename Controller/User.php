@@ -917,6 +917,11 @@ class User extends AbstractController
         return $this->api($data);
     }
 
+    public function actionPostGroups(ParameterBag $params)
+    {
+        return $this->rerouteController('Xfrocks\Api\Controller\User', 'put-index', $params);
+    }
+
     /**
      * @param ParameterBag $params
      * @return \XF\Mvc\Reply\Reroute
