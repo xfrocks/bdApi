@@ -877,12 +877,13 @@ class User extends AbstractController
      */
     public function actionGetGroups(ParameterBag $params)
     {
-        if (!\XF::visitor()->hasAdminPermission('user')) {
-            return $this->noPermission();
-        }
-
+        $hasAdminUserPermission = \XF::visitor()->hasAdminPermission('user');
         if ($params->user_id) {
             $user = $this->assertViewableUser($params->user_id);
+
+            if ($user->user_id != \XF::visitor()->user_id && !$hasAdminUserPermission) {
+                return $this->noPermission();
+            }
 
             $userGroupIds = $user->secondary_group_ids;
             $userGroupIds[] = $user->user_group_id;
@@ -890,6 +891,10 @@ class User extends AbstractController
             $finder = $this->finder('XF:UserGroup');
             $finder->whereIds($userGroupIds);
         } else {
+            if (!$hasAdminUserPermission) {
+                return $this->noPermission();
+            }
+
             $user = null;
             $finder = $this->finder('XF:UserGroup');
         }
