@@ -114,46 +114,41 @@ class bdApi_Data_Helper_Batch
                 }
                 $preparedJob['_job_result'] = $job['_job_result'];
 
+                $jobKey = null;
+
                 switch ($job['_job_result']) {
                     case 'error':
-                        if (empty($job['_job_error'])) {
-                            continue;
-                        }
-
-                        $preparedJob['_job_error'] = $job['_job_error'];
+                        $jobKey = '_job_error';
                         break;
                     case 'message':
-                        if (empty($job['_job_message'])) {
-                            continue;
-                        }
-
-                        $preparedJob['_job_message'] = $job['_job_message'];
+                        $jobKey = '_job_message';
                         break;
                     case 'ok':
-                        if (empty($job['_job_response'])) {
-                            continue;
-                        }
-                        /** @var XenForo_ControllerResponse_View $response */
-                        $response = $job['_job_response'];
+                        if (!empty($job['_job_response'])) {
+                            /** @var XenForo_ControllerResponse_View $response */
+                            $response = $job['_job_response'];
 
-                        $viewOutput = $viewRenderer->renderViewObject(
-                            $response->viewName,
-                            'Json',
-                            $response->params,
-                            $response->templateName
-                        );
-                        if (!is_array($viewOutput)) {
-                            $viewOutput = @json_decode($viewOutput, true);
-                        }
+                            $viewOutput = $viewRenderer->renderViewObject(
+                                $response->viewName,
+                                'Json',
+                                $response->params,
+                                $response->templateName
+                            );
+                            if (!is_array($viewOutput)) {
+                                $viewOutput = @json_decode($viewOutput, true);
+                            }
 
-                        if (is_array($viewOutput)) {
-                            $preparedJob = array_merge($preparedJob, $viewOutput);
-                        } elseif ($viewOutput === null) {
-                            $preparedJob = array_merge($preparedJob, $response->params);
+                            if (is_array($viewOutput)) {
+                                $preparedJob = array_merge($preparedJob, $viewOutput);
+                            } elseif ($viewOutput === null) {
+                                $preparedJob = array_merge($preparedJob, $response->params);
+                            }
                         }
                         break;
-                    default:
-                        continue;
+                }
+
+                if ($jobKey !== null && isset($job[$jobKey])) {
+                    $preparedJob[$jobKey] = $job[$jobKey];
                 }
 
                 $jobs[$jobId] = $preparedJob;
