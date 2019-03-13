@@ -43,7 +43,7 @@ class OneTimeToken
      */
     public static function parse($server, $ott)
     {
-        if (!preg_match('/^(\d+),(\d+),(.{32}),(.+)$/', $ott, $matches)) {
+        if (preg_match('/^(\d+),(\d+),(.{32}),(.+)$/', $ott, $matches) !== 1) {
             return null;
         }
 
@@ -67,7 +67,7 @@ class OneTimeToken
 
         if ($userId === 0) {
             $client = $token->Client;
-            if ($client === null) {
+            if (!$client) {
                 return null;
             }
             if ($once !== self::generateOnce($userId, $timestamp, '', $client->client_secret)) {

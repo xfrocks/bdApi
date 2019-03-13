@@ -25,7 +25,7 @@ class SessionStorage extends AbstractStorage implements SessionInterface
     protected $sessions = [];
 
     /**
-     * @param string $sessionId
+     * @param int|string $sessionId
      * @param bool $throw
      * @return array|null
      */
@@ -89,13 +89,13 @@ class SessionStorage extends AbstractStorage implements SessionInterface
 
     public function getScopes(SessionEntity $session)
     {
-        $sessionId = $session->getId();
-        if (empty($sessionId)) {
+        $sessionId = strval($session->getId());
+        if ($sessionId === '') {
             return [];
         }
 
         $cache = $this->getInMemoryCache($sessionId);
-        if (!is_array($cache)) {
+        if (!is_array($cache) || !isset($cache[self::SESSION_KEY_SCOPES])) {
             return [];
         }
 
@@ -104,7 +104,7 @@ class SessionStorage extends AbstractStorage implements SessionInterface
 
     public function create($ownerType, $ownerId, $clientId, $clientRedirectUri = null)
     {
-        $sessionId = md5(strval(count($this->sessions)));
+        $sessionId = count($this->sessions) + 1;
 
         $cache = [
             self::SESSION_KEY_CLIENT_ID => $clientId,
@@ -127,16 +127,17 @@ class SessionStorage extends AbstractStorage implements SessionInterface
         $sessionId = $session->getId();
         $cache = $this->getInMemoryCache($sessionId, true);
 
-        if (empty($cache[self::SESSION_KEY_SCOPES])) {
+        if (!isset($cache[self::SESSION_KEY_SCOPES])) {
             $cache[self::SESSION_KEY_SCOPES] = [];
         }
+        $scopesRef =& $cache[self::SESSION_KEY_SCOPES];
 
         $scopeId = $scope->getId();
-        if (in_array($scopeId, $cache[self::SESSION_KEY_SCOPES], true)) {
+        if (in_array($scopeId, $scopesRef, true)) {
             return;
         }
 
-        $cache[self::SESSION_KEY_SCOPES][] = $scopeId;
+        $scopesRef[] = $scopeId;
         $this->sessions[$sessionId] = $cache;
     }
 }

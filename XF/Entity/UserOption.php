@@ -4,11 +4,6 @@ namespace Xfrocks\Api\XF\Entity;
 
 use XF\Mvc\Entity\Structure;
 
-/**
- * Class UserOption
- * @package Xfrocks\Api\XF\Entity
- * @inheritdoc
- */
 class UserOption extends XFCP_UserOption
 {
     public static function getStructure(Structure $structure)
@@ -17,18 +12,16 @@ class UserOption extends XFCP_UserOption
 
         $options = \XF::options();
 
+        /** @var string $userColumn */
         $userColumn = $options->bdApi_subscriptionColumnUser;
+        /** @var string $userNotifyColumn */
         $userNotifyColumn = $options->bdApi_subscriptionColumnUserNotification;
 
-        if ($options->bdApi_subscriptionUser
-            && !empty($userColumn)
-        ) {
+        if ($options->bdApi_subscriptionUser && $userColumn !== '') {
             $structure->columns[$userColumn] = ['type' => self::SERIALIZED_ARRAY, 'default' => []];
         }
 
-        if ($options->bdApi_subscriptionUserNotification
-            && !empty($userNotifyColumn)
-        ) {
+        if ($options->bdApi_subscriptionUserNotification && $userNotifyColumn !== '') {
             $structure->columns[$userNotifyColumn] = ['type' => self::SERIALIZED_ARRAY, 'default' => []];
         }
 

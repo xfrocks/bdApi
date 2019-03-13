@@ -6,20 +6,26 @@ use tests\bases\ApiTestCase;
 
 class IndexTest extends ApiTestCase
 {
+    /**
+     * @return void
+     */
     public function testReturns200()
     {
-        $response = $this->httpRequest('GET', 'index');
-        $this->assertEquals(200, $response->getStatusCode());
+        $response = static::httpRequest('GET', 'index');
+        static::assertEquals(200, $response->getStatusCode());
     }
 
+    /**
+     * @return void
+     */
     public function testReturnsData()
     {
-        $json = $this->httpRequestJson('GET', 'index');
-        $this->assertArrayHasKey('links', $json, 'json has links');
+        $json = static::httpRequestJson('GET', 'index');
+        static::assertArrayHasKey('links', $json, 'json has links');
 
-        $this->assertArrayHasKey('system_info', $json);
+        static::assertArrayHasKey('system_info', $json);
         $systemInfo = $json['system_info'];
-        $this->assertArrayHasKey('oauth/authorize', $systemInfo);
-        $this->assertArrayHasKey('oauth/token', $systemInfo);
+        static::assertArrayHasKey('oauth/authorize', $systemInfo);
+        static::assertArrayHasKey('oauth/token', $systemInfo);
     }
 }

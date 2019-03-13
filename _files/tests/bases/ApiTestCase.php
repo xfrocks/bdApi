@@ -6,6 +6,9 @@ use PHPUnit\Framework\TestCase;
 
 abstract class ApiTestCase extends TestCase
 {
+    /**
+     * @var string
+     */
     public static $apiRoot = 'http://localhost/api/';
 
     /**
@@ -23,6 +26,9 @@ abstract class ApiTestCase extends TestCase
      */
     private static $testData = null;
 
+    /**
+     * @return void
+     */
     public static function setUpBeforeClass()
     {
         self::$http = new \GuzzleHttp\Client([
@@ -50,7 +56,7 @@ abstract class ApiTestCase extends TestCase
      */
     protected static function httpRequest($method, $path, array $options = [])
     {
-        if (preg_match('#^https?://#', $path)) {
+        if (preg_match('#^https?://#', $path) === 1) {
             $uri = $path;
         } else {
             $uri = 'index.php?' . str_replace('?', '&', $path);

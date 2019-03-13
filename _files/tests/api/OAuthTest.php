@@ -8,41 +8,50 @@ use tests\bases\ApiTestCase;
 
 class OAuthTest extends ApiTestCase
 {
+    /**
+     * @return void
+     */
     public function testGrantTypePassword()
     {
-        $client = $this->dataApiClient();
-        $user = $this->dataUser();
-        $json = $this->postPassword($client, $user);
+        $client = static::dataApiClient();
+        $user = static::dataUser();
+        $json = static::postPassword($client, $user);
 
-        $this->assertArrayHasKey('access_token', $json);
-        $this->assertArrayHasKey('expires_in', $json);
-        $this->assertArrayHasKey('scope', $json);
+        static::assertArrayHasKey('access_token', $json);
+        static::assertArrayHasKey('expires_in', $json);
+        static::assertArrayHasKey('scope', $json);
 
-        $this->assertEquals($user['user_id'], $json['user_id']);
+        static::assertEquals($user['user_id'], $json['user_id']);
     }
 
+    /**
+     * @return void
+     */
     public function testGrantTypeRefreshToken()
     {
-        $client = $this->dataApiClient();
-        $user = $this->dataUser();
-        $passwordJson = $this->postPassword($client, $user);
-        $this->assertArrayHasKey('refresh_token', $passwordJson);
+        $client = static::dataApiClient();
+        $user = static::dataUser();
+        $passwordJson = static::postPassword($client, $user);
+        static::assertArrayHasKey('refresh_token', $passwordJson);
 
-        $json = $this->postOauthToken([
+        $json = static::postOauthToken([
             'grant_type' => 'refresh_token',
             'client_id' => $client['client_id'],
             'client_secret' => $client['client_secret'],
             'refresh_token' => $passwordJson['refresh_token']
         ]);
 
-        $this->assertArrayHasKey('access_token', $json);
-        $this->assertArrayHasKey('refresh_token', $json);
+        static::assertArrayHasKey('access_token', $json);
+        static::assertArrayHasKey('refresh_token', $json);
     }
 
+    /**
+     * @return void
+     */
     public function testGrantTypePasswordWithTfa()
     {
-        $client = $this->dataApiClient();
-        $user = $this->dataUser(4);
+        $client = static::dataApiClient();
+        $user = static::dataUser(4);
 
         $oAuthParams = [
             'grant_type' => 'password',
@@ -52,26 +61,26 @@ class OAuthTest extends ApiTestCase
             'password' => $user['password']
         ];
 
-        $this->httpRequestJson('POST', 'oauth/token', [
+        static::httpRequestJson('POST', 'oauth/token', [
             'body' => $oAuthParams
         ], false);
 
-        $response = $this->httpLatestResponse();
-        $this->assertEquals('202', strval($response->getStatusCode()), '202');
+        $response = static::httpLatestResponse();
+        static::assertEquals('202', strval($response->getStatusCode()), '202');
 
-        $this->assertNotEmpty($response->getHeader('X-Api-Tfa-Providers'));
+        static::assertNotEmpty($response->getHeader('X-Api-Tfa-Providers'));
 
         $oAuthParams['tfa_provider'] = 'totp';
 
         $otp = new Otp();
         $oAuthParams['code'] = $otp->totp(Base32::decode($user['tfa_secret']));
 
-        $json = $this->postOauthToken($oAuthParams);
+        $json = static::postOauthToken($oAuthParams);
 
-        $this->assertArrayHasKey('access_token', $json);
-        $this->assertArrayHasKey('expires_in', $json);
-        $this->assertArrayHasKey('scope', $json);
+        static::assertArrayHasKey('access_token', $json);
+        static::assertArrayHasKey('expires_in', $json);
+        static::assertArrayHasKey('scope', $json);
 
-        $this->assertEquals($user['user_id'], $json['user_id']);
+        static::assertEquals($user['user_id'], $json['user_id']);
     }
 }

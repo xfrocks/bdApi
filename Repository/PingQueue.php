@@ -8,6 +8,14 @@ use XF\Util\Php;
 
 class PingQueue extends Repository
 {
+    /**
+     * @param string $callback
+     * @param string $objectType
+     * @param array $data
+     * @param int $expireDate
+     * @param int $queueDate
+     * @return void
+     */
     public function insertQueue($callback, $objectType, array $data, $expireDate = 0, $queueDate = 0)
     {
         $this->db()->insert('xf_bdapi_ping_queue', array(
@@ -29,7 +37,11 @@ class PingQueue extends Repository
             ->enqueueLater(__CLASS__, $triggerDate, 'Xfrocks\Api\Job\PingQueue', [], false);
     }
 
-    public function reInsertQueue($records)
+    /**
+     * @param array $records
+     * @return void
+     */
+    public function reInsertQueue(array $records)
     {
         foreach ($records as $record) {
             $data = $record['data'];
@@ -44,12 +56,15 @@ class PingQueue extends Repository
                 continue;
             }
 
-            $queueDate = time() + 60 * pow(2, $data['_retries'] - 1);
+            $queueDate = time() + intval(60 * pow(2, $data['_retries'] - 1));
 
             $this->insertQueue($record['callback'], $record['object_type'], $data, $record['expire_date'], $queueDate);
         }
     }
 
+    /**
+     * @return bool
+     */
     public function hasQueue()
     {
         $minId = $this->db()->fetchOne('
@@ -58,9 +73,13 @@ class PingQueue extends Repository
 			WHERE queue_date < ?
         ', \XF::$time);
 
-        return (bool) $minId;
+        return (bool)$minId;
     }
 
+    /**
+     * @param int $limit
+     * @return array
+     */
     public function getQueue($limit = 20)
     {
         $queueRecords = $this->db()->fetchAllKeyed($this->db()->limit('
@@ -77,16 +96,20 @@ class PingQueue extends Repository
         return $queueRecords;
     }
 
+    /**
+     * @param int $maxRunTime
+     * @return bool
+     */
     public function run($maxRunTime)
     {
         $s = microtime(true);
 
         do {
-            $queueRecords = $this->getQueue($maxRunTime ? 20 : 0);
+            $queueRecords = $this->getQueue($maxRunTime > 0 ? 20 : 0);
 
             $this->ping($queueRecords);
 
-            if ($maxRunTime && microtime(true) - $s > $maxRunTime) {
+            if ($maxRunTime > 0 && microtime(true) - $s > $maxRunTime) {
                 break;
             }
         } while ($queueRecords);
@@ -94,6 +117,10 @@ class PingQueue extends Repository
         return $this->hasQueue();
     }
 
+    /**
+     * @param array $queueRecords
+     * @return void
+     */
     public function ping(array $queueRecords)
     {
         while (count($queueRecords) > 0) {
@@ -125,7 +152,7 @@ class PingQueue extends Repository
             }
 
             $payloads = $this->preparePayloadsFromRecords($records);
-            if (empty($payloads)) {
+            if (count($payloads) === 0) {
                 continue;
             }
 
@@ -169,28 +196,45 @@ class PingQueue extends Repository
         }
     }
 
+    /**
+     * @param array $records
+     * @return array
+     */
     protected function preparePayloadsFromRecords(array $records)
     {
         $dataByTypes = array();
         $payloads = array();
 
         foreach ($records as $key => $record) {
-            if (!isset($dataByTypes[$record['object_type']])) {
-                $dataByTypes[$record['object_type']] = array();
+            /** @var string $objectTypeRef */
+            $objectTypeRef =& $record['object_type'];
+
+            if (!isset($dataByTypes[$objectTypeRef])) {
+                $dataByTypes[$objectTypeRef] = array();
             }
-            $dataByTypes[$record['object_type']][$key] = $record['data'];
+            $dataRef =& $dataByTypes[$objectTypeRef];
+
+            $dataRef[$key] = $record['data'];
         }
 
         /** @var Subscription $subscriptionRepo */
         $subscriptionRepo = $this->repository('Xfrocks\Api:Subscription');
-        foreach ($dataByTypes as $objectType => &$dataMany) {
-            $dataMany = $subscriptionRepo->preparePingDataMany($objectType, $dataMany);
+        foreach ($dataByTypes as $objectType => &$dataManyRef) {
+            $dataManyRef = $subscriptionRepo->preparePingDataMany($objectType, $dataManyRef);
         }
 
         foreach ($records as $key => $record) {
-            if (!empty($dataByTypes[$record['object_type']][$key])) {
-                $payloads[$key] = $dataByTypes[$record['object_type']][$key];
+            $objectTypeRef =& $record['object_type'];
+
+            if (!isset($dataByTypes[$objectTypeRef])) {
+                continue;
             }
+            $dataRef =& $dataByTypes[$objectTypeRef];
+
+            if (!isset($dataRef[$key])) {
+                continue;
+            }
+            $payloads[$key] = $dataRef[$key];
         }
 
         return $payloads;

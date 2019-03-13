@@ -4,13 +4,11 @@ namespace Xfrocks\Api\XF\Entity;
 
 use Xfrocks\Api\Repository\Subscription;
 
-/**
- * Class Post
- * @package Xfrocks\Api\XF\Entity
- * @inheritdoc
- */
 class Post extends XFCP_Post
 {
+    /**
+     * @return void
+     */
     protected function _postSave()
     {
         parent::_postSave();
@@ -31,6 +29,9 @@ class Post extends XFCP_Post
         }
     }
 
+    /**
+     * @return void
+     */
     protected function _postDelete()
     {
         parent::_postDelete();

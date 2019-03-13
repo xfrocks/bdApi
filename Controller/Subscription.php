@@ -20,18 +20,18 @@ class Subscription extends AbstractController
         $session = $this->session();
         $token = $session->getToken();
 
+        $clientId = '';
         if ($token) {
             $clientId = $token->client_id;
         }
 
         $isSessionClientId = true;
-
-        if (empty($clientId)) {
+        if ($clientId === '') {
             $clientId = $params['client_id'];
             $isSessionClientId = false;
         }
 
-        if (empty($clientId)) {
+        if ($clientId === '') {
             return $this->noPermission();
         }
 
@@ -134,6 +134,10 @@ class Subscription extends AbstractController
         return $this->responseError(\XF::phrase('bdapi_subscription_cannot_verify_intent_of_subscriber'));
     }
 
+    /**
+     * @param mixed $error
+     * @return \XF\Mvc\Reply\View
+     */
     protected function responseError($error)
     {
         $this->setResponseType('raw');

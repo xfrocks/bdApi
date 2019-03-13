@@ -10,11 +10,15 @@ use Xfrocks\Api\OAuth2\Entity\RefreshTokenHybrid;
 
 class RefreshTokenStorage extends AbstractStorage implements RefreshTokenInterface
 {
+    /**
+     * @param string $token
+     * @return RefreshTokenHybrid|null
+     */
     public function get($token)
     {
-        /** @var RefreshToken $xfRefreshToken */
+        /** @var RefreshToken|null $xfRefreshToken */
         $xfRefreshToken = $this->doXfEntityFind('Xfrocks\Api:RefreshToken', 'refresh_token_text', $token);
-        if (empty($xfRefreshToken)) {
+        if (!$xfRefreshToken) {
             return null;
         }
 
@@ -22,7 +26,10 @@ class RefreshTokenStorage extends AbstractStorage implements RefreshTokenInterfa
     }
 
     /**
-     * @inheritdoc
+     * @param string $token
+     * @param int $expireTime
+     * @param string $accessToken
+     * @return RefreshTokenHybrid
      * @throws \XF\PrintableException
      */
     public function create($token, $expireTime, $accessToken)
@@ -42,19 +49,23 @@ class RefreshTokenStorage extends AbstractStorage implements RefreshTokenInterfa
         ]);
 
         $this->doXfEntitySave($xfRefreshToken);
+
+        return new RefreshTokenHybrid($this->server, $xfRefreshToken);
     }
 
     /**
-     * @inheritdoc
+     * @param RefreshTokenEntity $token
+     * @return void
      * @throws \XF\PrintableException
      */
     public function delete(RefreshTokenEntity $token)
     {
-        if ($token instanceof RefreshTokenHybrid) {
-            $hybrid = $token;
-        } else {
+        /** @var RefreshTokenHybrid $hybrid */
+        $hybrid = $token;
+
+        if (!$token instanceof RefreshTokenHybrid) {
             $hybrid = $this->get($token->getId());
-            if (empty($hybrid)) {
+            if (!$hybrid) {
                 return;
             }
         }

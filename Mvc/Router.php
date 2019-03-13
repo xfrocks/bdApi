@@ -27,6 +27,12 @@ class Router extends \XF\Mvc\Router
         $this->setPather($app->container('request.pather'));
     }
 
+    /**
+     * @param mixed $link
+     * @param mixed|null $data
+     * @param array $parameters
+     * @return string
+     */
     public function buildLink($link, $data = null, array $parameters = [])
     {
         if (!isset($parameters[Listener::$accessTokenParamKey])) {
@@ -41,9 +47,14 @@ class Router extends \XF\Mvc\Router
         return parent::buildLink($link, $data, $parameters);
     }
 
+    /**
+     * @param string $route
+     * @param string $queryString
+     * @return string
+     */
     protected function formatApiLink($route, $queryString)
     {
-        $suffix = $route . (strlen($queryString) ? '&' . $queryString : '');
-        return sprintf('%s/index.php%s', Listener::$apiDirName, strlen($suffix) ? ('?' . $suffix) : '');
+        $suffix = $route . (strlen($queryString) > 0 ? '&' . $queryString : '');
+        return sprintf('%s/index.php%s', Listener::$apiDirName, strlen($suffix) > 0 ? ('?' . $suffix) : '');
     }
 }

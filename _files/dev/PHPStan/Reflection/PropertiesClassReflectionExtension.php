@@ -11,6 +11,9 @@ use XF\Mvc\Entity\Entity;
 
 class PropertiesClassReflectionExtension implements \PHPStan\Reflection\PropertiesClassReflectionExtension
 {
+    /**
+     * @var array
+     */
     private $map = [
         'XF\Entity\AbstractNode' => [
             'node_id' => ['column', 'type' => Entity::UINT],

@@ -39,7 +39,7 @@ class ResourceItem extends AbstractController
             ->define(\Xfrocks\Api\XFRM\Transform\ResourceItem::KEY_UPDATE_DATE, 'uint', 'timestamp to filter')
             ->define('resource_ids', 'str', 'resource ids to fetch (ignoring all filters, separated by comma)');
 
-        if (!empty($params['resource_ids'])) {
+        if ($params['resource_ids'] !== '') {
             return $this->actionMultiple($params->filterCommaSeparatedIds('resource_ids'));
         }
 
@@ -74,7 +74,7 @@ class ResourceItem extends AbstractController
             /** @var \XFRM\Entity\Category $theCategory */
             $theCategory = $this->assertRecordExists('XFRM:Category', $params['resource_category_id']);
         }
-        if ($theCategory !== null) {
+        if ($theCategory) {
             $this->transformEntityIfNeeded($data, 'category', $theCategory);
         }
 
@@ -83,6 +83,10 @@ class ResourceItem extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param array $ids
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionMultiple(array $ids)
     {
         $resources = [];
@@ -93,6 +97,11 @@ class ResourceItem extends AbstractController
         return $this->api(['resources' => $resources]);
     }
 
+
+    /**
+     * @param int $resourceId
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionSingle($resourceId)
     {
         return $this->api([
@@ -107,6 +116,7 @@ class ResourceItem extends AbstractController
     /**
      * @param \XFRM\Finder\ResourceItem $finder
      * @param Params $params
+     * @return void
      */
     protected function applyFilters($finder, Params $params)
     {
@@ -122,7 +132,7 @@ class ResourceItem extends AbstractController
             }
         }
         if (count($categoryIds) > 0) {
-            if ($params['in_sub']) {
+            if ($params['in_sub'] === true) {
                 /** @var \XFRM\Repository\Category $categoryRepo */
                 $categoryRepo = $this->repository('XFRM:Category');
                 $categories = $this->finder('XFRM:Category')->fetch();

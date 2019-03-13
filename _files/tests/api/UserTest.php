@@ -19,16 +19,19 @@ class UserTest extends ApiTestCase
         self::$accessToken = $token['access_token'];
     }
 
+    /**
+     * @return void
+     */
     public function testGetIndex()
     {
-        $user = $this->dataUser();
+        $user = static::dataUser();
 
         $jsonUsers = static::httpRequestJson('GET', 'users', [
             'query' => [
                 'oauth_token' => self::$accessToken
             ]
         ]);
-        $this->assertArrayHasKey('users', $jsonUsers);
+        static::assertArrayHasKey('users', $jsonUsers);
 
         // test exclude fields.
         $excludeFields = [
@@ -53,14 +56,17 @@ class UserTest extends ApiTestCase
                 ]
             );
 
-            $this->assertArrayHasKey('user', $jsonUser);
+            static::assertArrayHasKey('user', $jsonUser);
 
-            if ($excludeField) {
-                $this->assertArrayNotHasKey($excludeField, $jsonUser);
+            if ($excludeField !== '') {
+                static::assertArrayNotHasKey($excludeField, $jsonUser);
             }
         }
     }
 
+    /**
+     * @return void
+     */
     public function testPostIndex()
     {
         $now = time();
@@ -68,7 +74,7 @@ class UserTest extends ApiTestCase
         $userEmail = 'tests_' . $now . '@local.com';
         $username = 'tests_' . $now;
 
-        $json = $this->httpRequestJson(
+        $json = static::httpRequestJson(
             'POST',
             'users',
             [
@@ -81,21 +87,24 @@ class UserTest extends ApiTestCase
             ]
         );
 
-        $this->assertArrayHasKey('user', $json);
-        $this->assertArrayHasKey('token', $json);
+        static::assertArrayHasKey('user', $json);
+        static::assertArrayHasKey('token', $json);
 
         $token = $json['token'];
-        $this->assertArrayHasKey('access_token', $token);
-        $this->assertArrayHasKey('expires_in', $token);
-        $this->assertArrayHasKey('scope', $token);
-        $this->assertArrayHasKey('refresh_token', $token);
+        static::assertArrayHasKey('access_token', $token);
+        static::assertArrayHasKey('expires_in', $token);
+        static::assertArrayHasKey('scope', $token);
+        static::assertArrayHasKey('refresh_token', $token);
     }
 
+    /**
+     * @return void
+     */
     public function testPutIndex()
     {
-        $user = $this->dataUser();
+        $user = static::dataUser();
 
-        $json = $this->httpRequestJson(
+        $json = static::httpRequestJson(
             'PUT',
             'users/' . $user['user_id'],
             [
@@ -105,7 +114,7 @@ class UserTest extends ApiTestCase
             ]
         );
 
-        $this->assertArrayHasKey('status', $json);
-        $this->assertEquals('ok', $json['status']);
+        static::assertArrayHasKey('status', $json);
+        static::assertEquals('ok', $json['status']);
     }
 }

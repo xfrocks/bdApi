@@ -34,7 +34,7 @@ class Post extends AbstractController
             ->definePageNav()
             ->define('post_ids', 'str', 'post ids to fetch (ignoring all filters, separated by comma)');
 
-        if (!empty($params['post_ids'])) {
+        if ($params['post_ids'] !== '') {
             $postIds = $params->filterCommaSeparatedIds('post_ids');
 
             return $this->actionMultiple($postIds);
@@ -64,6 +64,10 @@ class Post extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param array $ids
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionMultiple(array $ids)
     {
         $posts = [];
@@ -74,6 +78,10 @@ class Post extends AbstractController
         return $this->api(['posts' => $posts]);
     }
 
+    /**
+     * @param int $postId
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionSingle($postId)
     {
         return $this->api([
@@ -94,13 +102,17 @@ class Post extends AbstractController
             ->define('post_body', 'str', 'content of the new post')
             ->defineAttachmentHash();
 
-        if (!empty($params['quote_post_id'])) {
+        if ($params['quote_post_id'] > 0) {
             $post = $this->assertViewablePost($params['quote_post_id']);
             if ($params['thread_id'] > 0 && $post->thread_id !== $params['thread_id']) {
                 return $this->noPermission();
             }
 
             $thread = $post->Thread;
+            if (!$thread) {
+                return $this->notFound();
+            }
+
             $postBody = $post->getQuoteWrapper($post->message) . $params['post_body'];
         } else {
             $thread = $this->assertViewableThread($params['thread_id']);
@@ -211,7 +223,7 @@ class Post extends AbstractController
         $editor->validate($postErrors);
 
         $errors = array_merge($errors, $postErrors);
-        if ($errors) {
+        if (count($errors) > 0) {
             return $this->error($errors);
         }
 
@@ -296,7 +308,7 @@ class Post extends AbstractController
             ->define('post_id', 'uint', 'id of the target post')
             ->defineAttachmentHash();
 
-        if (empty($params['post_id']) && empty($params['thread_id'])) {
+        if ($params['post_id'] === '' && $params['thread_id'] === '') {
             return $this->error(\XF::phrase('bdapi_slash_posts_attachments_requires_ids'), 400);
         }
 
@@ -456,6 +468,7 @@ class Post extends AbstractController
     /**
      * @param \XF\Finder\Post $finder
      * @param Params $params
+     * @return void
      * @throws \XF\Mvc\Reply\Exception
      */
     protected function applyFilters($finder, Params $params)

@@ -7,22 +7,32 @@ use XF\Timer;
 
 class ClientDelete extends AbstractJob
 {
+    /**
+     * @return bool
+     */
     public function canTriggerByChoice()
     {
         return true;
     }
 
+    /**
+     * @return bool
+     */
     public function canCancel()
     {
         return false;
     }
 
+    /**
+     * @param mixed $maxRunTime
+     * @return \XF\Job\JobResult
+     */
     public function run($maxRunTime)
     {
-        if (empty($this->data['clientId'])) {
+        if (!isset($this->data['clientId'])) {
             return $this->complete();
         }
-        
+
         $timer = new Timer($maxRunTime);
         $finder = $this->app
             ->finder('Xfrocks\Api:Subscription')
@@ -44,6 +54,9 @@ class ClientDelete extends AbstractJob
         return $this->complete();
     }
 
+    /**
+     * @return string
+     */
     public function getStatusMessage()
     {
         return '';

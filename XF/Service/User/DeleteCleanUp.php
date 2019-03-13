@@ -6,6 +6,11 @@ use Xfrocks\Api\Repository\Subscription;
 
 class DeleteCleanUp extends XFCP_DeleteCleanUp
 {
+    /**
+     * @param \XF\App $app
+     * @param int $userId
+     * @param string $userName
+     */
     public function __construct(\XF\App $app, $userId, $userName)
     {
         parent::__construct($app, $userId, $userName);
@@ -18,6 +23,9 @@ class DeleteCleanUp extends XFCP_DeleteCleanUp
         $this->steps[] = 'stepDeleteApiSubscriptions';
     }
 
+    /**
+     * @return void
+     */
     public function stepDeleteApiSubscriptions()
     {
         $app = $this->app;

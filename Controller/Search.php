@@ -7,6 +7,9 @@ use Xfrocks\Api\Util\PageNav;
 
 class Search extends AbstractController
 {
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionGetIndex()
     {
         $data = [
@@ -72,7 +75,7 @@ class Search extends AbstractController
             ->define('forum_id', 'uint', 'forum id to filter')
             ->define('user_id', 'uint', 'creator user id to filter');
 
-        if (empty($params['q'])) {
+        if ($params['q'] === '') {
             return $this->error(\XF::phrase('bdapi_slash_search_requires_q'), 400);
         }
 
@@ -101,7 +104,7 @@ class Search extends AbstractController
             ->define('thread_id', 'uint', 'id of the container thread to search for posts')
             ->define('user_id', 'uint', 'id of the creator to search for contents');
 
-        if (empty($params['q'])) {
+        if ($params['q'] === '') {
             return $this->error(\XF::phrase('bdapi_slash_search_requires_q'), 400);
         }
 

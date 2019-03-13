@@ -45,6 +45,7 @@ class Attachment extends AbstractPlugin
         $controller = $this->controller;
         $params = $controller->params();
 
+        /** @var \XF\Http\Upload|null $file */
         $file = $params[$formField];
         if (!$file) {
             throw $this->controller->errorException(\XF::phrase('uploaded_file_failed_not_found'));
@@ -66,6 +67,10 @@ class Attachment extends AbstractPlugin
         return $controller->api(['attachment' => $lazyTransformer]);
     }
 
+    /**
+     * @param array $contentData
+     * @return string
+     */
     public function getAttachmentTempHash(array $contentData = [])
     {
         /** @var AbstractController $controller */
@@ -75,19 +80,19 @@ class Attachment extends AbstractPlugin
         $prefix = '';
         $inputHash = $params['attachment_hash'];
 
-        if (!empty($inputHash)) {
+        if ($inputHash !== '') {
             $prefix = sprintf('hash%s', $inputHash);
-        } elseif (!empty($contentData['post_id'])) {
+        } elseif (isset($contentData['post_id'])) {
             $prefix = sprintf('post%d', $contentData['post_id']);
-        } elseif (!empty($contentData['thread_id'])) {
+        } elseif (isset($contentData['thread_id'])) {
             $prefix = sprintf('thread%d', $contentData['thread_id']);
-        } elseif (!empty($contentData['forum_id'])) {
+        } elseif (isset($contentData['forum_id'])) {
             $prefix = sprintf('node%d', $contentData['forum_id']);
-        } elseif (!empty($contentData['node_id'])) {
+        } elseif (isset($contentData['node_id'])) {
             $prefix = sprintf('node%d', $contentData['node_id']);
-        } elseif (!empty($contentData['message_id'])) {
+        } elseif (isset($contentData['message_id'])) {
             $prefix = sprintf('message%d', $contentData['message_id']);
-        } elseif (!empty($contentData['conversation_id'])) {
+        } elseif (isset($contentData['conversation_id'])) {
             $prefix = sprintf('conversation%d', $contentData['conversation_id']);
         }
 

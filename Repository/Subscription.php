@@ -8,7 +8,6 @@ use XF\Entity\Post;
 use XF\Entity\Thread;
 use XF\Entity\User;
 use XF\Entity\UserAlert;
-use XF\Entity\UserOption;
 use XF\Mvc\Entity\Repository;
 use XF\Util\Php;
 use Xfrocks\Api\Listener;
@@ -27,17 +26,25 @@ class Subscription extends Repository
     const TYPE_CLIENT = '__client__';
     const TYPE_CLIENT_DATA_REGISTRY = 'apiSubs';
 
+    /**
+     * @return array
+     */
     public function getClientSubscriptionsData()
     {
         $data = $this->app()->registry()->get(self::TYPE_CLIENT_DATA_REGISTRY);
 
-        if (empty($data)) {
+        if (!is_array($data)) {
             $data = array();
         }
 
         return $data;
     }
 
+    /**
+     * @param string $type
+     * @param int|string $id
+     * @return int|null
+     */
     public function deleteSubscriptionsForTopic($type, $id)
     {
         $topic = self::getTopic($type, $id);
@@ -46,6 +53,10 @@ class Subscription extends Repository
         return $deleted;
     }
 
+    /**
+     * @param string $topic
+     * @return void
+     */
     public function updateCallbacksForTopic($topic)
     {
         list($type, $id) = self::parseTopic($topic);
@@ -65,7 +76,7 @@ class Subscription extends Repository
 
         switch ($type) {
             case self::TYPE_NOTIFICATION:
-                if (!empty($subscriptions)) {
+                if (count($subscriptions) > 0) {
                     $userOption = [
                         'topic' => $topic,
                         'link' => $apiRouter->buildLink('notifications', null, ['oauth_token' => '']),
@@ -77,13 +88,13 @@ class Subscription extends Repository
 
                 $this->db()->update(
                     'xf_user_option',
-                    [$this->options()->bdApi_subscriptionColumnUserNotification => serialize($userOption)],
+                    [self::getSubColumn($type) => serialize($userOption)],
                     'user_id = ?',
                     $id
                 );
                 break;
             case self::TYPE_THREAD_POST:
-                if (!empty($subscriptions)) {
+                if (count($subscriptions) > 0) {
                     $threadOption = [
                         'topic' => $topic,
                         'link' => $apiRouter->buildLink('posts', null, ['thread_id' => $id, 'oauth_token' => '']),
@@ -95,13 +106,13 @@ class Subscription extends Repository
 
                 $this->db()->update(
                     'xf_thread',
-                    [$this->options()->bdApi_subscriptionColumnThreadPost => serialize($threadOption)],
+                    [self::getSubColumn($type) => serialize($threadOption)],
                     'thread_id = ?',
                     $id
                 );
                 break;
             case self::TYPE_USER:
-                if (!empty($subscriptions)) {
+                if (count($subscriptions) > 0) {
                     $userOption = [
                         'topic' => $topic,
                         'link' => $apiRouter->buildLink('users', ['user_id' => $id], ['oauth_token' => '']),
@@ -125,7 +136,7 @@ class Subscription extends Repository
                 }
                 break;
             case self::TYPE_CLIENT:
-                if (!empty($subscriptions)) {
+                if (count($subscriptions) > 0) {
                     $data = [
                         'topic' => $topic,
                         'link' => '',
@@ -140,6 +151,14 @@ class Subscription extends Repository
         }
     }
 
+    /**
+     * @param string $callback
+     * @param string $mode
+     * @param string $topic
+     * @param int $leaseSeconds
+     * @param array $extraParams
+     * @return bool
+     */
     public function verifyIntentOfSubscriber($callback, $mode, $topic, $leaseSeconds, array $extraParams = [])
     {
         $challenge = md5(\XF::$time . $callback . $mode . $topic . $leaseSeconds);
@@ -196,13 +215,16 @@ class Subscription extends Repository
         return true;
     }
 
+    /**
+     * @param string $topic
+     * @param User|null $user
+     * @return bool
+     */
     public function isValidTopic(&$topic, User $user = null)
     {
         list($type, $id) = self::parseTopic($topic);
 
-        if ($type != self::TYPE_CLIENT
-            && !self::getSubscription($type)
-        ) {
+        if ($type != self::TYPE_CLIENT && !self::getSubOption($type)) {
             // subscription for this topic type has been disabled
             return false;
         }
@@ -210,12 +232,8 @@ class Subscription extends Repository
         $user = $user ?: \XF::visitor();
         /** @var \Xfrocks\Api\XF\ApiOnly\Session\Session $session */
         $session = \XF::app()->session();
-
         $token = $session->getToken();
-        $client = null;
-        if ($token) {
-            $client = $token->Client;
-        }
+        $client = $token ? $token->Client : null;
 
         switch ($type) {
             case self::TYPE_NOTIFICATION:
@@ -241,24 +259,33 @@ class Subscription extends Repository
                     $topic = self::getTopic($type, $id);
                 }
 
-                if ($id === '0'
-                    && $client
-                    && !empty($client->options['allow_user_0_subscription'])
-                ) {
-                    return false;
+                if ($id === '0' && $client) {
+                    if (!isset($client->options['allow_user_0_subscription']) ||
+                        $client->options['allow_user_0_subscription'] < 1
+                    ) {
+                        return false;
+                    }
                 }
 
                 return (intval($id) === intval($user->user_id));
             case self::TYPE_CLIENT:
-                return !empty($client);
+                return $client !== null;
         }
 
         return false;
     }
 
+    /**
+     * @param array $params
+     * @param string $topicType
+     * @param int|string $topicId
+     * @param string $selfLink
+     * @param array|string $subscriptionOption
+     * @return bool
+     */
     public function prepareDiscoveryParams(array &$params, $topicType, $topicId, $selfLink, $subscriptionOption)
     {
-        if (!self::getSubscription($topicType)) {
+        if (!self::getSubOption($topicType)) {
             return false;
         }
 
@@ -270,33 +297,24 @@ class Subscription extends Repository
         ]);
 
         $response->header('Link', sprintf('<%s>; rel=hub', $hubLink), false);
-        if (!empty($selfLink)) {
+        if ($selfLink !== '') {
             $response->header('Link', sprintf('<%s>; rel=self', $selfLink), false);
         }
 
-        if (!empty($subscriptionOption)) {
-            if (is_string($subscriptionOption)) {
-                $subscriptionOption = Php::safeUnserialize($subscriptionOption);
-            }
-
-            /** @var Session $session */
-            $session = $this->app()->session();
-            $token = $session->getToken();
-
-            $clientId = '';
-
-            if ($token) {
-                $clientId = $token->client_id;
-            }
-
-            if (is_array($subscriptionOption)
-                && $clientId
-                && !empty($subscriptionOption['subscriptions'])
-            ) {
-                foreach ($subscriptionOption['subscriptions'] as $subscription) {
-                    if ($subscription['client_id'] == $clientId) {
-                        $params['subscription_callback'] = $subscription['callback'];
-                    }
+        /** @var Session $session */
+        $session = $this->app()->session();
+        $token = $session->getToken();
+        $clientId = $token ? $token->client_id : '';
+        if (is_string($subscriptionOption)) {
+            $subscriptionOption = Php::safeUnserialize($subscriptionOption);
+        }
+        if (is_array($subscriptionOption)
+            && $clientId !== ''
+            && isset($subscriptionOption['subscriptions'])
+        ) {
+            foreach ($subscriptionOption['subscriptions'] as $subscription) {
+                if ($subscription['client_id'] == $clientId) {
+                    $params['subscription_callback'] = $subscription['callback'];
                 }
             }
         }
@@ -304,11 +322,16 @@ class Subscription extends Repository
         return true;
     }
 
+    /**
+     * @param array $option
+     * @param string $action
+     * @param string $objectType
+     * @param mixed $objectData
+     * @return bool
+     */
     public function ping(array $option, $action, $objectType, $objectData)
     {
-        if (!isset($option['topic'])
-            || empty($option['subscriptions'])
-        ) {
+        if (!isset($option['topic']) || !isset($option['subscriptions'])) {
             return false;
         }
 
@@ -335,7 +358,7 @@ class Subscription extends Repository
                 'object_data' => $objectData,
             );
 
-            if (!empty($option['link'])) {
+            if (isset($option['link'])) {
                 $pingData['link'] = $option['link'];
             }
 
@@ -352,20 +375,24 @@ class Subscription extends Repository
         return true;
     }
 
+    /**
+     * @param string $action
+     * @param ConversationMessage $message
+     * @param User $alertedUser
+     * @param User|null $triggerUser
+     * @return bool
+     */
     public function pingConversationMessage(
         $action,
         ConversationMessage $message,
         User $alertedUser,
         User $triggerUser = null
     ) {
-        if (!$this->options()->bdApi_userNotificationConversation
-            || !static::getSubscription(self::TYPE_NOTIFICATION)
-        ) {
+        $type = self::TYPE_NOTIFICATION;
+        if ($this->options()->bdApi_userNotificationConversation < 1 || !self::getSubOption($type)) {
             return false;
         }
 
-        $subColumn = $this->options()->bdApi_subscriptionColumnUserNotification;
-        /** @var UserOption|null $userOption */
         $userOption = $alertedUser->Option;
         if (!$userOption) {
             return false;
@@ -407,76 +434,82 @@ class Subscription extends Repository
             'extra_data' => serialize($extraData)
         ];
 
-        $userOptionValue = $userOption->getValue($subColumn);
-        if (!empty($userOptionValue)) {
-            $this->ping($userOptionValue, $action, self::TYPE_NOTIFICATION, $fakeAlert);
-        }
-
-        return true;
-    }
-
-    public function pingThreadPost($action, Post $post)
-    {
-        if (!self::getSubscription(self::TYPE_THREAD_POST)) {
+        /** @var array $userOptionValue */
+        $userOptionValue = $userOption->getValue(self::getSubColumn($type));
+        if (count($userOptionValue) === 0) {
             return false;
         }
 
-        $subColumn = $this->options()->bdApi_subscriptionColumnThreadPost;
-        if (!empty($post->Thread->getValue($subColumn))) {
-            $option = $post->Thread->getValue($subColumn);
-            $this->ping(
-                $option,
-                $action,
-                self::TYPE_THREAD_POST,
-                $post->post_id
-            );
-        }
-
-        return true;
+        return $this->ping($userOptionValue, $action, $type, $fakeAlert);
     }
 
+    /**
+     * @param string $action
+     * @param Post $post
+     * @return bool
+     */
+    public function pingThreadPost($action, Post $post)
+    {
+        $type = self::TYPE_THREAD_POST;
+        if (!self::getSubOption($type)) {
+            return false;
+        }
+
+        $thread = $post->Thread;
+        if (!$thread) {
+            return false;
+        }
+
+        /** @var array|null $threadOptionValue */
+        $threadOptionValue = $thread->getValue(self::getSubColumn($type));
+        if ($threadOptionValue === null || count($threadOptionValue) === 0) {
+            return false;
+        }
+
+        return $this->ping($threadOptionValue, $action, $type, $post->post_id);
+    }
+
+    /**
+     * @param string $action
+     * @param User $user
+     * @return bool
+     */
     public function pingUser($action, User $user)
     {
-        if (!self::getSubscription(self::TYPE_USER)) {
+        $type = self::TYPE_USER;
+        if (!self::getSubOption($type)) {
             return false;
         }
 
         if ($action === 'insert') {
             $user0Option = $this->app()->simpleCache()->getValue('Xfrocks/Api', self::TYPE_USER_0_SIMPLE_CACHE);
-            if (!empty($user0Option)) {
-                $this->ping(
-                    $user0Option,
-                    $action,
-                    self::TYPE_USER,
-                    $user->user_id
-                );
+            if (is_array($user0Option) && count($user0Option) > 0) {
+                $this->ping($user0Option, $action, $type, $user->user_id);
             }
         }
 
-        $subColumn = $this->options()->bdApi_subscriptionColumnUser;
-        /** @var UserOption|null $userOption */
         $userOption = $user->Option;
         if (!$userOption) {
             return false;
         }
 
-        $userOptionValue = $userOption->getValue($subColumn);
-        if (!empty($userOptionValue)) {
-            $this->ping(
-                $userOptionValue,
-                $action,
-                self::TYPE_USER,
-                $user->user_id
-            );
+        /** @var array $userOptionValue */
+        $userOptionValue = $userOption->getValue(self::getSubColumn($type));
+        if (count($userOptionValue) === 0) {
+            return false;
         }
 
-        return true;
+        return $this->ping($userOptionValue, $action, $type, $user->user_id);
     }
 
+    /**
+     * @param string $objectType
+     * @param array $pingDataMany
+     * @return array
+     */
     public function preparePingDataMany($objectType, array $pingDataMany)
     {
-        if (!self::getSubscription($objectType)) {
-            // subscription for this topic type has been disabled
+        if (!self::getSubOption($objectType)) {
             return array();
         }
 
@@ -492,7 +525,11 @@ class Subscription extends Repository
         return array();
     }
 
-    protected function preparePingDataManyNotification($pingDataMany)
+    /**
+     * @param array $pingDataMany
+     * @return array
+     */
+    protected function preparePingDataManyNotification(array $pingDataMany)
     {
         $alertIds = array();
         $alerts = array();
@@ -517,10 +554,11 @@ class Subscription extends Repository
                 $fakeAlert->action = $alertRaw['action'];
                 $fakeAlert->event_date = $alertRaw['event_date'];
                 $fakeAlert->view_date = $alertRaw['view_date'];
-                if (!empty($alertRaw['extra_data'])) {
+
+                if (isset($alertRaw['extra_data'])) {
                     $fakeAlert->extra_data = is_array($alertRaw['extra_data'])
                         ? $alertRaw['extra_data']
-                        : unserialize($alertRaw['extra_data']);
+                        : Php::safeUnserialize($alertRaw['extra_data']);
                 }
 
                 $fakeAlert->setReadOnly(true);
@@ -530,7 +568,7 @@ class Subscription extends Repository
             }
         }
 
-        if (!empty($alertIds)) {
+        if (count($alertIds) > 0) {
             $realAlerts = $this->em->findByIds('XF:UserAlert', $alertIds);
             foreach ($realAlerts as $alertId => $alert) {
                 $alerts[$alertId] = $alert;
@@ -568,17 +606,18 @@ class Subscription extends Repository
         foreach (array_keys($pingDataMany) as $pingDataKey) {
             $pingDataRef = &$pingDataMany[$pingDataKey];
 
-            if (empty($pingDataRef['object_data'])) {
+            if (!isset($pingDataRef['object_data'])) {
                 // no alert is attached to object data
                 continue;
             }
+            $alertId = $pingDataRef['object_data'];
 
-            if (!isset($alerts[$pingDataRef['object_data']])) {
+            if (!isset($alerts[$alertId])) {
                 // alert not found
                 unset($pingDataMany[$pingDataKey]);
                 continue;
             }
-            $alertRef = &$alerts[$pingDataRef['object_data']];
+            $alertRef =& $alerts[$alertId];
 
             if ($alertRef instanceof UserAlert) {
                 $transformContext = new TransformContext();
@@ -586,7 +625,7 @@ class Subscription extends Repository
                 $transformer = $this->app()->container('api.transformer');
 
                 $visitor = \XF::visitor();
-                if (!$visitor->user_id && !empty($alertRef['alerted_user_id'])) {
+                if ($visitor->user_id < 1 && isset($alertRef['alerted_user_id']) && $alertRef['alerted_user_id'] > 0) {
                     $visitor = $this->em->find('XF:User', $alertRef['alerted_user_id']);
                 }
 
@@ -602,9 +641,7 @@ class Subscription extends Repository
                 }
             }
 
-            if (!is_numeric($alertRef['alert_id'])
-                && !empty($alertRef['extra_data']['object_data'])
-            ) {
+            if (!is_numeric($alertRef['alert_id']) && isset($alertRef['extra_data']['object_data'])) {
                 // fake alert, use the included object_data
                 $pingDataRef['object_data'] = array_merge(
                     $pingDataRef['object_data'],
@@ -624,7 +661,11 @@ class Subscription extends Repository
         return $pingDataMany;
     }
 
-    protected function preparePingDataGetViewingUsers($userIds)
+    /**
+     * @param array $userIds
+     * @return array
+     */
+    protected function preparePingDataGetViewingUsers(array $userIds)
     {
         static $allUsers = array();
         $users = array();
@@ -644,7 +685,7 @@ class Subscription extends Repository
             }
         }
 
-        if (!empty($dbUserIds)) {
+        if (count($dbUserIds) > 0) {
             $dbUsers = $this->em->findByIds('XF:User', $dbUserIds, [
                 'Option',
                 'Profile',
@@ -661,26 +702,43 @@ class Subscription extends Repository
         return $users;
     }
 
-    protected function preparePingDataManyPost($pingDataMany)
+    /**
+     * @param array $pingDataMany
+     * @return array
+     */
+    protected function preparePingDataManyPost(array $pingDataMany)
     {
         // TODO: do anything here?
         return $pingDataMany;
     }
 
-    protected function preparePingDataManyUser($pingDataMany)
+    /**
+     * @param array $pingDataMany
+     * @return array
+     */
+    protected function preparePingDataManyUser(array $pingDataMany)
     {
         // TODO: do anything here?
         return $pingDataMany;
     }
 
+    /**
+     * @param string $type
+     * @param int|string $id
+     * @return string
+     */
     public static function getTopic($type, $id)
     {
         return sprintf('%s_%s', $type, $id);
     }
 
+    /**
+     * @param string $topic
+     * @return array
+     */
     public static function parseTopic($topic)
     {
-        if (empty($topic)) {
+        if ($topic === '') {
             return array(self::TYPE_CLIENT, 0);
         }
 
@@ -691,14 +749,37 @@ class Subscription extends Repository
         return [$type, $id];
     }
 
-    public static function getSubscription($topicType)
+    /**
+     * @param string $topicType
+     * @return bool
+     */
+    public static function getSubOption($topicType)
     {
-        $optionKey = str_replace(' ', '', ucwords(str_replace('_', ' ', $topicType)));
+        $options = \XF::options();
+        $topicTypeCamelCase = str_replace(' ', '', ucwords(str_replace('_', ' ', $topicType)));
+        $optionKey = 'bdApi_subscription' . $topicTypeCamelCase;
 
-        if (!\XF::options()->offsetExists('bdApi_subscription' . $optionKey)) {
-            return null;
+        if (!$options->offsetExists($optionKey)) {
+            return false;
         }
 
-        return \XF::options()->offsetGet('bdApi_subscription' . $optionKey);
+        return intval($options->offsetGet($optionKey)) > 0;
+    }
+
+    /**
+     * @param string $topicType
+     * @return string
+     */
+    public static function getSubColumn($topicType)
+    {
+        $options = \XF::options();
+        $topicTypeCamelCase = str_replace(' ', '', ucwords(str_replace('_', ' ', $topicType)));
+        $optionKey = 'bdApi_subscriptionColumn' . $topicTypeCamelCase;
+
+        if (!$options->offsetExists($optionKey)) {
+            return '';
+        }
+
+        return strval($options->offsetGet($optionKey));
     }
 }

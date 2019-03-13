@@ -6,11 +6,14 @@ use Xfrocks\Api\Util\Cors;
 
 class ApiData extends \XF\Mvc\View
 {
+    /**
+     * @return string|false
+     */
     public function renderRaw()
     {
         Cors::addHeaders($this->response);
 
-        if (!empty($this->params['callback'])) {
+        if (isset($this->params['callback']) && strlen($this->params['callback']) > 0) {
             $this->response->contentType('application/x-javascript');
             return sprintf('%s(%s);', $this->params['callback'], json_encode($this->params['data']));
         } else {

@@ -12,18 +12,16 @@ class BearerWithScope extends Bearer
     {
         $response = parent::generateResponse();
 
-        if (!empty($this->session)) {
-            $session = $this->session;
-
-            $scopes = $session->getScopes();
+        if ($this->session !== null) {
+            $scopes = $this->session->getScopes();
             $scopeIds = [];
             foreach ($scopes as $scope) {
                 $scopeIds[] = $scope->getId();
             }
             $response['scope'] = implode(Listener::$scopeDelimiter, $scopeIds);
 
-            if ($session->getOwnerType() === SessionStorage::OWNER_TYPE_USER) {
-                $response['user_id'] = intval($session->getOwnerId());
+            if ($this->session->getOwnerType() === SessionStorage::OWNER_TYPE_USER) {
+                $response['user_id'] = intval($this->session->getOwnerId());
             }
         }
 

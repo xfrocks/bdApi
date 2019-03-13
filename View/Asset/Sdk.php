@@ -4,6 +4,9 @@ namespace Xfrocks\Api\View\Asset;
 
 class Sdk extends \XF\Mvc\View
 {
+    /**
+     * @return string
+     */
     public function renderRaw()
     {
         $this->response->contentType('application/x-javascript');

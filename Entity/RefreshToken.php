@@ -28,6 +28,10 @@ class RefreshToken extends TokenWithScope
         return $this->refresh_token_text;
     }
 
+    /**
+     * @param string $columnName
+     * @return \XF\Phrase|null
+     */
     public function getEntityColumnLabel($columnName)
     {
         switch ($columnName) {
@@ -43,6 +47,9 @@ class RefreshToken extends TokenWithScope
         return null;
     }
 
+    /**
+     * @return string
+     */
     public function getEntityLabel()
     {
         return $this->refresh_token_text;

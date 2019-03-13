@@ -57,8 +57,6 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
     const PERM_DOWNLOAD = 'download';
     const PERM_RATE = 'rate';
 
-    protected $attachmentData = null;
-
     public function attachmentCalculateDynamicValue(TransformContext $context, $key)
     {
         switch ($key) {
@@ -112,14 +110,14 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
 
                 return $this->transformer->transformEntityRelation($context, $key, $description, 'Attachments');
             case self::DYNAMIC_KEY_CURRENCY:
-                return $resourceItem->external_purchase_url ? $resourceItem->currency : null;
+                return strlen($resourceItem->external_purchase_url) > 0 ? $resourceItem->currency : null;
             case self::DYNAMIC_KEY_FIELDS:
                 $resourceFields = $resourceItem->custom_fields;
                 return $this->transformer->transformCustomFieldSet($context, $resourceFields);
             case self::DYNAMIC_KEY_HAS_FILE:
                 return $resourceItem->getResourceTypeDetailed() === 'download_local';
             case self::DYNAMIC_KEY_HAS_URL:
-                if ($resourceItem->external_purchase_url) {
+                if (strlen($resourceItem->external_purchase_url) > 0) {
                     return true;
                 }
 
@@ -136,7 +134,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
                     return false;
                 }
 
-                return !empty($resourceItem->Watch[$userId]);
+                return isset($resourceItem->Watch[$userId]);
             case self::DYNAMIC_KEY_IS_LIKED:
                 return BackwardCompat21::isLiked($resourceItem->Description);
             case self::DYNAMIC_KEY_IS_PUBLISHED:
@@ -144,7 +142,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
             case self::DYNAMIC_KEY_LIKE_COUNT:
                 return $resourceItem->Description->get(BackwardCompat21::getLikesColumn());
             case self::DYNAMIC_KEY_PRICE:
-                return $resourceItem->external_purchase_url ? $resourceItem->price : null;
+                return strlen($resourceItem->external_purchase_url) > 0 ? $resourceItem->price : null;
             case self::DYNAMIC_KEY_RATING:
                 $count = $resourceItem->rating_count;
                 if ($count == 0) {
@@ -189,7 +187,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
             self::LINK_REPORT => $this->buildApiLink('resources/report', $resourceItem),
         ];
 
-        if ($resourceItem->external_purchase_url) {
+        if (strlen($resourceItem->external_purchase_url) > 0) {
             $links[self::LINK_CONTENT] = $resourceItem->external_purchase_url;
         } else {
             $resourceTypeDetailed = $resourceItem->getResourceTypeDetailed();

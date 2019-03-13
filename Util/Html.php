@@ -10,7 +10,7 @@ class Html
      */
     public static function parseColor($color)
     {
-        if (!preg_match('/^#(([0-9a-f]{3}){1,2})$/i', $color, $matches)) {
+        if (preg_match('/^#(([0-9a-f]{3}){1,2})$/i', $color, $matches) !== 1) {
             return [0, 0, 0];
         }
 
@@ -27,13 +27,17 @@ class Html
         return $elements;
     }
 
+    /**
+     * @param string $fontFamily
+     * @return string
+     */
     public static function parseFontFamily($fontFamily)
     {
         $parts = explode(',', $fontFamily);
         $font = strval(reset($parts));
         $font = trim($font);
 
-        if (preg_match('#^(\'|")(.+)\\1$#', $font, $matches)) {
+        if (preg_match('#^(\'|")(.+)\\1$#', $font, $matches) === 1) {
             $font = $matches[2];
         }
 

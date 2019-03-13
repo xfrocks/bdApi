@@ -26,7 +26,7 @@ class Token extends \XF\Mvc\Entity\Finder
      */
     public function entityDoXfFilter($match, $prefixMatch = false)
     {
-        if ($match) {
+        if (strlen($match) > 0) {
             $this->where(
                 $this->columnUtf8('token_text'),
                 'LIKE',

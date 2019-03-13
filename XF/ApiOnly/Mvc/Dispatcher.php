@@ -19,6 +19,11 @@ class Dispatcher extends XFCP_Dispatcher
         return $router;
     }
 
+    /**
+     * @param \XF\Mvc\Renderer\AbstractRenderer $renderer
+     * @param \XF\Mvc\Reply\View $reply
+     * @return array
+     */
     public function renderView(\XF\Mvc\Renderer\AbstractRenderer $renderer, \XF\Mvc\Reply\View $reply)
     {
         if ($reply instanceof \Xfrocks\Api\Mvc\Reply\Api) {
@@ -28,6 +33,10 @@ class Dispatcher extends XFCP_Dispatcher
         return parent::renderView($renderer, $reply);
     }
 
+    /**
+     * @param mixed $routePath
+     * @return \XF\Mvc\RouteMatch
+     */
     public function route($routePath)
     {
         $match = parent::route($routePath);

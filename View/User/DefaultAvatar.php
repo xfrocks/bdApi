@@ -8,6 +8,9 @@ use Xfrocks\Api\XF\ApiOnly\Template\Templater;
 
 class DefaultAvatar extends \XF\Mvc\View
 {
+    /**
+     * @return string
+     */
     public function renderRaw()
     {
         $app = \XF::app();
@@ -31,7 +34,7 @@ class DefaultAvatar extends \XF\Mvc\View
         $text = $defaultAvatarStyling['innerContent'];
 
         $fontFile = $this->findTtfFontPath($font);
-        if ($fontFile) {
+        if ($fontFile !== false) {
             $image->putTextAtCenterForApi($percent, $color[0], $color[1], $color[2], $fontFile, $text);
         }
 

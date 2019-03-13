@@ -64,18 +64,18 @@ abstract class TokenWithScope extends Entity
 
     /**
      * @param array $scopes
+     * @return void
      */
-    public function setScopes($scopes)
+    public function setScopes(array $scopes)
     {
-        if (!is_array($scopes)) {
-            throw new \InvalidArgumentException('Scopes must be an array');
-        }
-
         $this->set('scope', implode(Listener::$scopeDelimiter, $scopes));
-
         unset($this->_getterCache['scopes']);
     }
 
+    /**
+     * @param Structure $structure
+     * @return Structure
+     */
     protected static function addDefaultTokenElements(Structure $structure)
     {
         $structure->columns['scope'] = ['type' => self::STR, 'default' => Server::SCOPE_READ];

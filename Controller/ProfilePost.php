@@ -21,7 +21,7 @@ class ProfilePost extends AbstractController
             ->params()
             ->define('profile_post_ids', 'str');
 
-        if (!empty($params['profile_post_ids'])) {
+        if ($params['profile_post_ids'] !== '') {
             $profilePostIds = $params->filterCommaSeparatedIds('profile_post_ids');
 
             return $this->actionMultiple($profilePostIds);
@@ -171,22 +171,22 @@ class ProfilePost extends AbstractController
             ->define('comment_id', 'uint')
             ->definePageNav();
 
-        /** @var ProfilePostComment|null $comment */
-        $comment = null;
+        /** @var ProfilePostComment|null $pageOfComment */
+        $pageOfComment = null;
         if ($params['page_of_comment_id'] > 0) {
-            $comment = $this->assertViewableComment($params['page_of_comment_id']);
-            $profilePost = $comment->ProfilePost;
+            $pageOfComment = $this->assertViewableComment($params['page_of_comment_id']);
+            $profilePost = $pageOfComment->ProfilePost;
         } else {
             $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
 
             if ($params['comment_id'] > 0) {
-                $comment = $this->assertViewableComment($params['comment_id']);
-                if ($comment->profile_post_id != $profilePost->profile_post_id) {
+                $oneComment = $this->assertViewableComment($params['comment_id']);
+                if ($oneComment->profile_post_id != $profilePost->profile_post_id) {
                     return $this->noPermission();
                 }
 
                 $data = [
-                    'comment' => $this->transformEntityLazily($comment)
+                    'comment' => $this->transformEntityLazily($oneComment)
                 ];
 
                 return $this->api($data);
@@ -194,8 +194,8 @@ class ProfilePost extends AbstractController
         }
 
         $beforeDate = $params['before'];
-        if ($comment) {
-            $beforeDate = $comment->comment_date + 1;
+        if ($pageOfComment) {
+            $beforeDate = $pageOfComment->comment_date + 1;
         }
 
         list($limit,) = $params->filterLimitAndPage();
@@ -225,7 +225,7 @@ class ProfilePost extends AbstractController
             $data['comments'][] = $this->transformEntityLazily($comment);
         }
 
-        if ($oldestComment && $oldestComment->comment_date != $profilePost->first_comment_date) {
+        if ($oldestComment !== false && $oldestComment->comment_date !== $profilePost->first_comment_date) {
             $data['links']['prev'] = $this->buildApiLink(
                 'profile-posts/comments',
                 $profilePost,
@@ -233,7 +233,7 @@ class ProfilePost extends AbstractController
             );
         }
 
-        if ($latestComment && $latestComment->comment_date != $profilePost->last_comment_date) {
+        if ($latestComment !== false && $latestComment->comment_date !== $profilePost->last_comment_date) {
             $data['links']['latest'] = $this->buildApiLink(
                 'profile-posts/comments',
                 $profilePost
@@ -340,6 +340,10 @@ class ProfilePost extends AbstractController
         return $this->message(\XF::phrase('changes_saved'));
     }
 
+    /**
+     * @param array $ids
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionMultiple(array $ids)
     {
         $profilePosts = [];

@@ -23,6 +23,7 @@ class Api extends \XF\Mvc\Reply\View
     /**
      * @param array $data
      * @param bool $merge
+     * @return void
      */
     public function setData(array $data, $merge = true)
     {

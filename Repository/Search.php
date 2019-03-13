@@ -28,26 +28,26 @@ class Search extends Repository
         $searcher = $this->app()->search();
         $query = $searcher->getQuery();
 
-        if (!empty($contentType)) {
+        if ($contentType !== '') {
             $typeHandler = $searcher->handler($contentType);
             $urlConstraints = [];
 
             $query->forTypeHandler($typeHandler, $httpRequest, $urlConstraints);
         }
 
-        if (!empty($input['q'])) {
+        if (isset($input['q']) && strlen($input['q']) > 0) {
             $query->withKeywords($input['q']);
         }
 
-        if (!empty($input['user_id'])) {
+        if (isset($input['user_id']) && $input['user_id'] > 0) {
             $query->byUserId($input['user_id']);
         }
 
-        if (!empty($options[self::OPTION_SEARCH_TYPE])) {
+        if (isset($options[self::OPTION_SEARCH_TYPE])) {
             $query->inType($options[self::OPTION_SEARCH_TYPE]);
         }
 
-        if (!empty($input['forum_id'])) {
+        if (isset($input['forum_id']) && $input['forum_id'] > 0) {
             /** @var Node $nodeRepo */
             $nodeRepo = $this->repository('XF:Node');
             /** @var Forum|null $forum */
@@ -65,7 +65,7 @@ class Search extends Repository
             $query->withMetadata('node', $nodeIds ?: $input['forum_id']);
         }
 
-        if (!empty($input['thread_id'])) {
+        if (isset($input['thread_id']) && $input['thread_id'] > 0) {
             $query->withMetadata('thread', $input['thread_id'])
                 ->inTitleOnly(false);
         }

@@ -19,11 +19,14 @@ class PostTest extends ApiTestCase
         self::$accessToken = $token['access_token'];
     }
 
+    /**
+     * @return void
+     */
     public function testGetIndex()
     {
-        $thread = $this->dataThread();
+        $thread = static::dataThread();
 
-        $jsonPosts = $this->httpRequestJson(
+        $jsonPosts = static::httpRequestJson(
             'GET',
             'posts',
             [
@@ -33,9 +36,9 @@ class PostTest extends ApiTestCase
                 ]
             ]
         );
-        $this->assertArrayHasKey('posts', $jsonPosts);
+        static::assertArrayHasKey('posts', $jsonPosts);
 
-        $post = $this->dataPost();
+        $post = static::dataPost();
         $excludeFields = [
             '',
             'signature',
@@ -44,7 +47,7 @@ class PostTest extends ApiTestCase
         ];
 
         foreach ($excludeFields as $excludeField) {
-            $jsonPost = $this->httpRequestJson(
+            $jsonPost = static::httpRequestJson(
                 'GET',
                 'posts/' . $post['post_id'],
                 [
@@ -55,18 +58,21 @@ class PostTest extends ApiTestCase
                 ]
             );
 
-            $this->assertArrayHasKey('post', $jsonPost);
-            if ($excludeField) {
-                $this->assertArrayNotHasKey($excludeField, $jsonPost);
+            static::assertArrayHasKey('post', $jsonPost);
+            if ($excludeField !== '') {
+                static::assertArrayNotHasKey($excludeField, $jsonPost);
             }
         }
     }
 
+    /**
+     * @return void
+     */
     public function testPostIndex()
     {
-        $thread = $this->dataThread();
+        $thread = static::dataThread();
 
-        $json = $this->httpRequestJson(
+        $json = static::httpRequestJson(
             'POST',
             'posts',
             [
@@ -78,14 +84,17 @@ class PostTest extends ApiTestCase
             ]
         );
 
-        $this->assertArrayHasKey('post', $json);
+        static::assertArrayHasKey('post', $json);
     }
 
+    /**
+     * @return void
+     */
     public function testPutIndex()
     {
-        $post = $this->dataPost();
+        $post = static::dataPost();
 
-        $json = $this->httpRequestJson(
+        $json = static::httpRequestJson(
             'PUT',
             'posts/' . $post['post_id'],
             [
@@ -96,7 +105,7 @@ class PostTest extends ApiTestCase
             ]
         );
 
-        $jsonPostId = $this->assertArrayHasKeyPath($json, 'post', 'post_id');
-        $this->assertEquals($post['post_id'], $jsonPostId);
+        $jsonPostId = static::assertArrayHasKeyPath($json, 'post', 'post_id');
+        static::assertEquals($post['post_id'], $jsonPostId);
     }
 }

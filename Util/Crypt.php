@@ -37,26 +37,20 @@ class Crypt
 
         switch ($algo) {
             case self::ALGO_AES_128:
-                $data = self::aes128Encrypt($data, $key);
-                if (!$data) {
-                    throw new \InvalidArgumentException('Cannot encrypt data');
-                }
-
-                $encrypted = base64_encode($data);
+                $encrypted = self::aes128Encrypt($data, $key);
                 break;
             case self::ALGO_AES_256:
-                $data = self::aes256Encrypt($data, $key);
-                if (!$data) {
-                    throw new \InvalidArgumentException('Cannot encrypt data');
-                }
-
-                $encrypted = base64_encode($data);
+                $encrypted = self::aes256Encrypt($data, $key);
                 break;
             default:
-                $encrypted = $data;
+                throw new \InvalidArgumentException('Unknown algo');
         }
 
-        return $encrypted;
+        if ($encrypted === false) {
+            throw new \InvalidArgumentException('Cannot encrypt data');
+        }
+
+        return base64_encode($encrypted);
     }
 
     /**
@@ -72,18 +66,19 @@ class Crypt
             $key = self::getKey();
         }
 
-        switch ($algo) {
-            case self::ALGO_AES_128:
-                $decrypted = self::aes128Decrypt(strval(base64_decode($data)), $key);
-                break;
-            case self::ALGO_AES_256:
-                $decrypted = self::aes256Decrypt(strval(base64_decode($data)), $key);
-                break;
-            default:
-                $decrypted = $data;
+        $decoded = base64_decode($data, true);
+        if ($decoded === false) {
+            throw new \InvalidArgumentException('Cannot decode data');
         }
 
-        return $decrypted;
+        switch ($algo) {
+            case self::ALGO_AES_128:
+                return self::aes128Decrypt($decoded, $key);
+            case self::ALGO_AES_256:
+                return self::aes256Decrypt($decoded, $key);
+            default:
+                throw new \InvalidArgumentException('Unknown algo');
+        }
     }
 
     /**
@@ -132,16 +127,15 @@ class Crypt
         $session = \XF::app()->session();
         $callable = [$session, 'getToken'];
 
-        $clientSecret = null;
+        $clientSecret = '';
         if (is_callable($callable)) {
             /** @var Token|null $token */
             $token = call_user_func($callable);
-            if ($token) {
-                $clientSecret = $token->Client->client_secret;
-            }
+            $client = $token ? $token->Client : null;
+            $clientSecret = $client ? $client->client_secret : '';
         }
 
-        if (empty($clientSecret)) {
+        if ($clientSecret === '') {
             throw new PrintableException(\XF::phrase('bdapi_request_must_authorize_to_encrypt'));
         }
 
@@ -173,7 +167,7 @@ class Crypt
     /**
      * @param string $data
      * @param string $key
-     * @return string
+     * @return string|false
      */
     protected static function aes256Encrypt($data, $key)
     {
@@ -188,6 +182,9 @@ class Crypt
         }
 
         $encrypted = openssl_encrypt($data, self::OPENSSL_METHOD_AES256, $key, self::OPENSSL_OPT_RAW_DATA, $iv);
+        if ($encrypted === false) {
+            return false;
+        }
 
         return self::ALGO_AES_256 . $iv . $encrypted;
     }

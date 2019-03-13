@@ -35,7 +35,7 @@ class Attachment extends AbstractController
         $attachment = $this->assertRecordExists('XF:Attachment', $pb->attachment_id);
 
         $handler = $attachment->getHandler();
-        if ($handler === null) {
+        if (!$handler) {
             return $this->noPermission();
         }
 
@@ -70,7 +70,7 @@ class Attachment extends AbstractController
             throw $this->exception($this->notFound());
         }
 
-        if ($attachment->temp_hash) {
+        if ($attachment->temp_hash !== '') {
             $hash = $this->filter('hash', 'str');
             if ($attachment->temp_hash !== $hash) {
                 return $this->noPermission();

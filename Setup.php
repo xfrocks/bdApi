@@ -15,6 +15,9 @@ class Setup extends AbstractSetup
     use StepRunnerUpgradeTrait;
     use StepRunnerUninstallTrait;
 
+    /**
+     * @return void
+     */
     public function installStep1()
     {
         $sm = $this->schemaManager();
@@ -24,6 +27,9 @@ class Setup extends AbstractSetup
         }
     }
 
+    /**
+     * @return void
+     */
     public function uninstallStep1()
     {
         $sm = $this->schemaManager();
@@ -33,6 +39,9 @@ class Setup extends AbstractSetup
         }
     }
 
+    /**
+     * @return void
+     */
     public function upgrade2000012Step1()
     {
         $sm = $this->schemaManager();
@@ -63,6 +72,9 @@ class Setup extends AbstractSetup
         });
     }
 
+    /**
+     * @return void
+     */
     public function upgrade2000013Step1()
     {
         $sm = $this->schemaManager();
@@ -86,6 +98,9 @@ class Setup extends AbstractSetup
         });
     }
 
+    /**
+     * @return void
+     */
     public function upgrade2000014Step1()
     {
         $sm = $this->schemaManager();
@@ -102,6 +117,9 @@ class Setup extends AbstractSetup
         });
     }
 
+    /**
+     * @return void
+     */
     public function upgrade2000015Step1()
     {
         $sm = $this->schemaManager();
@@ -111,6 +129,9 @@ class Setup extends AbstractSetup
         }
     }
 
+    /**
+     * @return array
+     */
     private function getTables()
     {
         $tables = [];
@@ -122,6 +143,9 @@ class Setup extends AbstractSetup
         return $tables;
     }
 
+    /**
+     * @return array
+     */
     private function getTables1()
     {
         $tables = [];
@@ -173,6 +197,9 @@ class Setup extends AbstractSetup
         return $tables;
     }
 
+    /**
+     * @return array
+     */
     private function getTables2()
     {
         $tables = [];
@@ -190,6 +217,9 @@ class Setup extends AbstractSetup
         return $tables;
     }
 
+    /**
+     * @return array
+     */
     private function getTables3()
     {
         $tables = [];

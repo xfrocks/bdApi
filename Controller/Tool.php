@@ -30,6 +30,9 @@ class Tool extends AbstractController
         return $loginPlugin->initiate('account/api-logout');
     }
 
+    /**
+     * @return \XF\Mvc\Reply\AbstractReply
+     */
     public function actionGetWebsubEchoHubChallenge()
     {
         if (!\XF::$debugMode) {
@@ -42,6 +45,9 @@ class Tool extends AbstractController
         die($params['hub_challenge']);
     }
 
+    /**
+     * @return void
+     */
     public function actionGetWebsubEchoNone()
     {
         exit(0);
@@ -81,6 +87,9 @@ class Tool extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionPostLink()
     {
         $params = $this->params()
@@ -101,6 +110,9 @@ class Tool extends AbstractController
         return $this->api(['link' => $link]);
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionPostOtt()
     {
         $params = $this->params()
@@ -112,7 +124,7 @@ class Tool extends AbstractController
 
         $session = $this->session();
         $token = $session->getToken();
-        if ($token === null) {
+        if (!$token) {
             return $this->noPermission();
         }
         $client = $token->Client;
@@ -135,7 +147,7 @@ class Tool extends AbstractController
             return $this->noPermission();
         }
 
-        if (!$params['decrypt']) {
+        if ($params['decrypt'] === false) {
             $result = Crypt::encrypt($params['password'], $params['password_algo']);
         } else {
             $result = Crypt::decrypt($params['password'], $params['password_algo']);
@@ -144,6 +156,9 @@ class Tool extends AbstractController
         return $this->api(['result' => $result]);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\AbstractReply
+     */
     public function actionPostWebsubEchoHubChallenge()
     {
         if (!\XF::$debugMode) {

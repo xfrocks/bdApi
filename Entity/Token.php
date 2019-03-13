@@ -28,6 +28,10 @@ class Token extends TokenWithScope
         return $this->token_text;
     }
 
+    /**
+     * @param string $columnName
+     * @return \XF\Phrase|null
+     */
     public function getEntityColumnLabel($columnName)
     {
         switch ($columnName) {
@@ -43,11 +47,17 @@ class Token extends TokenWithScope
         return null;
     }
 
+    /**
+     * @return string
+     */
     public function getEntityLabel()
     {
         return $this->token_text;
     }
 
+    /**
+     * @return void
+     */
     protected function _postSave()
     {
         if ($this->isChanged('scope')) {
@@ -55,15 +65,20 @@ class Token extends TokenWithScope
         }
     }
 
+    /**
+     * @return void
+     */
     protected function updateUserScopes()
     {
+        $db = $this->db();
+
         $values = [];
         foreach ($this->getScopes() as $scope) {
             $values[] = sprintf(
                 '(%s, %d, %s, %d)',
-                $this->db()->quote($this->get('client_id')),
+                $db->quote($this->get('client_id')),
                 $this->get('user_id'),
-                $this->db()->quote($scope),
+                $db->quote($scope),
                 \XF::$time
             );
         }
@@ -71,7 +86,7 @@ class Token extends TokenWithScope
             return;
         }
 
-        $this->db()->query('
+        $db->query('
             INSERT IGNORE INTO `xf_bdapi_user_scope`
             (`client_id`, `user_id`, `scope`, `accept_date`)
             VALUES ' . implode(', ', $values) . ' 

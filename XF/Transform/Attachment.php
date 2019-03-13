@@ -51,7 +51,7 @@ class Attachment extends AbstractHandler
         ];
 
         $thumbnailUrl = $attachment->thumbnail_url;
-        if (!empty($thumbnailUrl)) {
+        if ($thumbnailUrl !== '') {
             $links[self::LINK_THUMBNAIL] = $thumbnailUrl;
         }
 

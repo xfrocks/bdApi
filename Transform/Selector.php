@@ -59,18 +59,14 @@ class Selector
     /**
      * @param string|array $exclude
      * @param string|array $include
+     * @return void
      */
     public function parseRules($exclude, $include)
     {
         $this->rules = [];
 
-        if (!empty($include)) {
-            $this->parseRulesInclude($include);
-        }
-
-        if (!empty($exclude)) {
-            $this->parseRulesExclude($exclude);
-        }
+        $this->parseRulesInclude($include);
+        $this->parseRulesExclude($exclude);
     }
 
     /**
@@ -83,10 +79,7 @@ class Selector
             if (isset($this->rules[$key])) {
                 $rulesRef =& $this->rules[$key];
                 $action = $rulesRef['action'] ?: $this->defaultAction;
-                if ($action === self::ACTION_INCLUDE) {
-                    return false;
-                }
-                if (!empty($rulesRef['includes'])) {
+                if ($action === self::ACTION_INCLUDE || count($rulesRef['includes']) > 0) {
                     return false;
                 }
             }
@@ -97,8 +90,7 @@ class Selector
         if (isset($this->rules[$key])) {
             $rulesRef =& $this->rules[$key];
             $action = $rulesRef['action'] ?: $this->defaultAction;
-            if ($action === self::ACTION_EXCLUDE &&
-                empty($rulesRef['includes'])) {
+            if ($action === self::ACTION_EXCLUDE && count($rulesRef['includes']) === 0) {
                 return true;
             }
         }
@@ -119,10 +111,7 @@ class Selector
         if (isset($this->rules[$key])) {
             $rulesRef =& $this->rules[$key];
             $action = $rulesRef['action'] ?: $this->defaultAction;
-            if ($action === self::ACTION_INCLUDE) {
-                return true;
-            }
-            if (!empty($rulesRef['includes'])) {
+            if ($action === self::ACTION_INCLUDE || count($rulesRef['includes']) > 0) {
                 return true;
             }
         }
@@ -132,6 +121,7 @@ class Selector
 
     /**
      * @param string $key
+     * @return void
      */
     protected function makeSureRuleExists($key)
     {
@@ -148,6 +138,7 @@ class Selector
 
     /**
      * @param string|array $rules
+     * @return void
      */
     protected function parseRulesExclude($rules)
     {
@@ -157,13 +148,13 @@ class Selector
 
         foreach ($rules as $rule) {
             $rule = trim($rule);
-            if (empty($rule)) {
+            if ($rule === '') {
                 continue;
             }
 
             $parts = explode('.', $rule, 2);
             $key = $parts[0];
-            if (empty($key)) {
+            if ($key === '') {
                 continue;
             }
 
@@ -174,8 +165,7 @@ class Selector
 
             $this->makeSureRuleExists($key);
 
-
-            if (!empty($parts[1])) {
+            if (isset($parts[1])) {
                 $this->rules[$key]['excludes'][] = $parts[1];
             } else {
                 $this->rules[$key]['action'] = self::ACTION_EXCLUDE;
@@ -185,6 +175,7 @@ class Selector
 
     /**
      * @param string|array $rules
+     * @return void
      */
     protected function parseRulesInclude($rules)
     {
@@ -194,13 +185,13 @@ class Selector
 
         foreach ($rules as $rule) {
             $rule = trim($rule);
-            if (empty($rule)) {
+            if ($rule === '') {
                 continue;
             }
 
             $parts = explode('.', $rule, 2);
             $key = $parts[0];
-            if (empty($key)) {
+            if ($key === '') {
                 continue;
             }
 
@@ -216,7 +207,7 @@ class Selector
             $this->makeSureRuleExists($key);
             $this->rules[$key]['action'] = self::ACTION_INCLUDE;
 
-            if (!empty($parts[1])) {
+            if (isset($parts[1])) {
                 $this->rules[$key]['includes'][] = $parts[1];
             }
         }

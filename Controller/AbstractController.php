@@ -47,11 +47,12 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
     /**
      * @param string|null $scope
+     * @return void
      * @throws \XF\Mvc\Reply\Exception
      */
     public function assertApiScope($scope)
     {
-        if (empty($scope)) {
+        if ($scope === null || strlen($scope) === 0) {
             return;
         }
 
@@ -61,6 +62,11 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         }
     }
 
+    /**
+     * @param string $linkUrl
+     * @return void
+     * @throws Reply\Exception
+     */
     public function assertCanonicalUrl($linkUrl)
     {
         $responseType = $this->responseType;
@@ -75,7 +81,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
                 /** @var Redirect $redirect */
                 $redirect = $reply;
                 $url = $redirect->getUrl();
-                if (preg_match('#^https?://.+(https?://.+)$#', $url, $matches)) {
+                if (preg_match('#^https?://.+(https?://.+)$#', $url, $matches) === 1) {
                     // because we are unable to modify XF\Http\Request::getBaseUrl,
                     // parent::assertCanonicalUrl will prepend the full base path incorrectly.
                     // And because we don't want to parse the request params ourselves
@@ -97,20 +103,18 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         }
 
         $this->responseType = $responseType;
-        if ($exception !== null) {
+        if ($exception) {
             throw $exception;
         }
     }
 
     /**
+     * @return void
      * @throws Reply\Exception
      */
     protected function assertValidToken()
     {
-        $session = $this->session();
-        $token = $session->getTokenText();
-
-        if (empty($token)) {
+        if (!$this->session()->getToken()) {
             throw $this->exception($this->noPermission());
         }
     }
@@ -126,6 +130,11 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         return $this->app->router(Listener::$routerType)->buildLink($link, $data, $parameters);
     }
 
+    /**
+     * @param mixed $action
+     * @param ParameterBag $params
+     * @return void
+     */
     public function checkCsrfIfNeeded($action, ParameterBag $params)
     {
         // no op
@@ -166,7 +175,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         $lazyTransformer = new LazyTransformer($this);
         $lazyTransformer->setFinder($finder);
 
-        if ($sortByList !== null) {
+        if ($sortByList) {
             $lazyTransformer->addCallbackFinderPostFetch(function ($entities) use ($sortByList) {
                 /** @var \XF\Mvc\Entity\ArrayCollection $arrayCollection */
                 $arrayCollection = $entities;
@@ -200,7 +209,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      */
     public function params()
     {
-        if ($this->apiParams === null) {
+        if (!$this->apiParams) {
             $this->apiParams = new Params($this);
         }
 
@@ -208,8 +217,9 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
     }
 
     /**
-     * @param string $action
+     * @param mixed $action
      * @param ParameterBag $params
+     * @return void
      * @throws Reply\Exception
      */
     public function preDispatch($action, ParameterBag $params)
@@ -220,7 +230,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
 
         $addOnId = 'Xfrocks/Api';
         $addOnCache = $this->app->container('addon.cache');
-        if (empty($addOnCache[$addOnId])) {
+        if (!isset($addOnCache[$addOnId])) {
             throw $this->errorException('The API is currently disabled.', 500);
         }
         if (\XF::$debugMode) {
@@ -288,20 +298,39 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         return $lazyTransformer;
     }
 
+    /**
+     * @param mixed $viewClass
+     * @param mixed $templateName
+     * @param array $params
+     * @return Reply\View
+     */
     public function view($viewClass = '', $templateName = '', array $params = [])
     {
-        if (!empty($viewClass)) {
+        if ($viewClass !== '') {
             $viewClass = \XF::stringToClass($viewClass, '%s\%s\View\%s', 'Pub');
         }
 
         return parent::view($viewClass, $templateName, $params);
     }
 
+    /**
+     * @param mixed $action
+     * @param ParameterBag $params
+     * @param AbstractReply $reply
+     * @param mixed $viewState
+     * @return false
+     */
     protected function canUpdateSessionActivity($action, ParameterBag $params, AbstractReply &$reply, &$viewState)
     {
         return false;
     }
 
+    /**
+     * @param mixed $action
+     * @param ParameterBag $params
+     * @param AbstractReply $reply
+     * @return void
+     */
     public function postDispatch($action, ParameterBag $params, Reply\AbstractReply &$reply)
     {
         $this->logRequest($reply);
@@ -309,6 +338,10 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         parent::postDispatch($action, $params, $reply);
     }
 
+    /**
+     * @param AbstractReply $reply
+     * @return void
+     */
     protected function logRequest(AbstractReply $reply)
     {
         $requestMethod = $this->request()->getServer('REQUEST_METHOD');
@@ -326,6 +359,11 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         $logRepo->logRequest($requestMethod, $requestUri, $requestData, $responseCode, $responseOutput);
     }
 
+    /**
+     * @param AbstractReply|Reply\Exception $reply
+     * @param int $responseCode
+     * @return array|false
+     */
     protected function getControllerResponseOutput($reply, &$responseCode)
     {
         if ($reply instanceof AbstractReply) {

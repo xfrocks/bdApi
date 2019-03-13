@@ -39,26 +39,24 @@ class Misc extends XFCP_Misc
 
                 // TODO: check for auto authorize
 
-                if ($data[$cmd] === 0) {
-                    $userScopes = $this->finder('Xfrocks\Api:UserScope')
-                        ->where('client_id', $client->client_id)
-                        ->where('user_id', $visitor->user_id)
-                        ->keyedBy('scope')
-                        ->fetch();
+                $userScopes = $this->finder('Xfrocks\Api:UserScope')
+                    ->where('client_id', $client->client_id)
+                    ->where('user_id', $visitor->user_id)
+                    ->keyedBy('scope')
+                    ->fetch();
 
-                    foreach ($requestedScopes as $requestedScope) {
-                        if (isset($userScopes[$requestedScope])) {
-                            $requestedScopesAccepted[] = $requestedScope;
-                        }
-                    }
-
-                    if (count($requestedScopes) === count($requestedScopesAccepted)) {
-                        $data[$cmd] = 1;
+                foreach ($requestedScopes as $requestedScope) {
+                    if (isset($userScopes[$requestedScope])) {
+                        $requestedScopesAccepted[] = $requestedScope;
                     }
                 }
 
+                if (count($requestedScopes) === count($requestedScopesAccepted)) {
+                    $data[$cmd] = 1;
+                }
+
                 if ($data[$cmd] > 0) {
-                    if (!empty($scope)) {
+                    if ($scope !== '') {
                         $data += $this->prepareApiDataForVisitor($visitor, $requestedScopesAccepted);
                     } else {
                         // just checking for connection status, return user_id only
@@ -96,6 +94,11 @@ class Misc extends XFCP_Misc
         return $loginPlugin->login('misc/api-login');
     }
 
+    /**
+     * @param mixed $action
+     * @param ParameterBag $params
+     * @return void
+     */
     public function checkCsrfIfNeeded($action, ParameterBag $params)
     {
         if ($action === 'ApiData') {
@@ -128,6 +131,7 @@ class Misc extends XFCP_Misc
     /**
      * @param Client $client
      * @param array $data
+     * @return void
      */
     protected function signApiData($client, array &$data)
     {

@@ -56,48 +56,34 @@ class ConversationMaster extends AbstractHandler
 
         switch ($key) {
             case self::DYNAMIC_KEY_IS_DELETED:
-                $visitor = \XF::visitor();
-                if (empty($conversation->Recipients[$visitor->user_id])) {
-                    return false;
-                }
+                $userId = \XF::visitor()->user_id;
 
-                $recipient = $conversation->Recipients[$visitor->user_id];
-                switch ($recipient->recipient_state) {
-                    case 'active':
-                        return false;
-                    case 'deleted':
-                    case 'deleted_ignored':
-                        return true;
+                if (!isset($conversation->Recipients[$userId])) {
+                    return true;
                 }
+                $recipient = $conversation->Recipients[$userId];
 
-                return null;
+                return in_array($recipient->recipient_state, ['deleted', 'deleted_ignored'], true);
             case self::DYNAMIC_KEY_IS_IGNORED:
                 return \XF::visitor()->isIgnoring($conversation->user_id);
             case self::DYNAMIC_KEY_IS_OPEN:
-                $visitor = \XF::visitor();
-                if (empty($conversation->Recipients[$visitor->user_id])) {
-                    return true;
-                }
+                $userId = \XF::visitor()->user_id;
 
-                $recipient = $conversation->Recipients[$visitor->user_id];
-                switch ($recipient->recipient_state) {
-                    case 'active':
-                        return $conversation->conversation_open;
-                    case 'deleted':
-                    case 'deleted_ignored':
-                        return false;
+                if (!isset($conversation->Recipients[$userId])) {
+                    return false;
                 }
+                $recipient = $conversation->Recipients[$userId];
 
-                return null;
+                return $recipient->recipient_state === 'active';
             case self::DYNAMIC_KEY_FIRST_MESSAGE:
                 return $this->transformer->transformEntity($context, $key, $conversation->FirstMessage);
             case self::DYNAMIC_KEY_HAS_NEW_MESSAGE:
-                $visitor = \XF::visitor();
-                if (empty($conversation->Recipients[$visitor->user_id])) {
+                $userId = \XF::visitor()->user_id;
+
+                if (!isset($conversation->Recipients[$userId])) {
                     return false;
                 }
-
-                $recipient = $conversation->Recipients[$visitor->user_id];
+                $recipient = $conversation->Recipients[$userId];
 
                 return $recipient->last_read_date < $conversation->last_message_date;
             case self::DYNAMIC_KEY_LAST_MESSAGE:

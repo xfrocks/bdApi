@@ -24,11 +24,18 @@ use Xfrocks\Api\OAuth2\Server;
  */
 class AuthCode extends TokenWithScope
 {
+    /**
+     * @return string
+     */
     public function getText()
     {
         return $this->auth_code_text;
     }
 
+    /**
+     * @param string $columnName
+     * @return \XF\Phrase|null
+     */
     public function getEntityColumnLabel($columnName)
     {
         switch ($columnName) {
@@ -45,6 +52,9 @@ class AuthCode extends TokenWithScope
         return null;
     }
 
+    /**
+     * @return string
+     */
     public function getEntityLabel()
     {
         return $this->auth_code_text;

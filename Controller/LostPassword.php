@@ -6,6 +6,9 @@ use XF\Service\User\PasswordReset;
 
 class LostPassword extends AbstractController
 {
+    /**
+     * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Message
+     */
     public function actionPostIndex()
     {
         $params = $this->params()
@@ -13,12 +16,12 @@ class LostPassword extends AbstractController
             ->define('email', 'str');
 
         $usernameOrEmail = $params['username'] ?: $params['email'];
-        if (empty($usernameOrEmail)) {
+        if ($usernameOrEmail === '') {
             return $this->error(\XF::phrase('bdapi_slash_lost_password_requires_username_or_email'), 400);
         }
 
         $token = $this->session()->getToken();
-        if (empty($token)) {
+        if (!$token) {
             return $this->noPermission();
         }
 

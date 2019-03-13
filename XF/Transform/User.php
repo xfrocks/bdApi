@@ -73,28 +73,19 @@ class User extends AbstractHandler
                     return null;
                 }
                 $userProfile = $user->Profile;
-                if (empty($userProfile)) {
-                    return null;
-                }
-                return $userProfile->dob_day;
+                return $userProfile ? $userProfile->dob_day : null;
             case self::DYNAMIC_KEY_DOB_MONTH:
                 if ($context->data('flagFullAccess') !== true) {
                     return null;
                 }
                 $userProfile = $user->Profile;
-                if (empty($userProfile)) {
-                    return null;
-                }
-                return $userProfile->dob_month;
+                return $userProfile ? $userProfile->dob_month : null;
             case self::DYNAMIC_KEY_DOB_YEAR:
                 if ($context->data('flagFullAccess') !== true) {
                     return null;
                 }
                 $userProfile = $user->Profile;
-                if (empty($userProfile)) {
-                    return null;
-                }
-                return $userProfile->dob_year;
+                return $userProfile ? $userProfile->dob_year : null;
             case self::DYNAMIC_KEY_EMAIL:
                 if ($context->data('flagFullAccess') !== true) {
                     return null;
@@ -127,23 +118,18 @@ class User extends AbstractHandler
                     return null;
                 }
                 $userAuth = $user->Auth;
-                if (empty($userAuth)) {
+                if (!$userAuth) {
                     return false;
                 }
 
                 $handler = $userAuth->getAuthenticationHandler();
-                if (empty($handler)) {
-                    return false;
-                }
-
-                return $handler->hasPassword();
+                return $handler ? $handler->hasPassword() : false;
             case self::DYNAMIC_KEY_IS_FOLLOWED:
                 return $visitor->isFollowing($user);
             case self::DYNAMIC_KEY_IS_IGNORED:
                 return $visitor->isIgnoring($user->user_id);
             case self::DYNAMIC_KEY_IS_VALID:
-                return (!$user->is_banned &&
-                    in_array($user->user_state, ['valid', 'email_confirm', 'email_confirm_edit']));
+                return (!$user->is_banned && in_array($user->user_state, ['valid', 'email_confirm', 'email_confirm_edit'], true));
             case self::DYNAMIC_KEY_IS_VERIFIED:
                 return $user->user_state === 'valid';
             case self::DYNAMIC_KEY_IS_VISITOR:
@@ -287,9 +273,8 @@ class User extends AbstractHandler
 
         /** @var \XF\Entity\User $user */
         $user = $context->getSource();
-        /** @var UserProfile|null $userProfile */
         $userProfile = $user->Profile;
-        if (empty($userProfile)) {
+        if (!$userProfile) {
             return null;
         }
 

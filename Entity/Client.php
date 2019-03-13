@@ -21,38 +21,37 @@ use XF\Util\Arr;
  */
 class Client extends Entity
 {
+    /**
+     * @return bool
+     */
     public function canEdit()
     {
-        $visitor = \XF::visitor();
-        if (!$visitor->user_id) {
-            return false;
-        }
-
-        return $this->user_id === $visitor->user_id;
+        $visitorUserId = \XF::visitor()->user_id;
+        return $visitorUserId > 0 && $visitorUserId === $this->user_id;
     }
 
+    /**
+     * @param string $redirectUri
+     * @return bool
+     */
     public function isValidRedirectUri($redirectUri)
     {
-        if (empty($redirectUri) || !is_string($redirectUri)) {
-            return false;
-        }
-
         if ($redirectUri === $this->redirect_uri) {
             return true;
         }
 
-        if (empty($this->options['whitelisted_domains'])) {
+        if (!isset($this->options['whitelisted_domains'])) {
             return false;
         }
 
         $parsed = parse_url($redirectUri);
-        if (empty($parsed['scheme']) || empty($parsed['host'])) {
+        if (!is_array($parsed) || !isset($parsed['scheme']) || !isset($parsed['host'])) {
             return false;
         }
 
         $domains = explode("\n", $this->options['whitelisted_domains']);
         foreach ($domains as $domain) {
-            if (empty($domain)) {
+            if ($domain === '') {
                 continue;
             }
 
@@ -66,7 +65,7 @@ class Client extends Entity
                 }
             }
             $pattern .= '$#';
-            if (preg_match($pattern, $parsed['host'])) {
+            if (preg_match($pattern, $parsed['host']) === 1) {
                 return true;
             }
         }
@@ -74,11 +73,19 @@ class Client extends Entity
         return false;
     }
 
+    /**
+     * @param array $options
+     * @return void
+     */
     public function setClientOptions(array $options)
     {
         $this->set('options', Arr::mapMerge($this->options ?: [], $options));
     }
 
+    /**
+     * @param string $columnName
+     * @return \XF\Phrase|null
+     */
     public function getEntityColumnLabel($columnName)
     {
         switch ($columnName) {
@@ -96,6 +103,9 @@ class Client extends Entity
         return null;
     }
 
+    /**
+     * @return string
+     */
     public function getEntityLabel()
     {
         return $this->name;
@@ -137,6 +147,9 @@ class Client extends Entity
         return $structure;
     }
 
+    /**
+     * @return void
+     */
     protected function _postDelete()
     {
         $db = $this->db();

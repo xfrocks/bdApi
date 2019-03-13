@@ -18,9 +18,24 @@ class PreTest extends Command
 {
     const VERSION_ID = 2018082101;
 
+    /**
+     * @var string
+     */
     public $prefix = 'api_test';
+
+    /**
+     * @var int
+     */
     public $users = 5;
+
+    /**
+     * @var int
+     */
     public $threads = 3;
+
+    /**
+     * @var int
+     */
     public $posts = 3;
 
     /**
@@ -53,6 +68,10 @@ class PreTest extends Command
         return $data['forum'];
     }
 
+    /**
+     * @param array $data
+     * @return array
+     */
     public function createUsers(array &$data)
     {
         $app = \XF::app();
@@ -233,6 +252,10 @@ class PreTest extends Command
         return $data['apiClient'];
     }
 
+    /**
+     * @param array $data
+     * @return void
+     */
     public function enableSubscriptions(array &$data)
     {
         $app = \XF::app();
@@ -271,6 +294,9 @@ class PreTest extends Command
         }
     }
 
+    /**
+     * @return void
+     */
     protected function configure()
     {
         $this

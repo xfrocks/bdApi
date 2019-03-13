@@ -52,6 +52,7 @@ class LazyTransformer implements \JsonSerializable
 
     /**
      * @param callable $f
+     * @return void
      */
     public function addCallbackFinderPostFetch($f)
     {
@@ -64,6 +65,7 @@ class LazyTransformer implements \JsonSerializable
 
     /**
      * @param callable $f
+     * @return void
      */
     public function addCallbackPostTransform($f)
     {
@@ -72,6 +74,7 @@ class LazyTransformer implements \JsonSerializable
 
     /**
      * @param callable $f
+     * @return void
      */
     public function addCallbackPreTransform($f)
     {
@@ -86,6 +89,9 @@ class LazyTransformer implements \JsonSerializable
         return $this->transform();
     }
 
+    /**
+     * @return string
+     */
     public function getLogData()
     {
         switch ($this->sourceType) {
@@ -102,7 +108,7 @@ class LazyTransformer implements \JsonSerializable
 
                     $entityId = implode('-', $entityId);
                 }
-                
+
                 return sprintf(
                     'LazyTransformer(%s@%s)',
                     \XF::stringToClass($entity->structure()->shortName, '%s\Entity\%s'),
@@ -123,6 +129,7 @@ class LazyTransformer implements \JsonSerializable
 
     /**
      * @param Entity $entity
+     * @return void
      */
     public function setEntity(Entity $entity)
     {
@@ -136,6 +143,7 @@ class LazyTransformer implements \JsonSerializable
 
     /**
      * @param Finder $finder
+     * @return void
      */
     public function setFinder(Finder $finder)
     {

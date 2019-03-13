@@ -71,11 +71,7 @@ abstract class AbstractNode extends AbstractHandler
     public function calculateDynamicValue(TransformContext $context, $key)
     {
         $value = $this->nodeRepo()->apiTransformCalculateDynamicValue($context, $key);
-        if ($value !== null) {
-            return $value;
-        }
-
-        return parent::calculateDynamicValue($context, $key);
+        return $value !== null ? $value : parent::calculateDynamicValue($context, $key);
     }
 
     /**
@@ -85,11 +81,16 @@ abstract class AbstractNode extends AbstractHandler
     {
         /** @var Node $nodeRepo */
         $nodeRepo = $this->app->repository('XF:Node');
-
         return $nodeRepo;
     }
 
+    /**
+     * @return string
+     */
     abstract protected function getNameSingular();
 
+    /**
+     * @return string
+     */
     abstract protected function getRoutePrefix();
 }

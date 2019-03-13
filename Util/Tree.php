@@ -16,7 +16,7 @@ class Tree
             $childIds = $tree->childIds($ids[$i]);
             $i++;
 
-            if (empty($childIds)) {
+            if (count($childIds) === 0) {
                 continue;
             }
 

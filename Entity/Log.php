@@ -22,11 +22,18 @@ use XF\Mvc\Entity\Structure;
  */
 class Log extends Entity
 {
+    /**
+     * @param string $columnName
+     * @return null
+     */
     public function getEntityColumnLabel($columnName)
     {
         return null;
     }
 
+    /**
+     * @return string
+     */
     public function getEntityLabel()
     {
         return $this->request_uri;
@@ -46,7 +53,7 @@ class Log extends Entity
             'request_method' => ['type' => self::STR, 'maxLength' => 10, 'required' => true],
             'request_uri' => ['type' => self::STR, 'required' => true],
             'request_data' => ['type' => self::SERIALIZED_ARRAY, 'default' => []],
-            'response_code' => ['type' => self::STR, 'default' => 0],
+            'response_code' => ['type' => self::UINT, 'default' => 0],
             'response_output' => ['type' => self::SERIALIZED_ARRAY, 'default' => []]
         ];
 

@@ -56,15 +56,14 @@ class ConversationRecipient extends AbstractHandler
         return null;
     }
 
+    /**
+     * @param \XF\Entity\ConversationRecipient $recipient
+     * @param string $sizeCode
+     * @return mixed|string|null
+     */
     protected function collectUserAvatarUrl(\XF\Entity\ConversationRecipient $recipient, $sizeCode)
     {
-        /** @var \XF\Entity\User|null $user */
         $user = $recipient->User;
-
-        if (!$user) {
-            return null;
-        }
-
-        return $user->getAvatarUrl($sizeCode);
+        return $user ? $user->getAvatarUrl($sizeCode) : null;
     }
 }

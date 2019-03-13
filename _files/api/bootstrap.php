@@ -12,7 +12,7 @@ $fileDir = false;
 if (file_exists($parentOfDirOfFile . $pathToXfPhp)) {
     $fileDir = $parentOfDirOfFile;
 }
-if ($fileDir === false && !empty($scriptFilename)) {
+if ($fileDir === false && $scriptFilename !== '') {
     $parentOfDirOfScriptFilename = dirname(dirname($scriptFilename));
     if (file_exists($parentOfDirOfScriptFilename . $pathToXfPhp)) {
         $fileDir = $parentOfDirOfScriptFilename;

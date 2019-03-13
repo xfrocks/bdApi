@@ -24,12 +24,8 @@ class PageNav
         array $config = []
     ) {
         $filteredLimit = $params->getFilteredLimit();
-        if (empty($filteredLimit)) {
-            return null;
-        }
-
         $filteredPage = $params->getFilteredPage();
-        if (empty($filteredPage)) {
+        if (!is_array($filteredLimit) || !is_array($filteredPage)) {
             return null;
         }
 
@@ -95,9 +91,9 @@ class PageNav
      */
     protected static function mapKey(array $config, $key)
     {
-        if (!empty($config['keys'][$key])) {
-            return $config['keys'][$key];
+        if (!isset($config['keys']) || !isset($config['keys'][$key])) {
+            return $key;
         }
-        return $key;
+        return $config['keys'][$key];
     }
 }

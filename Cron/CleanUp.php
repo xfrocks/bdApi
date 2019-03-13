@@ -10,6 +10,9 @@ use Xfrocks\Api\Repository\Token;
 
 class CleanUp
 {
+    /**
+     * @return void
+     */
     public static function runHourlyCleanUp()
     {
         $app = \XF::app();

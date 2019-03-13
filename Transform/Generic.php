@@ -54,9 +54,4 @@ class Generic extends AbstractHandler
 
         return $mappings;
     }
-
-    protected function prepareContextSelector($context)
-    {
-        // intentionally left blank
-    }
 }

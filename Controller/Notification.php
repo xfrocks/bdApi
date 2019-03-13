@@ -7,6 +7,7 @@ use XF\Mvc\ParameterBag;
 use Xfrocks\Api\Data\BatchJob;
 use Xfrocks\Api\Transformer;
 use Xfrocks\Api\Util\PageNav;
+use Xfrocks\Api\Repository\Subscription as RepoSub;
 
 class Notification extends AbstractController
 {
@@ -17,6 +18,9 @@ class Notification extends AbstractController
         $this->assertRegistrationRequired();
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionGetIndex()
     {
         $params = $this
@@ -41,15 +45,16 @@ class Notification extends AbstractController
             'notifications_total' => $total
         ];
 
-        if ($this->options()->bdApi_subscriptionUserNotification) {
-            /** @var \Xfrocks\Api\Repository\Subscription $subscriptionRepo */
+        $topicType = RepoSub::TYPE_NOTIFICATION;
+        if (RepoSub::getSubOption($topicType)) {
+            /** @var RepoSub $subscriptionRepo */
             $subscriptionRepo = $this->repository('Xfrocks\Api:Subscription');
             $subscriptionRepo->prepareDiscoveryParams(
                 $data,
-                \Xfrocks\Api\Repository\Subscription::TYPE_NOTIFICATION,
+                $topicType,
                 \XF::visitor()->user_id,
                 $this->buildApiLink('notifications', null, ['oauth_token' => '']),
-                \XF::visitor()->Option->getValue($this->options()->bdApi_subscriptionColumnUserNotification)
+                \XF::visitor()->Option->getValue(RepoSub::getSubColumn($topicType))
             );
         }
 
@@ -58,6 +63,9 @@ class Notification extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \XF\Mvc\Reply\Message
+     */
     public function actionPostRead()
     {
         $visitor = \XF::visitor();
@@ -112,6 +120,10 @@ class Notification extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param UserAlert $alert
+     * @return array|null
+     */
     protected function getBatchJobConfig(UserAlert $alert)
     {
         switch ($alert->content_type) {

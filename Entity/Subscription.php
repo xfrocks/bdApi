@@ -21,6 +21,10 @@ class Subscription extends Entity
 {
     const OPTION_UPDATE_CALLBACKS = 'updateCallbacks';
 
+    /**
+     * @param string $columnName
+     * @return \XF\Phrase|null
+     */
     public function getEntityColumnLabel($columnName)
     {
         switch ($columnName) {
@@ -36,6 +40,9 @@ class Subscription extends Entity
         return null;
     }
 
+    /**
+     * @return string
+     */
     public function getEntityLabel()
     {
         return $this->topic;
@@ -72,16 +79,22 @@ class Subscription extends Entity
         return $structure;
     }
 
+    /**
+     * @return void
+     */
     protected function _postSave()
     {
-        if ($this->getOption(self::OPTION_UPDATE_CALLBACKS)) {
+        if ($this->getOption(self::OPTION_UPDATE_CALLBACKS) === true) {
             $this->subscriptionRepo()->updateCallbacksForTopic($this->topic);
         }
     }
 
+    /**
+     * @return void
+     */
     protected function _postDelete()
     {
-        if ($this->getOption(self::OPTION_UPDATE_CALLBACKS)) {
+        if ($this->getOption(self::OPTION_UPDATE_CALLBACKS) === true) {
             $this->subscriptionRepo()->updateCallbacksForTopic($this->topic);
         }
     }

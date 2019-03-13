@@ -44,8 +44,6 @@ class Post extends AbstractHandler implements AttachmentParent
     const PERM_REPLY = 'reply';
     const PERM_UPLOAD_ATTACHMENT = 'upload_attachment';
 
-    protected $attachmentData = null;
-
     public function attachmentCalculateDynamicValue(TransformContext $context, $key)
     {
         switch ($key) {
@@ -106,7 +104,7 @@ class Post extends AbstractHandler implements AttachmentParent
             case self::DYNAMIC_KEY_IS_FIRST_POST:
                 return $post->isFirstPost();
             case self::DYNAMIC_KEY_IS_IGNORED:
-                if (!\XF::visitor()->user_id) {
+                if (\XF::visitor()->user_id === 0) {
                     return false;
                 }
 
@@ -116,38 +114,30 @@ class Post extends AbstractHandler implements AttachmentParent
             case self::DYNAMIC_KEY_IS_PUBLISHED:
                 return $post->message_state === 'visible';
             case self::DYNAMIC_KEY_SIGNATURE:
-                if ($post->user_id < 1) {
-                    return null;
-                }
-
-                $user = $post->User;
-                if (empty($user)) {
-                    return null;
-                }
-
-                return $user->Profile->signature;
             case self::DYNAMIC_KEY_SIGNATURE_HTML:
-                if ($post->user_id < 1) {
-                    return null;
-                }
-
-                $user = $post->User;
-                if (empty($user)) {
-                    return null;
-                }
-
-                return $this->renderBbCodeHtml($key, $user->Profile->signature, $user);
             case self::DYNAMIC_KEY_SIGNATURE_PLAIN:
                 if ($post->user_id < 1) {
                     return null;
                 }
 
                 $user = $post->User;
-                if (empty($user)) {
+                if (!$user) {
                     return null;
                 }
 
-                return $this->renderBbCodePlainText($user->Profile->signature);
+                $userProfile = $user->Profile;
+                if (!$userProfile) {
+                    return null;
+                }
+
+                switch ($key) {
+                    case self::DYNAMIC_KEY_SIGNATURE:
+                        return $userProfile->signature;
+                    case self::DYNAMIC_KEY_SIGNATURE_HTML:
+                        return $this->renderBbCodeHtml($key, $userProfile->signature, $user);
+                    case self::DYNAMIC_KEY_SIGNATURE_PLAIN:
+                        return $this->renderBbCodePlainText($userProfile->signature);
+                }
         }
 
         return null;
@@ -186,7 +176,7 @@ class Post extends AbstractHandler implements AttachmentParent
 
         if ($post->user_id > 0) {
             $user = $post->User;
-            if (!empty($user)) {
+            if ($user) {
                 $links[self::LINK_POSTER] = $this->buildApiLink('users', $post->User);
                 $links[self::LINK_POSTER_AVATAR] = $user->getAvatarUrl('l');
             }

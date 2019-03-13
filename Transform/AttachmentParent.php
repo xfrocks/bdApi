@@ -28,6 +28,7 @@ interface AttachmentParent
     /**
      * @param TransformContext $context
      * @param array $mappings
+     * @return void
      */
     public function attachmentGetMappings(TransformContext $context, array &$mappings);
 }

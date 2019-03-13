@@ -46,7 +46,7 @@ class Thread extends AbstractController
             ->define(\Xfrocks\Api\XF\Transform\Thread::KEY_UPDATE_DATE, 'uint', 'timestamp to filter')
             ->define('thread_ids', 'str', 'thread ids to fetch (ignoring all filters, separated by comma)');
 
-        if (!empty($params['thread_ids'])) {
+        if ($params['thread_ids'] !== '') {
             $threadIds = $params->filterCommaSeparatedIds('thread_ids');
 
             return $this->actionMultiple($threadIds);
@@ -115,17 +115,17 @@ class Thread extends AbstractController
 
         /** @var Creator $creator */
         $creator = $this->service('XF:Thread\Creator', $forum);
-
         $creator->setContent($params['thread_title'], $params['post_body']);
-        if ($params['thread_prefix_id']) {
+
+        if ($params['thread_prefix_id'] > 0) {
             $creator->setPrefix($params['thread_prefix_id']);
         }
 
-        if ($params['thread_tags']) {
+        if ($params['thread_tags'] !== '') {
             $creator->setTags($params['thread_tags']);
         }
 
-        if ($params['fields']) {
+        if (count($params['fields']) > 0) {
             $creator->setCustomFields($params['fields']);
         }
 
@@ -281,7 +281,7 @@ class Thread extends AbstractController
         $threadWatchRepo->setWatchState(
             $thread,
             \XF::visitor(),
-            $params['email'] ? 'watch_email' : 'watch_no_email'
+            $params['email'] === true ? 'watch_email' : 'watch_no_email'
         );
 
         return $this->message(\XF::phrase('changes_saved'));
@@ -494,6 +494,10 @@ class Thread extends AbstractController
         return $this->getNewOrRecentResponse('threads_recent', $finder);
     }
 
+    /**
+     * @param array $ids
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionMultiple(array $ids)
     {
         $threads = [];
@@ -504,6 +508,10 @@ class Thread extends AbstractController
         return $this->api(['threads' => $threads]);
     }
 
+    /**
+     * @param int $threadId
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionSingle($threadId)
     {
         return $this->api([
@@ -514,6 +522,7 @@ class Thread extends AbstractController
     /**
      * @param \XF\Finder\Thread $finder
      * @param Params $params
+     * @return void
      * @throws \XF\Mvc\Reply\Exception
      */
     protected function applyFilters($finder, Params $params)

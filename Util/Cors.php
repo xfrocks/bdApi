@@ -6,6 +6,7 @@ class Cors
 {
     /**
      * @param \XF\Http\Response $response
+     * @return void
      */
     public static function addHeaders($response)
     {
@@ -17,7 +18,7 @@ class Cors
         $request = $app->request();
 
         $origin = $request->getServer('HTTP_ORIGIN');
-        if (!empty($origin)) {
+        if ($origin !== false) {
             $response->header('Access-Control-Allow-Origin', $origin, true);
             $response->header('Access-Control-Allow-Credentials', 'true', true);
         } else {
@@ -25,12 +26,12 @@ class Cors
         }
 
         $method = $request->getServer('HTTP_ACCESS_CONTROL_REQUEST_METHOD');
-        if (!empty($method)) {
+        if ($method !== false) {
             $response->header('Access-Control-Allow-Methods', $method, true);
         }
 
         $headers = $request->getServer('HTTP_ACCESS_CONTROL_REQUEST_HEADERS');
-        if (!empty($headers)) {
+        if ($headers !== false) {
             $response->header('Access-Control-Allow-Headers', $headers, true);
         }
     }

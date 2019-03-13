@@ -38,7 +38,7 @@ class Log extends Entity
 
     public function getEntityExplain($entity)
     {
-        if (!($entity instanceof \Xfrocks\Api\Entity\Log)) {
+        if (!$entity instanceof \Xfrocks\Api\Entity\Log) {
             return parent::getEntityExplain($entity);
         }
 

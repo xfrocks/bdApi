@@ -12,7 +12,7 @@ class LinkForum extends AbstractNode
 
         /** @var \XF\Entity\LinkForum $linkForum */
         $linkForum = $context->getSource();
-        if ($linkForum->link_url) {
+        if ($linkForum->link_url !== '') {
             $links['target'] = $linkForum->link_url;
         } else {
             $links['target'] = $this->buildPublicLink('link-forums', $linkForum);

@@ -12,16 +12,14 @@ abstract class Entity extends \Xfrocks\Api\DevHelper\Admin\Controller\Entity
      */
     protected function getEntityClientAndUser($entity)
     {
-        /** @var \Xfrocks\Api\Entity\Client $client */
+        /** @var \Xfrocks\Api\Entity\Client|null $client */
         $client = $entity->getRelation('Client');
-
-        /** @var \XF\Entity\User|null $user */
-        $user = $entity->getRelation('User');
-        if ($user === null) {
-            return $client->name;
+        if (!$client) {
+            return '';
         }
 
-        return sprintf('%s / %s', $client->name, $user->username);
+        $user = $client->User;
+        return $user ? sprintf('%s / %s', $client->name, $user->username) : $client->name;
     }
 
     protected function getPrefixForClasses()
@@ -34,6 +32,12 @@ abstract class Entity extends \Xfrocks\Api\DevHelper\Admin\Controller\Entity
         return 'bdapi';
     }
 
+    /**
+     * @param mixed $action
+     * @param ParameterBag $params
+     * @return void
+     * @throws \XF\Mvc\Reply\Exception
+     */
     protected function preDispatchType($action, ParameterBag $params)
     {
         parent::preDispatchType($action, $params);

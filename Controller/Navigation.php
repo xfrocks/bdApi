@@ -65,7 +65,7 @@ class Navigation extends AbstractController
             }
         }
 
-        if (!empty($forumIds)) {
+        if (count($forumIds) > 0) {
             $forums = $this->em()->findByIds('XF:Forum', $forumIds);
         }
 
@@ -84,12 +84,15 @@ class Navigation extends AbstractController
         return $elements;
     }
 
-    protected function arrangeElements(
-        array &$elements,
-        Tree $tree,
-        $parentNodeId,
-        array &$options = []
-    ) {
+    /**
+     * @param array $elements
+     * @param Tree $tree
+     * @param mixed $parentNodeId
+     * @param array $options
+     * @return void
+     */
+    protected function arrangeElements(array &$elements, Tree $tree, $parentNodeId, array &$options = [])
+    {
         $this->params()->getTransformContext()->onTransformedCallbacks[] = function ($context, &$data) use ($tree) {
             /** @var TransformContext $context */
             $source = $context->getSource();
@@ -102,8 +105,8 @@ class Navigation extends AbstractController
             $data['navigation_parent_id'] = $source->Node->parent_node_id;
 
             $data['has_sub_elements'] = count($tree->children($source->node_id)) > 0;
-            if ($data['has_sub_elements']) {
-                if (empty($data['links'])) {
+            if ($data['has_sub_elements'] === true) {
+                if (!isset($data['links'])) {
                     $data['links'] = [];
                 }
 
@@ -139,7 +142,7 @@ class Navigation extends AbstractController
                     }
                     break;
                 case 'Forum':
-                    if (!empty($options['forums'][$node->node_id])) {
+                    if (isset($options['forums'][$node->node_id])) {
                         $element = $this->transformEntityLazily($options['forums'][$node->node_id]);
                     }
                     break;
@@ -177,7 +180,7 @@ class Navigation extends AbstractController
                     break;
             }
 
-            if (!empty($element)) {
+            if ($element) {
                 $elements[] = $element;
             }
         }

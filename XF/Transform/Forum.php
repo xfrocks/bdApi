@@ -74,14 +74,14 @@ class Forum extends AbstractNode
 
         switch ($key) {
             case self::DYNAMIC_KEY_IS_FOLLOW:
-                $visitor = \XF::visitor();
-                if ($visitor->user_id <= 0) {
+                $userId = \XF::visitor()->user_id;
+                if ($userId < 1) {
                     return false;
                 }
 
-                return !empty($forum->Watch[$visitor->user_id]);
+                return isset($forum->Watch[$userId]);
             case self::DYNAMIC_KEY_PREFIXES:
-                if (!$forum->prefix_cache) {
+                if (count($forum->prefix_cache) === 0) {
                     return null;
                 }
 

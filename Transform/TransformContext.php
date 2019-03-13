@@ -128,7 +128,7 @@ class TransformContext
      */
     public function getParentHandler()
     {
-        if ($this->parentContext === null) {
+        if (!$this->parentContext) {
             return null;
         }
 
@@ -140,7 +140,7 @@ class TransformContext
      */
     public function getParentSource()
     {
-        if ($this->parentContext === null) {
+        if (!$this->parentContext) {
             return null;
         }
 
@@ -153,7 +153,7 @@ class TransformContext
      */
     public function getParentSourceValue($key)
     {
-        if ($this->parentContext === null) {
+        if (!$this->parentContext) {
             return null;
         }
 
@@ -186,7 +186,7 @@ class TransformContext
     public function getSubContext($key = null, $subHandler = null, $subSource = null)
     {
         $subSelector = $this->selector;
-        if ($subSelector !== null && $key !== null) {
+        if ($subSelector && $key !== null) {
             $subSelector = $subSelector->getSubSelector($key);
         }
 
@@ -207,7 +207,7 @@ class TransformContext
      */
     public function makeSureSelectorIsNotNull($handlerType)
     {
-        if ($this->selector === null) {
+        if (!$this->selector) {
             $this->selector = $this->getSelectorDefault();
         }
 
@@ -230,11 +230,7 @@ class TransformContext
      */
     public function selectorShouldExcludeField($key)
     {
-        if ($this->selector === null) {
-            return false;
-        }
-
-        return $this->selector->shouldExcludeField($key);
+        return $this->selector ? $this->selector->shouldExcludeField($key) : false;
     }
 
     /**
@@ -243,16 +239,13 @@ class TransformContext
      */
     public function selectorShouldIncludeField($key)
     {
-        if ($this->selector === null) {
-            return false;
-        }
-
-        return $this->selector->shouldIncludeField($key);
+        return $this->selector ? $this->selector->shouldIncludeField($key) : false;
     }
 
     /**
      * @param array|mixed $data
      * @param mixed|null $key
+     * @return void
      */
     public function setData($data, $key = null)
     {
@@ -274,7 +267,7 @@ class TransformContext
     {
         $rootContext = $this->rootContext;
 
-        if ($rootContext->selectorDefault === null) {
+        if (!$rootContext->selectorDefault) {
             $rootContext->selectorDefault = new Selector();
         }
 

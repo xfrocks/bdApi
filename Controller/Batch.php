@@ -8,25 +8,31 @@ use Xfrocks\Api\Transformer;
 
 class Batch extends AbstractController
 {
+    /**
+     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionPostIndex()
     {
         $inputRaw = $this->request->getInputRaw();
-        if (empty($inputRaw) && \XF::$debugMode) {
+        if ($inputRaw === '' && \XF::$debugMode) {
             $inputRaw = $this->request->filter('_xfApiInputRaw', 'str');
         }
         $configs = @json_decode($inputRaw, true);
-        if (empty($configs)) {
+        if (!is_array($configs)) {
             return $this->error(\XF::phrase('bdapi_slash_batch_requires_json'));
         }
 
         $replies = [];
         foreach ($configs as $config) {
+            if (!is_array($config)) {
+                continue;
+            }
             $job = $this->buildJobFromConfig($config);
-            if (empty($job)) {
+            if (!$job) {
                 continue;
             }
 
-            if (empty($config['id'])) {
+            if (!isset($config['id'])) {
                 $i = 0;
                 do {
                     $id = $i > 0 ? sprintf('%s_%d', $job->getUri(), $i) : $job->getUri();
@@ -50,26 +56,24 @@ class Batch extends AbstractController
      * @param array $config
      * @return BatchJob|null
      */
-    protected function buildJobFromConfig($config)
+    protected function buildJobFromConfig(array $config)
     {
-        if (!is_array($config)) {
-            return null;
-        }
-        if (empty($config['uri'])) {
+        if (!isset($config['uri']) || !is_string($config['uri'])) {
             return null;
         }
 
-        if (empty($config['method'])) {
+        if (!isset($config['method'])) {
             $config['method'] = 'GET';
         }
         $config['method'] = strtoupper($config['method']);
 
-        if (empty($config['params']) || !is_array($config['params'])) {
+        if (!isset($config['params']) || !is_array($config['params'])) {
             $config['params'] = [];
         }
 
+        /** @var string|false $uriQuery */
         $uriQuery = @parse_url($config['uri'], PHP_URL_QUERY);
-        if (!empty($uriQuery)) {
+        if ($uriQuery !== false) {
             $uriParams = [];
             parse_str($uriQuery, $uriParams);
             if (count($uriParams) > 0) {

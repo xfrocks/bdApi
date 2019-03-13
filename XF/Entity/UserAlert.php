@@ -5,13 +5,11 @@ namespace Xfrocks\Api\XF\Entity;
 use XF\Util\Php;
 use Xfrocks\Api\Repository\Subscription;
 
-/**
- * Class UserAlert
- * @package Xfrocks\Api\XF\Entity
- * @inheritdoc
- */
 class UserAlert extends XFCP_UserAlert
 {
+    /**
+     * @return void
+     */
     protected function _postSave()
     {
         parent::_postSave();
@@ -21,8 +19,9 @@ class UserAlert extends XFCP_UserAlert
         /** @var Subscription $subRepo */
         $subRepo = $this->repository('Xfrocks\Api:Subscription');
 
-        if (Subscription::getSubscription(Subscription::TYPE_NOTIFICATION)) {
+        if (Subscription::getSubOption(Subscription::TYPE_NOTIFICATION)) {
             if ($this->alerted_user_id > 0) {
+                /** @var string $subColumn */
                 $subColumn = \XF::options()->bdApi_subscriptionColumnUserNotification;
                 if (!isset($userOptions[$this->alerted_user_id])) {
                     $userOptions[$this->alerted_user_id] = $this->db()->fetchOne('
@@ -33,18 +32,18 @@ class UserAlert extends XFCP_UserAlert
                 }
 
                 $option = $userOptions[$this->alerted_user_id];
-                if (!empty($option)) {
+                if (is_string($option) && strlen($option) > 0) {
                     $option = Php::safeUnserialize($option);
                 }
 
-                if (empty($option)) {
+                if (!is_array($option)) {
                     $option = [];
                 }
             } else {
                 $option = $subRepo->getClientSubscriptionsData();
             }
 
-            if (!empty($option)) {
+            if (count($option) > 0) {
                 $subRepo->ping(
                     $option,
                     'insert',

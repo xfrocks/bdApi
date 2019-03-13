@@ -7,19 +7,22 @@ use Xfrocks\Api\OAuth2\Server;
 
 class Index extends AbstractController
 {
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionGetIndex()
     {
         /** @var Modules $modules */
         $modules = $this->data('Xfrocks\Api:Modules');
 
         $systemInfo = [];
-        $sessionToken = $this->session()->getToken();
-        if (empty($sessionToken)) {
+        $token = $this->session()->getToken();
+        if (!$token) {
             $systemInfo += [
                 'oauth/authorize' => $this->app->router('public')->buildLink('account/authorize'),
                 'oauth/token' => $this->buildApiLink('oauth/token')
             ];
-        } elseif ($sessionToken->hasScope(Server::SCOPE_POST)) {
+        } elseif ($token->hasScope(Server::SCOPE_POST)) {
             $systemInfo += [
                 'api_revision' => 2016062001,
                 'api_modules' => $modules->getVersions()

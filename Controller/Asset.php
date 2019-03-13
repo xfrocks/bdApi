@@ -4,6 +4,9 @@ namespace Xfrocks\Api\Controller;
 
 class Asset extends AbstractController
 {
+    /**
+     * @return \XF\Mvc\Reply\View
+     */
     public function actionGetSdk()
     {
         $params = $this->params()
@@ -39,11 +42,19 @@ class Asset extends AbstractController
         return $this->view('Xfrocks\Api\View\Asset\Sdk', '', ['sdk' => $sdk]);
     }
 
+    /**
+     * @param mixed $action
+     * @return void
+     */
     public function assertBoardActive($action)
     {
         // intentionally left empty
     }
 
+    /**
+     * @param mixed $action
+     * @return void
+     */
     public function assertViewingPermissions($action)
     {
         // intentionally left empty

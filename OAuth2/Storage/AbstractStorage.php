@@ -35,9 +35,8 @@ abstract class AbstractStorage implements StorageInterface
     }
 
     /**
-     * Set the server
-     *
      * @param \League\OAuth2\Server\AbstractServer $server
+     * @return void
      */
     final public function setServer(AbstractServer $server)
     {
@@ -80,8 +79,7 @@ abstract class AbstractStorage implements StorageInterface
 
         /** @var TokenWithScope|null $xfEntity */
         $xfEntity = $this->app->em()->findOne($shortName, [$textColumn => $text], $with);
-
-        if (!empty($xfEntity)) {
+        if ($xfEntity) {
             $this->xfEntities[$text] = $xfEntity;
         }
 
@@ -110,7 +108,7 @@ abstract class AbstractStorage implements StorageInterface
      * @param array $scopes
      * @return string
      */
-    protected function scopeBuildStrFromObjArray($scopes)
+    protected function scopeBuildStrFromObjArray(array $scopes)
     {
         /** @var Server $apiServer */
         $apiServer = $this->app->container('api.server');
@@ -123,13 +121,16 @@ abstract class AbstractStorage implements StorageInterface
      * @param array $scopes
      * @return array
      */
-    protected function scopeBuildObjArrayFromStrArray($scopes)
+    protected function scopeBuildObjArrayFromStrArray(array $scopes)
     {
         /** @var Server $apiServer */
         $apiServer = $this->app->container('api.server');
         return $apiServer->getScopeObjArrayFromStrArray($scopes, $this->server);
     }
 
+    /**
+     * @return array
+     */
     protected function getXfEntityWith()
     {
         return [];

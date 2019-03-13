@@ -4,13 +4,29 @@ namespace Xfrocks\Api;
 
 class Listener
 {
+    /**
+     * @var string
+     */
     public static $accessTokenParamKey = 'oauth_token';
+
+    /**
+     * @var string
+     */
     public static $apiDirName = 'api';
+
+    /**
+     * @var string
+     */
     public static $routerType = 'XfrocksApi';
+
+    /**
+     * @var string
+     */
     public static $scopeDelimiter = ' ';
 
     /**
      * @param \XF\App $app
+     * @return void
      */
     public static function appSetup($app)
     {
@@ -54,7 +70,7 @@ class Listener
 
         $addOnCache = $container['addon.cache'];
         $extension = $app->extension();
-        if (!empty($addOnCache['XFRM'])) {
+        if (isset($addOnCache['XFRM'])) {
             $extension->addClassExtension('Xfrocks\Api\Data\Modules', 'Xfrocks\Api\XFRM\Data\Modules');
         }
     }
@@ -62,6 +78,7 @@ class Listener
     /**
      * @param \XF\Mvc\Dispatcher $dispatcher
      * @param \XF\Mvc\RouteMatch $match
+     * @return void
      */
     public static function apiOnlyDispatcherMatch($dispatcher, &$match)
     {
@@ -72,7 +89,7 @@ class Listener
             $method = strtolower($request->getServer('REQUEST_METHOD'));
             if ($method === 'get' && \XF::$debugMode) {
                 $methodDebug = $request->filter('_xfApiMethod', 'str');
-                if (!empty($methodDebug)) {
+                if ($methodDebug !== '') {
                     $method = strtolower($methodDebug);
                 }
             }
@@ -94,6 +111,7 @@ class Listener
     /**
      * @param \XF\Service\User\ContentChange $changeService
      * @param array $updates
+     * @return void
      */
     public static function userContentChangeInit($changeService, array &$updates)
     {

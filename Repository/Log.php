@@ -8,18 +8,30 @@ use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class Log extends Repository
 {
+    /**
+     * @var int
+     */
     protected static $logging = 1;
 
+    /**
+     * @return void
+     */
     public function pauseLogging()
     {
         self::$logging--;
     }
 
+    /**
+     * @return void
+     */
     public function resumeLogging()
     {
         self::$logging++;
     }
 
+    /**
+     * @return int|null
+     */
     public function pruneExpired()
     {
         $days = $this->options()->bdApi_logRetentionDays;
@@ -28,6 +40,15 @@ class Log extends Repository
         return $this->db()->delete('xf_bdapi_log', 'request_date < ?', $cutoff);
     }
 
+    /**
+     * @param string $requestMethod
+     * @param string $requestUri
+     * @param array $requestData
+     * @param int $responseCode
+     * @param array $responseOutput
+     * @param array $bulkSet
+     * @return bool
+     */
     public function logRequest(
         $requestMethod,
         $requestUri,
@@ -81,6 +102,11 @@ class Log extends Repository
         }
     }
 
+    /**
+     * @param array $data
+     * @param int $level
+     * @return array
+     */
     protected function filterData(array &$data, $level = 0)
     {
         $filtered = array();

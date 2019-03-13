@@ -8,6 +8,12 @@ use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class User extends XFCP_User
 {
+    /**
+     * @param mixed $sizeCode
+     * @param mixed $forceType
+     * @param mixed $canonical
+     * @return string
+     */
     public function getAvatarUrl($sizeCode, $forceType = null, $canonical = false)
     {
         $url = parent::getAvatarUrl($sizeCode, $forceType, $canonical);
@@ -20,6 +26,10 @@ class User extends XFCP_User
         return $url;
     }
 
+    /**
+     * @param mixed $permissionId
+     * @return bool
+     */
     public function hasAdminPermission($permissionId)
     {
         /** @var Session $session */

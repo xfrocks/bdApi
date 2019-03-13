@@ -17,9 +17,9 @@ class BatchJobReply extends AbstractHandler
 
     public function calculateDynamicValue(TransformContext $context, $key)
     {
-        /** @var \XF\Mvc\Reply\AbstractReply $reply */
+        /** @var \XF\Mvc\Reply\AbstractReply|null $reply */
         $reply = $context->data('reply');
-        if (empty($reply)) {
+        if (!$reply) {
             return null;
         }
 
@@ -128,10 +128,5 @@ class BatchJobReply extends AbstractHandler
         }
 
         parent::onTransformed($context, $data);
-    }
-
-    protected function prepareContextSelector($context)
-    {
-        // intentionally left blank
     }
 }

@@ -2,12 +2,19 @@
 
 namespace Xfrocks\Api\Data;
 
-use XF\Mvc\Controller;
+use Xfrocks\Api\Controller\AbstractController;
 use Xfrocks\Api\Listener;
 
 class Modules
 {
+    /**
+     * @var array
+     */
     private $routes = [];
+
+    /**
+     * @var array
+     */
     private $versions = [
         'forum' => 2018092501,
         'oauth2' => 2016030902,
@@ -39,7 +46,7 @@ class Modules
     }
 
     /**
-     * @param Controller $controller
+     * @param AbstractController $controller
      * @return array
      */
     public function getDataForApiIndex($controller)
@@ -111,6 +118,7 @@ class Modules
      * @param string $subSection
      * @param string $context
      * @param string $actionPrefix
+     * @return void
      */
     protected function addController(
         $controller,
@@ -134,10 +142,11 @@ class Modules
      * @param string $prefix
      * @param string $subSection
      * @param array $route
+     * @return void
      */
     protected function addRoute($prefix, $subSection, $route)
     {
-        if (!empty($this->routes[$prefix][$subSection])) {
+        if (isset($this->routes[$prefix][$subSection])) {
             throw new \InvalidArgumentException(sprintf('Route "%s"."%s" has already existed', $prefix, $subSection));
         }
 
@@ -147,10 +156,11 @@ class Modules
     /**
      * @param string $id
      * @param int $version
+     * @return void
      */
     protected function register($id, $version)
     {
-        if (!empty($this->versions[$id])) {
+        if (isset($this->versions[$id])) {
             throw new \InvalidArgumentException(sprintf('Module "%s" has already been registered', $id));
         }
 

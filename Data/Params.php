@@ -36,27 +36,27 @@ class Params implements \ArrayAccess
     /**
      * @var string
      */
-    protected $paramKeyLimit;
+    protected $paramKeyLimit = '';
 
     /**
      * @var string
      */
-    protected $paramKeyOrder;
+    protected $paramKeyOrder = '';
 
     /**
      * @var string
      */
-    protected $paramKeyPage;
+    protected $paramKeyPage = '';
 
     /**
      * @var string
      */
-    protected $paramKeyTransformSelectorExclude;
+    protected $paramKeyTransformSelectorExclude = '';
 
     /**
      * @var string
      */
-    protected $paramKeyTransformSelectorInclude;
+    protected $paramKeyTransformSelectorInclude = '';
 
     /**
      * @var Param[]
@@ -90,6 +90,9 @@ class Params implements \ArrayAccess
         if ($this->defineCompleted) {
             throw new \LogicException('All params must be defined together and before the first param parsing.');
         }
+        if ($key === '') {
+            throw new \InvalidArgumentException('$key cannot be an empty string');
+        }
 
         if ($type === null || is_string($type)) {
             $param = new Param($type, $description);
@@ -105,6 +108,9 @@ class Params implements \ArrayAccess
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function defineAttachmentHash()
     {
         $this->define('attachment_hash', 'str', 'a unique hash value');
@@ -112,11 +118,21 @@ class Params implements \ArrayAccess
         return $this;
     }
 
+    /**
+     * @param string $key
+     * @param string|null $description
+     * @return Params
+     */
     public function defineFile($key, $description = null)
     {
         return $this->define($key, 'file', $description);
     }
 
+    /**
+     * @param string $key
+     * @param string|null $description
+     * @return Params
+     */
     public function defineFiles($key, $description = null)
     {
         return $this->define($key, 'files', $description);
@@ -134,9 +150,7 @@ class Params implements \ArrayAccess
         $this->paramKeyOrder = $paramKeyOrder;
 
         $param = new Param('str', implode(', ', array_keys($choices)));
-        if (is_string($defaultOrder) && strlen($defaultOrder) > 0) {
-            $param->default = $defaultOrder;
-        }
+        $param->default = $defaultOrder;
 
         return $this->define($paramKeyOrder, $param);
     }
@@ -241,7 +255,7 @@ class Params implements \ArrayAccess
      */
     public function filterLimitAndPage()
     {
-        if (empty($this->paramKeyLimit) || empty($this->paramKeyPage)) {
+        if ($this->paramKeyLimit === '' || $this->paramKeyPage === '') {
             throw new \LogicException('Params::definePageNav() must be called before calling filterLimitAndPage().');
         }
 
@@ -297,8 +311,7 @@ class Params implements \ArrayAccess
      */
     public function filterTransformSelector()
     {
-        if (empty($this->paramKeyTransformSelectorExclude) ||
-            empty($this->paramKeyTransformSelectorInclude)) {
+        if ($this->paramKeyTransformSelectorExclude === '' || $this->paramKeyTransformSelectorInclude === '') {
             throw new \LogicException('Params::defineFieldsFiltering() must be called before calling filterTransformSelector().');
         }
 
@@ -333,9 +346,6 @@ class Params implements \ArrayAccess
      */
     public function getFilteredLimit()
     {
-        if (!is_string($this->paramKeyLimit)) {
-            return null;
-        }
         return $this->getFiltered($this->paramKeyLimit);
     }
 
@@ -344,9 +354,6 @@ class Params implements \ArrayAccess
      */
     public function getFilteredPage()
     {
-        if (!is_string($this->paramKeyPage)) {
-            return null;
-        }
         return $this->getFiltered($this->paramKeyPage);
     }
 
@@ -367,7 +374,7 @@ class Params implements \ArrayAccess
      */
     public function getTransformContext()
     {
-        if ($this->transformContext === null) {
+        if (!$this->transformContext) {
             $selector = new Selector();
             list($exclude, $include) = $this->filterTransformSelector();
             $selector->parseRules($exclude, $include);
@@ -390,26 +397,46 @@ class Params implements \ArrayAccess
         return $page;
     }
 
+    /**
+     * @return void
+     */
     public function markAsDeprecated()
     {
         $this->isDeprecated = true;
     }
 
+    /**
+     * @param mixed $offset
+     * @return bool
+     */
     public function offsetExists($offset)
     {
         return isset($this->params[$offset]);
     }
 
+    /**
+     * @param mixed $offset
+     * @return mixed|null
+     */
     public function offsetGet($offset)
     {
         return $this->filter($offset);
     }
 
+    /**
+     * @param mixed $offset
+     * @param mixed $value
+     * @return void
+     */
     public function offsetSet($offset, $value)
     {
         throw new \LogicException('Params::define() must be used to define new param.');
     }
 
+    /**
+     * @param mixed $offset
+     * @return void
+     */
     public function offsetUnset($offset)
     {
         throw new \LogicException('Params::define() must be used to define new param.');
@@ -421,28 +448,27 @@ class Params implements \ArrayAccess
      */
     public function sortFinder($finder)
     {
-        if (empty($this->paramKeyOrder)) {
+        if ($this->paramKeyOrder === '') {
             throw new \LogicException('Params::defineOrder() must be called before calling sortFinder().');
         }
 
         $order = $this->offsetGet($this->paramKeyOrder);
-        if (empty($order) || !isset($this->orderChoices[$order])) {
+        if ($order === '' || !isset($this->orderChoices[$order])) {
             return false;
         }
 
         $orderChoice = $this->orderChoices[$order];
-        if (!is_array($orderChoice)) {
-            return false;
-        }
 
-        if (count($orderChoice) < 2) {
-            return $orderChoice;
+        if (count($orderChoice) >= 2) {
+            $finder->order($orderChoice[0], $orderChoice[1]);
         }
-        $finder->order($orderChoice[0], $orderChoice[1]);
 
         return $orderChoice;
     }
 
+    /**
+     * @return void
+     */
     protected function setDefineCompleted()
     {
         $this->defineCompleted = true;

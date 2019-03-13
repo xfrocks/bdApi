@@ -117,13 +117,10 @@ class User extends AbstractController
         }
 
         $extraData = [];
-        if (!empty($params['extra_data'])) {
-            $extraData = Crypt::decryptTypeOne($params['extra_data'], $params['extra_timestamp']);
-            if (!empty($extraData)) {
-                $extraData = Php::safeUnserialize($extraData);
-            }
-
-            if (empty($extraData)) {
+        if ($params['extra_data'] !== '') {
+            $extraDataDecrypted = Crypt::decryptTypeOne($params['extra_data'], $params['extra_timestamp']);
+            $extraData = Php::safeUnserialize($extraDataDecrypted);
+            if (!is_array($extraData)) {
                 $extraData = [];
             }
         }
@@ -140,17 +137,16 @@ class User extends AbstractController
             'custom_fields' => $params['fields']
         ];
 
-        $password = Crypt::decrypt($params['password'], $params['password_algo'], $clientSecret);
-        if (!empty($password)) {
-            $input['password'] = $password;
+        if ($params['password_algo'] !== '') {
+            $input['password'] = Crypt::decrypt($params['password'], $params['password_algo'], $clientSecret);
+        } elseif ($params['password'] !== '') {
+            $input['password'] = $params['password'];
         } else {
             $registration->setNoPassword();
         }
 
         $skipEmailConfirmation = false;
-        if (!empty($extraData['user_email'])
-            && $extraData['user_email'] == $input['email']
-        ) {
+        if (isset($extraData['user_email']) && $extraData['user_email'] == $input['email']) {
             $skipEmailConfirmation = true;
         }
 
@@ -176,9 +172,9 @@ class User extends AbstractController
             \XF::setVisitor($user);
         }
 
-        if (!empty($extraData['external_provider'])
-            && !empty($extraData['external_provider_key'])
-            && !empty($extraData['access_token'])
+        if (isset($extraData['external_provider'])
+            && isset($extraData['external_provider_key'])
+            && isset($extraData['access_token'])
         ) {
             /** @var ConnectedAccountProvider|null $provider */
             $provider = $this->em()->find('XF:ConnectedAccountProvider', $extraData['external_provider']);
@@ -189,7 +185,7 @@ class User extends AbstractController
 
                 $storageState = $handler->getStorageState($provider, $user);
                 $storageState->storeToken($tokenObj);
-                
+
                 $providerData = $handler->getProviderData($storageState);
 
                 /** @var ConnectedAccount $connectedAccountRepo */
@@ -241,10 +237,10 @@ class User extends AbstractController
         $isAdmin = $visitor->hasAdminPermission('user');
         $requiredAuth = 0;
 
-        if (!empty($params['password'])) {
+        if ($params['password'] !== '') {
             $requiredAuth++;
         }
-        if (!empty($params['user_email'])) {
+        if ($params['user_email'] !== '') {
             $requiredAuth++;
         }
 
@@ -252,11 +248,13 @@ class User extends AbstractController
             $isAuth = false;
             if ($isAdmin && $visitor->user_id !== $user->user_id) {
                 $isAuth = true;
-            } elseif (!empty($params['password_old'])) {
+            } elseif ($params['password_old'] !== '') {
                 /** @var \XF\Entity\UserAuth|null $userAuth */
                 $userAuth = $user->Auth;
                 if ($userAuth) {
-                    $passwordOld = Crypt::decrypt($params['password_old'], $params['password_algo']);
+                    $passwordOld = $params['password_algo'] === '' ?
+                        $params['password_old'] :
+                        Crypt::decrypt($params['password_old'], $params['password_algo']);
                     $authHandler = $userAuth->getAuthenticationHandler();
                     if ($authHandler && $authHandler->hasPassword() && $userAuth->authenticate($passwordOld)) {
                         $isAuth = true;
@@ -273,15 +271,20 @@ class User extends AbstractController
             $user->setOption('admin_edit', true);
         }
 
-        if (!empty($params['password'])) {
-            $password = Crypt::decrypt($params['password'], $params['password_algo']);
+        if ($params['password'] !== '') {
             /** @var UserAuth $userAuth */
             $userAuth = $user->getRelationOrDefault('Auth');
-            $userAuth->setPassword($password);
+
+            if ($params['password_algo'] !== '') {
+                $userAuth->setPassword(Crypt::decrypt($params['password'], $params['password_algo']));
+            } else {
+                $userAuth->setPassword($params['password']);
+            }
+
             $user->addCascadedSave($userAuth);
         }
 
-        if (!empty($params['user_email'])) {
+        if ($params['user_email'] !== '') {
             $user->email = $params['user_email'];
             $options = $this->options();
 
@@ -299,7 +302,7 @@ class User extends AbstractController
             }
         }
 
-        if (!empty($params['username'])) {
+        if ($params['username'] !== '') {
             $user->username = $params['username'];
             if ($user->isChanged('username') && !$isAdmin) {
                 return $this->error(\XF::phrase('bdapi_slash_users_denied_username'), 403);
@@ -323,11 +326,9 @@ class User extends AbstractController
                 return $this->notFound(\XF::phrase('bdapi_requested_user_group_not_found'));
             }
 
-            if (!empty($params['secondary_group_ids'])) {
-                foreach ($params['secondary_group_ids'] as $secondaryGroupId) {
-                    if (!isset($userGroups[$secondaryGroupId])) {
-                        return $this->notFound(\XF::phrase('bdapi_requested_user_group_not_found'));
-                    }
+            foreach ($params['secondary_group_ids'] as $secondaryGroupId) {
+                if (!isset($userGroups[$secondaryGroupId])) {
+                    return $this->notFound(\XF::phrase('bdapi_requested_user_group_not_found'));
                 }
             }
 
@@ -338,7 +339,7 @@ class User extends AbstractController
             $secondaryGroupIds = array_unique($secondaryGroupIds);
             sort($secondaryGroupIds, SORT_NUMERIC);
 
-            $zeroKey = array_search(0, $secondaryGroupIds);
+            $zeroKey = array_search(0, $secondaryGroupIds, true);
             if ($zeroKey !== false) {
                 unset($secondaryGroupIds[$zeroKey]);
             }
@@ -349,7 +350,7 @@ class User extends AbstractController
         $userProfile = $user->Profile;
         $user->addCascadedSave($userProfile);
 
-        if (!empty($params['user_dob_day']) && !empty($params['user_dob_month']) && !empty($params['user_dob_year'])) {
+        if ($params['user_dob_day'] > 0 && $params['user_dob_month'] > 0 && $params['user_dob_year'] > 0) {
             $userProfile->setDob($params['user_dob_day'], $params['user_dob_month'], $params['user_dob_year']);
 
             $hasExistingDob = false;
@@ -371,7 +372,7 @@ class User extends AbstractController
             }
         }
 
-        if (!empty($params['fields'])) {
+        if (count($params['fields']) > 0) {
             $inputFilter = $this->app()->inputFilterer();
             $fields = $params['fields'];
 
@@ -402,7 +403,7 @@ class User extends AbstractController
 
         $shouldSendEmailConfirmation = false;
         if ($user->isChanged('email')
-            && in_array($user->user_state, ['email_confirm', 'email_confirm_edit'])
+            && in_array($user->user_state, ['email_confirm', 'email_confirm_edit'], true)
         ) {
             $shouldSendEmailConfirmation = true;
         }
@@ -463,6 +464,9 @@ class User extends AbstractController
         return $this->view('Xfrocks\Api\View\User\DefaultAvatar', '', $viewParams);
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionGetFields()
     {
         $app = $this->app;
@@ -483,6 +487,9 @@ class User extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionGetFind()
     {
         $params = $this
@@ -498,7 +505,7 @@ class User extends AbstractController
         $users = [];
 
         $email = $params['user_email'] ?: $params['email'];
-        if (!empty($email)) {
+        if ($email !== '') {
             if (!\XF::visitor()->hasAdminPermission('user')) {
                 return $this->noPermission();
             }
@@ -636,17 +643,19 @@ class User extends AbstractController
             return $this->noPermission();
         }
 
-        if (empty($params['avatar'])) {
+        /** @var \XF\Http\Upload|null $avatarUpload */
+        $avatarUpload = $params['avatar'];
+        if (!$avatarUpload) {
             return $this->error(\XF::phrase('bdapi_requires_upload_x', [
                 'field' => 'avatar'
             ]), 400);
         }
 
-        /** @var Avatar $avatar */
-        $avatar = $this->service('XF:User\Avatar', $user);
-        $avatar->setImageFromUpload($params['avatar']);
+        /** @var Avatar $avatarService */
+        $avatarService = $this->service('XF:User\Avatar', $user);
+        $avatarService->setImageFromUpload($avatarUpload);
 
-        $avatar->updateAvatar();
+        $avatarService->updateAvatar();
 
         return $this->message(\XF::phrase('upload_completed_successfully'));
     }
@@ -801,7 +810,7 @@ class User extends AbstractController
 
         /** @var Finder|null $finder */
         $finder = null;
-        if ($visitor->Profile->ignored) {
+        if (count($visitor->Profile->ignored) > 0) {
             $finder = $this->finder('XF:User')
                 ->where('user_id', array_keys($visitor->Profile->ignored))
                 ->order('username');
@@ -899,10 +908,11 @@ class User extends AbstractController
             $finder = $this->finder('XF:UserGroup');
         }
 
-        $this->params()->getTransformContext()->onTransformedCallbacks[] = function ($context, array &$data) use ($user) {
+        $onTransformedCallbacksRef =& $this->params()->getTransformContext()->onTransformedCallbacks;
+        $onTransformedCallbacksRef[] = function ($context, array &$data) use ($user) {
             /** @var TransformContext $context */
             $source = $context->getSource();
-            if (!($source instanceof UserGroup)) {
+            if (!$source instanceof UserGroup) {
                 return;
             }
 
@@ -912,16 +922,17 @@ class User extends AbstractController
         };
 
         $data = [
+            'user_id' => $user ? $user->user_id : null,
             'user_groups' => $this->transformFinderLazily($finder)
         ];
-
-        if (!empty($user)) {
-            $data['user_id'] = $user->user_id;
-        }
 
         return $this->api($data);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Reroute
+     */
     public function actionPostGroups(ParameterBag $params)
     {
         return $this->rerouteController('Xfrocks\Api\Controller\User', 'put-index', $params);
@@ -942,6 +953,10 @@ class User extends AbstractController
         return $this->rerouteController('Xfrocks\Api:Search', 'user-timeline', $params);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Reroute
+     */
     public function actionPostTimeline(ParameterBag $params)
     {
         return $this->rerouteController('Xfrocks\Api:ProfilePost', 'post-index', $params);
@@ -985,9 +1000,8 @@ class User extends AbstractController
     {
         if ($action === 'PostIndex') {
             $session = $this->session();
-            /** @var Token|null $token */
             $token = $session->getToken();
-            if (!$token || !$token->client_id) {
+            if (!$token || $token->client_id === '') {
                 return null;
             }
         }

@@ -100,10 +100,10 @@ class Server
             $request = Request::createFromGlobals();
 
             // TODO: verify whether using token from query for all requests violates OAuth2 spec
-            $queryAccessToken = $request->query->get(Listener::$accessTokenParamKey);
-            if (!empty($queryAccessToken)) {
-                $bodyAccessToken = $request->request->get(Listener::$accessTokenParamKey);
-                if (empty($bodyAccessToken)) {
+            $queryAccessToken = $request->query->get(Listener::$accessTokenParamKey, '');
+            if (strlen($queryAccessToken) > 0) {
+                $bodyAccessToken = $request->request->get(Listener::$accessTokenParamKey, '');
+                if ($bodyAccessToken === '') {
                     $request->request->set(Listener::$accessTokenParamKey, $queryAccessToken);
                 }
             }
@@ -252,12 +252,9 @@ class Server
      * @param AbstractServer $server
      * @return array
      */
-    public function getScopeObjArrayFromStrArray($scopes, $server)
+    public function getScopeObjArrayFromStrArray(array $scopes, $server)
     {
         $result = [];
-        if (!is_array($scopes)) {
-            return $result;
-        }
 
         foreach ($scopes as $scope) {
             if (!is_string($scope)) {
@@ -282,12 +279,9 @@ class Server
      * @param array $scopes
      * @return array
      */
-    public function getScopeStrArrayFromObjArray($scopes)
+    public function getScopeStrArrayFromObjArray(array $scopes)
     {
         $scopeIds = [];
-        if (!is_array($scopes)) {
-            return $scopeIds;
-        }
 
         /** @var ScopeEntity $scope */
         foreach ($scopes as $scope) {
@@ -396,15 +390,15 @@ class Server
         $authorizationServer = $this->container['server.auth'];
 
         $request = $authorizationServer->getRequest()->request;
-        $clientId = $request->get('client_id');
-        $password = $request->get('password');
-        $passwordAlgo = $request->get('password_algo');
-        if (!empty($clientId) && !empty($password) && !empty($passwordAlgo)) {
+        $clientId = $request->get('client_id', '');
+        $password = $request->get('password', '');
+        $passwordAlgo = $request->get('password_algo', '');
+        if (strlen($clientId) > 0 && strlen($password) > 0 && strlen($passwordAlgo) > 0) {
             /** @var Client|null $client */
             $client = $this->app->find('Xfrocks\Api:Client', $clientId);
-            if ($client !== null) {
+            if ($client) {
                 $decryptedPassword = Crypt::decrypt($password, $passwordAlgo, $client->client_secret);
-                if (!empty($decryptedPassword)) {
+                if ($decryptedPassword !== false) {
                     $request->set('client_secret', $client->client_secret);
                     $request->set('password', $decryptedPassword);
                     $request->set('password_algo', '');
@@ -412,10 +406,10 @@ class Server
             }
         }
 
-        $grantType = $request->get('grant_type');
+        $grantType = $request->get('grant_type', '');
         if ($grantType === 'password') {
-            $scope = $request->get('scope');
-            if (empty($scope)) {
+            $scope = $request->get('scope', '');
+            if ($scope === '') {
                 $scopeDefaults = implode(Listener::$scopeDelimiter, $this->getScopeDefaults());
                 $request->set('scope', $scopeDefaults);
             }
@@ -504,7 +498,7 @@ class Server
 
         try {
             $xfToken = OneTimeToken::parse($this, $resourceServer->determineAccessToken(false));
-            if ($xfToken !== null) {
+            if ($xfToken) {
                 $accessTokenHybrid = new AccessTokenHybrid($resourceServer, $xfToken);
                 return $accessTokenHybrid;
             }
@@ -535,6 +529,7 @@ class Server
     /**
      * @param string $key
      * @param mixed $value
+     * @return void
      */
     public function setRequestQuery($key, $value)
     {
@@ -553,7 +548,7 @@ class Server
     protected function buildControllerException($controller, $e)
     {
         $errors = [];
-        if (!empty($e->errorType)) {
+        if ($e->errorType !== '') {
             switch ($e->errorType) {
                 case 'access_denied':
                 case 'invalid_client':

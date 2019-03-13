@@ -6,6 +6,13 @@ use Xfrocks\Api\Repository\Subscription;
 
 class Notifier extends XFCP_Notifier
 {
+    /**
+     * @param mixed $actionType
+     * @param array $notifyUsers
+     * @param \XF\Entity\ConversationMessage|null $message
+     * @param \XF\Entity\User|null $sender
+     * @return array
+     */
     protected function _sendNotifications(
         $actionType,
         array $notifyUsers,

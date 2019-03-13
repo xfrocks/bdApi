@@ -61,7 +61,7 @@ class Thread extends AbstractHandler
                     return false;
                 }
 
-                return !empty($thread->Watch[$userId]);
+                return isset($thread->Watch[$userId]);
             case self::DYNAMIC_KEY_IS_PUBLISHED:
                 return $thread->discussion_state === 'visible';
             case self::DYNAMIC_KEY_IS_STICKY:
@@ -79,7 +79,7 @@ class Thread extends AbstractHandler
 
                 return $this->transformer->transformEntity($context, $key, $thread->Poll);
             case self::DYNAMIC_KEY_PREFIXES:
-                if (!$thread->prefix_id) {
+                if ($thread->prefix_id === 0) {
                     return null;
                 }
 
@@ -140,7 +140,7 @@ class Thread extends AbstractHandler
         $firstPost = $thread->FirstPost;
         if ($firstPost->user_id > 0) {
             $firstPostUser = $firstPost->User;
-            if (!empty($firstPostUser)) {
+            if ($firstPostUser) {
                 $links[self::LINK_FIRST_POSTER] = $this->buildApiLink('users', $firstPostUser);
                 $links[self::LINK_FIRST_POSTER_AVATAR] = $firstPostUser->getAvatarUrl('l');
             }

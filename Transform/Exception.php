@@ -42,9 +42,4 @@ class Exception extends AbstractHandler
             self::DYNAMIC_KEY_TRACE,
         ];
     }
-
-    protected function prepareContextSelector($context)
-    {
-        // intentionally left blank
-    }
 }

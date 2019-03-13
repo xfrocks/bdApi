@@ -8,6 +8,10 @@ use Xfrocks\Api\Controller\AbstractController;
 
 class Search extends AbstractPlugin
 {
+    /**
+     * @param array $results
+     * @return array
+     */
     public function prepareSearchResults(array $results)
     {
         $grouped = [];

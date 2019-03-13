@@ -10,18 +10,26 @@ use Xfrocks\Api\Transformer;
  */
 class Error extends XFCP_Error
 {
+    /**
+     * @return \XF\Mvc\Reply\Error
+     */
     public function actionRegistrationRequired()
     {
         return $this->error(\XF::phrase('login_required'), 403);
     }
 
+    /**
+     * @param mixed $exception
+     * @param mixed $showDetails
+     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     */
     public function actionException($exception, $showDetails = null)
     {
         if ($showDetails === null) {
             $showDetails = (\XF::$debugMode || \XF::visitor()->is_admin);
         }
 
-        if ($showDetails) {
+        if ($showDetails !== null) {
             $app = $this->app;
             /** @var Transformer $transformer */
             $transformer = $app->container('api.transformer');

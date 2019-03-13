@@ -21,6 +21,10 @@ class Session extends XFCP_Session
         $this->_unusedStorage = $storage;
     }
 
+    /**
+     * @param \XF\Http\Response $response
+     * @return void
+     */
     public function applyToResponse(\XF\Http\Response $response)
     {
         $headers = $response->headers();
@@ -45,11 +49,7 @@ class Session extends XFCP_Session
     public function getTokenText()
     {
         $token = $this->getToken();
-        if (empty($token)) {
-            return null;
-        }
-
-        return $token->token_text;
+        return $token ? $token->token_text : null;
     }
 
     /**
@@ -59,21 +59,18 @@ class Session extends XFCP_Session
     public function hasScope($scope)
     {
         $token = $this->getToken();
-        if (empty($token)) {
-            return false;
-        }
-
-        return $token->hasScope($scope);
+        return $token ? $token->hasScope($scope) : false;
     }
 
     /**
      * @param Token|null $token
+     * @return void
      */
     public function setToken($token)
     {
         $this->__set(self::KEY_TOKEN, $token);
 
-        if ($token && $token->user_id > 0 && $token->User !== null) {
+        if ($token && $token->user_id > 0 && $token->User) {
             $this->changeUser($token->User);
         }
     }

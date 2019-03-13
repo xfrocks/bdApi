@@ -11,24 +11,27 @@ use Xfrocks\Api\OAuth2\Entity\AuthCodeHybrid;
 class AuthCodeStorage extends AbstractStorage implements AuthCodeInterface
 {
     /**
-     * @inheritdoc
+     * @param AuthCodeEntity $token
+     * @param ScopeEntity $scope
+     * @return void
      * @throws \XF\PrintableException
      */
     public function associateScope(AuthCodeEntity $token, ScopeEntity $scope)
     {
         $hybrid = $this->getHybrid($token);
-        if (empty($hybrid)) {
-            throw new \RuntimeException('Auth code could not be found ' . $token->getId());
-        }
-
         $xfAuthCode = $hybrid->getXfAuthCode();
+
         if ($xfAuthCode->associateScope($scope->getId())) {
             $this->doXfEntitySave($xfAuthCode);
         }
     }
 
     /**
-     * @inheritdoc
+     * @param string $token
+     * @param int $expireTime
+     * @param int $sessionId
+     * @param string $redirectUri
+     * @return void
      * @throws \XF\PrintableException
      */
     public function create($token, $expireTime, $sessionId, $redirectUri)
@@ -52,24 +55,21 @@ class AuthCodeStorage extends AbstractStorage implements AuthCodeInterface
     }
 
     /**
-     * @inheritdoc
+     * @param AuthCodeEntity $token
+     * @return void
      * @throws \XF\PrintableException
      */
     public function delete(AuthCodeEntity $token)
     {
         $hybrid = $this->getHybrid($token);
-        if (empty($hybrid)) {
-            return;
-        }
-
         $this->doXfEntityDelete($hybrid->getXfAuthCode());
     }
 
     public function get($code)
     {
-        /** @var AuthCode $xfAuthCode */
+        /** @var AuthCode|null $xfAuthCode */
         $xfAuthCode = $this->doXfEntityFind('Xfrocks\Api:AuthCode', 'auth_code_text', $code);
-        if (empty($xfAuthCode)) {
+        if (!$xfAuthCode) {
             return null;
         }
 
@@ -79,11 +79,9 @@ class AuthCodeStorage extends AbstractStorage implements AuthCodeInterface
     public function getScopes(AuthCodeEntity $token)
     {
         $hybrid = $this->getHybrid($token);
-        if (empty($hybrid)) {
-            return [];
-        }
+        $xfAuthCode = $hybrid->getXfAuthCode();
 
-        return $this->scopeBuildObjArrayFromStrArray($hybrid->getXfAuthCode()->scopes);
+        return $this->scopeBuildObjArrayFromStrArray($xfAuthCode->scopes);
     }
 
     /**

@@ -31,12 +31,12 @@ class Token
             'token_type' => 'Bearer',
         ];
 
-        if ($refreshToken !== null) {
+        if ($refreshToken) {
             $response['refresh_token'] = $refreshToken->getId();
         }
 
         $session = $accessToken->getSession();
-        if (!empty($session) && $session->getOwnerType() === SessionStorage::OWNER_TYPE_USER) {
+        if ($session !== null && $session->getOwnerType() === SessionStorage::OWNER_TYPE_USER) {
             $response['user_id'] = intval($session->getOwnerId());
         }
 

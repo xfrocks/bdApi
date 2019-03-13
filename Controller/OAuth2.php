@@ -50,7 +50,7 @@ class OAuth2 extends AbstractController
 
         $session = $this->session();
         $token = $session->getToken();
-        if (empty($token)) {
+        if (!$token) {
             return $this->noPermission();
         }
 
@@ -108,7 +108,7 @@ class OAuth2 extends AbstractController
 
         /** @var Facebook $providerData */
         $providerData = $handler->getProviderData($storageState);
-        if (empty($providerData->getProviderKey())) {
+        if (strval($providerData->getProviderKey()) === '') {
             return $this->error(\XF::phrase('bdapi_invalid_facebook_token'), 400);
         }
 
@@ -123,15 +123,11 @@ class OAuth2 extends AbstractController
 
         if (\XF::$versionId > 2010000) {
             $getBody = [$fbApp, 'getBody'];
-            if (is_callable($getBody)) {
-                $fbApp = call_user_func($getBody)->getContents();
-            }
+            $fbApp = call_user_func($getBody)->getContents();
         }
 
         $fbApp = json_decode(strval($fbApp), true);
-        if (!empty($fbApp['id'])
-            && $fbApp['id'] === $provider->options['app_id']
-        ) {
+        if (isset($fbApp['id']) && $fbApp['id'] === $provider->options['app_id']) {
             $externalProviderKey = $providerData->getProviderKey();
         }
 
@@ -176,7 +172,7 @@ class OAuth2 extends AbstractController
             'access_token' => $params['facebook_token']
         ];
 
-        if (!empty($userData['user_email'])) {
+        if (isset($userData['user_email'])) {
             $extraData['user_email'] = $userData['user_email'];
         }
 
@@ -246,7 +242,7 @@ class OAuth2 extends AbstractController
         /** @var Tfa $tfaRepo */
         $tfaRepo = $this->repository('XF:Tfa');
         $providers = $tfaRepo->getAvailableProvidersForUser($user->user_id);
-        if (empty($providers)) {
+        if (count($providers) === 0) {
             return true;
         }
 
@@ -260,7 +256,7 @@ class OAuth2 extends AbstractController
         /** @var \XF\Service\User\Tfa $tfaService */
         $tfaService = $this->service('XF:User\Tfa', $user);
 
-        if ($params['tfa_trigger']) {
+        if ($params['tfa_trigger'] === true) {
             $tfaService->trigger($this->request(), $tfaProvider);
             throw $this->exception($this->message(\XF::phrase('changes_saved')));
         }

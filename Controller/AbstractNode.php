@@ -61,7 +61,7 @@ abstract class AbstractNode extends AbstractController
         $keyTotal = $this->getNamePlural() . '_total';
         $data = [$keyNodes => [], $keyTotal => 0];
 
-        if ($nodeIds && isset($nodeTypes[$this->getNodeTypeId()])) {
+        if (count($nodeIds) > 0 && isset($nodeTypes[$this->getNodeTypeId()])) {
             $entityIdentifier = $nodeTypes[$this->getNodeTypeId()]['entity_identifier'];
 
             $finder = $this->finder($entityIdentifier)
@@ -99,9 +99,18 @@ abstract class AbstractNode extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @return string
+     */
     abstract protected function getNodeTypeId();
 
+    /**
+     * @return string
+     */
     abstract protected function getNamePlural();
 
+    /**
+     * @return string
+     */
     abstract protected function getNameSingular();
 }

@@ -47,10 +47,11 @@ class ParentFinder
 
     /**
      * @param string $name
+     * @return void
      */
     public function with($name)
     {
-        if ($this->parentFinder !== null) {
+        if ($this->parentFinder) {
             $this->parentFinder->with($name);
         } else {
             $this->finder->with(sprintf('%s.%s', $this->relationKey, $name));
@@ -70,7 +71,7 @@ class ParentFinder
             }
 
             $finder = $finder->getParentFinder();
-            if ($finder === null) {
+            if (!$finder) {
                 break;
             }
         }

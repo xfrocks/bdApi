@@ -19,11 +19,14 @@ class ZzzTest extends ApiTestCase
         self::$accessToken = $token['access_token'];
     }
 
+    /**
+     * @return void
+     */
     public function testPostMultipartWithQueryParams()
     {
         $accessToken = self::$accessToken;
         $fileName = 'white.png';
-        $forum = $this->dataForum();
+        $forum = static::dataForum();
 
         static::httpRequest(
             'POST',
@@ -35,13 +38,16 @@ class ZzzTest extends ApiTestCase
             ]
         );
 
-        $this->assertEquals(200, static::httpLatestResponse()->getStatusCode());
+        static::assertEquals(200, static::httpLatestResponse()->getStatusCode());
     }
 
+    /**
+     * @return void
+     */
     public function testPostMultipartWithBodyParams()
     {
         $fileName = 'white.png';
-        $forum = $this->dataForum();
+        $forum = static::dataForum();
 
         static::httpRequest(
             'POST',
@@ -55,37 +61,47 @@ class ZzzTest extends ApiTestCase
             ]
         );
 
-        $this->assertEquals(200, static::httpLatestResponse()->getStatusCode());
+        static::assertEquals(200, static::httpLatestResponse()->getStatusCode());
     }
 
+    /**
+     * @return void
+     */
     public function testOttWithGuest()
     {
         $this->requestActiveOttToken(0);
     }
 
+    /**
+     * @return void
+     */
     public function testOttWithUser()
     {
-        $user = $this->dataUser();
+        $user = static::dataUser();
         $this->requestActiveOttToken($user['user_id']);
     }
 
+    /**
+     * @param int $userId
+     * @return void
+     */
     protected function requestActiveOttToken($userId)
     {
         $timestamp = time() + 5 * 30;
         $accessToken = ($userId > 0) ? self::$accessToken : '';
-        $client = $this->dataApiClient();
-        $forum = $this->dataForum();
+        $client = static::dataApiClient();
+        $forum = static::dataForum();
 
         $once = md5($userId . $timestamp . $accessToken . $client['client_secret']);
         $ott = sprintf('%d,%d,%s,%s', $userId, $timestamp, $once, $client['client_id']);
 
-        $json = $this->httpRequestJson('GET', 'threads', [
+        $json = static::httpRequestJson('GET', 'threads', [
             'query' => [
                 'oauth_token' => $ott,
                 'forum_id' => ($userId > 0) ? $forum['node_id'] : 0
             ]
         ]);
 
-        $this->assertArrayHasKey('threads', $json);
+        static::assertArrayHasKey('threads', $json);
     }
 }

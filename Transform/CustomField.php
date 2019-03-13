@@ -20,7 +20,7 @@ class CustomField extends AbstractHandler
     {
         /** @var Definition|null $definition */
         $definition = $context->data('definition');
-        if ($definition === null) {
+        if (!$definition) {
             return null;
         }
 
@@ -38,8 +38,8 @@ class CustomField extends AbstractHandler
                 }
 
                 $choices = [];
-                foreach ($definition['field_choices'] as $key => $value) {
-                    $choices[] = ['key' => $key, 'value' => $value];
+                foreach ($definition['field_choices'] as $choiceKey => $choiceValue) {
+                    $choices[] = ['key' => $choiceKey, 'value' => $choiceValue];
                 }
 
                 return $choices;
@@ -74,7 +74,7 @@ class CustomField extends AbstractHandler
                 $choiceKeys = is_array($valueData) ? $valueData : [strval($valueData)];
                 $values = [];
                 foreach ($choiceKeys as $choiceKey) {
-                    if (empty($choices[$choiceKey])) {
+                    if (!isset($choices[$choiceKey])) {
                         continue;
                     }
 

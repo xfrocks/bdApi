@@ -23,23 +23,23 @@ class Login extends AbstractPlugin
         $params = $apiController->params()
             ->define('redirect_uri', 'str', 'URI to redirect afterwards');
 
-        if (empty($params['redirect_uri'])) {
+        if ($params['redirect_uri'] === '') {
             return $this->noPermission();
         }
 
         $session = $apiController->session();
         $token = $session->getToken();
-        if (empty($token)) {
+        if (!$token) {
             return $this->noPermission();
         }
 
         $client = $token->Client;
-        if (empty($client) || !$client->isValidRedirectUri($params['redirect_uri'])) {
+        if (!$client || !$client->isValidRedirectUri($params['redirect_uri'])) {
             return $this->noPermission();
         }
 
         $userId = \XF::visitor()->user_id;
-        if (empty($userId)) {
+        if ($userId < 1) {
             return $this->noPermission();
         }
 

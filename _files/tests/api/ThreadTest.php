@@ -19,11 +19,14 @@ class ThreadTest extends ApiTestCase
         self::$accessTokenBypassFloodCheck = $token['access_token'];
     }
 
+    /**
+     * @return void
+     */
     public function testGetIndex()
     {
-        $forum = $this->dataForum();
+        $forum = static::dataForum();
 
-        $jsonThreads = $this->httpRequestJson(
+        $jsonThreads = static::httpRequestJson(
             'GET',
             'threads',
             [
@@ -33,9 +36,9 @@ class ThreadTest extends ApiTestCase
                 ]
             ]
         );
-        $this->assertArrayHasKey('threads', $jsonThreads);
+        static::assertArrayHasKey('threads', $jsonThreads);
 
-        $thread = $this->dataThread();
+        $thread = static::dataThread();
         $excludeFields = [
             '',
             'first_post',
@@ -43,7 +46,7 @@ class ThreadTest extends ApiTestCase
         ];
 
         foreach ($excludeFields as $excludeField) {
-            $jsonThread = $this->httpRequestJson(
+            $jsonThread = static::httpRequestJson(
                 'GET',
                 'threads/' . $thread['thread_id'],
                 [
@@ -54,16 +57,19 @@ class ThreadTest extends ApiTestCase
                 ]
             );
 
-            $this->assertArrayHasKey('thread', $jsonThread);
-            if ($excludeField) {
-                $this->assertArrayNotHasKey($excludeField, $jsonThread);
+            static::assertArrayHasKey('thread', $jsonThread);
+            if ($excludeField !== '') {
+                static::assertArrayNotHasKey($excludeField, $jsonThread);
             }
         }
     }
 
+    /**
+     * @return void
+     */
     public function testPostIndex()
     {
-        $forum = $this->dataForum();
+        $forum = static::dataForum();
 
         $json = static::httpRequestJson(
             'POST',
@@ -78,15 +84,18 @@ class ThreadTest extends ApiTestCase
             ]
         );
 
-        $this->assertArrayHasKey('thread', $json);
+        static::assertArrayHasKey('thread', $json);
     }
 
+    /**
+     * @return void
+     */
     public function testPutIndex()
     {
-        $thread = $this->dataThread();
-        $token = $this::postPassword($this->dataApiClient(), $this->dataUser());
+        $thread = static::dataThread();
+        $token = $this::postPassword(static::dataApiClient(), static::dataUser());
 
-        $json = $this->httpRequestJson(
+        $json = static::httpRequestJson(
             'PUT',
             'threads/' . $thread['thread_id'],
             [
@@ -97,12 +106,13 @@ class ThreadTest extends ApiTestCase
             ]
         );
 
-        $jsonThreadId = $this->assertArrayHasKeyPath($json, 'thread', 'thread_id');
-        $this->assertEquals($thread['thread_id'], $jsonThreadId);
+        $jsonThreadId = static::assertArrayHasKeyPath($json, 'thread', 'thread_id');
+        static::assertEquals($thread['thread_id'], $jsonThreadId);
     }
 
     /** @noinspection PhpUnusedPrivateMethodInspection */
     /**
+     * @return void
      * @see ThreadAttachmentTest::postThreadsAttachments()
      */
     private function _testPostAttachments()

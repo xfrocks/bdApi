@@ -63,7 +63,6 @@ class ConversationMessage extends AbstractController
 
         $this->params()->getTransformContext()->onTransformEntitiesCallbacks[] = function ($context, $entities) use ($conversation) {
             $maxReadDate = 0;
-            /** @var \XF\Entity\ConversationMessage $entity */
             foreach ($entities as $entity) {
                 if (!$entity instanceof \XF\Entity\ConversationMessage) {
                     continue;
@@ -200,6 +199,10 @@ class ConversationMessage extends AbstractController
         return $this->actionSingle($message->message_id);
     }
 
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\AbstractReply
+     */
     public function actionDeleteIndex(ParameterBag $params)
     {
         return $this->noPermission();
@@ -245,7 +248,7 @@ class ConversationMessage extends AbstractController
             ->define('message_id', 'uint', 'id of the target message')
             ->defineAttachmentHash();
 
-        if (empty($params['conversation_id']) && empty($params['message_id'])) {
+        if ($params['conversation_id'] === '' && $params['message_id'] === '') {
             return $this->error(\XF::phrase('bdapi_slash_conversation_messages_attachments_requires_ids'), 400);
         }
 
@@ -414,6 +417,7 @@ class ConversationMessage extends AbstractController
     /**
      * @param \XF\Finder\ConversationMessage $finder
      * @param Params $params
+     * @return void
      */
     protected function applyMessagesFilters($finder, Params $params)
     {

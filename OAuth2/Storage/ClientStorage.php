@@ -10,19 +10,17 @@ class ClientStorage extends AbstractStorage implements ClientInterface
 {
     public function get($clientId, $clientSecret = null, $redirectUri = null, $grantType = null)
     {
-        /** @var \Xfrocks\Api\Entity\Client $xfClient */
+        /** @var \Xfrocks\Api\Entity\Client|null $xfClient */
         $xfClient = $this->doXfEntityFind('Xfrocks\Api:Client', 'client_id', $clientId);
-        if (empty($xfClient)) {
+        if (!$xfClient) {
             return null;
         }
 
-        if ($clientSecret !== null) {
-            if ($xfClient->client_secret !== $clientSecret) {
-                return null;
-            }
+        if ($clientSecret && $xfClient->client_secret !== $clientSecret) {
+            return null;
         }
 
-        if ($redirectUri !== null && !$xfClient->isValidRedirectUri($redirectUri)) {
+        if ($redirectUri && !$xfClient->isValidRedirectUri($redirectUri)) {
             return null;
         }
 
@@ -34,7 +32,7 @@ class ClientStorage extends AbstractStorage implements ClientInterface
         /** @var SessionStorage $sessionStorage */
         $sessionStorage = $this->server->getSessionStorage();
         $sessionCache = $sessionStorage->getInMemoryCache($session->getId());
-        if (empty($sessionCache[SessionStorage::SESSION_KEY_CLIENT_ID])) {
+        if (!isset($sessionCache[SessionStorage::SESSION_KEY_CLIENT_ID])) {
             return null;
         }
 

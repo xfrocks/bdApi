@@ -10,8 +10,16 @@ use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 class Json extends XFCP_Json
 {
+    /**
+     * @var int
+     */
     private $prepareJsonEncodeDepth = 0;
 
+    /**
+     * @param mixed $content
+     * @param AbstractReply $reply
+     * @return string
+     */
     public function postFilter($content, AbstractReply $reply)
     {
         Cors::addHeaders($this->response);
@@ -19,6 +27,7 @@ class Json extends XFCP_Json
         $json = parent::postFilter($content, $reply);
 
         if (\XF::$debugMode) {
+            // TODO: find a more efficient way to do this
             $json = json_encode(json_decode($json), JSON_PRETTY_PRINT);
 
             $app = \XF::app();
@@ -44,6 +53,10 @@ class Json extends XFCP_Json
         return $json;
     }
 
+    /**
+     * @param array $errors
+     * @return array
+     */
     public function renderErrors(array $errors)
     {
         return [
@@ -52,6 +65,12 @@ class Json extends XFCP_Json
         ];
     }
 
+    /**
+     * @param mixed $url
+     * @param mixed $type
+     * @param mixed $message
+     * @return array
+     */
     public function renderRedirect($url, $type, $message = '')
     {
         /** @var Html $htmlRenderer */
@@ -61,6 +80,10 @@ class Json extends XFCP_Json
         return parent::renderRedirect($url, $type, $message);
     }
 
+    /**
+     * @param array $content
+     * @return array
+     */
     protected function addDefaultJsonParams(array $content)
     {
         $visitor = \XF::visitor();
@@ -81,7 +104,7 @@ class Json extends XFCP_Json
                 /** @var Session $session */
                 $session = $container['session'];
                 $token = $session->getToken();
-                if (!empty($token)) {
+                if ($token) {
                     $content['system_info']['client_id'] = $token->client_id;
                     $content['system_info']['token_text'] = $token->token_text;
                     $content['system_info']['expire_date'] = $token->expire_date;
@@ -93,6 +116,11 @@ class Json extends XFCP_Json
         return $content;
     }
 
+    /**
+     * @param mixed $value
+     * @return array
+     * @throws \Throwable
+     */
     protected function prepareJsonEncode($value)
     {
         $this->prepareJsonEncodeDepth++;
@@ -132,7 +160,7 @@ class Json extends XFCP_Json
 
         $this->prepareJsonEncodeDepth--;
 
-        if ($throwable !== null) {
+        if ($throwable) {
             throw $throwable;
         }
 

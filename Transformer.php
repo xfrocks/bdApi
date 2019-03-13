@@ -211,10 +211,10 @@ class Transformer
         $finder = $handler->onTransformFinder($context, $finder);
 
         $entities = $finder->fetch();
-        if ($postFetchCallback !== null) {
+        if ($postFetchCallback) {
             $entities = call_user_func($postFetchCallback, $entities);
         }
-        if (is_object($entities) && $entities instanceof \XF\Mvc\Entity\ArrayCollection) {
+        if ($entities instanceof \XF\Mvc\Entity\ArrayCollection) {
             $entities = $entities->toArray();
         }
         $entities = $handler->onTransformEntities($context, $entities);
@@ -235,7 +235,7 @@ class Transformer
 
     /**
      * @param TransformContext $context
-     * @param array $tags
+     * @param mixed $tags
      * @return array
      */
     public function transformTags($context, $tags)
@@ -258,6 +258,7 @@ class Transformer
      * @param string $key
      * @param array|null $values
      * @param array $data
+     * @return void
      */
     protected function addArrayToData($context, $key, $values, array &$data)
     {
@@ -281,7 +282,7 @@ class Transformer
     {
         $data = [];
         $handler = $context->getHandler();
-        if ($handler === null) {
+        if (!$handler) {
             return $data;
         }
 

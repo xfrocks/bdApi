@@ -10,6 +10,9 @@ use Xfrocks\Api\OAuth2\Server;
 
 class Account extends XFCP_Account
 {
+    /**
+     * @return \XF\Mvc\Reply\View
+     */
     public function actionApi()
     {
         $visitor = \XF::visitor();
@@ -27,6 +30,9 @@ class Account extends XFCP_Account
         return $this->addAccountWrapperParams($view, 'api');
     }
 
+    /**
+     * @return \XF\Mvc\Reply\View
+     */
     public function actionApiClientAdd()
     {
         $viewParams = [
@@ -87,7 +93,7 @@ class Account extends XFCP_Account
 
         $clientId = $this->filter('client_id', 'str');
 
-        if (!empty($clientId)) {
+        if ($clientId !== '') {
             $client = $this->assertEditableApiClient($clientId);
         } else {
             /** @var Client $client */
@@ -138,12 +144,12 @@ class Account extends XFCP_Account
 
         $clientId = $this->filter('client_id', 'str');
         $clientIsAuto = false;
-        if (empty($clientId)) {
-            /** @var Client $visitorClient */
+        if ($clientId === '') {
+            /** @var Client|null $visitorClient */
             $visitorClient = $this->getApiClientRepo()->findUserClients(\XF::visitor()->user_id)
                 ->order(Finder::ORDER_RANDOM)
                 ->fetchOne();
-            if (!empty($visitorClient)) {
+            if ($visitorClient) {
                 $clientIsAuto = true;
                 $apiServer->setRequestQuery('client_id', $visitorClient->client_id);
                 $apiServer->setRequestQuery('redirect_uri', $visitorClient->redirect_uri);

@@ -1,6 +1,10 @@
 includes:
 	- /var/www/html/src/addons/DevHelper/PHPStan/phpstan.neon
 
+parameters:
+    ignoreErrors:
+        - '#^Variable static property access on Xfrocks\\Api\\Listener.$#'
+
 services:
 	-
 		class: dev\PHPStan\Reflection\PropertiesClassReflectionExtension

@@ -80,10 +80,12 @@ class UserAlert extends AbstractHandler
 
     public function onTransformEntities(TransformContext $context, $entities)
     {
+        /** @var \XF\Entity\UserAlert[] $userAlerts */
+        $userAlerts = $entities;
+
         /** @var \XF\Repository\UserAlert $userAlertRepo */
         $userAlertRepo = $this->app->repository('XF:UserAlert');
-        /** @var \XF\Entity\UserAlert[] $entities */
-        $userAlertRepo->addContentToAlerts($entities);
+        $userAlertRepo->addContentToAlerts($userAlerts);
 
         return parent::onTransformEntities($context, $entities);
     }

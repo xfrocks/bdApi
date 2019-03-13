@@ -5,14 +5,14 @@ namespace Xfrocks\Api\Option;
 class ColumnOption extends \XF\Option\AbstractOption
 {
     /**
-     * @param mixed $value
+     * @param int $value
      * @param \XF\Entity\Option $option
      * @return bool
      * @throws \XF\PrintableException
      */
     public static function verifyOnOffOption(&$value, $option)
     {
-        if (empty($value)) {
+        if ($value === 0) {
             // no verify when disable the option
             return true;
         }
@@ -44,7 +44,7 @@ class ColumnOption extends \XF\Option\AbstractOption
     }
 
     /**
-     * @param mixed $value
+     * @param string $value
      * @param \XF\Entity\Option $option
      * @return bool
      * @throws \XF\PrintableException
@@ -66,7 +66,7 @@ class ColumnOption extends \XF\Option\AbstractOption
                 throw new \XF\PrintableException(sprintf('Unsupported option %s', $subscriptionTopicType));
         }
 
-        if (!empty($value) && !self::checkColumnExists($table, $value, $option)) {
+        if (strlen($value) > 0 && !self::checkColumnExists($table, $value, $option)) {
             return false;
         }
 

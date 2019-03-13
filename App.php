@@ -6,11 +6,21 @@ use Xfrocks\Api\OAuth2\Server;
 
 class App extends \XF\Pub\App
 {
+    /**
+     * @param mixed $action
+     * @param array $params
+     * @param mixed $responseType
+     * @return \XF\Mvc\RouteMatch
+     */
     public function getErrorRoute($action, array $params = [], $responseType = 'html')
     {
         return new \XF\Mvc\RouteMatch('Xfrocks:Error', $action, $params, $responseType);
     }
 
+    /**
+     * @param \XF\Mvc\Reply\AbstractReply|null $reply
+     * @return array
+     */
     public function getGlobalTemplateData(\XF\Mvc\Reply\AbstractReply $reply = null)
     {
         $data = parent::getGlobalTemplateData($reply);
@@ -20,6 +30,9 @@ class App extends \XF\Pub\App
         return $data;
     }
 
+    /**
+     * @return void
+     */
     public function initializeExtra()
     {
         parent::initializeExtra();
@@ -97,6 +110,10 @@ class App extends \XF\Pub\App
         });
     }
 
+    /**
+     * @param \XF\Session\Session $session
+     * @return void
+     */
     protected function onSessionCreation(\XF\Session\Session $session)
     {
         /** @var Server $apiServer */
@@ -108,11 +125,17 @@ class App extends \XF\Pub\App
         $apiSession->setToken($accessToken ? $accessToken->getXfToken() : null);
     }
 
+    /**
+     * @return void
+     */
     protected function updateModeratorCaches()
     {
         // no op
     }
 
+    /**
+     * @return void
+     */
     protected function updateUserCaches()
     {
         // no op

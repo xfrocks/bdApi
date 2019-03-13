@@ -44,31 +44,53 @@ class Error extends AbstractController
         return $this->pluginError()->actionAddOnUpgrade();
     }
 
+    /**
+     * @return void
+     */
     public function assertIpNotBanned()
     {
         // no op
     }
 
+    /**
+     * @return void
+     */
     public function assertNotBanned()
     {
         // no op
     }
 
+    /**
+     * @param mixed $action
+     * @return void
+     */
     public function assertViewingPermissions($action)
     {
         // no op
     }
 
+    /**
+     * @param mixed $action
+     * @return void
+     */
     public function assertCorrectVersion($action)
     {
         // no op
     }
 
+    /**
+     * @param mixed $action
+     * @return void
+     */
     public function assertBoardActive($action)
     {
         // no op
     }
 
+    /**
+     * @param mixed $action
+     * @return void
+     */
     public function assertTfaRequirement($action)
     {
         // no op

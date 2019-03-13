@@ -19,16 +19,19 @@ class ThreadAttachmentTest extends ApiTestCase
         self::$accessTokenBypassFloodCheck = $token['access_token'];
     }
 
+    /**
+     * @return void
+     */
     public function testUploadForExistingThread()
     {
         $thread = $this->postThreads(__METHOD__);
-        $threadId = $this->assertArrayHasKeyPath($thread, 'thread_id');
+        $threadId = static::assertArrayHasKeyPath($thread, 'thread_id');
 
         $hash = strval(microtime(true));
         $attachment = $this->postThreadsAttachments($hash);
-        $attachmentId = $this->assertArrayHasKeyPath($attachment, 'attachment_id');
+        $attachmentId = static::assertArrayHasKeyPath($attachment, 'attachment_id');
 
-        $json = $this->httpRequestJson(
+        $json = static::httpRequestJson(
             'PUT',
             "threads/{$threadId}",
             [
@@ -39,55 +42,66 @@ class ThreadAttachmentTest extends ApiTestCase
                 ],
             ]
         );
-        $thread = $this->assertArrayHasKeyPath($json, 'thread');
-        $jsonThreadId = $this->assertArrayHasKeyPath($thread, 'thread_id');
-        $this->assertEquals($threadId, $jsonThreadId);
-        $postAttachments = $this->assertArrayHasKeyPath($thread, 'first_post', 'attachments');
+        $thread = static::assertArrayHasKeyPath($json, 'thread');
+        $jsonThreadId = static::assertArrayHasKeyPath($thread, 'thread_id');
+        static::assertEquals($threadId, $jsonThreadId);
+        $postAttachments = static::assertArrayHasKeyPath($thread, 'first_post', 'attachments');
 
         $attachmentFound = false;
         foreach ($postAttachments as $postAttachment) {
-            $postAttachmentId = $this->assertArrayHasKeyPath($postAttachment, 'attachment_id');
+            $postAttachmentId = static::assertArrayHasKeyPath($postAttachment, 'attachment_id');
             if ($postAttachmentId === $attachmentId) {
                 $attachmentFound = true;
             }
         }
-        $this->assertTrue($attachmentFound);
+        static::assertTrue($attachmentFound);
     }
 
+    /**
+     * @return void
+     */
     public function testDeleteNewlyUploadedAttachment()
     {
         $attachment = $this->postThreadsAttachments();
-        $dataLink = $this->assertArrayHasKeyPath($attachment, 'links', 'data');
+        $dataLink = static::assertArrayHasKeyPath($attachment, 'links', 'data');
 
-        $json2 = $this->httpRequestJson('DELETE', $dataLink);
-        $status = $this->assertArrayHasKeyPath($json2, 'status');
-        $this->assertEquals('ok', $status);
+        $json2 = static::httpRequestJson('DELETE', $dataLink);
+        $status = static::assertArrayHasKeyPath($json2, 'status');
+        static::assertEquals('ok', $status);
     }
 
+    /**
+     * @return void
+     */
     public function testDeleteAssociatedAttachment()
     {
         $hash = strval(microtime(true));
         $attachment = $this->postThreadsAttachments($hash);
 
         $thread = $this->postThreads(__METHOD__, $hash);
-        $threadAttachments = $this->assertArrayHasKeyPath($thread, 'first_post', 'attachments');
-        $this->assertCount(1, $threadAttachments);
+        $threadAttachments = static::assertArrayHasKeyPath($thread, 'first_post', 'attachments');
+        static::assertCount(1, $threadAttachments);
         $threadAttachment = reset($threadAttachments);
-        $this->assertEquals(
+        static::assertEquals(
             $attachment['attachment_id'],
-            $this->assertArrayHasKeyPath($threadAttachment, 'attachment_id')
+            static::assertArrayHasKeyPath($threadAttachment, 'attachment_id')
         );
-        $dataLink = $this->assertArrayHasKeyPath($threadAttachment, 'links', 'data');
+        $dataLink = static::assertArrayHasKeyPath($threadAttachment, 'links', 'data');
 
-        $json2 = $this->httpRequestJson('DELETE', $dataLink);
-        $status = $this->assertArrayHasKeyPath($json2, 'status');
-        $this->assertEquals('ok', $status);
+        $json2 = static::httpRequestJson('DELETE', $dataLink);
+        $status = static::assertArrayHasKeyPath($json2, 'status');
+        static::assertEquals('ok', $status);
     }
 
+    /**
+     * @param string $method
+     * @param string $hash
+     * @return mixed
+     */
     private function postThreads($method, $hash = '')
     {
-        $forum = $this->dataForum();
-        $json = $this->httpRequestJson(
+        $forum = static::dataForum();
+        $json = static::httpRequestJson(
             'POST',
             'threads',
             [
@@ -101,16 +115,20 @@ class ThreadAttachmentTest extends ApiTestCase
             ]
         );
 
-        return $this->assertArrayHasKeyPath($json, 'thread');
+        return static::assertArrayHasKeyPath($json, 'thread');
     }
 
+    /**
+     * @param string $hash
+     * @return mixed
+     */
     private function postThreadsAttachments($hash = '')
     {
         $accessToken = self::$accessTokenBypassFloodCheck;
         $fileName = 'white.png';
-        $forum = $this->dataForum();
+        $forum = static::dataForum();
 
-        $json = $this->httpRequestJson(
+        $json = static::httpRequestJson(
             'POST',
             "threads/attachments?attachment_hash={$hash}&forum_id={$forum['node_id']}&oauth_token={$accessToken}",
             [
@@ -120,6 +138,6 @@ class ThreadAttachmentTest extends ApiTestCase
             ]
         );
 
-        return $this->assertArrayHasKeyPath($json, 'attachment');
+        return static::assertArrayHasKeyPath($json, 'attachment');
     }
 }

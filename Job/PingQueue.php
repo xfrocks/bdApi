@@ -6,16 +6,26 @@ use XF\Job\AbstractJob;
 
 class PingQueue extends AbstractJob
 {
+    /**
+     * @return bool
+     */
     public function canTriggerByChoice()
     {
         return false;
     }
 
+    /**
+     * @return bool
+     */
     public function canCancel()
     {
         return false;
     }
 
+    /**
+     * @param mixed $maxRunTime
+     * @return \XF\Job\JobResult
+     */
     public function run($maxRunTime)
     {
         /** @var \Xfrocks\Api\Repository\PingQueue $pingQueueRepo */
@@ -31,6 +41,9 @@ class PingQueue extends AbstractJob
         return $this->complete();
     }
 
+    /**
+     * @return string
+     */
     public function getStatusMessage()
     {
         return '';

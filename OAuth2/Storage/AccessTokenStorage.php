@@ -12,16 +12,21 @@ use Xfrocks\Api\OAuth2\Entity\AccessTokenHybrid;
 
 class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
 {
+    /**
+     * @var array
+     */
     protected $fakeTokenTexts = [];
 
     /**
-     * @inheritdoc
+     * @param AccessTokenEntity $token
+     * @param ScopeEntity $scope
+     * @return void
      * @throws \XF\PrintableException
      */
     public function associateScope(AccessTokenEntity $token, ScopeEntity $scope)
     {
         $hybrid = $this->getHybrid($token);
-        if (empty($hybrid)) {
+        if (!$hybrid) {
             throw new \RuntimeException('Access token cloud not be found ' . $token->getId());
         }
 
@@ -32,7 +37,10 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
     }
 
     /**
-     * @inheritdoc
+     * @param string $token
+     * @param int $expireTime
+     * @param int|string $sessionId
+     * @return void
      * @throws \XF\PrintableException
      */
     public function create($token, $expireTime, $sessionId)
@@ -55,7 +63,8 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
     }
 
     /**
-     * @inheritdoc
+     * @param AccessTokenEntity $token
+     * @return void
      * @throws \XF\PrintableException
      */
     public function delete(AccessTokenEntity $token)
@@ -65,13 +74,16 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
         }
 
         $hybrid = $this->getHybrid($token);
-        if (empty($hybrid)) {
+        if (!$hybrid) {
             return;
         }
 
         $this->doXfEntityDelete($hybrid->getXfToken());
     }
 
+    /**
+     * @return string
+     */
     public function generateFakeTokenText()
     {
         $tokenText = SecureKey::generate();
@@ -83,9 +95,9 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
 
     public function get($token)
     {
-        /** @var Token $xfToken */
+        /** @var Token|null $xfToken */
         $xfToken = $this->doXfEntityFind('Xfrocks\Api:Token', 'token_text', $token);
-        if (empty($xfToken)) {
+        if (!$xfToken) {
             return null;
         }
 

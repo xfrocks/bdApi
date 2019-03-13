@@ -64,6 +64,9 @@ abstract class AbstractHandler
         $this->type = $type;
     }
 
+    /**
+     * @return void
+     */
     public function addAttachmentsToQueuedEntities()
     {
         /** @var \XF\Repository\Attachment $attachmentRepo */
@@ -173,6 +176,7 @@ abstract class AbstractHandler
     /**
      * @param TransformContext $context
      * @param array $data
+     * @return void
      */
     public function onTransformed(TransformContext $context, array &$data)
     {
@@ -211,6 +215,7 @@ abstract class AbstractHandler
      * @param Entity[]|AbstractCollection $entities
      * @param string|null $contextKey
      * @param string $relationKey
+     * @return void
      */
     protected function callOnTransformEntitiesForRelation(
         TransformContext $context,
@@ -223,16 +228,16 @@ abstract class AbstractHandler
                 return;
             }
 
-            $entity = $entities->first();
+            $firstEntity = $entities->first();
         } else {
-            $entity = reset($entities);
+            $firstEntity = reset($entities);
         }
 
-        if ($entity === false) {
+        if ($firstEntity === false) {
             return;
         }
 
-        $entityStructure = $entity->structure();
+        $entityStructure = $firstEntity->structure();
         if (!isset($entityStructure->relations[$relationKey])) {
             return;
         }
@@ -272,6 +277,7 @@ abstract class AbstractHandler
      * @param string|null $contextKey
      * @param string $relationKey
      * @param string|null $shortName
+     * @return void
      */
     protected function callOnTransformFinderForRelation(
         TransformContext $context,
@@ -327,7 +333,7 @@ abstract class AbstractHandler
         /** @var \XF\Repository\Attachment $attachmentRepo */
         $attachmentRepo = $this->app->repository('XF:Attachment');
         $attachmentHandler = $attachmentRepo->getAttachmentHandler($contentType);
-        if ($attachmentHandler === null) {
+        if (!$attachmentHandler) {
             return false;
         }
 
@@ -341,9 +347,10 @@ abstract class AbstractHandler
      */
     protected function checkSessionScope($scope)
     {
-        /** @var Session $session */
+        /** @var mixed $session */
         $session = $this->app->session();
-        return is_callable([$session, 'hasScope']) && $session->hasScope($scope);
+        $callable = [$session, 'hasScope'];
+        return is_callable($callable) && boolval(call_user_func($callable, $scope));
     }
 
     /**
@@ -351,6 +358,7 @@ abstract class AbstractHandler
      * @param string $contentType
      * @param string $countKey
      * @param string $relationKey
+     * @return void
      */
     protected function enqueueEntitiesToAddAttachmentsTo(
         $entities,
