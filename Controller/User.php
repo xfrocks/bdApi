@@ -152,16 +152,18 @@ class User extends AbstractController
 
         $registration->skipEmailConfirmation($skipEmailConfirmation);
 
-        $visitor = \XF::visitor();
-        if ($visitor->hasAdminPermission('user')) {
-            $input['user_state'] = 'valid';
-        }
-
         $registration->setFromInput($input);
         $registration->checkForSpam();
 
         if (!$registration->validate($errors)) {
             return $this->error($errors);
+        }
+
+        $visitor = \XF::visitor();
+        if ($visitor->hasAdminPermission('user')) {
+            $registration->getUser()->set('user_state', 'valid', [
+                'forceSet' => true
+            ]);
         }
 
         /** @var \XF\Entity\User $user */
