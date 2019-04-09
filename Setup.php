@@ -226,9 +226,9 @@ class Setup extends AbstractSetup
 
         $tables['xf_bdapi_subscription'] = function (Create $table) {
             $table->addColumn('subscription_id', 'int')->autoIncrement()->primaryKey();
-            $table->addColumn('client_id', 'varchar', 255);
+            $table->addColumn('client_id', 'varbinary')->length(255);
             $table->addColumn('callback', 'text');
-            $table->addColumn('topic', 'varchar', 255);
+            $table->addColumn('topic', 'varbinary')->length(255);
             $table->addColumn('subscribe_date', 'int')->unsigned();
             $table->addColumn('expire_date', 'int')->unsigned()->setDefault(0);
 
@@ -238,11 +238,11 @@ class Setup extends AbstractSetup
 
         $tables['xf_bdapi_log'] = function (Create $table) {
             $table->addColumn('log_id', 'int')->autoIncrement()->primaryKey();
-            $table->addColumn('client_id', 'varchar', 255);
+            $table->addColumn('client_id', 'varbinary')->length(255);
             $table->addColumn('user_id', 'int')->unsigned();
-            $table->addColumn('ip_address', 'varchar', 50);
+            $table->addColumn('ip_address', 'varbinary')->length(50);
             $table->addColumn('request_date', 'int')->unsigned();
-            $table->addColumn('request_method', 'varchar', 10);
+            $table->addColumn('request_method', 'varbinary')->length(10);
             $table->addColumn('request_uri', 'text');
             $table->addColumn('request_data', 'mediumblob');
             $table->addColumn('response_code', 'int')->unsigned();
@@ -251,7 +251,7 @@ class Setup extends AbstractSetup
 
         $tables['xf_bdapi_ping_queue'] = function (Create $table) {
             $table->addColumn('ping_queue_id', 'int')->autoIncrement()->primaryKey();
-            $table->addColumn('callback_md5', 'varchar', 32);
+            $table->addColumn('callback_md5', 'varbinary')->length(32);
             $table->addColumn('callback', 'text');
             $table->addColumn('object_type', 'varbinary', 25);
             $table->addColumn('data', 'mediumblob');
