@@ -416,36 +416,38 @@ class bdApi_Model_Subscription extends XenForo_Model
         ), $extraParams);
         $client->setParameterGet($requestData);
 
-        $response = $client->request('GET');
-        $body = trim($response->getBody());
-
-        if (XenForo_Application::debugMode()) {
-            /* @var $logModel bdApi_Model_Log */
-            $logModel = $this->getModelFromCache('bdApi_Model_Log');
-
-            $logModel->logRequest(
-                'GET',
-                $callback,
-                $requestData,
-                $response->getStatus(),
-                array('message' => $response->getBody()),
-                array(
-                    'client_id' => '',
-                    'user_id' => 0,
-                    'ip_address' => '127.0.0.1',
-                )
-            );
+        $body = '';
+        $status = 0;
+        $error = null;
+        try {
+            $response = $client->request('GET');
+            $body = trim($response->getBody());
+            $status = $response->getStatus();
+        } catch (Zend_Http_Client_Exception $e) {
+            $error = $e->getMessage();
         }
 
+        $verified = true;
         if ($body !== $challenge) {
-            return false;
+            $verified = false;
+        }
+        if ($status < 200 || $status > 299) {
+            $verified = false;
         }
 
-        if ($response->getStatus() < 200 OR $response->getStatus() > 299) {
-            return false;
-        }
+        /* @var $logModel bdApi_Model_Log */
+        $logModel = $this->getModelFromCache('bdApi_Model_Log');
 
-        return true;
+        $logModel->logRequest(
+            'GET',
+            $callback,
+            $requestData,
+            $status,
+            array('body' => $body, 'error' => $error, 'verified' => $verified),
+            array('ip_address' => '127.0.0.1')
+        );
+
+        return $verified;
     }
 
     public function deleteSubscriptionsForTopic($type, $id)
