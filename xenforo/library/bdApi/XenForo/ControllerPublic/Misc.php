@@ -27,7 +27,12 @@ class bdApi_XenForo_ControllerPublic_Misc extends XFCP_bdApi_XenForo_ControllerP
         $viewParams['jQuerySourceLocal'] = XenForo_Dependencies_Public::getJquerySource(true);
         $viewParams['javaScriptSource'] = XenForo_Application::$javaScriptUrl;
 
-        return $this->responseView('bdApi_ViewPublic_Misc_Api_Chr', 'bdapi_misc_chr', $viewParams);
+        return $this->responseView(
+            'bdApi_ViewPublic_Misc_Api_Chr',
+            'bdapi_misc_chr',
+            $viewParams,
+            array('containerTemplate' => 'bdapi_misc_chr_container')
+        );
     }
 
     public function actionApiData()

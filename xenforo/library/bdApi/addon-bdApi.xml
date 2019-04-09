@@ -1641,7 +1641,16 @@ step=3600</edit_format_params>
 
 
 <xen:include template="helper_login_form" />]]></template>
-    <template title="bdapi_misc_chr" version_id="1060201" version_string="1.6.2"><![CDATA[<!doctype html>
+    <template title="bdapi_misc_chr" version_id="1060270" version_string="1.6.2"><![CDATA[<div id="content" class="bdapi_misc_chr" style="margin: 0; padding: 0">
+	<div class="pageContent" style="margin: 0; padding: 0">
+		<div class="baseHtml" style="margin: 0; padding: 0">{xen:raw $html}</div>
+	</div>
+</div>
+
+<xen:edithint template="bdapi_misc_chr_container" />
+<xen:edithint template="PAGE_CONTAINER" />
+]]></template>
+    <template title="bdapi_misc_chr_container" version_id="1060270" version_string="1.6.2"><![CDATA[<!doctype html>
 <html lang="{$visitorLanguage.language_code}" dir="{$visitorLanguage.text_direction}" class="Public NoJs NoSidebar Responsive ApiChr">
 <head>
 	<meta charset="utf-8" />
@@ -1664,15 +1673,10 @@ step=3600</edit_format_params>
 	<xen:if is="{$head}"><xen:foreach loop="$head" value="$headElement">{xen:raw $headElement}</xen:foreach></xen:if>
 </head>
 <body>
-	<div id="content" class="bdapi_misc_chr">
-		<div class="pageContent">
-			<div class="baseHtml">{xen:raw $html}</div>
-		</div>
-	</div>
+	{xen:raw $contents}
+	<xen:include template="page_container_js_body" />
 </body>
-</html>
-
-<xen:edithint template="PAGE_CONTAINER" />]]></template>
+</html>]]></template>
     <template title="bdapi_navigation_visitor_tab" version_id="67" version_string="1.4.3-BETA"><![CDATA[<xen:if is="{xen:property bdApi_linkNavVisitor} && {xen:helper api_visitorHasPermission, clientNew}">
 	<li><a href="{xen:link account/api}">{xen:phrase bdapi_clients}</a></li>
 </xen:if>]]></template>
