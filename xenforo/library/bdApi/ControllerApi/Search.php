@@ -376,9 +376,9 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
 
             $validTags = $tagModel->getTags($tagList, $notFound);
             if ($notFound) {
-                return $this->responseError(new XenForo_Phrase(
-                    'following_tags_not_found_x',
-                    array('tags' => implode(', ', $notFound))
+                throw $this->responseException($this->responseError(
+                    new XenForo_Phrase('following_tags_not_found_x', array('tags' => implode(', ', $notFound))),
+                    404
                 ));
             }
 
