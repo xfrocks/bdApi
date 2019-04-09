@@ -78,7 +78,7 @@ class bdApi_ControllerApi_Index extends bdApi_ControllerApi_Abstract
         $modules = array(
             'forum' => 2019012901,
             'oauth2' => 2016030902,
-            'subscription' => 2014092301,
+            'subscription' => 2019040901,
         );
 
         $session = bdApi_Data_Helper_Core::safeGetSession();

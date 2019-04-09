@@ -2679,7 +2679,9 @@ Required scopes:
  * `post`
 
 ## Subscriptions
-Clients can subscribe to certain events to receive real time ping when data is changed within the system. The subscription system uses the [PubSubHubbub protocol](https://code.google.com/p/pubsubhubbub/) to communicate with hubs and subscribers. Since subscription-2014081001.
+Clients can subscribe to certain events to receive real time ping when data is changed within the system.
+The subscription system uses the [WebSub protocol](https://github.com/w3c/websub) to communicate with hubs and subscribers.
+Since subscription-2014081001.
 
 List of supported topics:
 
@@ -2699,3 +2701,7 @@ For supported resources, two `Link` HTTP headers will be included. It is recomme
         -d 'hub.callback=$callback_url' \
         -d 'hub.mode=subscribe' \
         -d 'hub.topic=$topic'
+
+### Notes
+
+ * Each client can only subscribe 01 callback url for a given topic. Existing subscriptions will be deleted when a new one is verified. Since subscription-2019040901.
