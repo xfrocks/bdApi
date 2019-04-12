@@ -117,21 +117,21 @@ class bdApi_Data_Helper_Batch
                 switch ($job['_job_result']) {
                     case 'error':
                         if (empty($job['_job_error'])) {
-                            continue;
+                            break;
                         }
 
                         $preparedJob['_job_error'] = $job['_job_error'];
                         break;
                     case 'message':
                         if (empty($job['_job_message'])) {
-                            continue;
+                            break;
                         }
 
                         $preparedJob['_job_message'] = $job['_job_message'];
                         break;
                     case 'ok':
                         if (empty($job['_job_response'])) {
-                            continue;
+                            break;
                         }
                         /** @var XenForo_ControllerResponse_View $response */
                         $response = $job['_job_response'];
