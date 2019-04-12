@@ -153,7 +153,7 @@ class bdApi_Data_Helper_Batch
                         }
                         break;
                     default:
-                        continue;
+                        break;
                 }
 
                 $jobs[$jobId] = $preparedJob;
