@@ -1641,16 +1641,17 @@ step=3600</edit_format_params>
 
 
 <xen:include template="helper_login_form" />]]></template>
-    <template title="bdapi_misc_chr" version_id="1060270" version_string="1.6.2"><![CDATA[<div id="content" class="bdapi_misc_chr" style="margin: 0; padding: 0">
-	<div class="pageContent" style="margin: 0; padding: 0">
-		<div class="baseHtml" style="margin: 0; padding: 0">{xen:raw $html}</div>
+    <template title="bdapi_misc_chr" version_id="1060311" version_string="1.6.3"><![CDATA[<xen:set var="$style">border: 0; margin: 0; padding: 0</xen:set>
+<div id="content" class="bdapi_misc_chr" style="{xen:raw $style}">
+	<div class="pageContent" style="{xen:raw $style}">
+		<div class="baseHtml" style="{xen:raw $style}">{xen:raw $html}</div>
 	</div>
 </div>
 
 <xen:edithint template="bdapi_misc_chr_container" />
 <xen:edithint template="PAGE_CONTAINER" />
 ]]></template>
-    <template title="bdapi_misc_chr_container" version_id="1060270" version_string="1.6.2"><![CDATA[<!doctype html>
+    <template title="bdapi_misc_chr_container" version_id="1060311" version_string="1.6.3"><![CDATA[<!doctype html>
 <html lang="{$visitorLanguage.language_code}" dir="{$visitorLanguage.text_direction}" class="Public NoJs NoSidebar Responsive ApiChr">
 <head>
 	<meta charset="utf-8" />
@@ -1671,6 +1672,9 @@ step=3600</edit_format_params>
 	<xen:include template="google_analytics" />
 	<xen:include template="page_container_js_head" />
 	<xen:if is="{$head}"><xen:foreach loop="$head" value="$headElement">{xen:raw $headElement}</xen:foreach></xen:if>
+	<style>
+		iframe { border: 0; display: block; margin: 0 auto; padding: 0 }
+	</style>
 </head>
 <body>
 	{xen:raw $contents}
