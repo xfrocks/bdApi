@@ -336,6 +336,7 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 
                 if (!empty($nodeId)) {
                     $this->_request->setParam('forum_id', $nodeId);
+                    $this->_request->setParam('page', $request->getParam('page'));
                 }
 
                 return $this->responseReroute('bdApi_ControllerApi_Thread', 'get-index');
@@ -344,6 +345,7 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 
                 if (!empty($threadId)) {
                     $this->_request->setParam('thread_id', $threadId);
+                    $this->_request->setParam('page', $request->getParam('page'));
 
                     $linkFragment = parse_url($link, PHP_URL_FRAGMENT);
                     if (!empty($linkFragment) AND preg_match('#^post-(?<post_id>\d+)$#', $linkFragment, $fragment)) {
