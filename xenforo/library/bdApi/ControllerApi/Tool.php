@@ -366,6 +366,15 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
                     return $this->responseReroute('bdApi_ControllerApi_Post', 'get-index');
                 }
                 break;
+            case 'XenForo_ControllerPublic_Tag':
+                $tagUrl = $request->getParam('tag_url');
+                /** @var XenForo_Model_Tag $tagModel */
+                $tagModel = $this->getModelFromCache('XenForo_Model_Tag');
+                $tag = $tagModel->getTagByUrl($tagUrl);
+                if (!empty($tag['tag_id'])) {
+                    $this->_request->setParam('tag_id', $tag['tag_id']);
+                }
+                return $this->responseReroute('bdApi_ControllerApi_Tag', 'get-index');
         }
 
         return null;
