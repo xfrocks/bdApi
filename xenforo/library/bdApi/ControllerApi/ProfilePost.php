@@ -422,6 +422,10 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
             );
         }
 
+        if (!empty($pageOfComment['profile_post_comment_id'])) {
+            $data['page_of_comment_id'] = $pageOfComment['profile_post_comment_id'];
+        }
+
         return $this->responseData('bdApi_ViewApi_ProfilePost_Comments', $data);
     }
 

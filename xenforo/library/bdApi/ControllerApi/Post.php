@@ -175,6 +175,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             );
         }
 
+        if (!empty($pageOfPost['post_id'])) {
+            $data['page_of_post_id'] = $pageOfPost['post_id'];
+        }
+
         return $this->responseData('bdApi_ViewApi_Post_List', $data);
     }
 
