@@ -319,6 +319,9 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         XenForo_RouteMatch $routeMatch
     ) {
         switch ($routeMatch->getControllerName()) {
+            case 'XenForo_ControllerPublic_Member':
+                $this->_request->setParam('user_id', $request->getParam('user_id'));
+                return $this->responseReroute('bdApi_ControllerApi_User', 'get-index');
             case 'XenForo_ControllerPublic_Forum':
                 $nodeId = $request->getParam('node_id');
 
