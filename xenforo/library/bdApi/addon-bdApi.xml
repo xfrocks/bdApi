@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApi" title="[bd] API" version_string="1.6.3" version_id="1060313" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApi" title="[bd] API" version_string="1.6.3" version_id="1060314" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdApi" parent_navigation_id="tools" display_order="9999" link="api-clients" admin_permission_id="bdApi" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_auth_codes" parent_navigation_id="bdApi" display_order="3000" link="api-auth-codes" admin_permission_id="" debug_only="0" hide_no_children="0"/>
@@ -1651,7 +1651,7 @@ step=3600</edit_format_params>
 <xen:edithint template="bdapi_misc_chr_container" />
 <xen:edithint template="PAGE_CONTAINER" />
 ]]></template>
-    <template title="bdapi_misc_chr_container" version_id="1060311" version_string="1.6.3"><![CDATA[<!doctype html>
+    <template title="bdapi_misc_chr_container" version_id="1060313" version_string="1.6.3"><![CDATA[<!doctype html>
 <html lang="{$visitorLanguage.language_code}" dir="{$visitorLanguage.text_direction}" class="Public NoJs NoSidebar Responsive ApiChr">
 <head>
 	<meta charset="utf-8" />
@@ -1673,6 +1673,7 @@ step=3600</edit_format_params>
 	<xen:include template="page_container_js_head" />
 	<xen:if is="{$head}"><xen:foreach loop="$head" value="$headElement">{xen:raw $headElement}</xen:foreach></xen:if>
 	<style>
+		#content .pageContent:after { display: none; }
 		iframe { border: 0; display: block; margin: 0 auto; padding: 0 }
 	</style>
 </head>
