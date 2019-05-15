@@ -1012,6 +1012,8 @@ Detail information of a post.
                     attachment_download_count: (int),
                     filename: (string), # since 2014052201
                     attachment_is_inserted: (boolean), # since forum-2014091001
+                    attachment_width: (int), # since forum-2019051601
+                    attachment_height: (int), # since forum-2019051601
                     links: {
                         permalink: (uri),
                         data: (uri),
@@ -2315,6 +2317,8 @@ Detail information of a message.
                     attachment_download_count: (int),
                     filename: (string),
                     attachment_is_inserted: (boolean), # since forum-2014091001
+                    attachment_width: (int), # since forum-2019051601
+                    attachment_height: (int), # since forum-2019051601
                     links: {
                         permalink: (uri),
                         data: (uri),
