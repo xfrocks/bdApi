@@ -48,6 +48,9 @@ class bdApi_ControllerApi_Navigation extends bdApi_ControllerApi_Abstract
         }
 
         $nodeList = $this->_getNodeModel()->getNodeDataForListDisplay($parentNode, 0);
+        if (empty($nodeList['nodesGrouped'])) {
+            return array();
+        }
 
         /** @var bdApi_ControllerHelper_Navigation $helper */
         $helper = $this->getHelper('bdApi_ControllerHelper_Navigation');
