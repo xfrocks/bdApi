@@ -740,6 +740,43 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));
     }
 
+    public function actionGetNavigation()
+    {
+        $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
+
+        /** @var XenForo_ControllerHelper_ForumThreadPost $ftpHelper */
+        $ftpHelper = $this->getHelper('ForumThreadPost');
+        list(, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
+
+        /** @var XenForo_Model_Node $nodeModel */
+        $nodeModel = $this->getModelFromCache('XenForo_Model_Node');
+
+        $nodes = $nodeModel->getNodeAncestors($forum);
+        $nodes[] = $forum;
+        $groupedNodes = [];
+        $prevNodeId = 0;
+        foreach ($nodes as $nodeId => $node) {
+            if (!isset($node['parent_node_id'])) {
+                // unserialized data from $node['breadcrumb_data'] may not contain parent_node_id
+                // so we have to "fake" it here
+                $node['parent_node_id'] = $prevNodeId;
+            }
+            $groupedNodes[$node['parent_node_id']] = array($nodeId => $node);
+            $prevNodeId = $nodeId;
+        }
+
+        /** @var bdApi_ControllerHelper_Navigation $helper */
+        $helper = $this->getHelper('bdApi_ControllerHelper_Navigation');
+        $elements = $helper->prepareElements($groupedNodes);
+
+        $viewParams = array(
+            'elements' => $this->_filterDataMany($elements),
+            'elements_count' => count($elements),
+        );
+
+        return $this->responseData('bdApi_ViewApi_Thread_Navigation', $viewParams);
+    }
+
     public function actionPostPollVotes()
     {
         $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);

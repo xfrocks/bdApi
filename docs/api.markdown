@@ -809,6 +809,24 @@ Required scopes:
 
  * `read`
 
+### GET `/threads/:threadId/navigation`
+List of navigation elements to reach the specified thread. Since forum-2019052201.
+
+    {
+        elements: [
+            ...
+        ],
+        elements_count: (int)
+    }
+
+Parameters:
+
+ * N/A
+ 
+Required scopes:
+
+ * `read`
+
 ### POST `/threads/:threadId/poll/votes`
 Vote on a thread poll. Since forum-2015100601.
 
