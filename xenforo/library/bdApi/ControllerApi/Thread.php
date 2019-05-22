@@ -751,19 +751,17 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         /** @var XenForo_Model_Node $nodeModel */
         $nodeModel = $this->getModelFromCache('XenForo_Model_Node');
 
+        $visitor = XenForo_Visitor::getInstance();
+        $nodePermissions = $nodeModel->getNodePermissionsForPermissionCombination();
+        foreach ($nodePermissions as $nodeId => $permissions) {
+            $visitor->setNodePermissions($nodeId, $permissions);
+        }
+
+        // do not use cached data because it does not have all the keys
+        unset($forum['breadcrumb_data']);
         $nodes = $nodeModel->getNodeAncestors($forum);
         $nodes[] = $forum;
-        $groupedNodes = [];
-        $prevNodeId = 0;
-        foreach ($nodes as $nodeId => $node) {
-            if (!isset($node['parent_node_id'])) {
-                // unserialized data from $node['breadcrumb_data'] may not contain parent_node_id
-                // so we have to "fake" it here
-                $node['parent_node_id'] = $prevNodeId;
-            }
-            $groupedNodes[$node['parent_node_id']] = array($nodeId => $node);
-            $prevNodeId = $nodeId;
-        }
+        $groupedNodes = $nodeModel->groupNodesByParent($nodes);
 
         /** @var bdApi_ControllerHelper_Navigation $helper */
         $helper = $this->getHelper('bdApi_ControllerHelper_Navigation');
