@@ -130,30 +130,41 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
 
         $data = bdApi_Data_Helper_Core::filter($alert, $publicKeys);
 
+        if ($alert['content_type'] === 'bdalerts_groupped' && is_array($alert['alerts'])) {
+            $firstAlert = reset($alert['alerts']);
+            foreach (array('content_type', 'content_id', 'action') as $key) {
+                $data[$key] = $firstAlert[$key];
+            }
+            $data['alerts_has_been_grouped'] = true;
+        }
+
         if (!empty($alert['user'])) {
             $data['creator_user_id'] = $alert['user']['user_id'];
             $data['creator_username'] = $alert['user']['username'];
         }
 
-        if (!empty($alert['content_type'])
-            && !empty($alert['content_id'])
-            && !empty($alert['action'])
+        if (!empty($data['content_type'])
+            && !empty($data['content_id'])
+            && !empty($data['content_action'])
         ) {
             $data['notification_type'] = sprintf(
                 '%s_%d_%s',
-                $alert['content_type'],
-                $alert['content_id'],
-                $alert['action']
+                $data['content_type'],
+                $data['content_id'],
+                $data['content_action']
             );
         }
 
-        $data['links'] = array(
-            'content' => bdApi_Data_Helper_Core::safeBuildApiLink(
-                'notifications/content',
-                null,
-                array('notification_id' => $alert['alert_id'])
-            ),
+        $data['links'] = array();
+
+        $contentLink = bdApi_Data_Helper_Core::safeBuildApiLink(
+            'notifications/content',
+            null,
+            array('notification_id' => $alert['alert_id'])
         );
+        if (!empty($contentLink)) {
+            $data['links']['content'] = $contentLink;
+        }
 
         if (!empty($alert['user'])) {
             $data['links']['creator_avatar'] = XenForo_Template_Helper_Core::callHelper(
