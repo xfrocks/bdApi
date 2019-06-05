@@ -4,6 +4,18 @@ class bdApi_Route_PrefixApi_Notifications extends bdApi_Route_PrefixApi_Abstract
 {
     public function match($routePath, Zend_Controller_Request_Http $request, XenForo_Router $router)
     {
-        return $router->getRouteMatch('bdApi_ControllerApi_Notification', $routePath);
+        $action = $router->resolveActionWithIntegerParam($routePath, $request, 'notification_id');
+        return $router->getRouteMatch('bdApi_ControllerApi_Notification', $action);
+    }
+
+    public function buildLink($originalPrefix, $outputPrefix, $action, $extension, $data, array &$extraParams)
+    {
+        return XenForo_Link::buildBasicLinkWithIntegerParam(
+            $outputPrefix,
+            $action,
+            $extension,
+            $data,
+            'notification_id'
+        );
     }
 }

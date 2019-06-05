@@ -157,11 +157,7 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
 
         $data['links'] = array();
 
-        $contentLink = bdApi_Data_Helper_Core::safeBuildApiLink(
-            'notifications/content',
-            null,
-            array('notification_id' => $alert['alert_id'])
-        );
+        $contentLink = bdApi_Data_Helper_Core::safeBuildApiLink('notifications/content', $data);
         if (!empty($contentLink)) {
             $data['links']['content'] = $contentLink;
         }

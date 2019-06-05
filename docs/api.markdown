@@ -2494,7 +2494,7 @@ Required scopes:
 
  * `read`
 
-### GET `/notifications/content`
+### GET `/notifications/:notificationId/content`
 Get associated content of notification. The response depends on the content type. Since forum-2015041001.
 
     {
@@ -2504,7 +2504,7 @@ Get associated content of notification. The response depends on the content type
 
 Parameters:
 
- * `notification_id` (__required__): id of the notification.
+ * N/A
 
 Required scopes:
 
