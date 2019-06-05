@@ -64,7 +64,8 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
     public function actionGetContent()
     {
         $id = $this->_input->filterSingle('notification_id', XenForo_Input::UINT);
-        $alert = $this->_getAlertModel()->getAlertById($id);
+        $alertModel = $this->_getAlertModel();
+        $alert = $alertModel->getAlertById($id);
         if (empty($alert)) {
             return $this->responseNoPermission();
         }
@@ -72,6 +73,13 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
         $visitor = XenForo_Visitor::getInstance();
         if ($visitor['user_id'] != $alert['alerted_user_id']) {
             return $this->responseNoPermission();
+        }
+
+        if (empty($alert['view_date'])) {
+            $markAlertRead = array($alertModel, 'bdAlerts_markAlertRead');
+            if (is_callable($markAlertRead)) {
+                call_user_func($markAlertRead, $alert);
+            }
         }
 
         if (!$this->_isFieldExcluded('notification')) {
