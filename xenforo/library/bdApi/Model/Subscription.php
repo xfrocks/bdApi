@@ -194,16 +194,16 @@ class bdApi_Model_Subscription extends XenForo_Model
 
         $alertIds = array();
         $alerts = array();
+        $fakeAlertIds = array();
         foreach ($pingDataMany as $key => &$pingDataRef) {
             if (is_numeric($pingDataRef['object_data'])) {
-                if ($pingDataRef['object_data'] > 0) {
-                    $alertIds[] = $pingDataRef['object_data'];
-                }
+                $alertIds[] = $pingDataRef['object_data'];
             } elseif (is_array($pingDataRef['object_data'])
                 && isset($pingDataRef['object_data']['alert_id'])
-                && $pingDataRef['object_data']['alert_id'] == 0
+                && $pingDataRef['object_data']['alert_id'] === 0
             ) {
                 $fakeAlertId = sprintf(md5($key));
+                $fakeAlertIds[] = $fakeAlertId;
                 $pingDataRef['object_data']['alert_id'] = $fakeAlertId;
                 $alerts[$fakeAlertId] = $pingDataRef['object_data'];
                 $pingDataRef['object_data'] = $fakeAlertId;
@@ -219,16 +219,29 @@ class bdApi_Model_Subscription extends XenForo_Model
 
         $userIds = array();
         $alertsByUser = array();
-        foreach ($alerts as $alert) {
-            $userIds[] = $alert['alerted_user_id'];
+        foreach (array_keys($alerts) as $alertId) {
+            $alertRef =& $alerts[$alertId];
+            $userId = $alertRef['alerted_user_id'];
+            $userIds[] = $userId;
 
-            if (!isset($alertsByUser[$alert['alerted_user_id']])) {
-                $alertsByUser[$alert['alerted_user_id']] = array();
+            if (!isset($alertsByUser[$userId])) {
+                $alertsByUser[$userId] = array();
             }
-            $alertsByUser[$alert['alerted_user_id']][$alert['alert_id']] = $alert;
+            $alertsByUser[$userId][$alertRef['alert_id']] =& $alertRef;
         }
 
         $viewingUsers = $this->_preparePingData_getViewingUsers($userIds);
+        foreach ($fakeAlertIds as $fakeAlertId) {
+            $fakeAlertRef =& $alerts[$fakeAlertId];
+            $userId = $fakeAlertRef['alerted_user_id'];
+            if (!isset($viewingUsers[$userId])) {
+                unset($alerts[$fakeAlertId]);
+                continue;
+            }
+
+            $fakeAlertRef += $viewingUsers[$userId];
+        }
+
         foreach ($alertsByUser as $userId => &$userAlerts) {
             if (!isset($viewingUsers[$userId])) {
                 // user not found
@@ -256,14 +269,6 @@ class bdApi_Model_Subscription extends XenForo_Model
         foreach (array_keys($pingDataMany) as $pingDataKey) {
             $pingDataRef = &$pingDataMany[$pingDataKey];
 
-            if ($pingDataRef['object_data'] === 0) {
-                // read action
-                $pingDataRef['object_data'] = array(
-                    'user_unread_notification_count' => 0,
-                );
-                continue;
-            }
-
             if (!isset($alerts[$pingDataRef['object_data']])) {
                 // alert not found
                 unset($pingDataMany[$pingDataKey]);
@@ -271,18 +276,22 @@ class bdApi_Model_Subscription extends XenForo_Model
             }
             $alertRef = &$alerts[$pingDataRef['object_data']];
 
-            $pingDataRef['object_data'] = $alertModel->prepareApiDataForAlert($alertRef);
-            if (isset($alertRef['template'])) {
-                $pingDataRef['object_data']['notification_html'] = strval($alertRef['template']);
-            }
-            if (!is_numeric($alertRef['alert_id'])
-                && !empty($alertRef['extra']['object_data'])
-            ) {
-                // fake alert, use the included object_data
-                $pingDataRef['object_data'] = array_merge(
-                    $pingDataRef['object_data'],
-                    $alertRef['extra']['object_data']
-                );
+            if (!empty($alertRef['extra']['ping_data'])) {
+                $pingDataRef['object_data'] = $alertRef['extra']['ping_data'];
+            } else {
+                $pingDataRef['object_data'] = $alertModel->prepareApiDataForAlert($alertRef);
+                if (!empty($alertRef['template'])) {
+                    $pingDataRef['object_data']['notification_html'] = strval($alertRef['template']);
+                }
+                if (!is_numeric($alertRef['alert_id'])
+                    && !empty($alertRef['extra']['object_data'])
+                ) {
+                    // fake alert, use the included object_data
+                    $pingDataRef['object_data'] = array_merge(
+                        $pingDataRef['object_data'],
+                        $alertRef['extra']['object_data']
+                    );
+                }
             }
 
             $alertedUserId = $alertRef['alerted_user_id'];

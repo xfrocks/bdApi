@@ -10,7 +10,15 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
             if (!empty($userOption)) {
                 /* @var $subscriptionModel bdApi_Model_Subscription */
                 $subscriptionModel = $this->getModelFromCache('bdApi_Model_Subscription');
-                $subscriptionModel->ping($userOption, 'read', bdApi_Model_Subscription::TYPE_NOTIFICATION, 0);
+                $subscriptionModel->ping(
+                    $userOption,
+                    'read',
+                    bdApi_Model_Subscription::TYPE_NOTIFICATION,
+                    bdApi_AlertHandler_Ping::fakeAlert(
+                        $userId,
+                        array('read_notification_id' => 'all')
+                    )
+                );
             }
         }
 

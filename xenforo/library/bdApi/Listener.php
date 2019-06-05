@@ -20,6 +20,8 @@ class bdApi_Listener
 
             'XenForo_Model_Alert',
             'XenForo_Model_Conversation',
+
+            'bdAlerts_Model_Alert_Integration',
         );
 
         if (in_array($class, $classes)) {
