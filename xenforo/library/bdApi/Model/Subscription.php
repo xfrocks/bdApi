@@ -300,6 +300,9 @@ class bdApi_Model_Subscription extends XenForo_Model
                 if (isset($alertedUser['alerts_unread'])) {
                     $pingDataRef['object_data']['user_unread_notification_count'] = $alertedUser['alerts_unread'];
                 }
+                if (isset($alertedUser['conversations_unread'])) {
+                    $pingDataRef['object_data']['user_unread_conversation_count'] = $alertedUser['conversations_unread'];
+                }
             }
         }
 

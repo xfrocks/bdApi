@@ -96,4 +96,33 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 
         return;
     }
+
+    public function markConversationAsRead(
+        $conversationId,
+        $userId,
+        $newReadDate,
+        $lastMessageDate = 0,
+        $updateVisitor = true
+    ) {
+        if (bdApi_Option::getSubscription(bdApi_Model_Subscription::TYPE_NOTIFICATION)) {
+            /** @var bdApi_XenForo_Model_Alert $alertModel */
+            $alertModel = $this->getModelFromCache('XenForo_Model_Alert');
+            $userOption = $alertModel->bdApi_getUserNotificationOption($userId);
+            if (!empty($userOption)) {
+                /* @var $subscriptionModel bdApi_Model_Subscription */
+                $subscriptionModel = $this->getModelFromCache('bdApi_Model_Subscription');
+                $subscriptionModel->ping(
+                    $userOption,
+                    'read',
+                    bdApi_Model_Subscription::TYPE_NOTIFICATION,
+                    bdApi_AlertHandler_Ping::fakeAlert(
+                        $userId,
+                        array('read_conversation_id' => $conversationId)
+                    )
+                );
+            }
+        }
+
+        parent::markConversationAsRead($conversationId, $userId, $newReadDate, $lastMessageDate, $updateVisitor);
+    }
 }
