@@ -16,7 +16,7 @@ class SubscriptionTest extends ApiTestCase
         parent::setUpBeforeClass();
 
         $token = static::postPassword(static::dataApiClient(), static::dataUser());
-        self::$accessToken = $token['access_token'];
+        static::$accessToken = $token['access_token'];
     }
 
     /**
@@ -24,36 +24,35 @@ class SubscriptionTest extends ApiTestCase
      */
     public function testSubscribeSuccess()
     {
-        $hubCallback = self::$apiRoot . 'index.php?tools/websub/echo-hub-challenge';
+        $hubCallback = static::$apiRoot . 'index.php?tools/websub/echo-hub-challenge';
         $this->postSubscriptions($hubCallback);
 
         static::assertEquals(202, static::httpLatestResponse()->getStatusCode());
 
-        $json = static::httpRequestJson('GET', 'notifications', [
-            'query' => [
-                'oauth_token' => self::$accessToken
-            ]
-        ]);
-
-        static::assertArrayHasKey('subscription_callback', $json);
+        $notificationsPath = 'notifications?oauth_token=' . static::$accessToken;
+        $notificationsJson1 = static::httpRequestJson('GET', $notificationsPath);
+        static::assertArrayHasKey('subscription_callback', $notificationsJson1);
 
         $response = static::httpLatestResponse();
         $links = $response->getHeader('Link');
 
-        static::assertNotEmpty($links);
-        static::assertContains('rel=hub', $links);
-        static::assertContains('rel=self', $links);
+        static::assertTrue(is_array($links));
+
+        $hrefs = [];
+        foreach ($links as $link) {
+            if (!preg_match('#^<(.+)>; rel=(\w+)$#', $link, $matches)) {
+                continue;
+            }
+            $hrefs[$matches[2]] = $matches[1];
+        }
+        static::assertArrayHasKey('hub', $hrefs);
+        static::assertArrayHasKey('self', $hrefs);
 
         $this->postSubscriptions($hubCallback, 'unsubscribe');
         static::assertEquals(202, static::httpLatestResponse()->getStatusCode());
 
-        $notifyJson = static::httpRequestJson('GET', 'notifications', [
-            'query' => [
-                'oauth_token' => self::$accessToken
-            ]
-        ]);
-
-        static::assertArrayNotHasKey('subscription_callback', $notifyJson);
+        $notificationJson2 = static::httpRequestJson('GET', $notificationsPath);
+        static::assertArrayNotHasKey('subscription_callback', $notificationJson2);
     }
 
     /**
@@ -61,29 +60,24 @@ class SubscriptionTest extends ApiTestCase
      */
     public function testSubscribeFailure()
     {
-        $hubCallback = self::$apiRoot . 'index.php?tools/websub/echo-none';
+        $hubCallback = static::$apiRoot . 'index.php?tools/websub/echo-none';
         $this->postSubscriptions($hubCallback);
 
         static::assertEquals(400, static::httpLatestResponse()->getStatusCode());
     }
 
     /**
-     * @param string $hubCallback
+     * @param $hubCallback
      * @param string $hubMode
-     * @return \GuzzleHttp\Message\ResponseInterface
+     * @return mixed|\Psr\Http\Message\ResponseInterface|null
      */
     private function postSubscriptions($hubCallback, $hubMode = 'subscribe')
     {
+        $hubCallbackEncoded = rawurlencode($hubCallback);
         return static::httpRequest(
             'POST',
-            'subscriptions',
+            "subscriptions?hub.callback={$hubCallbackEncoded}&hub.mode={$hubMode}&hub.topic=user_notification_me&oauth_token=" . static::$accessToken,
             [
-                'body' => [
-                    'hub.callback' => $hubCallback,
-                    'hub.mode' => $hubMode,
-                    'hub.topic' => 'user_notification_me',
-                    'oauth_token' => self::$accessToken,
-                ],
                 'exceptions' => false,
             ]
         );
