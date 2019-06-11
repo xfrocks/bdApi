@@ -3,8 +3,10 @@
 namespace Xfrocks\Api\XFRM\Controller;
 
 use XF\Mvc\ParameterBag;
+use XFRM\Entity\ResourceWatch;
 use Xfrocks\Api\Controller\AbstractController;
 use Xfrocks\Api\Data\Params;
+use Xfrocks\Api\Transform\TransformContext;
 use Xfrocks\Api\Util\PageNav;
 use Xfrocks\Api\Util\Tree;
 
@@ -114,6 +116,158 @@ class ResourceItem extends AbstractController
     }
 
     /**
+     * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    public function actionGetFollowers(ParameterBag $params)
+    {
+        $resource = $this->assertViewableResource($params->resource_id);
+
+        $users = [];
+        if ($resource->canWatch()) {
+            $visitor = \XF::visitor();
+            /** @var ResourceWatch|null $watch */
+            $watch = $resource->Watch[$visitor->user_id];
+            if ($watch) {
+                $users[] = [
+                    'user_id' => $visitor->user_id,
+                    'username' => $visitor->username,
+                    'follow' => [
+                        'alert' => true,
+                        'email' => $watch->email_subscribe
+                    ]
+                ];
+            }
+        }
+
+        $data = [
+            'users' => $users
+        ];
+
+        return $this->api($data);
+    }
+
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    public function actionPostFollowers(ParameterBag $params)
+    {
+        $resource = $this->assertViewableResource($params->resource_id);
+
+        $params = $this
+            ->params()
+            ->define('email', 'bool', 'whether to receive notification as email');
+
+        if (!$resource->canWatch($error)) {
+            return $this->noPermission($error);
+        }
+
+        /** @var \XFRM\Repository\ResourceWatch $resourceWatchRepo */
+        $resourceWatchRepo = $this->repository('XFRM:ResourceWatch');
+        $resourceWatchRepo->setWatchState(
+            $resource,
+            \XF::visitor(),
+            'watch',
+            ['email_subscribe' => $params['email']]
+        );
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    /**
+     * @param ParameterBag $params
+     * @return \XF\Mvc\Reply\Message
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    public function actionDeleteFollowers(ParameterBag $params)
+    {
+        $resource = $this->assertViewableResource($params->resource_id);
+
+        /** @var \XFRM\Repository\ResourceWatch $resourceWatchRepo */
+        $resourceWatchRepo = $this->repository('XFRM:ResourceWatch');
+        $resourceWatchRepo->setWatchState($resource, \XF::visitor(), 'delete');
+
+        return $this->message(\XF::phrase('changes_saved'));
+    }
+
+    /**
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    public function actionGetFollowed()
+    {
+        $params = $this
+            ->params()
+            ->define('total', 'uint')
+            ->definePageNav();
+
+        $this->assertRegistrationRequired();
+
+        $visitor = \XF::visitor();
+        $finder = $this->finder('XFRM:ResourceWatch')
+            ->where('user_id', $visitor->user_id);
+
+        if ($params['total'] > 0) {
+            $data = [
+                'resources_total' => $finder->total()
+            ];
+
+            return $this->api($data);
+        }
+
+        $finder->with('Resource');
+        $params->limitFinderByPage($finder);
+
+        /** @var ResourceWatch[] $resourceWatches */
+        $resourceWatches = $finder->fetch();
+
+
+        $context = $this->params()->getTransformContext();
+        $context->onTransformedCallbacks[] = function ($context, &$data) use ($resourceWatches) {
+            /** @var TransformContext $context */
+            $source = $context->getSource();
+            if (!($source instanceof \XFRM\Entity\ResourceItem)) {
+                return;
+            }
+
+            /** @var ResourceWatch|null $watched */
+            $watched = null;
+            foreach ($resourceWatches as $resourceWatch) {
+                if ($resourceWatch->resource_id == $source->resource_id) {
+                    $watched = $resourceWatch;
+                    break;
+                }
+            }
+
+            if ($watched) {
+                $data['follow'] = [
+                    'alert' => true,
+                    'email' => $watched->email_subscribe
+                ];
+            }
+        };
+
+        $resources = [];
+        foreach ($resourceWatches as $resourceWatch) {
+            $resources[] = $this->transformEntityLazily($resourceWatch->Resource);
+        }
+
+        $total = $finder->total();
+
+        $data = [
+            'resources' => $resources,
+            'resources_total' => $total
+        ];
+
+        PageNav::addLinksToData($data, $params, $total, 'resources/followed');
+
+        return $this->api($data);
+    }
+
+    /**
      * @param \XFRM\Finder\ResourceItem $finder
      * @param Params $params
      * @return void
@@ -161,7 +315,7 @@ class ResourceItem extends AbstractController
             'xfrm_requested_resource_not_found'
         );
 
-        if ($resourceItem->canView($error)) {
+        if (!$resourceItem->canView($error)) {
             throw $this->exception($this->noPermission($error));
         }
 
