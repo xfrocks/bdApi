@@ -8,7 +8,6 @@ use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Finder;
 use Xfrocks\Api\Listener;
 use Xfrocks\Api\Transformer;
-use Xfrocks\Api\XF\ApiOnly\Session\Session;
 
 abstract class AbstractHandler
 {

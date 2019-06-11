@@ -372,7 +372,7 @@ class ProfilePost extends AbstractController
     /**
      * @param int $commentId
      * @param array $extraWith
-     * @return \XF\Entity\ProfilePostComment
+     * @return ProfilePostComment
      * @throws \XF\Mvc\Reply\Exception
      */
     protected function assertViewableComment($commentId, array $extraWith = [])
@@ -382,7 +382,7 @@ class ProfilePost extends AbstractController
         $extraWith[] = 'ProfilePost.ProfileUser.Privacy';
         array_unique($extraWith);
 
-        /** @var \XF\Entity\ProfilePostComment|null $comment */
+        /** @var ProfilePostComment|null $comment */
         $comment = $this->em()->find('XF:ProfilePostComment', $commentId, $extraWith);
         if (!$comment) {
             throw $this->exception($this->notFound(\XF::phrase('requested_comment_not_found')));

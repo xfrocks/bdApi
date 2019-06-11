@@ -1,0 +1,19 @@
+<xf:title>{{ phrase('confirm_action') }}</xf:title>
+
+<xf:form action="{{ link($links.delete, $entity) }}" ajax="true" class="block">
+    <div class="block-container">
+        <div class="block-body">
+            <xf:inforow rowtype="confirm">
+                {{ phrase('please_confirm_that_you_want_to_delete_following:') }}
+                <strong>
+                    <xf:if is="{$links.edit}">
+                        <a href="{{ link($links.edit, $entity) }}">{$entityLabel}</a>
+                        <xf:else/>
+                        {$entityLabel}
+                    </xf:if>
+                </strong>
+            </xf:inforow>
+        </div>
+        <xf:submitrow rowtype="simple" icon="delete"/>
+    </div>
+</xf:form>

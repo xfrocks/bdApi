@@ -631,7 +631,7 @@ class Thread extends AbstractController
      */
     protected function assertViewableForum($forumId, array $extraWith = [])
     {
-        /** @var \XF\Entity\Forum $forum */
+        /** @var Forum $forum */
         $forum = $this->assertRecordExists('XF:Forum', $forumId, $extraWith, 'requested_forum_not_found');
 
         if (!$forum->canView($error)) {

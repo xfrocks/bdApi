@@ -57,6 +57,7 @@ class Token extends TokenWithScope
 
     /**
      * @return void
+     * @throws \XF\Db\Exception
      */
     protected function _postSave()
     {
@@ -67,6 +68,7 @@ class Token extends TokenWithScope
 
     /**
      * @return void
+     * @throws \XF\Db\Exception
      */
     protected function updateUserScopes()
     {

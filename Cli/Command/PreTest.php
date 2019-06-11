@@ -53,7 +53,7 @@ class PreTest extends Command
             $node->node_type_id = 'Forum';
             $node->title = sprintf('%s-%d', $this->prefix, \XF::$time);
 
-            /** @var \XF\Entity\Forum $forum */
+            /** @var Forum $forum */
             $forum = $node->getDataRelationOrDefault();
             $node->addCascadedSave($forum);
 

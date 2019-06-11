@@ -230,7 +230,7 @@ class Subscription extends Repository
         }
 
         $user = $user ?: \XF::visitor();
-        /** @var \Xfrocks\Api\XF\ApiOnly\Session\Session $session */
+        /** @var Session $session */
         $session = \XF::app()->session();
         $token = $session->getToken();
         $client = $token ? $token->Client : null;
@@ -362,7 +362,7 @@ class Subscription extends Repository
                 $pingData['link'] = $option['link'];
             }
 
-            /** @var \Xfrocks\Api\Repository\PingQueue $pingQueueRepo */
+            /** @var PingQueue $pingQueueRepo */
             $pingQueueRepo = $this->repository('Xfrocks\Api:PingQueue');
             $pingQueueRepo->insertQueue(
                 $subscription['callback'],

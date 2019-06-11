@@ -1,0 +1,84 @@
+<xf:title>{$phrases.entities|raw}</xf:title>
+
+<xf:if is="{$links.add}">
+    <xf:pageaction>
+        <xf:button href="{{ link($links.add) }}" icon="add">{$phrases.add|raw}</xf:button>
+    </xf:pageaction>
+</xf:if>
+
+<xf:if is="$macroTemplateEntityListFilters">
+	<xf:macro template="{$macroTemplateEntityListFilters}"
+			  name="entity_list_filters"
+			  arg-controller="{$controller}"
+			  arg-filters="{$filters}"/>
+</xf:if>
+
+<xf:if is="$entities is not empty">
+    <div class="block">
+		<xf:if contentcheck="true">
+			<div class="block-outer">
+				<xf:contentcheck>
+					<xf:if is="$links.quickFilter">
+						<xf:macro template="filter_macros" name="quick_filter"
+								  arg-class="block-outer-opposite"
+								  arg-ajax="{{ link($links.quickFilter) }}"
+								  arg-key="{$phrases.entity}" />
+					</xf:if>
+				</xf:contentcheck>
+			</div>
+		</xf:if>
+
+        <div class="block-container">
+            <div class="block-body">
+                <xf:datalist>
+                    <xf:macro name="entity_list"
+							  arg-controller="{$controller}"
+							  arg-entities="{$entities}"
+							  arg-links="{$links}" />
+					
+					<xf:if is="$filters._xfFilter && $total > $perPage">
+						<xf:datarow rowclass="dataList-row--note dataList-row--noHover js-filterForceShow">
+							<xf:cell colspan="2">{{ phrase('more_records_matching_filter_more_specific') }}</xf:cell>
+						</xf:datarow>
+					</xf:if>
+                </xf:datalist>
+                <div class="block-footer">
+                    <span class="block-footer-counter">{{ display_totals($entities, $total) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <xf:pagenav page="{$page}" perpage="{$perPage}" total="{$total}"
+                    link="{$links.index}" params="{$filters.pageNavParams}"
+                    wrapperclass="block-outer block-outer--after"/>
+    </div>
+    <xf:else/>
+    <div class="blockMessage">{{ phrase('no_items_have_been_created_yet') }}</div>
+</xf:if>
+
+<xf:macro name="entity_list" arg-controller="!" arg-entities="!" arg-links="!">
+	<xf:foreach loop="{$entities}" value="$entity">
+		<xf:set var="$editLink" value="{{ $links.edit ? link($links.edit, $entity) : '' }}"/>
+		<xf:set var="$viewLink" value="{{ (empty($editLink) && $links.view) ? link($links.view, $entity) : '' }}"/>
+		<xf:set var="$popup">
+			<xf:if is="$macroTemplateEntityListItemPopup">
+				<xf:macro template="{$macroTemplateEntityListItemPopup}"
+						  name="entity_list_item_popup"
+						  arg-controller="{$controller}"
+						  arg-entity="{$entity}"/>
+			</xf:if>
+		</xf:set>
+		<xf:datarow delete="{{ $links.delete ? link($links.delete, $entity) : '' }}"
+					explain="{$controller.getEntityExplain($entity)}"
+					hint="{$controller.getEntityHint($entity)}"
+					href="{{ $editLink ?: $viewLink }}"
+					label="{$controller.getEntityLabel($entity)}"
+					overlay="{{ !!$viewLink }}">
+			<xf:if is="trim($popup)">
+				<xf:popup label="&#8226;&#8226;&#8226;">
+					{$popup|raw}
+				</xf:popup>
+			</xf:if>
+		</xf:datarow>
+	</xf:foreach>
+</xf:macro>

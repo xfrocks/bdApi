@@ -36,11 +36,9 @@ class SubscriptionTest extends ApiTestCase
         $response = static::httpLatestResponse();
         $links = $response->getHeader('Link');
 
-        static::assertTrue(is_array($links));
-
         $hrefs = [];
         foreach ($links as $link) {
-            if (!preg_match('#^<(.+)>; rel=(\w+)$#', $link, $matches)) {
+            if (preg_match('#^<(.+)>; rel=(\w+)$#', $link, $matches) === false) {
                 continue;
             }
             $hrefs[$matches[2]] = $matches[1];
@@ -67,7 +65,7 @@ class SubscriptionTest extends ApiTestCase
     }
 
     /**
-     * @param $hubCallback
+     * @param string $hubCallback
      * @param string $hubMode
      * @return mixed|\Psr\Http\Message\ResponseInterface|null
      */

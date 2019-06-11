@@ -7,7 +7,6 @@ use XF\Mvc\ParameterBag;
 use XF\Service\Conversation\MessageEditor;
 use XF\Service\Conversation\Replier;
 use Xfrocks\Api\Data\Params;
-use Xfrocks\Api\Transform\TransformContext;
 use Xfrocks\Api\Util\PageNav;
 
 class ConversationMessage extends AbstractController

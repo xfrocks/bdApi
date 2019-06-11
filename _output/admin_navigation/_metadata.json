@@ -1,23 +1,23 @@
 {
     "XfrocksApi.json": {
-        "hash": "2fdf0c0d301531f3dc5c5d3a3cc34270"
+        "hash": "70c9a12340688ed97c2c94750b2bfe4a"
     },
     "XfrocksApiAuthCodes.json": {
-        "hash": "aaa72b63a71b595576eabd20f659cf86"
+        "hash": "36dfe726932ff2ff3f37966ab8004ce2"
     },
     "XfrocksApiClients.json": {
-        "hash": "3109c06cc4da08dac83e6ef7ab373e8d"
+        "hash": "f0a9f46b160ed14cd6e3b8bc55bb1ce1"
     },
     "XfrocksApiLogs.json": {
-        "hash": "b7e2f995e170dc1d33ad356553e8c4cd"
+        "hash": "538a3eed705ea8a9e44bb39610deef33"
     },
     "XfrocksApiRefreshTokens.json": {
-        "hash": "33e876f049d934a17b542292b127d7be"
+        "hash": "70f7b7990f1ae8bdaaf5033aaab50e14"
     },
     "XfrocksApiSubscriptions.json": {
-        "hash": "62d1d4f54292c4c532676b2c9ec366e9"
+        "hash": "7266e7d7343935a993e1a0e421740ae0"
     },
     "XfrocksApiTokens.json": {
-        "hash": "2fa132c94a179c65e101f3bdba248329"
+        "hash": "6d8bdd9c9ae05e5090a33674b4ed8528"
     }
 }

@@ -73,7 +73,7 @@ class App extends \XF\Pub\App
         });
 
         $container['request'] = function (\XF\Container $c) {
-            /** @var \Xfrocks\Api\OAuth2\Server $apiServer */
+            /** @var Server $apiServer */
             $apiServer = $this->container('api.server');
             /** @var \Symfony\Component\HttpFoundation\Request $apiRequest */
             $apiRequest = $apiServer->container('request');
