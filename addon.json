@@ -9,6 +9,11 @@
     "faq_url": "",
     "support_url": "",
     "extra_urls": [],
-    "require": [],
+    "require": {
+        "XF": [
+            2010000,
+            "XenForo 2.1.0"
+        ]
+    },
     "icon": ""
 }

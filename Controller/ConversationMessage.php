@@ -8,7 +8,6 @@ use XF\Service\Conversation\MessageEditor;
 use XF\Service\Conversation\Replier;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Transform\TransformContext;
-use Xfrocks\Api\Util\BackwardCompat21;
 use Xfrocks\Api\Util\PageNav;
 
 class ConversationMessage extends AbstractController
@@ -61,7 +60,8 @@ class ConversationMessage extends AbstractController
 
         $total = $finder->total();
 
-        $this->params()->getTransformContext()->onTransformEntitiesCallbacks[] = function ($context, $entities) use ($conversation) {
+        $tc = $this->params()->getTransformContext();
+        $tc->onTransformEntitiesCallbacks[] = function ($_, $entities) use ($conversation) {
             $maxReadDate = 0;
             foreach ($entities as $entity) {
                 if (!$entity instanceof \XF\Entity\ConversationMessage) {
@@ -304,19 +304,19 @@ class ConversationMessage extends AbstractController
     {
         $message = $this->assertViewableMessage($params->message_id);
 
-        $finder = $message->getRelationFinder(BackwardCompat21::getLikesRelation());
-        $finder->with(BackwardCompat21::getLikerRelation());
+        $finder = $message->getRelationFinder('Reactions');
+        $finder->with('ReactionUser');
 
         $users = [];
 
-        /** @var \XF\Mvc\Entity\Entity $liked */
-        foreach ($finder->fetch() as $liked) {
-            /** @var \XF\Entity\User $liker */
-            $liker = $liked->getRelation(BackwardCompat21::getLikerRelation());
+        /** @var \XF\Entity\ReactionContent $reactionContent */
+        foreach ($finder->fetch() as $reactionContent) {
+            /** @var \XF\Entity\User $user */
+            $user = $reactionContent->ReactionUser;
 
             $users[] = [
-                'user_id' => $liker->user_id,
-                'username' => $liker->username
+                'user_id' => $user->user_id,
+                'username' => $user->username
             ];
         }
 
@@ -333,12 +333,12 @@ class ConversationMessage extends AbstractController
     {
         $message = $this->assertViewableMessage($params->message_id);
 
-        if (!BackwardCompat21::canLike($message, $error)) {
+        if (!$message->canReact($error)) {
             return $this->noPermission($error);
         }
 
         $visitor = \XF::visitor();
-        if (!BackwardCompat21::isLiked($message)) {
+        if (!$message->isReactedTo()) {
             /** @var \XF\Repository\LikedContent $likeRepo */
             $likeRepo = $this->repository('XF:LikedContent');
             $likeRepo->toggleLike('conversation_message', $message->message_id, $visitor);
@@ -356,12 +356,12 @@ class ConversationMessage extends AbstractController
     {
         $message = $this->assertViewableMessage($params->message_id);
 
-        if (!BackwardCompat21::canLike($message, $error)) {
+        if (!$message->canReact($error)) {
             return $this->noPermission($error);
         }
 
         $visitor = \XF::visitor();
-        if (BackwardCompat21::isLiked($message)) {
+        if ($message->isReactedTo()) {
             /** @var \XF\Repository\LikedContent $likeRepo */
             $likeRepo = $this->repository('XF:LikedContent');
             $likeRepo->toggleLike('conversation_message', $message->message_id, $visitor);

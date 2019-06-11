@@ -7,7 +7,6 @@ use XF\Service\Post\Deleter;
 use XF\Service\Post\Editor;
 use XF\Service\Thread\Replier;
 use Xfrocks\Api\Data\Params;
-use Xfrocks\Api\Util\BackwardCompat21;
 use Xfrocks\Api\Util\PageNav;
 
 class Post extends AbstractController
@@ -333,19 +332,18 @@ class Post extends AbstractController
     {
         $post = $this->assertViewablePost($params->post_id);
 
-        $finder = $post->getRelationFinder(BackwardCompat21::getLikesRelation());
-        $finder->with(BackwardCompat21::getLikerRelation());
+        $finder = $post->getRelationFinder('Reactions');
+        $finder->with('ReactionUser');
 
         $users = [];
 
-        /** @var \XF\Mvc\Entity\Entity $liked */
-        foreach ($finder->fetch() as $liked) {
-            /** @var \XF\Entity\User $liker */
-            $liker = $liked->getRelation(BackwardCompat21::getLikerRelation());
+        /** @var \XF\Entity\ReactionContent $reactionContent */
+        foreach ($finder->fetch() as $reactionContent) {
+            $user = $reactionContent->ReactionUser;
 
             $users[] = [
-                'user_id' => $liker->user_id,
-                'username' => $liker->username
+                'user_id' => $user->user_id,
+                'username' => $user->username
             ];
         }
 
@@ -362,12 +360,12 @@ class Post extends AbstractController
     {
         $post = $this->assertViewablePost($params->post_id);
 
-        if (!BackwardCompat21::canLike($post, $error)) {
+        if (!$post->canReact($error)) {
             return $this->noPermission($error);
         }
 
         $visitor = \XF::visitor();
-        if (!BackwardCompat21::isLiked($post)) {
+        if (!$post->isReactedTo()) {
             /** @var \XF\Repository\LikedContent $likeRepo */
             $likeRepo = $this->repository('XF:LikedContent');
             $likeRepo->toggleLike('post', $post->post_id, $visitor);
@@ -385,12 +383,12 @@ class Post extends AbstractController
     {
         $post = $this->assertViewablePost($params->post_id);
 
-        if (!BackwardCompat21::canLike($post, $error)) {
+        if (!$post->canReact($error)) {
             return $this->noPermission($error);
         }
 
         $visitor = \XF::visitor();
-        if (BackwardCompat21::isLiked($post)) {
+        if ($post->isReactedTo()) {
             /** @var \XF\Repository\LikedContent $likeRepo */
             $likeRepo = $this->repository('XF:LikedContent');
             $likeRepo->toggleLike('post', $post->post_id, $visitor);
