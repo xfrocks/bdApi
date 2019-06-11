@@ -234,6 +234,10 @@ class bdApi_Extend_Model_Conversation extends XFCP_bdApi_Extend_Model_Conversati
         if (!isset($message['messageHtml'])) {
             $bbCodeOptions = array(
                 'states' => array(
+                    'prepareApiDataForMessage' => array(
+                        'message' => $message,
+                        'conversation' => $conversation,
+                    ),
                     'viewAttachments' => $this->canViewAttachmentOnConversation($conversation),
                 ),
             );

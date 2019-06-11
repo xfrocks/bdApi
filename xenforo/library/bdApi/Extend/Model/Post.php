@@ -146,6 +146,11 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
         if (!isset($post['messageHtml'])) {
             $bbCodeOptions = array(
                 'states' => array(
+                    'prepareApiDataForPost' => array(
+                        'post' => $post,
+                        'thread' => $thread,
+                        'forum' => $forum,
+                    ),
                     'viewAttachments' => $this->canViewAttachmentOnPost($post, $thread, $forum),
                 ),
             );
