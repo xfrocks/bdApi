@@ -54,6 +54,11 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_Batch_Index', $data);
     }
 
+    protected function _assertBoardActive($action)
+    {
+        // avoid issue with read only mode
+    }
+
     protected function _extractUriParams(&$uri)
     {
         $params = array();
