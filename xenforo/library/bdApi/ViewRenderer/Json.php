@@ -4,6 +4,11 @@ class bdApi_ViewRenderer_Json extends XenForo_ViewRenderer_Json
 {
     public function renderError($error)
     {
+        if ($this->_response->getHttpResponseCode() === 200) {
+            // render errors with http 400 unless specified otherwise
+            $this->_response->setHttpResponseCode(400);
+        }
+
         bdApi_Data_Helper_Cors::addHeaders($this, $this->_response);
 
         if (!is_array($error)) {
