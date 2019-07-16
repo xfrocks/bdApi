@@ -94,16 +94,22 @@ class bdApi_DataWriter_Log extends XenForo_DataWriter
 
         $requestData = XenForo_Helper_Php::safeUnserialize($this->get('request_data'));
 
-        $syslogLine = json_encode(array(
-            'log_id' => $this->get('log_id'),
+        $syslogArray = array(
+            'log_id' => intval($this->get('log_id')),
             'client_id' => $this->get('client_id'),
             'ip_address' => $this->get('ip_address'),
             'is_job' => !empty($requestData['_isApiJob']),
-            'response_code' => $this->get('response_code'),
-            'request_method' => $this->get('request_method'),
+            'response_code' => intval($this->get('response_code')),
+            'request_method' => strtoupper($this->get('request_method')),
             'request_uri' => $this->get('request_uri'),
-            'user_id' => $this->get('user_id'),
-        ));
+            'user_id' => intval($this->get('user_id')),
+        );
+
+        if (!empty($_SERVER['HTTP_X_HAPROXY_UID'])) {
+            $syslogArray['ID'] = $_SERVER['HTTP_X_HAPROXY_UID'];
+        }
+
+        $syslogLine = json_encode($syslogArray);
 
         try {
             // https://gist.github.com/troy/2220679
