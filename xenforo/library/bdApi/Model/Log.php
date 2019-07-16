@@ -284,13 +284,21 @@ class bdApi_Model_Log extends XenForo_Model
                             $filtered[$key] = $value;
                         }
                     }
+                } elseif (is_object($value)) {
+                    if ($value instanceof XenForo_Phrase) {
+                        $filtered[$key] = sprintf('(phrase:%s)', $value->getPhraseName());
+                    } else {
+                        $filtered[$key] = sprintf('(object:%s)', get_class($value));
+                    }
                 } else {
                     $filtered[$key] = '?';
                 }
             }
         }
 
-        $filtered['_isApiJob'] = !empty($data['_isApiJob']);
+        if ($level === 0 && !empty($data['_isApiJob'])) {
+            $filtered['_isApiJob'] = true;
+        }
 
         return $filtered;
     }
