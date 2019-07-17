@@ -297,11 +297,9 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
         $writer->preSave();
 
-        if ($writer->hasErrors()) {
-            return $this->responseErrors($writer->getErrors(), 400);
+        if (!$writer->hasErrors()) {
+            $this->assertNotFlooding('post');
         }
-
-        $this->assertNotFlooding('post');
 
         $writer->save();
         $post = $writer->getMergedData();
@@ -381,9 +379,8 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         }
 
         $dw->preSave();
-
         if ($dw->hasErrors()) {
-            return $this->responseErrors($dw->getErrors(), 400);
+            return $this->responseError($dw->getErrors());
         }
 
         $threadDw = null;
@@ -434,22 +431,25 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             }
 
             if ($threadDw->hasErrors()) {
-                return $this->responseErrors($threadDw->getErrors(), 400);
+                return $this->responseError($threadDw->getErrors());
             }
         }
 
         XenForo_Db::beginTransaction();
 
-        $dw->save();
+        try {
+            $dw->save();
 
-        if ($threadDw != null
-            && $threadDw->hasChanges()
-        ) {
-            $threadDw->save();
-        }
+            if ($threadDw != null && $threadDw->hasChanges()) {
+                $threadDw->save();
+            }
 
-        if ($threadTagger != null) {
-            $threadTagger->save();
+            if ($threadTagger != null) {
+                $threadTagger->save();
+            }
+        } catch (Exception $e) {
+            XenForo_Db::rollback();
+            throw $e;
         }
 
         XenForo_Db::commit();

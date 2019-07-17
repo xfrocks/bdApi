@@ -166,11 +166,9 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
 
         $messageDw->preSave();
 
-        if ($messageDw->hasErrors()) {
-            return $this->responseErrors($messageDw->getErrors(), 400);
+        if (!$messageDw->hasErrors()) {
+            $this->assertNotFlooding('conversation');
         }
-
-        $this->assertNotFlooding('conversation');
 
         $messageDw->save();
         $message = $messageDw->getMergedData();
@@ -222,12 +220,6 @@ class bdApi_ControllerApi_ConversationMessage extends bdApi_ControllerApi_Abstra
             case self::SPAM_RESULT_DENIED:
                 return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
                 break;
-        }
-
-        $messageDw->preSave();
-
-        if ($messageDw->hasErrors()) {
-            return $this->responseErrors($messageDw->getErrors(), 400);
         }
 
         $messageDw->save();

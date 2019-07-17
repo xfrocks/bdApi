@@ -502,19 +502,16 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             }
         }
 
-        if ($writer->hasErrors()) {
-            return $this->responseErrors($writer->getErrors(), 400);
+        if (!$writer->hasErrors()) {
+            $this->assertNotFlooding('post');
         }
-
-        $this->assertNotFlooding('post');
 
         $writer->save();
 
         $thread = $writer->getMergedData();
 
         if (!empty($tagger)) {
-            $tagger->setContent($thread['thread_id'], true)
-                ->save();
+            $tagger->setContent($thread['thread_id'], true)->save();
         }
 
         $this->_getThreadWatchModel()->setVisitorThreadWatchStateFromInput($thread['thread_id'], array(

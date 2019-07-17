@@ -125,7 +125,9 @@ class bdApi_OAuth2 extends \OAuth2\Server
 
             $request = $this->_generateOAuth2Request();
             if ($this->verifyResourceRequest($request)) {
-                $token = $this->getResourceController()->getToken();
+                /** @var \OAuth2\Controller\ResourceController $controller */
+                $controller = $this->getResourceController();
+                $token = $controller->getToken();
                 $effectiveToken = $token;
             }
         }

@@ -132,11 +132,9 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
 
             $writer->preSave();
 
-            if ($writer->hasErrors()) {
-                return $this->responseErrors($writer->getErrors(), 400);
+            if (!$writer->hasErrors()) {
+                $this->assertNotFlooding('post');
             }
-
-            $this->assertNotFlooding('post');
 
             $writer->save();
             $profilePostId = $writer->get('profile_post_id');
@@ -174,12 +172,6 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
                     return $this->responseError(new XenForo_Phrase('your_content_cannot_be_submitted_try_later'), 400);
                     break;
             }
-        }
-
-        $dw->preSave();
-
-        if ($dw->hasErrors()) {
-            return $this->responseErrors($dw->getErrors(), 400);
         }
 
         $dw->save();
@@ -480,11 +472,9 @@ class bdApi_ControllerApi_ProfilePost extends bdApi_ControllerApi_Abstract
 
         $dw->preSave();
 
-        if ($dw->hasErrors()) {
-            return $this->responseErrors($dw->getErrors(), 400);
+        if (!$dw->hasErrors()) {
+            $this->assertNotFlooding('post');
         }
-
-        $this->assertNotFlooding('post');
 
         $dw->save();
         $comment = $dw->getMergedData();

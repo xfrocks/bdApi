@@ -287,12 +287,6 @@ class bdApi_ControllerApi_Search extends bdApi_ControllerApi_Abstract
             $dw->set('user_id', XenForo_Visitor::getUserId());
         }
 
-        $dw->preSave();
-
-        if ($dw->hasErrors()) {
-            return $this->responseErrors($dw->getErrors(), 400);
-        }
-
         $dw->save();
 
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));

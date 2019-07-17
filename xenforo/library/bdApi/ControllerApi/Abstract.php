@@ -144,18 +144,6 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
     }
 
     /**
-     * @param array $errors
-     * @param int $responseCode
-     * @param array $containerParams
-     *
-     * @return XenForo_ControllerResponse_Error
-     */
-    public function responseErrors(array $errors, $responseCode = 200, array $containerParams = array())
-    {
-        return parent::responseError(reset($errors), $responseCode, $containerParams);
-    }
-
-    /**
      * Filters param `limit` and `page` from request input.
      *
      * @param array $pageNavParams
@@ -734,6 +722,13 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
     protected function _postDispatch($controllerResponse, $controllerName, $action)
     {
+        if ($controllerResponse instanceof XenForo_ControllerResponse_Error) {
+            if ($controllerResponse->responseCode === 200) {
+                // enforce response code 400 unless specified otherwise
+                $controllerResponse->responseCode = 400;
+            }
+        }
+
         $this->_logRequest($controllerResponse, $controllerName, $action);
 
         parent::_postDispatch($controllerResponse, $controllerName, $action);
