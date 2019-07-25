@@ -6,6 +6,7 @@ use XF\Mvc\ParameterBag;
 use XF\Service\Post\Deleter;
 use XF\Service\Post\Editor;
 use XF\Service\Thread\Replier;
+use Xfrocks\Api\ControllerPlugin\Like;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
 
@@ -360,18 +361,9 @@ class Post extends AbstractController
     {
         $post = $this->assertViewablePost($params->post_id);
 
-        if (!$post->canReact($error)) {
-            return $this->noPermission($error);
-        }
-
-        $visitor = \XF::visitor();
-        if (!$post->isReactedTo()) {
-            /** @var \XF\Repository\LikedContent $likeRepo */
-            $likeRepo = $this->repository('XF:LikedContent');
-            $likeRepo->toggleLike('post', $post->post_id, $visitor);
-        }
-
-        return $this->message(\XF::phrase('changes_saved'));
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionToggleLike($post, true);
     }
 
     /**
@@ -383,18 +375,9 @@ class Post extends AbstractController
     {
         $post = $this->assertViewablePost($params->post_id);
 
-        if (!$post->canReact($error)) {
-            return $this->noPermission($error);
-        }
-
-        $visitor = \XF::visitor();
-        if ($post->isReactedTo()) {
-            /** @var \XF\Repository\LikedContent $likeRepo */
-            $likeRepo = $this->repository('XF:LikedContent');
-            $likeRepo->toggleLike('post', $post->post_id, $visitor);
-        }
-
-        return $this->message(\XF::phrase('changes_saved'));
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionToggleLike($post, false);
     }
 
     /**

@@ -6,6 +6,7 @@ use XF\Entity\ProfilePostComment;
 use XF\Mvc\ParameterBag;
 use XF\Service\ProfilePostComment\Creator;
 use XF\Service\ProfilePostComment\Deleter;
+use Xfrocks\Api\ControllerPlugin\Like;
 
 class ProfilePost extends AbstractController
 {
@@ -119,18 +120,9 @@ class ProfilePost extends AbstractController
     {
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
 
-        if ($profilePost->canReact($error)) {
-            return $this->noPermission($error);
-        }
-
-        $visitor = \XF::visitor();
-        if (!$profilePost->isReactedTo()) {
-            /** @var \XF\Repository\LikedContent $likeRepo */
-            $likeRepo = $this->repository('XF:LikedContent');
-            $likeRepo->toggleLike('profile_post', $profilePost->profile_post_id, $visitor);
-        }
-
-        return $this->message(\XF::phrase('changes_saved'));
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionToggleLike($profilePost, true);
     }
 
     /**
@@ -142,18 +134,9 @@ class ProfilePost extends AbstractController
     {
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
 
-        if (!$profilePost->canReact($error)) {
-            return $this->noPermission($error);
-        }
-
-        $visitor = \XF::visitor();
-        if ($profilePost->isReactedTo()) {
-            /** @var \XF\Repository\LikedContent $likeRepo */
-            $likeRepo = $this->repository('XF:LikedContent');
-            $likeRepo->toggleLike('profile_post', $profilePost->profile_post_id, $visitor);
-        }
-
-        return $this->message(\XF::phrase('changes_saved'));
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionToggleLike($profilePost, true);
     }
 
     /**

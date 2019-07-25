@@ -6,6 +6,7 @@ use XF\Entity\ConversationMaster;
 use XF\Mvc\ParameterBag;
 use XF\Service\Conversation\MessageEditor;
 use XF\Service\Conversation\Replier;
+use Xfrocks\Api\ControllerPlugin\Like;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
 
@@ -332,18 +333,9 @@ class ConversationMessage extends AbstractController
     {
         $message = $this->assertViewableMessage($params->message_id);
 
-        if (!$message->canReact($error)) {
-            return $this->noPermission($error);
-        }
-
-        $visitor = \XF::visitor();
-        if (!$message->isReactedTo()) {
-            /** @var \XF\Repository\LikedContent $likeRepo */
-            $likeRepo = $this->repository('XF:LikedContent');
-            $likeRepo->toggleLike('conversation_message', $message->message_id, $visitor);
-        }
-
-        return $this->message(\XF::phrase('changes_saved'));
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionToggleLike($message, true);
     }
 
     /**
@@ -355,18 +347,9 @@ class ConversationMessage extends AbstractController
     {
         $message = $this->assertViewableMessage($params->message_id);
 
-        if (!$message->canReact($error)) {
-            return $this->noPermission($error);
-        }
-
-        $visitor = \XF::visitor();
-        if ($message->isReactedTo()) {
-            /** @var \XF\Repository\LikedContent $likeRepo */
-            $likeRepo = $this->repository('XF:LikedContent');
-            $likeRepo->toggleLike('conversation_message', $message->message_id, $visitor);
-        }
-
-        return $this->message(\XF::phrase('changes_saved'));
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionToggleLike($message, false);
     }
 
     /**
