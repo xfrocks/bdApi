@@ -296,8 +296,22 @@ class bdApi_Model_Log extends XenForo_Model
             }
         }
 
-        if ($level === 0 && !empty($data['_isApiJob'])) {
-            $filtered['_isApiJob'] = true;
+        if ($level === 0) {
+            if (isset($data['_controller']) && isset($data['_action'])) {
+                $controller = $data['_controller'];
+                $controllerPregReplaceCount = 0;
+                $controller = preg_replace('/^bdApi_ControllerApi_/', '', $controller, -1, $controllerPregReplaceCount);
+                if ($controllerPregReplaceCount === 0) {
+                    $controller = str_replace('_ControllerApi_', '/', $controller);
+                }
+
+                $filtered['_controller'] = $controller;
+                $filtered['_action'] = $data['_action'];
+            }
+
+            if (!empty($data['_isApiJob'])) {
+                $filtered['_isApiJob'] = true;
+            }
         }
 
         return $filtered;

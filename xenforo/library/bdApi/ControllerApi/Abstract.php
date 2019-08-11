@@ -753,14 +753,16 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
             }
         } else {
             $responseCode = $this->_response->getHttpResponseCode();
-            $responseOutput = array(
-                'raw' => $controllerResponse,
-                'controller' => $controller,
-                'action' => $action,
-            );
+            $responseOutput = $controllerResponse;
         }
 
         if ($responseOutput !== false) {
+            if (!is_array($responseOutput)) {
+                $responseOutput = array('raw' => $responseOutput);
+            }
+            $responseOutput['_controller'] = $controller;
+            $responseOutput['_action'] = $action;
+
             /* @var $logModel bdApi_Model_Log */
             $logModel = $this->getModelFromCache('bdApi_Model_Log');
             $logModel->logRequest($requestMethod, $requestUri, $requestData, $responseCode, $responseOutput);

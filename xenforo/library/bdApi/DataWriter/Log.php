@@ -93,6 +93,7 @@ class bdApi_DataWriter_Log extends XenForo_DataWriter
         $hostname = gethostname();
 
         $requestData = XenForo_Helper_Php::safeUnserialize($this->get('request_data'));
+        $responseOutput = XenForo_Helper_Php::safeUnserialize($this->get('response_output'));
 
         $syslogArray = array(
             'log_id' => intval($this->get('log_id')),
@@ -107,6 +108,10 @@ class bdApi_DataWriter_Log extends XenForo_DataWriter
 
         if (!empty($_SERVER['HTTP_X_HAPROXY_UID'])) {
             $syslogArray['ID'] = $_SERVER['HTTP_X_HAPROXY_UID'];
+        }
+
+        if (is_array($responseOutput) && isset($responseOutput['_controller']) && isset($responseOutput['_action'])) {
+            $syslogArray['xf_template'] = sprintf('%s::%s', $responseOutput['_controller'], $responseOutput['_action']);
         }
 
         $syslogLine = json_encode($syslogArray);
