@@ -2,6 +2,12 @@
 
 class bdApi_XenForo_ControllerPublic_Login extends XFCP_bdApi_XenForo_ControllerPublic_Login
 {
+    /**
+     * @return XenForo_ControllerResponse_Redirect
+     * @throws XenForo_Exception
+     *
+     * @see XenForo_ControllerPublic_Login::completeLogin()
+     */
     public function actionApi()
     {
         $input = $this->_input->filter(array(
@@ -17,23 +23,18 @@ class bdApi_XenForo_ControllerPublic_Login extends XFCP_bdApi_XenForo_Controller
             try {
                 $userId = intval(bdApi_Crypt::decryptTypeOne($input['user_id'], $input['timestamp']));
             } catch (XenForo_Exception $e) {
-                if (XenForo_Application::debugMode()) {
-                    $this->_response->setHeader('X-Api-Exception', $e->getMessage());
-                }
+                XenForo_Error::logError($e, false);
             }
         }
 
         if ($userId > 0) {
             $this->_response->setHeader('X-Api-Login-User', $userId);
 
-            $this->_getUserModel()->setUserRememberCookie($userId);
-
             XenForo_Model_Ip::log($userId, 'user', $userId, 'login_api');
 
-            $this->_getUserModel()->deleteSessionActivity(0, $this->_request->getClientIp(false));
-            $session = XenForo_Application::get('session');
-            $session->changeUserId($userId);
-            XenForo_Visitor::setup($userId);
+            $visitor = XenForo_Visitor::setup($userId);
+
+            XenForo_Application::getSession()->userLogin($userId, $visitor['password_date']);
         }
 
         if (empty($input['redirect'])) {

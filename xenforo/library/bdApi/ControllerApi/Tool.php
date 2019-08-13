@@ -15,7 +15,7 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         if ($userId > 0) {
             $loginLinkData = array(
                 'redirect' => $link,
-                'timestamp' => XenForo_Application::$time + 10,
+                'timestamp' => time() + bdApi_Option::get('loginTtl'),
             );
             $loginLinkData['user_id'] = bdApi_Crypt::encryptTypeOne($userId, $loginLinkData['timestamp']);
 
@@ -58,7 +58,7 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 
         $loginLinkData = array(
             'redirect' => $redirectUri,
-            'timestamp' => XenForo_Application::$time + 10,
+            'timestamp' => time() + bdApi_Option::get('loginTtl'),
         );
         $loginLinkData['user_id'] = bdApi_Crypt::encryptTypeOne($userId, $loginLinkData['timestamp']);
 
@@ -111,7 +111,7 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         $logoutLinkData = array(
             'redirect' => $redirectUri,
             '_xfToken' => XenForo_Visitor::getInstance()->get('csrf_token_page'),
-            'timestamp' => XenForo_Application::$time + 10,
+            'timestamp' => time() + bdApi_Option::get('loginTtl'),
         );
         $logoutLinkData['md5'] = bdApi_Crypt::encryptTypeOne(
             md5($logoutLinkData['redirect']),

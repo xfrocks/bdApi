@@ -13,6 +13,8 @@ class bdApi_Option
                 return 15;
             case 'authorizeBypassSecs':
                 return 600;
+            case 'loginTtl':
+                return 600;
         }
 
         return $options->get('bdApi_' . $key);
