@@ -8,6 +8,35 @@ class Like extends \XF\ControllerPlugin\Reaction
 {
     /**
      * @param \XF\Mvc\Entity\Entity $content
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     */
+    public function actionGetLikes($content)
+    {
+        $finder = $content->getRelationFinder('Reactions');
+        $finder->with('ReactionUser');
+
+        $users = [];
+
+        /** @var \XF\Entity\ReactionContent $reactionContent */
+        foreach ($finder->fetch() as $reactionContent) {
+            $user = $reactionContent->ReactionUser;
+
+            $users[] = [
+                'user_id' => $user->user_id,
+                'username' => $user->username
+            ];
+        }
+
+        $data = ['users' => $users];
+
+        /** @var AbstractController $controller */
+        $controller = $this->controller;
+
+        return $controller->api($data);
+    }
+
+    /**
+     * @param \XF\Mvc\Entity\Entity $content
      * @param bool $insert true to insert, false to delete
      * @return \XF\Mvc\Reply\Message
      * @throws \XF\Mvc\Reply\Exception

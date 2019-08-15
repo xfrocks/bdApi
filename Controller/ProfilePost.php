@@ -91,23 +91,9 @@ class ProfilePost extends AbstractController
     {
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
 
-        $finder = $profilePost->getRelationFinder('Reactions');
-        $finder->with('ReactionUser');
-
-        $users = [];
-
-        /** @var \XF\Entity\ReactionContent $reactionContent */
-        foreach ($finder->fetch() as $reactionContent) {
-            $user = $reactionContent->ReactionUser;
-
-            $users[] = [
-                'user_id' => $user->user_id,
-                'username' => $user->username
-            ];
-        }
-
-        $data = ['users' => $users];
-        return $this->api($data);
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionGetLikes($profilePost);
     }
 
     /**
