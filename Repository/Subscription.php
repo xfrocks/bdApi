@@ -434,9 +434,9 @@ class Subscription extends Repository
             'extra_data' => serialize($extraData)
         ];
 
-        /** @var array $userOptionValue */
+        /** @var mixed $userOptionValue */
         $userOptionValue = $userOption->getValue(self::getSubColumn($type));
-        if (count($userOptionValue) === 0) {
+        if (!is_array($userOptionValue) || count($userOptionValue) === 0) {
             return false;
         }
 
