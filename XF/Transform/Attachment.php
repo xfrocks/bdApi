@@ -28,16 +28,7 @@ class Attachment extends AbstractHandler
 
     public function canView(TransformContext $context)
     {
-        /** @var \XF\Entity\Attachment $attachment */
-        $attachment = $context->getSource();
-
-        if (strlen($attachment->temp_hash) > 0 &&
-            $context->data('tempHash') === $attachment->temp_hash
-        ) {
-            return true;
-        }
-
-        return $attachment->canView();
+        return true;
     }
 
     public function collectLinks(TransformContext $context)
