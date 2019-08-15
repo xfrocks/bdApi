@@ -418,6 +418,8 @@ class Post extends AbstractController
      */
     protected function assertViewablePost($postId, array $extraWith = [])
     {
+        $extraWith[] = 'Thread.Forum.Node.Permissions|' . \XF::visitor()->permission_combination_id;
+
         /** @var \XF\Entity\Post $post */
         $post = $this->assertRecordExists('XF:Post', $postId, $extraWith, 'requested_post_not_found');
 
@@ -436,6 +438,8 @@ class Post extends AbstractController
      */
     protected function assertViewableThread($threadId, array $extraWith = [])
     {
+        $extraWith[] = 'Forum.Node.Permissions|' . \XF::visitor()->permission_combination_id;
+
         /** @var \XF\Entity\Thread $thread */
         $thread = $this->assertRecordExists('XF:Thread', $threadId, $extraWith, 'requested_thread_not_found');
 

@@ -90,7 +90,8 @@ abstract class AbstractNode extends AbstractController
             return $this->noPermission();
         }
 
-        $node = $this->assertRecordExists($nodeTypes[$nodeTypeId]['entity_identifier'], $nodeId);
+        $with = 'Node.Permissions|' . \XF::visitor()->permission_combination_id;
+        $node = $this->assertRecordExists($nodeTypes[$nodeTypeId]['entity_identifier'], $nodeId, $with);
 
         $data = [
             $this->getNameSingular() => $this->transformEntityLazily($node)

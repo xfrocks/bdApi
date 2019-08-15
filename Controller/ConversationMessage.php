@@ -10,16 +10,8 @@ use Xfrocks\Api\ControllerPlugin\Like;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Util\PageNav;
 
-class ConversationMessage extends AbstractController
+class ConversationMessage extends Conversation
 {
-    public function preDispatch($action, ParameterBag $params)
-    {
-        parent::preDispatch($action, $params);
-
-        $this->assertApiScope('conversate');
-        $this->assertRegistrationRequired();
-    }
-
     /**
      * @param ParameterBag $params
      * @return \Xfrocks\Api\Mvc\Reply\Api
@@ -311,7 +303,6 @@ class ConversationMessage extends AbstractController
 
         /** @var \XF\Entity\ReactionContent $reactionContent */
         foreach ($finder->fetch() as $reactionContent) {
-            /** @var \XF\Entity\User $user */
             $user = $reactionContent->ReactionUser;
 
             $users[] = [
@@ -360,40 +351,21 @@ class ConversationMessage extends AbstractController
      */
     protected function assertViewableMessage($messageId, array $extraWith = [])
     {
+        $extraWith[] = 'Conversation.Users|' . \XF::visitor()->user_id;
+
         /** @var \XF\Entity\ConversationMessage $message */
-        $message = $this->assertRecordExists('XF:ConversationMessage', $messageId, $extraWith);
+        $message = $this->assertRecordExists(
+            'XF:ConversationMessage',
+            $messageId,
+            $extraWith,
+            'requested_message_not_found'
+        );
+
         if (!$message->canView($error)) {
             throw $this->exception($this->noPermission($error));
         }
 
         return $message;
-    }
-
-    /**
-     * @param int $conversationId
-     * @param array $extraWith
-     * @return ConversationMaster
-     * @throws \XF\Mvc\Reply\Exception
-     */
-    protected function assertViewableConversation($conversationId, array $extraWith = [])
-    {
-        $visitor = \XF::visitor();
-
-        /** @var \XF\Finder\ConversationUser $finder */
-        $finder = $this->finder('XF:ConversationUser');
-        $finder->forUser($visitor, false);
-        $finder->where('conversation_id', $conversationId);
-        $finder->with($extraWith);
-
-        /** @var \XF\Entity\ConversationUser|null $conversation */
-        $conversation = $finder->fetchOne();
-        /** @var ConversationMaster|null $convoMaster */
-        $convoMaster = $conversation ? $conversation->Master : null;
-        if (!$conversation || !$convoMaster) {
-            throw $this->exception($this->notFound(\XF::phrase('requested_conversation_not_found')));
-        }
-
-        return $conversation->Master;
     }
 
     /**

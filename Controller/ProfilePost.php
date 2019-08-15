@@ -98,7 +98,6 @@ class ProfilePost extends AbstractController
 
         /** @var \XF\Entity\ReactionContent $reactionContent */
         foreach ($finder->fetch() as $reactionContent) {
-            /** @var \XF\Entity\User $user */
             $user = $reactionContent->ReactionUser;
 
             $users[] = [
@@ -361,15 +360,16 @@ class ProfilePost extends AbstractController
     protected function assertViewableComment($commentId, array $extraWith = [])
     {
         $extraWith[] = 'User';
-        $extraWith[] = 'ProfilePost.ProfileUser';
         $extraWith[] = 'ProfilePost.ProfileUser.Privacy';
-        array_unique($extraWith);
 
-        /** @var ProfilePostComment|null $comment */
-        $comment = $this->em()->find('XF:ProfilePostComment', $commentId, $extraWith);
-        if (!$comment) {
-            throw $this->exception($this->notFound(\XF::phrase('requested_comment_not_found')));
-        }
+        /** @var ProfilePostComment $comment */
+        $comment = $this->assertRecordExists(
+            'XF:ProfilePostComment',
+            $commentId,
+            $extraWith,
+            'requested_comment_not_found'
+        );
+
         if (!$comment->canView($error)) {
             throw $this->exception($this->noPermission($error));
         }
@@ -386,15 +386,16 @@ class ProfilePost extends AbstractController
     protected function assertViewableProfilePost($profilePostId, array $extraWith = [])
     {
         $extraWith[] = 'User';
-        $extraWith[] = 'ProfileUser';
         $extraWith[] = 'ProfileUser.Privacy';
-        array_unique($extraWith);
 
-        /** @var \XF\Entity\ProfilePost|null $profilePost */
-        $profilePost = $this->em()->find('XF:ProfilePost', $profilePostId, $extraWith);
-        if (!$profilePost) {
-            throw $this->exception($this->notFound(\XF::phrase('requested_profile_post_not_found')));
-        }
+        /** @var \XF\Entity\ProfilePost $profilePost */
+        $profilePost = $this->assertRecordExists(
+            'XF:ProfilePost',
+            $profilePostId,
+            $extraWith,
+            'requested_profile_post_not_found'
+        );
+
         if (!$profilePost->canView($error)) {
             throw $this->exception($this->noPermission($error));
         }
