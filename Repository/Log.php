@@ -48,6 +48,7 @@ class Log extends Repository
      * @param array $responseOutput
      * @param array $bulkSet
      * @return bool
+     * @throws \XF\PrintableException
      */
     public function logRequest(
         $requestMethod,
@@ -95,11 +96,7 @@ class Log extends Repository
         $log->response_code = $responseCode;
         $log->response_output = $this->filterData($responseOutput);
 
-        try {
-            return $log->save();
-        } catch (\Exception $e) {
-            return false;
-        }
+        return $log->save(false, false);
     }
 
     /**
