@@ -1,0 +1,101 @@
+<xf:if is="$entity.isInsert()">
+    <xf:title>{$phrases.add|raw}</xf:title>
+    <xf:else/>
+    <xf:title>{$phrases.edit|raw}: {$controller.getEntityLabel($entity)}</xf:title>
+</xf:if>
+
+<xf:pageaction if="$links.delete && $entity.isUpdate()">
+    <xf:button href="{{ link({$links.delete}, $entity) }}" icon="delete" overlay="true"/>
+</xf:pageaction>
+
+<xf:form action="{{ link({$links.save}) }}" ajax="true" class="block">
+    <div class="block-container">
+
+        <div class="block-body">
+            <xf:macro name="columns"
+					  arg-columns="{$columns}"
+					  arg-controller="{$controller}"
+					  arg-entity="{$entity}"/>
+
+			<xf:if is="{$macroTemplateEntityEdit}">
+				<xf:macro template="{$macroTemplateEntityEdit}" name="entity_edit"
+						  arg-columns="{$columns}"
+						  arg-controller="{$controller}"
+						  arg-entity="{$entity}"/>
+			</xf:if>
+        </div>
+
+        <xf:hiddenval name="entity_id" value="{{ $entity.getEntityId() }}"/>
+        <xf:submitrow sticky="true" icon="save"/>
+    </div>
+</xf:form>
+
+<xf:macro name="columns" arg-columns="!" arg-controller="!" arg-entity="!">
+	<xf:foreach loop="$columns" key="$columnName" value="$column">
+		<xf:if is="{$column._structureData.macroTemplate}">
+			<xf:macro template="{$column._structureData.macroTemplate}" name="entity_edit_column"
+					  arg-column="{$column}"
+					  arg-columnName="{$columnName}"
+					  arg-controller="{$controller}"
+					  arg-entity="{$entity}"/>
+
+			<xf:elseif is="!{$column.label}"/>
+			<xf:hiddenval name="hidden_columns[]" value="{$columnName}"/>
+			<xf:hiddenval name="hidden_{$column.name}" value="{$column.value}"/>
+
+			<xf:elseif is="{$column.tag} === 'number-box'"/>
+			<xf:numberboxrow label="{$column.label}"
+							 min="{$column.tagOptions.min}"
+							 name="{$column.name}"
+							 value="{$column.value}"/>
+
+			<xf:elseif is="{$column.tag} === 'radio'"/>
+			<xf:radiorow label="{$column.label}"
+						  name="{$column.name}"
+						  value="{$column.value}">
+				<xf:foreach loop="$column.tagOptions.choices" value="$choice">
+					<xf:option label="{$choice.label}"
+							   value="{$choice.value}"/>
+				</xf:foreach>
+			</xf:radiorow>
+
+			<xf:elseif is="{$column.tag} === 'select'"/>
+			<xf:selectrow label="{$column.label}"
+						  name="{$column.name}"
+						  value="{$column.value}">
+				<xf:foreach loop="$column.tagOptions.choices" value="$choice">
+					<xf:option disabled="{$choice.disabled}"
+							   label="{$choice.label}"
+							   value="{$choice.value}"/>
+				</xf:foreach>
+			</xf:selectrow>
+
+			<xf:elseif is="{$column.tag} === 'text-area'"/>
+			<xf:set var="$hint">
+				<xf:if is="{$column._structureData.html}">
+					{{ phrase('you_may_use_html') }}
+				</xf:if>
+			</xf:set>
+			<xf:textarearow hint="{{ trim($hint) }}"
+							label="{$column.label}"
+							name="{$column.name}"
+							value="{{ $entity.get($columnName) }}"/>
+
+			<xf:elseif is="{$column.tag} === 'text-box'"/>
+			<xf:textboxrow label="{$column.label}"
+						   maxlength="{$column._structureData.maxLength}"
+						   name="{$column.name}"
+						   value="{$column.value}"/>
+
+			<xf:elseif is="{$column.tag} === 'username'"/>
+			<xf:hiddenval name="username_columns[]" value="{$columnName}"/>
+			<xf:textboxrow ac="single"
+						   autocomplete="off"
+						   label="{$column.label}"
+						   maxlength="{{ max_length($xf.visitor, 'username') }}"
+						   name="username_{$column.name}"
+						   placeholder="{{ phrase('name...') }}"
+						   value="{$column.tagOptions.username}"/>
+		</xf:if>
+	</xf:foreach>
+</xf:macro>

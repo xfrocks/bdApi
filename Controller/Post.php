@@ -6,8 +6,8 @@ use XF\Mvc\ParameterBag;
 use XF\Service\Post\Deleter;
 use XF\Service\Post\Editor;
 use XF\Service\Thread\Replier;
+use Xfrocks\Api\ControllerPlugin\Like;
 use Xfrocks\Api\Data\Params;
-use Xfrocks\Api\Util\BackwardCompat21;
 use Xfrocks\Api\Util\PageNav;
 
 class Post extends AbstractController
@@ -333,24 +333,9 @@ class Post extends AbstractController
     {
         $post = $this->assertViewablePost($params->post_id);
 
-        $finder = $post->getRelationFinder(BackwardCompat21::getLikesRelation());
-        $finder->with(BackwardCompat21::getLikerRelation());
-
-        $users = [];
-
-        /** @var \XF\Mvc\Entity\Entity $liked */
-        foreach ($finder->fetch() as $liked) {
-            /** @var \XF\Entity\User $liker */
-            $liker = $liked->getRelation(BackwardCompat21::getLikerRelation());
-
-            $users[] = [
-                'user_id' => $liker->user_id,
-                'username' => $liker->username
-            ];
-        }
-
-        $data = ['users' => $users];
-        return $this->api($data);
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionGetLikes($post);
     }
 
     /**
@@ -362,18 +347,9 @@ class Post extends AbstractController
     {
         $post = $this->assertViewablePost($params->post_id);
 
-        if (!BackwardCompat21::canLike($post, $error)) {
-            return $this->noPermission($error);
-        }
-
-        $visitor = \XF::visitor();
-        if (!BackwardCompat21::isLiked($post)) {
-            /** @var \XF\Repository\LikedContent $likeRepo */
-            $likeRepo = $this->repository('XF:LikedContent');
-            $likeRepo->toggleLike('post', $post->post_id, $visitor);
-        }
-
-        return $this->message(\XF::phrase('changes_saved'));
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionToggleLike($post, true);
     }
 
     /**
@@ -385,18 +361,9 @@ class Post extends AbstractController
     {
         $post = $this->assertViewablePost($params->post_id);
 
-        if (!BackwardCompat21::canLike($post, $error)) {
-            return $this->noPermission($error);
-        }
-
-        $visitor = \XF::visitor();
-        if (BackwardCompat21::isLiked($post)) {
-            /** @var \XF\Repository\LikedContent $likeRepo */
-            $likeRepo = $this->repository('XF:LikedContent');
-            $likeRepo->toggleLike('post', $post->post_id, $visitor);
-        }
-
-        return $this->message(\XF::phrase('changes_saved'));
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionToggleLike($post, false);
     }
 
     /**
@@ -437,6 +404,8 @@ class Post extends AbstractController
      */
     protected function assertViewablePost($postId, array $extraWith = [])
     {
+        $extraWith[] = 'Thread.Forum.Node.Permissions|' . \XF::visitor()->permission_combination_id;
+
         /** @var \XF\Entity\Post $post */
         $post = $this->assertRecordExists('XF:Post', $postId, $extraWith, 'requested_post_not_found');
 
@@ -455,6 +424,8 @@ class Post extends AbstractController
      */
     protected function assertViewableThread($threadId, array $extraWith = [])
     {
+        $extraWith[] = 'Forum.Node.Permissions|' . \XF::visitor()->permission_combination_id;
+
         /** @var \XF\Entity\Thread $thread */
         $thread = $this->assertRecordExists('XF:Thread', $threadId, $extraWith, 'requested_thread_not_found');
 

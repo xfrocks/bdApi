@@ -2,7 +2,6 @@
 
 namespace Xfrocks\Api\XF\Transform;
 
-use XF\Mvc\Entity\Finder;
 use Xfrocks\Api\XF\Repository\Node;
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\TransformContext;

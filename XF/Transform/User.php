@@ -3,7 +3,6 @@
 namespace Xfrocks\Api\XF\Transform;
 
 use XF\Entity\ConversationMaster;
-use XF\Entity\UserProfile;
 use XF\Repository\UserFollow;
 use XF\Repository\UserGroup;
 use Xfrocks\Api\OAuth2\Server;

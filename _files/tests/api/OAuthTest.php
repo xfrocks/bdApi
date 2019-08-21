@@ -62,7 +62,7 @@ class OAuthTest extends ApiTestCase
         ];
 
         static::httpRequestJson('POST', 'oauth/token', [
-            'body' => $oAuthParams
+            'form_params' => $oAuthParams
         ], false);
 
         $response = static::httpLatestResponse();

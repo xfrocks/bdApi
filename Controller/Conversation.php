@@ -2,7 +2,6 @@
 
 namespace Xfrocks\Api\Controller;
 
-use XF\Entity\ConversationMaster;
 use XF\Mvc\ParameterBag;
 use Xfrocks\Api\Util\PageNav;
 
@@ -146,27 +145,25 @@ class Conversation extends AbstractController
     /**
      * @param int $conversationId
      * @param array $extraWith
-     * @return ConversationMaster
+     * @return \XF\Entity\ConversationMaster
      * @throws \XF\Mvc\Reply\Exception
      */
     protected function assertViewableConversation($conversationId, array $extraWith = [])
     {
-        $visitor = \XF::visitor();
+        $extraWith[] = 'Users|' . \XF::visitor()->user_id;
 
-        /** @var \XF\Finder\ConversationUser $finder */
-        $finder = $this->finder('XF:ConversationUser');
-        $finder->forUser($visitor, false);
-        $finder->where('conversation_id', $conversationId);
-        $finder->with($extraWith);
+        /** @var \XF\Entity\ConversationMaster $conversation */
+        $conversation = $this->assertRecordExists(
+            'XF:ConversationMaster',
+            $conversationId,
+            $extraWith,
+            'requested_conversation_not_found'
+        );
 
-        /** @var \XF\Entity\ConversationUser|null $conversation */
-        $conversation = $finder->fetchOne();
-        /** @var ConversationMaster|null $convoMaster */
-        $convoMaster = $conversation ? $conversation->Master : null;
-        if (!$conversation || !$convoMaster) {
-            throw $this->exception($this->notFound(\XF::phrase('requested_conversation_not_found')));
+        if (!$conversation->canView($error)) {
+            throw $this->exception($this->noPermission($error));
         }
 
-        return $conversation->Master;
+        return $conversation;
     }
 }

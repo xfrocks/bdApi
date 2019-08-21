@@ -189,6 +189,8 @@ class Forum extends AbstractNode
      */
     protected function assertViewableForum($forumId, array $extraWith = [])
     {
+        $extraWith[] = 'Node.Permissions|' . \XF::visitor()->permission_combination_id;
+
         /** @var \XF\Entity\Forum $forum */
         $forum = $this->assertRecordExists('XF:Forum', $forumId, $extraWith);
         if (!$forum->canView($error)) {

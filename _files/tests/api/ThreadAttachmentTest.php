@@ -16,7 +16,7 @@ class ThreadAttachmentTest extends ApiTestCase
         parent::setUpBeforeClass();
 
         $token = static::postPassword(static::dataApiClient(), static::dataUserWithBypassFloodCheckPermission());
-        self::$accessTokenBypassFloodCheck = $token['access_token'];
+        static::$accessTokenBypassFloodCheck = $token['access_token'];
     }
 
     /**
@@ -35,9 +35,9 @@ class ThreadAttachmentTest extends ApiTestCase
             'PUT',
             "threads/{$threadId}",
             [
-                'body' => [
+                'form_params' => [
                     'attachment_hash' => $hash,
-                    'oauth_token' => self::$accessTokenBypassFloodCheck,
+                    'oauth_token' => static::$accessTokenBypassFloodCheck,
                     'post_body' => __METHOD__ . ' now with attachment',
                 ],
             ]
@@ -105,10 +105,10 @@ class ThreadAttachmentTest extends ApiTestCase
             'POST',
             'threads',
             [
-                'body' => [
+                'form_params' => [
                     'attachment_hash' => $hash,
                     'forum_id' => $forum['node_id'],
-                    'oauth_token' => self::$accessTokenBypassFloodCheck,
+                    'oauth_token' => static::$accessTokenBypassFloodCheck,
                     'post_body' => $method,
                     'thread_title' => $method,
                 ],
@@ -124,7 +124,7 @@ class ThreadAttachmentTest extends ApiTestCase
      */
     private function postThreadsAttachments($hash = '')
     {
-        $accessToken = self::$accessTokenBypassFloodCheck;
+        $accessToken = static::$accessTokenBypassFloodCheck;
         $fileName = 'white.png';
         $forum = static::dataForum();
 
@@ -132,8 +132,12 @@ class ThreadAttachmentTest extends ApiTestCase
             'POST',
             "threads/attachments?attachment_hash={$hash}&forum_id={$forum['node_id']}&oauth_token={$accessToken}",
             [
-                'body' => [
-                    'file' => fopen(__DIR__ . "/files/{$fileName}", 'r')
+                'multipart' => [
+                    [
+                        'name' => 'file',
+                        'contents' => fopen(__DIR__ . "/files/{$fileName}", 'r'),
+                        'filename' => $fileName,
+                    ],
                 ]
             ]
         );

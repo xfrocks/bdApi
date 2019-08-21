@@ -5,7 +5,7 @@
     "sub_options": [],
     "validation_class": "",
     "validation_method": "",
-    "default_value": "",
+    "default_value": "0",
     "relations": {
         "bdApi": 10
     }

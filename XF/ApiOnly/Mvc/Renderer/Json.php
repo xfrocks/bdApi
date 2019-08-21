@@ -153,6 +153,8 @@ class Json extends XFCP_Json
                 } else {
                     $value = $this->renderErrors([\XF::phrase('unexpected_error_occurred')]);
                     $this->setResponseCode(500);
+
+                    \XF::logException($e);
                     $throwable = null;
                 }
             }

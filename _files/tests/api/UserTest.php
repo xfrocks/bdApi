@@ -16,7 +16,7 @@ class UserTest extends ApiTestCase
         parent::setUpBeforeClass();
 
         $token = static::postPassword(static::dataApiClient(), static::dataUser());
-        self::$accessToken = $token['access_token'];
+        static::$accessToken = $token['access_token'];
     }
 
     /**
@@ -26,11 +26,7 @@ class UserTest extends ApiTestCase
     {
         $user = static::dataUser();
 
-        $jsonUsers = static::httpRequestJson('GET', 'users', [
-            'query' => [
-                'oauth_token' => self::$accessToken
-            ]
-        ]);
+        $jsonUsers = static::httpRequestJson('GET', 'users?oauth_token=' . static::$accessToken);
         static::assertArrayHasKey('users', $jsonUsers);
 
         // test exclude fields.
@@ -47,13 +43,7 @@ class UserTest extends ApiTestCase
         foreach ($excludeFields as $excludeField) {
             $jsonUser = static::httpRequestJson(
                 'GET',
-                'users/' . $user['user_id'],
-                [
-                    'query' => [
-                        'oauth_token' => self::$accessToken,
-                        'exclude_field' => $excludeField ?: null
-                    ]
-                ]
+                "users/{$user['user_id']}?exclude_field={$excludeField}&oauth_token=" . static::$accessToken
             );
 
             static::assertArrayHasKey('user', $jsonUser);
@@ -78,11 +68,11 @@ class UserTest extends ApiTestCase
             'POST',
             'users',
             [
-                'body' => [
+                'form_params' => [
                     'user_email' => $userEmail,
                     'username' => $username,
                     'password' => '123456',
-                    'oauth_token' => self::$accessToken
+                    'oauth_token' => static::$accessToken
                 ]
             ]
         );
@@ -108,8 +98,8 @@ class UserTest extends ApiTestCase
             'PUT',
             'users/' . $user['user_id'],
             [
-                'body' => [
-                    'oauth_token' => self::$accessToken
+                'form_params' => [
+                    'oauth_token' => static::$accessToken
                 ]
             ]
         );

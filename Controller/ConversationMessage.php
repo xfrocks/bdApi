@@ -6,21 +6,12 @@ use XF\Entity\ConversationMaster;
 use XF\Mvc\ParameterBag;
 use XF\Service\Conversation\MessageEditor;
 use XF\Service\Conversation\Replier;
+use Xfrocks\Api\ControllerPlugin\Like;
 use Xfrocks\Api\Data\Params;
-use Xfrocks\Api\Transform\TransformContext;
-use Xfrocks\Api\Util\BackwardCompat21;
 use Xfrocks\Api\Util\PageNav;
 
-class ConversationMessage extends AbstractController
+class ConversationMessage extends Conversation
 {
-    public function preDispatch($action, ParameterBag $params)
-    {
-        parent::preDispatch($action, $params);
-
-        $this->assertApiScope('conversate');
-        $this->assertRegistrationRequired();
-    }
-
     /**
      * @param ParameterBag $params
      * @return \Xfrocks\Api\Mvc\Reply\Api
@@ -61,7 +52,8 @@ class ConversationMessage extends AbstractController
 
         $total = $finder->total();
 
-        $this->params()->getTransformContext()->onTransformEntitiesCallbacks[] = function ($context, $entities) use ($conversation) {
+        $tc = $this->params()->getTransformContext();
+        $tc->onTransformEntitiesCallbacks[] = function ($_, $entities) use ($conversation) {
             $maxReadDate = 0;
             foreach ($entities as $entity) {
                 if (!$entity instanceof \XF\Entity\ConversationMessage) {
@@ -304,24 +296,9 @@ class ConversationMessage extends AbstractController
     {
         $message = $this->assertViewableMessage($params->message_id);
 
-        $finder = $message->getRelationFinder(BackwardCompat21::getLikesRelation());
-        $finder->with(BackwardCompat21::getLikerRelation());
-
-        $users = [];
-
-        /** @var \XF\Mvc\Entity\Entity $liked */
-        foreach ($finder->fetch() as $liked) {
-            /** @var \XF\Entity\User $liker */
-            $liker = $liked->getRelation(BackwardCompat21::getLikerRelation());
-
-            $users[] = [
-                'user_id' => $liker->user_id,
-                'username' => $liker->username
-            ];
-        }
-
-        $data = ['users' => $users];
-        return $this->api($data);
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionGetLikes($message);
     }
 
     /**
@@ -333,18 +310,9 @@ class ConversationMessage extends AbstractController
     {
         $message = $this->assertViewableMessage($params->message_id);
 
-        if (!BackwardCompat21::canLike($message, $error)) {
-            return $this->noPermission($error);
-        }
-
-        $visitor = \XF::visitor();
-        if (!BackwardCompat21::isLiked($message)) {
-            /** @var \XF\Repository\LikedContent $likeRepo */
-            $likeRepo = $this->repository('XF:LikedContent');
-            $likeRepo->toggleLike('conversation_message', $message->message_id, $visitor);
-        }
-
-        return $this->message(\XF::phrase('changes_saved'));
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionToggleLike($message, true);
     }
 
     /**
@@ -356,18 +324,9 @@ class ConversationMessage extends AbstractController
     {
         $message = $this->assertViewableMessage($params->message_id);
 
-        if (!BackwardCompat21::canLike($message, $error)) {
-            return $this->noPermission($error);
-        }
-
-        $visitor = \XF::visitor();
-        if (BackwardCompat21::isLiked($message)) {
-            /** @var \XF\Repository\LikedContent $likeRepo */
-            $likeRepo = $this->repository('XF:LikedContent');
-            $likeRepo->toggleLike('conversation_message', $message->message_id, $visitor);
-        }
-
-        return $this->message(\XF::phrase('changes_saved'));
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionToggleLike($message, false);
     }
 
     /**
@@ -378,40 +337,21 @@ class ConversationMessage extends AbstractController
      */
     protected function assertViewableMessage($messageId, array $extraWith = [])
     {
+        $extraWith[] = 'Conversation.Users|' . \XF::visitor()->user_id;
+
         /** @var \XF\Entity\ConversationMessage $message */
-        $message = $this->assertRecordExists('XF:ConversationMessage', $messageId, $extraWith);
+        $message = $this->assertRecordExists(
+            'XF:ConversationMessage',
+            $messageId,
+            $extraWith,
+            'requested_message_not_found'
+        );
+
         if (!$message->canView($error)) {
             throw $this->exception($this->noPermission($error));
         }
 
         return $message;
-    }
-
-    /**
-     * @param int $conversationId
-     * @param array $extraWith
-     * @return ConversationMaster
-     * @throws \XF\Mvc\Reply\Exception
-     */
-    protected function assertViewableConversation($conversationId, array $extraWith = [])
-    {
-        $visitor = \XF::visitor();
-
-        /** @var \XF\Finder\ConversationUser $finder */
-        $finder = $this->finder('XF:ConversationUser');
-        $finder->forUser($visitor, false);
-        $finder->where('conversation_id', $conversationId);
-        $finder->with($extraWith);
-
-        /** @var \XF\Entity\ConversationUser|null $conversation */
-        $conversation = $finder->fetchOne();
-        /** @var ConversationMaster|null $convoMaster */
-        $convoMaster = $conversation ? $conversation->Master : null;
-        if (!$conversation || !$convoMaster) {
-            throw $this->exception($this->notFound(\XF::phrase('requested_conversation_not_found')));
-        }
-
-        return $conversation->Master;
     }
 
     /**

@@ -6,7 +6,7 @@ use XF\Entity\ProfilePostComment;
 use XF\Mvc\ParameterBag;
 use XF\Service\ProfilePostComment\Creator;
 use XF\Service\ProfilePostComment\Deleter;
-use Xfrocks\Api\Util\BackwardCompat21;
+use Xfrocks\Api\ControllerPlugin\Like;
 
 class ProfilePost extends AbstractController
 {
@@ -91,24 +91,9 @@ class ProfilePost extends AbstractController
     {
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
 
-        $finder = $profilePost->getRelationFinder(BackwardCompat21::getLikesRelation());
-        $finder->with(BackwardCompat21::getLikerRelation());
-
-        $users = [];
-
-        /** @var \XF\Mvc\Entity\Entity $liked */
-        foreach ($finder->fetch() as $liked) {
-            /** @var \XF\Entity\User $liker */
-            $liker = $liked->getRelation(BackwardCompat21::getLikerRelation());
-
-            $users[] = [
-                'user_id' => $liker->user_id,
-                'username' => $liker->username
-            ];
-        }
-
-        $data = ['users' => $users];
-        return $this->api($data);
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionGetLikes($profilePost);
     }
 
     /**
@@ -120,18 +105,9 @@ class ProfilePost extends AbstractController
     {
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
 
-        if (!BackwardCompat21::canLike($profilePost, $error)) {
-            return $this->noPermission($error);
-        }
-
-        $visitor = \XF::visitor();
-        if (!BackwardCompat21::isLiked($profilePost)) {
-            /** @var \XF\Repository\LikedContent $likeRepo */
-            $likeRepo = $this->repository('XF:LikedContent');
-            $likeRepo->toggleLike('profile_post', $profilePost->profile_post_id, $visitor);
-        }
-
-        return $this->message(\XF::phrase('changes_saved'));
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionToggleLike($profilePost, true);
     }
 
     /**
@@ -143,18 +119,9 @@ class ProfilePost extends AbstractController
     {
         $profilePost = $this->assertViewableProfilePost($paramBag->profile_post_id);
 
-        if (!BackwardCompat21::canLike($profilePost, $error)) {
-            return $this->noPermission($error);
-        }
-
-        $visitor = \XF::visitor();
-        if (BackwardCompat21::isLiked($profilePost)) {
-            /** @var \XF\Repository\LikedContent $likeRepo */
-            $likeRepo = $this->repository('XF:LikedContent');
-            $likeRepo->toggleLike('profile_post', $profilePost->profile_post_id, $visitor);
-        }
-
-        return $this->message(\XF::phrase('changes_saved'));
+        /** @var Like $likePlugin */
+        $likePlugin = $this->plugin('Xfrocks\Api:Like');
+        return $likePlugin->actionToggleLike($profilePost, true);
     }
 
     /**
@@ -373,21 +340,22 @@ class ProfilePost extends AbstractController
     /**
      * @param int $commentId
      * @param array $extraWith
-     * @return \XF\Entity\ProfilePostComment
+     * @return ProfilePostComment
      * @throws \XF\Mvc\Reply\Exception
      */
     protected function assertViewableComment($commentId, array $extraWith = [])
     {
         $extraWith[] = 'User';
-        $extraWith[] = 'ProfilePost.ProfileUser';
         $extraWith[] = 'ProfilePost.ProfileUser.Privacy';
-        array_unique($extraWith);
 
-        /** @var \XF\Entity\ProfilePostComment|null $comment */
-        $comment = $this->em()->find('XF:ProfilePostComment', $commentId, $extraWith);
-        if (!$comment) {
-            throw $this->exception($this->notFound(\XF::phrase('requested_comment_not_found')));
-        }
+        /** @var ProfilePostComment $comment */
+        $comment = $this->assertRecordExists(
+            'XF:ProfilePostComment',
+            $commentId,
+            $extraWith,
+            'requested_comment_not_found'
+        );
+
         if (!$comment->canView($error)) {
             throw $this->exception($this->noPermission($error));
         }
@@ -404,15 +372,16 @@ class ProfilePost extends AbstractController
     protected function assertViewableProfilePost($profilePostId, array $extraWith = [])
     {
         $extraWith[] = 'User';
-        $extraWith[] = 'ProfileUser';
         $extraWith[] = 'ProfileUser.Privacy';
-        array_unique($extraWith);
 
-        /** @var \XF\Entity\ProfilePost|null $profilePost */
-        $profilePost = $this->em()->find('XF:ProfilePost', $profilePostId, $extraWith);
-        if (!$profilePost) {
-            throw $this->exception($this->notFound(\XF::phrase('requested_profile_post_not_found')));
-        }
+        /** @var \XF\Entity\ProfilePost $profilePost */
+        $profilePost = $this->assertRecordExists(
+            'XF:ProfilePost',
+            $profilePostId,
+            $extraWith,
+            'requested_profile_post_not_found'
+        );
+
         if (!$profilePost->canView($error)) {
             throw $this->exception($this->noPermission($error));
         }

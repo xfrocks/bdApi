@@ -16,7 +16,7 @@ class ThreadTest extends ApiTestCase
         parent::setUpBeforeClass();
 
         $token = static::postPassword(static::dataApiClient(), static::dataUserWithBypassFloodCheckPermission());
-        self::$accessTokenBypassFloodCheck = $token['access_token'];
+        static::$accessTokenBypassFloodCheck = $token['access_token'];
     }
 
     /**
@@ -28,13 +28,7 @@ class ThreadTest extends ApiTestCase
 
         $jsonThreads = static::httpRequestJson(
             'GET',
-            'threads',
-            [
-                'query' => [
-                    'forum_id' => $forum['node_id'],
-                    'oauth_token' => self::$accessTokenBypassFloodCheck
-                ]
-            ]
+            "threads?forum_id={$forum['node_id']}&oauth_token=" . static::$accessTokenBypassFloodCheck
         );
         static::assertArrayHasKey('threads', $jsonThreads);
 
@@ -48,13 +42,7 @@ class ThreadTest extends ApiTestCase
         foreach ($excludeFields as $excludeField) {
             $jsonThread = static::httpRequestJson(
                 'GET',
-                'threads/' . $thread['thread_id'],
-                [
-                    'query' => [
-                        'oauth_token' => self::$accessTokenBypassFloodCheck,
-                        'exclude_field' => $excludeField ?: null
-                    ]
-                ]
+                "threads/{$thread['thread_id']}?exclude_fields={$excludeField}&oauth_token=" . static::$accessTokenBypassFloodCheck
             );
 
             static::assertArrayHasKey('thread', $jsonThread);
@@ -75,9 +63,9 @@ class ThreadTest extends ApiTestCase
             'POST',
             'threads',
             [
-                'body' => [
+                'form_params' => [
                     'forum_id' => $forum['node_id'],
-                    'oauth_token' => self::$accessTokenBypassFloodCheck,
+                    'oauth_token' => static::$accessTokenBypassFloodCheck,
                     'post_body' => str_repeat(__METHOD__ . ' ', 10),
                     'thread_title' => __METHOD__,
                 ],
@@ -99,7 +87,7 @@ class ThreadTest extends ApiTestCase
             'PUT',
             'threads/' . $thread['thread_id'],
             [
-                'body' => [
+                'form_params' => [
                     'post_body' => str_repeat(__METHOD__ . ' ', 10),
                     'oauth_token' => $token['access_token']
                 ]

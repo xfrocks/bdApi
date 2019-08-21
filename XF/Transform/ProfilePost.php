@@ -4,7 +4,6 @@ namespace Xfrocks\Api\XF\Transform;
 
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\TransformContext;
-use Xfrocks\Api\Util\BackwardCompat21;
 
 class ProfilePost extends AbstractHandler
 {
@@ -36,8 +35,8 @@ class ProfilePost extends AbstractHandler
             'user_id' => self::KEY_POSTER_USER_ID,
             'username' => self::KEY_POSTER_USERNAME,
             'post_date' => self::KEY_POST_CREATE_DATE,
-            BackwardCompat21::getLikesColumn() => self::KEY_POST_LIKE_COUNT,
             'comment_count' => self::KEY_POST_COMMENT_COUNT,
+            'reaction_score' => self::KEY_POST_LIKE_COUNT,
 
             self::DYNAMIC_KEY_POST_BODY,
             self::DYNAMIC_KEY_TIMELINE_USER_ID,
@@ -66,7 +65,7 @@ class ProfilePost extends AbstractHandler
             case self::DYNAMIC_KEY_POST_IS_DELETED:
                 return $profilePost->message_state === 'deleted';
             case self::DYNAMIC_KEY_POST_IS_LIKED:
-                return BackwardCompat21::isLiked($profilePost);
+                return $profilePost->isReactedTo();
             case self::DYNAMIC_KEY_USER_IS_IGNORED:
                 return $profilePost->isIgnored();
         }
@@ -108,7 +107,7 @@ class ProfilePost extends AbstractHandler
             self::PERM_VIEW => $profilePost->canView(),
             self::PERM_EDIT => $profilePost->canEdit(),
             self::PERM_DELETE => $profilePost->canDelete(),
-            self::PERM_LIKE => BackwardCompat21::canLike($profilePost),
+            self::PERM_LIKE => $profilePost->canReact(),
             self::PERM_REPORT => $profilePost->canReport(),
             self::PERM_COMMENT => $profilePost->canComment()
         ];

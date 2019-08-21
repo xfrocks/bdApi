@@ -16,7 +16,7 @@ class PostTest extends ApiTestCase
         parent::setUpBeforeClass();
 
         $token = static::postPassword(static::dataApiClient(), static::dataUser());
-        self::$accessToken = $token['access_token'];
+        static::$accessToken = $token['access_token'];
     }
 
     /**
@@ -28,13 +28,7 @@ class PostTest extends ApiTestCase
 
         $jsonPosts = static::httpRequestJson(
             'GET',
-            'posts',
-            [
-                'query' => [
-                    'thread_id' => $thread['thread_id'],
-                    'oauth_token' => self::$accessToken
-                ]
-            ]
+            "posts?thread_id={$thread['thread_id']}&oauth_token=" . static::$accessToken
         );
         static::assertArrayHasKey('posts', $jsonPosts);
 
@@ -49,13 +43,7 @@ class PostTest extends ApiTestCase
         foreach ($excludeFields as $excludeField) {
             $jsonPost = static::httpRequestJson(
                 'GET',
-                'posts/' . $post['post_id'],
-                [
-                    'query' => [
-                        'oauth_token' => self::$accessToken,
-                        'exclude_field' => $excludeField
-                    ]
-                ]
+                "posts/{$post['post_id']}?exclude_field={$excludeField}&oauth_token=" . static::$accessToken
             );
 
             static::assertArrayHasKey('post', $jsonPost);
@@ -76,8 +64,8 @@ class PostTest extends ApiTestCase
             'POST',
             'posts',
             [
-                'body' => [
-                    'oauth_token' => self::$accessToken,
+                'form_params' => [
+                    'oauth_token' => static::$accessToken,
                     'thread_id' => $thread['thread_id'],
                     'post_body' => str_repeat(__METHOD__ . ' ', 10)
                 ]
@@ -98,8 +86,8 @@ class PostTest extends ApiTestCase
             'PUT',
             'posts/' . $post['post_id'],
             [
-                'body' => [
-                    'oauth_token' => self::$accessToken,
+                'form_params' => [
+                    'oauth_token' => static::$accessToken,
                     'post_body' => str_repeat(__METHOD__ . ' ', 10)
                 ]
             ]

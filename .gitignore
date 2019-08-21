@@ -1,9 +1,5 @@
-/DevHelper/Admin/Controller/Entity.php
 /DevHelper/autogen.json
 /_build/
 /_data/
-/_output/templates/admin/bdapi_entity_delete.html
-/_output/templates/admin/bdapi_entity_edit.html
-/_output/templates/admin/bdapi_entity_list.html
 /_releases/
 /vendor/

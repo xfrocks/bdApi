@@ -631,7 +631,9 @@ class Thread extends AbstractController
      */
     protected function assertViewableForum($forumId, array $extraWith = [])
     {
-        /** @var \XF\Entity\Forum $forum */
+        $extraWith[] = 'Node.Permissions|' . \XF::visitor()->permission_combination_id;
+
+        /** @var Forum $forum */
         $forum = $this->assertRecordExists('XF:Forum', $forumId, $extraWith, 'requested_forum_not_found');
 
         if (!$forum->canView($error)) {
@@ -649,6 +651,8 @@ class Thread extends AbstractController
      */
     protected function assertViewableThread($threadId, array $extraWith = [])
     {
+        $extraWith[] = 'Forum.Node.Permissions|' . \XF::visitor()->permission_combination_id;
+
         /** @var \XF\Entity\Thread $thread */
         $thread = $this->assertRecordExists('XF:Thread', $threadId, $extraWith, 'requested_thread_not_found');
 

@@ -5,7 +5,6 @@ namespace Xfrocks\Api\XF\Transform;
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\AttachmentParent;
 use Xfrocks\Api\Transform\TransformContext;
-use Xfrocks\Api\Util\BackwardCompat21;
 
 class ConversationMessage extends AbstractHandler implements AttachmentParent
 {
@@ -116,7 +115,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
             case self::DYNAMIC_KEY_BODY_PLAIN:
                 return $this->renderBbCodePlainText($message->message);
             case self::DYNAMIC_KEY_IS_LIKED:
-                return BackwardCompat21::isLiked($message);
+                return $message->isReactedTo();
             case self::DYNAMIC_KEY_SIGNATURE:
                 if ($message->user_id < 1) {
                     return null;
@@ -196,7 +195,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
             self::PERM_REPLY => $message->Conversation->canReply(),
             self::PERM_UPLOAD_ATTACHMENT => $message->Conversation->canUploadAndManageAttachments(),
 
-            self::PERM_LIKE => BackwardCompat21::canLike($message),
+            self::PERM_LIKE => $message->canReact(),
         ];
 
         return $perms;

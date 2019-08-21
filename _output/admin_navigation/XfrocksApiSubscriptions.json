@@ -5,5 +5,6 @@
     "icon": "",
     "admin_permission_id": "bdApi",
     "debug_only": false,
+    "development_only": false,
     "hide_no_children": false
 }

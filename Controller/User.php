@@ -251,7 +251,7 @@ class User extends AbstractController
             if ($isAdmin && $visitor->user_id !== $user->user_id) {
                 $isAuth = true;
             } elseif ($params['password_old'] !== '') {
-                /** @var \XF\Entity\UserAuth|null $userAuth */
+                /** @var UserAuth|null $userAuth */
                 $userAuth = $user->Auth;
                 if ($userAuth) {
                     $passwordOld = $params['password_algo'] === '' ?

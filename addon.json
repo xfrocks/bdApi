@@ -2,13 +2,18 @@
     "legacy_addon_id": "bdApi",
     "title": "[bd] API",
     "description": "",
-    "version_id": 2000034,
-    "version_string": "2.0.0 Beta 4",
+    "version_id": 2000037,
+    "version_string": "2.0.0 Beta 7",
     "dev": "",
     "dev_url": "",
     "faq_url": "",
     "support_url": "",
     "extra_urls": [],
-    "require": [],
+    "require": {
+        "XF": [
+            2010000,
+            "XenForo 2.1.0"
+        ]
+    },
     "icon": ""
 }

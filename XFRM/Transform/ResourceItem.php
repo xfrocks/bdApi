@@ -5,7 +5,6 @@ namespace Xfrocks\Api\XFRM\Transform;
 use Xfrocks\Api\Transform\AbstractHandler;
 use Xfrocks\Api\Transform\AttachmentParent;
 use Xfrocks\Api\Transform\TransformContext;
-use Xfrocks\Api\Util\BackwardCompat21;
 use Xfrocks\Api\Util\ParentFinder;
 
 class ResourceItem extends AbstractHandler implements AttachmentParent
@@ -136,11 +135,11 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
 
                 return isset($resourceItem->Watch[$userId]);
             case self::DYNAMIC_KEY_IS_LIKED:
-                return BackwardCompat21::isLiked($resourceItem->Description);
+                return $resourceItem->Description->isReactedTo();
             case self::DYNAMIC_KEY_IS_PUBLISHED:
                 return $resourceItem->resource_state === 'visible';
             case self::DYNAMIC_KEY_LIKE_COUNT:
-                return $resourceItem->Description->get(BackwardCompat21::getLikesColumn());
+                return $resourceItem->Description->get('reaction_score');
             case self::DYNAMIC_KEY_PRICE:
                 return strlen($resourceItem->external_purchase_url) > 0 ? $resourceItem->price : null;
             case self::DYNAMIC_KEY_RATING:
@@ -222,7 +221,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
             self::PERM_DOWNLOAD => $resourceItem->canDownload(),
             self::PERM_EDIT => $resourceItem->canEdit(),
             self::PERM_FOLLOW => $resourceItem->canWatch(),
-            self::PERM_LIKE => BackwardCompat21::canLike($resourceItem->Description),
+            self::PERM_LIKE => $resourceItem->Description->canReact(),
             self::PERM_RATE => $resourceItem->canRate(),
             self::PERM_REPORT => $resourceItem->Description->canReport(),
         ];
@@ -310,7 +309,7 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
             }
 
             if (!$context->selectorShouldExcludeField(self::DYNAMIC_KEY_IS_LIKED)) {
-                $finder->with('Description.Likes|' . $userId);
+                $finder->with('Description.Reactions|' . $userId);
             }
         }
 
