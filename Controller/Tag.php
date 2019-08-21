@@ -138,11 +138,11 @@ class Tag extends AbstractController
     /**
      * @return \XF\Repository\Tag
      */
-      protected function tagRepo()
-      {
-          /** @var \XF\Repository\Tag $tagRepo */
-          $tagRepo = $this->repository('XF:Tag');
+    protected function tagRepo()
+    {
+        /** @var \XF\Repository\Tag $tagRepo */
+        $tagRepo = $this->repository('XF:Tag');
 
-          return $tagRepo;
-      }
+        return $tagRepo;
+    }
 }
