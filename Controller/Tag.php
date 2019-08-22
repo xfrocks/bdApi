@@ -30,6 +30,11 @@ class Tag extends AbstractController
         return $this->api($data);
     }
 
+    /**
+     * @param int $tagId
+     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\PrintableException
+     */
     public function actionSingle($tagId)
     {
         $params = $this->params()
