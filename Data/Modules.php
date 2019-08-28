@@ -40,6 +40,7 @@ class Modules
         $this->addController('Xfrocks:Post', 'posts', ':int<post_id>/');
         $this->addController('Xfrocks:Search', 'search', ':int<search_id>/');
         $this->addController('Xfrocks:Subscription', 'subscriptions', ':int<subscription_id>/');
+        $this->addController('Xfrocks:Tag', 'tags', ':int<tag_id>/');
         $this->addController('Xfrocks:Thread', 'threads', ':int<thread_id>/');
         $this->addController('Xfrocks:Tool', 'tools');
         $this->addController('Xfrocks:User', 'users', ':int<user_id>/');

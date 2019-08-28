@@ -59,6 +59,8 @@ class ThreadTest extends ApiTestCase
     {
         $forum = static::dataForum();
 
+        $randomTag = 'randomTag' . time();
+
         $json = static::httpRequestJson(
             'POST',
             'threads',
@@ -68,11 +70,23 @@ class ThreadTest extends ApiTestCase
                     'oauth_token' => static::$accessTokenBypassFloodCheck,
                     'post_body' => str_repeat(__METHOD__ . ' ', 10),
                     'thread_title' => __METHOD__,
+                    'thread_tags' => $randomTag
                 ],
             ]
         );
 
         static::assertArrayHasKey('thread', $json);
+
+        static::assertArrayHasKeyPath($json, 'thread', 'thread_tags');
+        static::assertNotEmpty($json['thread']['thread_tags']);
+
+        $tagIds = array_keys($json['thread']['thread_tags']);
+        $tagJson = static::httpRequestJson(
+            'GET',
+            "tags/${tagIds[0]}"
+        );
+
+        static::assertArrayHasKey('tag', $tagJson);
     }
 
     /**
