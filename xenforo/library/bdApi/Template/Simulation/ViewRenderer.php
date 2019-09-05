@@ -15,6 +15,7 @@ class bdApi_Template_Simulation_ViewRenderer extends XenForo_ViewRenderer_HtmlPu
     {
         if (self::$_bdApi_dependencies === null) {
             self::$_bdApi_dependencies = new bdApi_Template_Simulation_Dependencies();
+            self::$_bdApi_dependencies->preRenderView();
         }
 
         if (self::$_bdApi_request === null) {

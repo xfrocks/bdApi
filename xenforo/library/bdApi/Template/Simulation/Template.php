@@ -89,7 +89,6 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
         }
 
         $params['isApiTemplateSimulation'] = true;
-        $params['xenOptions'] = XenForo_Application::getOptions()->getOptions();
 
         parent::__construct(sprintf('__%s_%d', $templateName, $languageId), $params);
     }
