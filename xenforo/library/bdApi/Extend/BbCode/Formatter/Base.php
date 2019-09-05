@@ -8,7 +8,7 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
     protected $_bdApiChr = null;
 
     /** @var string */
-    protected $_bdApiMediaHtmlTagsRegEx = '#<(audio|canvas|embed|iframe|object|video)(\s|>)#i';
+    protected $_bdApiMediaHtmlTagsRegEx = '#<(audio|canvas|embed|iframe|object|source|video)(\s|>)#i';
 
     /** @var bdApi_Template_Simulation_Template|null */
     protected $_bdApiNoNameTemplate;
@@ -54,12 +54,13 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
 
         $this->_bdApiTagCount++;
         $tagCount = $this->_bdApiTagCount;
-        $tagContext = md5($tagCount . rand());
-        $this->_bdApiNoNameTemplate->bdApi_setRequiredExternalContext($tagContext);
+        $template = $this->_bdApiNoNameTemplate;
+
+        $renderContext = $template->bdApi_setRenderContext('tag_' . $tag['tag']);
         $rendered = parent::renderValidTag($tagInfo, $tag, $rendererStates);
 
         if ($this->_bdApiTagCount === $tagCount && preg_match($this->_bdApiMediaHtmlTagsRegEx, $rendered)) {
-            $requiredExternals = $this->_bdApiNoNameTemplate->bdApi_getRequiredExternalsByContext($tagContext);
+            $requiredExternals = $template->bdApi_unsetAndGetRequiredExternalsByContext($renderContext);
             return $this->_bdApi_renderCHR($rendered, $requiredExternals);
         }
 
@@ -94,10 +95,8 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
         if ($this->_bdApiNoNameTemplate !== null) {
             $requiredExternalsHtml = $this->_bdApiNoNameTemplate->getRequiredExternalsAsHtmlForApi();
             if (strlen($requiredExternalsHtml) > 0) {
-                $rendered = sprintf('<!--%s-->%s', preg_replace('/(\n|\t)/', '', $requiredExternalsHtml), $rendered);
+                $rendered = sprintf('<!--%s-->%s', preg_replace('/([\n\t])/', '', $requiredExternalsHtml), $rendered);
             }
-
-            $this->_bdApiNoNameTemplate->bdApi_clearRequiredExternalsByContext();
         }
 
         return $rendered;
@@ -105,11 +104,20 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
 
     protected function _bdApi_renderCHR($html, array $requiredExternals)
     {
+        $requiredArray = array();
+        foreach ($requiredExternals as $type => $values) {
+            if ($type === 'js' || $type === 'css') {
+                $requiredArray[$type] = array_keys($values);
+            } else {
+                $requiredArray[$type] = array_values($values);
+            }
+        }
+
         $linkTimestamp = time() + 86400;
         $linkParams = array(
             'html' => bdApi_Crypt::encryptTypeOne($html, $linkTimestamp),
-            'required' => count($requiredExternals) > 0
-                ? bdApi_Crypt::encryptTypeOne(json_encode($requiredExternals), $linkTimestamp) : '',
+            'required' => count($requiredArray) > 0
+                ? bdApi_Crypt::encryptTypeOne(json_encode($requiredArray), $linkTimestamp) : '',
             'timestamp' => $linkTimestamp,
         );
         $href = bdApi_Data_Helper_Core::safeBuildApiLink('tools/chr', null, $linkParams);
@@ -119,6 +127,7 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
 
         if (preg_match('#data-chr-thumbnail="([^"]+)"#', $html, $thumbnailMatches)) {
             $attributes .= ' ' . $thumbnailMatches[0];
+            /** @noinspection HtmlRequiredAltAttribute, HtmlUnknownTarget */
             $label = sprintf('<img src="%s" />', $thumbnailMatches[1]);
         }
         if (preg_match('#https?://([^/]+)/#', $html, $domainMatches)) {
@@ -132,6 +141,7 @@ class bdApi_Extend_BbCode_Formatter_Base extends XFCP_bdApi_Extend_BbCode_Format
             $label = md5($html);
         }
 
+        /** @noinspection HtmlUnknownAttribute, HtmlUnknownTarget */
         return sprintf(
             "<div style=\"text-align: center\"><a %s href=\"%s\">%s</a></div><br />\n",
             $attributes,

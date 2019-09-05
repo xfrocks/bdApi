@@ -6,8 +6,10 @@ class bdApi_ViewPublic_Misc_Api_Chr extends XenForo_ViewPublic_Base
     {
         $template = $this->createTemplateObject('');
         foreach ($this->_params['required'] as $type => $requirements) {
-            foreach ($requirements as $requirement) {
-                $template->addRequiredExternal($type, $requirement);
+            if ($type === 'css' || $type === 'js') {
+                foreach ($requirements as $requirement) {
+                    $template->addRequiredExternal($type, $requirement);
+                }
             }
         }
     }

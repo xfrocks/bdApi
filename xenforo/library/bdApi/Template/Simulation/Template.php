@@ -4,41 +4,76 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
 {
     public static $bdApi_visitor = null;
 
-    protected static $_bdApi_requiredExternalActiveContext = null;
-    protected static $_bdApi_requiredExternalsByContext = array();
+    protected static $_bdApi_renderContexts = array();
+    protected static $_bdApi_renderContextCount = 0;
+    protected static $_bdApi_renderContextData = array();
 
-    public function bdApi_clearRequiredExternalsByContext()
+    /**
+     * @param string $prefix
+     * @return string
+     */
+    public function bdApi_setRenderContext($prefix = '')
     {
-        self::$_bdApi_requiredExternalsByContext = array();
+        self::$_bdApi_renderContextCount++;
+        $context = sprintf('%s_%d', $prefix, self::$_bdApi_renderContextCount);
+        self::$_bdApi_renderContexts[] = $context;
+
+        return $context;
     }
 
-    public function bdApi_getRequiredExternalsByContext($context)
+    public function bdApi_unsetAndGetRequiredExternalsByContext($context)
     {
-        $ref =& self::$_bdApi_requiredExternalsByContext;
-        if (!isset($ref[$context])) {
-            return array();
-        }
+        $ref =& self::$_bdApi_renderContextData;
+        $unset = $this->bdApi_unsetRenderContext($context);
+        $result = array();
 
-        $result = $ref[$context];
-        unset($ref[$context]);
+        foreach ($unset as $unsetContext) {
+            if (empty($ref[$unsetContext])) {
+                continue;
+            }
+
+            foreach ($ref[$unsetContext] as $type => $values) {
+                if (!isset($result[$type])) {
+                    $result[$type] = array();
+                }
+                $result[$type] += $values;
+            }
+
+            unset($ref[$unsetContext]);
+        }
 
         return $result;
     }
 
-    public function bdApi_setRequiredExternalContext($context)
+    /**
+     * @param string $context
+     * @return array
+     */
+    public function bdApi_unsetRenderContext($context)
     {
-        self::$_bdApi_requiredExternalActiveContext = $context;
+        $unset = array();
+        while (true) {
+            $last = array_pop(self::$_bdApi_renderContexts);
+            if (is_string($last)) {
+                $unset[] = $last;
+            }
+            if (empty($last) || $last === $context) {
+                break;
+            }
+        }
+
+        return $unset;
     }
 
     public function addRequiredExternal($type, $requirement)
     {
-        $context = self::$_bdApi_requiredExternalActiveContext;
-        if ($context !== null) {
-            $ref =& self::$_bdApi_requiredExternalsByContext;
+        $context = end(self::$_bdApi_renderContexts);
+        if (is_string($context)) {
+            $ref =& self::$_bdApi_renderContextData;
             if (empty($ref[$context][$type])) {
                 $ref[$context][$type] = array();
             }
-            $ref[$context][$type][] = $requirement;
+            $ref[$context][$type][$requirement] = true;
         }
 
         parent::addRequiredExternal($type, $requirement);
@@ -46,23 +81,46 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
 
     public function clearRequiredExternalsForApi()
     {
+        if (isset(self::$_extraData['head'])) {
+            unset(self::$_extraData['head']);
+        }
+
+        self::$_bdApi_renderContexts = array('root');
+        self::$_bdApi_renderContextData = array();
+
         $this->_setRequiredExternals(array());
     }
 
     public function getRequiredExternalsAsHtmlForApi()
     {
-        $required = $this->_getRequiredExternals();
-        $html = '';
+        $required = array();
 
-        $extraData = self::getExtraContainerData();
-        if (!empty($extraData['head'])) {
-            foreach ($extraData['head'] as $head) {
-                $html .= utf8_trim($head);
+        foreach (self::$_bdApi_renderContextData as $context => $contextData) {
+            foreach ($contextData as $type => $values) {
+                if (!isset($required[$type])) {
+                    $required[$type] = array();
+                }
+                $required[$type] += $values;
             }
         }
 
-        foreach (array_keys($required) as $type) {
-            $html .= $this->getRequiredExternalsAsHtml($type);
+        $html = '';
+
+        foreach (array('css', 'js', 'head') as $type) {
+            if (!isset($required[$type])) {
+                continue;
+            }
+            switch ($type) {
+                case 'css':
+                    $html .= $this->getRequiredCssAsHtml($this->getRequiredCssUrl(array_keys($required[$type])));
+                    break;
+                case 'head':
+                    $html .= implode('', $required[$type]);
+                    break;
+                case 'js':
+                    $html .= $this->getRequiredJavaScriptAsHtml(array_keys($required[$type]));
+                    break;
+            }
         }
 
         return $html;
@@ -143,5 +201,24 @@ class bdApi_Template_Simulation_Template extends XenForo_Template_Public
         } else {
             return '';
         }
+    }
+
+    protected function _mergeExtraContainerData(array $extraData)
+    {
+        if (isset($extraData['head'])) {
+            $context = end(self::$_bdApi_renderContexts);
+            if (is_string($context)) {
+                $ref =& self::$_bdApi_renderContextData;
+                $type = 'head';
+                if (empty($ref[$context][$type])) {
+                    $ref[$context][$type] = array();
+                }
+                foreach ($extraData['head'] as $key => $value) {
+                    $ref[$context][$type][$key] = utf8_trim($value);
+                }
+            }
+        }
+
+        parent::_mergeExtraContainerData($extraData);
     }
 }
