@@ -289,6 +289,9 @@ class PreTest extends Command
                      'bdApi_subscriptionThreadPost',
                      'bdApi_subscriptionUser',
                      'bdApi_subscriptionUserNotification',
+
+                     // for testing api tags
+                     'enableTagging'
                  ] as $optionName) {
             $optionRepo->updateOption($optionName, true);
         }
