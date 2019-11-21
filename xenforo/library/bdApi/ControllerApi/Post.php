@@ -686,6 +686,39 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));
     }
 
+    public function actionGetUnread()
+    {
+        $visitor = XenForo_Visitor::getInstance();
+        if ($visitor['user_id'] < 1) {
+            return $this->responseReroute(__CLASS__, 'get-index');
+        }
+
+        $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
+        list($thread, $forum) = $this->_getForumThreadPostHelper()->assertThreadValidAndViewable(
+            $threadId,
+            array('readUserId' => $visitor['user_id']),
+            array('readUserId' => $visitor['user_id'])
+        );
+
+        $readDate = $this->_getThreadModel()->getMaxThreadReadDate($thread, $forum);
+        $postModel = $this->_getPostModel();
+
+        $ignoredUserIds = (!empty($visitor['ignored']) ? XenForo_Helper_Php::safeUnserialize($visitor['ignored']) : array());
+        $ignoredUserIds = array_keys($ignoredUserIds);
+
+        $fetchOptions = $postModel->getPermissionBasedPostFetchOptions($thread, $forum);
+        $post = $postModel->getNextPostInThread($threadId, $readDate, $fetchOptions, $ignoredUserIds);
+        if (empty($post)) {
+            $post = $postModel->getLastPostInThread($threadId, $fetchOptions);
+        }
+
+        if (!empty($post)) {
+            $this->_request->setParam('page_of_post_id', $post['post_id']);
+        }
+
+        return $this->responseReroute(__CLASS__, 'get-index');
+    }
+
     protected function _prepareFetchOptionsForPageOfPost(
         array &$fetchOptions,
         array $pageOfPost,

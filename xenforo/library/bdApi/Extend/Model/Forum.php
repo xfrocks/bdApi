@@ -66,7 +66,11 @@ class bdApi_Extend_Model_Forum extends XFCP_bdApi_Extend_Model_Forum
 
     public function getFetchOptionsToPrepareApiData(array $fetchOptions = array())
     {
-        $fetchOptions['watchUserId'] = XenForo_Visitor::getUserId();
+        $visitorUserId = XenForo_Visitor::getUserId();
+        if ($visitorUserId > 0) {
+            $fetchOptions['readUserId'] = $visitorUserId;
+            $fetchOptions['watchUserId'] = $visitorUserId;
+        }
 
         if (!isset($fetchOptions[self::GET_THREAD_PREFIXES])) {
             $fetchOptions[self::GET_THREAD_PREFIXES] = true;

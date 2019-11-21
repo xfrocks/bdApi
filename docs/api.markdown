@@ -633,6 +633,7 @@ Detail information of a thread.
             user_is_ignored: (boolean), # since forum-2015072304
             thread_create_date: (unix timestamp in seconds),
             thread_update_date: (unix timestamp in seconds),
+            thread_is_new: (boolean), # since forum-2019112101
             thread_is_published: (boolean),
             thread_is_deleted: (boolean),
             thread_is_sticky: (boolean),
@@ -683,6 +684,7 @@ Detail information of a thread.
                 detail: (uri),
                 forum: (uri),
                 posts: (uri),
+                posts_unread: (uri), # since forum-2019112101
                 first_poster: (uri),
                 first_poster_avatar: (uri), # since forum-2016091201
                 first_post: (uri),
@@ -1224,6 +1226,17 @@ Parameters:
 Required scopes:
 
  * `post`
+
+### GET `/posts/unread`
+Alias for GET `/posts?page_of_post_id`. Since forum-2019112101.
+
+Parameters:
+
+ * `thread_id` (__required__)
+
+Required scopes:
+
+ * `read`
 
 ## Content Tagging
 

@@ -93,8 +93,12 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
             $fetchOptions['join'] |= XenForo_Model_Thread::FETCH_USER;
         }
 
-        $fetchOptions['watchUserId'] = XenForo_Visitor::getUserId();
-        $fetchOptions['replyBanUserId'] = XenForo_Visitor::getUserId();
+        $visitorUserId = XenForo_Visitor::getUserId();
+        if ($visitorUserId > 0) {
+            $fetchOptions['readUserId'] = $visitorUserId;
+            $fetchOptions['replyBanUserId'] = $visitorUserId;
+            $fetchOptions['watchUserId'] = $visitorUserId;
+        }
 
         return $fetchOptions;
     }
@@ -129,6 +133,9 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
             'username' => 'creator_username',
             'post_date' => 'thread_create_date',
             'last_post_date' => 'thread_update_date',
+
+            // XenForo_Model_Thread::prepareThread
+            'isNew' => 'thread_is_new',
         );
 
         $data = bdApi_Data_Helper_Core::filter($thread, $publicKeys);
@@ -220,6 +227,14 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
                 array('post_id' => $thread['first_post_id'])
             ),
         );
+
+        if (!empty($thread['isNew']) || !empty($thread['haveReadData'])) {
+            $data['links']['posts_unread'] = bdApi_Data_Helper_Core::safeBuildApiLink(
+                'posts/unread',
+                null,
+                array('thread_id' => $thread['thread_id'])
+            );
+        }
 
         if ($thread['last_post_user_id'] != $thread['user_id']) {
             $data['links']['last_poster'] = bdApi_Data_Helper_Core::safeBuildApiLink('users', array(
