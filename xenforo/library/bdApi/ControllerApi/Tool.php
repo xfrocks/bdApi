@@ -288,7 +288,9 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
         $dependencies = $fc->getDependencies();
 
         $request = new bdApi_Zend_Controller_Request_Http($link);
-        $request->setBaseUrl(parse_url(XenForo_Application::getOptions()->get('boardUrl'), PHP_URL_PATH));
+        $boardUrl = XenForo_Application::getOptions()->get('boardUrl');
+        $fullBoardUrl = $boardUrl . '/index.php';
+        $request->setBaseUrl(parse_url(0 === strpos($link, $fullBoardUrl) ? $fullBoardUrl : $boardUrl, PHP_URL_PATH));
 
         $routeMatch = $dependencies->routePublic($request);
         if (!$routeMatch OR !$routeMatch->getControllerName()) {
@@ -375,6 +377,20 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
                     $this->_request->setParam('tag_id', $tag['tag_id']);
                 }
                 return $this->responseReroute('bdApi_ControllerApi_Tag', 'get-index');
+            case 'XenForo_ControllerPublic_Goto':
+                switch ($routeMatch->getAction()) {
+                    case 'post':
+                        $postId = $request->getQuery('id');
+                        if (!empty($postId)) {
+                            $this->_request->setParam('page_of_post_id', $postId);
+                            return $this->responseReroute('bdApi_ControllerApi_Post', 'get-index');
+                        }
+                        break;
+                    case 'convMessage':
+                        // TODO
+                        break;
+                }
+                break;
         }
 
         return null;
