@@ -228,7 +228,7 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
             ),
         );
 
-        if (!empty($thread['isNew']) || !empty($thread['haveReadData'])) {
+        if (!empty($thread['haveReadData'])) {
             $data['links']['posts_unread'] = bdApi_Data_Helper_Core::safeBuildApiLink(
                 'posts/unread',
                 null,
