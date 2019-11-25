@@ -23,7 +23,7 @@ class Generic extends AbstractHandler
 
     public function canView(TransformContext $context)
     {
-        return true;
+        return false;
     }
 
     public function getMappings(TransformContext $context)
