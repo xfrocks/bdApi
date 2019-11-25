@@ -489,7 +489,7 @@ class Thread extends AbstractController
 
         /** @var \XF\Repository\Thread $threadRepo */
         $threadRepo = $this->repository('XF:Thread');
-        $finder = $threadRepo->findThreadsWithUnreadPosts();
+        $finder = $threadRepo->findThreadsWithLatestPosts();
 
         return $this->getNewOrRecentResponse('threads_recent', $finder);
     }
@@ -551,7 +551,7 @@ class Thread extends AbstractController
     /**
      * @param string $searchType
      * @param Finder $finder
-     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @return \XF\Mvc\Reply\Message|\XF\Mvc\Reply\Reroute
      * @throws \XF\Mvc\Reply\Exception
      * @throws \XF\PrintableException
      */
@@ -584,43 +584,26 @@ class Thread extends AbstractController
         }
 
         $totalResults = count($searchResults);
-        $search = null;
-        $results = [];
-
-        if ($totalResults > 0) {
-            /** @var \XF\Entity\Search $search */
-            $search = $this->em()->create('XF:Search');
-
-            $search->search_type = $searchType;
-            $search->search_results = $searchResults;
-            $search->result_count = $totalResults;
-            $search->search_order = 'date';
-            $search->user_id = 0;
-
-            $search->query_hash = md5(serialize($search->getNewValues()));
-
-            $search->save();
-
-            $searcher = $this->app()->search();
-            $resultSet = $searcher->getResultSet($search->search_results);
-
-            list($limit,) = $params->filterLimitAndPage();
-            $resultSet->sliceResultsToPage(1, $limit, false);
-
-            foreach ($resultSet->getResults() as $result) {
-                /** @var \XF\Entity\Thread $thread */
-                $thread = $threads[$result[1]];
-                $results[] = $this->transformEntityLazily($thread);
-            }
+        if ($totalResults === 0) {
+            return $this->message(\XF::phrase('no_results_found'));
         }
 
-        $data = [
-            'results' => $results
-        ];
+        /** @var \XF\Entity\Search $search */
+        $search = $this->em()->create('XF:Search');
 
-        PageNav::addLinksToData($data, $params, $totalResults, 'search/results', $search);
+        $search->search_type = $searchType;
+        $search->search_results = $searchResults;
+        $search->result_count = $totalResults;
+        $search->search_order = 'date';
+        $search->user_id = \XF::visitor()->user_id;
 
-        return $this->api($data);
+        $search->query_hash = md5(serialize($search->getNewValues()));
+
+        $search->save();
+
+        return $this->rerouteController('Xfrocks\Api\Controller\Search', 'get-results', [
+            'search_id' => $search->search_id
+        ]);
     }
 
     /**
