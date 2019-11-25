@@ -2,7 +2,7 @@
 
 <xf:wrap template="account_wrapper"/>
 
-<xf:pageaction if="{$canAddClient}">
+<xf:pageaction if="{$xf.visitor.canAddApiClient()}">
     <xf:button href="{{ link('account/api/client-add') }}" class="button--cta" data-xf-click="overlay" icon="add">
         {{ phrase('bdapi_client_add') }}
     </xf:button>

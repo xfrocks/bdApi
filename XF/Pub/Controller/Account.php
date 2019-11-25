@@ -7,6 +7,7 @@ use XF\Util\Random;
 use Xfrocks\Api\ControllerPlugin\Login;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\OAuth2\Server;
+use Xfrocks\Api\XF\Entity\User;
 
 class Account extends XFCP_Account
 {
@@ -22,7 +23,6 @@ class Account extends XFCP_Account
             ->fetch();
 
         $viewParams = [
-            'canAddClient' => $visitor->hasPermission('general', 'bdApi_clientNew'),
             'clients' => $clients
         ];
 
@@ -35,6 +35,12 @@ class Account extends XFCP_Account
      */
     public function actionApiClientAdd()
     {
+        /** @var User $visitor */
+        $visitor = \XF::visitor();
+        if (!$visitor->canAddApiClient()) {
+            return $this->noPermission();
+        }
+
         $viewParams = [
             'client' => $this->em()->create('Xfrocks\Api:Client')
         ];
@@ -96,6 +102,12 @@ class Account extends XFCP_Account
         if ($clientId !== '') {
             $client = $this->assertEditableApiClient($clientId);
         } else {
+            /** @var User $visitor */
+            $visitor = \XF::visitor();
+            if (!$visitor->canAddApiClient()) {
+                return $this->noPermission();
+            }
+
             /** @var Client $client */
             $client = $this->em()->create('Xfrocks\Api:Client');
         }

@@ -18,7 +18,7 @@ abstract class Entity extends \Xfrocks\Api\DevHelper\Admin\Controller\Entity
             return '';
         }
 
-        $user = $client->User;
+        $user = $entity->User;
         return $user ? sprintf('%s / %s', $client->name, $user->username) : $client->name;
     }
 
