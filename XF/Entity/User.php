@@ -6,6 +6,9 @@ use Xfrocks\Api\Repository\Subscription;
 
 class User extends XFCP_User
 {
+    /**
+     * @return bool
+     */
     public function canAddApiClient()
     {
         if ($this->hasPermission('general', 'bdApi_clientNew')) {

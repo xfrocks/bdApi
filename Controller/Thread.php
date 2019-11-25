@@ -455,7 +455,7 @@ class Thread extends AbstractController
     }
 
     /**
-     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @return \XF\Mvc\Reply\AbstractReply
      * @throws \XF\Mvc\Reply\Exception
      * @throws \XF\PrintableException
      */
@@ -476,7 +476,7 @@ class Thread extends AbstractController
     }
 
     /**
-     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @return \XF\Mvc\Reply\AbstractReply
      * @throws \XF\Mvc\Reply\Exception
      * @throws \XF\PrintableException
      */
@@ -551,7 +551,7 @@ class Thread extends AbstractController
     /**
      * @param string $searchType
      * @param Finder $finder
-     * @return \XF\Mvc\Reply\Message|\XF\Mvc\Reply\Reroute
+     * @return \XF\Mvc\Reply\AbstractReply
      * @throws \XF\Mvc\Reply\Exception
      * @throws \XF\PrintableException
      */

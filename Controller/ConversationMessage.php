@@ -227,7 +227,7 @@ class ConversationMessage extends Conversation
     }
 
     /**
-     * @return \XF\Mvc\Reply\Error|\Xfrocks\Api\Mvc\Reply\Api
+     * @return \XF\Mvc\Reply\AbstractReply
      * @throws \XF\Mvc\Reply\Exception
      * @throws \XF\PrintableException
      */
