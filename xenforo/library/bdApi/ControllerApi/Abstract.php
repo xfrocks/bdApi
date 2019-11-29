@@ -736,9 +736,6 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
     protected function _logRequest($controllerResponse, $controller, $action)
     {
-        $requestMethod = $this->_request->getMethod();
-        $requestUri = $this->_request->getRequestUri();
-        $requestData = $this->_request->getParams();
         if ($controllerResponse instanceof XenForo_ControllerResponse_Abstract) {
             if ($controllerResponse instanceof XenForo_ControllerResponse_Redirect) {
                 $responseCode = 301;
@@ -757,6 +754,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         }
 
         if ($responseOutput !== false) {
+            $requestUri = $this->_request->getRequestUri();
+            $requestUri = preg_replace('#/index.php\?(.+?)&#', '/$1?', $requestUri);
+            $requestUri = preg_replace('#\?.*$#', '', $requestUri);
+
             if (!is_array($responseOutput)) {
                 $responseOutput = array('raw' => $responseOutput);
             }
@@ -765,7 +766,13 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
             /* @var $logModel bdApi_Model_Log */
             $logModel = $this->getModelFromCache('bdApi_Model_Log');
-            $logModel->logRequest($requestMethod, $requestUri, $requestData, $responseCode, $responseOutput);
+            $logModel->logRequest(
+                $this->_request->getMethod(),
+                $requestUri,
+                $this->_request->getParams(),
+                $responseCode,
+                $responseOutput
+            );
         }
 
         return true;
