@@ -2,7 +2,7 @@
 
 class bdApi_Installer
 {
-    /* Start auto-generated lines of code. Change made will be overwriten... */
+    /* Start auto-generated lines of code. Change made will be overwritten... */
 
     protected static $_tables = array(
         'client' => array(
@@ -27,6 +27,7 @@ class bdApi_Installer
                 ,`expire_date` INT(10) UNSIGNED NOT NULL
                 ,`user_id` INT(10) UNSIGNED NOT NULL
                 ,`scope` TEXT NOT NULL
+                ,`issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'
                 , PRIMARY KEY (`token_id`)
                 ,UNIQUE INDEX `token_text` (`token_text`)
             ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
@@ -41,6 +42,7 @@ class bdApi_Installer
                 ,`expire_date` INT(10) UNSIGNED NOT NULL
                 ,`user_id` INT(10) UNSIGNED NOT NULL
                 ,`scope` TEXT NOT NULL
+                ,`issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'
                 , PRIMARY KEY (`auth_code_id`)
                 ,UNIQUE INDEX `auth_code_text` (`auth_code_text`)
             ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
@@ -54,6 +56,7 @@ class bdApi_Installer
                 ,`expire_date` INT(10) UNSIGNED NOT NULL
                 ,`user_id` INT(10) UNSIGNED NOT NULL
                 ,`scope` TEXT NOT NULL
+                ,`issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'
                 , PRIMARY KEY (`refresh_token_id`)
                 ,UNIQUE INDEX `refresh_token_text` (`refresh_token_text`)
             ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
@@ -72,7 +75,7 @@ class bdApi_Installer
                 ,`response_code` INT(10) UNSIGNED NOT NULL
                 ,`response_output` MEDIUMBLOB
                 , PRIMARY KEY (`log_id`)
-                
+                ,INDEX `request_date` (`request_date`)
             ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
             'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdapi_log`',
         ),
@@ -147,6 +150,14 @@ class bdApi_Installer
             'modifyQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` MODIFY COLUMN `issue_date` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'',
             'dropQuery' => 'ALTER TABLE `xf_bdapi_refresh_token` DROP COLUMN `issue_date`',
         ),
+        array(
+            'table' => 'xf_bdapi_log',
+            'tableCheckQuery' => 'SHOW TABLES LIKE \'xf_bdapi_log\'',
+            'index' => 'request_date',
+            'checkQuery' => 'SHOW INDEXES FROM `xf_bdapi_log` WHERE Key_name LIKE \'request_date\'',
+            'addQuery' => 'ALTER TABLE `xf_bdapi_log` ADD INDEX `request_date` (`request_date`)',
+            'dropQuery' => 'ALTER TABLE `xf_bdapi_log` DROP INDEX `request_date`',
+        ),
     );
 
     public static function install($existingAddOn, $addOnData)
@@ -166,7 +177,7 @@ class bdApi_Installer
             $existed = $db->fetchOne($patch['checkQuery']);
             if (empty($existed)) {
                 $db->query($patch['addQuery']);
-            } else {
+            } elseif (!empty($patch['modifyQuery'])) {
                 $db->query($patch['modifyQuery']);
             }
         }
