@@ -287,22 +287,25 @@ class bdApi_OAuth2 extends \OAuth2\Server
         }
 
         $params = $response->getParameters();
-        $params['_statusCode'] = $response->getStatusCode();
-        $params['_headers'] = $response->getHttpHeaders();
+        $params['_oauth2ResponseHttpHeaders'] = $response->getHttpHeaders();
 
         if ($controller instanceof bdApi_ControllerApi_Abstract) {
-            return $controller->responseData('bdApi_ViewApi_OAuth', $params);
+            $controllerResponse = $controller->responseData('bdApi_ViewApi_OAuth', $params);
         } else {
             if ($response->isClientError()) {
-                return $controller->responseError(
+                $controllerResponse = $controller->responseError(
                     $response->getParameter('error_description'),
                     $response->getStatusCode()
                 );
             } else {
                 $controller->getRouteMatch()->setResponseType('json');
-                return $controller->responseView('bdApi_ViewPublic_OAuth', '', $params);
+                $controllerResponse = $controller->responseView('bdApi_ViewPublic_OAuth', '', $params);
             }
         }
+
+        $controllerResponse->responseCode = $response->getStatusCode();
+
+        return $controllerResponse;
     }
 }
 

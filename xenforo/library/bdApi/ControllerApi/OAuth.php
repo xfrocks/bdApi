@@ -367,8 +367,7 @@ class bdApi_ControllerApi_OAuth extends bdApi_ControllerApi_Abstract
         $_POST['grant_type'] = 'password';
         $response = $this->actionPostToken();
         if ($response instanceof XenForo_ControllerResponse_View
-            && !empty($response->params['_statusCode'])
-            && $response->params['_statusCode'] == 200
+            && $response->responseCode === 200
         ) {
             // good
         } else {
