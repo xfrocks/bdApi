@@ -43,13 +43,23 @@ class bdApi_Model_Log extends XenForo_Model
 
         $dw->bulkSet($bulkSet);
         if (!isset($bulkSet['client_id'])) {
-            /* @var $session bdApi_Session */
-            $session = XenForo_Application::getSession();
-            $dw->set('client_id', $session->getOAuthClientId());
+            $clientId = '';
+            if (XenForo_Application::isRegistered('session')) {
+                /* @var $session bdApi_Session */
+                $session = XenForo_Application::getSession();
+                $clientId = $session->getOAuthClientId();
+            }
+            if (empty($clientId) && !empty($requestData['client_id'])) {
+                $clientId = $requestData['client_id'];
+            }
+            $dw->set('client_id', $clientId);
         }
         if (!isset($bulkSet['user_id'])) {
-            $visitor = XenForo_Visitor::getInstance();
-            $dw->set('user_id', $visitor->get('user_id'));
+            $userId = XenForo_Visitor::getUserId();
+            if (empty($userId) && !empty($responseOutput['access_token']) && !empty($responseOutput['user_id'])) {
+                $userId = $responseOutput['user_id'];
+            }
+            $dw->set('user_id', $userId);
         }
         if (!isset($bulkSet['ip_address'])) {
             $dw->set('ip_address', isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
