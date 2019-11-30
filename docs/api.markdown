@@ -1464,6 +1464,9 @@ Detail information of a user.
             *user_unread_conversation_count: (int), # since forum-2014022601, requires conversate scope
             user_followers_total: (int), # must be in fields_include to work, since forum-2016062701
             user_followings_total: (int), # must be in fields_include to work, since forum-2016062701
+            user_is_admin: (boolean), # since forum-2019113001
+            user_is_moderator: (boolean), # since forum-2019113001
+            user_is_staff: (boolean), # since forum-2019113001
             user_is_valid: (boolean),
             user_is_verified: (boolean),
             user_is_followed: (boolean), # since forum-2014052902

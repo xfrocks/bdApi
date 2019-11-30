@@ -151,6 +151,9 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         }
 
         $data['user_is_followed'] = !empty($user['bdapi_user_is_followed']);
+        $data['user_is_admin'] = !empty($user['is_admin']);
+        $data['user_is_moderator'] = !empty($user['is_moderator']);
+        $data['user_is_staff'] = !empty($user['is_staff']);
 
         if ($this->canViewUserCurrentActivity($user)) {
             $data['user_last_seen_date'] = $user['last_activity'];
