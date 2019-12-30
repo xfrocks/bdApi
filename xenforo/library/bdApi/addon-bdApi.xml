@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdApi" title="[bd] API" version_string="1.6.3" version_id="1060315" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdApi" title="[bd] API" version_string="1.6.3" version_id="1060316" url="" install_callback_class="bdApi_Installer" install_callback_method="install" uninstall_callback_class="bdApi_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdApi" parent_navigation_id="tools" display_order="9999" link="api-clients" admin_permission_id="bdApi" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdApi_auth_codes" parent_navigation_id="bdApi" display_order="3000" link="api-auth-codes" admin_permission_id="" debug_only="0" hide_no_children="0"/>
@@ -764,6 +764,7 @@ step=3600</edit_format_params>
     <permission_groups/>
     <permissions>
       <permission permission_group_id="general" permission_id="bdApi_clientNew" permission_type="flag" default_value="unset" interface_group_id="generalPermissions" display_order="9999"/>
+      <permission permission_group_id="general" permission_id="bdApi_notificationCustom" permission_type="flag" default_value="unset" interface_group_id="generalModeratorPermissions" display_order="9999"/>
     </permissions>
     <interface_groups/>
   </permissions>
@@ -956,6 +957,7 @@ step=3600</edit_format_params>
     <phrase title="option_group_bdApi" version_id="50" version_string="1.2.1b"><![CDATA[[bd] API]]></phrase>
     <phrase title="option_group_bdApi_description" version_id="50" version_string="1.2.1b"><![CDATA[]]></phrase>
     <phrase title="permission_general_bdApi_clientNew" version_id="4" version_string="0.9-dev"><![CDATA[[bd] API: Create Client]]></phrase>
+    <phrase title="permission_general_bdApi_notificationCustom" version_id="1060315" version_string="1.6.3"><![CDATA[[bd] API: Send custom alert]]></phrase>
     <phrase title="style_property_bdApi_linkAccountWrapper_description_master" version_id="67" version_string="1.4.3-BETA"><![CDATA[]]></phrase>
     <phrase title="style_property_bdApi_linkAccountWrapper_master" version_id="67" version_string="1.4.3-BETA"><![CDATA[Show link in account sidebar]]></phrase>
     <phrase title="style_property_bdApi_linkNavVisitor_description_master" version_id="67" version_string="1.4.3-BETA"><![CDATA[]]></phrase>
@@ -1603,7 +1605,7 @@ step=3600</edit_format_params>
 	<li><a class="{xen:if "{$selectedKey} == 'account/api'", 'secondaryContent', 
 		'primaryContent'}" href="{xen:link account/api}">{xen:phrase bdapi_home}</a></li>
 </xen:if>]]></template>
-    <template title="bdapi_alert_ping_message" version_id="71" version_string="1.4.3c"><![CDATA[{xen:helper username, $user, 'subject'}: {$extra.message}]]></template>
+    <template title="bdapi_alert_ping_message" version_id="1060315" version_string="1.6.3"><![CDATA[{xen:helper username, $user, 'subject'}: {xen:if $extra.html, {xen:raw $extra.html}, $extra.message}]]></template>
     <template title="bdapi_error_authorize_guest" version_id="77" version_string="1.4.5"><![CDATA[<xen:title>{xen:phrase bdapi_authorize_access}</xen:title>
 
 <xen:set var="$text">

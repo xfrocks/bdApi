@@ -49,6 +49,53 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_Notification_List', $data);
     }
 
+    public function actionPostCustom()
+    {
+        $visitor = XenForo_Visitor::getInstance();
+        if (!$visitor->hasPermission('general', 'bdApi_notificationCustom')) {
+            return $this->responseNoPermission();
+        }
+
+        /** @var XenForo_Model_User $userModel */
+        $userModel = $this->getModelFromCache('XenForo_Model_User');
+        $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+        $username = $this->_input->filterSingle('username', XenForo_Input::STRING);
+        $user = null;
+        if ($userId > 0) {
+            $user = $userModel->getUserById($userId);
+        } elseif (strlen($username) > 0) {
+            $user = $userModel->getUserByName($username);
+        }
+        if (empty($user)) {
+            return $this->responseError(new XenForo_Phrase('requested_user_not_found'), 404);
+        }
+
+        /* @var $editorHelper XenForo_ControllerHelper_Editor */
+        $editorHelper = $this->getHelper('Editor');
+        $message = $editorHelper->getMessageText('message', $this->_input);
+        $messageArray = ['message' => $message];
+        $html = bdApi_Data_Helper_Message::getHtml($messageArray);
+        $html = trim($html);
+        if (strlen($html) < 1) {
+            return $this->responseError(new XenForo_Phrase('please_enter_valid_message'), 400);
+        }
+
+        XenForo_Model_Alert::alert(
+            $userId,
+            $visitor['user_id'],
+            $visitor['username'],
+            'api_ping',
+            0,
+            'message',
+            array(
+                'html' => $html,
+                'message' => $message,
+            )
+        );
+
+        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
+
     public function actionPostRead()
     {
         $this->_assertRegistrationRequired();

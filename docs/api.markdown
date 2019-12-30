@@ -2526,6 +2526,19 @@ Required scopes:
 
  * `read`
 
+### POST `/notifications/custom`
+Send a custom alert. Since forum-2019123001.
+
+Parameters:
+
+ * `user_id` or `username` (__required__): the alert receiver.
+ * `message` or `message_html` (__required__): the alert message.
+
+Required scopes:
+
+ * `post`
+ * Also: the current user must have the __[bd] API: Send custom alert__ permission 
+
 ### POST `/notifications/read`
 Mark all existing notifications as read. Since forum-2014092701.
 

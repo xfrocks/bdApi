@@ -251,7 +251,7 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
 
         $visitor = XenForo_Visitor::getInstance();
         $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
-        $message = $this->_input->filterSingle('message', XenForo_Input::STRING);
+        $html = $this->_input->filterSingle('html', XenForo_Input::STRING);
 
         XenForo_Model_Alert::alert(
             $userId,
@@ -261,7 +261,7 @@ class bdApi_ControllerApi_Tool extends bdApi_ControllerApi_Abstract
             0,
             'message',
             array(
-                'message' => $message,
+                'html' => $html,
             )
         );
 
