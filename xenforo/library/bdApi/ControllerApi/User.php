@@ -74,6 +74,10 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     {
         $user = $this->_getUserOrError();
 
+        if (!$this->_getUserProfileModel()->canViewFullUserProfile($user, $errorPhraseKey)) {
+            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+        }
+
         $users = array($user['user_id'] => $user);
         $usersData = $this->_prepareUsers($users);
 
@@ -100,8 +104,13 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             $this->_getUserModel()->getFetchOptionsToPrepareApiData()
         );
 
+        $userProfileModel = $this->_getUserProfileModel();
         $usersOrdered = array();
         foreach ($userIds as $userId) {
+            if (!$userProfileModel->canViewFullUserProfile($users[$userId])) {
+                continue;
+            }
+
             if (isset($users[$userId])) {
                 $usersOrdered[$userId] = $users[$userId];
             }
@@ -126,7 +135,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $userModel = $this->_getUserModel();
 
         $fakeUser = array('custom_fields' => 'a:0:{}');
-        $fields = $userModel->prepareApiDataForUserFields($fakeUser);
+        $fields = $userModel->prepareApiDataForUserFields($fakeUser, true);
 
         $data = array('fields' => $this->_filterDataMany($fields));
 
@@ -905,6 +914,15 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_UserGroup');
+    }
+
+    /**
+     * @return XenForo_Model_UserProfile
+     */
+    protected function _getUserProfileModel()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getModelFromCache('XenForo_Model_UserProfile');
     }
 
     /**

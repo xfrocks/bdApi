@@ -125,6 +125,7 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 
         $data = bdApi_Data_Helper_Core::filter($user, $publicKeys);
 
+        $data['fields'] = $this->prepareApiDataForUserFields($user, $prepareProtectedData);
         $data['user_title'] = XenForo_Template_Helper_Core::helperUserTitle($user);
 
         if (isset($user['user_state']) AND isset($user['is_banned'])) {
@@ -195,8 +196,6 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 
             $auth = $this->getUserAuthenticationObjectByUserId($user['user_id']);
             $data['user_has_password'] = $auth->hasPassword();
-
-            $data['fields'] = $this->prepareApiDataForUserFields($user);
 
             $thisUserGroups = array();
             $userGroups = $userGroupModel->bdApi_getAllUserGroupsCached();
@@ -286,7 +285,7 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         return $data;
     }
 
-    public function prepareApiDataForUserFields(array $user)
+    public function prepareApiDataForUserFields(array $user, $prepareProtectedData = false)
     {
         $data = array();
 
@@ -313,6 +312,13 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
             $values = unserialize($user['custom_fields']);
 
             foreach ($fields as $fieldId => $field) {
+                $isProtectedData = false;
+                $isProtectedData = $isProtectedData || $field['display_group'] === 'preferences';
+                $isProtectedData = $isProtectedData || (empty($field['viewable_profile']) && empty($field['viewable_message']));
+                if ($isProtectedData && $prepareProtectedData !== true) {
+                    continue;
+                }
+
                 $fieldValue = isset($values[$fieldId]) ? $values[$fieldId] : null;
                 $fieldData = $fieldModel->prepareApiDataForField($field, $fieldValue);
                 $data[] = $fieldData;
