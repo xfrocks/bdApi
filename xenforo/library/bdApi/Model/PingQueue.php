@@ -24,7 +24,19 @@ class bdApi_Model_PingQueue extends XenForo_Model
                 $triggerDate = $queueDate;
             }
 
-            XenForo_Application::defer('bdApi_Deferred_PingQueue', array(), __CLASS__, false, $triggerDate);
+            try {
+                XenForo_Application::defer(
+                    'bdApi_Deferred_PingQueue',
+                    array(),
+                    __CLASS__,
+                    false,
+                    $triggerDate
+                );
+            } catch (Exception $e) {
+                if (XenForo_Application::debugMode()) {
+                    XenForo_Error::logException($e, false);
+                }
+            }
         }
     }
 
