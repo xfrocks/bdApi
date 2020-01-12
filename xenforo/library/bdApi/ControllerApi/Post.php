@@ -445,9 +445,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         XenForo_Db::beginTransaction();
 
         try {
-            if ($dw->hasChanges()) {
-                $dw->save();
-            }
+            $dw->save();
 
             if ($threadDw != null && $threadDw->hasChanges()) {
                 $threadDw->save();
