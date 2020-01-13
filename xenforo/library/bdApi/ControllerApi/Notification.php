@@ -90,6 +90,8 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
             array(
                 'html' => $html,
                 'message' => $message,
+
+                'notificationType' => $this->_input->filterSingle('notification_type', XenForo_Input::STRING),
             )
         );
 

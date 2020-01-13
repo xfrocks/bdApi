@@ -161,6 +161,8 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
                 $data['content_id'],
                 $data['content_action']
             );
+        } elseif ($data['content_type'] === 'api_ping' && !empty($alert['extra']['notificationType'])) {
+            $data['notification_type'] = $alert['extra']['notificationType'];
         }
 
         $data['links'] = array();
