@@ -81,7 +81,7 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
         }
 
         XenForo_Model_Alert::alert(
-            $userId,
+            $user['user_id'],
             $visitor['user_id'],
             $visitor['username'],
             'api_ping',
