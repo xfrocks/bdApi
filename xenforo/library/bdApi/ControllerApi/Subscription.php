@@ -35,7 +35,20 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
             return $this->_responseError(new XenForo_Phrase('bdapi_subscription_mode_must_valid'));
         }
 
-        if ($input['hub_mode'] === 'subscribe') {
+        $isSubscribe = $input['hub_mode'] === 'subscribe';
+        $existingSubscriptions = $this->_getSubscriptionModel()->getSubscriptions(array(
+            'client_id' => $clientId,
+            'topic' => $input['hub_topic'],
+        ));
+
+        if ($isSubscribe) {
+            foreach ($existingSubscriptions as $existingSubscription) {
+                if ($existingSubscription['callback'] === $input['hub_callback']) {
+                    // found existing subscription with the same callback, return asap
+                    return $this->_responseSuccess();
+                }
+            }
+
             if (!$isSessionClientId) {
                 // subscribe requires authenticated session
                 return $this->responseNoPermission();
@@ -46,50 +59,40 @@ class bdApi_ControllerApi_Subscription extends bdApi_ControllerApi_Abstract
             }
         }
 
-        if ($this->_getSubscriptionModel()->verifyIntentOfSubscriber(
+        if (!$this->_getSubscriptionModel()->verifyIntentOfSubscriber(
             $input['hub_callback'],
             $input['hub_mode'],
             $input['hub_topic'],
             $input['hub_lease_seconds'],
             array('client_id' => $clientId)
-        )
-        ) {
-            $existingSubscriptions = $this->_getSubscriptionModel()->getSubscriptions(array(
-                'client_id' => $clientId,
-                'topic' => $input['hub_topic'],
-            ));
-
-            foreach ($existingSubscriptions as $subscription) {
-                $dw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription', XenForo_DataWriter::ERROR_SILENT);
-                $dw->setOption(bdApi_DataWriter_Subscription::OPTION_UPDATE_CALLBACKS, false);
-                $dw->setExistingData($subscription, true);
-                $dw->delete();
-            }
-
-            switch ($input['hub_mode']) {
-                case 'subscribe':
-                    $dw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription');
-                    $dw->set('client_id', $clientId);
-                    $dw->set('callback', $input['hub_callback']);
-                    $dw->set('topic', $input['hub_topic']);
-                    $dw->set('subscribe_date', XenForo_Application::$time);
-
-                    if ($input['hub_lease_seconds'] > 0) {
-                        $dw->set('expire_date', XenForo_Application::$time + $input['hub_lease_seconds']);
-                    }
-
-                    $dw->save();
-                    break;
-                default:
-                    if (count($existingSubscriptions) > 0) {
-                        $this->_getSubscriptionModel()->updateCallbacksForTopic($input['hub_topic']);
-                    }
-            }
-
-            return $this->_responseSuccess();
+        )) {
+            return $this->_responseError(new XenForo_Phrase('bdapi_subscription_cannot_verify_intent_of_subscriber'));
         }
 
-        return $this->_responseError(new XenForo_Phrase('bdapi_subscription_cannot_verify_intent_of_subscriber'));
+        foreach ($existingSubscriptions as $subscription) {
+            $dw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription', XenForo_DataWriter::ERROR_SILENT);
+            $dw->setOption(bdApi_DataWriter_Subscription::OPTION_UPDATE_CALLBACKS, false);
+            $dw->setExistingData($subscription, true);
+            $dw->delete();
+        }
+
+        if ($isSubscribe) {
+            $dw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription');
+            $dw->set('client_id', $clientId);
+            $dw->set('callback', $input['hub_callback']);
+            $dw->set('topic', $input['hub_topic']);
+            $dw->set('subscribe_date', XenForo_Application::$time);
+
+            if ($input['hub_lease_seconds'] > 0) {
+                $dw->set('expire_date', XenForo_Application::$time + $input['hub_lease_seconds']);
+            }
+
+            $dw->save();
+        } elseif (count($existingSubscriptions) > 0) {
+            $this->_getSubscriptionModel()->updateCallbacksForTopic($input['hub_topic']);
+        }
+
+        return $this->_responseSuccess();
     }
 
     /**
