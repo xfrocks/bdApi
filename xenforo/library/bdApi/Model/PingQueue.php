@@ -42,8 +42,6 @@ class bdApi_Model_PingQueue extends XenForo_Model
 
     public function reInsertQueue($records)
     {
-        $toBeDeletedSubIds = array();
-
         foreach ($records as $record) {
             $data = $record['data'];
 
@@ -54,11 +52,8 @@ class bdApi_Model_PingQueue extends XenForo_Model
             }
 
             if ($data['_retries'] > 5) {
-                // too many attempts already -> delete the subscription
-                if (isset($data['subscription_id'])) {
-                    $toBeDeletedSubIds[] = $data['subscription_id'];
-                }
-
+                // too many attempts already, skip it
+                XenForo_Error::logException(json_encode($record), false);
                 continue;
             }
 
@@ -70,18 +65,6 @@ class bdApi_Model_PingQueue extends XenForo_Model
             }
 
             $this->insertQueue($record['callback'], $record['object_type'], $data, $record['expire_date'], $queueDate);
-        }
-
-        if (count($toBeDeletedSubIds) > 0) {
-            $e = new Exception('$toBeDeletedSubIds = ' . implode(', ', $toBeDeletedSubIds));
-            XenForo_Error::logException($e, false);
-
-            foreach ($toBeDeletedSubIds as $subId) {
-                $dw = XenForo_DataWriter::create('bdApi_DataWriter_Subscription', XenForo_DataWriter::ERROR_SILENT);
-                if ($dw->setExistingData($subId)) {
-                    $dw->delete();
-                }
-            }
         }
     }
 
