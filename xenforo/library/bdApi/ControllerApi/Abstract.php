@@ -755,7 +755,7 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
         if ($responseOutput !== false) {
             $requestUri = $this->_request->getRequestUri();
-            $requestUri = preg_replace('#/index.php\?(.+?)&#', '/$1?', $requestUri);
+            $requestUri = preg_replace('#/index.php\?/?(.+?)&#', '/$1?', $requestUri);
             $requestUri = preg_replace('#\?.*$#', '', $requestUri);
 
             if (!is_array($responseOutput)) {
