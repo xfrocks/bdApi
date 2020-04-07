@@ -96,15 +96,21 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         $hasAdminScope = (!empty($session) && $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM));
         $isAdminRequest = ($hasAdminScope && $visitor->hasAdminPermission('user'));
         $prepareProtectedData = (($user['user_id'] == $visitor->get('user_id')) || $isAdminRequest);
+        $prepareExtendedData = $prepareProtectedData || $this->_getUserProfileModel()->canViewFullUserProfile($user);
 
         $publicKeys = array(
             // xf_user
             'user_id' => 'user_id',
             'username' => 'username',
-            'message_count' => 'user_message_count',
-            'register_date' => 'user_register_date',
-            'like_count' => 'user_like_count',
         );
+
+        if ($prepareExtendedData) {
+            $publicKeys = array_merge($publicKeys, array(
+                'message_count' => 'user_message_count',
+                'register_date' => 'user_register_date',
+                'like_count' => 'user_like_count',
+            ));
+        }
 
         if ($prepareProtectedData) {
             $publicKeys = array_merge($publicKeys, array(
@@ -125,44 +131,12 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 
         $data = bdApi_Data_Helper_Core::filter($user, $publicKeys);
 
-        $data['fields'] = $this->prepareApiDataForUserFields($user, $prepareProtectedData);
-        $data['user_title'] = XenForo_Template_Helper_Core::helperUserTitle($user);
-
-        if (isset($user['user_state']) AND isset($user['is_banned'])) {
-            if (!empty($user['is_banned'])) {
-                $data['user_is_valid'] = false;
-                $data['user_is_verified'] = true;
-            } else {
-                switch ($user['user_state']) {
-                    case 'valid':
-                        $data['user_is_valid'] = true;
-                        $data['user_is_verified'] = true;
-                        break;
-                    case 'email_confirm':
-                    case 'email_confirm_edit':
-                        $data['user_is_valid'] = true;
-                        $data['user_is_verified'] = false;
-                        break;
-                    case 'moderated':
-                        $data['user_is_valid'] = false;
-                        $data['user_is_verified'] = false;
-                        break;
-                }
-            }
-        }
-
         $data['user_is_followed'] = !empty($user['bdapi_user_is_followed']);
         $data['user_is_admin'] = !empty($user['is_admin']);
         $data['user_is_moderator'] = !empty($user['is_moderator']);
         $data['user_is_staff'] = !empty($user['is_staff']);
-
-        if ($this->canViewUserCurrentActivity($user)) {
-            $data['user_last_seen_date'] = $user['last_activity'];
-        } else {
-            // user hides his/her activity, use the register date value instead
-            // (IMHO using 0 will make it too obvious that activity is hidden)
-            $data['user_last_seen_date'] = $user['register_date'];
-        }
+        $data['user_is_visitor'] = ($user['user_id'] == $visitor->get('user_id'));
+        $data['user_title'] = XenForo_Template_Helper_Core::helperUserTitle($user);
 
         $data['links'] = array(
             'permalink' => XenForo_Link::buildPublicLink('members', $user),
@@ -185,7 +159,40 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         $data['permissions']['ignore'] = $ignoreModel->canIgnoreUser($visitor->get('user_id'), $user);
         $data['user_is_ignored'] = $visitor->isIgnoring($user['user_id']);
 
-        $data['user_is_visitor'] = ($user['user_id'] == $visitor->get('user_id'));
+        if ($prepareExtendedData) {
+            $data['fields'] = $this->prepareApiDataForUserFields($user, $prepareProtectedData);
+
+            if (isset($user['user_state']) AND isset($user['is_banned'])) {
+                if (!empty($user['is_banned'])) {
+                    $data['user_is_valid'] = false;
+                    $data['user_is_verified'] = true;
+                } else {
+                    switch ($user['user_state']) {
+                        case 'valid':
+                            $data['user_is_valid'] = true;
+                            $data['user_is_verified'] = true;
+                            break;
+                        case 'email_confirm':
+                        case 'email_confirm_edit':
+                            $data['user_is_valid'] = true;
+                            $data['user_is_verified'] = false;
+                            break;
+                        case 'moderated':
+                            $data['user_is_valid'] = false;
+                            $data['user_is_verified'] = false;
+                            break;
+                    }
+                }
+            }
+
+            if ($this->canViewUserCurrentActivity($user)) {
+                $data['user_last_seen_date'] = $user['last_activity'];
+            } else {
+                // user hides his/her activity, use the register date value instead
+                // (IMHO using 0 will make it too obvious that activity is hidden)
+                $data['user_last_seen_date'] = $user['register_date'];
+            }
+        }
 
         if ($prepareProtectedData) {
             if (isset($user['timezone'])) {

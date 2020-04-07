@@ -1450,10 +1450,10 @@ Detail information of a user.
             user_id: (int),
             username: (string),
             user_title: (string),
-            user_message_count: (int),
-            user_register_date: (unix timestamp in seconds),
-            user_last_seen_date: (unit timestamp in seconds), # since forum-2015080601
-            user_like_count: (int),
+            +user_message_count: (int),
+            +user_register_date: (unix timestamp in seconds),
+            +user_last_seen_date: (unit timestamp in seconds), # since forum-2015080601
+            +user_like_count: (int),
             user_is_visitor: (boolean), # since forum-2013110601
             *user_email: (email),
             *user_dob_day: (int),
@@ -1467,11 +1467,11 @@ Detail information of a user.
             user_is_admin: (boolean), # since forum-2019113001
             user_is_moderator: (boolean), # since forum-2019113001
             user_is_staff: (boolean), # since forum-2019113001
-            user_is_valid: (boolean),
-            user_is_verified: (boolean),
+            +user_is_valid: (boolean),
+            +user_is_verified: (boolean),
             user_is_followed: (boolean), # since forum-2014052902
             user_is_ignored: (boolean), # since forum-2015072303
-            *fields: [ # since forum-2017040402
+            +fields: [ # since forum-2017040402
                 (field),
                 ...
             ],
@@ -1524,6 +1524,8 @@ Detail information of a user.
         },
         subscription_callback: (uri) # since subscription-2014092301
     }
+
+Fields with plus (+) are extended data. They are only included if the authenticated user is allowed to view full profile of the requested user.
 
 Fields with asterisk (*) are protected data. They are only included when the authenticated user is the requested user or the authenticated user is an admin with `user` admin permission and has `admincp` scope.
 

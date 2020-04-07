@@ -72,9 +72,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                 $creatorUserId,
                 $this->_getUserModel()->getFetchOptionsToPrepareApiData()
             );
-            if (empty($creatorUser)
-                || !$this->_getUserProfileModel()->canViewFullUserProfile($creatorUser)
-            ) {
+            if (empty($creatorUser)) {
                 return $this->responseError(new XenForo_Phrase('requested_user_not_found'), 404);
             }
 

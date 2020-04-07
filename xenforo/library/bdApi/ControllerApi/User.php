@@ -74,10 +74,6 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     {
         $user = $this->_getUserOrError();
 
-        if (!$this->_getUserProfileModel()->canViewFullUserProfile($user, $errorPhraseKey)) {
-            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
-        }
-
         $users = array($user['user_id'] => $user);
         $usersData = $this->_prepareUsers($users);
 
@@ -104,13 +100,8 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             $this->_getUserModel()->getFetchOptionsToPrepareApiData()
         );
 
-        $userProfileModel = $this->_getUserProfileModel();
         $usersOrdered = array();
         foreach ($userIds as $userId) {
-            if (!$userProfileModel->canViewFullUserProfile($users[$userId])) {
-                continue;
-            }
-
             if (isset($users[$userId])) {
                 $usersOrdered[$userId] = $users[$userId];
             }
