@@ -32,6 +32,11 @@ class bdApi_Data_Helper_Message
         return XenForo_ViewPublic_Helper_Message::getBbCodeWrapper($message, $bbCodeParser, $bbCodeOptions);
     }
 
+    /**
+     * @param string $bbCode
+     * @return string
+     * @see XenForo_Helper_String::bbCodeStrip
+     */
     public static function getPlainText($bbCode)
     {
         $config = XenForo_Application::getConfig();
@@ -49,17 +54,7 @@ class bdApi_Data_Helper_Message
 
             return htmlspecialchars_decode($html, ENT_QUOTES);
         } else {
-            // from XenForo_Helper_String::bbCodeStrip
-            $string = $bbCode;
-
-            $string = preg_replace('#\[(attach|media|img)[^\]]*\].*\[/\\1\]#siU', '', $string);
-
-            while ($string != ($newString = preg_replace('#\[([a-z0-9]+)(=[^\]]*)?\](.*)\[/\1\]#siU', '\3', $string))) {
-                $string = $newString;
-            }
-
-            $string = str_replace('[*]', '', $string);
-            $string = trim($string);
+            $string = XenForo_Helper_String::bbCodeStrip($bbCode, true);
             $string = XenForo_Helper_String::censorString($string);
 
             return $string;
