@@ -357,32 +357,38 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
 
         $user = $this->_getUserOrError();
         $visitor = XenForo_Visitor::getInstance();
+        $userIsVisitor = $user['user_id'] == $visitor['user_id'];
 
         $session = bdApi_Data_Helper_Core::safeGetSession();
         $isAdmin = $session->checkScope(bdApi_Model_OAuth2::SCOPE_MANAGE_SYSTEM) && $visitor->hasAdminPermission('user');
+        if (!$userIsVisitor && !$isAdmin) {
+            return $this->responseNoPermission();
+        }
 
-        $requiredAuth = 0;
+        $passwordOldRequired = false;
         if (!empty($input['password'])) {
-            $requiredAuth++;
+            $passwordOldRequired = true;
         }
         if (!empty($input['user_email'])) {
-            $requiredAuth++;
+            $passwordOldRequired = true;
         }
-        if ($requiredAuth > 0) {
-            $isAuth = false;
-            if ($isAdmin && $visitor['user_id'] != $user['user_id']) {
-                $isAuth = true;
-            } elseif (!empty($input['password_old'])) {
+        if ($passwordOldRequired && $isAdmin && !$userIsVisitor) {
+            // admin can edit any account email / password except self
+            $passwordOldRequired = false;
+        }
+        if ($passwordOldRequired) {
+            $passwordOldVerified = false;
+            if (!empty($input['password_old'])) {
                 $auth = $this->_getUserModel()->getUserAuthenticationObjectByUserId($user['user_id']);
                 if (!empty($auth)) {
                     $passwordOld = bdApi_Crypt::decrypt($input['password_old'], $input['password_algo']);
                     if ($auth->hasPassword() && $auth->authenticate($user['user_id'], $passwordOld)) {
-                        $isAuth = true;
+                        $passwordOldVerified = true;
                     }
                 }
             }
 
-            if (!$isAuth) {
+            if (!$passwordOldVerified) {
                 return $this->responseError(new XenForo_Phrase('bdapi_slash_users_requires_password_old'), 403);
             }
         }
