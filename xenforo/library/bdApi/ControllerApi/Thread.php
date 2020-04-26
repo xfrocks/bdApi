@@ -770,6 +770,32 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         return $this->responseData('bdApi_ViewApi_Thread_Navigation', $viewParams);
     }
 
+    public function actionGetPoll()
+    {
+        $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
+
+        /** @var XenForo_ControllerHelper_ForumThreadPost $ftpHelper */
+        $ftpHelper = $this->getHelper('ForumThreadPost');
+        list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
+
+        $pollModel = $this->_getPollModel();
+        $poll = $pollModel->getPollByContent('thread', $threadId);
+        if (empty($poll)) {
+            return $this->responseError(new XenForo_Phrase('requested_page_not_found'), 404);
+        }
+
+        $pollModel = $this->_getPollModel();
+        $data = array(
+            'poll' => $pollModel->prepareApiDataForPoll(
+                $poll,
+                $this->_getThreadModel()->canVoteOnPoll($poll, $thread, $forum),
+                bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll', $thread)
+            ),
+        );
+
+        return $this->responseData('bdApi_ViewApi_Thread_Poll', $data);
+    }
+
     public function actionPostPollVotes()
     {
         $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
@@ -806,6 +832,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         return $pollModel->bdApi_actionGetResults(
             $poll,
             $this->_getThreadModel()->canVoteOnPoll($poll, $thread, $forum),
+            bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll', $thread),
             $this
         );
     }
@@ -920,7 +947,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         $firstPostIds = array();
         $lastPostIds = array();
         $latestPostIds = array();
-        $pollThreadIds = array();
         foreach ($threads as $threadId => $threadRef) {
             if (!$this->_isFieldExcluded('first_post')) {
                 $firstPostIds[$threadId] = $threadRef['first_post_id'];
@@ -931,12 +957,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                     || $threadRef['last_post_id'] != $threadRef['first_post_id'])
             ) {
                 $lastPostIds[$threadId] = $threadRef['last_post_id'];
-            }
-
-            if (!$this->_isFieldExcluded('poll')
-                && $threadRef['discussion_type'] === 'poll'
-            ) {
-                $pollThreadIds[] = $threadId;
             }
         }
 
@@ -960,11 +980,6 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             ) {
                 $posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
             }
-        }
-
-        if (!empty($pollThreadIds)) {
-            $polls = $this->_getPollModel()->bdApi_getPollByContentIds('thread', $pollThreadIds);
-            $this->_getThreadModel()->bdApi_setPolls($polls);
         }
 
         $threadsData = array();

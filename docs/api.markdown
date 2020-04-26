@@ -651,34 +651,12 @@ Detail information of a thread.
                 },
                 ...
             ],
-            poll: { # since forum-2015100601
-                poll_id: (int),
-                poll_question: (string),
-                poll_vote_count: (int),
-                poll_is_open: (boolean),
-                poll_is_voted: (boolean),
-                poll_max_votes: (int),
-                responses: [
-                    {
-                        response_id: (int),
-                        response_answer: (string),
-                        response_is_voted: (boolean)
-                    },
-                    ...
-                ],
-                permissions: {
-                    vote: (boolean),
-                    result: (boolean)
-                },
-                links: {
-                    votes: (uri),
-                    results: (uri)
-                }
-            },
             thread_tags { # since forum-2015091001
                 (tag id): (tag text),
                 ...
             },
+            # poll: removed since forum-2020042601
+            has_poll: (boolean), # since forum-2020042601
             links: {
                 permalink: (uri),
                 detail: (uri),
@@ -689,7 +667,8 @@ Detail information of a thread.
                 first_poster_avatar: (uri), # since forum-2016091201
                 first_post: (uri),
                 last_poster: (uri),
-                last_post: (uri)
+                last_post: (uri),
+                poll: (uri) # since forum-2020042601
             },
             permissions: {
                 view: (boolean),
@@ -825,6 +804,42 @@ Parameters:
 
  * N/A
  
+Required scopes:
+
+ * `read`
+
+### GET `/threads/:threadId/poll`
+Detail information of a poll. Since forum-2020042601.
+
+    {
+        poll_id: (int),
+        poll_question: (string),
+        poll_vote_count: (int),
+        poll_is_open: (boolean),
+        poll_is_voted: (boolean),
+        poll_max_votes: (int),
+        responses: [
+            {
+                response_id: (int),
+                response_answer: (string),
+                response_is_voted: (boolean)
+            },
+            ...
+        ],
+        permissions: {
+            vote: (boolean),
+            result: (boolean)
+        },
+        links: {
+            votes: (uri),
+            results: (uri)
+        }
+    }
+
+Parameters:
+
+ * N/A
+
 Required scopes:
 
  * `read`

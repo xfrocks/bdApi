@@ -6,7 +6,6 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
     const CONDITIONS_TAG_ID = 'bdApi_tagId';
     const FETCH_OPTION_JOIN_TAG_CONTENT = 'bdApi_joinTagContent';
 
-    protected $_bdApi_polls = array();
     protected $_bdApi_limitQueryResults_nodeId = false;
 
     public function bdApi_getLatestThreadId()
@@ -181,20 +180,6 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
             $data['thread_prefixes'][] = $prefixModel->prepareApiDataForPrefix($thread);
         }
 
-        if ($thread['discussion_type'] === 'poll'
-            && isset($this->_bdApi_polls[$thread['thread_id']])
-        ) {
-            $poll = $this->_bdApi_polls[$thread['thread_id']];
-            /** @var bdApi_Extend_Model_Poll $pollModel */
-            $pollModel = $this->getModelFromCache('XenForo_Model_Poll');
-            $data['poll'] = $pollModel->prepareApiDataForPoll($poll, $this->canVoteOnPoll($poll, $thread, $forum));
-            $data['poll']['links']['vote'] = bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll/votes', $thread);
-            $data['poll']['links']['results'] = bdApi_Data_Helper_Core::safeBuildApiLink(
-                'threads/poll/results',
-                $thread
-            );
-        }
-
         if (XenForo_Application::$versionId > 1050000
             && isset($thread['tags'])
         ) {
@@ -250,6 +235,18 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
             );
         }
 
+        if (!empty($thread['discussion_type'])) {
+            switch ($thread['discussion_type']) {
+                case 'poll':
+                    $data['has_poll'] = true;
+                    $data['links']['poll'] = bdApi_Data_Helper_Core::safeBuildApiLink(
+                        'threads/poll',
+                        $thread
+                    );
+                    break;
+            }
+        }
+
         $data['permissions'] = array(
             'view' => $this->canViewThread($thread, $forum),
             'delete' => $this->canDeleteThread($thread, $forum),
@@ -280,15 +277,6 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
         $this->_bdApi_limitQueryResults_nodeId = false;
 
         return $threadIds;
-    }
-
-    public function bdApi_setPolls(array $polls = null)
-    {
-        if (is_array($polls)) {
-            $this->_bdApi_polls += $polls;
-        }
-
-        return $this->_bdApi_polls;
     }
 
     public function limitQueryResults($query, $limit, $offset = 0)

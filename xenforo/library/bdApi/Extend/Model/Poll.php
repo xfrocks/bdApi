@@ -2,7 +2,7 @@
 
 class bdApi_Extend_Model_Poll extends XFCP_bdApi_Extend_Model_Poll
 {
-    public function prepareApiDataForPoll(array $poll, $canVote)
+    public function prepareApiDataForPoll(array $poll, $canVote, $selfLink)
     {
         $poll = $this->preparePoll($poll, $canVote);
 
@@ -37,6 +37,11 @@ class bdApi_Extend_Model_Poll extends XFCP_bdApi_Extend_Model_Poll
         $data['permissions'] = array(
             'vote' => $poll['canVote'],
             'result' => $poll['canViewResults'],
+        );
+
+        $data['links'] = array(
+            'vote' => $selfLink . '/votes',
+            'results' => $selfLink . '/results',
         );
 
         return $data;
@@ -81,10 +86,10 @@ class bdApi_Extend_Model_Poll extends XFCP_bdApi_Extend_Model_Poll
         }
     }
 
-    public function bdApi_actionGetResults(array $poll, $canVote, bdApi_ControllerApi_Abstract $controller)
+    public function bdApi_actionGetResults(array $poll, $canVote, $selfLink, bdApi_ControllerApi_Abstract $controller)
     {
         $poll = $this->preparePoll($poll, $canVote);
-        $pollData = $this->prepareApiDataForPoll($poll, $canVote);
+        $pollData = $this->prepareApiDataForPoll($poll, $canVote, $selfLink);
 
         $results = array();
         foreach ($pollData['responses'] as $responseData) {
@@ -112,15 +117,5 @@ class bdApi_Extend_Model_Poll extends XFCP_bdApi_Extend_Model_Poll
         }
 
         return $controller->responseData('bdApi_ViewApi_Helper_Poll_Results', $data);
-    }
-
-    public function bdApi_getPollByContentIds($contentType, array $contentIds)
-    {
-        return $this->fetchAllKeyed('
-			SELECT *
-			FROM xf_poll
-			WHERE content_type = ?
-				AND content_id IN (' . $this->_getDb()->quote($contentIds) . ')
-		', 'content_id', $contentType);
     }
 }
