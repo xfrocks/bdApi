@@ -789,7 +789,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             'poll' => $pollModel->prepareApiDataForPoll(
                 $poll,
                 $this->_getThreadModel()->canVoteOnPoll($poll, $thread, $forum),
-                bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll', $thread)
+                bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll/self', $thread)
             ),
         );
 
@@ -832,7 +832,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         return $pollModel->bdApi_actionGetResults(
             $poll,
             $this->_getThreadModel()->canVoteOnPoll($poll, $thread, $forum),
-            bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll', $thread),
+            bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll/self', $thread),
             $this
         );
     }

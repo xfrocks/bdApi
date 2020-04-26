@@ -40,8 +40,8 @@ class bdApi_Extend_Model_Poll extends XFCP_bdApi_Extend_Model_Poll
         );
 
         $data['links'] = array(
-            'vote' => $selfLink . '/votes',
-            'results' => $selfLink . '/results',
+            'vote' => str_replace('/poll/self', '/poll/votes', $selfLink),
+            'results' => str_replace('/poll/self', '/poll/results', $selfLink),
         );
 
         return $data;
