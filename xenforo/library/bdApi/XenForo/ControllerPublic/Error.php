@@ -24,7 +24,6 @@ class bdApi_XenForo_ControllerPublic_Error extends XFCP_bdApi_XenForo_Controller
         /* @var $oauth2Model bdApi_Model_OAuth2 */
         $oauth2Model = $this->getModelFromCache('bdApi_Model_OAuth2');
 
-        /* @var $clientModel bdApi_Model_Client */
         $clientModel = $oauth2Model->getClientModel();
 
         $clientId = $this->_input->filterSingle('client_id', XenForo_Input::STRING);

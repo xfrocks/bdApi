@@ -68,8 +68,6 @@ class bdApi_Data_ColumnOption
         $subscriptionTopicType = preg_replace('/^.+subscription/', '', $fieldName);
         switch ($subscriptionTopicType) {
             case 'User':
-                $table = 'xf_user_option';
-                break;
             case 'UserNotification':
                 $table = 'xf_user_option';
                 break;

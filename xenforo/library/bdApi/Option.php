@@ -12,7 +12,6 @@ class bdApi_Option
             case 'secretLength':
                 return 15;
             case 'authorizeBypassSecs':
-                return 600;
             case 'loginTtl':
                 return 600;
         }
