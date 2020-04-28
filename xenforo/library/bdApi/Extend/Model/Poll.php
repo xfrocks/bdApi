@@ -31,6 +31,17 @@ class bdApi_Extend_Model_Poll extends XFCP_bdApi_Extend_Model_Poll
                 $responseData['response_is_voted'] = $response['hasVoted'];
             }
 
+            if ($poll['canViewResults']) {
+                $responseData['response_vote_count'] = $response['response_vote_count'];
+
+                if (!empty($poll['public_votes'])) {
+                    $responseData['voters'] = array();
+                    if (!empty($response['voters'])) {
+                        $responseData['voters'] = array_values($response['voters']);
+                    }
+                }
+            }
+
             $data['responses'][] = $responseData;
         }
 
@@ -41,7 +52,6 @@ class bdApi_Extend_Model_Poll extends XFCP_bdApi_Extend_Model_Poll
 
         $data['links'] = array(
             'vote' => str_replace('/poll/self', '/poll/votes', $selfLink),
-            'results' => str_replace('/poll/self', '/poll/results', $selfLink),
         );
 
         return $data;
@@ -84,38 +94,5 @@ class bdApi_Extend_Model_Poll extends XFCP_bdApi_Extend_Model_Poll
         } else {
             return $controller->responseError(new XenForo_Phrase('unexpected_error_occurred'));
         }
-    }
-
-    public function bdApi_actionGetResults(array $poll, $canVote, $selfLink, bdApi_ControllerApi_Abstract $controller)
-    {
-        $poll = $this->preparePoll($poll, $canVote);
-        $pollData = $this->prepareApiDataForPoll($poll, $canVote, $selfLink);
-
-        $results = array();
-        foreach ($pollData['responses'] as $responseData) {
-            $response = $poll['responses'][$responseData['response_id']];
-
-            $resultData = $responseData;
-            $resultData['response_vote_count'] = $response['response_vote_count'];
-
-            if (!empty($poll['public_votes'])) {
-                $resultData['voters'] = array();
-                if (!empty($response['voters'])) {
-                    $resultData['voters'] = array_values($response['voters']);
-                }
-            }
-
-            $results[] = $resultData;
-        }
-
-        $data = array(
-            'results' => $controller->_filterDataMany($results),
-        );
-
-        if (!$controller->_isFieldExcluded('poll')) {
-            $data['poll'] = $controller->_filterDataSingle($pollData, array('poll'));
-        }
-
-        return $controller->responseData('bdApi_ViewApi_Helper_Poll_Results', $data);
     }
 }

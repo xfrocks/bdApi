@@ -656,7 +656,7 @@ Detail information of a thread.
                 ...
             },
             # poll: removed since forum-2020042601
-            has_poll: (boolean), # since forum-2020042601
+            thread_has_poll: (boolean), # since forum-2020042801
             links: {
                 permalink: (uri),
                 detail: (uri),
@@ -822,7 +822,15 @@ Detail information of a poll. Since forum-2020042601.
             {
                 response_id: (int),
                 response_answer: (string),
-                response_is_voted: (boolean)
+                response_is_voted: (boolean),
+                response_vote_count: (int), # since forum-2020042801
+                voters: [ # since forum-2020042801
+                    {
+                        user_id: (int),
+                        username: (string)
+                    },
+                    ...
+                ]
             },
             ...
         ],
@@ -831,8 +839,7 @@ Detail information of a poll. Since forum-2020042601.
             result: (boolean)
         },
         links: {
-            votes: (uri),
-            results: (uri)
+            votes: (uri)
         }
     }
 
@@ -862,33 +869,7 @@ Required scopes:
  * `post`
 
 ### GET `/threads/:threadId/poll/results`
-List of poll responses with their results. Since forum-2015100601.
-
-    {
-        results: [
-            {
-                response_id: (int),
-                response_answer: (string),
-                response_is_voted: (boolean),
-                response_vote_count: (int),
-                voters: [
-                    {
-                        user_id: (int),
-                        username: (string)
-                    },
-                    ...
-                ]
-            }
-        ]
-    }
-
-Parameters:
-
- * N/A
-
-Required scopes:
-
- * `read`
+Alias for GET `/threads/:threadId/poll`. Since forum-2020042801.
 
 ### GET `/threads/new`
 List of unread threads (must be logged in).

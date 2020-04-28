@@ -238,7 +238,7 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
         if (!empty($thread['discussion_type'])) {
             switch ($thread['discussion_type']) {
                 case 'poll':
-                    $data['has_poll'] = true;
+                    $data['thread_has_poll'] = true;
                     $data['links']['poll'] = bdApi_Data_Helper_Core::safeBuildApiLink(
                         'threads/poll',
                         $thread

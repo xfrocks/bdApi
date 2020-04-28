@@ -817,24 +817,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
 
     public function actionGetPollResults()
     {
-        $threadId = $this->_input->filterSingle('thread_id', XenForo_Input::UINT);
-
-        /** @var XenForo_ControllerHelper_ForumThreadPost $ftpHelper */
-        $ftpHelper = $this->getHelper('ForumThreadPost');
-        list($thread, $forum) = $ftpHelper->assertThreadValidAndViewable($threadId);
-
-        $pollModel = $this->_getPollModel();
-        $poll = $pollModel->getPollByContent('thread', $threadId);
-        if (empty($poll)) {
-            return $this->responseError(new XenForo_Phrase('requested_page_not_found'), 404);
-        }
-
-        return $pollModel->bdApi_actionGetResults(
-            $poll,
-            $this->_getThreadModel()->canVoteOnPoll($poll, $thread, $forum),
-            bdApi_Data_Helper_Core::safeBuildApiLink('threads/poll/self', $thread),
-            $this
-        );
+        return $this->responseReroute(__CLASS__, 'get-poll');
     }
 
     public function actionGetNew()
