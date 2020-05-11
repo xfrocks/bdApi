@@ -25,6 +25,25 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 		', $userId);
     }
 
+    public function bdApi_getUsersFollowingUserId($userId, $order, $limit, $page)
+	{
+        $order = $this->getQueryOrder($order);
+        $offset = ($page - 1) * $limit;
+
+		$sql = "
+			SELECT user.user_id, user.username
+			FROM xf_user_follow AS user_follow
+			INNER JOIN xf_user AS user ON
+				(user.user_id = user_follow.user_id AND user.is_banned = 0)
+			WHERE user_follow.follow_user_id = $userId
+            ORDER BY user_follow.follow_date $order
+            LIMIT $limit
+            OFFSET $offset
+		";
+
+		return $this->_getDb()->fetchAll($sql);
+	}
+
     public function bdApi_countUsersFollowingUserIds(array $userIds)
     {
         if (count($userIds) === 0) {
@@ -38,6 +57,25 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
             GROUP BY follow_user_id
         ');
     }
+
+    public function bdApi_getFollowedUserProfiles($userId, $order, $limit, $page)
+	{
+        $order = $this->getQueryOrder($order);
+        $offset = ($page - 1) * $limit;
+
+		$sql = "
+            SELECT user.user_id, user.username
+			FROM xf_user_follow AS user_follow
+			INNER JOIN xf_user AS user ON
+				(user.user_id = user_follow.follow_user_id AND user.is_banned = 0)
+			WHERE user_follow.user_id = $userId
+            ORDER BY user_follow.follow_date $order
+            LIMIT $limit
+            OFFSET $offset
+		";
+
+		return $this->_getDb()->fetchAll($sql);
+	}
 
     public function bdApi_getSystemFields()
     {
@@ -363,5 +401,14 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         $choices[self::ORDER_USER_ID] = 'user.user_id';
 
         return parent::getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
+    }
+
+    protected function getQueryOrder($order)
+    {
+        if (strtolower($order) === 'asc') {
+            return 'ASC';
+        } else {
+            return 'DESC';
+        }
     }
 }
