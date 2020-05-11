@@ -26,11 +26,11 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
     }
 
     public function bdApi_getUsersFollowingUserId($userId, $order, $limit, $page)
-	{
+    {
         $order = $this->getQueryOrder($order);
         $offset = ($page - 1) * $limit;
 
-		$sql = "
+        $sql = "
 			SELECT user.user_id, user.username
 			FROM xf_user_follow AS user_follow
 			INNER JOIN xf_user AS user ON
@@ -41,8 +41,8 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
             OFFSET $offset
 		";
 
-		return $this->_getDb()->fetchAll($sql);
-	}
+        return $this->_getDb()->fetchAll($sql);
+    }
 
     public function bdApi_countUsersFollowingUserIds(array $userIds)
     {
@@ -59,11 +59,11 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
     }
 
     public function bdApi_getFollowedUserProfiles($userId, $order, $limit, $page)
-	{
+    {
         $order = $this->getQueryOrder($order);
         $offset = ($page - 1) * $limit;
 
-		$sql = "
+        $sql = "
             SELECT user.user_id, user.username
 			FROM xf_user_follow AS user_follow
 			INNER JOIN xf_user AS user ON
@@ -74,8 +74,8 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
             OFFSET $offset
 		";
 
-		return $this->_getDb()->fetchAll($sql);
-	}
+        return $this->_getDb()->fetchAll($sql);
+    }
 
     public function bdApi_getSystemFields()
     {
