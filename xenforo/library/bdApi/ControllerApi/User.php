@@ -584,8 +584,8 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     public function actionGetFollowers()
     {
         $user = $this->_getUserOrError();
-
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING);
+        $orderDirection = $this->_input->filterSingle('order_direction', XenForo_Input::STRING);
 
         $pageNavParams = array();
         list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
@@ -597,7 +597,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             return $this->responseData('bdApi_ViewApi_User_Followers_Total', $data);
         }
 
-        $followers = $this->_getUserModel()->bdApi_getUsersFollowingUserId($user['user_id'], $order, $limit, $page);
+        $followers = $this->_getUserModel()->bdApi_getUsersFollowingUserId($user['user_id'], $order, $orderDirection, $limit, $page);
 
         $data = array(
             'users' => array(),
@@ -646,6 +646,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     {
         $user = $this->_getUserOrError();
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING);
+        $orderDirection = $this->_input->filterSingle('order_direction', XenForo_Input::STRING);
 
         $pageNavParams = array();
         list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
@@ -657,7 +658,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             return $this->responseData('bdApi_ViewApi_User_Followings_Total', $data);
         }
 
-        $followings = $this->_getUserModel()->bdApi_getFollowedUserProfiles($user['user_id'], $order, $limit, $page);
+        $followings = $this->_getUserModel()->bdApi_getFollowedUserProfiles($user['user_id'], $order, $orderDirection, $limit, $page);
 
         $data = array(
             'users' => array(),

@@ -25,9 +25,9 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 		', $userId);
     }
 
-    public function bdApi_getUsersFollowingUserId($userId, $order, $limit, $page)
+    public function bdApi_getUsersFollowingUserId($userId, $order, $orderDirection, $limit, $page)
     {
-        $order = $this->getQueryOrder($order);
+        $orderClause = $this->getFollowDateOrderClause($order, $orderDirection);
         $offset = ($page - 1) * $limit;
 
         $sql = "
@@ -36,7 +36,7 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 			INNER JOIN xf_user AS user ON
 				(user.user_id = user_follow.user_id AND user.is_banned = 0)
 			WHERE user_follow.follow_user_id = $userId
-            ORDER BY user_follow.follow_date $order
+            $orderClause
             LIMIT $limit
             OFFSET $offset
 		";
@@ -58,9 +58,9 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         ');
     }
 
-    public function bdApi_getFollowedUserProfiles($userId, $order, $limit, $page)
+    public function bdApi_getFollowedUserProfiles($userId, $order, $orderDirection, $limit, $page)
     {
-        $order = $this->getQueryOrder($order);
+        $orderClause = $this->getFollowDateOrderClause($order, $orderDirection);
         $offset = ($page - 1) * $limit;
 
         $sql = "
@@ -69,7 +69,7 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 			INNER JOIN xf_user AS user ON
 				(user.user_id = user_follow.follow_user_id AND user.is_banned = 0)
 			WHERE user_follow.user_id = $userId
-            ORDER BY user_follow.follow_date $order
+            $orderClause
             LIMIT $limit
             OFFSET $offset
 		";
@@ -403,12 +403,18 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         return parent::getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
     }
 
-    protected function getQueryOrder($order)
+    protected function getFollowDateOrderClause($order, $orderDirection)
     {
-        if (strtolower($order) === 'asc') {
-            return 'ASC';
-        } else {
-            return 'DESC';
+        $orderBy = 'user.user_id';
+        if ($order === 'follow_date') {
+            $orderBy = 'user_follow.follow_date';
         }
+
+        $direction = 'ASC';
+        if (strtolower($orderDirection) === 'desc') {
+            $direction = 'DESC';
+        }
+
+        return "ORDER BY $orderBy $direction";
     }
 }
