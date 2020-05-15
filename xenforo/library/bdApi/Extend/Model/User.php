@@ -25,10 +25,10 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 		', $userId);
     }
 
-    public function bdApi_getUsersFollowingUserId($userId, $order, $orderDirection, $limit, $page)
+    public function bdApi_getUsersFollowingUserId($userId, $fetchOptions = array())
     {
-        $orderClause = $this->getFollowDateOrderClause($order, $orderDirection);
-        $offset = ($page - 1) * $limit;
+        $orderClause = $this->bdApi_prepareUserOrderOptions($fetchOptions);
+        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
         $sql = "
 			SELECT user.user_id, user.username
@@ -37,11 +37,9 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 				(user.user_id = user_follow.user_id AND user.is_banned = 0)
 			WHERE user_follow.follow_user_id = $userId
             $orderClause
-            LIMIT $limit
-            OFFSET $offset
 		";
 
-        return $this->_getDb()->fetchAll($sql);
+        return $this->fetchAllKeyed($this->limitQueryResults($sql, $limitOptions['limit'], $limitOptions['offset']), 'user_id');
     }
 
     public function bdApi_countUsersFollowingUserIds(array $userIds)
@@ -58,10 +56,10 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         ');
     }
 
-    public function bdApi_getFollowedUserProfiles($userId, $order, $orderDirection, $limit, $page)
+    public function bdApi_getFollowedUserProfiles($userId, $fetchOptions = array())
     {
-        $orderClause = $this->getFollowDateOrderClause($order, $orderDirection);
-        $offset = ($page - 1) * $limit;
+        $orderClause = $this->bdApi_prepareUserOrderOptions($fetchOptions);
+        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
         $sql = "
             SELECT user.user_id, user.username
@@ -70,11 +68,9 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 				(user.user_id = user_follow.follow_user_id AND user.is_banned = 0)
 			WHERE user_follow.user_id = $userId
             $orderClause
-            LIMIT $limit
-            OFFSET $offset
 		";
 
-        return $this->_getDb()->fetchAll($sql);
+        return $this->fetchAllKeyed($this->limitQueryResults($sql, $limitOptions['limit'], $limitOptions['offset']), 'user_id');
     }
 
     public function bdApi_getSystemFields()
@@ -396,25 +392,17 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         return $prepared;
     }
 
+    public function bdApi_prepareUserOrderOptions(array $fetchOptions, $defaultOrderSql = '')
+    {
+        $choices = array('follow_date' => 'user_follow.follow_date');
+
+        return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
+    }
+
     public function getOrderByClause(array $choices, array $fetchOptions, $defaultOrderSql = '')
     {
         $choices[self::ORDER_USER_ID] = 'user.user_id';
 
         return parent::getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
-    }
-
-    protected function getFollowDateOrderClause($order, $orderDirection)
-    {
-        $orderBy = 'user.user_id';
-        if ($order === 'follow_date') {
-            $orderBy = 'user_follow.follow_date';
-        }
-
-        $direction = 'ASC';
-        if (strtolower($orderDirection) === 'desc') {
-            $direction = 'DESC';
-        }
-
-        return "ORDER BY $orderBy $direction";
     }
 }

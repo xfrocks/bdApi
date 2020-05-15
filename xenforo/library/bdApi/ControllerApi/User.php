@@ -584,12 +584,6 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     public function actionGetFollowers()
     {
         $user = $this->_getUserOrError();
-        $order = $this->_input->filterSingle('order', XenForo_Input::STRING);
-        $orderDirection = $this->_input->filterSingle('order_direction', XenForo_Input::STRING);
-
-        $pageNavParams = array();
-        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
-
         $total = $this->_getUserModel()->countUsersFollowingUserId($user['user_id']);
 
         if ($this->_input->inRequest('total')) {
@@ -597,7 +591,33 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             return $this->responseData('bdApi_ViewApi_User_Followers_Total', $data);
         }
 
-        $followers = $this->_getUserModel()->bdApi_getUsersFollowingUserId($user['user_id'], $order, $orderDirection, $limit, $page);
+        $order = $this->_input->filterSingle('order', XenForo_Input::STRING);
+
+        $pageNavParams = array();
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
+
+        $fetchOptions = array();
+        $fetchOptions += array(
+            'limit' => $limit,
+            'page' => $page,
+        );
+
+        switch ($order) {
+            case 'follow_date':
+                $fetchOptions['order'] = 'follow_date';
+                $fetchOptions['direction'] = 'desc';
+                break;            
+            case 'follow_date_reverse':
+                $fetchOptions['order'] = 'follow_date';
+                $fetchOptions['direction'] = 'asc';
+                break;
+            default:
+                $fetchOptions['order'] = 'user_id';
+                $fetchOptions['direction'] = 'asc';
+                break;
+        }
+
+        $followers = $this->_getUserModel()->bdApi_getUsersFollowingUserId($user['user_id'], $fetchOptions);
 
         $data = array(
             'users' => array(),
@@ -645,12 +665,6 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     public function actionGetFollowings()
     {
         $user = $this->_getUserOrError();
-        $order = $this->_input->filterSingle('order', XenForo_Input::STRING);
-        $orderDirection = $this->_input->filterSingle('order_direction', XenForo_Input::STRING);
-
-        $pageNavParams = array();
-        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
-
         $total = $this->_getUserModel()->bdApi_countUsersBeingFollowedByUserId($user['user_id']);
 
         if ($this->_input->inRequest('total')) {
@@ -658,7 +672,33 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             return $this->responseData('bdApi_ViewApi_User_Followings_Total', $data);
         }
 
-        $followings = $this->_getUserModel()->bdApi_getFollowedUserProfiles($user['user_id'], $order, $orderDirection, $limit, $page);
+        $order = $this->_input->filterSingle('order', XenForo_Input::STRING);
+
+        $pageNavParams = array();
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
+
+        $fetchOptions = array();
+        $fetchOptions += array(
+            'limit' => $limit,
+            'page' => $page,
+        );
+
+        switch ($order) {
+            case 'follow_date':
+                $fetchOptions['order'] = 'follow_date';
+                $fetchOptions['direction'] = 'desc';
+                break;            
+            case 'follow_date_reverse':
+                $fetchOptions['order'] = 'follow_date';
+                $fetchOptions['direction'] = 'asc';
+                break;
+            default:
+                $fetchOptions['order'] = 'user_id';
+                $fetchOptions['direction'] = 'asc';
+                break;
+        }
+
+        $followings = $this->_getUserModel()->bdApi_getFollowedUserProfiles($user['user_id'], $fetchOptions);
 
         $data = array(
             'users' => array(),
