@@ -1634,8 +1634,7 @@ List of a user's followers
 Parameters:
 
  * `total` (_optional_): if included in the request, only the user count is returned as `users_total`. Since forum-2015072305.
- * `order` (_optional_): ordering of user followers. Default order: `user_id`. Support: `follow_date`
- * `order_direction` (_optional_): followers are sorted in this direction. Default value: ASC (ascending).
+ * `order` (_optional_): ordering of user followers. Support: `natural`, `follow_date`, `follow_date_reverse`
  * `page` (_optional_): page number of user followers.
  * `limit` (_optional_): number of user followers in a page. Default value depends on the system configuration.
 
@@ -1692,8 +1691,7 @@ List of users whom are followed by a user.
 Parameters:
 
  * `total` (_optional_): if included in the request, only the user count is returned as `users_total`. Since forum-2015072305.
- * `order` (_optional_): ordering of following users. Default order: `user_id`. Support: `follow_date`
- * `order_direction` (_optional_): users are sorted in this direction. Default value: ASC (ascending).
+ * `order` (_optional_): ordering of following users. Support: `natural`, `follow_date`, `follow_date_reverse`
  * `page` (_optional_): page number of following users.
  * `limit` (_optional_): number of following users in a page. Default value depends on the system configuration.
 
