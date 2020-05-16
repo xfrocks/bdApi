@@ -1025,7 +1025,6 @@ Detail information of a post.
                 {
                     user_id: (int),
                     username: (string),
-                    avatar: (string) # must be in fields_include to work
                 },
             ],
             attachments: [
@@ -1169,6 +1168,13 @@ List of users who liked a post.
             {
                 user_id: (int),
                 username: (string)
+                links: {
+                    permalink: (string),
+                    detail: (string),
+                    avatar: (string),
+                    avatar_big: (string),
+                    avatar_small: (string)
+                }
             },
             ...
         ]
