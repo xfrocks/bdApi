@@ -179,6 +179,7 @@ class bdApi_Extend_Model_Post extends XFCP_bdApi_Extend_Model_Post
             'signaturePlainText' => 'signature_plain_text',
             'likes' => 'post_like_count',
             'attach_count' => 'post_attachment_count',
+            'likeUsers' => 'like_users',
         );
 
         $data = bdApi_Data_Helper_Core::filter($post, $publicKeys);

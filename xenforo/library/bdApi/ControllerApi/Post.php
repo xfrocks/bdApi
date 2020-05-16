@@ -781,6 +781,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         }
 
         $postsData = array();
+        $likeUserIds = array();
         foreach ($posts as &$postRef) {
             if (!isset($threads[$postRef['thread_id']])) {
                 continue;
@@ -798,12 +799,35 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
             $postData = $this->_getPostModel()->prepareApiDataForPost($postRef, $threadRef, $forumRef);
 
+            if (!empty($postData['like_users'])) {
+                foreach ($postData['like_users'] as $likeUser) {
+                    $likeUserIds[] = $likeUser['user_id'];
+                }
+            }
+
             if ($preparePostThread) {
                 $postData['thread'] = $this->_getThreadModel()
                     ->prepareApiDataForThread($threadRef, $forumRef, array());
             }
 
             $postsData[] = $postData;
+        }
+
+        if (!empty($likeUserIds) && $this->_isFieldIncluded('like_users.avatar')) {
+            $likeUsers = $this->_getUserModel()->getUsersByIds($likeUserIds);
+            foreach ($postsData as &$postData) {
+                if (!empty($postData['like_users'])) {
+                    foreach ($postData['like_users'] as &$likeUserData) {
+                        if (!empty($likeUsers[$likeUserData['user_id']])) {
+                            $likeUser = $likeUsers[$likeUserData['user_id']];
+                            $likeUserData['avatar'] = XenForo_Template_Helper_Core::callHelper(
+                                'avatar',
+                                array($likeUser, 'm', false, true)
+                            );
+                        }
+                    }
+                }
+            }
         }
 
         return $postsData;
@@ -861,6 +885,15 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Like');
+    }
+
+    /**
+     * @return bdApi_Extend_Model_User
+     */
+    protected function _getUserModel()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getModelFromCache('XenForo_Model_User');
     }
 
     /**

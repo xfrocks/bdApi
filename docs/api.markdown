@@ -1021,6 +1021,13 @@ Detail information of a post.
             post_is_first_post: (boolean), # since forum-2013122402
             post_is_liked: (boolean),
             post_origin: (string), # since forum-2017081401
+            like_users: [
+                {
+                    user_id: (int),
+                    username: (string),
+                    avatar: (string) # must be in fields_include to work
+                },
+            ],
             attachments: [
                 {
                     attachment_id: (int),
