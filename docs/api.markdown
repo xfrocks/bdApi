@@ -1166,15 +1166,10 @@ List of users who liked a post.
     {
         users: [
             {
+                like_date: (int),
                 user_id: (int),
-                username: (string)
-                links: {
-                    permalink: (string),
-                    detail: (string),
-                    avatar: (string),
-                    avatar_big: (string),
-                    avatar_small: (string)
-                }
+                username: (string),
+                (other_user_data)
             },
             ...
         ]

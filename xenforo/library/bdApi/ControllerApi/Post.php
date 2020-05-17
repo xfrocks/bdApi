@@ -518,26 +518,46 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $ftpHelper = $this->getHelper('ForumThreadPost');
         list($post, ,) = $ftpHelper->assertPostValidAndViewable($postId);
 
-        $likes = $this->_getLikeModel()->getContentLikes('post', $post['post_id']);
-        $users = array();
+        $pageNavParams = array();
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
 
-        if (!empty($likes)) {
-            foreach ($likes as $like) {
-                $users[] = array(
-                    'user_id' => $like['like_user_id'],
-                    'username' => $like['username'],
-                    'links' => array(
-                        'permalink' => XenForo_Link::buildPublicLink('members', $like),
-                        'detail' => bdApi_Data_Helper_Core::safeBuildApiLink('users', $like),
-                        'avatar' => XenForo_Template_Helper_Core::callHelper('avatar', array($like, 'm', false, true)),
-                        'avatar_big' => XenForo_Template_Helper_Core::callHelper('avatar', array($like, 'l', false, true)),
-                        'avatar_small' => XenForo_Template_Helper_Core::callHelper('avatar', array($like, 's', false, true)),
-                    ),
-                );
-            }
+        $likes = $this->_getLikeModel()->getContentLikes('post', $post['post_id']);
+
+        $likeUsers = array();
+        foreach ($likes as $like) {
+            $likeUsers[] = array(
+                XenForo_Model_Search::CONTENT_TYPE => 'user',
+                XenForo_Model_Search::CONTENT_ID => $like['like_user_id'],
+                'like_date' => $like['like_date'],
+            );
         }
 
-        $data = array('users' => $users);
+        $usersTotal = count($likeUsers);
+        $pageResultIds = array_slice($likeUsers, ($page - 1) * $limit, $limit);
+
+        $usersData = array();
+        if (!empty($pageResultIds)) {
+            /** @var bdApi_Extend_Model_Search $searchModel */
+            $searchModel = $this->getModelFromCache('XenForo_Model_Search');
+            $searchResults = $searchModel->prepareApiDataForSearchResults($pageResultIds);
+            $usersData = $searchModel->prepareApiContentDataForSearch($searchResults);
+        }
+
+        $data = array(
+            'users' => array_values($usersData),
+            'users_total' => $usersTotal,
+        );
+
+        bdApi_Data_Helper_Core::addPageLinks(
+            $this->getInput(),
+            $data,
+            $limit,
+            $usersTotal,
+            $page,
+            'posts/likes',
+            $post,
+            $pageNavParams,
+        );
 
         return $this->responseData('bdApi_ViewApi_Post_Likes', $data);
     }
@@ -868,15 +888,6 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Like');
-    }
-
-    /**
-     * @return bdApi_Extend_Model_User
-     */
-    protected function _getUserModel()
-    {
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return $this->getModelFromCache('XenForo_Model_User');
     }
 
     /**
