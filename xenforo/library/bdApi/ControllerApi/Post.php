@@ -521,7 +521,14 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $pageNavParams = array();
         list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
 
-        $likes = $this->_getLikeModel()->getContentLikes('post', $post['post_id']);
+        $fetchOptions = array(
+            'limit' => $limit,
+            'page' => $page,
+        );
+
+        $bdApiLikeModel = $this->_getBdApiLikeModel();
+
+        $likes = $bdApiLikeModel->getContentLikes('post', $post['post_id'], $fetchOptions);
 
         $likeUsers = array();
         foreach ($likes as $like) {
@@ -532,16 +539,15 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             );
         }
 
-        $usersTotal = count($likeUsers);
-        $pageResultIds = array_slice($likeUsers, ($page - 1) * $limit, $limit);
-
         $usersData = array();
-        if (!empty($pageResultIds)) {
+        if (!empty($likeUsers)) {
             /** @var bdApi_Extend_Model_Search $searchModel */
             $searchModel = $this->getModelFromCache('XenForo_Model_Search');
-            $searchResults = $searchModel->prepareApiDataForSearchResults($pageResultIds);
+            $searchResults = $searchModel->prepareApiDataForSearchResults($likeUsers);
             $usersData = $searchModel->prepareApiContentDataForSearch($searchResults);
         }
+
+        $usersTotal = $bdApiLikeModel->countContentLikes('post', $post['post_id']);
 
         $data = array(
             'users' => array_values($usersData),
@@ -888,6 +894,15 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Like');
+    }
+
+    /**
+     * @return bdApi_Model_Like
+     */
+    protected function _getBdApiLikeModel()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getModelFromCache('bdApi_Model_Like');
     }
 
     /**
