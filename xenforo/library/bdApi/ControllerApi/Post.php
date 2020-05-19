@@ -535,7 +535,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             $likeUsers[] = array(
                 XenForo_Model_Search::CONTENT_TYPE => 'user',
                 XenForo_Model_Search::CONTENT_ID => $like['like_user_id'],
-                'content_like_date' => $like['like_date'],
+                'like_date' => $like['like_date'],
             );
         }
 

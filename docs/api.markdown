@@ -1166,7 +1166,7 @@ List of users who liked a post.
     {
         users: [
             {
-                content_like_date: (int),
+                like_date: (int),
                 user_id: (int),
                 username: (string),
                 (other_user_data)
