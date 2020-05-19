@@ -31,7 +31,7 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
         $sql = "
-			SELECT user.user_id, user.username
+			SELECT user.*
 			FROM xf_user_follow AS user_follow
 			INNER JOIN xf_user AS user ON
 				(user.user_id = user_follow.user_id AND user.is_banned = 0)
@@ -62,7 +62,7 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
         $sql = "
-            SELECT user.user_id, user.username
+            SELECT user.*
 			FROM xf_user_follow AS user_follow
 			INNER JOIN xf_user AS user ON
 				(user.user_id = user_follow.follow_user_id AND user.is_banned = 0)
