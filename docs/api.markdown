@@ -1624,7 +1624,8 @@ List of a user's followers
         users: [
             {
                 user_id: (int),
-                username: (string)
+                username: (string),
+                (Other user data)
             },
             ...
         ],
@@ -1681,7 +1682,8 @@ List of users whom are followed by a user.
         users: [
             {
                 user_id: (int),
-                username: (string)
+                username: (string),
+                (Other user data)
             },
             ...
         ]
