@@ -1021,6 +1021,12 @@ Detail information of a post.
             post_is_first_post: (boolean), # since forum-2013122402
             post_is_liked: (boolean),
             post_origin: (string), # since forum-2017081401
+            like_users: [
+                {
+                    user_id: (int),
+                    username: (string),
+                },
+            ],
             attachments: [
                 {
                     attachment_id: (int),
@@ -1160,8 +1166,10 @@ List of users who liked a post.
     {
         users: [
             {
+                like_date: (int),
                 user_id: (int),
-                username: (string)
+                username: (string),
+                (other_user_data)
             },
             ...
         ]

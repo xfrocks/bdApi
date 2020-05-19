@@ -518,19 +518,52 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $ftpHelper = $this->getHelper('ForumThreadPost');
         list($post, ,) = $ftpHelper->assertPostValidAndViewable($postId);
 
-        $likes = $this->_getLikeModel()->getContentLikes('post', $post['post_id']);
-        $users = array();
+        $pageNavParams = array();
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
 
-        if (!empty($likes)) {
-            foreach ($likes as $like) {
-                $users[] = array(
-                    'user_id' => $like['like_user_id'],
-                    'username' => $like['username'],
-                );
-            }
+        $fetchOptions = array(
+            'limit' => $limit,
+            'page' => $page,
+        );
+
+        $bdApiLikeModel = $this->_getBdApiLikeModel();
+
+        $likes = $bdApiLikeModel->getContentLikes('post', $post['post_id'], $fetchOptions);
+
+        $likeUsers = array();
+        foreach ($likes as $like) {
+            $likeUsers[] = array(
+                XenForo_Model_Search::CONTENT_TYPE => 'user',
+                XenForo_Model_Search::CONTENT_ID => $like['like_user_id'],
+                'like_date' => $like['like_date'],
+            );
         }
 
-        $data = array('users' => $users);
+        $usersData = array();
+        if (!empty($likeUsers)) {
+            /** @var bdApi_Extend_Model_Search $searchModel */
+            $searchModel = $this->getModelFromCache('XenForo_Model_Search');
+            $searchResults = $searchModel->prepareApiDataForSearchResults($likeUsers);
+            $usersData = $searchModel->prepareApiContentDataForSearch($searchResults);
+        }
+
+        $usersTotal = $bdApiLikeModel->countContentLikes('post', $post['post_id']);
+
+        $data = array(
+            'users' => array_values($usersData),
+            'users_total' => $usersTotal,
+        );
+
+        bdApi_Data_Helper_Core::addPageLinks(
+            $this->getInput(),
+            $data,
+            $limit,
+            $usersTotal,
+            $page,
+            'posts/likes',
+            $post,
+            $pageNavParams,
+        );
 
         return $this->responseData('bdApi_ViewApi_Post_Likes', $data);
     }
@@ -861,6 +894,15 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_Like');
+    }
+
+    /**
+     * @return bdApi_Model_Like
+     */
+    protected function _getBdApiLikeModel()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getModelFromCache('bdApi_Model_Like');
     }
 
     /**
