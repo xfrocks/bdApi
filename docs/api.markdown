@@ -1021,7 +1021,7 @@ Detail information of a post.
             post_is_first_post: (boolean), # since forum-2013122402
             post_is_liked: (boolean),
             post_origin: (string), # since forum-2017081401
-            like_users: [
+            like_users: [ # since forum-2020051901
                 {
                     user_id: (int),
                     username: (string),
@@ -1166,10 +1166,10 @@ List of users who liked a post.
     {
         users: [
             {
-                like_date: (int),
+                like_date: (int), # since forum-2020051901
                 user_id: (int),
                 username: (string),
-                (other_user_data)
+                (other_user_data) # since forum-2020051901
             },
             ...
         ]
