@@ -602,13 +602,14 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
                 break;
         }
 
-        $followers = $this->_getUserModel()->bdApi_getUsersFollowingUserId($user['user_id'], $fetchOptions);
+        $followers = $this->_getBdApiUserModel()->getUsersFollowingUserId($user['user_id'], $fetchOptions);
 
         $followUsers = array();
         foreach ($followers as $follower) {
             $followUsers[] = array(
                 XenForo_Model_Search::CONTENT_TYPE => 'user',
                 XenForo_Model_Search::CONTENT_ID => $follower['user_id'],
+                'follow_date' => $follower['follow_date'],
             );
         }
 
@@ -694,13 +695,14 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
                 break;
         }
 
-        $followings = $this->_getUserModel()->bdApi_getFollowedUserProfiles($user['user_id'], $fetchOptions);
+        $followings = $this->_getBdApiUserModel()->getFollowedUserProfiles($user['user_id'], $fetchOptions);
 
         $followUsers = array();
         foreach ($followings as $following) {
             $followUsers[] = array(
                 XenForo_Model_Search::CONTENT_TYPE => 'user',
                 XenForo_Model_Search::CONTENT_ID => $following['user_id'],
+                'follow_date' => $following['follow_date'],
             );
         }
 
@@ -982,6 +984,15 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_User');
+    }
+
+    /**
+     * @return bdApi_Model_User
+     */
+    protected function _getBdApiUserModel()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getModelFromCache('bdApi_Model_User');
     }
 
     /**

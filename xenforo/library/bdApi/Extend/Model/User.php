@@ -25,23 +25,6 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
 		', $userId);
     }
 
-    public function bdApi_getUsersFollowingUserId($userId, $fetchOptions = array())
-    {
-        $orderClause = $this->bdApi_prepareUserOrderOptions($fetchOptions);
-        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
-
-        $sql = "
-			SELECT user.*
-			FROM xf_user_follow AS user_follow
-			INNER JOIN xf_user AS user ON
-				(user.user_id = user_follow.user_id AND user.is_banned = 0)
-			WHERE user_follow.follow_user_id = $userId
-            $orderClause
-		";
-
-        return $this->fetchAllKeyed($this->limitQueryResults($sql, $limitOptions['limit'], $limitOptions['offset']), 'user_id');
-    }
-
     public function bdApi_countUsersFollowingUserIds(array $userIds)
     {
         if (count($userIds) === 0) {
@@ -54,23 +37,6 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
             WHERE follow_user_id IN (' . $this->_getDb()->quote($userIds) . ')
             GROUP BY follow_user_id
         ');
-    }
-
-    public function bdApi_getFollowedUserProfiles($userId, $fetchOptions = array())
-    {
-        $orderClause = $this->bdApi_prepareUserOrderOptions($fetchOptions);
-        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
-
-        $sql = "
-            SELECT user.*
-			FROM xf_user_follow AS user_follow
-			INNER JOIN xf_user AS user ON
-				(user.user_id = user_follow.follow_user_id AND user.is_banned = 0)
-			WHERE user_follow.user_id = $userId
-            $orderClause
-		";
-
-        return $this->fetchAllKeyed($this->limitQueryResults($sql, $limitOptions['limit'], $limitOptions['offset']), 'user_id');
     }
 
     public function bdApi_getSystemFields()
@@ -390,13 +356,6 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         }
 
         return $prepared;
-    }
-
-    public function bdApi_prepareUserOrderOptions(array $fetchOptions, $defaultOrderSql = '')
-    {
-        $choices = array('follow_date' => 'user_follow.follow_date');
-
-        return $this->getOrderByClause($choices, $fetchOptions, $defaultOrderSql);
     }
 
     public function getOrderByClause(array $choices, array $fetchOptions, $defaultOrderSql = '')
