@@ -586,7 +586,16 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $user = $this->_getUserOrError();
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING);
 
-        $fetchOptions = array();
+        $total = $this->_getUserModel()->countUsersFollowingUserId($user['user_id']);
+
+        $pageNavParams = array();
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
+
+        $fetchOptions = array(
+            'limit' => $limit,
+            'page' => $page,
+        );
+
         switch ($order) {
             case 'follow_date':
                 $fetchOptions['order'] = 'follow_date';
@@ -613,18 +622,12 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             );
         }
 
-        $total = count($followUsers);
-
-        $pageNavParams = array();
-        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
-        $pageResultIds = array_slice($followUsers, ($page - 1) * $limit, $limit);
-
         $this->_request->setParam('user_id', '');
 
         $usersData = array();
         /** @var bdApi_Extend_Model_Search $searchModel */
         $searchModel = $this->getModelFromCache('XenForo_Model_Search');
-        $searchResults = $searchModel->prepareApiDataForSearchResults($pageResultIds);
+        $searchResults = $searchModel->prepareApiDataForSearchResults($followUsers);
         $usersData = $searchModel->prepareApiContentDataForSearch($searchResults);
 
         $data = array(
@@ -679,7 +682,16 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $user = $this->_getUserOrError();
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING);
 
-        $fetchOptions = array();
+        $total = $this->_getUserModel()->bdApi_countUsersBeingFollowedByUserId($user['user_id']);
+
+        $pageNavParams = array();
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
+
+        $fetchOptions = array(
+            'limit' => $limit,
+            'page' => $page,
+        );
+
         switch ($order) {
             case 'follow_date':
                 $fetchOptions['order'] = 'follow_date';
@@ -706,18 +718,12 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             );
         }
 
-        $total = count($followUsers);
-
-        $pageNavParams = array();
-        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
-        $pageResultIds = array_slice($followUsers, ($page - 1) * $limit, $limit);
-
         $this->_request->setParam('user_id', '');
 
         $usersData = array();
         /** @var bdApi_Extend_Model_Search $searchModel */
         $searchModel = $this->getModelFromCache('XenForo_Model_Search');
-        $searchResults = $searchModel->prepareApiDataForSearchResults($pageResultIds);
+        $searchResults = $searchModel->prepareApiDataForSearchResults($followUsers);
         $usersData = $searchModel->prepareApiContentDataForSearch($searchResults);
 
         $data = array(
