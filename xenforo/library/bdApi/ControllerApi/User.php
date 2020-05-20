@@ -638,7 +638,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             $total,
             $page,
             'users/followers',
-            array(),
+            $user,
             $pageNavParams
         );
 
@@ -730,7 +730,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
             $total,
             $page,
             'users/followings',
-            array(),
+            $user,
             $pageNavParams
         );
 
