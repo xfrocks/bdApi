@@ -4,17 +4,18 @@ class bdApi_Data_Helper_Message
 {
     public static function getHtml(&$message, array $bbCodeOptions = array())
     {
-        static $bbCodeParser = false;
+        static $bbCodeParsers = array();
+        $formatterId = isset($bbCodeOptions['formatter']) ? $bbCodeOptions['formatter'] : 'Base';
 
-        if ($bbCodeParser === false) {
-            $formatter = XenForo_BbCode_Formatter_Base::create('Base', array(
+        if (!isset($bbCodeParsers[$formatterId])) {
+            $formatter = XenForo_BbCode_Formatter_Base::create($formatterId, array(
                 'view' => bdApi_Template_Simulation_View::create(),
             ));
 
             if (XenForo_Application::$versionId >= 1020000) {
-                $bbCodeParser = XenForo_BbCode_Parser::create($formatter);
+                $bbCodeParsers[$formatterId] = XenForo_BbCode_Parser::create($formatter);
             } else {
-                $bbCodeParser = new XenForo_BbCode_Parser($formatter);
+                $bbCodeParsers[$formatterId] = new XenForo_BbCode_Parser($formatter);
             }
         }
 
@@ -29,7 +30,11 @@ class bdApi_Data_Helper_Message
             $statesRef['shortenUrl'] = false;
         }
 
-        return XenForo_ViewPublic_Helper_Message::getBbCodeWrapper($message, $bbCodeParser, $bbCodeOptions);
+        return XenForo_ViewPublic_Helper_Message::getBbCodeWrapper(
+            $message,
+            $bbCodeParsers[$formatterId],
+            $bbCodeOptions
+        );
     }
 
     /**

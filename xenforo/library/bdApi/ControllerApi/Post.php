@@ -750,6 +750,27 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         return $this->responseReroute(__CLASS__, 'get-index');
     }
 
+    public function actionGetEditorConfig()
+    {
+        $input = $this->_input->filter(array(
+            'post_id' => XenForo_Input::UINT,
+        ));
+
+        list($post, $thread, $forum) = $this->_getForumThreadPostHelper()->assertPostValidAndViewable($input['post_id']);
+
+        if (!$this->_getPostModel()->canEditPost($post, $thread, $forum, $errorPhraseKey)) {
+            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+        }
+
+        $data = array();
+
+        if ($this->_isFieldIncluded('post_body_editor_html')) {
+            $data['post_body_editor_html'] = bdApi_Data_Helper_Message::getHtml($post, array('formatter' => 'Wysiwyg'));
+        }
+
+        return $this->responseData('bdApi_ViewApi_Post_EditorConfig', $data);
+    }
+
     protected function _prepareFetchOptionsForPageOfPost(
         array &$fetchOptions,
         array $pageOfPost,
