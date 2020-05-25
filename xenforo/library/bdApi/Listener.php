@@ -35,6 +35,7 @@ class bdApi_Listener
         // this is done to reduce performance impact for public context
         static $classes = array(
             'XenForo_BbCode_Formatter_Base',
+            'XenForo_BbCode_Formatter_Wysiwyg',
 
             'XenForo_Model_Attachment',
             'XenForo_Model_Category',
