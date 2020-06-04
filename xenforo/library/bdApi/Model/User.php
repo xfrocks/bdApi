@@ -2,6 +2,15 @@
 
 class bdApi_Model_User extends XenForo_Model
 {
+    public function countUsersBeingFollowedByUserId($userId)
+    {
+        return $this->_getDb()->fetchOne('
+			SELECT COUNT(*)
+			FROM xf_user_follow
+			WHERE user_id = ?
+		', $userId);
+    }
+
     public function getFollowedUserProfiles($userId, $fetchOptions = array())
     {
         $orderClause = $this->prepareUserOrderOptions($fetchOptions);

@@ -682,7 +682,7 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         $user = $this->_getUserOrError();
         $order = $this->_input->filterSingle('order', XenForo_Input::STRING);
 
-        $total = $this->_getUserModel()->bdApi_countUsersBeingFollowedByUserId($user['user_id']);
+        $total = $this->_getBdApiUserModel()->countUsersBeingFollowedByUserId($user['user_id']);
 
         $pageNavParams = array();
         list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
