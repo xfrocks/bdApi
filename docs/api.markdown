@@ -1177,7 +1177,8 @@ List of users who liked a post.
 
 Parameters:
 
- * N/A
+ * `page` (_optional_): page number of users. Since forum-2020051901.
+ * `limit` (_optional_): number of users in a page. Default value depends on the system configuration. Since forum-2020051901.
 
 Required scopes:
 
@@ -1631,22 +1632,21 @@ List of a user's followers
     {
         users: [
             {
-                follow_date: (int),
+                follow_date: (int), # since forum-2020060501
                 user_id: (int),
                 username: (string),
-                (Other user data)
+                (other_user_data) # since forum-2020060501
             },
             ...
         ],
-        users_total: (int)
+        users_total: (int) # since forum-2020060501
     }
 
 Parameters:
 
- * `total` (_optional_): if included in the request, only the user count is returned as `users_total`. Since forum-2015072305.
- * `order` (_optional_): ordering of user followers. Support: `natural`, `follow_date`, `follow_date_reverse`
- * `page` (_optional_): page number of user followers.
- * `limit` (_optional_): number of user followers in a page. Default value depends on the system configuration.
+ * `order` (_optional_): ordering of followers. Support: `natural`, `follow_date`, `follow_date_reverse`. Since forum-2020060501.
+ * `page` (_optional_): page number of followers. Since forum-2020060501.
+ * `limit` (_optional_): number of followers in a page. Default value depends on the system configuration. Since forum-2020060501.
 
 Required scopes:
 
@@ -1690,22 +1690,21 @@ List of users whom are followed by a user.
     {
         users: [
             {
-                follow_date: (int),
+                follow_date: (int), # since forum-2020060501
                 user_id: (int),
                 username: (string),
-                (Other user data)
+                (other_user_data) # since forum-2020060501
             },
             ...
         ]
-        users_total: (int)
+        users_total: (int) # since forum-2020060501
     }
 
 Parameters:
 
- * `total` (_optional_): if included in the request, only the user count is returned as `users_total`. Since forum-2015072305.
- * `order` (_optional_): ordering of following users. Support: `natural`, `follow_date`, `follow_date_reverse`
- * `page` (_optional_): page number of following users.
- * `limit` (_optional_): number of following users in a page. Default value depends on the system configuration.
+ * `order` (_optional_): ordering of users. Support: `natural`, `follow_date`, `follow_date_reverse`. Since forum-2020060501.
+ * `page` (_optional_): page number of users. Since forum-2020060501.
+ * `limit` (_optional_): number of users in a page. Default value depends on the system configuration. Since forum-2020060501.
 
 Required scopes:
 
