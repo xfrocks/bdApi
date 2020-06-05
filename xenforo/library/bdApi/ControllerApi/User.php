@@ -584,23 +584,67 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     public function actionGetFollowers()
     {
         $user = $this->_getUserOrError();
+        $order = $this->_input->filterSingle('order', XenForo_Input::STRING);
 
-        if ($this->_input->inRequest('total')) {
-            $total = $this->_getUserModel()->countUsersFollowingUserId($user['user_id']);
-            $data = array('users_total' => $total);
-            return $this->responseData('bdApi_ViewApi_User_Followers_Total', $data);
+        $total = $this->_getUserModel()->countUsersFollowingUserId($user['user_id']);
+
+        $pageNavParams = array();
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
+
+        $fetchOptions = array(
+            'limit' => $limit,
+            'page' => $page,
+        );
+
+        switch ($order) {
+            case 'follow_date':
+                $fetchOptions['order'] = 'follow_date';
+                $fetchOptions['direction'] = 'desc';
+                break;
+            case 'follow_date_reverse':
+                $fetchOptions['order'] = 'follow_date';
+                $fetchOptions['direction'] = 'asc';
+                break;
+            default:
+                $fetchOptions['order'] = 'user_id';
+                $fetchOptions['direction'] = 'asc';
+                break;
         }
 
-        $followers = $this->_getUserModel()->getUsersFollowingUserId($user['user_id'], 0, 'user.user_id');
+        $followers = $this->_getBdApiUserModel()->getUsersFollowingUserId($user['user_id'], $fetchOptions);
 
-        $data = array('users' => array());
-
+        $followUsers = array();
         foreach ($followers as $follower) {
-            $data['users'][] = array(
-                'user_id' => $follower['user_id'],
-                'username' => $follower['username'],
+            $followUsers[] = array(
+                XenForo_Model_Search::CONTENT_TYPE => 'user',
+                XenForo_Model_Search::CONTENT_ID => $follower['user_id'],
+                'follow_date' => $follower['follow_date'],
             );
         }
+
+        $this->_request->setParam('user_id', '');
+
+        $usersData = array();
+        /** @var bdApi_Extend_Model_Search $searchModel */
+        $searchModel = $this->getModelFromCache('XenForo_Model_Search');
+        $searchResults = $searchModel->prepareApiDataForSearchResults($followUsers);
+        $usersData = $searchModel->prepareApiContentDataForSearch($searchResults);
+
+        $data = array(
+            'users' => array_values($usersData),
+            'users_total' => $total,
+        );
+
+        bdApi_Data_Helper_Core::addPageLinks(
+            $this->getInput(),
+            $data,
+            $limit,
+            $total,
+            $page,
+            'users/followers',
+            $user,
+            $pageNavParams
+        );
 
         return $this->responseData('bdApi_ViewApi_User_Followers', $data);
     }
@@ -636,23 +680,67 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     public function actionGetFollowings()
     {
         $user = $this->_getUserOrError();
+        $order = $this->_input->filterSingle('order', XenForo_Input::STRING);
 
-        if ($this->_input->inRequest('total')) {
-            $total = $this->_getUserModel()->bdApi_countUsersBeingFollowedByUserId($user['user_id']);
-            $data = array('users_total' => $total);
-            return $this->responseData('bdApi_ViewApi_User_Followings_Total', $data);
+        $total = $this->_getBdApiUserModel()->countUsersBeingFollowedByUserId($user['user_id']);
+
+        $pageNavParams = array();
+        list($limit, $page) = $this->filterLimitAndPage($pageNavParams);
+
+        $fetchOptions = array(
+            'limit' => $limit,
+            'page' => $page,
+        );
+
+        switch ($order) {
+            case 'follow_date':
+                $fetchOptions['order'] = 'follow_date';
+                $fetchOptions['direction'] = 'desc';
+                break;
+            case 'follow_date_reverse':
+                $fetchOptions['order'] = 'follow_date';
+                $fetchOptions['direction'] = 'asc';
+                break;
+            default:
+                $fetchOptions['order'] = 'user_id';
+                $fetchOptions['direction'] = 'asc';
+                break;
         }
 
-        $followings = $this->_getUserModel()->getFollowedUserProfiles($user['user_id'], 0, 'user.user_id');
+        $followings = $this->_getBdApiUserModel()->getFollowedUserProfiles($user['user_id'], $fetchOptions);
 
-        $data = array('users' => array());
-
+        $followUsers = array();
         foreach ($followings as $following) {
-            $data['users'][] = array(
-                'user_id' => $following['user_id'],
-                'username' => $following['username'],
+            $followUsers[] = array(
+                XenForo_Model_Search::CONTENT_TYPE => 'user',
+                XenForo_Model_Search::CONTENT_ID => $following['user_id'],
+                'follow_date' => $following['follow_date'],
             );
         }
+
+        $this->_request->setParam('user_id', '');
+
+        $usersData = array();
+        /** @var bdApi_Extend_Model_Search $searchModel */
+        $searchModel = $this->getModelFromCache('XenForo_Model_Search');
+        $searchResults = $searchModel->prepareApiDataForSearchResults($followUsers);
+        $usersData = $searchModel->prepareApiContentDataForSearch($searchResults);
+
+        $data = array(
+            'users' => array_values($usersData),
+            'users_total' => $total,
+        );
+
+        bdApi_Data_Helper_Core::addPageLinks(
+            $this->getInput(),
+            $data,
+            $limit,
+            $total,
+            $page,
+            'users/followings',
+            $user,
+            $pageNavParams
+        );
 
         return $this->responseData('bdApi_ViewApi_User_Followings', $data);
     }
@@ -902,6 +990,15 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('XenForo_Model_User');
+    }
+
+    /**
+     * @return bdApi_Model_User
+     */
+    protected function _getBdApiUserModel()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return $this->getModelFromCache('bdApi_Model_User');
     }
 
     /**

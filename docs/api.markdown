@@ -1631,16 +1631,22 @@ List of a user's followers
     {
         users: [
             {
+                follow_date: (int),
                 user_id: (int),
-                username: (string)
+                username: (string),
+                (Other user data)
             },
             ...
-        ]
+        ],
+        users_total: (int)
     }
 
 Parameters:
 
  * `total` (_optional_): if included in the request, only the user count is returned as `users_total`. Since forum-2015072305.
+ * `order` (_optional_): ordering of user followers. Support: `natural`, `follow_date`, `follow_date_reverse`
+ * `page` (_optional_): page number of user followers.
+ * `limit` (_optional_): number of user followers in a page. Default value depends on the system configuration.
 
 Required scopes:
 
@@ -1684,16 +1690,22 @@ List of users whom are followed by a user.
     {
         users: [
             {
+                follow_date: (int),
                 user_id: (int),
-                username: (string)
+                username: (string),
+                (Other user data)
             },
             ...
         ]
+        users_total: (int)
     }
 
 Parameters:
 
  * `total` (_optional_): if included in the request, only the user count is returned as `users_total`. Since forum-2015072305.
+ * `order` (_optional_): ordering of following users. Support: `natural`, `follow_date`, `follow_date_reverse`
+ * `page` (_optional_): page number of following users.
+ * `limit` (_optional_): number of following users in a page. Default value depends on the system configuration.
 
 Required scopes:
 

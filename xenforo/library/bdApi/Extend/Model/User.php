@@ -16,15 +16,6 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
         ');
     }
 
-    public function bdApi_countUsersBeingFollowedByUserId($userId)
-    {
-        return $this->_getDb()->fetchOne('
-			SELECT COUNT(*)
-			FROM xf_user_follow
-			WHERE user_id = ?
-		', $userId);
-    }
-
     public function bdApi_countUsersFollowingUserIds(array $userIds)
     {
         if (count($userIds) === 0) {
