@@ -44,25 +44,12 @@ class bdApi_Data_Helper_Message
      */
     public static function getPlainText($bbCode)
     {
-        $config = XenForo_Application::getConfig();
-        $useSnippet = $config->get('bdApi_useSnippet');
+        $string = XenForo_Helper_String::bbCodeStrip($bbCode, true);
+        $string = XenForo_Helper_String::censorString($string);
 
-        if (!empty($useSnippet)) {
-            $html = XenForo_Template_Helper_Core::callHelper('snippet', array(
-                $bbCode,
-                0,
-                array(
-                    'stripQuote' => true,
-                    'stripHtml' => false,
-                )
-            ));
+        // remove unviewable's placeholders, it's unlikely they are expected in api contexts
+        $string = preg_replace('#\[(attach|media|img|spoiler)\]#i', '', $string);
 
-            return htmlspecialchars_decode($html, ENT_QUOTES);
-        } else {
-            $string = XenForo_Helper_String::bbCodeStrip($bbCode, true);
-            $string = XenForo_Helper_String::censorString($string);
-
-            return $string;
-        }
+        return $string;
     }
 }
