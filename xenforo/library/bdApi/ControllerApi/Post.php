@@ -562,7 +562,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             $page,
             'posts/likes',
             $post,
-            $pageNavParams,
+            $pageNavParams
         );
 
         return $this->responseData('bdApi_ViewApi_Post_Likes', $data);
