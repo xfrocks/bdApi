@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="Custom ruleset">
+    <description>My rules for PHP CodeSniffer</description>
+
+    <rule ref="PHPCompatibility"/>
+    <!-- php_version_x_does_not_meet_requirements -->
+    <config name="testVersion" value="5.2.11"/>
+
+    <rule ref="PSR2"/>
+</ruleset>
