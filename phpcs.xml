@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<ruleset name="phpcs">
+    <exclude-pattern>*/Lib/</exclude-pattern>
+
+    <rule ref="Generic.PHP.Syntax"/>
+
+    <rule ref="PHPCompatibility"/>
+    <config name="testVersion" value="5.4"/>
+</ruleset>
