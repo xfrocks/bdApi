@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
-<ruleset name="Custom ruleset">
-    <description>My rules for PHP CodeSniffer</description>
+<ruleset name="phpcs">
+    <exclude-pattern>*/Lib/</exclude-pattern>
+
+    <rule ref="Generic.PHP.Syntax"/>
 
     <rule ref="PHPCompatibility"/>
-    <!-- php_version_x_does_not_meet_requirements -->
-    <config name="testVersion" value="5.3"/>
+    <config name="testVersion" value="5.4"/>
 </ruleset>

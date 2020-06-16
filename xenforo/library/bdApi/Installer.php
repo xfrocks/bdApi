@@ -212,8 +212,8 @@ class bdApi_Installer
 
     public static function installCustomized($existingAddOn, $addOnData)
     {
-        if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 50309) {
-            throw new XenForo_Exception('PHP 5.3.9+ is required.');
+        if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 50400) {
+            throw new XenForo_Exception('PHP 5.4+ is required.');
         }
 
         if (!function_exists('openssl_encrypt')) {
