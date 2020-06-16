@@ -382,17 +382,17 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $errors = $dw->getErrors();
 
         $threadDw = null;
-        if ($post['post_id'] == $thread['first_post_id']
-            && $this->_getThreadModel()->canEditThread($thread, $forum)
-        ) {
+        $canEditPrefix = $this->_getThreadModel()->canEditThread($thread, $forum);
+        $canEditTitle = $this->_getThreadModel()->canEditThreadTitle($thread, $forum);
+        if ($post['post_id'] == $thread['first_post_id']) {
             $threadDw = XenForo_DataWriter::create('XenForo_DataWriter_Discussion_Thread');
             $threadDw->setExistingData($thread, true);
 
-            if ($this->_input->inRequest('thread_title')) {
+            if ($this->_input->inRequest('thread_title') && $canEditTitle) {
                 $threadDw->set('title', $input['thread_title']);
             }
 
-            if ($this->_input->inRequest('thread_prefix_id')) {
+            if ($this->_input->inRequest('thread_prefix_id') && $canEditPrefix) {
                 $prefixId = $input['thread_prefix_id'];
                 if (!is_numeric($prefixId)
                     && !empty($forum['default_prefix_id'])
@@ -404,7 +404,8 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
 
             $threadDw->preSave();
 
-            if (!$threadDw->get('prefix_id')
+            if ($canEditPrefix
+                && !$threadDw->get('prefix_id')
                 && !empty($forum['require_prefix'])
             ) {
                 /** @var bdApi_Extend_Model_ThreadPrefix $prefixModel */

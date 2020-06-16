@@ -256,15 +256,11 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
         );
 
         if (!empty($firstPost)) {
-            $data['permissions']['edit'] = $this->_getPostModel()->canEditPost($firstPost, $thread, $forum);
-
-            if (!empty($data['permissions']['edit'])) {
-                $data['permissions']['edit_title'] = $this->canEditThread($thread, $forum);
-
-                if (XenForo_Application::$versionId > 1050000) {
-                    $data['permissions']['edit_tags'] = $this->canEditTags($thread, $forum);
-                }
+            $data['permissions']['edit_prefix'] = $this->canEditThread($thread, $forum);
+            if (XenForo_Application::$versionId > 1050000) {
+                $data['permissions']['edit_tags'] = $this->canEditTags($thread, $forum);
             }
+            $data['permissions']['edit_title'] = $this->canEditThreadTitle($thread, $forum);
         }
 
         return $data;

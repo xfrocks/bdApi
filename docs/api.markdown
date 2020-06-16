@@ -676,9 +676,10 @@ Detail information of a thread.
                 follow: (boolean), # since forum-2014052903
                 post: (boolean),
                 upload_attachment: (boolean), # since forum-2014081203
-                edit: (boolean),
-                edit_title: (boolean), # since forum-2015100701
+                edit: nil, # removed since forum-2020061601
+                edit_prefix: (boolean), # since forum-2020061601
                 edit_tags: (boolean), # since forum-2015091102
+                edit_title: (boolean), # since forum-2015100701
             }
         }
     }
