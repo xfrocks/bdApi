@@ -13,5 +13,4 @@ jobs:
         - name: PHPCS check
           uses: chekalsky/phpcs-action@v1
           with:
-            enable_warnings: true
             phpcs_bin_path: './vendor/bin/phpcs'
