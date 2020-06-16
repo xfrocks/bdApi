@@ -10,3 +10,5 @@ xenforo/js/bdApi/*.min.js
 google-services.json
 xenforo_consumer/library/bdApiConsumer/DevHelper/XFCP
 xenforo_consumer/js/bdApiConsumer/*.js
+
+/vendor/

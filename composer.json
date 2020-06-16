@@ -1,0 +1,8 @@
+{
+    "name": "xfrocks/api",
+    "type": "project",
+    "require-dev": {
+    	"dealerdirect/phpcodesniffer-composer-installer": "*",
+        "phpcompatibility/php-compatibility": "^9.3"
+    }
+}
