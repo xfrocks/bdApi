@@ -4,7 +4,5 @@
 
     <rule ref="PHPCompatibility"/>
     <!-- php_version_x_does_not_meet_requirements -->
-    <config name="testVersion" value="5.2.11"/>
-
-    <rule ref="PSR2"/>
+    <config name="testVersion" value="5.3"/>
 </ruleset>
