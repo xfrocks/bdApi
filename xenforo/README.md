@@ -2,6 +2,28 @@
 
 ## Changelog
 
+### 1.6.3
+
+* PHP 7.3 support
+* Added GET `/users/fields`
+* Added POST `/lost-password`
+* Added GET `/threads/:threadId/navigation`
+* Added GET `/posts/unread`
+* Added POST `/notifications/custom`
+* Added GET `/threads/:threadId/poll`
+* Added param `fields` for POST `/users`
+* Added param `before` and `after` for GET `/conversation-messages`
+* Added param `thread_create_date` and `thread_update_date` for GET `/threads`
+* Added `ids` into response of GET `/tags/find`
+* Added `last_message` into conversation data
+* Added avatar links into recipient data
+* Added `thread_is_new` and `links.posts_unread` into thread data
+* Added `user_is_admin`, `user_is_moderator` and `user_is_staff` into user data
+* Added `like_users` into post data
+* Added `follow_date` and user data into response of GET `/users/:userId/followers` and GET `/users/:userId/followings`
+* Added support for `Api-Username-Inline-Style` header
+* Other performance improvements and bug fixes
+
 ### 1.6.1
 
 * PHP 7.2 support
