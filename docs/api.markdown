@@ -473,11 +473,13 @@ List of navigation elements within the system. Since forum-2015030601.
             (category) + {
                 navigation_type: "category",
                 navigation_id: (int),
+                navigation_depth: (int), # since forum-2020061901
                 has_sub_elements: (boolean)
             },
             (forum) + {
                 navigation_type: "forum",
                 navigation_id: (int),
+                navigation_depth: (int), # since forum-2020061901
                 has_sub_elements: (boolean)
             },
             {
@@ -495,6 +497,7 @@ List of navigation elements within the system. Since forum-2015030601.
                 },
                 navigation_type: "linkforum",
                 navigation_id: (int),
+                navigation_depth: (int), # since forum-2020061901
                 has_sub_elements: (boolean)
             },
             ...

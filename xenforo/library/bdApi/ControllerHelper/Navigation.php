@@ -71,6 +71,7 @@ class bdApi_ControllerHelper_Navigation extends XenForo_ControllerHelper_Abstrac
                 if (!empty($element)) {
                     $element['navigation_type'] = strtolower($node['node_type_id']);
                     $element['navigation_id'] = $node['node_id'];
+                    $element['navigation_depth'] = $node['depth'];
                     $element['navigation_parent_id'] = $node['parent_node_id'];
 
                     $element['has_sub_elements'] = !empty($nodesGrouped[$node['node_id']]);
