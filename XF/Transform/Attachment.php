@@ -10,13 +10,39 @@ class Attachment extends AbstractHandler
 {
     const KEY_DOWNLOAD_COUNT = 'attachment_download_count';
     const KEY_FILENAME = 'filename';
+    const KEY_HEIGHT = 'attachment_height';
+    const KEY_IS_INSERTED = 'attachment_is_inserted';
     const KEY_ID = 'attachment_id';
+    const KEY_WIDTH = 'attachment_width';
 
     const LINK_DATA = 'data';
     const LINK_THUMBNAIL = 'thumbnail';
 
     public function calculateDynamicValue(TransformContext $context, $key)
     {
+        switch ($key) {
+            case self::KEY_HEIGHT:
+            case self::KEY_WIDTH:
+                /** @var \XF\Entity\Attachment $attachment */
+                $attachment = $context->getSource();
+                $data = $attachment->Data;
+                if ($data->height > 0 && $data->width > 0) {
+                    return $key == self::KEY_HEIGHT ? $data->height : $data->width;
+                }
+
+                return null;
+            case self::KEY_IS_INSERTED:
+                $parentSource = $context->getParentSource();
+                $isAttachmentEmbedded = [$parentSource, 'isAttachmentEmbedded'];
+                if (is_callable($isAttachmentEmbedded)) {
+                    /** @var \XF\Entity\Attachment $attachment */
+                    $attachment = $context->getSource();
+                    return call_user_func($isAttachmentEmbedded, $attachment->attachment_id);
+                }
+
+                return null;
+        }
+
         /** @var AttachmentParent|null $parentHandler */
         $parentHandler = $context->getParentHandler();
         if ($parentHandler) {
@@ -80,6 +106,10 @@ class Attachment extends AbstractHandler
             'attachment_id' => self::KEY_ID,
             'filename' => self::KEY_FILENAME,
             'view_count' => self::KEY_DOWNLOAD_COUNT,
+
+            self::KEY_HEIGHT,
+            self::KEY_IS_INSERTED,
+            self::KEY_WIDTH,
         ];
 
         /** @var AttachmentParent|null $parentHandler */
