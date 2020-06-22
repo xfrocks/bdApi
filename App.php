@@ -26,6 +26,7 @@ class App extends \XF\Pub\App
         $data = parent::getGlobalTemplateData($reply);
 
         $data['isApi'] = true;
+        $data['apiRouterType'] = Listener::$routerType;
 
         return $data;
     }
