@@ -38,7 +38,7 @@ class bdApi_Extend_Model_Thread extends XFCP_bdApi_Extend_Model_Thread
             INNER JOIN `xf_thread` AS thread
             ON (thread.thread_id = post.thread_id)
             WHERE post.thread_id IN (' . $this->_getDb()->quote($threadIds) . ')
-                AND position > IF(thread.reply_count >= ' . $limit . ',
+                AND position >= IF(thread.reply_count >= ' . $limit . ',
                     thread.reply_count - ' . $limit . ', 0)
         ');
 

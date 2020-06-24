@@ -928,38 +928,40 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         $firstPostIds = array();
-        $lastPostIds = array();
         $latestPostIds = array();
+        $latestPostLimit = 0;
         foreach ($threads as $threadId => $threadRef) {
             if (!$this->_isFieldExcluded('first_post')) {
                 $firstPostIds[$threadId] = $threadRef['first_post_id'];
             }
-
-            if ($this->_isFieldIncluded('last_post')
-                && (!isset($firstPostIds[$threadId])
-                    || $threadRef['last_post_id'] != $threadRef['first_post_id'])
-            ) {
-                $lastPostIds[$threadId] = $threadRef['last_post_id'];
-            }
         }
 
+        if ($this->_isFieldIncluded('last_post')) {
+            $latestPostLimit = 1;
+        }
         if ($this->_isFieldIncluded('latest_posts')) {
-            $latestPostIds = $this->_getThreadModel()->bdApi_getLatestPostIds(array_keys($threads));
+            $latestPostLimit = 3;
+        }
+        if ($latestPostLimit > 0) {
+            $latestPostIds = $this->_getThreadModel()->bdApi_getLatestPostIds(
+                array_keys($threads),
+                // get twice the requested numbers to account for viewing permissions
+                2 * $latestPostLimit
+            );
         }
 
         $posts = array();
         if (!empty($firstPostIds)
-            || !empty($lastPostIds)
             || !empty($latestPostIds)
         ) {
             $posts = $this->_getPostModel()->getPostsByIds(
-                array_merge(array_values($firstPostIds), array_values($lastPostIds), $latestPostIds),
+                array_merge(array_values($firstPostIds), $latestPostIds),
                 $this->_getPostModel()->getFetchOptionsToPrepareApiData()
             );
 
             if ((!empty($firstPostIds) && !$this->_isFieldExcluded('first_post.attachments'))
-                || (!empty($lastPostIds) && !$this->_isFieldExcluded('last_post.attachments'))
-                || (!empty($latestPostIds) && !$this->_isFieldExcluded('latest_posts.attachments'))
+                || ($latestPostLimit === 1 && !$this->_isFieldExcluded('last_post.attachments'))
+                || ($latestPostLimit > 1 && !$this->_isFieldExcluded('latest_posts.attachments'))
             ) {
                 $posts = $this->_getPostModel()->getAndMergeAttachmentsIntoPosts($posts);
             }
@@ -1002,22 +1004,37 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
                         continue;
                     }
 
+                    if (!$this->_getPostModel()->canViewPost($post, $threadRef, $forumRef)) {
+                        continue;
+                    }
+
                     $threadData['_latestPosts'][$post['post_id']] = $post;
                 }
 
-                $threadData['latest_posts'] = $this->_getPostModel()->prepareApiDataForPosts(
-                    $threadData['_latestPosts'],
-                    $threadRef,
-                    $forumRef
-                );
-            } elseif (!empty($lastPostIds)
-                && isset($posts[$threadRef['last_post_id']])
-            ) {
-                $threadData['last_post'] = $this->_getPostModel()->prepareApiDataForPost(
-                    $posts[$threadRef['last_post_id']],
-                    $threadRef,
-                    $forumRef
-                );
+                if (count($threadData['_latestPosts']) > 0) {
+                    if (count($threadData['_latestPosts']) > $latestPostLimit) {
+                        $threadData['_latestPosts'] = array_slice(
+                            $threadData['_latestPosts'],
+                            -$latestPostLimit,
+                            null,
+                            true
+                        );
+                    }
+
+                    if ($latestPostLimit === 1) {
+                        $threadData['last_post'] = $this->_getPostModel()->prepareApiDataForPost(
+                            array_shift($threadData['_latestPosts']),
+                            $threadRef,
+                            $forumRef
+                        );
+                    } else {
+                        $threadData['latest_posts'] = $this->_getPostModel()->prepareApiDataForPosts(
+                            $threadData['_latestPosts'],
+                            $threadRef,
+                            $forumRef
+                        );
+                    }
+                }
             }
 
             $threadsData[] = $threadData;
