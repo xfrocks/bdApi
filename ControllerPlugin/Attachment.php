@@ -56,15 +56,7 @@ class Attachment extends AbstractPlugin
             throw $this->controller->exception($this->controller->noPermission($error));
         }
 
-        $lazyTransformer = $controller->transformEntityLazily($attachment);
-        $lazyTransformer->addCallbackPreTransform(function ($context) use ($hash) {
-            /** @var TransformContext $context */
-            $context->setData($hash, 'tempHash');
-
-            return $context;
-        });
-
-        return $controller->api(['attachment' => $lazyTransformer]);
+        return $controller->api(['attachment' => $controller->transformEntityLazily($attachment)]);
     }
 
     /**

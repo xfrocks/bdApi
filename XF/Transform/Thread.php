@@ -19,6 +19,8 @@ class Thread extends AbstractHandler
     const KEY_VIEW_COUNT = 'thread_view_count';
 
     const DYNAMIC_KEY_FIRST_POST = 'first_post';
+    const DYNAMIC_KEY_FORUM = 'forum';
+    const DYNAMIC_KEY_FORUM_DATA_KEY = 'thread.forum';
     const DYNAMIC_KEY_IS_DELETED = 'thread_is_deleted';
     const DYNAMIC_KEY_IS_FOLLOWED = 'thread_is_followed';
     const DYNAMIC_KEY_IS_PUBLISHED = 'thread_is_published';
@@ -47,16 +49,25 @@ class Thread extends AbstractHandler
         $thread = $context->getSource();
 
         switch ($key) {
-            case self::DYNAMIC_KEY_FIRST_POST:
-                $firstPost = $thread->FirstPost;
-                if ($firstPost !== null) {
-                    return $this->transformer->transformEntity($context, $key, $firstPost);
-                }
-                break;
             case self::DYNAMIC_KEY_FIELDS:
                 $customFieldSet = $thread->custom_fields;
-
                 return $this->transformer->transformCustomFieldSet($context, $customFieldSet);
+            case self::DYNAMIC_KEY_FIRST_POST:
+                $firstPost = $thread->FirstPost;
+                return $firstPost !== null ? $this->transformer->transformEntity($context, $key, $firstPost) : null;
+            case self::DYNAMIC_KEY_FORUM:
+                if ($context->data(self::DYNAMIC_KEY_FORUM_DATA_KEY) === true) {
+                    if ($context->selectorShouldExcludeField(self::DYNAMIC_KEY_FORUM)) {
+                        return null;
+                    }
+                } else {
+                    if (!$context->selectorShouldIncludeField(self::DYNAMIC_KEY_FORUM)) {
+                        return null;
+                    }
+                }
+
+                $forum = $thread->Forum;
+                return $forum !== null ? $this->transformer->transformEntity($context, $key, $forum) : null;
             case self::DYNAMIC_KEY_IS_DELETED:
                 return $thread->discussion_state === 'deleted';
             case self::DYNAMIC_KEY_IS_FOLLOWED:
@@ -167,11 +178,12 @@ class Thread extends AbstractHandler
             'view_count' => self::KEY_VIEW_COUNT,
 
             self::DYNAMIC_KEY_FIELDS,
+            self::DYNAMIC_KEY_FIRST_POST,
+            self::DYNAMIC_KEY_FORUM,
             self::DYNAMIC_KEY_IS_PUBLISHED,
             self::DYNAMIC_KEY_IS_DELETED,
             self::DYNAMIC_KEY_IS_STICKY,
             self::DYNAMIC_KEY_IS_FOLLOWED,
-            self::DYNAMIC_KEY_FIRST_POST,
             self::DYNAMIC_KEY_POLL,
             self::DYNAMIC_KEY_PREFIXES,
             self::DYNAMIC_KEY_TAGS,
@@ -206,6 +218,17 @@ class Thread extends AbstractHandler
                 $finder,
                 self::DYNAMIC_KEY_FIRST_POST,
                 'FirstPost'
+            );
+        }
+
+        if ($context->selectorShouldIncludeField(self::DYNAMIC_KEY_FORUM)
+            || ($context->data(self::DYNAMIC_KEY_FORUM_DATA_KEY) === true
+                && !$context->selectorShouldExcludeField(self::DYNAMIC_KEY_FORUM))) {
+            $this->callOnTransformFinderForRelation(
+                $context,
+                $finder,
+                self::DYNAMIC_KEY_FORUM,
+                'Forum'
             );
         }
 

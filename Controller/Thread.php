@@ -14,6 +14,7 @@ use XF\Service\Thread\Deleter;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Transform\TransformContext;
 use Xfrocks\Api\Util\PageNav;
+use Xfrocks\Api\XF\Transform\Thread as TransformThread;
 
 class Thread extends AbstractController
 {
@@ -501,6 +502,7 @@ class Thread extends AbstractController
     {
         $threads = [];
         if (count($ids) > 0) {
+            $this->params()->getTransformContext()->setData(true, TransformThread::DYNAMIC_KEY_FORUM_DATA_KEY);
             $threads = $this->findAndTransformLazily('XF:Thread', $ids);
         }
 
@@ -513,9 +515,8 @@ class Thread extends AbstractController
      */
     public function actionSingle($threadId)
     {
-        return $this->api([
-            'thread' => $this->findAndTransformLazily('XF:Thread', intval($threadId), 'requested_thread_not_found')
-        ]);
+        $thread = $this->findAndTransformLazily('XF:Thread', intval($threadId), 'requested_thread_not_found');
+        return $this->api(['thread' => $thread]);
     }
 
     /**
