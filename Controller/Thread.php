@@ -360,6 +360,32 @@ class Thread extends AbstractController
 
     /**
      * @param ParameterBag $params
+     * @return \Xfrocks\Api\Mvc\Reply\Api
+     * @throws \XF\Mvc\Reply\Exception
+     */
+    public function actionGetNavigation(ParameterBag $params)
+    {
+        $thread = $this->assertViewableThread($params->thread_id);
+        $forum = $thread->Forum;
+        if ($forum === null) {
+            throw new \RuntimeException('$thread->Forum === null');
+        }
+
+        $breadcrumbs = $forum->getBreadcrumbs(true);
+        $nodeIds = [];
+        foreach ($breadcrumbs as $breadcrumb) {
+            $nodeIds[] = $breadcrumb['node_id'];
+        }
+
+        /** @var \Xfrocks\Api\ControllerPlugin\Navigation $navigationPlugin */
+        $navigationPlugin = $this->plugin('Xfrocks\Api:Navigation');
+        $elements = $navigationPlugin->prepareElementsFromIds($nodeIds);
+
+        return $this->api(['elements' => $elements]);
+    }
+
+    /**
+     * @param ParameterBag $params
      * @return \XF\Mvc\Reply\Error|\XF\Mvc\Reply\Message
      * @throws \XF\Mvc\Reply\Exception
      */
