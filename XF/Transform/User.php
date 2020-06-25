@@ -72,19 +72,19 @@ class User extends AbstractHandler
                     return null;
                 }
                 $userProfile = $user->Profile;
-                return $userProfile ? $userProfile->dob_day : null;
+                return $userProfile !== null ? $userProfile->dob_day : null;
             case self::DYNAMIC_KEY_DOB_MONTH:
                 if ($context->data('flagFullAccess') !== true) {
                     return null;
                 }
                 $userProfile = $user->Profile;
-                return $userProfile ? $userProfile->dob_month : null;
+                return $userProfile !== null ? $userProfile->dob_month : null;
             case self::DYNAMIC_KEY_DOB_YEAR:
                 if ($context->data('flagFullAccess') !== true) {
                     return null;
                 }
                 $userProfile = $user->Profile;
-                return $userProfile ? $userProfile->dob_year : null;
+                return $userProfile !== null ? $userProfile->dob_year : null;
             case self::DYNAMIC_KEY_EMAIL:
                 if ($context->data('flagFullAccess') !== true) {
                     return null;
@@ -117,18 +117,24 @@ class User extends AbstractHandler
                     return null;
                 }
                 $userAuth = $user->Auth;
-                if (!$userAuth) {
+                if ($userAuth === null) {
                     return false;
                 }
 
                 $handler = $userAuth->getAuthenticationHandler();
-                return $handler ? $handler->hasPassword() : false;
+                return $handler !== null ? $handler->hasPassword() : false;
             case self::DYNAMIC_KEY_IS_FOLLOWED:
                 return $visitor->isFollowing($user);
             case self::DYNAMIC_KEY_IS_IGNORED:
                 return $visitor->isIgnoring($user->user_id);
             case self::DYNAMIC_KEY_IS_VALID:
-                return (!$user->is_banned && in_array($user->user_state, ['valid', 'email_confirm', 'email_confirm_edit'], true));
+                return (!$user->is_banned
+                    && in_array(
+                        $user->user_state,
+                        ['valid', 'email_confirm', 'email_confirm_edit'],
+                        true
+                    )
+                );
             case self::DYNAMIC_KEY_IS_VERIFIED:
                 return $user->user_state === 'valid';
             case self::DYNAMIC_KEY_IS_VISITOR:
@@ -151,7 +157,7 @@ class User extends AbstractHandler
                 }
                 return $dtz->getOffset($dt);
             case self::DYNAMIC_KEY_TITLE:
-                return strip_tags($this->getTemplater()->fn('user_title', [$user]));
+                return strip_tags($this->getTemplater()->func('user_title', [$user]));
             case self::DYNAMIC_KEY_UNREAD_CONVO_COUNT:
                 if ($context->data('flagFullAccess') !== true ||
                     !$this->checkSessionScope(Server::SCOPE_PARTICIPATE_IN_CONVERSATIONS)) {
@@ -207,10 +213,8 @@ class User extends AbstractHandler
 
     public function getMappings(TransformContext $context)
     {
-        $likeCountColumn = \XF::$versionId < 2010000 ? 'like_count' : 'reaction_score';
-
         return [
-            $likeCountColumn => self::KEY_LIKE_COUNT,
+            'reaction_score' => self::KEY_LIKE_COUNT,
             'message_count' => self::KEY_MESSAGE_COUNT,
             'register_date' => self::KEY_REGISTER_DATE,
             'user_id' => self::KEY_ID,
@@ -273,7 +277,7 @@ class User extends AbstractHandler
         /** @var \XF\Entity\User $user */
         $user = $context->getSource();
         $userProfile = $user->Profile;
-        if (!$userProfile) {
+        if ($userProfile === null) {
             return null;
         }
 
@@ -298,7 +302,10 @@ class User extends AbstractHandler
         $user = $context->getSource();
 
         $systemFields = ['about', 'homepage', 'location'];
-        $data = $this->transformer->transformCustomFieldSet($context, $user->Profile->custom_fields);
+        $profile = $user->Profile;
+        $data = $profile != null
+            ? $this->transformer->transformCustomFieldSet($context, $profile->custom_fields)
+            : [];
 
         foreach ($systemFields as $systemFieldId) {
             $systemField = [
@@ -311,14 +318,14 @@ class User extends AbstractHandler
 
             switch ($systemFieldId) {
                 case 'about':
-                    $systemField['value'] = $user->Profile->about;
+                    $systemField['value'] = $profile !== null ? $profile->about : null;
                     break;
                 case 'homepage':
-                    $systemField['value'] = $user->Profile->website;
+                    $systemField['value'] = $profile !== null ? $profile->website : null;
                     $systemField['title'] = \XF::phrase('website');
                     break;
                 case 'location':
-                    $systemField['value'] = $user->Profile->location;
+                    $systemField['value'] = $profile !== null ? $profile->location : null;
                     break;
             }
 

@@ -15,13 +15,16 @@ class LostPassword extends AbstractController
             ->define('username', 'str')
             ->define('email', 'str');
 
-        $usernameOrEmail = $params['username'] ?: $params['email'];
+        $usernameOrEmail = $params['username'];
+        if (strlen($usernameOrEmail) === 0) {
+            $usernameOrEmail = $params['email'];
+        }
         if ($usernameOrEmail === '') {
             return $this->error(\XF::phrase('bdapi_slash_lost_password_requires_username_or_email'), 400);
         }
 
         $token = $this->session()->getToken();
-        if (!$token) {
+        if ($token === null) {
             return $this->noPermission();
         }
 
@@ -29,7 +32,7 @@ class LostPassword extends AbstractController
         $userRepo = $this->repository('XF:User');
         /** @var \XF\Entity\User|null $user */
         $user = $userRepo->getUserByNameOrEmail($usernameOrEmail);
-        if (!$user) {
+        if ($user === null) {
             return $this->error(\XF::phrase('requested_member_not_found'));
         }
 

@@ -229,11 +229,11 @@ class Subscription extends Repository
             return false;
         }
 
-        $user = $user ?: \XF::visitor();
+        $user = $user !== null ? $user : \XF::visitor();
         /** @var Session $session */
         $session = \XF::app()->session();
         $token = $session->getToken();
-        $client = $token ? $token->Client : null;
+        $client = $token !== null ? $token->Client : null;
 
         switch ($type) {
             case self::TYPE_NOTIFICATION:
@@ -247,7 +247,7 @@ class Subscription extends Repository
             case self::TYPE_THREAD_POST:
                 /** @var Thread|null $thread */
                 $thread = $this->em->find('XF:Thread', $id);
-                if (!$thread) {
+                if ($thread === null) {
                     return false;
                 }
 
@@ -259,7 +259,7 @@ class Subscription extends Repository
                     $topic = self::getTopic($type, $id);
                 }
 
-                if ($id === '0' && $client) {
+                if ($id === '0' && $client !== null) {
                     if (!isset($client->options['allow_user_0_subscription']) ||
                         $client->options['allow_user_0_subscription'] < 1
                     ) {
@@ -304,7 +304,7 @@ class Subscription extends Repository
         /** @var Session $session */
         $session = $this->app()->session();
         $token = $session->getToken();
-        $clientId = $token ? $token->client_id : '';
+        $clientId = $token !== null ? $token->client_id : '';
         if (is_string($subscriptionOption)) {
             $subscriptionOption = Php::safeUnserialize($subscriptionOption);
         }
@@ -394,7 +394,7 @@ class Subscription extends Repository
         }
 
         $userOption = $alertedUser->Option;
-        if (!$userOption) {
+        if ($userOption === null) {
             return false;
         }
 
@@ -404,8 +404,11 @@ class Subscription extends Repository
         }
 
         $templater = $this->app()->templater();
-
-        $triggerUser = $triggerUser ?: $message->User;
+        $conversation = $message->Conversation;
+        $triggerUser = $triggerUser !== null ? $triggerUser : $message->User;
+        if ($triggerUser === null) {
+            return false;
+        }
 
         $extraData = [
             'object_data' => [
@@ -416,9 +419,9 @@ class Subscription extends Repository
 
         $extraData['object_data']['message'] = [
             'conversation_id' => $message->conversation_id,
-            'title' => $message->Conversation->title,
+            'title' => $conversation !== null ? $conversation->title : '',
             'message_id' => $message->message_id,
-            'message' => $templater->fn('snippet', [$message->message, 140, ['stripQuote' => true]])
+            'message' => $templater->func('snippet', [$message->message, 140, ['stripQuote' => true]])
         ];
 
         $fakeAlert = [
@@ -456,7 +459,7 @@ class Subscription extends Repository
         }
 
         $thread = $post->Thread;
-        if (!$thread) {
+        if ($thread === null) {
             return false;
         }
 
@@ -489,7 +492,7 @@ class Subscription extends Repository
         }
 
         $userOption = $user->Option;
-        if (!$userOption) {
+        if ($userOption === null) {
             return false;
         }
 
@@ -624,18 +627,21 @@ class Subscription extends Repository
                 /** @var Transformer $transformer */
                 $transformer = $this->app()->container('api.transformer');
 
+                /** @var User $visitor */
                 $visitor = \XF::visitor();
                 if ($visitor->user_id < 1 && isset($alertRef['alerted_user_id']) && $alertRef['alerted_user_id'] > 0) {
+                    /** @var User|null $visitor */
                     $visitor = $this->em->find('XF:User', $alertRef['alerted_user_id']);
                 }
 
                 try {
-                    $pingDataRef['object_data'] = \XF::asVisitor(
-                        $visitor,
-                        function () use ($transformer, $transformContext, $alertRef) {
-                            return $transformer->transformEntity($transformContext, null, $alertRef);
-                        }
-                    );
+                    $pingDataRef['object_data'] = $visitor !== null
+                        ? \XF::asVisitor(
+                            $visitor,
+                            function () use ($transformer, $transformContext, $alertRef) {
+                                return $transformer->transformEntity($transformContext, null, $alertRef);
+                            }
+                        ) : [];
                 } catch (\Exception $e) {
                     $pingDataRef['object_data'] = [];
                 }

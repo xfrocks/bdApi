@@ -76,7 +76,12 @@ class ConversationMaster extends AbstractHandler
 
                 return $recipient->recipient_state === 'active';
             case self::DYNAMIC_KEY_FIRST_MESSAGE:
-                return $this->transformer->transformEntity($context, $key, $conversation->FirstMessage);
+                $firstMessage = $conversation->FirstMessage;
+                if ($firstMessage === null) {
+                    return null;
+                }
+
+                return $this->transformer->transformEntity($context, $key, $firstMessage);
             case self::DYNAMIC_KEY_HAS_NEW_MESSAGE:
                 $userId = \XF::visitor()->user_id;
 
@@ -91,7 +96,12 @@ class ConversationMaster extends AbstractHandler
                     return null;
                 }
 
-                return $this->transformer->transformEntity($context, $key, $conversation->LastMessage);
+                $lastMessage = $conversation->LastMessage;
+                if ($lastMessage === null) {
+                    return null;
+                }
+
+                return $this->transformer->transformEntity($context, $key, $lastMessage);
             case self::DYNAMIC_KEY_RECIPIENTS:
                 return $this->transformer->transformEntityRelation($context, $key, $conversation, 'Recipients');
         }

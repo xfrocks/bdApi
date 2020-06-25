@@ -20,7 +20,7 @@ class CustomField extends AbstractHandler
     {
         /** @var Definition|null $definition */
         $definition = $context->data('definition');
-        if (!$definition) {
+        if ($definition === null) {
             return null;
         }
 

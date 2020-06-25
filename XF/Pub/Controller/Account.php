@@ -161,7 +161,7 @@ class Account extends XFCP_Account
             $visitorClient = $this->getApiClientRepo()->findUserClients(\XF::visitor()->user_id)
                 ->order(Finder::ORDER_RANDOM)
                 ->fetchOne();
-            if ($visitorClient) {
+            if ($visitorClient !== null) {
                 $clientIsAuto = true;
                 $apiServer->setRequestQuery('client_id', $visitorClient->client_id);
                 $apiServer->setRequestQuery('redirect_uri', $visitorClient->redirect_uri);

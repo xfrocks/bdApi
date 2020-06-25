@@ -48,7 +48,11 @@ class Thread extends AbstractHandler
 
         switch ($key) {
             case self::DYNAMIC_KEY_FIRST_POST:
-                return $this->transformer->transformEntity($context, $key, $thread->FirstPost);
+                $firstPost = $thread->FirstPost;
+                if ($firstPost !== null) {
+                    return $this->transformer->transformEntity($context, $key, $firstPost);
+                }
+                break;
             case self::DYNAMIC_KEY_FIELDS:
                 $customFieldSet = $thread->custom_fields;
 
@@ -71,13 +75,12 @@ class Thread extends AbstractHandler
                     return null;
                 }
 
-                /** @var \XF\Entity\Poll|null $poll */
                 $poll = $thread->Poll;
-                if (!$poll) {
+                if ($poll === null) {
                     return null;
                 }
 
-                return $this->transformer->transformEntity($context, $key, $thread->Poll);
+                return $this->transformer->transformEntity($context, $key, $poll);
             case self::DYNAMIC_KEY_PREFIXES:
                 if ($thread->prefix_id === 0) {
                     return null;
@@ -85,7 +88,7 @@ class Thread extends AbstractHandler
 
                 /** @var \XF\Entity\ThreadPrefix|null $prefix */
                 $prefix = $thread->Prefix;
-                if (!$prefix) {
+                if ($prefix === null) {
                     return null;
                 }
 
@@ -108,18 +111,17 @@ class Thread extends AbstractHandler
     {
         /** @var \XF\Entity\Thread $thread */
         $thread = $context->getSource();
+        $forum = $thread->Forum;
 
-        $permissions = [
+        return [
             self::PERM_DELETE => $thread->canDelete(),
             self::PERM_EDIT => $thread->canEdit(),
             self::PERM_EDIT_TAGS => $thread->canEditTags(),
             self::PERM_EDIT_TITLE => $thread->canEdit(),
             self::PERM_FOLLOW => $thread->canWatch(),
             self::PERM_POST => $thread->canReply(),
-            self::PERM_UPLOAD_ATTACHMENT => $thread->Forum->canUploadAndManageAttachments(),
+            self::PERM_UPLOAD_ATTACHMENT => $forum !== null ? $forum->canUploadAndManageAttachments() : null,
         ];
-
-        return $permissions;
     }
 
     public function collectLinks(TransformContext $context)
@@ -139,9 +141,9 @@ class Thread extends AbstractHandler
         ];
 
         $firstPost = $thread->FirstPost;
-        if ($firstPost->user_id > 0) {
+        if ($firstPost !== null && $firstPost->user_id > 0) {
             $firstPostUser = $firstPost->User;
-            if ($firstPostUser) {
+            if ($firstPostUser !== null) {
                 $links[self::LINK_FIRST_POSTER] = $this->buildApiLink('users', $firstPostUser);
                 $links[self::LINK_FIRST_POSTER_AVATAR] = $firstPostUser->getAvatarUrl('l');
             }

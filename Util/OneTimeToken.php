@@ -65,11 +65,12 @@ class OneTimeToken
         $token->user_id = $userId;
         $token->setScopes($server->getScopeDefaults());
 
+        $client = $token->Client;
+        if ($client === null) {
+            return null;
+        }
+
         if ($userId === 0) {
-            $client = $token->Client;
-            if (!$client) {
-                return null;
-            }
             if ($once !== self::generateOnce($userId, $timestamp, '', $client->client_secret)) {
                 return null;
             }
@@ -84,7 +85,7 @@ class OneTimeToken
         }, $userWith);
 
         $userTokenTexts = $app->finder('Xfrocks\Api:Token')
-            ->where('client_id', $clientId)
+            ->where('client_id', $client->client_id)
             ->where('user_id', $userId)
             ->with($with)
             ->with('Client', true)
@@ -92,7 +93,7 @@ class OneTimeToken
             ->fetch();
 
         foreach ($userTokenTexts as $userTokenText => $expireDate) {
-            if ($once === self::generateOnce($userId, $timestamp, $userTokenText, $token->Client->client_secret)) {
+            if ($once === self::generateOnce($userId, $timestamp, $userTokenText, $client->client_secret)) {
                 $token->expire_date = min($token->expire_date, $expireDate);
                 return $token;
             }

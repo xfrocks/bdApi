@@ -30,8 +30,14 @@ class Notification extends AbstractController
         /** @var \XF\Repository\UserAlert $alertRepo */
         $alertRepo = $this->repository('XF:UserAlert');
 
+        $visitor = \XF::visitor();
+        $option = $visitor->Option;
+        if ($option === null) {
+            throw new \RuntimeException('$option === null');
+        }
+
         $finder = $alertRepo->findAlertsForUser(
-            \XF::visitor()->user_id,
+            $visitor->user_id,
             \XF::$time - $this->options()->alertExpiryDays * 86400
         );
 
@@ -52,9 +58,9 @@ class Notification extends AbstractController
             $subscriptionRepo->prepareDiscoveryParams(
                 $data,
                 $topicType,
-                \XF::visitor()->user_id,
+                $visitor->user_id,
                 $this->buildApiLink('notifications', null, ['oauth_token' => '']),
-                \XF::visitor()->Option->getValue(RepoSub::getSubColumn($topicType))
+                $option->getValue(RepoSub::getSubColumn($topicType))
             );
         }
 
@@ -94,7 +100,7 @@ class Notification extends AbstractController
         $jobConfig = $this->getBatchJobConfig($alert);
         $contentResponse = null;
 
-        if ($jobConfig) {
+        if (is_array($jobConfig)) {
             $jobConfig = array_replace([
                 'method' => 'GET',
                 'uri' => null,
@@ -110,7 +116,7 @@ class Notification extends AbstractController
             'notification' => $this->transformEntityLazily($alert)
         ];
 
-        if ($contentResponse) {
+        if ($contentResponse !== null) {
             /** @var Transformer $transformer */
             $transformer = $this->app()->container('api.transformer');
 

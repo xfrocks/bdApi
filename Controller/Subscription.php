@@ -21,7 +21,7 @@ class Subscription extends AbstractController
         $token = $session->getToken();
 
         $clientId = '';
-        if ($token) {
+        if ($token !== null) {
             $clientId = $token->client_id;
         }
 

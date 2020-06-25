@@ -1,5 +1,10 @@
 <?php
 
+// phpcs:disable PHPCompatibility.FunctionDeclarations.NewParamTypeDeclarations.boolFound
+// phpcs:disable PHPCompatibility.FunctionDeclarations.NewParamTypeDeclarations.stringFound
+// phpcs:disable PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations.boolFound
+// phpcs:disable PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations.class_nameFound
+
 namespace dev\PHPStan\Reflection;
 
 use DevHelper\PHPStan\Reflection\EntityColumnReflection;

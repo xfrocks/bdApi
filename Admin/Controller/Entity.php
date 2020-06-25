@@ -14,13 +14,13 @@ abstract class Entity extends \Xfrocks\Api\DevHelper\Admin\Controller\Entity
     {
         /** @var \Xfrocks\Api\Entity\Client|null $client */
         $client = $entity->getRelation('Client');
-        if (!$client) {
+        if ($client === null) {
             return '';
         }
 
         /** @var \XF\Entity\User|null $user */
         $user = $entity->getRelation('User');
-        return $user ? sprintf('%s / %s', $client->name, $user->username) : $client->name;
+        return $user !== null ? sprintf('%s / %s', $client->name, $user->username) : $client->name;
     }
 
     protected function getPrefixForClasses()

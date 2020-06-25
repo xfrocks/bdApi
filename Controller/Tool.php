@@ -124,10 +124,14 @@ class Tool extends AbstractController
 
         $session = $this->session();
         $token = $session->getToken();
-        if (!$token) {
+        if ($token === null) {
             return $this->noPermission();
         }
+
         $client = $token->Client;
+        if ($client === null) {
+            return $this->noPermission();
+        }
 
         return $this->api(['ott' => OneTimeToken::generate($params['ttl'], $client)]);
     }
@@ -173,6 +177,6 @@ class Tool extends AbstractController
 
     protected function getDefaultApiScopeForAction($action)
     {
-        return false;
+        return null;
     }
 }

@@ -203,8 +203,6 @@ class PingQueue extends Repository
     protected function preparePayloadsFromRecords(array $records)
     {
         $dataByTypes = array();
-        $payloads = array();
-
         foreach ($records as $key => $record) {
             /** @var string $objectTypeRef */
             $objectTypeRef =& $record['object_type'];
@@ -219,22 +217,24 @@ class PingQueue extends Repository
 
         /** @var Subscription $subscriptionRepo */
         $subscriptionRepo = $this->repository('Xfrocks\Api:Subscription');
+        $payloadsByTypes = [];
         foreach ($dataByTypes as $objectType => &$dataManyRef) {
-            $dataManyRef = $subscriptionRepo->preparePingDataMany($objectType, $dataManyRef);
+            $payloadsByTypes[$objectType] = $subscriptionRepo->preparePingDataMany($objectType, $dataManyRef);
         }
 
+        $payloads = array();
         foreach ($records as $key => $record) {
             $objectTypeRef =& $record['object_type'];
 
-            if (!isset($dataByTypes[$objectTypeRef])) {
+            if (!isset($payloadsByTypes[$objectTypeRef])) {
                 continue;
             }
-            $dataRef =& $dataByTypes[$objectTypeRef];
+            $payloadsRef =& $payloadsByTypes[$objectTypeRef];
 
-            if (!isset($dataRef[$key])) {
+            if (!isset($payloadsRef[$key])) {
                 continue;
             }
-            $payloads[$key] = $dataRef[$key];
+            $payloads[$key] = $payloadsRef[$key];
         }
 
         return $payloads;

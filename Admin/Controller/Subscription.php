@@ -8,9 +8,9 @@ class Subscription extends Entity
 {
     public function getEntityExplain($entity)
     {
-        /** @var EntitySubscription $subscription */
-        $subscription = $entity;
-        return $subscription->Client->name;
+        /** @var \Xfrocks\Api\Entity\Client|null $client */
+        $client = $entity->getRelation('Client');
+        return $client !== null ? $client->name : '';
     }
 
     public function getEntityHint($entity)

@@ -38,9 +38,8 @@ class ConversationRecipient extends AbstractHandler
 
         switch ($key) {
             case self::DYNAMIC_KEY_USERNAME:
-                /** @var \XF\Entity\User|null $user */
                 $user = $recipient->User;
-                if (!$user) {
+                if ($user === null) {
                     return \XF::phrase('deleted_member');
                 }
 
@@ -64,6 +63,6 @@ class ConversationRecipient extends AbstractHandler
     protected function collectUserAvatarUrl(\XF\Entity\ConversationRecipient $recipient, $sizeCode)
     {
         $user = $recipient->User;
-        return $user ? $user->getAvatarUrl($sizeCode) : null;
+        return $user !== null ? $user->getAvatarUrl($sizeCode) : null;
     }
 }

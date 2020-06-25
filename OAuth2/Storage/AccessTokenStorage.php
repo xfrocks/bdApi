@@ -26,7 +26,7 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
     public function associateScope(AccessTokenEntity $token, ScopeEntity $scope)
     {
         $hybrid = $this->getHybrid($token);
-        if (!$hybrid) {
+        if ($hybrid === null) {
             throw new \RuntimeException('Access token cloud not be found ' . $token->getId());
         }
 
@@ -47,6 +47,7 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
     {
         /** @var SessionStorage $sessionStorage */
         $sessionStorage = $this->server->getSessionStorage();
+        /** @var array $sessionCache */
         $sessionCache = $sessionStorage->getInMemoryCache($sessionId, true);
 
         /** @var Token $xfToken */
@@ -74,7 +75,7 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
         }
 
         $hybrid = $this->getHybrid($token);
-        if (!$hybrid) {
+        if ($hybrid === null) {
             return;
         }
 
@@ -93,11 +94,15 @@ class AccessTokenStorage extends AbstractStorage implements AccessTokenInterface
         return $tokenText;
     }
 
+    /**
+     * @param string $token
+     * @return AccessTokenHybrid|null
+     */
     public function get($token)
     {
         /** @var Token|null $xfToken */
         $xfToken = $this->doXfEntityFind('Xfrocks\Api:Token', 'token_text', $token);
-        if (!$xfToken) {
+        if ($xfToken === null) {
             return null;
         }
 

@@ -42,6 +42,7 @@ abstract class ApiTestCase extends TestCase
      */
     protected static function httpLatestResponse()
     {
+        /** @var \Psr\Http\Message\ResponseInterface $response */
         $response = self::$latestResponse;
         static::assertNotNull($response);
 
@@ -120,7 +121,8 @@ abstract class ApiTestCase extends TestCase
             $path = '/tmp/api_test.json';
             static::assertFileExists($path);
 
-            $json = json_decode(file_get_contents($path) ?: '', true);
+            $contents = file_get_contents($path);
+            $json = is_string($contents) ? json_decode($contents, true) : false;
             static::assertTrue(is_array($json));
 
             self::$testData = $json;

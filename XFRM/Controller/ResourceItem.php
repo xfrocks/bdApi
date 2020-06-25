@@ -76,7 +76,7 @@ class ResourceItem extends AbstractController
             /** @var \XFRM\Entity\Category $theCategory */
             $theCategory = $this->assertRecordExists('XFRM:Category', $params['resource_category_id']);
         }
-        if ($theCategory) {
+        if ($theCategory !== null) {
             $this->transformEntityIfNeeded($data, 'category', $theCategory);
         }
 
@@ -129,7 +129,7 @@ class ResourceItem extends AbstractController
             $visitor = \XF::visitor();
             /** @var ResourceWatch|null $watch */
             $watch = $resource->Watch[$visitor->user_id];
-            if ($watch) {
+            if ($watch !== null) {
                 $users[] = [
                     'user_id' => $visitor->user_id,
                     'username' => $visitor->username,
@@ -242,7 +242,7 @@ class ResourceItem extends AbstractController
                 }
             }
 
-            if ($watched) {
+            if ($watched !== null) {
                 $data['follow'] = [
                     'alert' => true,
                     'email' => $watched->email_subscribe
@@ -252,7 +252,10 @@ class ResourceItem extends AbstractController
 
         $resources = [];
         foreach ($resourceWatches as $resourceWatch) {
-            $resources[] = $this->transformEntityLazily($resourceWatch->Resource);
+            $resource = $resourceWatch->Resource;
+            if ($resource !== null) {
+                $resources[] = $this->transformEntityLazily($resource);
+            }
         }
 
         $total = $finder->total();

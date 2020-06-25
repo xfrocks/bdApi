@@ -17,7 +17,7 @@ class Index extends AbstractController
 
         $systemInfo = [];
         $token = $this->session()->getToken();
-        if (!$token) {
+        if ($token === null) {
             $systemInfo += [
                 'oauth/authorize' => $this->app->router('public')->buildLink('account/authorize'),
                 'oauth/token' => $this->buildApiLink('oauth/token')

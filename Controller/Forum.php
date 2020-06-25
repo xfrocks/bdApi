@@ -35,15 +35,14 @@ class Forum extends AbstractNode
         $forumWatches = $finder->fetch();
 
         $forums = [];
-
-        $this->params()->getTransformContext()->onTransformedCallbacks[] = function ($context, &$data) use ($forumWatches) {
+        $context = $this->params()->getTransformContext();
+        $context->onTransformedCallbacks[] = function ($context, &$data) use ($forumWatches) {
             /** @var TransformContext $context */
             $source = $context->getSource();
             if (!($source instanceof \XF\Entity\Forum)) {
                 return;
             }
 
-            /** @var ForumWatch|null $watched */
             $watched = null;
             foreach ($forumWatches as $forumWatch) {
                 if ($forumWatch->node_id == $source->node_id) {
@@ -53,7 +52,7 @@ class Forum extends AbstractNode
                 }
             }
 
-            if ($watched) {
+            if ($watched !== null) {
                 $data['follow'] = [
                     'post' => $watched->notify_on == 'message',
                     'alert' => $watched->send_alert,
@@ -63,7 +62,10 @@ class Forum extends AbstractNode
         };
 
         foreach ($forumWatches as $forumWatch) {
-            $forums[] = $this->transformEntityLazily($forumWatch->Forum);
+            $forum = $forumWatch->Forum;
+            if ($forum !== null) {
+                $forums[] = $this->transformEntityLazily($forum);
+            }
         }
 
         $data = [
@@ -92,7 +94,7 @@ class Forum extends AbstractNode
                 'node_id' => $forum->node_id
             ]);
 
-            if ($watched) {
+            if ($watched !== null) {
                 $users[] = [
                     'user_id' => $visitor->user_id,
                     'username' => $visitor->username,

@@ -18,7 +18,7 @@ class RefreshTokenStorage extends AbstractStorage implements RefreshTokenInterfa
     {
         /** @var RefreshToken|null $xfRefreshToken */
         $xfRefreshToken = $this->doXfEntityFind('Xfrocks\Api:RefreshToken', 'refresh_token_text', $token);
-        if (!$xfRefreshToken) {
+        if ($xfRefreshToken === null) {
             return null;
         }
 
@@ -65,7 +65,7 @@ class RefreshTokenStorage extends AbstractStorage implements RefreshTokenInterfa
 
         if (!$token instanceof RefreshTokenHybrid) {
             $hybrid = $this->get($token->getId());
-            if (!$hybrid) {
+            if ($hybrid === null) {
                 return;
             }
         }

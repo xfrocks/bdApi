@@ -51,7 +51,7 @@ class ParentFinder
      */
     public function with($name)
     {
-        if ($this->parentFinder) {
+        if ($this->parentFinder !== null) {
             $this->parentFinder->with($name);
         } else {
             $this->finder->with(sprintf('%s.%s', $this->relationKey, $name));

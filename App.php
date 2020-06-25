@@ -123,7 +123,7 @@ class App extends \XF\Pub\App
 
         /** @var \Xfrocks\Api\XF\ApiOnly\Session\Session $apiSession */
         $apiSession = $session;
-        $apiSession->setToken($accessToken ? $accessToken->getXfToken() : null);
+        $apiSession->setToken($accessToken !== null ? $accessToken->getXfToken() : null);
     }
 
     /**

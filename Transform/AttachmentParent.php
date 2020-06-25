@@ -14,14 +14,14 @@ interface AttachmentParent
     /**
      * @param TransformContext $context
      * @param array $links
-     * @return array|null
+     * @return void
      */
     public function attachmentCollectLinks(TransformContext $context, array &$links);
 
     /**
      * @param TransformContext $context
      * @param array $permissions
-     * @return array|null
+     * @return void
      */
     public function attachmentCollectPermissions(TransformContext $context, array &$permissions);
 

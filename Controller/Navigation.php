@@ -100,9 +100,14 @@ class Navigation extends AbstractController
                 return;
             }
 
-            $data['navigation_type'] = strtolower($source->Node->node_type_id);
+            $node = $source->Node;
+            if ($node === null) {
+                return;
+            }
+
+            $data['navigation_type'] = strtolower($node->node_type_id);
             $data['navigation_id'] = $source->node_id;
-            $data['navigation_parent_id'] = $source->Node->parent_node_id;
+            $data['navigation_parent_id'] = $node->parent_node_id;
 
             $data['has_sub_elements'] = count($tree->children($source->node_id)) > 0;
             if ($data['has_sub_elements'] === true) {
@@ -129,15 +134,11 @@ class Navigation extends AbstractController
                     /** @var \XF\Entity\Category|null $category */
                     $category = $this->em()->instantiateEntity(
                         'XF:Category',
-                        [
-                            'node_id' => $node->node_id
-                        ],
-                        [
-                            'Node' => $node
-                        ]
+                        ['node_id' => $node->node_id],
+                        ['Node' => $node]
                     );
 
-                    if ($category) {
+                    if ($category !== null) {
                         $element = $this->transformEntityLazily($category);
                     }
                     break;
@@ -150,15 +151,11 @@ class Navigation extends AbstractController
                     /** @var LinkForum|null $linkForum */
                     $linkForum = $this->em()->instantiateEntity(
                         'XF:LinkForum',
-                        [
-                            'node_id' => $node->node_id
-                        ],
-                        [
-                            'Node' => $node
-                        ]
+                        ['node_id' => $node->node_id],
+                        ['Node' => $node]
                     );
 
-                    if ($linkForum) {
+                    if ($linkForum !== null) {
                         $element = $this->transformEntityLazily($linkForum);
                     }
                     break;
@@ -166,21 +163,17 @@ class Navigation extends AbstractController
                     /** @var \XF\Entity\Page|null $page */
                     $page = $this->em()->instantiateEntity(
                         'XF:Page',
-                        [
-                            'node_id' => $node->node_id
-                        ],
-                        [
-                            'Node' => $node
-                        ]
+                        ['node_id' => $node->node_id],
+                        ['Node' => $node]
                     );
 
-                    if ($page) {
+                    if ($page !== null) {
                         $element = $this->transformEntityLazily($page);
                     }
                     break;
             }
 
-            if ($element) {
+            if ($element !== null) {
                 $elements[] = $element;
             }
         }

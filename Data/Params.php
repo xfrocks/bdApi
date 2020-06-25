@@ -374,7 +374,7 @@ class Params implements \ArrayAccess
      */
     public function getTransformContext()
     {
-        if (!$this->transformContext) {
+        if ($this->transformContext === null) {
             $selector = new Selector();
             list($exclude, $include) = $this->filterTransformSelector();
             $selector->parseRules($exclude, $include);

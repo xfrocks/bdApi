@@ -79,7 +79,7 @@ abstract class AbstractStorage implements StorageInterface
 
         /** @var TokenWithScope|null $xfEntity */
         $xfEntity = $this->app->em()->findOne($shortName, [$textColumn => $text], $with);
-        if ($xfEntity) {
+        if ($xfEntity !== null) {
             $this->xfEntities[$text] = $xfEntity;
         }
 

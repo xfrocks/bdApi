@@ -332,7 +332,7 @@ abstract class AbstractHandler
         /** @var \XF\Repository\Attachment $attachmentRepo */
         $attachmentRepo = $this->app->repository('XF:Attachment');
         $attachmentHandler = $attachmentRepo->getAttachmentHandler($contentType);
-        if (!$attachmentHandler) {
+        if ($attachmentHandler === null) {
             return false;
         }
 

@@ -116,7 +116,7 @@ class PreTest extends Command
                 /** @var TfaProvider $tfaProvider */
                 $tfaProvider = $app->em()->find('XF:TfaProvider', 'totp');
                 $handler = $tfaProvider->getHandler();
-                if ($handler) {
+                if ($handler !== null) {
                     $initialData = $handler->generateInitialData($user);
                     $data['users'][$i]['tfa_secret'] = $initialData['secret'];
 
@@ -325,7 +325,10 @@ class PreTest extends Command
         if (file_exists($jsonPath)) {
             $json = file_get_contents($jsonPath);
             if (is_string($json)) {
-                $data = @json_decode($json, true) ?: [];
+                $data = @json_decode($json, true);
+                if (!is_array($data)) {
+                    $data = [];
+                }
             }
         }
 

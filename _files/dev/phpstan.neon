@@ -2,6 +2,7 @@ includes:
 	- /var/www/html/src/addons/DevHelper/PHPStan/phpstan.neon
 
 parameters:
+    checkGenericClassInNonGenericObjectType: false
     ignoreErrors:
         - '#^Variable static property access on Xfrocks\\Api\\Listener.$#'
 

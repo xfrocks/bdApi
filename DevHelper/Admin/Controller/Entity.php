@@ -8,7 +8,7 @@ use XF\Mvc\FormAction;
 use XF\Mvc\ParameterBag;
 
 /**
- * @version 2019041201
+ * @version 2020052301
  * @see \DevHelper\Autogen\Admin\Controller\Entity
  */
 abstract class Entity extends AbstractController
@@ -275,7 +275,7 @@ abstract class Entity extends AbstractController
                 $tag = 'username';
                 /** @var \XF\Entity\User|null $user */
                 $user = $entity->getRelation($relationKey);
-                $tagOptions['username'] = $user ? $user->username : '';
+                $tagOptions['username'] = $user !== null ? $user->username : '';
                 break;
             default:
                 if (strpos($relation['entity'], $this->getPrefixForClasses()) === 0) {

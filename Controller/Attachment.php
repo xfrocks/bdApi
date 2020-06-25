@@ -66,7 +66,7 @@ class Attachment extends AbstractController
     {
         /** @var \XF\Entity\Attachment|null $attachment */
         $attachment = $this->em()->find('XF:Attachment', $attachmentId);
-        if (!$attachment) {
+        if ($attachment === null) {
             throw $this->exception($this->notFound());
         }
 

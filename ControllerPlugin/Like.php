@@ -21,10 +21,12 @@ class Like extends \XF\ControllerPlugin\Reaction
         foreach ($finder->fetch() as $reactionContent) {
             $user = $reactionContent->ReactionUser;
 
-            $users[] = [
-                'user_id' => $user->user_id,
-                'username' => $user->username
-            ];
+            if ($user !== null) {
+                $users[] = [
+                    'user_id' => $user->user_id,
+                    'username' => $user->username
+                ];
+            }
         }
 
         $data = ['users' => $users];

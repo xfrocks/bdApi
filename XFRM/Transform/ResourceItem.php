@@ -78,11 +78,14 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
         $resourceItem = $context->getParentSource();
         $canDelete = false;
 
-        if ($resourceItem->canEdit() && $resourceItem->Category->canUploadAndManageUpdateImages()) {
-            $canDelete = $this->checkAttachmentCanManage(
-                self::CONTENT_TYPE_RESOURCE_UPDATE,
-                $resourceItem->Description
-            );
+        $category = $resourceItem->Category;
+        $description = $resourceItem->Description;
+        if ($category !== null
+            && $description !== null
+            && $resourceItem->canEdit()
+            && $category->canUploadAndManageUpdateImages()
+        ) {
+            $canDelete = $this->checkAttachmentCanManage(self::CONTENT_TYPE_RESOURCE_UPDATE, $description);
         }
 
         $permissions[self::PERM_DELETE] = $canDelete;
@@ -100,11 +103,15 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
 
         switch ($key) {
             case self::DYNAMIC_KEY_ATTACHMENT_COUNT:
-                return $resourceItem->Description->attach_count;
+                $description = $resourceItem->Description;
+                if ($description !== null) {
+                    return $description->attach_count;
+                }
+                break;
             case self::DYNAMIC_KEY_ATTACHMENTS:
                 $description = $resourceItem->Description;
-                if ($description->attach_count < 1) {
-                    return [];
+                if ($description === null || $description->attach_count < 1) {
+                    return null;
                 }
 
                 return $this->transformer->transformEntityRelation($context, $key, $description, 'Attachments');
@@ -121,7 +128,10 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
                 }
 
                 if ($resourceItem->getResourceTypeDetailed() === 'download_external') {
-                    return $resourceItem->CurrentVersion->download_url;
+                    $version = $resourceItem->CurrentVersion;
+                    if ($version !== null) {
+                        return $version->download_url;
+                    }
                 }
 
                 return false;
@@ -135,11 +145,19 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
 
                 return isset($resourceItem->Watch[$userId]);
             case self::DYNAMIC_KEY_IS_LIKED:
-                return $resourceItem->Description->isReactedTo();
+                $description = $resourceItem->Description;
+                if ($description !== null) {
+                    return $description->isReactedTo();
+                }
+                break;
             case self::DYNAMIC_KEY_IS_PUBLISHED:
                 return $resourceItem->resource_state === 'visible';
             case self::DYNAMIC_KEY_LIKE_COUNT:
-                return $resourceItem->Description->get('reaction_score');
+                $description = $resourceItem->Description;
+                if ($description !== null) {
+                    return $description->reaction_score;
+                }
+                break;
             case self::DYNAMIC_KEY_PRICE:
                 return strlen($resourceItem->external_purchase_url) > 0 ? $resourceItem->price : null;
             case self::DYNAMIC_KEY_RATING:
@@ -155,14 +173,29 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
             case self::DYNAMIC_KEY_TAGS:
                 return $this->transformer->transformTags($context, $resourceItem->tags);
             case self::DYNAMIC_KEY_TEXT:
-                return $resourceItem->Description->message;
+                $description = $resourceItem->Description;
+                if ($description !== null) {
+                    return $description->message;
+                }
+                break;
             case self::DYNAMIC_KEY_TEXT_HTML:
                 $description = $resourceItem->Description;
-                return $this->renderBbCodeHtml($key, $description->message, $description);
+                if ($description !== null) {
+                    return $this->renderBbCodeHtml($key, $description->message, $description);
+                }
+                break;
             case self::DYNAMIC_KEY_TEXT_PLAIN:
-                return $this->renderBbCodePlainText($resourceItem->Description->message);
+                $description = $resourceItem->Description;
+                if ($description !== null) {
+                    return $this->renderBbCodePlainText($description->message);
+                }
+                break;
             case self::DYNAMIC_KEY_VERSION:
-                return $resourceItem->CurrentVersion->version_string;
+                $version = $resourceItem->CurrentVersion;
+                if ($version !== null) {
+                    return $version->version_string;
+                }
+                break;
         }
 
         return null;
@@ -172,11 +205,12 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
         $resourceItem = $context->getSource();
+        $user = $resourceItem->User;
 
         $links = [
             self::LINK_ATTACHMENTS => $this->buildApiLink('resources/attachments', $resourceItem),
             self::LINK_CATEGORY => $this->buildApiLink('resource-categories', $resourceItem->Category),
-            self::LINK_CREATOR_AVATAR => $resourceItem->User->getAvatarUrl('l'),
+            self::LINK_CREATOR_AVATAR => $user !== null ? $user->getAvatarUrl('l') : null,
             self::LINK_DETAIL => $this->buildApiLink('resources', $resourceItem),
             self::LINK_FOLLOWERS => $this->buildApiLink('resources/followers', $resourceItem),
             self::LINK_ICON => $resourceItem->getIconUrl(),
@@ -192,7 +226,10 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
             $resourceTypeDetailed = $resourceItem->getResourceTypeDetailed();
             switch ($resourceTypeDetailed) {
                 case 'download_external':
-                    $links[self::LINK_CONTENT] = $resourceItem->CurrentVersion->download_url;
+                    $version = $resourceItem->CurrentVersion;
+                    if ($version !== null) {
+                        $links[self::LINK_CONTENT] = $version->download_url;
+                    }
                     break;
                 case 'download_local':
                     $links[self::LINK_CONTENT] = $this->buildApiLink('resources/files', $resourceItem);
@@ -214,19 +251,18 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
     {
         /** @var \XFRM\Entity\ResourceItem $resourceItem */
         $resourceItem = $context->getSource();
+        $description = $resourceItem->Description;
 
-        $permissions = [
+        return [
             self::PERM_ADD_ICON => $resourceItem->canEdit(),
             self::PERM_DELETE => $resourceItem->canDelete(),
             self::PERM_DOWNLOAD => $resourceItem->canDownload(),
             self::PERM_EDIT => $resourceItem->canEdit(),
             self::PERM_FOLLOW => $resourceItem->canWatch(),
-            self::PERM_LIKE => $resourceItem->Description->canReact(),
+            self::PERM_LIKE => $description !== null ? $description->canReact() : null,
             self::PERM_RATE => $resourceItem->canRate(),
-            self::PERM_REPORT => $resourceItem->Description->canReport(),
+            self::PERM_REPORT => $description !== null ? $description->canReport() : null,
         ];
-
-        return $permissions;
     }
 
     public function getMappings(TransformContext $context)
@@ -282,7 +318,9 @@ class ResourceItem extends AbstractHandler implements AttachmentParent
             /** @var \XFRM\Entity\ResourceItem $resourceItem */
             foreach ($entities as $resourceItem) {
                 $description = $resourceItem->Description;
-                $descriptions[$description->resource_update_id] = $description;
+                if ($description !== null) {
+                    $descriptions[$description->resource_update_id] = $description;
+                }
             }
 
             $this->enqueueEntitiesToAddAttachmentsTo($descriptions, self::CONTENT_TYPE_RESOURCE_UPDATE);

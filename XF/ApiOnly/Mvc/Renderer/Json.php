@@ -104,7 +104,7 @@ class Json extends XFCP_Json
                 /** @var Session $session */
                 $session = $container['session'];
                 $token = $session->getToken();
-                if ($token) {
+                if ($token !== null) {
                     $content['system_info']['client_id'] = $token->client_id;
                     $content['system_info']['token_text'] = $token->token_text;
                     $content['system_info']['expire_date'] = $token->expire_date;
@@ -162,7 +162,7 @@ class Json extends XFCP_Json
 
         $this->prepareJsonEncodeDepth--;
 
-        if ($throwable) {
+        if ($throwable !== null) {
             throw $throwable;
         }
 

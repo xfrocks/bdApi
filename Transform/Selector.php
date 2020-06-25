@@ -78,7 +78,7 @@ class Selector
         if ($this->defaultAction === self::ACTION_EXCLUDE) {
             if (isset($this->rules[$key])) {
                 $rulesRef =& $this->rules[$key];
-                $action = $rulesRef['action'] ?: $this->defaultAction;
+                $action = is_string($rulesRef['action']) ? $rulesRef['action'] : $this->defaultAction;
                 if ($action === self::ACTION_INCLUDE || count($rulesRef['includes']) > 0) {
                     return false;
                 }
@@ -89,7 +89,7 @@ class Selector
 
         if (isset($this->rules[$key])) {
             $rulesRef =& $this->rules[$key];
-            $action = $rulesRef['action'] ?: $this->defaultAction;
+            $action = is_string($rulesRef['action']) ? $rulesRef['action'] : $this->defaultAction;
             if ($action === self::ACTION_EXCLUDE && count($rulesRef['includes']) === 0) {
                 return true;
             }
@@ -110,7 +110,7 @@ class Selector
 
         if (isset($this->rules[$key])) {
             $rulesRef =& $this->rules[$key];
-            $action = $rulesRef['action'] ?: $this->defaultAction;
+            $action = is_string($rulesRef['action']) ? $rulesRef['action'] : $this->defaultAction;
             if ($action === self::ACTION_INCLUDE || count($rulesRef['includes']) > 0) {
                 return true;
             }

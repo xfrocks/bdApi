@@ -165,11 +165,16 @@ class ConversationMessage extends Conversation
             return $this->noPermission($error);
         }
 
+        $conversation = $message->Conversation;
+        if ($conversation === null) {
+            return $this->noPermission();
+        }
+
         /** @var MessageEditor $editor */
         $editor = $this->service('XF:Conversation\MessageEditor', $message);
         $editor->setMessageContent($params['message_body']);
 
-        if ($message->Conversation->canUploadAndManageAttachments()) {
+        if ($conversation->canUploadAndManageAttachments()) {
             $context = [
                 'message_id' => $message->message_id
             ];

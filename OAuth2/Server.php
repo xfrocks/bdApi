@@ -396,7 +396,7 @@ class Server
         if (strlen($clientId) > 0 && strlen($password) > 0 && strlen($passwordAlgo) > 0) {
             /** @var Client|null $client */
             $client = $this->app->find('Xfrocks\Api:Client', $clientId);
-            if ($client) {
+            if ($client !== null) {
                 $decryptedPassword = Crypt::decrypt($password, $passwordAlgo, $client->client_secret);
                 if ($decryptedPassword !== false) {
                     $request->set('client_secret', $client->client_secret);
@@ -498,9 +498,8 @@ class Server
 
         try {
             $xfToken = OneTimeToken::parse($this, $resourceServer->determineAccessToken(false));
-            if ($xfToken) {
-                $accessTokenHybrid = new AccessTokenHybrid($resourceServer, $xfToken);
-                return $accessTokenHybrid;
+            if ($xfToken !== null) {
+                return new AccessTokenHybrid($resourceServer, $xfToken);
             }
         } catch (\League\OAuth2\Server\Exception\InvalidRequestException $ire) {
             // request does not have an access token, no need to go further

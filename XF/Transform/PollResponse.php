@@ -27,7 +27,7 @@ class PollResponse extends AbstractHandler
             case self::DYNAMIC_KEY_IS_VOTED:
                 /** @var \XF\Entity\Poll|null $poll */
                 $poll = \XF::em()->find('XF:Poll', $response->poll_id);
-                return $poll ? $poll->hasVoted($response->poll_response_id) : null;
+                return $poll !== null ? $poll->hasVoted($response->poll_response_id) : null;
         }
 
         return null;

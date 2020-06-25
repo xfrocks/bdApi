@@ -50,7 +50,12 @@ class OAuth2 extends AbstractController
 
         $session = $this->session();
         $token = $session->getToken();
-        if (!$token) {
+        if ($token === null) {
+            return $this->noPermission();
+        }
+
+        $client = $token->Client;
+        if ($client === null) {
             return $this->noPermission();
         }
 
@@ -61,8 +66,7 @@ class OAuth2 extends AbstractController
         /** @var Server $apiServer */
         $apiServer = $this->app->container('api.server');
         $scopes = $apiServer->getScopeDefaults();
-
-        $accessToken = $apiServer->newAccessToken($params['user_id'], $token->Client, $scopes);
+        $accessToken = $apiServer->newAccessToken($params['user_id'], $client, $scopes);
 
         return $this->api(Token::transformLibAccessTokenEntity($accessToken));
     }
@@ -95,7 +99,7 @@ class OAuth2 extends AbstractController
         $provider = $this->assertProviderExists('facebook');
         $handler = $provider->getHandler();
 
-        if (!$handler || !$handler->isUsable($provider)) {
+        if ($handler === null || !$handler->isUsable($provider)) {
             return $this->noPermission();
         }
 
@@ -119,12 +123,7 @@ class OAuth2 extends AbstractController
             'query' => [
                 'access_token' => $params['facebook_token']
             ]
-        ]);
-
-        if (\XF::$versionId > 2010000) {
-            $getBody = [$fbApp, 'getBody'];
-            $fbApp = call_user_func($getBody)->getContents();
-        }
+        ])->getBody()->getContents();
 
         $fbApp = json_decode(strval($fbApp), true);
         if (isset($fbApp['id']) && $fbApp['id'] === $provider->options['app_id']) {
@@ -142,11 +141,9 @@ class OAuth2 extends AbstractController
 
         if ($email = $providerData->getEmail()) {
             /** @var \XF\Entity\User|null $userByEmail */
-            $userByEmail = $this->em()->find('XF:User', [
-                'email' => $email
-            ]);
+            $userByEmail = $this->em()->find('XF:User', ['email' => $email]);
 
-            if ($userByEmail) {
+            if ($userByEmail !== null) {
                 $userData['associatable'][$userByEmail->user_id] = [
                     'user_id' => $userByEmail->user_id,
                     'username' => $userByEmail->username,

@@ -19,7 +19,7 @@ class BatchJobReply extends AbstractHandler
     {
         /** @var \XF\Mvc\Reply\AbstractReply|null $reply */
         $reply = $context->data('reply');
-        if (!$reply) {
+        if ($reply === null) {
             return null;
         }
 

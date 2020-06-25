@@ -35,7 +35,7 @@ abstract class AbstractNode extends AbstractHandler
         ];
 
         $nodeNode = $node->Node;
-        if ($nodeNode->rgt - $nodeNode->lft > 1) {
+        if ($nodeNode !== null && $nodeNode->rgt - $nodeNode->lft > 1) {
             $linkParams = ['parent_node_id' => $node->node_id];
             $links += [
                 self::LINK_SUB_CATEGORIES => $this->buildApiLink('categories', null, $linkParams),

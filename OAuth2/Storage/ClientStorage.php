@@ -12,15 +12,15 @@ class ClientStorage extends AbstractStorage implements ClientInterface
     {
         /** @var \Xfrocks\Api\Entity\Client|null $xfClient */
         $xfClient = $this->doXfEntityFind('Xfrocks\Api:Client', 'client_id', $clientId);
-        if (!$xfClient) {
+        if ($xfClient === null) {
             return null;
         }
 
-        if ($clientSecret && $xfClient->client_secret !== $clientSecret) {
+        if ($clientSecret !== null && $xfClient->client_secret !== $clientSecret) {
             return null;
         }
 
-        if ($redirectUri && !$xfClient->isValidRedirectUri($redirectUri)) {
+        if ($redirectUri !== null && !$xfClient->isValidRedirectUri($redirectUri)) {
             return null;
         }
 

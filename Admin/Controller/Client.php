@@ -11,7 +11,7 @@ class Client extends Entity
         /** @var EntityClient $client */
         $client = $entity;
         $user = $client->User;
-        return $user ? $user->username : '';
+        return $user !== null ? $user->username : '';
     }
 
     public function getEntityHint($entity)

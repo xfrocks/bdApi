@@ -16,7 +16,7 @@ class Tag extends AbstractController
 
         $tagCloud = $this->options()->tagCloud;
         $tags = [];
-        if ((bool) $tagCloud['enabled']) {
+        if ((bool)$tagCloud['enabled']) {
             $results = $this->tagRepo()->getTagsForCloud($tagCloud['count'], $this->options()->tagCloudMinUses);
             foreach ($results as $result) {
                 $tags[] = $this->transformEntityLazily($result);
@@ -38,7 +38,7 @@ class Tag extends AbstractController
     public function actionSingle($tagId)
     {
         $params = $this->params()
-              ->definePageNav();
+            ->definePageNav();
 
         /** @var \XF\Entity\Tag|null $tag */
         $tag = $this->em()->find('XF:Tag', $tagId);
@@ -98,9 +98,10 @@ class Tag extends AbstractController
             $results = $this->tagRepo()->getTagAutoCompleteResults($q);
             foreach ($results as $result) {
                 $tagTransformed = $this->transformEntityLazily($result)->transform();
-
-                $ids[] = $tagTransformed['tag_id'];
-                $tags[] = $tagTransformed;
+                if (is_array($tagTransformed)) {
+                    $ids[] = $tagTransformed['tag_id'];
+                    $tags[] = $tagTransformed;
+                }
             }
         }
 

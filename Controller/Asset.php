@@ -62,6 +62,6 @@ class Asset extends AbstractController
 
     protected function getDefaultApiScopeForAction($action)
     {
-        return false;
+        return null;
     }
 }

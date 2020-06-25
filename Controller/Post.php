@@ -109,7 +109,7 @@ class Post extends AbstractController
             }
 
             $thread = $post->Thread;
-            if (!$thread) {
+            if ($thread === null) {
                 return $this->notFound();
             }
 
@@ -170,6 +170,11 @@ class Post extends AbstractController
             return $this->noPermission($error);
         }
 
+        $thread = $post->Thread;
+        if ($thread === null) {
+            throw new \RuntimeException('$thread === null');
+        }
+
         /** @var Editor $editor */
         $editor = $this->service('XF:Post\Editor', $post);
 
@@ -177,7 +182,10 @@ class Post extends AbstractController
 
         /** @var \Xfrocks\Api\ControllerPlugin\Attachment $attachmentPlugin */
         $attachmentPlugin = $this->plugin('Xfrocks\Api:Attachment');
-        $attachmentContentData = $pb->_attachmentContentData ?: ['post_id' => $post->post_id];
+        $attachmentContentData = $pb->_attachmentContentData;
+        if (!is_array($attachmentContentData)) {
+            $attachmentContentData = ['post_id' => $post->post_id];
+        }
         $tempHash = $attachmentPlugin->getAttachmentTempHash($attachmentContentData);
 
         $editor->setAttachmentHash($tempHash);
@@ -190,7 +198,7 @@ class Post extends AbstractController
 
         if ($post->isFirstPost()) {
             /** @var \XF\Service\Thread\Editor $threadEditor */
-            $threadEditor = $this->service('XF:Thread\Editor', $post->Thread);
+            $threadEditor = $this->service('XF:Thread\Editor', $thread);
 
             if ($this->request()->exists('thread_title')) {
                 $threadEditor->setTitle($params['thread_title']);
@@ -202,9 +210,9 @@ class Post extends AbstractController
                 $threadEditor->setCustomFields($params['fields']);
             }
 
-            if ($post->Thread->canEditTags()) {
+            if ($thread->canEditTags()) {
                 /** @var \XF\Service\Tag\Changer $tagger */
-                $tagger = $this->service('XF:Tag\Changer', 'thread', $post->Thread);
+                $tagger = $this->service('XF:Tag\Changer', 'thread', $thread);
 
                 $tagger->setEditableTags($params['thread_tags']);
 
@@ -229,11 +237,11 @@ class Post extends AbstractController
 
         $post = $editor->save();
 
-        if ($threadEditor) {
+        if ($threadEditor !== null) {
             $threadEditor->save();
         }
 
-        if ($tagger) {
+        if ($tagger !== null) {
             $tagger->save();
         }
 

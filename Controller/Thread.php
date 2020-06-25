@@ -240,7 +240,7 @@ class Thread extends AbstractController
             $visitor = \XF::visitor();
             /** @var \XF\Entity\ThreadWatch|null $watch */
             $watch = $thread->Watch[$visitor->user_id];
-            if ($watch) {
+            if ($watch !== null) {
                 $users[] = [
                     'user_id' => $visitor->user_id,
                     'username' => $visitor->username,
@@ -371,9 +371,8 @@ class Thread extends AbstractController
             ->define('response_id', 'uint', 'the id of the response to vote for')
             ->define('response_ids', 'array-uint', 'an array of ids of responses');
 
-        /** @var Poll|null $poll */
         $poll = $thread->Poll;
-        if (!$poll) {
+        if ($poll === null) {
             return $this->noPermission();
         }
 
@@ -409,7 +408,7 @@ class Thread extends AbstractController
 
         /** @var Poll|null $poll */
         $poll = $thread->Poll;
-        if (!$poll) {
+        if ($poll === null) {
             return $this->noPermission();
         }
 
@@ -564,12 +563,13 @@ class Thread extends AbstractController
 
             /** @var Node $nodeRepo */
             $nodeRepo = $this->repository('XF:Node');
-            $childNodes = $nodeRepo->findChildren($forum->Node, false)->fetch();
+            $node = $forum->Node;
+            if ($node !== null) {
+                $nodeIds = $nodeRepo->findChildren($node, false)->fetch()->keys();
+                $nodeIds[] = $forum->node_id;
 
-            $nodeIds = $childNodes->keys();
-            $nodeIds[] = $forum->node_id;
-
-            $finder->where('node_id', $nodeIds);
+                $finder->where('node_id', $nodeIds);
+            }
         }
 
         $finder->limit($this->options()->maximumSearchResults);

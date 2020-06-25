@@ -80,7 +80,7 @@ class Search extends AbstractController
         }
 
         $search = $this->searchRepo()->search($params, 'thread');
-        if (!$search) {
+        if ($search === null) {
             return $this->error(\XF::phrase('no_results_found'), 400);
         }
 
@@ -109,7 +109,7 @@ class Search extends AbstractController
         }
 
         $search = $this->searchRepo()->search($params, 'post');
-        if (!$search) {
+        if ($search === null) {
             // no results.
             return $this->error(\XF::phrase('no_results_found'), 400);
         }

@@ -26,7 +26,7 @@ class Attachment extends AbstractHandler
                 /** @var \XF\Entity\Attachment $attachment */
                 $attachment = $context->getSource();
                 $data = $attachment->Data;
-                if ($data->height > 0 && $data->width > 0) {
+                if ($data !== null && $data->height > 0 && $data->width > 0) {
                     return $key == self::KEY_HEIGHT ? $data->height : $data->width;
                 }
 
@@ -45,7 +45,7 @@ class Attachment extends AbstractHandler
 
         /** @var AttachmentParent|null $parentHandler */
         $parentHandler = $context->getParentHandler();
-        if ($parentHandler) {
+        if ($parentHandler !== null) {
             return $parentHandler->attachmentCalculateDynamicValue($context, $key);
         }
 
@@ -74,7 +74,7 @@ class Attachment extends AbstractHandler
 
         /** @var AttachmentParent|null $parentHandler */
         $parentHandler = $context->getParentHandler();
-        if ($parentHandler) {
+        if ($parentHandler !== null) {
             $parentHandler->attachmentCollectLinks($context, $links);
         }
 
@@ -93,7 +93,7 @@ class Attachment extends AbstractHandler
 
         /** @var AttachmentParent|null $parentHandler */
         $parentHandler = $context->getParentHandler();
-        if ($parentHandler) {
+        if ($parentHandler !== null) {
             $parentHandler->attachmentCollectPermissions($context, $permissions);
         }
 
@@ -114,7 +114,7 @@ class Attachment extends AbstractHandler
 
         /** @var AttachmentParent|null $parentHandler */
         $parentHandler = $context->getParentHandler();
-        if ($parentHandler) {
+        if ($parentHandler !== null) {
             $parentHandler->attachmentGetMappings($context, $mappings);
         }
 

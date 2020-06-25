@@ -31,10 +31,11 @@ class Token
             'token_type' => 'Bearer',
         ];
 
-        if ($refreshToken) {
+        if ($refreshToken !== null) {
             $response['refresh_token'] = $refreshToken->getId();
         }
 
+        /** @var \League\OAuth2\Server\Entity\SessionEntity|null $session */
         $session = $accessToken->getSession();
         if ($session !== null && $session->getOwnerType() === SessionStorage::OWNER_TYPE_USER) {
             $response['user_id'] = intval($session->getOwnerId());

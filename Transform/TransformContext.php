@@ -128,7 +128,7 @@ class TransformContext
      */
     public function getParentHandler()
     {
-        if (!$this->parentContext) {
+        if ($this->parentContext === null) {
             return null;
         }
 
@@ -140,7 +140,7 @@ class TransformContext
      */
     public function getParentSource()
     {
-        if (!$this->parentContext) {
+        if ($this->parentContext === null) {
             return null;
         }
 
@@ -153,7 +153,7 @@ class TransformContext
      */
     public function getParentSourceValue($key)
     {
-        if (!$this->parentContext) {
+        if ($this->parentContext === null) {
             return null;
         }
 
@@ -186,7 +186,7 @@ class TransformContext
     public function getSubContext($key = null, $subHandler = null, $subSource = null)
     {
         $subSelector = $this->selector;
-        if ($subSelector && $key !== null) {
+        if ($subSelector !== null && $key !== null) {
             $subSelector = $subSelector->getSubSelector($key);
         }
 
@@ -207,7 +207,7 @@ class TransformContext
      */
     public function makeSureSelectorIsNotNull($handlerType)
     {
-        if (!$this->selector) {
+        if ($this->selector === null) {
             $this->selector = $this->getSelectorDefault();
         }
 
@@ -230,7 +230,7 @@ class TransformContext
      */
     public function selectorShouldExcludeField($key)
     {
-        return $this->selector ? $this->selector->shouldExcludeField($key) : false;
+        return $this->selector !== null ? $this->selector->shouldExcludeField($key) : false;
     }
 
     /**
@@ -239,7 +239,7 @@ class TransformContext
      */
     public function selectorShouldIncludeField($key)
     {
-        return $this->selector ? $this->selector->shouldIncludeField($key) : false;
+        return $this->selector !== null ? $this->selector->shouldIncludeField($key) : false;
     }
 
     /**
@@ -267,7 +267,7 @@ class TransformContext
     {
         $rootContext = $this->rootContext;
 
-        if (!$rootContext->selectorDefault) {
+        if ($rootContext->selectorDefault === null) {
             $rootContext->selectorDefault = new Selector();
         }
 

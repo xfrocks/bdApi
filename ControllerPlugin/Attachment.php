@@ -27,7 +27,7 @@ class Attachment extends AbstractPlugin
         $attachRepo = $this->repository('XF:Attachment');
         $handler = $attachRepo->getAttachmentHandler($contentType);
 
-        if (!$handler) {
+        if ($handler === null) {
             throw new PrintableException('Invalid content type.');
         }
 
@@ -47,7 +47,7 @@ class Attachment extends AbstractPlugin
 
         /** @var \XF\Http\Upload|null $file */
         $file = $params[$formField];
-        if (!$file) {
+        if ($file === null) {
             throw $this->controller->errorException(\XF::phrase('uploaded_file_failed_not_found'));
         }
 
@@ -98,13 +98,12 @@ class Attachment extends AbstractPlugin
 
         /** @var Session $session */
         $session = $this->session();
-        /** @var Token|null $token */
         $token = $session->getToken();
 
         return md5(sprintf(
             'prefix%s_client%s_visitor%d_salt%s',
             $prefix,
-            $token ? $token->client_id : '',
+            $token !== null ? $token->client_id : '',
             \XF::visitor()->user_id,
             $this->app->config('globalSalt')
         ));

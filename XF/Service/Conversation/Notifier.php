@@ -21,8 +21,8 @@ class Notifier extends XFCP_Notifier
     ) {
         $sent = parent::_sendNotifications($actionType, $notifyUsers, $message, $sender);
 
-        $message = $message ?: $this->conversation->FirstMessage;
-        $sender = $sender ?: $message->User;
+        $message = $message !== null ? $message : $this->conversation->FirstMessage;
+        $sender = $sender !== null ? $sender : $message->User;
 
         foreach ($notifyUsers as $user) {
             if ($sender->user_id == $user->user_id) {

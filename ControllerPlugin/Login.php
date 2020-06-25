@@ -29,12 +29,12 @@ class Login extends AbstractPlugin
 
         $session = $apiController->session();
         $token = $session->getToken();
-        if (!$token) {
+        if ($token === null) {
             return $this->noPermission();
         }
 
         $client = $token->Client;
-        if (!$client || !$client->isValidRedirectUri($params['redirect_uri'])) {
+        if ($client === null || !$client->isValidRedirectUri($params['redirect_uri'])) {
             return $this->noPermission();
         }
 

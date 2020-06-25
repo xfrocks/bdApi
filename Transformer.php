@@ -211,7 +211,7 @@ class Transformer
         $finder = $handler->onTransformFinder($context, $finder);
 
         $entities = $finder->fetch();
-        if ($postFetchCallback) {
+        if ($postFetchCallback !== null) {
             $entities = call_user_func($postFetchCallback, $entities);
         }
         if ($entities instanceof \XF\Mvc\Entity\ArrayCollection) {
@@ -282,7 +282,7 @@ class Transformer
     {
         $data = [];
         $handler = $context->getHandler();
-        if (!$handler) {
+        if ($handler === null) {
             return $data;
         }
 

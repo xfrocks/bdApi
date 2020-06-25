@@ -11,12 +11,12 @@ class Dispatcher extends XFCP_Dispatcher
         /** @var \XF\Mvc\Router|null $router */
         $router = $this->router;
 
-        if (!$router) {
+        if ($router === null) {
             $router = $this->app->router(Listener::$routerType);
             $this->router = $router;
         }
 
-        return $router;
+        return $this->router;
     }
 
     /**

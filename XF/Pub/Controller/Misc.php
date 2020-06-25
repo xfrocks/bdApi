@@ -33,7 +33,10 @@ class Misc extends XFCP_Misc
                     // no scope requested, check for scope `read`
                     $requestedScopes = [Server::SCOPE_READ];
                 } else {
-                    $requestedScopes = explode(Listener::$scopeDelimiter, $scope) ?: [];
+                    $requestedScopes = explode(Listener::$scopeDelimiter, $scope);
+                    if (!is_array($requestedScopes)) {
+                        $requestedScopes = [];
+                    }
                 }
                 $requestedScopesAccepted = [];
 

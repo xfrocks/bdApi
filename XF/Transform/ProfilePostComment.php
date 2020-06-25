@@ -45,9 +45,19 @@ class ProfilePostComment extends AbstractHandler
 
         switch ($key) {
             case self::DYNAMIC_KEY_TIMELINE_USER_ID:
-                return $comment->ProfilePost->ProfileUser->user_id;
+                $profilePost = $comment->ProfilePost;
+                if ($profilePost === null) {
+                    break;
+                }
+
+                $profileUser = $profilePost->ProfileUser;
+                if ($profileUser === null) {
+                    break;
+                }
+
+                return $profileUser->user_id;
             case self::DYNAMIC_KEY_COMMENT_BODY:
-                return $this->app->templater()->fn('structured_text', [$comment->message]);
+                return $this->app->templater()->func('structured_text', [$comment->message]);
             case self::DYNAMIC_KEY_USER_IS_IGNORED:
                 return $comment->isIgnored();
         }
@@ -59,19 +69,25 @@ class ProfilePostComment extends AbstractHandler
     {
         /** @var \XF\Entity\ProfilePostComment $comment */
         $comment = $context->getSource();
-        /** @var \XF\Entity\User|null $user */
+        $profilePost = $comment->ProfilePost;
         $user = $comment->User;
 
         $links = [
-            self::LINK_DETAIL => $this->buildApiLink('profile-posts/comments', $comment->ProfilePost, [
-                'comment_id' => $comment->profile_post_comment_id
-            ]),
-            self::LINK_PROFILE_POST => $this->buildApiLink('profile-posts', $comment->ProfilePost),
-            self::LINK_TIMELINE => $this->buildApiLink('users/timeline', $comment->ProfilePost->ProfileUser),
-            self::LINK_TIMELINE_USER => $this->buildApiLink('users', $comment->ProfilePost->ProfileUser)
+            self::LINK_DETAIL => $this->buildApiLink(
+                'profile-posts/comments',
+                $comment->ProfilePost,
+                ['comment_id' => $comment->profile_post_comment_id]
+            ),
+            self::LINK_PROFILE_POST => $this->buildApiLink('profile-posts', $profilePost),
+            self::LINK_TIMELINE => $profilePost !== null
+                ? $this->buildApiLink('users/timeline', $profilePost->ProfileUser)
+                : null,
+            self::LINK_TIMELINE_USER => $profilePost !== null
+                ? $this->buildApiLink('users', $profilePost->ProfileUser)
+                : null,
         ];
 
-        if ($user) {
+        if ($user !== null) {
             $links[self::LINK_POSTER] = $this->buildApiLink('users', $user);
             $links[self::LINK_POSTER_AVATAR] = $user->getAvatarUrl('m');
         }

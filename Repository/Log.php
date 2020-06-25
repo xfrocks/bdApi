@@ -77,7 +77,7 @@ class Log extends Repository
             $token = $session->getToken();
             $log->client_id = '';
 
-            if ($token) {
+            if ($token !== null) {
                 $log->client_id = $token->client_id;
             }
         }

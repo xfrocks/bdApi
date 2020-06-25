@@ -97,12 +97,10 @@ class User extends AbstractController
         }
 
         $session = $this->session();
-        /** @var Token|null $token */
         $token = $this->session()->getToken();
-        /** @var Client|null $client */
-        $client = $token ? $token->Client : null;
+        $client = $token !== null ? $token->Client : null;
 
-        if (!$client) {
+        if ($client === null) {
             /** @var Client $client */
             $client = $this->assertRecordExists(
                 'Xfrocks\Api:Client',
@@ -128,8 +126,13 @@ class User extends AbstractController
         /** @var \XF\Service\User\Registration $registration */
         $registration = $this->service('XF:User\Registration');
 
+        $email = $params['user_email'];
+        if (strlen($email) === 0) {
+            $email = $params['email'];
+        }
+
         $input = [
-            'email' => $params['user_email'] ?: $params['email'],
+            'email' => $email,
             'username' => $params['username'],
             'dob_day' => $params['user_dob_day'],
             'dob_month' => $params['user_dob_month'],
@@ -180,8 +183,8 @@ class User extends AbstractController
         ) {
             /** @var ConnectedAccountProvider|null $provider */
             $provider = $this->em()->find('XF:ConnectedAccountProvider', $extraData['external_provider']);
-            $handler = $provider ? $provider->getHandler() : null;
-            if ($handler && $provider) {
+            $handler = $provider !== null ? $provider->getHandler() : null;
+            if ($handler !== null && $provider !== null) {
                 $tokenObj = new StdOAuth2Token();
                 $tokenObj->setAccessToken($extraData['access_token']);
 
@@ -251,14 +254,16 @@ class User extends AbstractController
             if ($isAdmin && $visitor->user_id !== $user->user_id) {
                 $isAuth = true;
             } elseif ($params['password_old'] !== '') {
-                /** @var UserAuth|null $userAuth */
                 $userAuth = $user->Auth;
-                if ($userAuth) {
+                if ($userAuth !== null) {
                     $passwordOld = $params['password_algo'] === '' ?
                         $params['password_old'] :
                         Crypt::decrypt($params['password_old'], $params['password_algo']);
                     $authHandler = $userAuth->getAuthenticationHandler();
-                    if ($authHandler && $authHandler->hasPassword() && $userAuth->authenticate($passwordOld)) {
+                    if ($authHandler !== null
+                        && $authHandler->hasPassword()
+                        && $userAuth->authenticate($passwordOld)
+                    ) {
                         $isAuth = true;
                     }
                 }
@@ -350,6 +355,9 @@ class User extends AbstractController
         }
 
         $userProfile = $user->Profile;
+        if ($userProfile === null) {
+            throw new \RuntimeException('$user->Profile === null');
+        }
         $user->addCascadedSave($userProfile);
 
         if ($params['user_dob_day'] > 0 && $params['user_dob_month'] > 0 && $params['user_dob_year'] > 0) {
@@ -506,7 +514,10 @@ class User extends AbstractController
 
         $users = [];
 
-        $email = $params['user_email'] ?: $params['email'];
+        $email = $params['user_email'];
+        if (strlen($email) === 0) {
+            $email = $params['email'];
+        }
         if ($email !== '') {
             if (!\XF::visitor()->hasAdminPermission('user')) {
                 return $this->noPermission();
@@ -647,7 +658,7 @@ class User extends AbstractController
 
         /** @var \XF\Http\Upload|null $avatarUpload */
         $avatarUpload = $params['avatar'];
-        if (!$avatarUpload) {
+        if ($avatarUpload === null) {
             return $this->error(\XF::phrase('bdapi_requires_upload_x', [
                 'field' => 'avatar'
             ]), 400);
@@ -713,10 +724,13 @@ class User extends AbstractController
 
         /** @var UserFollow $userFollow */
         foreach ($userFollowersFinder->fetch() as $userFollow) {
-            $data['users'][] = [
-                'user_id' => $userFollow->User->user_id,
-                'username' => $userFollow->User->username
-            ];
+            $user = $userFollow->User;
+            if ($user !== null) {
+                $data['users'][] = [
+                    'user_id' => $user->user_id,
+                    'username' => $user->username
+                ];
+            }
         }
 
         return $this->api($data);
@@ -791,10 +805,13 @@ class User extends AbstractController
 
         /** @var UserFollow $userFollow */
         foreach ($userFollowingFinder->fetch() as $userFollow) {
-            $data['users'][] = [
-                'user_id' => $userFollow->FollowUser->user_id,
-                'username' => $userFollow->FollowUser->username
-            ];
+            $followUser = $userFollow->FollowUser;
+            if ($followUser !== null) {
+                $data['users'][] = [
+                    'user_id' => $followUser->user_id,
+                    'username' => $followUser->username
+                ];
+            }
         }
 
         return $this->api($data);
@@ -809,12 +826,13 @@ class User extends AbstractController
         $this->assertRegistrationRequired();
 
         $visitor = \XF::visitor();
+        $profile = $visitor->Profile;
 
         /** @var Finder|null $finder */
         $finder = null;
-        if (count($visitor->Profile->ignored) > 0) {
+        if ($profile != null && count($profile->ignored) > 0) {
             $finder = $this->finder('XF:User')
-                ->where('user_id', array_keys($visitor->Profile->ignored))
+                ->where('user_id', array_keys($profile->ignored))
                 ->order('username');
         }
 
@@ -918,13 +936,13 @@ class User extends AbstractController
                 return;
             }
 
-            if ($user) {
+            if ($user !== null) {
                 $data['is_primary_group'] = $source->user_group_id == $user->user_group_id;
             }
         };
 
         $data = [
-            'user_id' => $user ? $user->user_id : null,
+            'user_id' => $user !== null ? $user->user_id : null,
             'user_groups' => $this->transformFinderLazily($finder)
         ];
 
@@ -1003,7 +1021,7 @@ class User extends AbstractController
         if ($action === 'PostIndex') {
             $session = $this->session();
             $token = $session->getToken();
-            if (!$token || $token->client_id === '') {
+            if ($token === null || $token->client_id === '') {
                 return null;
             }
         }

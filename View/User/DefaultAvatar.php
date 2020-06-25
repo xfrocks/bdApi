@@ -29,8 +29,8 @@ class DefaultAvatar extends \XF\Mvc\View
         $image->setBackgroundColorForApi($bgColor[0], $bgColor[1], $bgColor[2]);
 
         $color = Html::parseColor($defaultAvatarStyling['color']);
-        $font = Html::parseFontFamily($templater->fn('property', ['avatarDynamicFont']));
-        $percent = intval($templater->fn('property', ['avatarDynamicTextPercent']));
+        $font = Html::parseFontFamily($templater->func('property', ['avatarDynamicFont']));
+        $percent = intval($templater->func('property', ['avatarDynamicTextPercent']));
         $text = $defaultAvatarStyling['innerContent'];
 
         $fontFile = $this->findTtfFontPath($font);

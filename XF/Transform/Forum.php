@@ -38,8 +38,8 @@ class Forum extends AbstractNode
 
     public function collectLinks(TransformContext $context)
     {
+        /** @var array $links */
         $links = parent::collectLinks($context);
-
         /** @var \XF\Entity\Forum $forum */
         $forum = $context->getSource();
 
@@ -53,10 +53,10 @@ class Forum extends AbstractNode
 
     public function collectPermissions(TransformContext $context)
     {
-        $perms = parent::collectPermissions($context);
-
         /** @var \XF\Entity\Forum $forum */
         $forum = $context->getSource();
+        /** @var array $perms */
+        $perms = parent::collectPermissions($context);
 
         $perms += [
             self::PERM_FOLLOW => $forum->canWatch(),

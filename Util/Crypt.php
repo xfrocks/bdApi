@@ -131,8 +131,8 @@ class Crypt
         if (is_callable($callable)) {
             /** @var Token|null $token */
             $token = call_user_func($callable);
-            $client = $token ? $token->Client : null;
-            $clientSecret = $client ? $client->client_secret : '';
+            $client = $token !== null ? $token->Client : null;
+            $clientSecret = $client !== null ? $client->client_secret : '';
         }
 
         if ($clientSecret === '') {

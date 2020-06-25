@@ -54,15 +54,15 @@ class Search extends Repository
             $forum = $this->em->find('XF:Forum', $input['forum_id']);
             $nodeIds = [];
 
-            if ($forum) {
-                $children = $nodeRepo->findChildren($forum->Node, false)->fetch();
-
-                $nodeIds = $children->keys();
-                $nodeIds[] = $forum->node_id;
+            if ($forum != null) {
+                $node = $forum->Node;
+                if ($node !== null) {
+                    $nodeIds = $nodeRepo->findChildren($node, false)->fetch()->keys();
+                    $nodeIds[] = $forum->node_id;
+                }
             }
 
-
-            $query->withMetadata('node', $nodeIds ?: $input['forum_id']);
+            $query->withMetadata('node', count($nodeIds) > 0 ? $nodeIds : $input['forum_id']);
         }
 
         if (isset($input['thread_id']) && $input['thread_id'] > 0) {

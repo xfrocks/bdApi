@@ -160,8 +160,13 @@ class ProfilePost extends AbstractController
             }
         }
 
+        if ($profilePost === null) {
+            throw new \RuntimeException('$profilePost === null');
+        }
+        $profileUser = $profilePost->ProfileUser;
+
         $beforeDate = $params['before'];
-        if ($pageOfComment) {
+        if ($pageOfComment !== null) {
             $beforeDate = $pageOfComment->comment_date + 1;
         }
 
@@ -185,7 +190,7 @@ class ProfilePost extends AbstractController
             'comment_total' => $profilePost->comment_count,
             'links' => [],
             'profile_post' => $this->transformEntityLazily($profilePost),
-            'timeline_user' => $this->transformEntityLazily($profilePost->ProfileUser)
+            'timeline_user' => $profileUser !== null ? $this->transformEntityLazily($profileUser) : null,
         ];
 
         foreach ($comments as $comment) {

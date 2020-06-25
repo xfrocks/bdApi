@@ -103,7 +103,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         }
 
         $this->responseType = $responseType;
-        if ($exception) {
+        if ($exception !== null) {
             throw $exception;
         }
     }
@@ -114,7 +114,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      */
     protected function assertValidToken()
     {
-        if (!$this->session()->getToken()) {
+        if ($this->session()->getToken() === null) {
             throw $this->exception($this->noPermission());
         }
     }
@@ -175,7 +175,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
         $lazyTransformer = new LazyTransformer($this);
         $lazyTransformer->setFinder($finder);
 
-        if ($sortByList) {
+        if ($sortByList !== null) {
             $lazyTransformer->addCallbackFinderPostFetch(function ($entities) use ($sortByList) {
                 /** @var \XF\Mvc\Entity\ArrayCollection $arrayCollection */
                 $arrayCollection = $entities;
@@ -194,7 +194,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
                 return $data[0];
             }
 
-            if (!$phraseKey) {
+            if ($phraseKey === null) {
                 $phraseKey = 'requested_page_not_found';
             }
 
@@ -209,7 +209,7 @@ class AbstractController extends \XF\Pub\Controller\AbstractController
      */
     public function params()
     {
-        if (!$this->apiParams) {
+        if ($this->apiParams === null) {
             $this->apiParams = new Params($this);
         }
 

@@ -28,7 +28,7 @@ class Batch extends AbstractController
                 continue;
             }
             $job = $this->buildJobFromConfig($config);
-            if (!$job) {
+            if ($job === null) {
                 continue;
             }
 

@@ -65,12 +65,9 @@ class Post extends AbstractHandler implements AttachmentParent
         $post = $context->getParentSource();
         $canDelete = false;
 
-        /** @var \XF\Entity\Thread|null $thread */
         $thread = $post->Thread;
-        /** @var Forum|null $forum */
-        $forum = $thread ? $thread->Forum : null;
-
-        if ($forum && $forum->canUploadAndManageAttachments()) {
+        $forum = $thread !== null ? $thread->Forum : null;
+        if ($forum !== null && $forum->canUploadAndManageAttachments()) {
             $canDelete = $this->checkAttachmentCanManage(self::CONTENT_TYPE_POST, $post);
         }
 
@@ -120,12 +117,12 @@ class Post extends AbstractHandler implements AttachmentParent
                 }
 
                 $user = $post->User;
-                if (!$user) {
+                if ($user === null) {
                     return null;
                 }
 
                 $userProfile = $user->Profile;
-                if (!$userProfile) {
+                if ($userProfile === null) {
                     return null;
                 }
 
@@ -146,17 +143,17 @@ class Post extends AbstractHandler implements AttachmentParent
     {
         /** @var \XF\Entity\Post $post */
         $post = $context->getSource();
+        $thread = $post->Thread;
+        $forum = $thread !== null ? $thread->Forum : null;
 
-        $permissions = [
+        return [
             self::PERM_DELETE => $post->canDelete(),
             self::PERM_EDIT => $post->canEdit(),
             self::PERM_LIKE => $post->canReact(),
-            self::PERM_REPLY => $post->Thread->canReply(),
+            self::PERM_REPLY => $thread !== null ? $thread->canReply() : null,
             self::PERM_REPORT => $post->canReport(),
-            self::PERM_UPLOAD_ATTACHMENT => $post->Thread->Forum->canUploadAndManageAttachments(),
+            self::PERM_UPLOAD_ATTACHMENT => $forum !== null ? $forum->canUploadAndManageAttachments() : null,
         ];
-
-        return $permissions;
     }
 
     public function collectLinks(TransformContext $context)
@@ -175,7 +172,7 @@ class Post extends AbstractHandler implements AttachmentParent
 
         if ($post->user_id > 0) {
             $user = $post->User;
-            if ($user) {
+            if ($user !== null) {
                 $links[self::LINK_POSTER] = $this->buildApiLink('users', $post->User);
                 $links[self::LINK_POSTER_AVATAR] = $user->getAvatarUrl('l');
             }

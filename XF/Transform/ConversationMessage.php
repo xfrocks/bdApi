@@ -52,10 +52,9 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
         $message = $context->getParentSource();
 
         $canDelete = false;
-        /** @var \XF\Entity\ConversationMaster|null $conversation */
         $conversation = $message->Conversation;
 
-        if ($conversation && $conversation->canUploadAndManageAttachments()) {
+        if ($conversation !== null && $conversation->canUploadAndManageAttachments()) {
             $canDelete = $this->checkAttachmentCanManage(self::CONTENT_TYPE_CONVO_MESSAGE, $message);
         }
 
@@ -117,41 +116,31 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
             case self::DYNAMIC_KEY_IS_LIKED:
                 return $message->isReactedTo();
             case self::DYNAMIC_KEY_SIGNATURE:
-                if ($message->user_id < 1) {
-                    return null;
-                }
-
-                /** @var \XF\Entity\User|null $user */
-                $user = $message->User;
-                if (!$user) {
-                    return null;
-                }
-
-                return $user->Profile->signature;
             case self::DYNAMIC_KEY_SIGNATURE_HTML:
-                if ($message->user_id < 1) {
-                    return null;
-                }
-
-                /** @var \XF\Entity\User|null $user */
-                $user = $message->User;
-                if (!$user) {
-                    return null;
-                }
-
-                return $this->renderBbCodeHtml($key, $user->Profile->signature, $user->Profile);
             case self::DYNAMIC_KEY_SIGNATURE_PLAIN:
                 if ($message->user_id < 1) {
                     return null;
                 }
 
-                /** @var \XF\Entity\User|null $user */
                 $user = $message->User;
-                if (!$user) {
+                if ($user === null) {
                     return null;
                 }
 
-                return $this->renderBbCodePlainText($user->Profile->signature);
+                $profile = $user->Profile;
+                if ($profile === null) {
+                    return null;
+                }
+
+                switch ($key) {
+                    case self::DYNAMIC_KEY_SIGNATURE:
+                        return $profile->signature;
+                    case self::DYNAMIC_KEY_SIGNATURE_HTML:
+                        return $this->renderBbCodeHtml($key, $profile->signature, $profile);
+                    case self::DYNAMIC_KEY_SIGNATURE_PLAIN:
+                        return $this->renderBbCodePlainText($profile->signature);
+                }
+                break;
             case self::DYNAMIC_KEY_USER_IS_IGNORED:
                 return $message->isIgnored();
         }
@@ -163,7 +152,6 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
     {
         /** @var \XF\Entity\ConversationMessage $message */
         $message = $context->getSource();
-        /** @var \XF\Entity\User|null $user */
         $user = $message->User;
 
         $links = [
@@ -172,7 +160,7 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
             self::LINK_REPORT => $this->buildApiLink('conversation-messages/report', $message)
         ];
 
-        if ($user) {
+        if ($user !== null) {
             $links[self::LINK_CREATOR] = $this->buildApiLink('users', $user);
             $links[self::LINK_CREATOR_AVATAR] = $user->getAvatarUrl('l');
         }
@@ -184,21 +172,20 @@ class ConversationMessage extends AbstractHandler implements AttachmentParent
     {
         /** @var \XF\Entity\ConversationMessage $message */
         $message = $context->getSource();
+        $conversation = $message->Conversation;
 
-        $perms = [
+        return [
             self::PERM_VIEW => $message->canView(),
             self::PERM_EDIT => $message->canEdit(),
 
             // save value for version of xenforo 1.x
             self::PERM_DELETE => true,
 
-            self::PERM_REPLY => $message->Conversation->canReply(),
-            self::PERM_UPLOAD_ATTACHMENT => $message->Conversation->canUploadAndManageAttachments(),
+            self::PERM_REPLY => $conversation !== null ? $conversation->canReply() : null,
+            self::PERM_UPLOAD_ATTACHMENT => $conversation !== null ? $conversation->canUploadAndManageAttachments() : null,
 
             self::PERM_LIKE => $message->canReact(),
         ];
-
-        return $perms;
     }
 
     public function onTransformEntities(TransformContext $context, $entities)

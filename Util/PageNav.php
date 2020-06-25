@@ -55,6 +55,9 @@ class PageNav
         $linkParams = [];
         foreach ($params->getFilteredValues() as $linkParamKey => $linkParamValue) {
             $paramFiltered = $params->getFiltered($linkParamKey);
+            if (!is_array($paramFiltered)) {
+                continue;
+            }
             if ($paramFiltered['valueRaw'] === $paramFiltered['default']) {
                 continue;
             }

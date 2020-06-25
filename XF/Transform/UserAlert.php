@@ -69,9 +69,8 @@ class UserAlert extends AbstractHandler
         $links['content'] = $this->buildApiLink('notifications/content', $alert);
         $links['read'] = $this->buildApiLink('notifications/read');
 
-        /** @var \XF\Entity\User|null $user */
         $user = $alert->User;
-        if ($user) {
+        if ($user !== null) {
             $links['creator_avatar'] = $user->getAvatarUrl('m');
         }
 

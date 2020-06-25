@@ -52,14 +52,15 @@ class ProfilePost extends AbstractHandler
     {
         /** @var \XF\Entity\ProfilePost $profilePost */
         $profilePost = $context->getSource();
+        $profileUser = $profilePost->ProfileUser;
 
         switch ($key) {
             case self::DYNAMIC_KEY_POST_BODY:
-                return $this->app->templater()->fn('structured_text', [$profilePost->message]);
+                return $this->app->templater()->func('structured_text', [$profilePost->message]);
             case self::DYNAMIC_KEY_TIMELINE_USER_ID:
-                return $profilePost->ProfileUser->user_id;
+                return $profileUser !== null ? $profileUser->user_id : null;
             case self::DYNAMIC_KEY_TIMELINE_USER_NAME:
-                return $profilePost->ProfileUser->username;
+                return $profileUser !== null ? $profileUser->username : null;
             case self::DYNAMIC_KEY_POST_IS_PUBLISHED:
                 return $profilePost->isVisible();
             case self::DYNAMIC_KEY_POST_IS_DELETED:
@@ -77,7 +78,6 @@ class ProfilePost extends AbstractHandler
     {
         /** @var \XF\Entity\ProfilePost $profilePost */
         $profilePost = $context->getSource();
-        /** @var \XF\Entity\User|null $user */
         $user = $profilePost->User;
 
         $links = [
@@ -90,7 +90,7 @@ class ProfilePost extends AbstractHandler
             self::LINK_REPORT => $this->buildApiLink('profile-posts/report', $profilePost),
         ];
 
-        if ($user) {
+        if ($user !== null) {
             $links[self::LINK_POSTER] = $this->buildApiLink('users', $user);
             $links[self::LINK_POSTER_AVATAR] = $user->getAvatarUrl('m');
         }
