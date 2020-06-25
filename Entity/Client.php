@@ -79,7 +79,8 @@ class Client extends Entity
      */
     public function setClientOptions(array $options)
     {
-        $this->options = Arr::mapMerge($this->options, $options);
+        $existing = $this->options;
+        $this->options = Arr::mapMerge($existing !== null ? $existing : [], $options);
     }
 
     /**
