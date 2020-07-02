@@ -75,7 +75,7 @@ class Search extends AbstractController
             ->define('forum_id', 'uint', 'forum id to filter')
             ->define('user_id', 'uint', 'creator user id to filter');
 
-        if ($params['q'] === '') {
+        if ($params['q'] === '' && $params['user_id'] === 0) {
             return $this->error(\XF::phrase('bdapi_slash_search_requires_q'), 400);
         }
 
@@ -104,7 +104,7 @@ class Search extends AbstractController
             ->define('thread_id', 'uint', 'id of the container thread to search for posts')
             ->define('user_id', 'uint', 'id of the creator to search for contents');
 
-        if ($params['q'] === '') {
+        if ($params['q'] === '' && $params['user_id'] === 0) {
             return $this->error(\XF::phrase('bdapi_slash_search_requires_q'), 400);
         }
 

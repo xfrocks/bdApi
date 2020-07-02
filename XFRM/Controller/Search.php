@@ -19,7 +19,7 @@ class Search extends XFCP_Search
             ->define('q', 'str', 'query to search for')
             ->define('user_id', 'uint', 'id of the creator to search for contents');
 
-        if ($params['q'] === '') {
+        if ($params['q'] === '' && $params['user_id'] === 0) {
             return $this->error(\XF::phrase('bdapi_slash_search_requires_q'), 400);
         }
 
