@@ -71,6 +71,7 @@ class Listener
         $addOnCache = $container['addon.cache'];
         $extension = $app->extension();
         if (isset($addOnCache['XFRM'])) {
+            $extension->addClassExtension('Xfrocks\Api\Controller\Search', 'Xfrocks\Api\XFRM\Controller\Search');
             $extension->addClassExtension('Xfrocks\Api\Data\Modules', 'Xfrocks\Api\XFRM\Data\Modules');
         }
     }
