@@ -47,7 +47,15 @@ class Search extends AbstractPlugin
                     continue;
                 }
 
-                $values[$resultKeyMap[$dataKey]] = $controller->transformEntityLazily($entity);
+                $transformed = $controller->transformEntityLazily($entity);
+                $transformed->addCallbackPostTransform(function ($data) use ($contentType, $entity) {
+                    $data['content_type'] = $contentType;
+                    $data['content_id'] = $entity->getEntityId();
+
+                    return $data;
+                });
+
+                $values[$resultKeyMap[$dataKey]] = $transformed;
             }
         }
 
