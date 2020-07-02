@@ -24,10 +24,11 @@ class Post extends AbstractController
         }
 
         $params = $this->params()
-            ->define('thread_id', 'uint', 'thread id to filter')
+            ->define('thread_id', 'uint', 'thread id to filter', 0)
+            ->define('page_of_post_id', 'uint', 'post id to filter for thread and page', 0)
             ->defineOrder([
-                'natural' => ['post_date', 'asc'],
-                'natural_reverse' => ['post_date', 'desc'],
+                'natural' => ['position', 'asc'],
+                'natural_reverse' => ['position', 'desc'],
                 'post_create_date' => ['post_date', 'asc'],
                 'post_create_date_reverse' => ['post_date', 'desc']
             ])
@@ -38,6 +39,10 @@ class Post extends AbstractController
             $postIds = $params->filterCommaSeparatedIds('post_ids');
 
             return $this->actionMultiple($postIds);
+        }
+
+        if ($params['thread_id'] < 1 && $params['page_of_post_id'] < 1) {
+            $this->assertValidToken();
         }
 
         /** @var \XF\Finder\Post $finder */
@@ -452,8 +457,21 @@ class Post extends AbstractController
      */
     protected function applyFilters($finder, Params $params)
     {
+        if ($params['page_of_post_id'] > 0) {
+            $post = $this->assertViewablePost($params['page_of_post_id']);
+            $params['page_of_post_id'] = 0;
+            $params['thread_id'] = $post->thread_id;
+
+            list($limit,) = $params->filterLimitAndPage();
+
+            if ($params['order'] !== 'natural') {
+                // force natural ordering
+                $params['order'] = 'natural';
+            }
+            $params['page'] = floor($post->position / $limit) + 1;
+        }
+
         if ($params['thread_id'] > 0) {
-            /** @var \XF\Entity\Thread $thread */
             $thread = $this->assertViewableThread($params['thread_id']);
             $finder->inThread($thread);
         }

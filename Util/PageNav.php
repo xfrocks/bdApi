@@ -58,9 +58,6 @@ class PageNav
             if (!is_array($paramFiltered)) {
                 continue;
             }
-            if ($paramFiltered['valueRaw'] === $paramFiltered['default']) {
-                continue;
-            }
             if ($linkParamValue === $paramFiltered['default']) {
                 continue;
             }

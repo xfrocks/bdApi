@@ -430,7 +430,10 @@ class Params implements \ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        throw new \LogicException('Params::define() must be used to define new param.');
+        if (!isset($this->filtered[$offset])) {
+            throw new \LogicException('offsetSet must be called after offsetGet: ' . $offset);
+        }
+        $this->filtered[$offset]['value'] = $value;
     }
 
     /**
@@ -439,7 +442,10 @@ class Params implements \ArrayAccess
      */
     public function offsetUnset($offset)
     {
-        throw new \LogicException('Params::define() must be used to define new param.');
+        if (!isset($this->params[$offset])) {
+            throw new \LogicException('Unrecognized parameter: ' . $offset);
+        }
+        unset($this->filtered[$offset]);
     }
 
     /**

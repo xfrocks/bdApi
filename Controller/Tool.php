@@ -3,6 +3,7 @@
 namespace Xfrocks\Api\Controller;
 
 use Xfrocks\Api\ControllerPlugin\Login;
+use Xfrocks\Api\ControllerPlugin\ParseLink;
 use Xfrocks\Api\Util\Crypt;
 use Xfrocks\Api\Util\OneTimeToken;
 
@@ -158,6 +159,20 @@ class Tool extends AbstractController
         }
 
         return $this->api(['result' => $result]);
+    }
+
+    /**
+     * @return \XF\Mvc\Reply\AbstractReply
+     * @throws \Exception
+     */
+    public function actionGetParseLink()
+    {
+        $params = $this->params()
+            ->define('link', 'str');
+
+        /** @var ParseLink $plugin */
+        $plugin = $this->plugin('Xfrocks\Api:ParseLink');
+        return $plugin->parse($params['link']);
     }
 
     /**
