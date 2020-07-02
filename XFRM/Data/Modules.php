@@ -41,3 +41,11 @@ class Modules extends XFCP_Modules
         return $data;
     }
 }
+
+if (false) {
+    // phpcs:disable PSR1.Classes.ClassDeclaration.MultipleClasses
+    // phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
+    class XFCP_Modules extends \Xfrocks\Api\Data\Modules
+    {
+    }
+}

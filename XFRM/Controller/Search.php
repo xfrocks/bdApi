@@ -32,3 +32,11 @@ class Search extends XFCP_Search
         return $this->rerouteController(__CLASS__, 'getResults', ['search_id' => $search->search_id]);
     }
 }
+
+if (false) {
+    // phpcs:disable PSR1.Classes.ClassDeclaration.MultipleClasses
+    // phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
+    class XFCP_Search extends \Xfrocks\Api\Controller\Search
+    {
+    }
+}
