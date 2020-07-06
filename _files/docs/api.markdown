@@ -2690,6 +2690,25 @@ Get resource category detail
         parent_category_id: (int),
         category_resource_count: (int),
         category_title: (string),
+        fields: [
+            {
+                id: (string),
+                title: (string),
+                description: (string),
+                display_group: (string),
+                position: (string),
+                choices: [
+                    {
+                        key: (string),
+                        value: (string),
+                    },
+                    ...
+                ],
+                is_multiple_choice: (boolean),
+                is_required: (boolean),
+            },
+            ...
+        ],
         links: {
             resources: (uri),
             resources_in_sub: (uri),
@@ -2790,6 +2809,7 @@ Get resource detail
                 title: (string),
                 description: (string),
                 display_group: (string),
+                position: (string),
                 choices: [
                     {
                         key: (string),
