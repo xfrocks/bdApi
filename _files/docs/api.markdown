@@ -2671,6 +2671,10 @@ Get all resource categories
 }
 ```
 
+Parameters:
+
+* N/A
+
 Required scopes:
 
 * `read`
@@ -2688,7 +2692,9 @@ Get resource category detail
         category_title: (string),
         links: {
             resources: (uri),
-            resources_in_sub: (uri)
+            resources_in_sub: (uri),
+            detail: (uri),
+            permalink: (uri)
         },
         permissions: {
             add: (bool),
@@ -2700,6 +2706,10 @@ Get resource category detail
     }
 }
 ```
+
+Parameters:
+
+* N/A
 
 Required scopes:
 
@@ -2774,6 +2784,50 @@ Get resource detail
         resource_text_html: (string),
         resource_text_plain_text: (string),
         resource_version: (string),
+        fields: [
+            {
+                id: (string),
+                title: (string),
+                description: (string),
+                display_group: (string),
+                choices: [
+                    {
+                        key: (string),
+                        value: (string),
+                    },
+                    ...
+                ],
+                is_multiple_choice: (boolean),
+                is_required: (boolean),
+                value: (string),
+                values: [
+                    {
+                        key: (string),
+                        value: (string),
+                    },
+                    ...
+                ]
+            },
+            ...
+        ],
+        attachments: [
+            {
+                attachment_id: (int),
+                attachment_download_count: (int),
+                filename: (string),
+                attachment_is_inserted: (boolean),
+                links: {
+                    permalink: (uri),
+                    data: (uri),
+                    thumbnail: (uri)
+                },
+                permissions: {
+                    view: (boolean),
+                    delete: (boolean)
+                }
+            },
+            ...
+        ],
         links: {
             attachments: (uri),
             detail: (uri),
@@ -2857,6 +2911,10 @@ Remove follower record
     message: "Changes Saved"    
 }
 ```
+
+Parameters:
+
+* N/A
 
 Required scopes:
 
