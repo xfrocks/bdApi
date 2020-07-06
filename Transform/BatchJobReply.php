@@ -110,11 +110,28 @@ class BatchJobReply extends AbstractHandler
         $data = parent::onNewContext($context);
         $data['reply'] = null;
 
-        $contextSource = $context->getSource();
-        if ($contextSource instanceof \XF\Mvc\Reply\Exception) {
-            $data['reply'] = $contextSource->getReply();
-        } elseif ($contextSource instanceof \XF\Mvc\Reply\AbstractReply) {
-            $data['reply'] = $contextSource;
+        $reply = $context->getSource();
+        while ($data['reply'] === null) {
+            if ($reply instanceof \XF\Mvc\Reply\Exception) {
+                $data['reply'] = $reply->getReply();
+            } elseif ($reply instanceof \Xfrocks\Api\Mvc\Reply\Api) {
+                try {
+                    $data['transformed'] = $this->prepareJsonEncode(
+                        $this->transformer->transformArray($context, null, $reply->getData())
+                    );
+                    $data['reply'] = $reply;
+                } catch (\Exception $e) {
+                    if ($e instanceof \XF\Mvc\Reply\Exception) {
+                        $reply = $e;
+                    } elseif ($e instanceof \XF\PrintableException || \XF::$debugMode) {
+                        $reply = new \XF\Mvc\Reply\Message($e->getMessage());
+                    } else {
+                        $reply = new \XF\Mvc\Reply\Error(\XF::phrase('unexpected_error_occurred'));
+                    }
+                }
+            } elseif ($reply instanceof \XF\Mvc\Reply\AbstractReply) {
+                $data['reply'] = $reply;
+            }
         }
 
         return $data;
@@ -122,11 +139,35 @@ class BatchJobReply extends AbstractHandler
 
     public function onTransformed(TransformContext $context, array &$data)
     {
-        $reply = $context->data('reply');
-        if (is_object($reply) && $reply instanceof \Xfrocks\Api\Mvc\Reply\Api) {
-            $data += $this->transformer->transformArray($context, null, $reply->getData());
+        $transformed = $context->data('transformed');
+        if (is_array($transformed)) {
+            $data += $transformed;
         }
 
         parent::onTransformed($context, $data);
+    }
+
+    /**
+     * @param mixed $value
+     * @return array
+     * @see \XF\Mvc\Renderer\Json::prepareJsonEncode()
+     */
+    protected function prepareJsonEncode($value)
+    {
+        if (is_array($value)) {
+            foreach ($value as &$innerValue) {
+                $innerValue = $this->prepareJsonEncode($innerValue);
+            }
+        } else {
+            if (is_object($value) && method_exists($value, 'jsonSerialize')) {
+                $value = $value->jsonSerialize();
+            } else {
+                if (is_object($value) && method_exists($value, '__toString')) {
+                    $value = $value->__toString();
+                }
+            }
+        }
+
+        return $value;
     }
 }
