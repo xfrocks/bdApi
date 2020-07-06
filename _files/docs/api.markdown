@@ -2657,6 +2657,316 @@ Required scopes:
 
  * `read`
 
+## XenForo Resource Manager
+
+### GET `/resource-categories`
+Get all resource categories
+
+```
+{
+    categories: [
+        (category),
+        ...
+    ]
+}
+```
+
+Parameters:
+
+* N/A
+
+Required scopes:
+
+* `read`
+
+### GET `/resource-categories/:categoryId`
+Get resource category detail
+
+```
+{
+    category: {
+        resource_category_id: (int),
+        category_description: (string),
+        parent_category_id: (int),
+        category_resource_count: (int),
+        category_title: (string),
+        fields: [
+            {
+                id: (string),
+                title: (string),
+                description: (string),
+                display_group: (string),
+                position: (string),
+                choices: [
+                    {
+                        key: (string),
+                        value: (string),
+                    },
+                    ...
+                ],
+                is_multiple_choice: (boolean),
+                is_required: (boolean),
+            },
+            ...
+        ],
+        links: {
+            resources: (uri),
+            resources_in_sub: (uri),
+            detail: (uri),
+            permalink: (uri)
+        },
+        permissions: {
+            add: (bool),
+            add_file: (bool),
+            add_url: (bool),
+            add_price: (bool),
+            add_no_file_or_url: (bool)
+        }
+    }
+}
+```
+
+Parameters:
+
+* N/A
+
+Required scopes:
+
+* `read`
+
+### GET `/resources`
+Get resources
+
+```
+{
+    resources: [
+        (resource),
+        ...
+    ],
+    resource_total: (int),
+    links: {
+        pages: (int),
+        next: (uri),
+        prev: (uri)
+    }
+}
+```
+
+Parameters:
+
+* `resource_category_id` (_optional_): Get resources in category
+* `resource_category_ids` (_optional_): Get resources in categories. Each category ID separate by comma (,)
+* `in_sub` (_optional_): flag to include sub categories in filtering 
+* `page` (_optional_): page number of resources.
+* `limit` (_optional_): number of resources in a page. Default value depends on the system configuration.
+* `order` (_optional_): Support `resource_create_date`, `resource_create_date_reverse`, `resource_update_date`,
+`resource_update_date_reverse`, `resource_download_count`, `resource_download_count_reverse`, `resource_rating_weighted`, `resource_rating_weighted_reverse`
+* `resource_update_date` (_optional_): timestamp to filter
+* `resource_ids` (_optional_): resource ids to fetch (ignoring all filters, separated by comma)
+
+Required scopes:
+
+* `read`
+
+### GET `/resources/:resourceId`
+Get resource detail
+
+```
+{
+    resource: {
+        resource_category_id: (int),
+        creator_user_id: (int),
+        creator_username: (string),
+        resource_create_date: (int),
+        resource_description: (string),
+        resource_download_count: (int),
+        resource_id: (int),
+        resource_rating_count: (int),
+        resource_rating_sum: (int),
+        resource_rating_avg: (float),
+        resource_rating_weighted: (float),
+        resource_title: (string),
+        resource_update_date: (int),
+        resource_attachment_count: (int),
+        resource_currency: (string),
+        resource_has_file: (bool),
+        resource_has_url: (bool),
+        resource_is_deleted: (bool),
+        resource_is_followed: (bool),
+        resource_is_liked: (bool),
+        resource_is_published: (bool),
+        resource_like_count: (int),
+        resource_price: (float),
+        resource_rating: (int),
+        resource_tags: (array),
+        resource_text: (string),
+        resource_text_html: (string),
+        resource_text_plain_text: (string),
+        resource_version: (string),
+        fields: [
+            {
+                id: (string),
+                title: (string),
+                description: (string),
+                display_group: (string),
+                position: (string),
+                choices: [
+                    {
+                        key: (string),
+                        value: (string),
+                    },
+                    ...
+                ],
+                is_multiple_choice: (boolean),
+                is_required: (boolean),
+                value: (string),
+                values: [
+                    {
+                        key: (string),
+                        value: (string),
+                    },
+                    ...
+                ]
+            },
+            ...
+        ],
+        attachments: [
+            {
+                attachment_id: (int),
+                attachment_download_count: (int),
+                filename: (string),
+                attachment_is_inserted: (boolean),
+                links: {
+                    permalink: (uri),
+                    data: (uri),
+                    thumbnail: (uri)
+                },
+                permissions: {
+                    view: (boolean),
+                    delete: (boolean)
+                }
+            },
+            ...
+        ],
+        links: {
+            attachments: (uri),
+            detail: (uri),
+            followers: (uri),
+            likes: (uri),
+            permalink: (uri),
+            report: (uri),
+            category: (uri),
+            content: (uri),
+            creator_avatar: (uri),
+            icon: (uri),
+            ratings: (uri),
+            thread: (uri)
+        },
+        permissions: {
+            add_icon: (bool),
+            download: (bool),
+            rate: (bool),
+            delete: (bool),
+            edit: (bool),
+            follow: (bool),
+            like: (bool),
+            report: (bool),
+            view: (bool)
+        }
+    }
+}
+```
+
+Required scopes:
+
+* `read`
+
+### GET `/resources/:resourceId/followers`
+Get users following resource
+
+```
+{
+    users: [
+        {
+            user_id: (int),
+            username: (string),
+            follow: {
+                alert: (bool),
+                email: (bool)
+            }
+        },
+        ...    
+    ]
+}
+```
+
+Required scopes:
+
+* `read`
+
+
+### POST `/resources/:resourceId/followers`
+
+```
+{
+    status: "ok",
+    message: "Changes Saved"    
+}
+```
+
+Parameters:
+
+* `email` (_optional_): whether to receive notification as email
+
+Required scopes:
+
+* `post`
+
+### DELETE `/resources/:resourceId/followers`
+Remove follower record
+
+```
+{
+    status: "ok",
+    message: "Changes Saved"    
+}
+```
+
+Parameters:
+
+* N/A
+
+Required scopes:
+
+* `delete`
+
+
+### GET `/resources/followed`
+Get resources visitor following
+
+```
+{
+    resources: [
+        (resource),
+        ...
+    ],
+    resource_total: (int),
+    links: {
+        pages: (int),
+        next: (uri),
+        prev: (uri)
+    }
+}
+```
+
+Parameters:
+
+* `total` (_optional_): Determine to get `resource_total` only
+
+Required scopes:
+
+* `read`
+
 ## Batch requests
 
 ### POST `/batch`
