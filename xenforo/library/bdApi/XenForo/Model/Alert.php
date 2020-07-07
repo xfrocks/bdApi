@@ -140,9 +140,9 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
 
         if ($alert['content_type'] === 'bdalerts_groupped' && is_array($alert['alerts'])) {
             $firstAlert = reset($alert['alerts']);
-            foreach (array('content_type', 'content_id', 'action') as $key) {
-                $data[$key] = $firstAlert[$key];
-            }
+            $data['content_type'] = $firstAlert['content_type'];
+            $data['content_id'] = $firstAlert['content_id'];
+            $data['content_action'] = $firstAlert['action'];
             $data['alerts_has_been_grouped'] = true;
         }
 
