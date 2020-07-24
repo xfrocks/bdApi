@@ -360,7 +360,7 @@
 			<td class="primaryContent"><pre>{xen:helper dump, $log.request_data}</pre></td>
 		</tr>
 		<tr>
-			<th class="subHeading">{xen:phrase bdapi_response} ({$log.response_code})</th>
+			<th class="subHeading">{xen:phrase bdapi_response} ({$log.response_code}{xen:if $log.response_time, ', {$log.response_time}s'})</th>
 		</tr>
 		<tr>
 			<td class="primaryContent"><pre>{xen:helper dump, $log.response_output}</pre></td>

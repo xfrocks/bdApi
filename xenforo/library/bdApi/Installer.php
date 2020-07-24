@@ -74,6 +74,7 @@ class bdApi_Installer
                 ,`request_data` MEDIUMBLOB
                 ,`response_code` INT(10) UNSIGNED NOT NULL
                 ,`response_output` MEDIUMBLOB
+                ,`response_time` FLOAT
                 , PRIMARY KEY (`log_id`)
                 ,INDEX `request_date` (`request_date`)
             ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
@@ -157,6 +158,15 @@ class bdApi_Installer
             'checkQuery' => 'SHOW INDEXES FROM `xf_bdapi_log` WHERE Key_name LIKE \'request_date\'',
             'addQuery' => 'ALTER TABLE `xf_bdapi_log` ADD INDEX `request_date` (`request_date`)',
             'dropQuery' => 'ALTER TABLE `xf_bdapi_log` DROP INDEX `request_date`',
+        ),
+        array(
+            'table' => 'xf_bdapi_log',
+            'tableCheckQuery' => 'SHOW TABLES LIKE \'xf_bdapi_log\'',
+            'field' => 'response_time',
+            'checkQuery' => 'SHOW COLUMNS FROM `xf_bdapi_log` LIKE \'response_time\'',
+            'addQuery' => 'ALTER TABLE `xf_bdapi_log` ADD COLUMN `response_time` FLOAT',
+            'modifyQuery' => 'ALTER TABLE `xf_bdapi_log` MODIFY COLUMN `response_time` FLOAT',
+            'dropQuery' => 'ALTER TABLE `xf_bdapi_log` DROP COLUMN `response_time`',
         ),
     );
 

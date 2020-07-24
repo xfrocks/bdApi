@@ -16,6 +16,8 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
     protected $_fieldsFilterExcludeHasWildcards = false;
     protected $_fieldsFilterDefaults = array();
 
+    private $_startTime = 0.0;
+
     public function actionOptions()
     {
         $cors = $this->_request->getHeader('Access-Control-Request-Method');
@@ -720,6 +722,14 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
         }
     }
 
+
+    protected function _preDispatchFirst($action)
+    {
+        $this->_startTime = microtime(true);
+
+        parent::_preDispatchFirst($action);
+    }
+
     protected function _postDispatch($controllerResponse, $controllerName, $action)
     {
         if ($controllerResponse instanceof XenForo_ControllerResponse_Error) {
@@ -736,6 +746,8 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
 
     protected function _logRequest($controllerResponse, $controller, $action)
     {
+        $responseTime = $this->_startTime !== 0.0 ? microtime(true) - $this->_startTime : null;
+
         if ($controllerResponse instanceof XenForo_ControllerResponse_Abstract) {
             if ($controllerResponse instanceof XenForo_ControllerResponse_Redirect) {
                 $responseCode = 301;
@@ -771,7 +783,10 @@ abstract class bdApi_ControllerApi_Abstract extends XenForo_ControllerPublic_Abs
                 $requestUri,
                 $this->_request->getParams(),
                 $responseCode,
-                $responseOutput
+                $responseOutput,
+                array(
+                    'response_time' => $responseTime,
+                )
             );
         }
 

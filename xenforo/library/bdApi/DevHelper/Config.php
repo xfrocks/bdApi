@@ -475,6 +475,7 @@ class bdApi_DevHelper_Config extends DevHelper_Config_Base
                 'name' => 'request_date',
                 'type' => 'NORMAL',
             ),
+            'response_time' => array('name' => 'response_time', 'type' => 'float'),
         ),
     );
     protected $_exportPath = '/Users/sondh/XenForo/bdApi';

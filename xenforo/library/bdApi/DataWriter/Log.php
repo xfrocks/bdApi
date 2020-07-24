@@ -54,7 +54,8 @@ class bdApi_DataWriter_Log extends XenForo_DataWriter
                     'type' => XenForo_DataWriter::TYPE_UINT,
                     'required' => true
                 ),
-                'response_output' => array('type' => XenForo_DataWriter::TYPE_SERIALIZED)
+                'response_output' => array('type' => XenForo_DataWriter::TYPE_SERIALIZED),
+                'response_time' => array('type' => XenForo_DataWriter::TYPE_FLOAT),
             )
         );
     }
