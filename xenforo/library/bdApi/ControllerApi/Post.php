@@ -276,6 +276,10 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             $this->_getAttachmentHelper()->getAttachmentTempHash($thread)
         );
         $writer->setExtraData(XenForo_DataWriter_DiscussionMessage_Post::DATA_FORUM, $forum);
+        $writer->setOption(
+            XenForo_DataWriter_DiscussionMessage_Post::OPTION_MAX_TAGGED_USERS,
+            $visitor->hasPermission('general', 'maxTaggedUsers')
+        );
 
         /* @var $session bdApi_Session */
         $session = XenForo_Application::getSession();
