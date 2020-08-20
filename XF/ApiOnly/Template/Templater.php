@@ -47,7 +47,11 @@ class Templater extends XFCP_Templater
                 if ($data !== null) {
                     $output = self::_addDimensionsBySrc($output, "src=\"$linkApi\"", $data->height, $data->width);
 
-                    $srcThumbnail = sprintf('src="%s"', $this->escape($attachment->thumbnail_url_full));
+                    /** @var mixed $mixed */
+                    $mixed = $attachment;
+                    $hasGetThumbnailUrlFull = is_callable([$mixed, 'getThumbnailUrlFull']);
+                    $thumbnailUrl = $hasGetThumbnailUrlFull ? $attachment->thumbnail_url_full : $attachment->thumbnail_url;
+                    $srcThumbnail = sprintf('src="%s"', $this->escape($thumbnailUrl));
                     $output = self::_addDimensionsBySrc(
                         $output,
                         $srcThumbnail,
