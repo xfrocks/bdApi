@@ -13,6 +13,7 @@ use XF\Service\Thread\Creator;
 use XF\Service\Thread\Deleter;
 use Xfrocks\Api\Data\Params;
 use Xfrocks\Api\Transform\TransformContext;
+use Xfrocks\Api\Transformer;
 use Xfrocks\Api\Util\PageNav;
 use Xfrocks\Api\XF\Transform\Thread as TransformThread;
 
@@ -44,7 +45,7 @@ class Thread extends AbstractController
                 'thread_view_count_reverse' => ['view_count', 'asc'],
             ])
             ->definePageNav()
-            ->define(\Xfrocks\Api\XF\Transform\Thread::KEY_UPDATE_DATE, 'uint', 'timestamp to filter')
+            ->define(TransformThread::KEY_UPDATE_DATE, 'uint', 'timestamp to filter')
             ->define('thread_ids', 'str', 'thread ids to fetch (ignoring all filters, separated by comma)');
 
         if ($params['thread_ids'] !== '') {
@@ -65,7 +66,7 @@ class Thread extends AbstractController
         if (is_array($orderChoice)) {
             switch ($orderChoice[0]) {
                 case 'last_post_date':
-                    $keyUpdateDate = \Xfrocks\Api\XF\Transform\Thread::KEY_UPDATE_DATE;
+                    $keyUpdateDate = TransformThread::KEY_UPDATE_DATE;
                     if ($params[$keyUpdateDate] > 0) {
                         $finder->where($orderChoice[0], $orderChoice['_whereOp'], $params[$keyUpdateDate]);
                     }
@@ -76,7 +77,37 @@ class Thread extends AbstractController
         $params->limitFinderByPage($finder);
 
         $total = $finder->total();
-        $threads = $total > 0 ? $this->transformFinderLazily($finder) : [];
+
+        $threads = [];
+        if ($total > 0) {
+            $threads = $this->transformFinderLazily($finder);
+
+            if (!$this->request()->exists('sticky')) {
+                if ($params['forum_id'] > 0 && $params['page'] === 1) {
+                    // first page without `sticky` param specify
+                    // include stickied threads on top of the results
+                    $sticky = clone $finder;
+                    $sticky->where('sticky', 1);
+
+                    $threads->addCallbackFinderPostFetch(function ($normals) use ($params, $sticky) {
+                        // call handler to prepare finder
+                        /** @var Transformer $transformer */
+                        $transformer =\XF::app()->container('api.transformer');
+                        $handler = $transformer->handler('XF:Thread');
+                        $handler->onTransformFinder($params->getTransformContext(), $sticky);
+
+                        $threads = $sticky->fetch()->toArray();
+                        foreach ($normals as $thread) {
+                            $threads[] = $thread;
+                        }
+
+                        return $threads;
+                    });
+                }
+
+                $finder->where('sticky', 0);
+            }
+        }
 
         $data = [
             'threads' => $threads,
@@ -554,7 +585,6 @@ class Thread extends AbstractController
     protected function applyFilters($finder, Params $params)
     {
         if ($params['forum_id'] > 0) {
-            /** @var Forum $forum */
             $forum = $this->assertViewableForum($params['forum_id']);
             $finder->inForum($forum);
         }
