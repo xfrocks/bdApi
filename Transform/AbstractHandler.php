@@ -403,6 +403,8 @@ abstract class AbstractHandler
             return '';
         }
 
+        $options['lightbox'] = false;
+
         $context = 'api:' . $key;
         return $this->app->bbCode()->render($string, 'html', $context, $content, $options);
     }
