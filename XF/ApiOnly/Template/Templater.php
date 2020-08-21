@@ -6,6 +6,14 @@ use Xfrocks\Api\Listener;
 
 class Templater extends XFCP_Templater
 {
+    public function clearRequiredExternalsForApi()
+    {
+        $this->includeCss = [];
+        $this->inlineCss = [];
+        $this->includeJs = [];
+        $this->inlineJs = [];
+    }
+
     /**
      * @param string $username
      * @return array
@@ -13,6 +21,41 @@ class Templater extends XFCP_Templater
     public function getDefaultAvatarStylingForApi($username)
     {
         return $this->getDefaultAvatarStyling($username);
+    }
+
+    public function getRequiredExternalsAsHtmlForApi()
+    {
+        $html = '';
+
+        $includedCss = $this->getIncludedCss();
+        if (count($includedCss) > 0) {
+            $html .= '<link rel="stylesheet" href="'
+                . htmlspecialchars($this->getCssLoadUrl($includedCss))
+                . '" />';
+        }
+
+        $inlineCss = $this->getInlineCss();
+        if (count($inlineCss) > 0) {
+            foreach ($inlineCss as $inline) {
+                $html .= "<style>$inline</style>";
+            }
+        }
+
+        $includedJs = $this->getIncludedJs();
+        if (count($includedJs) > 0) {
+            foreach ($includedJs as $js) {
+                $html .= '<script src="' . htmlspecialchars($js) . '"></script>';
+            }
+        }
+
+        $inlineJs = $this->getInlineJs();
+        if (count($inlineJs) > 0) {
+            foreach ($inlineJs as $inline) {
+                $html .= "<script>$inline</script>";
+            }
+        }
+
+        return $html;
     }
 
     public function renderTemplate($template, array $params = [], $addDefaultParams = true)

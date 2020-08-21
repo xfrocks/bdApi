@@ -50,6 +50,7 @@ class App extends \XF\Pub\App
 
         $container->extend('extension.classExtensions', function (array $classExtensions) {
             $xfClasses = [
+                'BbCode\Renderer\Html',
                 'ControllerPlugin\Error',
                 'Entity\User',
                 'Image\Gd',
