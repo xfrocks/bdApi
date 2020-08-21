@@ -10,8 +10,8 @@ class Imagick extends XFCP_Imagick implements DriverInterface
 
         $color = new \ImagickPixel(sprintf('rgb(%d, %d, %d)', $r, $g, $b));
         $x = $y = 0;
-        $target = $image->getimagepixelcolor($x, $y);
-        $image->floodfillpaintimage($color, 1, $target, $x, $y, false);
+        $target = $image->getImagePixelColor($x, $y);
+        $image->floodFillPaintImage($color, 1, $target, $x, $y, false);
     }
 
     public function putTextAtCenterForApi($percent, $r, $g, $b, $fontFile, $text)
@@ -19,15 +19,15 @@ class Imagick extends XFCP_Imagick implements DriverInterface
         $image = $this->imagick;
 
         $draw = new \ImagickDraw();
-        $draw->setfillcolor(new \ImagickPixel(sprintf('rgb(%d, %d, %d)', $r, $g, $b)));
-        $draw->setfont($fontFile);
-        $draw->setgravity(\Imagick::GRAVITY_CENTER);
+        $draw->setFillColor(new \ImagickPixel(sprintf('rgb(%d, %d, %d)', $r, $g, $b)));
+        $draw->setFont($fontFile);
+        $draw->setGravity(\Imagick::GRAVITY_CENTER);
 
         $size = ceil($this->height * $percent / 10) / 10;
         $checkedSizes = [];
         while (true) {
-            $draw->setfontsize($size);
-            $metrics = $image->queryfontmetrics($draw, $text);
+            $draw->setFontSize($size);
+            $metrics = $image->queryFontMetrics($draw, $text);
             $checkedSizes[] = $size;
 
             $boxPercent = $metrics['textHeight'] / $this->height * 100;
@@ -46,7 +46,7 @@ class Imagick extends XFCP_Imagick implements DriverInterface
             }
         }
 
-        $image->annotateimage($draw, 0, 0, 0, $text);
+        $image->annotateImage($draw, 0, 0, 0, $text);
     }
 }
 

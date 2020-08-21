@@ -223,7 +223,7 @@ abstract class AbstractHandler
         $relationKey
     ) {
         if ($entities instanceof AbstractCollection) {
-            if (!$entities->count()) {
+            if ($entities->count() === 0) {
                 return;
             }
 

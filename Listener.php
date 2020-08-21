@@ -40,6 +40,7 @@ class Listener
                     case 'apiDirName':
                     case 'routerType':
                     case 'scopeDelimiter':
+                        // @phpstan-ignore-next-line
                         self::$$apiConfigKey = $apiConfigValue;
                         break;
                 }
