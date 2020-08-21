@@ -7,9 +7,35 @@ use Xfrocks\Api\ControllerPlugin\Login;
 use Xfrocks\Api\Entity\Client;
 use Xfrocks\Api\Listener;
 use Xfrocks\Api\OAuth2\Server;
+use Xfrocks\Api\Util\Crypt;
 
 class Misc extends XFCP_Misc
 {
+    /**
+     * @throws \XF\PrintableException
+     */
+    public function actionApiChr()
+    {
+        $input = $this->filter([
+            'html' => 'str',
+            'required_externals' => 'str',
+            'timestamp' => 'int',
+        ]);
+
+        $html = Crypt::decryptTypeOne($input['html'], $input['timestamp']);
+
+        $requiredExternals = [];
+        if (strlen($input['required_externals']) > 0) {
+            $requiredExternals = \GuzzleHttp\json_decode(
+                Crypt::decryptTypeOne($input['required_externals'], $input['timestamp']),
+                true
+            );
+        }
+
+        $viewParams = compact('html', 'requiredExternals');
+        return $this->view('Xfrocks\Api:Misc\Api\Chr', 'bdapi_misc_chr', $viewParams);
+    }
+
     /**
      * @return \XF\Mvc\Reply\View
      * @throws \XF\Mvc\Reply\Exception

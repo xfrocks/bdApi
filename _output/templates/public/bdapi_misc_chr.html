@@ -1,0 +1,38 @@
+<xf:page option="template" value="bdapi_misc_chr_container"/>
+
+<xf:if is="$requiredExternals.includeCss">
+    <xf:foreach loop="$requiredExternals.includeCss" key="$src" value="$_">
+        <xf:css src="{$src}"/>
+    </xf:foreach>
+</xf:if>
+
+<xf:if is="$requiredExternals.inlineCss">
+    <xf:foreach loop="$requiredExternals.inlineCss" value="$css">
+        <xf:css>{$css|raw}</xf:css>
+    </xf:foreach>
+</xf:if>
+
+<xf:if is="$requiredExternals.includeJs">
+    <xf:foreach loop="$requiredExternals.includeJs" key="$src" value="$_">
+        <xf:js src="{$src}"/>
+    </xf:foreach>
+</xf:if>
+
+<xf:if is="$requiredExternals.inlineJs">
+    <xf:foreach loop="$requiredExternals.inlineJs" value="$js">
+        <xf:js>{$js|raw}</xf:js>
+    </xf:foreach>
+</xf:if>
+
+<xf:if is="$requiredExternals.pageParams">
+    <xf:foreach loop="$requiredExternals.pageParams" key="$option" value="$value">
+        <xf:page option="{$option}" value="{$value}"/>
+    </xf:foreach>
+</xf:if>
+
+<xf:set var="$style">border: 0; margin: 0; padding: 0</xf:set>
+<div id="content" class="bdapi_misc_chr" style="{$style|raw}">
+    <div class="pageContent" style="{$style|raw}">
+        <div class="baseHtml" style="{$style|raw}">{$html|raw}</div>
+    </div>
+</div>

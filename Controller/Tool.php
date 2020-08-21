@@ -13,6 +13,31 @@ class Tool extends AbstractController
      * @return \XF\Mvc\Reply\AbstractReply|\XF\Mvc\Reply\Redirect
      * @throws \XF\PrintableException
      */
+    public function actionGetChr()
+    {
+        $params = $this->params()
+            ->define('html', 'str')
+            ->define('required_externals', 'str')
+            ->define('timestamp', 'int');
+        $link = $this->buildLink('misc/api-chr', null, [
+            'html' => $params['html'],
+            'required_externals' => $params['required_externals'],
+            'timestamp' => $params['timestamp'],
+        ]);
+
+        if (\XF::visitor()->user_id > 0) {
+            /** @var Login $loginPlugin */
+            $loginPlugin = $this->plugin('Xfrocks\Api:Login');
+            return $loginPlugin->initiate('misc/api-login', $link);
+        }
+
+        return $this->redirect($link, '', 'permanent');
+    }
+
+    /**
+     * @return \XF\Mvc\Reply\AbstractReply|\XF\Mvc\Reply\Redirect
+     * @throws \XF\PrintableException
+     */
     public function actionGetLogin()
     {
         /** @var Login $loginPlugin */

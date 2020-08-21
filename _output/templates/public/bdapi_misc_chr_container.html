@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html id="XF" lang="{$xf.language.language_code}" dir="{$xf.language.text_direction}"
+      data-app="api-chr"
+      data-template="{$template}"
+      data-container-key="{$containerKey}"
+      data-content-key="{$contentKey}"
+      data-logged-in="{{ $xf.visitor.user_id ? 'true' : 'false' }}"
+      data-cookie-prefix="{$xf.cookie.prefix}"
+      data-csrf="{{ csrf_token()|escape('js') }}"
+      class="has-no-js {{ $template ? 'template-' . $template : '' }}">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <xf:macro template="helper_js_global" name="head" arg-app="public"/>
+</head>
+
+<body data-template="{$template}">
+{$content|raw}
+<xf:macro template="helper_js_global" name="body" arg-app="public" arg-jsState="{$jsState}"/>
+</body>
+</html>

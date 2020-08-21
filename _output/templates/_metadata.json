@@ -63,5 +63,15 @@
         "version_id": 2000015,
         "version_string": "2.0.0 Alpha 5",
         "hash": "c8ede50f973589cb68608746320a2411"
+    },
+    "public/bdapi_misc_chr.html": {
+        "version_id": 2000132,
+        "version_string": "2.0.1 Beta 2",
+        "hash": "fdb22cdc038b213a303c7a835e82450e"
+    },
+    "public/bdapi_misc_chr_container.html": {
+        "version_id": 2000132,
+        "version_string": "2.0.1 Beta 2",
+        "hash": "59ee621597c8a9b6ff52d87b79fbb9fe"
     }
 }

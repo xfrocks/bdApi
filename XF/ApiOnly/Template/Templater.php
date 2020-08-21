@@ -6,14 +6,6 @@ use Xfrocks\Api\Listener;
 
 class Templater extends XFCP_Templater
 {
-    public function clearRequiredExternalsForApi()
-    {
-        $this->includeCss = [];
-        $this->inlineCss = [];
-        $this->includeJs = [];
-        $this->inlineJs = [];
-    }
-
     /**
      * @param string $username
      * @return array
@@ -21,41 +13,6 @@ class Templater extends XFCP_Templater
     public function getDefaultAvatarStylingForApi($username)
     {
         return $this->getDefaultAvatarStyling($username);
-    }
-
-    public function getRequiredExternalsAsHtmlForApi()
-    {
-        $html = '';
-
-        $includedCss = $this->getIncludedCss();
-        if (count($includedCss) > 0) {
-            $html .= '<link rel="stylesheet" href="'
-                . htmlspecialchars($this->getCssLoadUrl($includedCss))
-                . '" />';
-        }
-
-        $inlineCss = $this->getInlineCss();
-        if (count($inlineCss) > 0) {
-            foreach ($inlineCss as $inline) {
-                $html .= "<style>$inline</style>";
-            }
-        }
-
-        $includedJs = $this->getIncludedJs();
-        if (count($includedJs) > 0) {
-            foreach ($includedJs as $js) {
-                $html .= '<script src="' . htmlspecialchars($js) . '"></script>';
-            }
-        }
-
-        $inlineJs = $this->getInlineJs();
-        if (count($inlineJs) > 0) {
-            foreach ($inlineJs as $inline) {
-                $html .= "<script>$inline</script>";
-            }
-        }
-
-        return $html;
     }
 
     public function renderTemplate($template, array $params = [], $addDefaultParams = true)
@@ -106,6 +63,57 @@ class Templater extends XFCP_Templater
         }
 
         return $output;
+    }
+
+    private static $requiredExternalKeys = ['includeCss', 'inlineCss', 'includeJs', 'inlineJs', 'pageParams'];
+
+    public function requiredExternalsGetHtml()
+    {
+        $html = '';
+
+        $includedCss = $this->getIncludedCss();
+        if (count($includedCss) > 0) {
+            $html .= '<link rel="stylesheet" href="'
+                . htmlspecialchars($this->getCssLoadUrl($includedCss))
+                . '" />';
+        }
+
+        $inlineCss = $this->getInlineCss();
+        if (count($inlineCss) > 0) {
+            foreach ($inlineCss as $inline) {
+                $html .= "<style>$inline</style>";
+            }
+        }
+
+        $includedJs = $this->getIncludedJs();
+        if (count($includedJs) > 0) {
+            foreach ($includedJs as $js) {
+                $html .= '<script src="' . htmlspecialchars($js) . '"></script>';
+            }
+        }
+
+        $inlineJs = $this->getInlineJs();
+        if (count($inlineJs) > 0) {
+            foreach ($inlineJs as $inline) {
+                $html .= "<script>$inline</script>";
+            }
+        }
+
+        return $html;
+    }
+
+    public function requiredExternalsReset(array $values = null)
+    {
+        $backup = [];
+
+        foreach (self::$requiredExternalKeys as $key) {
+            // @phpstan-ignore-next-line
+            $backup[$key] = $this->$key;
+            // @phpstan-ignore-next-line
+            $this->$key = $values != null ? $values[$key] : [];
+        }
+
+        return $backup;
     }
 
     private static function _addDimensionsBySrc($html, $src, $height, $width)

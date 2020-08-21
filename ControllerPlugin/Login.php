@@ -13,17 +13,21 @@ class Login extends AbstractPlugin
 
     /**
      * @param string $publicLink
+     * @param null|string $redirectUri
      * @return \XF\Mvc\Reply\AbstractReply|\XF\Mvc\Reply\Redirect
      * @throws \XF\PrintableException
      */
-    public function initiate($publicLink)
+    public function initiate($publicLink, $redirectUri = null)
     {
         /** @var AbstractController $apiController */
         $apiController = $this->controller;
         $params = $apiController->params()
             ->define('redirect_uri', 'str', 'URI to redirect afterwards');
 
-        if ($params['redirect_uri'] === '') {
+        if ($redirectUri === null) {
+            $redirectUri = $params['redirect_uri'];
+        }
+        if ($redirectUri === '') {
             return $this->noPermission();
         }
 
@@ -34,7 +38,7 @@ class Login extends AbstractPlugin
         }
 
         $client = $token->Client;
-        if ($client === null || !$client->isValidRedirectUri($params['redirect_uri'])) {
+        if ($client === null || !$client->isValidRedirectUri($redirectUri)) {
             return $this->noPermission();
         }
 
@@ -45,7 +49,7 @@ class Login extends AbstractPlugin
 
         $timestamp = time() + self::INITIATE_TTL;
         $linkParams = array(
-            '_xfRedirect' => Crypt::encryptTypeOne($params['redirect_uri'], $timestamp),
+            '_xfRedirect' => Crypt::encryptTypeOne($redirectUri, $timestamp),
             'timestamp' => $timestamp,
             'user_id' => Crypt::encryptTypeOne(strval($userId), $timestamp)
         );
