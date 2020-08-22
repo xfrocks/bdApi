@@ -69,6 +69,12 @@ class Html extends XFCP_Html
             $requiredExternalsTrimmed[$key] = $value;
         }
 
+        if (count($requiredExternalsTrimmed) === 0 && stripos($html, '<script ') === false) {
+            // no externals, no script
+            // skip CHR completely
+            return $html;
+        }
+
         $timestamp = time() + self::CHR_TTL;
         $linkParams = [
             'html' => Crypt::encryptTypeOne($html, $timestamp),
