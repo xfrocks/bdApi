@@ -21,10 +21,10 @@ class Login extends AbstractPlugin
     {
         /** @var AbstractController $apiController */
         $apiController = $this->controller;
-        $params = $apiController->params()
-            ->define('redirect_uri', 'str', 'URI to redirect afterwards');
 
         if ($redirectUri === null) {
+            $params = $apiController->params()
+                ->define('redirect_uri', 'str', 'URI to redirect afterwards');
             $redirectUri = $params['redirect_uri'];
         }
         if ($redirectUri === '') {

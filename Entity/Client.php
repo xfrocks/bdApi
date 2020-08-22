@@ -40,6 +40,10 @@ class Client extends Entity
             return true;
         }
 
+        if (strpos($redirectUri, $this->app()->options()->boardUrl) === 0) {
+            return true;
+        }
+
         if (!isset($this->options['whitelisted_domains'])) {
             return false;
         }
