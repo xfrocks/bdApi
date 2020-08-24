@@ -31,9 +31,10 @@ class Router extends \XF\Mvc\Router
      * @param mixed $link
      * @param mixed|null $data
      * @param array $parameters
+     * @param mixed|null $hash
      * @return string
      */
-    public function buildLink($link, $data = null, array $parameters = [])
+    public function buildLink($link, $data = null, array $parameters = [], $hash = null)
     {
         if (!isset($parameters[Listener::$accessTokenParamKey])) {
             /** @var mixed $session */
@@ -44,7 +45,7 @@ class Router extends \XF\Mvc\Router
             }
         }
 
-        return parent::buildLink($link, $data, $parameters);
+        return parent::buildLink($link, $data, $parameters, $hash);
     }
 
     /**

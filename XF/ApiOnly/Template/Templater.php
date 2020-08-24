@@ -15,9 +15,13 @@ class Templater extends XFCP_Templater
         return $this->getDefaultAvatarStyling($username);
     }
 
-    public function renderTemplate($template, array $params = [], $addDefaultParams = true)
-    {
-        $output = parent::renderTemplate($template, $params, $addDefaultParams);
+    public function renderTemplate(
+        $template,
+        array $params = [],
+        $addDefaultParams = true,
+        \XF\Template\ExtensionSet $extensionOverrides = null
+    ) {
+        $output = parent::renderTemplate($template, $params, $addDefaultParams, $extensionOverrides);
 
         if ($template === 'public:bb_code_tag_attach' && isset($params['attachment'])) {
             /** @var \XF\Entity\Attachment $attachment */
