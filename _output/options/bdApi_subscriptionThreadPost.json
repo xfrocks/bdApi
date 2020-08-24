@@ -5,6 +5,7 @@
     "sub_options": [],
     "validation_class": "Xfrocks\\Api\\Option\\ColumnOption",
     "validation_method": "verifyOnOffOption",
+    "advanced": false,
     "default_value": "0",
     "relations": {
         "bdApi": 35
