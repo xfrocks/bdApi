@@ -40,6 +40,9 @@ class App extends \XF\Pub\App
 
         $container = $this->container;
 
+        // initialize this early for high availability
+        $container['api.server'] = Listener::apiServer($this);
+
         $container['app.classType'] = 'Api';
 
         $container->extend('extension', function (\XF\Extension $extension) {
