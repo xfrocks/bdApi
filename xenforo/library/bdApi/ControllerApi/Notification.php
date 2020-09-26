@@ -80,6 +80,8 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
             return $this->responseError(new XenForo_Phrase('please_enter_valid_message'), 400);
         }
 
+        $extraData = $this->_input->filterSingle('extra_data', XenForo_Input::ARRAY_SIMPLE);
+
         XenForo_Model_Alert::alert(
             $user['user_id'],
             $visitor['user_id'],
@@ -87,12 +89,12 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
             'api_ping',
             0,
             'message',
-            array(
+            array_merge(array(
                 'html' => $html,
                 'message' => $message,
 
-                'notificationType' => $this->_input->filterSingle('notification_type', XenForo_Input::STRING),
-            )
+                'notification_type' => $this->_input->filterSingle('notification_type', XenForo_Input::STRING),
+            ), $extraData)
         );
 
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));
