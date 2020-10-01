@@ -9,7 +9,9 @@ class bdApi_bdAlerts_Model_Alert_Integration extends XFCP_bdApi_bdAlerts_Model_A
             return false;
         }
 
-        if (!bdApi_Option::getSubscription(bdApi_Model_Subscription::TYPE_NOTIFICATION)) {
+        if (!bdApi_Option::getSubscription(bdApi_Model_Subscription::TYPE_NOTIFICATION)
+            || !bdApi_Option::get('markReadAsPing')
+        ) {
             return $marked;
         }
 
