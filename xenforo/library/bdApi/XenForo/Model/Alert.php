@@ -7,7 +7,7 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
         if (bdApi_Option::getSubscription(bdApi_Model_Subscription::TYPE_NOTIFICATION)) {
             // subscription for alert is enabled
             $userOption = $this->bdApi_getUserNotificationOption($userId);
-            if (!empty($userOption)) {
+            if (bdApi_Option::get('markReadAsPing') && !empty($userOption)) {
                 /* @var $subscriptionModel bdApi_Model_Subscription */
                 $subscriptionModel = $this->getModelFromCache('bdApi_Model_Subscription');
                 $subscriptionModel->ping(

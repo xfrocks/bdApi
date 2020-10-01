@@ -108,7 +108,7 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
             /** @var bdApi_XenForo_Model_Alert $alertModel */
             $alertModel = $this->getModelFromCache('XenForo_Model_Alert');
             $userOption = $alertModel->bdApi_getUserNotificationOption($userId);
-            if (!empty($userOption)) {
+            if (bdApi_Option::get('markReadAsPing') && !empty($userOption)) {
                 /* @var $subscriptionModel bdApi_Model_Subscription */
                 $subscriptionModel = $this->getModelFromCache('bdApi_Model_Subscription');
                 $subscriptionModel->ping(
