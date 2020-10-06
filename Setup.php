@@ -129,7 +129,7 @@ class Setup extends AbstractSetup
         }
     }
 
-    public function upgrade2000140Step1()
+    public function upgrade2000135Step1()
     {
         $this->schemaManager()->alterTable('xf_bdapi_token', function (Alter $table) {
             $table->addColumn('issue_date', 'int')->setDefault(0);
