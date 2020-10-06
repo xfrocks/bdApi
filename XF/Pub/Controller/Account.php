@@ -4,7 +4,6 @@ namespace Xfrocks\Api\XF\Pub\Controller;
 
 use XF\Entity\UserConnectedAccount;
 use XF\Mvc\Entity\Finder;
-use XF\Util\Arr;
 use XF\Util\Random;
 use Xfrocks\Api\ControllerPlugin\Login;
 use Xfrocks\Api\Entity\Client;
