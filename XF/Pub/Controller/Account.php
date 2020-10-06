@@ -2,6 +2,7 @@
 
 namespace Xfrocks\Api\XF\Pub\Controller;
 
+use XF\Entity\UserConnectedAccount;
 use XF\Mvc\Entity\Finder;
 use XF\Util\Arr;
 use XF\Util\Random;
@@ -149,7 +150,14 @@ class Account extends XFCP_Account
                     );
                 }
 
-                // TODO: clean up connected accounts
+                $connectedAccounts = $this->finder('XF:UserConnectedAccount')
+                    ->where('user_id', $visitor->user_id)
+                    ->where('provider', 'api_' . $client->client_id)
+                    ->fetch();
+                /** @var UserConnectedAccount $connectedAccount */
+                foreach ($connectedAccounts as $connectedAccount) {
+                    $connectedAccount->delete(true, false);
+                }
 
                 $db->commit();
             } catch (\Throwable $e) {
