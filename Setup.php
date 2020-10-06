@@ -2,12 +2,12 @@
 
 namespace Xfrocks\Api;
 
-use XF\AddOn\AbstractSetup;
-use XF\AddOn\StepRunnerInstallTrait;
-use XF\AddOn\StepRunnerUninstallTrait;
-use XF\AddOn\StepRunnerUpgradeTrait;
 use XF\Db\Schema\Alter;
 use XF\Db\Schema\Create;
+use XF\AddOn\AbstractSetup;
+use XF\AddOn\StepRunnerInstallTrait;
+use XF\AddOn\StepRunnerUpgradeTrait;
+use XF\AddOn\StepRunnerUninstallTrait;
 
 class Setup extends AbstractSetup
 {
