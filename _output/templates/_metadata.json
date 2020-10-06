@@ -30,9 +30,9 @@
         "hash": "67dcd4612ef598f62cd3e40f2ea0d43c"
     },
     "public/bdapi_account_api.html": {
-        "version_id": 2000037,
-        "version_string": "2.0.0 Beta 7",
-        "hash": "62fb8344cbd95381ea678ac1f14fd267"
+        "version_id": 2000134,
+        "version_string": "2.0.1 Beta 4",
+        "hash": "24b1f2999cdf3cce87d1949b57f12379"
     },
     "public/bdapi_account_api_client_add.html": {
         "version_id": 2000000,
@@ -48,6 +48,11 @@
         "version_id": 2000000,
         "version_string": "2.0.0",
         "hash": "15f93fbf695c367999738d2e2032d73f"
+    },
+    "public/bdapi_account_api_update_scope.html": {
+        "version_id": 2000134,
+        "version_string": "2.0.1 Beta 4",
+        "hash": "49e8bd00eacaa13987d8373320def269"
     },
     "public/bdapi_account_authorize.html": {
         "version_id": 2000015,

@@ -13,4 +13,18 @@ class AuthCode extends Repository
     {
         return $this->db()->delete('xf_bdapi_auth_code', 'expire_date < ?', \XF::$time);
     }
+
+    /**
+     * @param string $clientId
+     * @param int $userId
+     * @return int
+     */
+    public function deleteAuthCodes($clientId, $userId)
+    {
+        return $this->db()->delete(
+            'xf_bdapi_auth_code',
+            'client_id = ? AND user_id = ?',
+            [$clientId, $userId]
+        );
+    }
 }

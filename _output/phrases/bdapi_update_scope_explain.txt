@@ -1,0 +1,1 @@
+You can review and/or change {name}'s permissions below. Click {revoke} to completely remove {name} access to your account.

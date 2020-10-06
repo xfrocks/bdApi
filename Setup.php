@@ -129,6 +129,13 @@ class Setup extends AbstractSetup
         }
     }
 
+    public function upgrade2000140Step1()
+    {
+        $this->schemaManager()->alterTable('xf_bdapi_token', function (Alter $table) {
+            $table->addColumn('issue_date', 'int')->setDefault(0);
+        });
+    }
+
     /**
      * @return array
      */
@@ -190,6 +197,7 @@ class Setup extends AbstractSetup
             $table->addColumn('expire_date', 'int');
             $table->addColumn('user_id', 'int');
             $table->addColumn('scope', 'blob');
+            $table->addColumn('issue_date', 'int')->setDefault(0);
 
             $table->addUniqueKey('token_text');
         };

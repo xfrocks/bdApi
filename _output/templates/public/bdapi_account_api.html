@@ -20,3 +20,61 @@
         </ol>
     </div>
 </div>
+
+<xf:if is="$userScopesClientIds is not empty">
+    <div class="block">
+        <div class="block-container">
+            <h2 class="block-header">{{ phrase('bdapi_api_access_tokens') }}</h2>
+            <ol class="block-body">
+                <xf:foreach loop="$userScopesClientIds" value="$record">
+                    <li class="block-row block-row--separated">
+                        <xf:macro name="user_scope_item" arg-client="{$record.client}"
+                                  arg-scopes="{$scopesPhrase}"
+                                  arg-record="{$record}"/>
+                    </li>
+                </xf:foreach>
+            </ol>
+        </div>
+
+        <div class="block-outer block-outer--after">
+            <xf:pagenav page="{$page}" perpage="{$perPage}" total="{$total}"
+                        link="account/api"/>
+        </div>
+    </div>
+</xf:if>
+
+<xf:macro name="user_scope_item" arg-client="!" arg-record="!" arg-scopes="!">
+    <div class="contentRow">
+        <div class="contentRow-main">
+            <h3 class="contentRow-header">
+                <a href="{$client.redirect_uri}" target="_blank">{$client.name}</a>
+            </h3>
+
+            <div class="contentRow-lesser" dir="auto">
+                {$client.description}
+                <ul>
+                    <xf:foreach loop="$record.user_scopes" key="$scope" value="$userScope">
+                        <li class="scope-{$scope}">{$scopes.{$userScope.scope}}</li>
+                    </xf:foreach>
+                </ul>
+            </div>
+
+            <div class="contentRow-minor">
+                <ul class="listInline listInline--bullet">
+                    <li>
+                        <dl class="pairs pairs--inline">
+                            <dt>{{ phrase('bdapi_last_used') }}</dt>
+                            <dd><xf:date time="{$record.last_issue_date}" /></dd>
+                        </dl>
+                    </li>
+                    <li>
+                        <a href="{{ link('account/api/update-scope', null, {'client_id': {$client.client_id}}) }}"
+                           data-xf-click="overlay">
+                            {{ phrase('bdapi_update_scope') }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</xf:macro>

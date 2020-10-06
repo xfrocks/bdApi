@@ -1,0 +1,31 @@
+<xf:title>{{ phrase('bdapi_update_scope') }}</xf:title>
+
+<xf:wrap template="account_wrapper"/>
+
+<xf:form method="post" action="{{ link('account/api/update-scope') }}" ajax="true" class="block">
+    <div class="block-container">
+        <div class="block-body">
+            <xf:inforow rowtype="confirm">
+                {{ phrase('bdapi_update_scope_explain', {
+                    'name': '<a href="{$client.redirect_uri}" target="_blank">' . $client.name . '</a>',
+                    'revoke': phrase('bdapi_revoke')
+                }) }}
+            </xf:inforow>
+        </div>
+
+        <xf:checkboxrow label="">
+            <xf:foreach loop="$userScopes" value="$userScope">
+                <xf:option name="scopes[]" value="{$userScope.scope}"
+                           selected="{{ true }}">{$scopesPhrase.{$userScope.scope}}</xf:option>
+            </xf:foreach>
+        </xf:checkboxrow>
+
+        <xf:submitrow icon="save">
+            <xf:html>
+                <xf:button type="submit" name="revoke" value="1" class="button--link">{{ phrase('bdapi_revoke') }}</xf:button>
+            </xf:html>
+        </xf:submitrow>
+    </div>
+
+    <xf:hiddenval name="client_id">{$client.client_id}</xf:hiddenval>
+</xf:form>

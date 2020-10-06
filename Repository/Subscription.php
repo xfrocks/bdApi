@@ -54,6 +54,28 @@ class Subscription extends Repository
     }
 
     /**
+     * @param string $clientId
+     * @param string $type
+     * @param int|string $id
+     * @return int
+     */
+    public function deleteSubscriptions($clientId, $type, $id)
+    {
+        $topic = self::getTopic($type, $id);
+        $deleted = $this->db()->delete(
+            'xf_bdapi_subscription',
+            'client_id = ? AND topic = ?',
+            [$clientId, $topic]
+        );
+
+        if ($deleted > 0) {
+            $this->updateCallbacksForTopic($topic);
+        }
+
+        return $deleted;
+    }
+
+    /**
      * @param string $topic
      * @return void
      */
