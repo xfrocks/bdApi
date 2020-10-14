@@ -26,6 +26,18 @@ class Listener
 
     /**
      * @param \XF\App $app
+     * @return \Closure
+     */
+    public static function apiServer($app)
+    {
+        return function () use ($app) {
+            $class = $app->extendClass('Xfrocks\Api\OAuth2\Server');
+            return new $class($app);
+        };
+    }
+
+    /**
+     * @param \XF\App $app
      * @return void
      */
     public static function appSetup($app)
@@ -47,17 +59,10 @@ class Listener
             }
         }
 
-        if ($container->offsetExists('api.server')) {
-            // temporary workaround for XF2 job.php weird-behavior
-            // https://xenforo.com/community/threads/job-php-runs-app-setup-twice.153198/
-            // TODO: implement permanent solution or remove this after XF is updated
-            return;
+        if (!$container->offsetExists('api.server')) {
+            // this may have been done earlier by Xfrocks\Api\App
+            $container['api.server'] = self::apiServer($app);
         }
-
-        $container['api.server'] = function () use ($app) {
-            $class = $app->extendClass('Xfrocks\Api\OAuth2\Server');
-            return new $class($app);
-        };
 
         $container['api.transformer'] = function () use ($app) {
             $class = $app->extendClass('Xfrocks\Api\Transformer');
