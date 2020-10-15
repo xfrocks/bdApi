@@ -2555,6 +2555,7 @@ Parameters:
  * `user_id` or `username` (__required__): the alert receiver.
  * `message` or `message_html` (__required__): the alert message.
  * `notification_type` (_optional_): the notification type. Since forum-2020011301.
+ * `extra_data` (_optional_): extra data when sending alert.
 
 Required scopes:
 
