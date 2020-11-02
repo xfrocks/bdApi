@@ -143,6 +143,7 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
             $data['content_type'] = $firstAlert['content_type'];
             $data['content_id'] = $firstAlert['content_id'];
             $data['content_action'] = $firstAlert['action'];
+            $data['notification_create_date'] = $firstAlert['event_date'];
             $data['alerts_has_been_grouped'] = true;
         }
 
