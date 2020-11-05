@@ -116,13 +116,15 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
     {
         $id = $this->_input->filterSingle('notification_id', XenForo_Input::UINT);
         $alertModel = $this->_getAlertModel();
-        $alert = $alertModel->getAlertById($id);
-        if (empty($alert)) {
+        $alerts = $alertModel->bdApi_getAlertsByIds(array($id));
+        if (empty($alerts)) {
             return $this->responseNoPermission();
         }
-
         $visitor = XenForo_Visitor::getInstance();
-        if ($visitor['user_id'] != $alert['alerted_user_id']) {
+        $alerts = $alertModel->bdApi_prepareContentForAlerts($alerts, $visitor->toArray());
+        $alert = reset($alerts);
+
+        if (empty($alert) || $visitor['user_id'] != $alert['alerted_user_id']) {
             return $this->responseNoPermission();
         }
 
