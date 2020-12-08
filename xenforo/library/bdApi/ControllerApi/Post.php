@@ -237,7 +237,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             'quote_post_id' => XenForo_Input::UINT,
         ));
 
-        $input['post_body'] = $this->_assertPostBodyRequired();
+        $input['post_body'] = $this->_assertPostBodyValid();
 
         $ftpHelper = $this->_getForumThreadPostHelper();
         if (!empty($input['quote_post_id'])) {
@@ -784,7 +784,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $fetchOptions['page'] = floor($position / $fetchOptions['limit']) + 1;
     }
 
-    protected function _assertPostBodyRequired()
+    protected function _assertPostBodyValid()
     {
         /* @var $editorHelper XenForo_ControllerHelper_Editor */
         $editorHelper = $this->getHelper('Editor');
