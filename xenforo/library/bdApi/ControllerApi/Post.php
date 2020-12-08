@@ -237,13 +237,12 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             'quote_post_id' => XenForo_Input::UINT,
         ));
 
+        $this->_assertPostBodyRequired();
+
         /* @var $editorHelper XenForo_ControllerHelper_Editor */
         $editorHelper = $this->getHelper('Editor');
         $input['post_body'] = $editorHelper->getMessageText('post_body', $this->_input);
         $input['post_body'] = XenForo_Helper_String::autoLinkBbCode($input['post_body']);
-        if (!strlen(trim($input['post_body']))) {
-            return $this->responseError(new XenForo_Phrase('bdapi_slash_post_requires_post_body'), 400);
-        }
 
         $ftpHelper = $this->_getForumThreadPostHelper();
         if (!empty($input['quote_post_id'])) {
@@ -788,6 +787,19 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         }
 
         $fetchOptions['page'] = floor($position / $fetchOptions['limit']) + 1;
+    }
+
+    protected function _assertPostBodyRequired()
+    {
+        /* @var $editorHelper XenForo_ControllerHelper_Editor */
+        $editorHelper = $this->getHelper('Editor');
+        $postBody = $editorHelper->getMessageText('post_body', $this->_input);
+        $postBody = XenForo_Helper_String::autoLinkBbCode($postBody);
+        if (!strlen(trim($postBody))) {
+            throw $this->responseException(
+                $this->responseError(new XenForo_Phrase('bdapi_slash_post_requires_post_body'), 400)
+            );
+        }
     }
 
     protected function _preparePosts(array $posts, array $thread = null, array $forum = null)
