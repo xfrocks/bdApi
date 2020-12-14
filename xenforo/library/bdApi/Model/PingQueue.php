@@ -53,7 +53,7 @@ class bdApi_Model_PingQueue extends XenForo_Model
 
             if ($data['_retries'] > 5) {
                 // too many attempts already, skip it
-                XenForo_Error::logException(json_encode($record), false);
+                XenForo_Error::logException(new XenForo_Exception(json_encode($record)), false);
                 continue;
             }
 
