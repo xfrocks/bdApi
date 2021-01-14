@@ -35,7 +35,9 @@ class bdApi_Model_Client extends XenForo_Model
         if (XenForo_Application::debugMode() && !headers_sent()) {
             header('X-Api-Signature-String-Without-Secret: ' . $str);
         }
-        $str .= $client['client_secret'];
+        if (isset($client['client_secret'])) {
+            $str .= $client['client_secret'];
+        }
 
         $data['signature'] = md5($str);
     }
