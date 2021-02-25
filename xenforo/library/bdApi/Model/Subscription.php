@@ -131,6 +131,7 @@ class bdApi_Model_Subscription extends XenForo_Model
 
         /* @var $pingQueueModel bdApi_Model_PingQueue */
         $pingQueueModel = $this->getModelFromCache('bdApi_Model_PingQueue');
+        $queueCount = 0;
 
         foreach ($option['subscriptions'] as $subscription) {
             if (!isset($subscription['subscription_id']) || !isset($subscription['expire_date'])) {
@@ -163,9 +164,11 @@ class bdApi_Model_Subscription extends XenForo_Model
                 $pingData,
                 $subscription['expire_date']
             );
+
+            $queueCount++;
         }
 
-        return true;
+        return $queueCount;
     }
 
     public function preparePingDataMany($objectType, array $pingDataMany)
