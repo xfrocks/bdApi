@@ -126,7 +126,7 @@ class bdApi_Model_Subscription extends XenForo_Model
         if (!isset($option['topic'])
             || empty($option['subscriptions'])
         ) {
-            return 0;
+            return false;
         }
 
         /* @var $pingQueueModel bdApi_Model_PingQueue */
