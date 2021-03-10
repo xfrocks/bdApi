@@ -968,6 +968,7 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
         }
 
         $threadsData = array();
+        $forumsData = array();
         foreach ($threads as &$threadRef) {
             if (!isset($forums[$threadRef['node_id']])) {
                 continue;
@@ -988,7 +989,10 @@ class bdApi_ControllerApi_Thread extends bdApi_ControllerApi_Abstract
             $threadData = $this->_getThreadModel()->prepareApiDataForThread($threadRef, $forumRef, $firstPost);
 
             if ($prepareThreadForum) {
-                $threadData['forum'] = $this->_getForumModel()->prepareApiDataForForum($forumRef);
+                if (!isset($forumsData[$forumRef['node_id']])) {
+                    $forumsData[$forumRef['node_id']] = $this->_getForumModel()->prepareApiDataForForum($forumRef);
+                }
+                $threadData['forum'] = $forumsData[$forumRef['node_id']];
             }
 
             if (!empty($latestPostIds)) {
