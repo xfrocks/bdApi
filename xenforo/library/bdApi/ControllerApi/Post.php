@@ -876,17 +876,16 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
             $postData = $this->_getPostModel()->prepareApiDataForPost($postRef, $threadRef, $forumRef);
 
             if ($preparePostThread) {
-                if (isset($threadsData[$threadRef['thread_id']])) {
-                    $postData['thread'] = $threadsData[$threadRef['thread_id']];
-                } else {
-                    $postData['thread'] = $this->_getThreadModel()
+                if (!isset($threadsData[$threadRef['thread_id']])) {
+                    $threadsData[$threadRef['thread_id']] = $this->_getThreadModel()
                         ->prepareApiDataForThread(
                             $threadRef,
                             $forumRef,
                             $threadRef['first_post_id'] == $postRef['post_id'] ? $postRef : array()
                         );
-                    $threadsData[$threadRef['thread_id']] = $postData['thread'];
                 }
+
+                $postData['thread'] = $threadsData[$threadRef['thread_id']];
             }
 
             $postsData[] = $postData;
