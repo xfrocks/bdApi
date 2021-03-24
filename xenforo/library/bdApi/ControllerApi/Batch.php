@@ -9,6 +9,11 @@ class bdApi_ControllerApi_Batch extends bdApi_ControllerApi_Abstract
         if (empty($batchJobs)) {
             return $this->responseError(new XenForo_Phrase('bdapi_slash_batch_requires_json'), 400);
         }
+        if (!is_array($batchJobs)) {
+            return $this->responseData('bdApi_ViewApi_Batch_Index', array(
+                'jobs' => array()
+            ));
+        }
         $jobsOutput = array();
 
         foreach ($batchJobs as $batchJob) {
