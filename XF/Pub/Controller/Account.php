@@ -2,11 +2,17 @@
 
 namespace Xfrocks\Api\XF\Pub\Controller;
 
+use XF\Entity\UserConnectedAccount;
 use XF\Mvc\Entity\Finder;
 use XF\Util\Random;
 use Xfrocks\Api\ControllerPlugin\Login;
 use Xfrocks\Api\Entity\Client;
+use Xfrocks\Api\Entity\Token;
+use Xfrocks\Api\Entity\UserScope;
 use Xfrocks\Api\OAuth2\Server;
+use Xfrocks\Api\Repository\AuthCode;
+use Xfrocks\Api\Repository\RefreshToken;
+use Xfrocks\Api\Repository\Subscription;
 use Xfrocks\Api\XF\Entity\User;
 
 class Account extends XFCP_Account
@@ -22,11 +28,161 @@ class Account extends XFCP_Account
             ->with(['User'])
             ->fetch();
 
+        $userScopes = $this->finder('Xfrocks\Api:UserScope')
+            ->with('Client', true)
+            ->where('user_id', $visitor->user_id)
+            ->order('accept_date', 'DESC')
+            ->fetch();
+
+        $tokens = $this->finder('Xfrocks\Api:Token')
+            ->where('user_id', $visitor->user_id)
+            ->fetch();
+
+        $userScopesByClientIds = [];
+        $scopesPhrase = [];
+        /** @var Server $apiServer */
+        $apiServer = $this->app->container('api.server');
+
+        /** @var UserScope $userScope */
+        foreach ($userScopes as $userScope) {
+            if (!isset($userScopesByClientIds[$userScope->client_id])) {
+                $userScopesByClientIds[$userScope->client_id] = [
+                    'last_issue_date' => 0,
+                    'user_scopes' => [],
+                    'client' => $userScope->Client,
+                ];
+            }
+
+            $userScopesByClientIds[$userScope->client_id]['last_issue_date'] = \max(
+                $userScopesByClientIds[$userScope->client_id]['last_issue_date'],
+                $userScope->accept_date
+            );
+            $userScopesByClientIds[$userScope->client_id]['user_scopes'][$userScope->scope] = $userScope;
+            $scopesPhrase[$userScope->scope] = $apiServer->getScopeDescription($userScope->scope);
+        }
+
+        /** @var Token $token */
+        foreach ($tokens as $token) {
+            if (!isset($userScopesByClientIds[$token->client_id])) {
+                continue;
+            }
+
+            $userScopesByClientIds[$token->client_id]['last_issue_date'] = \max(
+                $userScopesByClientIds[$token->client_id]['last_issue_date'],
+                $token->issue_date
+            );
+        }
+
         $viewParams = [
-            'clients' => $clients
+            'clients' => $clients,
+            'userScopesClientIds' => $userScopesByClientIds,
+            'scopesPhrase' => $scopesPhrase,
         ];
 
         $view = $this->view('Xfrocks\Api:Account\Api\Index', 'bdapi_account_api', $viewParams);
+        return $this->addAccountWrapperParams($view, 'api');
+    }
+
+    public function actionApiUpdateScope()
+    {
+        $visitor = \XF::visitor();
+        $clientId = $this->filter('client_id', 'str');
+        /** @var Client $client */
+        $client = $this->assertRecordExists('Xfrocks\Api:Client', $clientId);
+
+        /** @var \Xfrocks\Api\Repository\UserScope $userScopeRepo */
+        $userScopeRepo = $this->repository('Xfrocks\Api:UserScope');
+        $userScopes = $this->finder('Xfrocks\Api:UserScope')
+            ->where('client_id', $client->client_id)
+            ->where('user_id', $visitor->user_id)
+            ->fetch();
+
+        if ($userScopes->count() === 0) {
+            return $this->noPermission();
+        }
+
+        if ($this->isPost()) {
+            $isRevoke = $this->filter('revoke', 'bool') === true;
+            $scopes = $this->filter('scopes', 'array-str');
+            if (count($scopes) === 0) {
+                $isRevoke = true;
+            }
+
+            $db = $this->app()->db();
+            $db->beginTransaction();
+
+            try {
+                $userScopesChanged = false;
+                /** @var UserScope $userScope */
+                foreach ($userScopes as $userScope) {
+                    if ($isRevoke || !in_array($userScope->scope, $scopes, true)) {
+                        $userScopeRepo->deleteUserScope($client->client_id, $visitor->user_id, $userScope->scope);
+                        $userScopesChanged = true;
+                    }
+                }
+
+                if ($userScopesChanged) {
+                    /** @var AuthCode $authCodeRepo */
+                    $authCodeRepo = $this->repository('Xfrocks\Api:AuthCode');
+                    $authCodeRepo->deleteAuthCodes($client->client_id, $visitor->user_id);
+                    /** @var RefreshToken $refreshTokenRepo */
+                    $refreshTokenRepo = $this->repository('Xfrocks\Api:RefreshToken');
+                    $refreshTokenRepo->deleteRefreshTokens($client->client_id, $visitor->user_id);
+                    /** @var \Xfrocks\Api\Repository\Token $tokenRepo */
+                    $tokenRepo = $this->repository('Xfrocks\Api:Token');
+                    $tokenRepo->deleteTokens($client->client_id, $visitor->user_id);
+                }
+
+                if ($isRevoke) {
+                    /** @var Subscription $subscriptionRepo */
+                    $subscriptionRepo = $this->repository('Xfrocks\Api:Subscription');
+                    $subscriptionRepo->deleteSubscriptions(
+                        $client->client_id,
+                        Subscription::TYPE_USER,
+                        $visitor->user_id
+                    );
+
+                    $subscriptionRepo->deleteSubscriptions(
+                        $client->client_id,
+                        Subscription::TYPE_NOTIFICATION,
+                        $visitor->user_id
+                    );
+                }
+
+                $connectedAccounts = $this->finder('XF:UserConnectedAccount')
+                    ->where('user_id', $visitor->user_id)
+                    ->where('provider', 'api_' . $client->client_id)
+                    ->fetch();
+                /** @var UserConnectedAccount $connectedAccount */
+                foreach ($connectedAccounts as $connectedAccount) {
+                    $connectedAccount->delete(true, false);
+                }
+
+                $db->commit();
+            } catch (\Throwable $e) {
+                $db->rollback();
+
+                throw $e;
+            }
+
+            return $this->redirect($this->buildLink('account/api'));
+        }
+
+        $scopesPhrase = [];
+        /** @var Server $apiServer */
+        $apiServer = $this->app->container('api.server');
+
+        foreach ($userScopes as $userScope) {
+            $scopesPhrase[$userScope->scope] = $apiServer->getScopeDescription($userScope->scope);
+        }
+
+        $viewParams = [
+            'client' => $client,
+            'userScopes' => $userScopes,
+            'scopesPhrase' => $scopesPhrase,
+        ];
+
+        $view = $this->view('Xfrocks\Api:Account\Api\UpdateScope', 'bdapi_account_api_update_scope', $viewParams);
         return $this->addAccountWrapperParams($view, 'api');
     }
 

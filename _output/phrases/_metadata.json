@@ -47,6 +47,12 @@
         "version_string": "2.0.0 Alpha 5",
         "hash": "f31afc34f3646e515ac887280a1abd04"
     },
+    "bdapi_api_access_tokens.txt": {
+        "global_cache": false,
+        "version_id": 2000134,
+        "version_string": "2.0.1 Beta 4",
+        "hash": "2dc554f3bbe39578deadcf21e6d30345"
+    },
     "bdapi_auth_code_add.txt": {
         "global_cache": false,
         "version_id": 2000015,
@@ -160,6 +166,12 @@
         "version_id": 2000014,
         "version_string": "2.0.0 Alpha 4",
         "hash": "7d19af7a3995fc262806c4037a19e452"
+    },
+    "bdapi_last_used.txt": {
+        "global_cache": false,
+        "version_id": 2000134,
+        "version_string": "2.0.1 Beta 4",
+        "hash": "135daaf0d59548436c6858c7f0798c45"
     },
     "bdapi_log_entities.txt": {
         "global_cache": false,
@@ -353,6 +365,12 @@
         "version_string": "2.0.0 Alpha 2",
         "hash": "cb4f4ba5151dea146ab0c89f352d750c"
     },
+    "bdapi_revoke.txt": {
+        "global_cache": false,
+        "version_id": 2000134,
+        "version_string": "2.0.1 Beta 4",
+        "hash": "e4c27e9d17bd34073a120ad7bba9e8f4"
+    },
     "bdapi_scope.txt": {
         "global_cache": false,
         "version_id": 2000015,
@@ -538,6 +556,18 @@
         "version_id": 2000015,
         "version_string": "2.0.0 Alpha 5",
         "hash": "459a6f79ad9b13cbcb5f692d2cc7a94d"
+    },
+    "bdapi_update_scope.txt": {
+        "global_cache": false,
+        "version_id": 2000134,
+        "version_string": "2.0.1 Beta 4",
+        "hash": "12dd7e892975d9eadad8649aa4b4e795"
+    },
+    "bdapi_update_scope_explain.txt": {
+        "global_cache": false,
+        "version_id": 2000134,
+        "version_string": "2.0.1 Beta 4",
+        "hash": "2e785349e3b77a5d6bab2179fd21842a"
     },
     "bdapi_whitelisted_domains.txt": {
         "global_cache": false,

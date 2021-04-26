@@ -12,6 +12,7 @@ use Xfrocks\Api\OAuth2\Server;
  * @property string client_id
  * @property int user_id
  * @property int expire_date
+ * @property int issue_date
  * @property string scope
  *
  * GETTERS
@@ -114,6 +115,7 @@ class Token extends TokenWithScope
             'client_id' => ['type' => self::STR, 'maxLength' => 255, 'required' => true],
             'user_id' => ['type' => self::UINT, 'default' => \XF::visitor()->user_id],
             'expire_date' => ['type' => self::UINT, 'default' => \XF::$time + $apiServer->getOptionAccessTokenTTL()],
+            'issue_date' => ['type' => self::UINT, 'default' => \XF::$time],
         ];
         $structure->relations = [
             'User' => [

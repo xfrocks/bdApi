@@ -6,10 +6,8 @@ use XF\Mvc\Entity\Entity;
 use XF\Mvc\Entity\Structure;
 
 /**
- * Class Log
- * @package Xfrocks\Api\Entity
- *
- * @property int log_id
+ * COLUMNS
+ * @property int|null log_id
  * @property string client_id
  * @property int user_id
  * @property string ip_address
@@ -18,7 +16,10 @@ use XF\Mvc\Entity\Structure;
  * @property string request_uri
  * @property array request_data
  * @property int response_code
- * @property string response_output
+ * @property array response_output
+ *
+ * RELATIONS
+ * @property \XF\Entity\User User
  */
 class Log extends Entity
 {

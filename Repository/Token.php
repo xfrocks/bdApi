@@ -13,4 +13,18 @@ class Token extends Repository
     {
         return $this->db()->delete('xf_bdapi_token', 'expire_date < ?', \XF::$time);
     }
+
+    /**
+     * @param string $clientId
+     * @param int $userId
+     * @return int
+     */
+    public function deleteTokens($clientId, $userId)
+    {
+        return $this->db()->delete(
+            'xf_bdapi_token',
+            'client_id = ? AND user_id = ?',
+            [$clientId, $userId]
+        );
+    }
 }

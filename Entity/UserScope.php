@@ -11,6 +11,9 @@ use XF\Mvc\Entity\Structure;
  * @property int user_id
  * @property string scope
  * @property int accept_date
+ *
+ * RELATIONS
+ * @property \Xfrocks\Api\Entity\Client Client
  */
 class UserScope extends Entity
 {
@@ -24,6 +27,15 @@ class UserScope extends Entity
             'user_id' => ['type' => self::UINT, 'readOnly' => true],
             'scope' => ['type' => self::STR, 'maxLength' => 255, 'readOnly' => true],
             'accept_date' => ['type' => self::UINT, 'readOnly' => true]
+        ];
+
+        $structure->relations = [
+            'Client' => [
+                'type' => self::TO_ONE,
+                'entity' => 'Xfrocks\Api:Client',
+                'conditions' => 'client_id',
+                'primary' => true,
+            ]
         ];
 
         return $structure;
