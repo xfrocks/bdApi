@@ -536,15 +536,7 @@ class bdApi_ControllerApi_Post extends bdApi_ControllerApi_Abstract
         $bdApiLikeModel = $this->_getBdApiLikeModel();
 
         $likes = $bdApiLikeModel->getContentLikes('post', $post['post_id'], $fetchOptions);
-
-        $likeUsers = array();
-        foreach ($likes as $like) {
-            $likeUsers[] = array(
-                XenForo_Model_Search::CONTENT_TYPE => 'user',
-                XenForo_Model_Search::CONTENT_ID => $like['like_user_id'],
-                'like_date' => $like['like_date'],
-            );
-        }
+        $likeUsers = $bdApiLikeModel->prepareApiDataForLikes($likes);
 
         $usersData = array();
         if (!empty($likeUsers)) {
