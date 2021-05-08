@@ -25,6 +25,39 @@ use Xfrocks\Api\Util\PageNav;
 
 class User extends AbstractController
 {
+    public function actionPostApi(ParameterBag $params) {
+
+        $apiKey = $this->em()->findOne("XF:ApiKey", ['user_id' => $params->user_id]);
+        if (!$apiKey) {
+            $apiKey = $this->em()->create('XF:ApiKey');
+        }
+        $user = $this->em()->find("XF:User", $params->user_id);
+        $keyScopes = [
+            'user:read',
+            'thread:read',
+            'resource:read',
+            'node:read',
+            'resource_category:read',
+            'resource_rating:read',
+            'profile_post:read',
+            'attachment:read',
+        ];
+
+        $keyManager = $this->service('XF:ApiKey\Manager', $apiKey);
+        $keyManager->setTitle('Launcher Key: ' . $user->username);
+        $keyManager->setActive(true);
+        $keyManager->setScopes(false, $keyScopes);
+        $keyManager->setKeyType('user', $user->username);
+        $keyManager->save();
+
+        $key = $keyManager->getKey();
+        $data = [
+            'api_key' => $key->api_key,
+            'active' => $key->active
+        ];
+
+        return $this->api($data);
+    }
     /**
      * @param ParameterBag $params
      * @return \Xfrocks\Api\Mvc\Reply\Api
