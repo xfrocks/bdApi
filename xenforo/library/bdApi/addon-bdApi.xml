@@ -709,6 +709,12 @@ step=100</edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdApi" display_order="550"/>
     </option>
+    <option option_id="bdApi_pingNotificationsTTL" edit_format="spinbox" data_type="unsigned_integer" can_backup="1">
+      <default_value>300</default_value>
+      <edit_format_params>min=0</edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdApi" display_order="130"/>
+    </option>
     <option option_id="bdApi_refreshTokenTTLDays" edit_format="spinbox" data_type="positive_integer" can_backup="1">
       <default_value>14</default_value>
       <edit_format_params>min=1
@@ -944,6 +950,8 @@ step=3600</edit_format_params>
     <phrase title="option_bdApi_paramLimitMax_explain" version_id="1050100" version_string="1.5.1"><![CDATA[Enter the maximum value for a request `limit` parameter. Enter 0 to have no limit.]]></phrase>
     <phrase title="option_bdApi_paramPageMax" version_id="1050100" version_string="1.5.1"><![CDATA[Maximum `page`]]></phrase>
     <phrase title="option_bdApi_paramPageMax_explain" version_id="1050100" version_string="1.5.1"><![CDATA[Enter the maximum value for a request `page` parameter. Enter 0 to have no limit]]></phrase>
+    <phrase title="option_bdApi_pingNotificationsTTL" version_id="1060400" version_string="1.6.4"><![CDATA[Ping Notifications TTL]]></phrase>
+    <phrase title="option_bdApi_pingNotificationsTTL_explain" version_id="1060400" version_string="1.6.4"><![CDATA[Enter the number of seconds before ping notifications expires itself.]]></phrase>
     <phrase title="option_bdApi_refreshTokenTTLDays" version_id="50" version_string="1.2.1b"><![CDATA[Refresh Token TTL]]></phrase>
     <phrase title="option_bdApi_refreshTokenTTLDays_explain" version_id="50" version_string="1.2.1b"><![CDATA[Enter the number of days before refresh token expires itself.]]></phrase>
     <phrase title="option_bdApi_restrictAccess" version_id="53" version_string="1.3.1"><![CDATA[Restrict Access]]></phrase>

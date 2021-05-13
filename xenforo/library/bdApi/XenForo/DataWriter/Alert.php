@@ -24,7 +24,8 @@ class bdApi_XenForo_DataWriter_Alert extends XFCP_bdApi_XenForo_DataWriter_Alert
                     $option,
                     'insert',
                     bdApi_Model_Subscription::TYPE_NOTIFICATION,
-                    $this->get('alert_id')
+                    $this->get('alert_id'),
+                    bdApi_Option::get('pingNotificationsTTL')
                 );
             }
         }

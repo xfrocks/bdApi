@@ -4,6 +4,10 @@ class bdApi_Model_PingQueue extends XenForo_Model
 {
     public function insertQueue($callback, $objectType, array $data, $expireDate = 0, $queueDate = 0)
     {
+        if (!$queueDate) {
+            $queueDate = XenForo_Application::$time;
+        }
+
         $this->_getDb()->insert('xf_bdapi_ping_queue', array(
             'callback_md5' => md5($callback),
             'callback' => $callback,
@@ -19,18 +23,13 @@ class bdApi_Model_PingQueue extends XenForo_Model
                 'defer'
             ))
         ) {
-            $triggerDate = null;
-            if ($queueDate > 0) {
-                $triggerDate = $queueDate;
-            }
-
             try {
                 XenForo_Application::defer(
                     'bdApi_Deferred_PingQueue',
                     array(),
                     __CLASS__,
                     false,
-                    $triggerDate
+                    $queueDate
                 );
             } catch (Exception $e) {
                 if (XenForo_Application::debugMode()) {

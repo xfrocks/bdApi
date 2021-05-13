@@ -121,7 +121,7 @@ class bdApi_Model_Subscription extends XenForo_Model
         }
     }
 
-    public function ping(array $option, $action, $objectType, $objectData)
+    public function ping(array $option, $action, $objectType, $objectData, $ttl = 0)
     {
         if (!isset($option['topic'])
             || empty($option['subscriptions'])
@@ -162,7 +162,7 @@ class bdApi_Model_Subscription extends XenForo_Model
                 $subscription['callback'],
                 $objectType,
                 $pingData,
-                $subscription['expire_date']
+                min($subscription['expire_date'], XenForo_Application::$time + $ttl)
             );
 
             $queueCount++;
@@ -216,6 +216,10 @@ class bdApi_Model_Subscription extends XenForo_Model
         if (!empty($alertIds)) {
             $realAlerts = $alertModel->bdApi_getAlertsByIds($alertIds);
             foreach ($realAlerts as $alertId => $alert) {
+                if (!empty($alert['view_date'])) {
+                    // skip alert already read
+                    continue;
+                }
                 $alerts[$alertId] = $alert;
             }
         }
