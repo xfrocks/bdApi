@@ -17,7 +17,8 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
                     bdApi_AlertHandler_Ping::fakeAlert(
                         $userId,
                         array('read_notification_id' => 'all')
-                    )
+                    ),
+                    bdApi_Option::get('pingNotificationsTTL')
                 );
             }
         }

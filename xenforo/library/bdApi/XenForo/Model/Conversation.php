@@ -91,7 +91,13 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
 
             /* @var $subscriptionModel bdApi_Model_Subscription */
             $subscriptionModel = $this->getModelFromCache('bdApi_Model_Subscription');
-            $subscriptionModel->ping($option, 'insert', bdApi_Model_Subscription::TYPE_NOTIFICATION, $fakeAlert);
+            $subscriptionModel->ping(
+                $option,
+                'insert',
+                bdApi_Model_Subscription::TYPE_NOTIFICATION,
+                $fakeAlert,
+                bdApi_Option::get('pingNotificationsTTL')
+            );
         }
 
         return;
@@ -118,7 +124,8 @@ class bdApi_XenForo_Model_Conversation extends XFCP_bdApi_XenForo_Model_Conversa
                     bdApi_AlertHandler_Ping::fakeAlert(
                         $userId,
                         array('read_conversation_id' => $conversationId)
-                    )
+                    ),
+                    bdApi_Option::get('pingNotificationsTTL')
                 );
             }
         }

@@ -32,7 +32,8 @@ class bdApi_bdAlerts_Model_Alert_Integration extends XFCP_bdApi_bdAlerts_Model_A
             bdApi_AlertHandler_Ping::fakeAlert(
                 $userId,
                 array('read_notification_id' => $alert['alert_id'])
-            )
+            ),
+            bdApi_Option::get('pingNotificationsTTL')
         );
 
         return $marked;
