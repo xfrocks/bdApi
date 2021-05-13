@@ -216,6 +216,10 @@ class bdApi_Model_Subscription extends XenForo_Model
         if (!empty($alertIds)) {
             $realAlerts = $alertModel->bdApi_getAlertsByIds($alertIds);
             foreach ($realAlerts as $alertId => $alert) {
+                if (!empty($alert['view_date'])) {
+                    // skip alert already read
+                    continue;
+                }
                 $alerts[$alertId] = $alert;
             }
         }
