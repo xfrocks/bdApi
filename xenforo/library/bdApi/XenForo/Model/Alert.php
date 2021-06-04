@@ -91,6 +91,11 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
         return $userOption;
     }
 
+    public function bdApi_canPushNotification(array $alert)
+    {
+        return true;
+    }
+
     public function getAlertOptOuts(array $user = null, $useDenormalized = true)
     {
         $subColumn = bdApi_Option::getConfig('subscriptionColumnUserNotification');
