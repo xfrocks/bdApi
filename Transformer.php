@@ -217,6 +217,10 @@ class Transformer
         if ($entities instanceof \XF\Mvc\Entity\ArrayCollection) {
             $entities = $entities->toArray();
         }
+        if ($postFetchCallback && count($entities) > 0) {
+            // postFetchCallback might have returned a different type of entity
+            $handler = $this->handler($entities[0]->structure()->shortName);
+        }
         $entities = $handler->onTransformEntities($context, $entities);
 
         $data = [];

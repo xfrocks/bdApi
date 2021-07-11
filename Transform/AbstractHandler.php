@@ -275,51 +275,26 @@ abstract class AbstractHandler
      * @param Finder $finder
      * @param string|null $contextKey
      * @param string $relationKey
-     * @param string|null $shortName
      * @return void
      */
     protected function callOnTransformFinderForRelation(
         TransformContext $context,
         Finder $finder,
         $contextKey,
-        $relationKey,
-        $shortName = null
+        $relationKey
     ) {
         $finder->with($relationKey);
 
-        if ($shortName === null) {
-            $shortName = $this->type;
-        }
+        $entityStructure = $finder->getStructure();
+        $relationConfig = $entityStructure->relations[$relationKey];
+        $subHandler = $this->transformer->handler($relationConfig['entity']);
 
         $em = $this->app->em();
-        $entityStructure = $em->getEntityStructure($shortName);
-        if (!isset($entityStructure->relations[$relationKey])) {
-            return;
-        }
+        $subFinder = $em->getFinder($relationConfig['entity'], false);
+        $subFinder->setParentFinder($finder, $relationKey);
 
-        $relationConfig = $entityStructure->relations[$relationKey];
-        if (!is_array($relationConfig) || !isset($relationConfig['entity'])) {
-            return;
-        }
-
-        $subHandler = $this->transformer->handler($relationConfig['entity']);
         $subContext = $context->getSubContext($contextKey, $subHandler);
-
-        $relationStructure = $em->getEntityStructure($relationConfig['entity']);
-        $finderClass = \XF::stringToClass($shortName, '%s\Finder\%s');
-        try {
-            $finderClass = $this->app->extendClass($finderClass, '\XF\Mvc\Entity\Finder');
-        } catch (\Exception $e) {
-            // ignore
-        }
-        if (!$finderClass || !class_exists($finderClass)) {
-            $finderClass = '\XF\Mvc\Entity\Finder';
-        }
-        /** @var Finder $relationFinder */
-        $relationFinder = new $finderClass($em, $relationStructure);
-        $relationFinder->setParentFinder($finder, $relationKey);
-
-        $subHandler->onTransformFinder($subContext, $relationFinder);
+        $subHandler->onTransformFinder($subContext, $subFinder);
     }
 
     /**

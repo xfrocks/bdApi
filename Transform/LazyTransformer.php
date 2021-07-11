@@ -181,13 +181,19 @@ class LazyTransformer implements \JsonSerializable
             case self::SOURCE_TYPE_FINDER:
                 /** @var Finder $finder */
                 $finder = $this->source;
-                $data = $transformer->transformFinder($context, null, $finder, function ($entities) {
-                    foreach (array_reverse($this->callbacksFinderPostFetch) as $f) {
-                        $entities = call_user_func($f, $entities);
-                    }
 
-                    return $entities;
-                });
+                $postFetchCallback = null;
+                if (count($this->callbacksFinderPostFetch) > 0) {
+                    $postFetchCallback = function ($entities) {
+                        foreach (array_reverse($this->callbacksFinderPostFetch) as $f) {
+                            $entities = call_user_func($f, $entities);
+                        }
+
+                        return $entities;
+                    };
+                }
+
+                $data = $transformer->transformFinder($context, null, $finder, $postFetchCallback);
                 break;
             default:
                 throw new \LogicException('Unrecognized source type ' . $this->sourceType);
