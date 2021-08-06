@@ -34,8 +34,7 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
 					user.gender, user.avatar_date, user.gravatar, user.username
 				FROM xf_user_alert AS alert
 				INNER JOIN xf_user AS user ON (user.user_id = alert.user_id)
-				WHERE alert.view_date = 0
-					AND alert.alert_id IN (' . $this->_getDb()->quote($alertIds) . ')
+				WHERE alert.alert_id IN (' . $this->_getDb()->quote($alertIds) . ')
 				ORDER BY event_date DESC
 		', 'alert_id');
     }
