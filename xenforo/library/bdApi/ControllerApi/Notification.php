@@ -103,6 +103,22 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
     public function actionPostRead()
     {
         $this->_assertRegistrationRequired();
+        $alertId = $this->_input->filterSingle('notification_id', XenForo_Input::UINT);
+        $alert = $this->_getAlertOrError($alertId);
+
+        if (empty($alert['view_date'])) {
+            $markAlertRead = array($this->_getAlertModel(), 'bdAlerts_markAlertRead');
+            if (is_callable($markAlertRead)) {
+                call_user_func($markAlertRead, $alert);
+            }
+        }
+
+        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
+
+    public function actionPostReadAll()
+    {
+        $this->_assertRegistrationRequired();
         $visitor = XenForo_Visitor::getInstance();
 
         if ($visitor['alerts_unread'] > 0) {
@@ -115,21 +131,10 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
     public function actionGetContent()
     {
         $id = $this->_input->filterSingle('notification_id', XenForo_Input::UINT);
-        $alertModel = $this->_getAlertModel();
-        $alerts = $alertModel->bdApi_getAlertsByIds(array($id));
-        if (empty($alerts)) {
-            return $this->responseNoPermission();
-        }
-        $visitor = XenForo_Visitor::getInstance();
-        $alerts = $alertModel->bdApi_prepareContentForAlerts($alerts, $visitor->toArray());
-        $alert = reset($alerts);
-
-        if (empty($alert) || $visitor['user_id'] != $alert['alerted_user_id']) {
-            return $this->responseNoPermission();
-        }
+        $alert = $this->_getAlertOrError($id);
 
         if (empty($alert['view_date'])) {
-            $markAlertRead = array($alertModel, 'bdAlerts_markAlertRead');
+            $markAlertRead = array($this->_getAlertModel(), 'bdAlerts_markAlertRead');
             if (is_callable($markAlertRead)) {
                 call_user_func($markAlertRead, $alert);
             }
@@ -146,6 +151,25 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
 
         // alert content type not recognized...
         return $this->_actionGetContent_getControllerResponseNop($alert);
+    }
+
+    protected function _getAlertOrError($alertId)
+    {
+        $alertModel = $this->_getAlertModel();
+        $alerts = $alertModel->bdApi_getAlertsByIds(array($alertId));
+        if (empty($alerts)) {
+            throw $this->getNoPermissionResponseException();
+        }
+
+        $visitor = XenForo_Visitor::getInstance();
+        $alerts = $alertModel->bdApi_prepareContentForAlerts($alerts, $visitor->toArray());
+
+        $alert = reset($alerts);
+        if (empty($alert) || $visitor['user_id'] != $alert['alerted_user_id']) {
+            throw $this->getNoPermissionResponseException();
+        }
+
+        return $alert;
     }
 
     protected function _actionGetContent_getControllerResponseNop(array $alert = null)
