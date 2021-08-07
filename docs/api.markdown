@@ -2567,7 +2567,7 @@ Required scopes:
 Mark single notification read. Since forum-2021080600.
 
 Parameters:
-* `notification_id` __required__
+* `notification_id` __optional__: If `notification_id` is omitted, it's mark all existing notifications as read.
 
     {
         status: "ok",
