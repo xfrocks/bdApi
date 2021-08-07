@@ -114,20 +114,12 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
                     call_user_func($markAlertRead, $alert);
                 }
             }
+        } else {
+            $visitor = XenForo_Visitor::getInstance();
 
-            return $this->responseMessage(new XenForo_Phrase('changes_saved'));
-        }
-
-        return $this->responseReroute(__CLASS__, 'post-read-all');
-    }
-
-    public function actionPostReadAll()
-    {
-        $this->_assertRegistrationRequired();
-        $visitor = XenForo_Visitor::getInstance();
-
-        if ($visitor['alerts_unread'] > 0) {
-            $this->_getAlertModel()->markAllAlertsReadForUser($visitor['user_id']);
+            if ($visitor['alerts_unread'] > 0) {
+                $this->_getAlertModel()->markAllAlertsReadForUser($visitor['user_id']);
+            }
         }
 
         return $this->responseMessage(new XenForo_Phrase('changes_saved'));
