@@ -95,6 +95,20 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
         return true;
     }
 
+    public function bdApi_markNotificationRead(array $alert)
+    {
+        if (!empty($alert['view_date'])) {
+            return;
+        }
+
+        $markAlertRead = array($this, 'bdAlerts_markAlertRead');
+        if (is_callable($markAlertRead)) {
+            call_user_func($markAlertRead, $alert);
+        } else {
+            throw new XenForo_Exception('Mark read notification item not supported');
+        }
+    }
+
     public function getAlertOptOuts(array $user = null, $useDenormalized = true)
     {
         $subColumn = bdApi_Option::getConfig('subscriptionColumnUserNotification');
