@@ -103,17 +103,22 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
     public function actionPostRead()
     {
         $this->_assertRegistrationRequired();
-        $alertId = $this->_input->filterSingle('notification_id', XenForo_Input::UINT);
-        $alert = $this->_getAlertOrError($alertId);
 
-        if (empty($alert['view_date'])) {
-            $markAlertRead = array($this->_getAlertModel(), 'bdAlerts_markAlertRead');
-            if (is_callable($markAlertRead)) {
-                call_user_func($markAlertRead, $alert);
+        if ($this->_input->inRequest('notification_id')) {
+            $alertId = $this->_input->filterSingle('notification_id', XenForo_Input::UINT);
+            $alert = $this->_getAlertOrError($alertId);
+
+            if (empty($alert['view_date'])) {
+                $markAlertRead = array($this->_getAlertModel(), 'bdAlerts_markAlertRead');
+                if (is_callable($markAlertRead)) {
+                    call_user_func($markAlertRead, $alert);
+                }
             }
+
+            return $this->responseMessage(new XenForo_Phrase('changes_saved'));
         }
 
-        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+        return $this->responseReroute(__CLASS__, 'post-read-all');
     }
 
     public function actionPostReadAll()
