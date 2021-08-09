@@ -109,7 +109,7 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
             $alert = $this->_getAlertOrError($alertId);
 
             try {
-                $this->_getAlertModel()->bdApi_markNotificationRead($alert);
+                $this->_getAlertModel()->bdApi_markAlertRead($alert);
             } catch (Throwable $e) {
                 return $this->responseNoPermission();
             }
@@ -130,7 +130,7 @@ class bdApi_ControllerApi_Notification extends bdApi_ControllerApi_Abstract
         $alert = $this->_getAlertOrError($id);
 
         try {
-            $this->_getAlertModel()->bdApi_markNotificationRead($alert);
+            $this->_getAlertModel()->bdApi_markAlertRead($alert);
         } catch (Throwable $e) {
         }
 

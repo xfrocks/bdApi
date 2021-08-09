@@ -95,18 +95,24 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
         return true;
     }
 
-    public function bdApi_markNotificationRead(array $alert)
+    public function bdApi_markAlertRead(array $alert)
     {
         if (!empty($alert['view_date'])) {
             return;
         }
 
-        $markAlertRead = array($this, 'bdAlerts_markAlertRead');
-        if (is_callable($markAlertRead)) {
-            call_user_func($markAlertRead, $alert);
+        if ($this->bdApi_markAlertReadSupported()) {
+            call_user_func(array($this, 'bdAlerts_markAlertRead'), $alert);
         } else {
             throw new XenForo_Exception('Mark read notification item not supported');
         }
+    }
+
+    public function bdApi_markAlertReadSupported()
+    {
+        $markAlertRead = array($this, 'bdAlerts_markAlertRead');
+
+        return is_callable($markAlertRead);
     }
 
     public function getAlertOptOuts(array $user = null, $useDenormalized = true)
@@ -197,6 +203,10 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
                 'avatar',
                 array($alert['user'], 'm', false, true)
             );
+        }
+
+        if ($this->bdApi_markAlertReadSupported()) {
+            $data['links']['read'] = bdApi_Data_Helper_Core::safeBuildApiLink('notifications/read', $data);
         }
 
         return $data;
