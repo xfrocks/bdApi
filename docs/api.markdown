@@ -2564,7 +2564,10 @@ Required scopes:
  * Also: the current user must have the __[bd] API: Send custom alert__ permission 
 
 ### POST `/notifications/read`
-Mark all existing notifications as read. Since forum-2014092701.
+Mark single notification or all existing notifications read. Since forum-2021080600.
+
+Parameters:
+* `notification_id` __optional__: If `notification_id` is omitted, it's mark all existing notifications as read.
 
     {
         status: "ok",

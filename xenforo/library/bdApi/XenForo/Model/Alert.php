@@ -34,8 +34,7 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
 					user.gender, user.avatar_date, user.gravatar, user.username
 				FROM xf_user_alert AS alert
 				INNER JOIN xf_user AS user ON (user.user_id = alert.user_id)
-				WHERE alert.view_date = 0
-					AND alert.alert_id IN (' . $this->_getDb()->quote($alertIds) . ')
+				WHERE alert.alert_id IN (' . $this->_getDb()->quote($alertIds) . ')
 				ORDER BY event_date DESC
 		', 'alert_id');
     }
@@ -94,6 +93,26 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
     public function bdApi_canPushNotification(array $alert)
     {
         return true;
+    }
+
+    public function bdApi_markAlertRead(array $alert)
+    {
+        if (!empty($alert['view_date'])) {
+            return;
+        }
+
+        if ($this->bdApi_markAlertReadSupported()) {
+            call_user_func(array($this, 'bdAlerts_markAlertRead'), $alert);
+        } else {
+            throw new XenForo_Exception('Mark read notification item not supported');
+        }
+    }
+
+    public function bdApi_markAlertReadSupported()
+    {
+        $markAlertRead = array($this, 'bdAlerts_markAlertRead');
+
+        return is_callable($markAlertRead);
     }
 
     public function getAlertOptOuts(array $user = null, $useDenormalized = true)
@@ -184,6 +203,10 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
                 'avatar',
                 array($alert['user'], 'm', false, true)
             );
+        }
+
+        if ($this->bdApi_markAlertReadSupported() && $data['notification_is_unread']) {
+            $data['links']['read'] = bdApi_Data_Helper_Core::safeBuildApiLink('notifications/read', $data);
         }
 
         return $data;
