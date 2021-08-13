@@ -205,7 +205,7 @@ class bdApi_XenForo_Model_Alert extends XFCP_bdApi_XenForo_Model_Alert
             );
         }
 
-        if ($this->bdApi_markAlertReadSupported() && $data['notification_is_unread']) {
+        if ($this->bdApi_markAlertReadSupported() && empty($alert['view_date'])) {
             $data['links']['read'] = bdApi_Data_Helper_Core::safeBuildApiLink('notifications/read', $data);
         }
 
