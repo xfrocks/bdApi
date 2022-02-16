@@ -945,6 +945,35 @@ class bdApi_ControllerApi_User extends bdApi_ControllerApi_Abstract
         return $this->responseReroute(__CLASS__, 'post-timeline');
     }
 
+    public function actionPostReport()
+    {
+        $userId = $this->_input->filterSingle('user_id', XenForo_Input::UINT);
+        /** @var XenForo_ControllerHelper_UserProfile $userHelper */
+        $userHelper = $this->getHelper('UserProfile');
+        $user = $userHelper->assertUserProfileValidAndViewable($userId);
+
+        $message = $this->_input->filterSingle('message', XenForo_Input::STRING);
+
+        if (!$this->_getUserModel()->canReportUser($user, $errorPhraseKey)) {
+            throw $this->getErrorOrNoPermissionResponseException($errorPhraseKey);
+        }
+
+        if (!$message) {
+            return $this->responseError(new XenForo_Phrase(
+                'bdapi_slash_x_report_requires_message',
+                array('route' => 'users')
+            ), 400);
+        }
+
+        $this->assertNotFlooding('report');
+
+        /* @var $reportModel XenForo_Model_Report */
+        $reportModel = $this->getModelFromCache('XenForo_Model_Report');
+        $reportModel->reportContent('user', $user, $message);
+
+        return $this->responseMessage(new XenForo_Phrase('changes_saved'));
+    }
+
     protected function _prepareUsers(array $users)
     {
         $usersData = array();
