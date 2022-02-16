@@ -138,11 +138,13 @@ class bdApi_Extend_Model_User extends XFCP_bdApi_Extend_Model_User
             'followers' => bdApi_Data_Helper_Core::safeBuildApiLink('users/followers', $user),
             'followings' => bdApi_Data_Helper_Core::safeBuildApiLink('users/followings', $user),
             'ignore' => bdApi_Data_Helper_Core::safeBuildApiLink('users/ignore', $user),
+            'report' => bdApi_Data_Helper_Core::safeBuildApiLink('users/report', $user),
         );
 
         $data['permissions'] = array(
             'edit' => $prepareProtectedData,
             'follow' => ($user['user_id'] != $visitor->get('user_id')) && $visitor->canFollow(),
+            'report' => $this->canReportUser($user),
         );
 
         /** @var XenForo_Model_UserIgnore $ignoreModel */
