@@ -354,6 +354,9 @@ class bdApi_OAuth2_Storage implements
 
     public function getAccessToken($oauthToken)
     {
+        if (!is_string($oauthToken)) {
+            return null;
+        }
         $token = $this->_model->getTokenModel()->getTokenByText($oauthToken);
 
         if (empty($token)) {
