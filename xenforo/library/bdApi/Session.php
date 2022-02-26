@@ -291,6 +291,7 @@ class bdApi_Session extends XenForo_Session
 
         if (empty($this->_oauthToken)
             && isset($_REQUEST['oauth_token'])
+            && is_string($_REQUEST['oauth_token'])
         ) {
             // one time token support
             $parts = explode(',', $_REQUEST['oauth_token']);
